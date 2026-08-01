@@ -149,6 +149,12 @@ canine-dsp evaluate-gse102459 \
   --out results/gse102459
 ```
 
+A tiny GRU can also learn only the cross-fitted second-order Volterra residual. It is trained with
+complete subject holdouts, masked irregular sequences, three random seeds, weight decay, and shared
+multi-module outputs. Reports include its parameter count, seed variability, and performance on both
+GSE190001 and the external GSE102459 study. The inverse controller continues to use the interpretable
+model until a neural residual demonstrates stable external improvement.
+
 ## Research path
 
 1. Pin an assembly and record accessions/checksums in `data/README.md`.

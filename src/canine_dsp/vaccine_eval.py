@@ -21,6 +21,7 @@ from .vaccine_viz import (
     plot_sampling_ablation,
 )
 from .expression import pca_modules, read_geo_series_matrix
+from .hybrid_rnn import crossvalidated_hybrid
 
 
 GENE_MODULES = {
@@ -33,6 +34,14 @@ GENE_MODULES = {
     "plasmablast": ["ENSG00000170476", "ENSG00000100219", "ENSG00000057657",
                     "ENSG00000132465", "ENSG00000048462"],
 }
+
+
+def _with_hybrid(predictions: pd.DataFrame, hybrid: pd.DataFrame) -> pd.DataFrame:
+    """Return plot-ready predictions containing the neural residual hybrid."""
+    hybrid_rows = hybrid[["sample", "subject", "module", "phase", "day",
+                          "observed", "predicted"]].copy()
+    hybrid_rows.insert(0, "model", "volterra_gru_hybrid")
+    return pd.concat([predictions, hybrid_rows], ignore_index=True)
 
 
 def read_soft_metadata(path: Path) -> pd.DataFrame:
@@ -234,21 +243,27 @@ def run_gse190001(prime: Path, boost: Path, soft: Path, out: Path) -> None:
     table = _baseline_relative(scores, metadata)
     modules = list(GENE_MODULES)
     predictions, metrics = evaluate_models(table, modules)
+    hybrid, hybrid_info = crossvalidated_hybrid(
+        table, predictions[predictions.model == "state_volterra2"], modules)
     landmarks = landmark_checks(predictions)
     ablation = sampling_ablation(table, modules)
     out.mkdir(parents=True, exist_ok=True)
     table.to_csv(out / "module_scores.csv")
     predictions.to_csv(out / "loso_predictions.csv", index=False)
     metrics.to_csv(out / "loso_metrics.csv", index=False)
+    hybrid.to_csv(out / "hybrid_loso_predictions.csv", index=False)
     landmarks.to_csv(out / "landmark_checks.csv", index=False)
     ablation.to_csv(out / "sampling_ablation.csv", index=False)
     chosen = predictions[predictions.model == "latent_volterra2"]
     pooled_r2 = {name: float(r2_score(group.observed, group.predicted))
                  for name, group in predictions.groupby("model")}
+    pooled_r2["volterra_gru_hybrid"] = float(r2_score(hybrid.observed, hybrid.predicted))
+    plot_predictions = _with_hybrid(predictions, hybrid)
     summary = {"source": "GSE190001", "subjects": int(table.subject.nunique()),
                "profiles": len(table), "modules": modules,
                "latent_volterra2_overall_r2": float(r2_score(chosen.observed, chosen.predicted)),
                "pooled_loso_r2_by_model": pooled_r2,
+               "hybrid": hybrid_info,
                "best_model_by_mean_subject_r2": metrics.groupby("model").r2.mean().idxmax(),
                "outcome_gap": "The public antibody supplement uses participant identifiers that "
                "are not cross-walked to GEO RNA identifiers, preventing leakage-safe individual "
@@ -257,7 +272,7 @@ def run_gse190001(prime: Path, boost: Path, soft: Path, out: Path) -> None:
                "but do not identify an optimal alternative dosing schedule."}
     (out / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")
     plot_response_trajectories(chosen, out / "response_trajectories.png")
-    plot_model_comparison(predictions, out / "model_comparison.png")
+    plot_model_comparison(plot_predictions, out / "model_comparison.png")
     plot_residual_heatmap(chosen, out / "residual_heatmap.png")
     plot_sampling_ablation(ablation, out / "sampling_ablation.png")
 
@@ -281,19 +296,25 @@ def run_gse102459(matrix: Path, out: Path, n_modules: int = 3) -> None:
         table[module] -= table.subject.map(baseline)
         table[f"memory_{module}"] = 0.0
     predictions, metrics = evaluate_models(table, modules, memory=31, rank=5)
+    hybrid, hybrid_info = crossvalidated_hybrid(
+        table, predictions[predictions.model == "state_volterra2"], modules)
     out.mkdir(parents=True, exist_ok=True)
     table.to_csv(out / "module_scores.csv")
     loadings.to_csv(out / "probe_loadings.csv")
     predictions.to_csv(out / "loso_predictions.csv", index=False)
     metrics.to_csv(out / "loso_metrics.csv", index=False)
+    hybrid.to_csv(out / "hybrid_loso_predictions.csv", index=False)
     pooled = {name: float(r2_score(group.observed, group.predicted))
               for name, group in predictions.groupby("model")}
+    pooled["volterra_gru_hybrid"] = float(r2_score(hybrid.observed, hybrid.predicted))
+    plot_predictions = _with_hybrid(predictions, hybrid)
     summary = {"source": "GSE102459", "subjects": int(table.subject.nunique()),
                "profiles": len(table), "modules": modules, "pooled_loso_r2_by_model": pooled,
+               "hybrid": hybrid_info,
                "scope": "External post-dose-2 whole-blood trajectory replication; PCA modules "
                "are platform-local and not direct biological module labels."}
     (out / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")
-    chosen = predictions[predictions.model == max(pooled, key=pooled.get)]
+    chosen = plot_predictions[plot_predictions.model == max(pooled, key=pooled.get)]
     plot_response_trajectories(chosen, out / "response_trajectories.png")
-    plot_model_comparison(predictions, out / "model_comparison.png")
+    plot_model_comparison(plot_predictions, out / "model_comparison.png")
     plot_residual_heatmap(chosen, out / "residual_heatmap.png")
