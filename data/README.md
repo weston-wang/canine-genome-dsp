@@ -11,3 +11,7 @@ Raw genomic data are intentionally excluded from Git. For every download, record
 Never mix coordinate systems silently. In particular, VCF positions are 1-based while internal
 NumPy indices are 0-based.
 
+`sources.csv` is the project registry for dog and human datasets. `scripts/fetch_public_data.py`
+downloads only small, credential-free collections and records URL, byte count, and SHA-256 checksum.
+Large GEO single-cell and controlled-access dbGaP studies remain registry entries until explicitly
+requested. Raw downloads remain ignored by Git.

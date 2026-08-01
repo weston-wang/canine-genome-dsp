@@ -11,6 +11,7 @@ from .signals import eiip, variant_density, windowed_gc
 from .spectral import coherence, multitaper_psd, spectral_entropy, welch_psd
 from .wavelets import cwt_power
 from .volterra_cli import run_volterra, synthetic_table
+from .hybrid_cli import inverse_demo, prepare_dog10k_aging, prepare_gse9794
 
 
 def _save_spectrum(x: np.ndarray, out: Path, title: str, sample_spacing: float = 1.0) -> dict:
@@ -75,6 +76,19 @@ def main() -> None:
     volterra.add_argument("--out", type=Path, required=True)
     synth = sub.add_parser("volterra-demo", help="generate and fit a known nonlinear system")
     synth.add_argument("--out", type=Path, default=Path("results/volterra-demo"))
+    expression = sub.add_parser("prepare-gse9794", help="prepare a real canine RNA time course")
+    expression.add_argument("--matrix", type=Path, required=True)
+    expression.add_argument("--modules", type=int, default=8)
+    expression.add_argument("--out", type=Path, required=True)
+    aging = sub.add_parser("prepare-dog10k-aging", help="prepare real Dog10K aging expression")
+    aging.add_argument("--expression", type=Path, required=True)
+    aging.add_argument("--information", type=Path, required=True)
+    aging.add_argument("--modules", type=int, default=8)
+    aging.add_argument("--out", type=Path, required=True)
+    inverse = sub.add_parser("inverse-demo", help="run robust vaccine inverse-control benchmark")
+    inverse.add_argument("--scenarios", type=int, default=8)
+    inverse.add_argument("--maxiter", type=int, default=60)
+    inverse.add_argument("--out", type=Path, default=Path("results/inverse-demo"))
     args = parser.parse_args()
     if args.command == "demo":
         rng = np.random.default_rng(42)
@@ -87,11 +101,17 @@ def main() -> None:
     elif args.command == "volterra-fit":
         run_volterra(args.table, args.out, args.inputs, args.target, args.group, args.exposure,
                      args.memory, args.basis, args.order, args.family, args.alpha, args.l1_ratio)
-    else:
+    elif args.command == "volterra-demo":
         table = args.out / "synthetic_tracks.csv"
         synthetic_table(table)
         run_volterra(table, args.out, ["gc", "repeat"], "variant_count", "chromosome",
                      "callable_bases", 7, 3, 2, "poisson", .001, .5)
+    elif args.command == "prepare-gse9794":
+        prepare_gse9794(args.matrix, args.out, args.modules)
+    elif args.command == "prepare-dog10k-aging":
+        prepare_dog10k_aging(args.expression, args.information, args.out, args.modules)
+    else:
+        inverse_demo(args.out, args.scenarios, args.maxiter)
 
 
 if __name__ == "__main__":

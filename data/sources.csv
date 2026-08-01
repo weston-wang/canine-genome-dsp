@@ -1,0 +1,10 @@
+dataset_id,species,disease,modality,design,accession,access,role,url
+dog10k_aging_dog,dog,aging,bulk_RNA,30_cross_sectional_ages,PRJCA016985,open,comparative_expression,https://file.kiz.ac.cn/dog10k/dog_count_both_ortholog_cpm.txt
+dog10k_aging_human,human,aging,bulk_RNA,527_cross_sectional_ages,GSE94438+GSE112087+GSE123658+GSE134080,open,comparative_expression,https://file.kiz.ac.cn/dog10k/human_count_both_ortholog_cpm.txt
+canine_heart_failure,dog,heart_failure,microarray,5_point_tachypacing_time_course,GSE9794,open,longitudinal_method_development,https://ftp.ncbi.nlm.nih.gov/geo/series/GSE9nnn/GSE9794/matrix/GSE9794_series_matrix.txt.gz
+canine_osteosarcoma_pbmc,dog,osteosarcoma,scRNA-seq,7_healthy_10_cancer_dogs,GSE225599,open,comparative_immune_state,https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE225599
+human_pdac_rna_vaccine,human,pancreatic_cancer,scRNA-seq_plus_TCR,5_vaccine_associated_T_cell_samples,GSE222011,open,cancer_vaccine_response,https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE222011
+human_hcc_vaccine_pembro,human,hepatocellular_carcinoma,scRNA-seq,personalized_vaccine_plus_pembrolizumab,GSE255830,open,cancer_vaccine_combination,https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE255830
+human_melanoma_neovax,human,melanoma,WES_plus_RNA,longitudinal_personal_vaccine,phs001451.3.1,controlled,immune_escape_validation,https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs001451.v3.p1
+canine_toxocara,dog,infection,bulk_RNA,infected_and_control_at_4_times,PRJNA673639,open,immune_dynamics_transfer,https://www.ncbi.nlm.nih.gov/bioproject/PRJNA673639
+

@@ -73,6 +73,51 @@ elastic-net penalty and is appropriate for transformed continuous targets.
 Treat the operator as a spatial association model. It does not by itself identify temporal dynamics
 or prove that mutation, selection, or another biological mechanism caused a learned interaction.
 
+## Evolutionary vaccine inverse problem
+
+The project also contains a hybrid tumor-evolution and immune-response model. Clone states undergo
+density-dependent growth, immune killing, and mutation/phenotypic transition. Multichannel vaccine
+histories drive antigen-specific immunity through first- and second-order Volterra kernels. A robust
+inverse solver chooses bounded doses at fixed administration times against an ensemble of uncertain
+models.
+
+```bash
+canine-dsp inverse-demo --scenarios 8 --out results/inverse-demo
+```
+
+The demonstration is deliberately labeled synthetic and uncalibrated. It produces the optimized
+schedule, immune response, all uncertainty-scenario trajectories, an objective comparison, and a
+plot. See `docs/HYBRID_VACCINE_MODEL.md` for assumptions and translational requirements.
+
+## Real RNA data
+
+Fetch and prepare the small public canine tachypacing time course:
+
+```bash
+python scripts/fetch_public_data.py gse9794
+canine-dsp prepare-gse9794 \
+  --matrix data/raw/gse9794/GSE9794_series_matrix.txt.gz \
+  --out data/processed/gse9794
+```
+
+This collapses 45 technical profiles into 15 biological samples at five measured time points and
+exports sample-level expression components plus probe loadings. It is a real-data adapter and a
+low-resolution methods dataset, not enough by itself to calibrate a vaccine-control policy.
+
+Prepare the public Dog10K whole-blood aging matrix in the same module-oriented format:
+
+```bash
+python scripts/fetch_public_data.py dog10k_aging
+canine-dsp prepare-dog10k-aging \
+  --expression data/raw/dog10k_aging/dog_expression_cpm.txt \
+  --information data/raw/dog10k_aging/dog_information.txt \
+  --out data/processed/dog10k-aging
+```
+
+`data/sources.csv` registers open canine and human datasets, including Dog10K aging RNA, canine
+osteosarcoma PBMC scRNA-seq, human pancreatic mRNA-vaccine scRNA/TCR data, human vaccine plus
+pembrolizumab scRNA-seq, and a controlled-access longitudinal melanoma vaccine study.
+
 ## Research path
 
 1. Pin an assembly and record accessions/checksums in `data/README.md`.
