@@ -11,3 +11,11 @@ def test_state_volterra_features_add_boost_interactions():
     assert state.shape[1] == 2 * common.shape[1]
     np.testing.assert_allclose(state[:3, common.shape[1]:], 0)
     np.testing.assert_allclose(state[3:, common.shape[1]:], common[3:])
+
+
+def test_third_order_contains_hierarchical_lower_terms():
+    days = np.arange(5)
+    second = impulse_features(days, 5, 2, 2)
+    third = impulse_features(days, 5, 2, 3)
+    np.testing.assert_allclose(third[:, :second.shape[1]], second)
+    assert third.shape[1] == second.shape[1] + 4  # C(2 + 3 - 1, 3)

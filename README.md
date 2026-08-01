@@ -138,6 +138,17 @@ Reusable visual functions export observed-versus-held-out trajectories, model co
 heatmap, and sampling-ablation plots. Fixed-dose data can validate response prediction and expose
 model gaps, but cannot validate an optimized alternative dosing schedule outside observed support.
 
+The expanded benchmark adds nested subject-aware regularization, observed pre-boost latent-state
+interactions, separate prime/boost regimes, and hierarchical third-order challengers. Replicate the
+comparison on the independent two-dose M72/AS01 study:
+
+```bash
+python scripts/fetch_public_data.py gse102459
+canine-dsp evaluate-gse102459 \
+  --matrix data/raw/gse102459/GSE102459_series_matrix.txt.gz \
+  --out results/gse102459
+```
+
 ## Research path
 
 1. Pin an assembly and record accessions/checksums in `data/README.md`.

@@ -12,7 +12,7 @@ from .spectral import coherence, multitaper_psd, spectral_entropy, welch_psd
 from .wavelets import cwt_power
 from .volterra_cli import run_volterra, synthetic_table
 from .hybrid_cli import inverse_demo, prepare_dog10k_aging, prepare_gse9794
-from .vaccine_eval import run_gse190001
+from .vaccine_eval import run_gse102459, run_gse190001
 
 
 def _save_spectrum(x: np.ndarray, out: Path, title: str, sample_spacing: float = 1.0) -> dict:
@@ -95,6 +95,10 @@ def main() -> None:
     vaccine_eval.add_argument("--boost", type=Path, required=True)
     vaccine_eval.add_argument("--soft", type=Path, required=True)
     vaccine_eval.add_argument("--out", type=Path, required=True)
+    external = sub.add_parser("evaluate-gse102459", help="external two-dose vaccine replication")
+    external.add_argument("--matrix", type=Path, required=True)
+    external.add_argument("--modules", type=int, default=3)
+    external.add_argument("--out", type=Path, required=True)
     args = parser.parse_args()
     if args.command == "demo":
         rng = np.random.default_rng(42)
@@ -118,8 +122,10 @@ def main() -> None:
         prepare_dog10k_aging(args.expression, args.information, args.out, args.modules)
     elif args.command == "inverse-demo":
         inverse_demo(args.out, args.scenarios, args.maxiter)
-    else:
+    elif args.command == "evaluate-gse190001":
         run_gse190001(args.prime, args.boost, args.soft, args.out)
+    else:
+        run_gse102459(args.matrix, args.out, args.modules)
 
 
 if __name__ == "__main__":

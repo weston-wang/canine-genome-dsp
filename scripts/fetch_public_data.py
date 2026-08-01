@@ -29,6 +29,11 @@ FILES = {
             "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE190nnn/GSE190001/soft/"
             "GSE190001_family.soft.gz?download=1",
     },
+    "gse102459": {
+        "GSE102459_series_matrix.txt.gz":
+            "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE102nnn/GSE102459/matrix/"
+            "GSE102459_series_matrix.txt.gz?download=1",
+    },
 }
 
 
