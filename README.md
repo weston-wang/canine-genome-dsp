@@ -44,6 +44,35 @@ canine-dsp analyze --fasta data/raw/region.fa --vcf data/raw/region.vcf \
 The command writes `summary.json`, numeric CSV tracks, and PNG plots. Large inputs remain ignored.
 For a whole genome, split work by chromosome/contig and compare only like-for-like windows.
 
+## Nonlinear Volterra modeling
+
+Fit a basis-reduced causal spatial Volterra model to a CSV of aligned genomic windows. The example
+below models variant counts, uses callable bases as a Poisson exposure, and holds out each chromosome
+in turn. Rows belonging to a chromosome must be contiguous and in genomic order.
+
+```bash
+canine-dsp volterra-fit --table data/processed/genome_tracks.csv \
+  --inputs gc_fraction repeat_fraction gene_density conservation mappability \
+  --target variant_count --exposure callable_bases --group chromosome \
+  --memory 11 --basis 4 --order 2 --family poisson --alpha 0.01 \
+  --out results/volterra
+```
+
+Run a complete synthetic example with a known GC-by-repeat interaction:
+
+```bash
+canine-dsp volterra-demo --out results/volterra-demo
+```
+
+The reduced model filters each input with a low-frequency orthonormal DCT lag basis and builds all
+unique quadratic products of the filtered channels. Outputs include held-out chromosome metrics,
+predictions, standardized-back-transformed coefficients, reconstructed first- and second-order
+kernels, and a kernel plot. The Poisson model uses exposure weighting; the Gaussian option uses an
+elastic-net penalty and is appropriate for transformed continuous targets.
+
+Treat the operator as a spatial association model. It does not by itself identify temporal dynamics
+or prove that mutation, selection, or another biological mechanism caused a learned interaction.
+
 ## Research path
 
 1. Pin an assembly and record accessions/checksums in `data/README.md`.
@@ -56,4 +85,3 @@ For a whole genome, split work by chromosome/contig and compare only like-for-li
 
 `src/canine_dsp/` contains signal encoding, spectral estimators, wavelets, I/O, and the CLI.
 `tests/` contains deterministic unit tests. `data/` stores only provenance documentation in Git.
-

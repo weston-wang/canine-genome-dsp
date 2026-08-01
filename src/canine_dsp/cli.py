@@ -10,6 +10,7 @@ from .io import read_first_fasta, read_vcf_positions
 from .signals import eiip, variant_density, windowed_gc
 from .spectral import coherence, multitaper_psd, spectral_entropy, welch_psd
 from .wavelets import cwt_power
+from .volterra_cli import run_volterra, synthetic_table
 
 
 def _save_spectrum(x: np.ndarray, out: Path, title: str, sample_spacing: float = 1.0) -> dict:
@@ -59,17 +60,39 @@ def main() -> None:
     run = sub.add_parser("analyze"); run.add_argument("--fasta", type=Path, required=True)
     run.add_argument("--vcf", type=Path); run.add_argument("--window", type=int, default=1000)
     run.add_argument("--out", type=Path, required=True)
+    volterra = sub.add_parser("volterra-fit", help="fit a chromosome-validated Volterra model")
+    volterra.add_argument("--table", type=Path, required=True)
+    volterra.add_argument("--inputs", nargs="+", required=True)
+    volterra.add_argument("--target", required=True)
+    volterra.add_argument("--group", default="chromosome")
+    volterra.add_argument("--exposure")
+    volterra.add_argument("--memory", type=int, default=11)
+    volterra.add_argument("--basis", type=int, default=4)
+    volterra.add_argument("--order", type=int, choices=[1, 2], default=2)
+    volterra.add_argument("--family", choices=["gaussian", "poisson"], default="poisson")
+    volterra.add_argument("--alpha", type=float, default=.01)
+    volterra.add_argument("--l1-ratio", type=float, default=.5)
+    volterra.add_argument("--out", type=Path, required=True)
+    synth = sub.add_parser("volterra-demo", help="generate and fit a known nonlinear system")
+    synth.add_argument("--out", type=Path, default=Path("results/volterra-demo"))
     args = parser.parse_args()
     if args.command == "demo":
         rng = np.random.default_rng(42)
         motif = "ATGCGT"; sequence = (motif * 1000) + "".join(rng.choice(list("ACGT"), 6000))
         analyze(sequence, args.out, 100)
-    else:
+    elif args.command == "analyze":
         contig, sequence = read_first_fasta(args.fasta)
         positions = read_vcf_positions(args.vcf, contig) if args.vcf else None
         analyze(sequence, args.out, args.window, positions)
+    elif args.command == "volterra-fit":
+        run_volterra(args.table, args.out, args.inputs, args.target, args.group, args.exposure,
+                     args.memory, args.basis, args.order, args.family, args.alpha, args.l1_ratio)
+    else:
+        table = args.out / "synthetic_tracks.csv"
+        synthetic_table(table)
+        run_volterra(table, args.out, ["gc", "repeat"], "variant_count", "chromosome",
+                     "callable_bases", 7, 3, 2, "poisson", .001, .5)
 
 
 if __name__ == "__main__":
     main()
-
