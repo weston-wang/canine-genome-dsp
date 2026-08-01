@@ -5,7 +5,7 @@ import argparse
 import hashlib
 import json
 from pathlib import Path
-from urllib.request import urlopen
+from urllib.request import Request, urlopen
 
 
 FILES = {
@@ -18,6 +18,17 @@ FILES = {
             "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE9nnn/GSE9794/matrix/"
             "GSE9794_series_matrix.txt.gz",
     },
+    "gse190001": {
+        "GSE190001_COVAX_raw_count_PRIME.txt.gz":
+            "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE190nnn/GSE190001/suppl/"
+            "GSE190001_COVAX_raw_count_PRIME.txt.gz?download=1",
+        "GSE190001_COVAX_raw_count_BOOST.txt.gz":
+            "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE190nnn/GSE190001/suppl/"
+            "GSE190001_COVAX_raw_count_BOOST.txt.gz?download=1",
+        "GSE190001_family.soft.gz":
+            "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE190nnn/GSE190001/soft/"
+            "GSE190001_family.soft.gz?download=1",
+    },
 }
 
 
@@ -28,8 +39,9 @@ def fetch(collection: str, root: Path) -> None:
     for name, url in FILES[collection].items():
         target = destination / name
         digest = hashlib.sha256()
-        if not target.exists():
-            with urlopen(url) as response, target.open("wb") as handle:
+        if not target.exists() or target.stat().st_size == 0:
+            request = Request(url, headers={"User-Agent": "canine-genome-dsp/0.1 research"})
+            with urlopen(request) as response, target.open("wb") as handle:
                 while block := response.read(1024 * 1024):
                     handle.write(block)
         with target.open("rb") as handle:
@@ -46,4 +58,3 @@ if __name__ == "__main__":
     parser.add_argument("--root", type=Path, default=Path("data/raw"))
     args = parser.parse_args()
     fetch(args.collection, args.root)
-

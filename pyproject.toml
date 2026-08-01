@@ -16,6 +16,7 @@ dependencies = [
   "PyWavelets>=1.5",
   "scikit-learn>=1.4",
   "scipy>=1.11",
+  "xlrd>=2.0",
 ]
 
 [project.optional-dependencies]

@@ -7,4 +7,4 @@ human_pdac_rna_vaccine,human,pancreatic_cancer,scRNA-seq_plus_TCR,5_vaccine_asso
 human_hcc_vaccine_pembro,human,hepatocellular_carcinoma,scRNA-seq,personalized_vaccine_plus_pembrolizumab,GSE255830,open,cancer_vaccine_combination,https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE255830
 human_melanoma_neovax,human,melanoma,WES_plus_RNA,longitudinal_personal_vaccine,phs001451.3.1,controlled,immune_escape_validation,https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs001451.v3.p1
 canine_toxocara,dog,infection,bulk_RNA,infected_and_control_at_4_times,PRJNA673639,open,immune_dynamics_transfer,https://www.ncbi.nlm.nih.gov/bioproject/PRJNA673639
-
+human_mrna_dense_timecourse,human,healthy_vaccination,bulk_RNA,23_subject_prime_boost_daily_timecourse,GSE190001,open,volterra_kernel_validation,https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE190001

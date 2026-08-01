@@ -118,6 +118,26 @@ canine-dsp prepare-dog10k-aging \
 osteosarcoma PBMC scRNA-seq, human pancreatic mRNA-vaccine scRNA/TCR data, human vaccine plus
 pembrolizumab scRNA-seq, and a controlled-access longitudinal melanoma vaccine study.
 
+### Real prime–boost Volterra evaluation
+
+GSE190001 contains dense daily RNA-seq after prime and booster mRNA vaccination. The evaluation uses
+curated interferon, inflammation, and plasmablast modules; leave-one-subject-out prediction; linear,
+quadratic, and immune-state-aware models; published peak-timing checks; residual analysis; and
+sampling-schedule ablation.
+
+```bash
+python scripts/fetch_public_data.py gse190001
+canine-dsp evaluate-gse190001 \
+  --prime data/raw/gse190001/GSE190001_COVAX_raw_count_PRIME.txt.gz \
+  --boost data/raw/gse190001/GSE190001_COVAX_raw_count_BOOST.txt.gz \
+  --soft data/raw/gse190001/GSE190001_family.soft.gz \
+  --out results/gse190001
+```
+
+Reusable visual functions export observed-versus-held-out trajectories, model comparison, residual
+heatmap, and sampling-ablation plots. Fixed-dose data can validate response prediction and expose
+model gaps, but cannot validate an optimized alternative dosing schedule outside observed support.
+
 ## Research path
 
 1. Pin an assembly and record accessions/checksums in `data/README.md`.
