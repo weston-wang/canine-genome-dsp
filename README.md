@@ -89,6 +89,24 @@ The demonstration is deliberately labeled synthetic and uncalibrated. It produce
 schedule, immune response, all uncertainty-scenario trajectories, an objective comparison, and a
 plot. See `docs/HYBRID_VACCINE_MODEL.md` for assumptions and translational requirements.
 
+### Combination immunotherapy inverse problem
+
+The combination workflow treats vaccine, checkpoint blockade, and radiation as bounded inputs to a
+three-output Volterra operator: cytotoxic activity, immune exhaustion, and inflammation. Its
+second-order vaccine × checkpoint kernel is exported as a timing-synergy surface. Sensitive and
+weakly immune-visible tumor states are propagated through an uncertainty ensemble, and the inverse
+solver penalizes terminal burden, escape composition, inflammation-bound violations, and dose.
+
+```bash
+canine-dsp immunotherapy-demo --scenarios 12 --out results/immunotherapy-demo
+```
+
+Outputs include CSVs, a clinical dashboard, machine-readable summary, and a plain-language
+`clinical_interpretation.md`. The bundled parameters are synthetic: normalized doses are not drug
+doses, tumor state is not RECIST response, and inflammation is not an adverse-event probability.
+The workflow becomes evaluative only after its kernels and clinical mappings are fitted and locked
+using longitudinal combination-therapy data, then tested on untouched patients and external cohorts.
+
 ## Real RNA data
 
 Fetch and prepare the small public canine tachypacing time course:

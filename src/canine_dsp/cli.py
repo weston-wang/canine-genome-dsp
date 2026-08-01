@@ -13,6 +13,7 @@ from .wavelets import cwt_power
 from .volterra_cli import run_volterra, synthetic_table
 from .hybrid_cli import inverse_demo, prepare_dog10k_aging, prepare_gse9794
 from .vaccine_eval import run_gse102459, run_gse190001
+from .immunotherapy_cli import immunotherapy_demo
 
 
 def _save_spectrum(x: np.ndarray, out: Path, title: str, sample_spacing: float = 1.0) -> dict:
@@ -90,6 +91,10 @@ def main() -> None:
     inverse.add_argument("--scenarios", type=int, default=8)
     inverse.add_argument("--maxiter", type=int, default=60)
     inverse.add_argument("--out", type=Path, default=Path("results/inverse-demo"))
+    immunotherapy = sub.add_parser("immunotherapy-demo", help="run combination-therapy inverse benchmark")
+    immunotherapy.add_argument("--scenarios", type=int, default=12)
+    immunotherapy.add_argument("--maxiter", type=int, default=60)
+    immunotherapy.add_argument("--out", type=Path, default=Path("results/immunotherapy-demo"))
     vaccine_eval = sub.add_parser("evaluate-gse190001", help="validate vaccine-response kernels")
     vaccine_eval.add_argument("--prime", type=Path, required=True)
     vaccine_eval.add_argument("--boost", type=Path, required=True)
@@ -122,6 +127,8 @@ def main() -> None:
         prepare_dog10k_aging(args.expression, args.information, args.out, args.modules)
     elif args.command == "inverse-demo":
         inverse_demo(args.out, args.scenarios, args.maxiter)
+    elif args.command == "immunotherapy-demo":
+        immunotherapy_demo(args.out, args.scenarios, args.maxiter)
     elif args.command == "evaluate-gse190001":
         run_gse190001(args.prime, args.boost, args.soft, args.out)
     else:
