@@ -8,9 +8,10 @@ to patient outcomes and cannot recommend a drug, dose, sequence, or treatment ch
 
 ## Model layers
 
-1. **Treatment operator.** Vaccine, checkpoint blockade, and radiation histories enter a
-   multi-input, multi-output Volterra model. First-order kernels encode delayed individual effects;
-   second-order cross-kernels encode schedule-dependent interaction.
+1. **Exposure and treatment operator.** Normalized administrations pass through reduced plasma PK,
+   tumor equilibration, and saturable target engagement before entering a multi-input, multi-output
+   Volterra model. First-order kernels encode delayed individual effects; second-order cross-kernels
+   encode a bounded residual schedule-dependent interaction.
 2. **Patient and kernel uncertainty.** Growth, killing, switching, and response gains vary across
    Monte Carlo draws using log-normal random effects.
 3. **Immune process.** Cytotoxic activity, exhaustion, and inflammation receive correlated
@@ -24,7 +25,8 @@ to patient outcomes and cannot recommend a drug, dose, sequence, or treatment ch
    immune-response distributions from imaging, ctDNA, and RNA-module measurements.
 7. **Inverse control.** Differential evolution uses common random numbers and penalizes the 90%
    conditional-value-at-risk (CVaR) of terminal burden, median burden, residual escape composition,
-   inflammation-bound violations, and total normalized dose.
+   inflammation-bound violations, and total normalized dose. Per-dose, cumulative-dose, plasma-Cmax,
+   and tumor-AUC bounds provide additional protocol constraints.
 
 The uncertainty ensemble is specified rather than learned from a posterior distribution in the
 synthetic demonstration. “Filtered” intervals are particle approximations to latent-state

@@ -122,6 +122,36 @@ crossing; terminal-burden uncertainty and CVaR; filtered state intervals; simula
 six-panel clinical dashboard. See `docs/STOCHASTIC_IMMUNOTHERAPY_MODEL.md` for the statistical
 assumptions, identifiability limits, validation sequence, and clinical guardrails.
 
+### Locked treatment-policy comparison
+
+The policy benchmark adds reduced plasma/tumor PK, target engagement, protocol and exposure bounds,
+a first-order PK/PD virtual-population optimizer, a fixed-protocol proxy, and a QSP–Volterra
+candidate. Locked policies are evaluated on untouched PK, tumor, escape, and interaction shifts with
+prespecified benefit, safety, evolutionary-risk, feasibility, and replication gates.
+
+```bash
+canine-dsp immunotherapy-policy-benchmark \
+  --draws 96 --scenarios 12 --maxiter 18 \
+  --out results/immunotherapy-policy-benchmark
+```
+
+The output distinguishes `IN_SILICO_ADVANTAGE` from clinical superiority and fails closed when any
+gate is missed. The built-in comparator is a research proxy—not a disease-specific standard of care.
+See `docs/POLICY_SUPERIORITY_BENCHMARK.md` for the locked estimand, claim limits, and evidence ladder.
+
+For a target-trial-aligned logged longitudinal dataset with externally cross-fitted behavior-policy
+and value-model nuisance estimates, run:
+
+```bash
+canine-dsp evaluate-logged-policy --table logged_decisions.csv --cross-fitted \
+  --out results/logged-policy-evaluation
+```
+
+This triangulates importance-weighted and sequential doubly robust estimates and returns
+`NOT_EVALUABLE_*` when overlap, effective sample size, weights, cross-fitting, or estimator agreement
+is inadequate. Even a passing result is labeled a retrospective causal estimate, not clinical
+superiority.
+
 ## Real RNA data
 
 Fetch and prepare the small public canine tachypacing time course:

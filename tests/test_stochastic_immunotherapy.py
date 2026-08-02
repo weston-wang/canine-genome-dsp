@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 
 from canine_dsp.immunotherapy import reference_immunotherapy_system
 from canine_dsp.stochastic_immunotherapy import (
@@ -53,7 +54,20 @@ def test_observation_model_and_particle_filter_have_valid_shapes():
     assert filtered.tumor_median.le(filtered.tumor_p95).all()
     assert filtered.cytotoxic_p05.le(filtered.cytotoxic_median).all()
     assert filtered.cytotoxic_median.le(filtered.cytotoxic_p95).all()
+    assert filtered.effective_sample_size.between(1, 48).all()
     assert filtered.observed.sum() == len(observations)
+
+
+def test_particle_filter_accepts_missing_modalities_and_duplicate_days():
+    system, kernels, schedule, config, run = small_run()
+    observations = sample_observations(run, [0, 4, 9], config)
+    imaging_only = observations[["day", "imaging_burden"]]
+    duplicated = np.repeat(imaging_only.to_numpy(), 2, axis=0)
+    filtered = particle_filter(system, kernels, schedule, np.array([.28, .018]),
+                               pd.DataFrame(duplicated, columns=imaging_only.columns),
+                               config, particles=48)
+    assert filtered.observed.sum() == len(imaging_only)
+    assert filtered.effective_sample_size.between(1, 48).all()
 
 
 def test_predictive_quantiles_cover_each_median():

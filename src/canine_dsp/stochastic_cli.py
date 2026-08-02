@@ -8,6 +8,8 @@ import numpy as np
 import pandas as pd
 
 from .immunotherapy import reference_immunotherapy_system, synergy_surface
+from .qsp import (reference_exposure_model, reference_protocol_constraints,
+                  simulate_exposure)
 from .stochastic_immunotherapy import (
     StochasticConfig,
     comparative_metrics,
@@ -41,6 +43,8 @@ def _clinical_report(summary: dict) -> str:
     response_mc = treated["response_probability_mc95"]
     untreated_response_mc = untreated["response_probability_mc95"]
     major_mc = comparative["probability_at_least_50pct_lower_than_untreated_mc95"]
+    diagnostics = summary["synthetic_filter_diagnostics"]
+    calibration = summary["state_estimation_status"]
     escape_mc = treated["escape_probability_mc95"]
     inflammation_mc = treated["inflammation_exceedance_probability_mc95"]
     return f"""# Clinical interpretation of the stochastic benchmark
@@ -56,6 +60,8 @@ The probability that an immune-escape phenotype constituted at least half of res
 The probability of crossing the inflammation-proxy bound was **{treated['inflammation_exceedance_probability']:.1%}** (finite-simulation 95% interval **{inflammation_mc[0]:.1%}–{inflammation_mc[1]:.1%}**). The nonzero upper bound matters: observing no crossings in {summary['predictive_draws']} simulations does not establish zero risk. The proxy is neither a CTCAE grade nor an adverse-event probability until calibrated against observed toxicity outcomes. The 90% conditional tail mean of terminal tumor burden was **{treated['terminal_tumor_cvar90']:.3f} normalized units**; this summarizes poor-outcome simulations and is the main quantity constrained by the risk-aware optimizer.
 
 The state estimates combine sparse synthetic imaging, ctDNA, and RNA-module observations through a bootstrap particle filter. Their 90% intervals represent model and process uncertainty conditional on those observations. They do not include every source of clinical uncertainty or establish that this model is correctly specified.
+
+On the one hidden synthetic trajectory used for this demonstration, the nominal 90% intervals covered the true tumor state on **{diagnostics['tumor_interval_coverage']:.1%}** of days and the true escape fraction on **{diagnostics['escape_interval_coverage']:.1%}**. State-estimation status is therefore **`{calibration}`**. These are debugging diagnostics from one simulated trajectory, not evidence of population calibration; a failed coverage gate blocks decision use.
 
 Before prospective use, treatment kernels, random-effect distributions, assay likelihoods, escape transitions, clinical thresholds, and safety constraints must be fitted on training patients, locked, and evaluated on untouched patients and an external cohort. A clinical protocol and independent safety oversight remain required.
 """
@@ -119,31 +125,52 @@ def _plot_dashboard(out: Path, schedule: np.ndarray, predictive: pd.DataFrame,
 def stochastic_immunotherapy_demo(out: Path, draws: int = 256, particles: int = 384,
                                   maxiter: int = 24, seed: int = 42) -> None:
     system, kernels = reference_immunotherapy_system()
+    exposure_model = reference_exposure_model()
+    protocol_constraints = reference_protocol_constraints()
     initial = np.array([.28, .018]); horizon = 42; administration_times = [0, 7, 14, 21]
     optimization_config = StochasticConfig(draws=min(64, draws))
     fit = optimize_stochastic_immunotherapy(
         system, kernels, initial, horizon, administration_times, np.array([1., .8, .7]),
-        optimization_config, seed=seed, maxiter=maxiter)
+        optimization_config, seed=seed, maxiter=maxiter, exposure_model=exposure_model,
+        protocol_constraints=protocol_constraints)
     evaluation_config = StochasticConfig(draws=draws)
     treated = simulate_stochastic(system, kernels, fit["schedule"], initial,
-                                  evaluation_config, seed=seed + 20_000)
+                                  evaluation_config, seed=seed + 20_000,
+                                  exposure_model=exposure_model)
     untreated_schedule = np.zeros_like(fit["schedule"])
     # Shared seed supplies common random numbers for a lower-variance counterfactual comparison.
     untreated = simulate_stochastic(system, kernels, untreated_schedule, initial,
-                                    evaluation_config, seed=seed + 20_000)
+                                    evaluation_config, seed=seed + 20_000,
+                                    exposure_model=exposure_model)
     observation_days = [0, 3, 7, 10, 14, 21, 28, 35, 42]
     observations = sample_observations(treated, observation_days, evaluation_config,
                                        draw=0, seed=seed + 40_000)
     filtered = particle_filter(system, kernels, fit["schedule"], initial, observations,
-                               evaluation_config, particles=particles, seed=seed + 50_000)
+                               evaluation_config, particles=particles, seed=seed + 50_000,
+                               exposure_model=exposure_model)
     predictive = predictive_quantiles(treated)
     distributions = _distribution_table(treated, evaluation_config)
     treated_risk = risk_metrics(treated, evaluation_config)
     untreated_risk = risk_metrics(untreated, evaluation_config)
     comparison = comparative_metrics(treated, untreated)
+    truth_total = treated.states[0].sum(axis=1)
+    truth_escape = np.divide(treated.states[0, :, 1], truth_total,
+                             out=np.zeros_like(truth_total), where=truth_total > 0)
+    filter_diagnostics = {
+        "tumor_interval_coverage": float(np.mean(
+            (truth_total >= filtered.tumor_p05) & (truth_total <= filtered.tumor_p95))),
+        "escape_interval_coverage": float(np.mean(
+            (truth_escape >= filtered.escape_p05) & (truth_escape <= filtered.escape_p95))),
+        "minimum_effective_sample_size": float(filtered.effective_sample_size.min()),
+        "mean_observation_day_effective_sample_size": float(
+            filtered.loc[filtered.observed, "effective_sample_size"].mean()),
+    }
+    coverage_gate = bool(filter_diagnostics["tumor_interval_coverage"] >= .80
+                         and filter_diagnostics["escape_interval_coverage"] >= .80)
     summary = {
         "status": "synthetic proof of method; not patient-calibrated and not a dosing recommendation",
-        "architecture": ["second-order MIMO Volterra treatment operator",
+        "architecture": ["reduced plasma/tumor PK and saturable target engagement",
+                         "second-order MIMO Volterra residual treatment operator",
                          "patient random effects and kernel gain uncertainty",
                          "correlated latent immune-process noise",
                          "stochastic birth/death and immune-escape transitions",
@@ -153,15 +180,30 @@ def stochastic_immunotherapy_demo(out: Path, draws: int = 256, particles: int = 
         "treatment_channels": ["vaccine", "checkpoint inhibitor", "radiation"],
         "predictive_draws": draws, "filter_particles": particles,
         "optimizer_success": fit["success"], "optimizer_message": fit["message"],
+        "protocol_feasible": fit["protocol_feasible"],
+        "protocol_violations": fit["protocol_violations"],
+        "kernel_source": "synthetic_reference",
         "response_definition": "50% of the initial normalized tumor state at day 42",
         "escape_definition": "escape phenotype is at least 50% of residual modeled tumor",
         "optimized_risk": treated_risk, "untreated_risk": untreated_risk,
         "counterfactual_comparison": comparison,
+        "synthetic_filter_diagnostics": filter_diagnostics,
+        "state_estimation_status": ("SYNTHETIC_COVERAGE_GATE_MET" if coverage_gate else
+                                    "FAILED_SYNTHETIC_COVERAGE"),
         "clinical_guardrail": "All probabilities are conditional on synthetic assumptions and are not clinical estimates."
     }
     out.mkdir(parents=True, exist_ok=True)
     pd.DataFrame(fit["schedule"], columns=["vaccine", "checkpoint", "radiation"]).assign(
         day=np.arange(horizon)).to_csv(out / "risk_aware_schedule.csv", index=False)
+    exposure = simulate_exposure(fit["schedule"], exposure_model)
+    exposure_rows = []
+    for day in range(horizon):
+        for channel, name in enumerate(["vaccine", "checkpoint", "radiation"]):
+            exposure_rows.append({"day": day, "channel": name,
+                                  "plasma": exposure.plasma[day, channel],
+                                  "tumor": exposure.tumor[day, channel],
+                                  "effective_input": exposure.effective_input[day, channel]})
+    pd.DataFrame(exposure_rows).to_csv(out / "exposure_trajectory.csv", index=False)
     predictive.to_csv(out / "predictive_quantiles.csv", index=False)
     observations.to_csv(out / "synthetic_observations.csv", index=False)
     filtered.to_csv(out / "filtered_state_estimates.csv", index=False)

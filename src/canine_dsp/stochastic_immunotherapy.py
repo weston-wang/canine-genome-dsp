@@ -1,6 +1,6 @@
 """Stochastic state-space layer for Volterra-driven combination immunotherapy."""
 
-from dataclasses import dataclass, replace
+from dataclasses import dataclass
 
 import numpy as np
 import pandas as pd
@@ -9,6 +9,8 @@ from scipy.stats import binom, nbinom, norm
 
 from .evolution import ImmuneKernels, volterra_response
 from .immunotherapy import ImmunotherapySystem
+from .qsp import (ExposureModel, ProtocolConstraints, protocol_is_feasible,
+                  protocol_violations, simulate_exposure)
 
 
 @dataclass(frozen=True)
@@ -41,6 +43,7 @@ class StochasticRun:
     immune: np.ndarray       # draw x time x [cytotoxic, exhaustion, inflammation]
     schedule: np.ndarray
     seed: int
+    exposure: np.ndarray | None = None
 
 
 def _wilson_interval(events: np.ndarray, z: float = 1.96) -> list[float]:
@@ -97,10 +100,14 @@ def _advance_counts(counts: np.ndarray, immune: np.ndarray, growth: np.ndarray,
 def simulate_stochastic(system: ImmunotherapySystem, kernels: ImmuneKernels,
                         schedule: np.ndarray, initial: np.ndarray,
                         config: StochasticConfig = StochasticConfig(),
-                        seed: int = 42) -> StochasticRun:
+                        seed: int = 42,
+                        exposure_model: ExposureModel | None = None) -> StochasticRun:
     """Tau-leap birth/death/escape simulation with patient, kernel, and process uncertainty."""
     rng = np.random.default_rng(seed)
-    immune = _uncertain_immune(np.asarray(schedule, float), kernels, config, rng)
+    schedule = np.asarray(schedule, float)
+    exposure = simulate_exposure(schedule, exposure_model).effective_input if (
+        exposure_model is not None) else schedule
+    immune = _uncertain_immune(exposure, kernels, config, rng)
     growth, killing, transition = _patient_parameters(
         system, config.draws, config.patient_log_sd, rng)
     counts = rng.poisson(np.asarray(initial)[None, :] * config.effective_population,
@@ -111,7 +118,7 @@ def simulate_stochastic(system: ImmunotherapySystem, kernels: ImmuneKernels,
         counts = _advance_counts(counts, immune[:, day], growth, killing, transition,
                                  system, config, rng)
         states[:, day + 1] = counts / config.effective_population
-    return StochasticRun(states, immune, np.asarray(schedule, float), seed)
+    return StochasticRun(states, immune, schedule, seed, exposure)
 
 
 def risk_metrics(run: StochasticRun, config: StochasticConfig) -> dict[str, float]:
@@ -177,7 +184,9 @@ def optimize_stochastic_immunotherapy(system: ImmunotherapySystem, kernels: Immu
                                       initial: np.ndarray, horizon: int,
                                       administration_times: list[int], max_dose: np.ndarray,
                                       config: StochasticConfig = StochasticConfig(draws=48),
-                                      seed: int = 42, maxiter: int = 24) -> dict:
+                                      seed: int = 42, maxiter: int = 24,
+                                      exposure_model: ExposureModel | None = None,
+                                      protocol_constraints: ProtocolConstraints | None = None) -> dict:
     """Minimize a common-random-number Monte Carlo objective emphasizing the adverse tail."""
     max_dose = np.asarray(max_dose, float)
     channels = kernels.h1.shape[1]
@@ -185,6 +194,10 @@ def optimize_stochastic_immunotherapy(system: ImmunotherapySystem, kernels: Immu
         raise ValueError("max_dose must contain one bound per treatment channel")
     if any(day < 0 or day >= horizon for day in administration_times):
         raise ValueError("administration times must lie inside the horizon")
+    if protocol_constraints is not None:
+        if exposure_model is None:
+            raise ValueError("protocol exposure constraints require an exposure model")
+        max_dose = np.minimum(max_dose, protocol_constraints.max_per_dose)
     bounds = [(0., float(limit)) for _ in administration_times for limit in max_dose]
 
     def unpack(vector):
@@ -194,16 +207,28 @@ def optimize_stochastic_immunotherapy(system: ImmunotherapySystem, kernels: Immu
 
     def objective(vector):
         schedule = unpack(vector)
-        run = simulate_stochastic(system, kernels, schedule, initial, config, seed)
-        return _risk_objective(run, config)
+        run = simulate_stochastic(system, kernels, schedule, initial, config, seed,
+                                  exposure_model)
+        penalty = 0.0
+        if protocol_constraints is not None:
+            violations = protocol_violations(schedule, exposure_model, protocol_constraints)
+            penalty = 10_000 * sum(float(np.square(value).sum())
+                                   for value in violations.values())
+        return _risk_objective(run, config) + penalty
 
     fit = differential_evolution(objective, bounds, seed=seed, maxiter=maxiter, popsize=6,
                                  tol=.025, polish=True)
     schedule = unpack(fit.x)
-    run = simulate_stochastic(system, kernels, schedule, initial, config, seed + 10_000)
+    run = simulate_stochastic(system, kernels, schedule, initial, config, seed + 10_000,
+                              exposure_model)
+    violations = protocol_violations(schedule, exposure_model, protocol_constraints) if (
+        protocol_constraints is not None) else {}
+    feasible = protocol_is_feasible(schedule, exposure_model, protocol_constraints, 1e-3) if (
+        protocol_constraints is not None) else True
     return {"schedule": schedule, "run": run, "objective": float(fit.fun),
             "success": bool(fit.success), "message": str(fit.message),
-            "metrics": risk_metrics(run, config)}
+            "metrics": risk_metrics(run, config), "protocol_feasible": bool(feasible),
+            "protocol_violations": {name: value.tolist() for name, value in violations.items()}}
 
 
 def sample_observations(run: StochasticRun, days: list[int], config: StochasticConfig,
@@ -233,48 +258,78 @@ def sample_observations(run: StochasticRun, days: list[int], config: StochasticC
 def particle_filter(system: ImmunotherapySystem, kernels: ImmuneKernels, schedule: np.ndarray,
                     initial: np.ndarray, observations: pd.DataFrame,
                     config: StochasticConfig, particles: int = 256,
-                    seed: int = 515) -> pd.DataFrame:
+                    seed: int = 515,
+                    exposure_model: ExposureModel | None = None) -> pd.DataFrame:
     """Bootstrap filter using imaging, ctDNA, and immune-module RNA observations."""
     rng = np.random.default_rng(seed)
-    particle_config = replace(config, draws=particles)
-    immune = _uncertain_immune(schedule, kernels, particle_config, rng)
+    exposure = simulate_exposure(schedule, exposure_model).effective_input if (
+        exposure_model is not None) else np.asarray(schedule, float)
+    drive = volterra_response(exposure, kernels)
+    gains = rng.lognormal(0, config.kernel_log_sd, (particles, drive.shape[1]))
+    noise = np.zeros((particles, drive.shape[1]))
+    innovation_sd = config.immune_process_sd * np.sqrt(1 - config.immune_noise_rho ** 2)
     growth, killing, transition = _patient_parameters(system, particles,
                                                       config.patient_log_sd, rng)
     counts = rng.poisson(np.asarray(initial)[None, :] * config.effective_population,
                          size=(particles, 2)).astype(np.int64)
-    observation_by_day = observations.set_index("day")
+    observation_by_day = {int(day): group for day, group in observations.groupby("day")}
     rows = []
     for day in range(len(schedule) + 1):
-        if day in observation_by_day.index:
-            observed = observation_by_day.loc[day]
-            total = counts.sum(axis=1) / config.effective_population
-            escape = np.divide(counts[:, 1], counts.sum(axis=1), out=np.zeros(particles),
-                               where=counts.sum(axis=1) > 0)
-            log_weight = norm.logpdf(np.log(max(observed.imaging_burden, 1e-8)),
-                                     np.log(np.maximum(total, 1e-8)), config.imaging_log_sd)
-            log_weight += binom.logpmf(int(observed.ctdna_alt), int(observed.ctdna_depth),
-                                      np.clip(escape, 1e-7, 1 - 1e-7))
-            immune_day = min(day, immune.shape[1] - 1)
-            rna_means = 80 * np.exp(np.clip(.55 * immune[:, immune_day], -5, 5))
-            rna_probability = config.rna_dispersion / (config.rna_dispersion + rna_means)
-            rna_observed = observed[["rna_cytotoxic", "rna_exhaustion",
-                                     "rna_inflammation"]].to_numpy(dtype=int)
-            log_weight += nbinom.logpmf(rna_observed[None, :], config.rna_dispersion,
-                                       rna_probability).sum(axis=1)
-            weight = np.exp(log_weight - np.max(log_weight)); weight /= weight.sum()
-            selected = rng.choice(particles, size=particles, replace=True, p=weight)
-            counts = counts[selected]; growth = growth[selected]; killing = killing[selected]
-            transition = transition[selected]; immune = immune[selected]
+        immune_day = min(day, len(schedule) - 1)
+        if day < len(schedule):
+            noise = config.immune_noise_rho * noise + rng.normal(
+                0, innovation_sd, size=noise.shape)
+        current_immune = np.maximum(0, drive[immune_day][None, :] * gains * np.exp(noise))
+        ess = float(particles); log_evidence = 0.0
+        if day in observation_by_day:
+            for _, observed in observation_by_day[day].iterrows():
+                total = counts.sum(axis=1) / config.effective_population
+                escape = np.divide(counts[:, 1], counts.sum(axis=1), out=np.zeros(particles),
+                                   where=counts.sum(axis=1) > 0)
+                log_weight = np.zeros(particles)
+                if "imaging_burden" in observed and pd.notna(observed.imaging_burden):
+                    log_weight += norm.logpdf(np.log(max(observed.imaging_burden, 1e-8)),
+                                              np.log(np.maximum(total, 1e-8)),
+                                              config.imaging_log_sd)
+                if all(name in observed and pd.notna(observed[name])
+                       for name in ["ctdna_alt", "ctdna_depth"]):
+                    log_weight += binom.logpmf(int(observed.ctdna_alt),
+                                              int(observed.ctdna_depth),
+                                              np.clip(escape, 1e-7, 1 - 1e-7))
+                rna_names = ["rna_cytotoxic", "rna_exhaustion", "rna_inflammation"]
+                if all(name in observed and pd.notna(observed[name]) for name in rna_names):
+                    rna_means = 80 * np.exp(np.clip(.55 * current_immune, -5, 5))
+                    probability = config.rna_dispersion / (config.rna_dispersion + rna_means)
+                    rna_observed = observed[rna_names].to_numpy(dtype=int)
+                    log_weight += nbinom.logpmf(rna_observed[None, :],
+                                               config.rna_dispersion, probability).sum(axis=1)
+                finite = np.isfinite(log_weight)
+                if not finite.any():
+                    weight = np.full(particles, 1 / particles)
+                    log_evidence = float("-inf")
+                else:
+                    maximum = np.max(log_weight[finite])
+                    unnormalized = np.where(finite, np.exp(log_weight - maximum), 0)
+                    weight = unnormalized / unnormalized.sum()
+                    log_evidence += float(maximum + np.log(unnormalized.mean()))
+                ess = float(1 / np.square(weight).sum())
+                selected = rng.choice(particles, size=particles, replace=True, p=weight)
+                counts = counts[selected]; growth = growth[selected]; killing = killing[selected]
+                transition = transition[selected]; gains = gains[selected]; noise = noise[selected]
+                current_immune = current_immune[selected]
+                # Small regularization prevents static-parameter collapse after repeated resampling.
+                growth *= rng.lognormal(0, .005, growth.shape)
+                killing *= rng.lognormal(0, .005, killing.shape)
+                transition *= rng.lognormal(0, .0075, transition.shape)
         total = counts.sum(axis=1) / config.effective_population
         escape = np.divide(counts[:, 1], counts.sum(axis=1), out=np.zeros(particles),
                            where=counts.sum(axis=1) > 0)
-        immune_day = min(day, immune.shape[1] - 1)
         immune_summary = {}
         for channel, name in enumerate(["cytotoxic", "exhaustion", "inflammation"]):
             immune_summary.update({
-                f"{name}_p05": float(np.quantile(immune[:, immune_day, channel], .05)),
-                f"{name}_median": float(np.median(immune[:, immune_day, channel])),
-                f"{name}_p95": float(np.quantile(immune[:, immune_day, channel], .95)),
+                f"{name}_p05": float(np.quantile(current_immune[:, channel], .05)),
+                f"{name}_median": float(np.median(current_immune[:, channel])),
+                f"{name}_p95": float(np.quantile(current_immune[:, channel], .95)),
             })
         rows.append({"day": day,
                      "tumor_p05": float(np.quantile(total, .05)),
@@ -284,9 +339,11 @@ def particle_filter(system: ImmunotherapySystem, kernels: ImmuneKernels, schedul
                      "escape_median": float(np.median(escape)),
                      "escape_p95": float(np.quantile(escape, .95)),
                      **immune_summary,
-                     "observed": bool(day in observation_by_day.index)})
+                     "effective_sample_size": ess,
+                     "log_evidence_increment": log_evidence,
+                     "observed": bool(day in observation_by_day)})
         if day < len(schedule):
-            counts = _advance_counts(counts, immune[:, day], growth, killing, transition,
+            counts = _advance_counts(counts, current_immune, growth, killing, transition,
                                      system, config, rng)
     return pd.DataFrame(rows)
 

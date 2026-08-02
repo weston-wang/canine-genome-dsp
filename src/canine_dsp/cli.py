@@ -15,6 +15,8 @@ from .hybrid_cli import inverse_demo, prepare_dog10k_aging, prepare_gse9794
 from .vaccine_eval import run_gse102459, run_gse190001
 from .immunotherapy_cli import immunotherapy_demo
 from .stochastic_cli import stochastic_immunotherapy_demo
+from .superiority_cli import policy_superiority_benchmark
+from .off_policy_cli import evaluate_logged_policy_file
 
 
 def _save_spectrum(x: np.ndarray, out: Path, title: str, sample_spacing: float = 1.0) -> dict:
@@ -104,6 +106,21 @@ def main() -> None:
     stochastic.add_argument("--seed", type=int, default=42)
     stochastic.add_argument("--out", type=Path,
                             default=Path("results/stochastic-immunotherapy-demo"))
+    benchmark = sub.add_parser("immunotherapy-policy-benchmark",
+                               help="compare locked PK/PD-QSP and Volterra policies")
+    benchmark.add_argument("--draws", type=int, default=96)
+    benchmark.add_argument("--scenarios", type=int, default=12)
+    benchmark.add_argument("--maxiter", type=int, default=18)
+    benchmark.add_argument("--seed", type=int, default=73)
+    benchmark.add_argument("--reference-schedule", type=Path)
+    benchmark.add_argument("--out", type=Path,
+                           default=Path("results/immunotherapy-policy-benchmark"))
+    logged = sub.add_parser("evaluate-logged-policy",
+                            help="run fail-closed longitudinal off-policy evaluation")
+    logged.add_argument("--table", type=Path, required=True)
+    logged.add_argument("--gamma", type=float, default=1.0)
+    logged.add_argument("--cross-fitted", action="store_true")
+    logged.add_argument("--out", type=Path, required=True)
     vaccine_eval = sub.add_parser("evaluate-gse190001", help="validate vaccine-response kernels")
     vaccine_eval.add_argument("--prime", type=Path, required=True)
     vaccine_eval.add_argument("--boost", type=Path, required=True)
@@ -141,6 +158,11 @@ def main() -> None:
     elif args.command == "stochastic-immunotherapy-demo":
         stochastic_immunotherapy_demo(args.out, args.draws, args.particles,
                                       args.maxiter, args.seed)
+    elif args.command == "immunotherapy-policy-benchmark":
+        policy_superiority_benchmark(args.out, args.draws, args.scenarios,
+                                     args.maxiter, args.seed, args.reference_schedule)
+    elif args.command == "evaluate-logged-policy":
+        evaluate_logged_policy_file(args.table, args.out, args.gamma, args.cross_fitted)
     elif args.command == "evaluate-gse190001":
         run_gse190001(args.prime, args.boost, args.soft, args.out)
     else:
