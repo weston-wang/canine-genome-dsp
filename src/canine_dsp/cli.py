@@ -17,6 +17,7 @@ from .immunotherapy_cli import immunotherapy_demo
 from .stochastic_cli import stochastic_immunotherapy_demo
 from .superiority_cli import policy_superiority_benchmark
 from .off_policy_cli import evaluate_logged_policy_file
+from .melanoma_benchmark import run_melanoma_benchmark
 
 
 def _save_spectrum(x: np.ndarray, out: Path, title: str, sample_spacing: float = 1.0) -> dict:
@@ -121,6 +122,17 @@ def main() -> None:
     logged.add_argument("--gamma", type=float, default=1.0)
     logged.add_argument("--cross-fitted", action="store_true")
     logged.add_argument("--out", type=Path, required=True)
+    melanoma = sub.add_parser(
+        "melanoma-neoadjuvant-benchmark",
+        help="benchmark a nonlinear stochastic DSP policy against OpACIN-neo and NADINA",
+    )
+    melanoma.add_argument("--anchors", type=Path,
+                          default=Path("data/clinical/melanoma_clinical_anchors.csv"))
+    melanoma.add_argument("--draws", type=int, default=192)
+    melanoma.add_argument("--candidates", type=int, default=96)
+    melanoma.add_argument("--seed", type=int, default=142)
+    melanoma.add_argument("--out", type=Path,
+                          default=Path("results/melanoma-neoadjuvant-benchmark"))
     vaccine_eval = sub.add_parser("evaluate-gse190001", help="validate vaccine-response kernels")
     vaccine_eval.add_argument("--prime", type=Path, required=True)
     vaccine_eval.add_argument("--boost", type=Path, required=True)
@@ -163,6 +175,8 @@ def main() -> None:
                                      args.maxiter, args.seed, args.reference_schedule)
     elif args.command == "evaluate-logged-policy":
         evaluate_logged_policy_file(args.table, args.out, args.gamma, args.cross_fitted)
+    elif args.command == "melanoma-neoadjuvant-benchmark":
+        run_melanoma_benchmark(args.out, args.anchors, args.draws, args.candidates, args.seed)
     elif args.command == "evaluate-gse190001":
         run_gse190001(args.prime, args.boost, args.soft, args.out)
     else:

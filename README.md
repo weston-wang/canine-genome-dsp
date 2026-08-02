@@ -152,6 +152,34 @@ This triangulates importance-weighted and sequential doubly robust estimates and
 is inadequate. Even a passing result is labeled a retrospective causal estimate, not clinical
 superiority.
 
+### Disease-specific melanoma benchmark
+
+The first disease-specific target is macroscopic resectable stage III melanoma treated with
+neoadjuvant ipilimumab plus nivolumab before week-six surgery. It was selected because two distinct
+checkpoint inputs, serial immune sampling, randomized dose/timing variation, an early pathology
+endpoint, and a phase-3 care benchmark all exist in the same biological setting.
+
+The model combines Hammerstein antibody exposure/occupancy, bilinear progenitor-exhausted-to-
+effector T-cell dynamics, a bounded low-rank second-order Volterra interaction, stochastic tumor
+birth/death and immune-escape events, and constrained risk-aware search. It is tested against
+published GSE272993 immune-wave directions, leave-one-arm-out OpACIN-neo response/toxicity, and the
+NADINA regimen and outcomes.
+
+```bash
+python scripts/fetch_public_data.py gse272993_metadata
+canine-dsp melanoma-neoadjuvant-benchmark \
+  --anchors data/clinical/melanoma_clinical_anchors.csv \
+  --draws 192 --candidates 96 \
+  --out results/melanoma-neoadjuvant-benchmark
+```
+
+Outputs include real-arm held-out predictions, method ablations, directional GSE checks, paired
+virtual-population draws, candidate and NADINA schedules, a clinical dashboard, and a plain-language
+interpretation. A candidate is always labeled a research hypothesis. Aggregate public data cannot
+show that its timing is clinically superior; that requires patient-level calibration followed by a
+prospective randomized comparison. See `docs/MELANOMA_DSP_BENCHMARK.md` and
+`docs/MELANOMA_DATA.md`.
+
 ## Real RNA data
 
 Fetch and prepare the small public canine tachypacing time course:
@@ -179,7 +207,8 @@ canine-dsp prepare-dog10k-aging \
 
 `data/sources.csv` registers open canine and human datasets, including Dog10K aging RNA, canine
 osteosarcoma PBMC scRNA-seq, human pancreatic mRNA-vaccine scRNA/TCR data, human vaccine plus
-pembrolizumab scRNA-seq, and a controlled-access longitudinal melanoma vaccine study.
+pembrolizumab scRNA-seq, longitudinal melanoma checkpoint scRNA/TCR/ADT, and a controlled-access
+longitudinal melanoma vaccine study.
 
 ### Real prime–boost Volterra evaluation
 

@@ -34,6 +34,17 @@ FILES = {
             "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE102nnn/GSE102459/matrix/"
             "GSE102459_series_matrix.txt.gz?download=1",
     },
+    "gse272993_metadata": {
+        # The full processed Seurat object is about 2 GB.  The SOFT record and
+        # file inventory are enough to audit cohort/sample provenance without
+        # silently downloading that object as part of the small-data fetcher.
+        "GSE272993_family.soft.gz":
+            "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE272nnn/GSE272993/soft/"
+            "GSE272993_family.soft.gz?download=1",
+        "filelist.txt":
+            "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE272nnn/GSE272993/suppl/"
+            "filelist.txt",
+    },
 }
 
 

@@ -15,3 +15,9 @@ NumPy indices are 0-based.
 downloads only small, credential-free collections and records URL, byte count, and SHA-256 checksum.
 Large GEO single-cell and controlled-access dbGaP studies remain registry entries until explicitly
 requested. Raw downloads remain ignored by Git.
+
+`clinical/` contains small, hand-curated aggregate endpoint tables whose rows link directly to
+primary sources. Blank numerators, denominators, or confidence limits mean the cited public report
+did not provide them; they must not be imputed. These tables support arm-level calibration and
+benchmarking only. They are not individual participant data and must never be expanded into
+pseudo-patients.
