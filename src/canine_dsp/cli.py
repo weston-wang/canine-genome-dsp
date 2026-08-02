@@ -14,6 +14,7 @@ from .volterra_cli import run_volterra, synthetic_table
 from .hybrid_cli import inverse_demo, prepare_dog10k_aging, prepare_gse9794
 from .vaccine_eval import run_gse102459, run_gse190001
 from .immunotherapy_cli import immunotherapy_demo
+from .stochastic_cli import stochastic_immunotherapy_demo
 
 
 def _save_spectrum(x: np.ndarray, out: Path, title: str, sample_spacing: float = 1.0) -> dict:
@@ -95,6 +96,14 @@ def main() -> None:
     immunotherapy.add_argument("--scenarios", type=int, default=12)
     immunotherapy.add_argument("--maxiter", type=int, default=60)
     immunotherapy.add_argument("--out", type=Path, default=Path("results/immunotherapy-demo"))
+    stochastic = sub.add_parser("stochastic-immunotherapy-demo",
+                                help="run stochastic state-space inverse benchmark")
+    stochastic.add_argument("--draws", type=int, default=256)
+    stochastic.add_argument("--particles", type=int, default=384)
+    stochastic.add_argument("--maxiter", type=int, default=24)
+    stochastic.add_argument("--seed", type=int, default=42)
+    stochastic.add_argument("--out", type=Path,
+                            default=Path("results/stochastic-immunotherapy-demo"))
     vaccine_eval = sub.add_parser("evaluate-gse190001", help="validate vaccine-response kernels")
     vaccine_eval.add_argument("--prime", type=Path, required=True)
     vaccine_eval.add_argument("--boost", type=Path, required=True)
@@ -129,6 +138,9 @@ def main() -> None:
         inverse_demo(args.out, args.scenarios, args.maxiter)
     elif args.command == "immunotherapy-demo":
         immunotherapy_demo(args.out, args.scenarios, args.maxiter)
+    elif args.command == "stochastic-immunotherapy-demo":
+        stochastic_immunotherapy_demo(args.out, args.draws, args.particles,
+                                      args.maxiter, args.seed)
     elif args.command == "evaluate-gse190001":
         run_gse190001(args.prime, args.boost, args.soft, args.out)
     else:

@@ -107,6 +107,21 @@ doses, tumor state is not RECIST response, and inflammation is not an adverse-ev
 The workflow becomes evaluative only after its kernels and clinical mappings are fitted and locked
 using longitudinal combination-therapy data, then tested on untouched patients and external cohorts.
 
+The stochastic extension adds patient random effects, uncertain kernel gains, correlated immune
+process variation, birth/death/escape events, modality-specific observations, bootstrap particle
+filtering, and tail-risk-aware inverse control:
+
+```bash
+canine-dsp stochastic-immunotherapy-demo \
+  --draws 256 --particles 384 --maxiter 24 \
+  --out results/stochastic-immunotherapy-demo
+```
+
+It reports conditional probabilities of modeled response, escape dominance, and inflammation-bound
+crossing; terminal-burden uncertainty and CVaR; filtered state intervals; simulated assay data; and a
+six-panel clinical dashboard. See `docs/STOCHASTIC_IMMUNOTHERAPY_MODEL.md` for the statistical
+assumptions, identifiability limits, validation sequence, and clinical guardrails.
+
 ## Real RNA data
 
 Fetch and prepare the small public canine tachypacing time course:
