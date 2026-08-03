@@ -525,6 +525,76 @@ routes stay flat near zero across the same horizons. So "cure" language anywhere
 should be read as "no relapse detected in the tested window," with the actual multi-year erosion
 rate reported in `durability_horizon_sensitivity.csv`, not assumed to be zero.
 
+### Following the combination with a tailored mRNA vaccine
+
+Shared/hotspot-mutation mRNA vaccines are a real, active human-oncology approach, not something
+invented for this module: mRNA-5671 (Moderna/Merck) is a Phase 1 lipid-nanoparticle vaccine
+targeting four recurrent KRAS mutations (G12D, G13D, G12C, G12V) as monotherapy or with
+pembrolizumab, and a KRAS G12V-specific mRNA vaccine combined with pembrolizumab reported clinical
+benefit in advanced solid tumors (Cell Research 2024). Corgi PIHS's own PTPN11/KRAS hotspot
+mutations, *if confirmed present*, would be the same kind of small, recurrent, shareable target --
+what makes an "off-the-shelf" vaccine plausible at all, rather than a fully personalized one
+requiring per-patient sequencing and manufacture. No canine cancer vaccine trial of any kind exists
+for this disease; everything below is this module's own extension of that human precedent.
+
+The key mechanistic point motivating this scenario: **none of the three modeled drug-resistance
+escape mechanisms requires losing the driver-mutation antigen a vaccine would target.**
+`pathway_reactivation` adds a secondary RAS/RAF hit on top of the original mutation, `rtk_bypass`
+reactivates parallel signaling around it, and `target_site_mutation` only changes the MEK-inhibitor
+binding site -- all three keep expressing the original PTPN11/KRAS hotspot peptide. A vaccine
+targeting that hotspot should therefore still recognize cells using any of those three routes,
+including the very `pathway_reactivation` clone responsible for the long-horizon erosion above.
+Only a genuinely new, separate antigen-loss/immune-evasion event would evade it -- modeled here as
+a 5th clone, `immune_escape`, seeded by its own Poisson process from the antigen-positive
+population (not the sensitive clone) and restricted to days on/after `VACCINE_START_DAY`, since
+antigen loss confers no advantage before immune pressure exists. It inherits
+`pathway_reactivation`'s drug susceptibility with an illustrative 15% growth penalty, reflecting
+the assumption that an antigen-loss variant most plausibly arises from a lineage that already
+survived MAPK-inhibitor selection. Vaccine-induced kill is modeled as time-gated and ramping (not
+concentration-driven like the two drugs): zero before `VACCINE_START_DAY` (illustrative, 90 days,
+allowing debulking recovery plus an initial drug course), then rising with a saturating time
+constant (`VACCINE_RAMP_DAYS`, illustrative, 21 days -- general T-cell priming/expansion kinetics,
+not measured for this vaccine).
+
+```bash
+canine-dsp mapk-vaccine-followon-demo --breed bmd --cdk46-max-kill 0.05 --horizon-days 3650 --out results/mapk-vaccine
+```
+
+Run at the same 10-year horizon that exposed the erosion (400 trials), sweeping
+`VACCINE_MAX_KILL_SWEEP` (`[0.0, 0.01, 0.03, 0.05, 0.08]`) on top of the fixed full-potency
+combination: durable response rose from **80% (vaccine off) to 98.75% at max_kill=0.01, to 100% at
+max_kill>=0.03** across all 400 trials at that potency and above. The mechanism breakdown confirms
+*why*: at vaccine_max_kill=0.0, relapses are 17.25% `pathway_reactivation` and 2.75%
+`target_site_mutation`; by max_kill=0.01, `pathway_reactivation` relapses are already fully
+suppressed (0%), leaving only a residual sliver of `target_site_mutation`; by 0.03 both are zero.
+Across every potency tested, out to 10 years, **`immune_escape` never appeared as the dominant
+mechanism in any trial** -- consistent with this module's own choice to set
+`IMMUNE_ESCAPE_SEEDING_RATE` an order of magnitude below the rarest existing drug-resistance
+mechanism, not evidence that antigen loss can't happen; a higher assumed rate would show up here
+if tested.
+
+Two caveats specific to this scenario, beyond the general disclaimers every other scenario in this
+module already carries:
+
+- **PIHS's own cell-of-origin is dendritic cells** -- the same lineage antigen presentation itself
+  depends on. This is worth flagging as an open biological question, not dismissing: it is the
+  patient's *normal*, non-malignant dendritic cells that would actually present the vaccine antigen,
+  not the tumor cells, which only partially (not fully) allays the concern, since it is not
+  established whether malignant transformation of this lineage locally impairs nearby normal
+  antigen presentation.
+- A human primary CNS HS case report noted PD-L1/PD-L2 expression on tumor cells, consistent with a
+  T-cell-exhaustion phenotype that could blunt vaccine-induced killing independent of antigen loss
+  -- not modeled explicitly here, and a reason a checkpoint-inhibitor combination (as in the real
+  KRAS G12V vaccine + pembrolizumab trial above) might matter for this specific application, not
+  just as a generic add-on.
+
+Read the vaccine's near-elimination of the long-horizon gap as a demonstration of the *shape* of
+the antigen-persistence argument (a vaccine should suppress an escape route that hasn't shed the
+antigen it targets), not as a probability estimate for an actual dog: `vaccine_start_day`,
+`vaccine_ramp_days`, `vaccine_max_kill`, and the immune-escape clone's seeding rate and fitness
+cost are all illustrative placeholders, and the premise that Corgi PIHS carries a shareable
+PTPN11/KRAS hotspot at all remains unconfirmed in dogs.
+
 ## Research path
 
 1. Pin an assembly and record accessions/checksums in `data/README.md`.

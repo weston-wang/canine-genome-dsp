@@ -9,6 +9,10 @@ from canine_dsp.mapk_cli import (
     CDK46_MAX_KILL_SWEEP,
     COMBINED_EXPOSURE_DERATING,
     DURABILITY_HORIZON_SWEEP,
+    IMMUNE_ESCAPE_GROWTH_PENALTY,
+    VACCINE_CLONE_NAMES,
+    VACCINE_MAX_KILL_SWEEP,
+    VACCINE_START_DAY,
     canine_cns_hs_scenarios,
     combination_control_demo,
     combination_scenarios,
@@ -17,8 +21,10 @@ from canine_dsp.mapk_cli import (
     localized_control_demo,
     localized_pihs_scenarios,
     mapk_cns_demo,
+    vaccine_followon_demo,
+    vaccine_followon_scenarios,
 )
-from canine_dsp.mapk_resistance import run_monte_carlo
+from canine_dsp.mapk_resistance import run_monte_carlo, run_monte_carlo_with_vaccine
 
 
 def test_cns_scenarios_scale_css_by_brain_penetration_fraction():
@@ -205,3 +211,57 @@ def test_durable_response_probability_is_not_flat_across_horizons():
                                   initial_burden=initial_burden, css_reference_2=500., seed=7)
         durability[horizon_days] = 1 - outcome.progressed.mean()
     assert durability[730] > durability[3650]
+
+
+def test_vaccine_followon_scenarios_adds_fifth_clone_inheriting_pathway_reactivation():
+    scenarios = vaccine_followon_scenarios(breed="bmd", vaccine_max_kill_values=[0.0, 0.05])
+    model, css, seeding_rates, initial_burden, provenance = scenarios[0.05]
+    assert len(model.growth) == 5
+    assert model.ic50_nM[4] == model.ic50_nM[1]
+    assert model.max_kill[4] == model.max_kill[1]
+    assert model.growth[4] == pytest.approx(model.growth[1] * IMMUNE_ESCAPE_GROWTH_PENALTY)
+    assert provenance["vaccine_max_kill"] == 0.05
+    assert css > 0.0  # trametinib still active underneath
+
+
+def test_vaccine_followon_scenarios_zero_max_kill_behaves_like_combination_only():
+    """vaccine_max_kill=0 should carry the 5th clone but never apply vaccine kill or seed it
+    before VACCINE_START_DAY -- behaviorally identical to the drug-only combination model."""
+    scenarios = vaccine_followon_scenarios(breed="bmd", vaccine_max_kill_values=[0.0])
+    model, css, seeding_rates, initial_burden, _ = scenarios[0.0]
+    clone_names = VACCINE_CLONE_NAMES
+    outcome = run_monte_carlo_with_vaccine(
+        model, css, 200, seeding_rates, vaccine_start_day=VACCINE_START_DAY, vaccine_ramp_days=21,
+        vaccine_max_kill=0.0, immune_escape_seeding_rate=0.0, clone_names=clone_names,
+        trials=30, css_reference_2=500., seed=5)
+    assert np.all(outcome.trajectories[:, :, 4] == 0)  # never seeded when the rate itself is 0
+
+
+def test_vaccine_followon_demo_writes_expected_outputs(tmp_path):
+    vaccine_followon_demo(tmp_path, breed="bmd", trials=15, horizon_days=200, seed=1)
+    table = pd.read_csv(tmp_path / "vaccine_followon_sensitivity.csv")
+    assert len(table) == len(VACCINE_MAX_KILL_SWEEP)
+    assert "mechanism_immune_escape" in table.columns
+    assert "mechanism_pathway_reactivation" in table.columns
+    summary = json.loads((tmp_path / "summary.json").read_text())
+    assert "vaccine_precedent" in summary
+    assert "antigen_persistence_rationale" in summary
+    assert "dendritic_cell_vaccine_caveat" in summary
+    assert "unverified_extrapolations" in summary
+    assert (tmp_path / "vaccine_followon.png").exists()
+
+
+def test_vaccine_suppresses_pathway_reactivation_without_worsening_durability():
+    """Core claim: since pathway_reactivation still expresses the original driver antigen, adding
+    a potent-enough vaccine on top of the combination should not make long-horizon durability
+    worse than the drug-only baseline, even though it introduces a new immune_escape route."""
+    scenarios = vaccine_followon_scenarios(breed="bmd", vaccine_max_kill_values=[0.0, 0.05])
+    durability = {}
+    for vaccine_max_kill, (model, css, seeding_rates, initial_burden, _) in scenarios.items():
+        outcome = run_monte_carlo_with_vaccine(
+            model, css, 1825, seeding_rates, vaccine_start_day=VACCINE_START_DAY,
+            vaccine_ramp_days=21, vaccine_max_kill=vaccine_max_kill,
+            immune_escape_seeding_rate=6e-5, clone_names=VACCINE_CLONE_NAMES, trials=150,
+            initial_burden=initial_burden, css_reference_2=500., seed=9)
+        durability[vaccine_max_kill] = 1 - outcome.progressed.mean()
+    assert durability[0.05] >= durability[0.0]

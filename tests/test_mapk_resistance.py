@@ -7,8 +7,11 @@ from canine_dsp.mapk_resistance import (
     _dominant_mechanism,
     build_mutation_matrix,
     drug_kill_rate,
+    merge_injections,
     poisson_mutation_injections,
+    ramping_kill_schedule,
     run_monte_carlo,
+    run_monte_carlo_with_vaccine,
     simulate_resistance,
 )
 
@@ -131,3 +134,98 @@ def test_monte_carlo_can_produce_durable_response_with_no_preexisting_clone():
     outcome = run_monte_carlo(model, css_reference=1640., horizon_days=730, seeding_rates=seeding_rates,
                              trials=60, preexisting_prob=0.0, seed=5)
     assert (~outcome.progressed).any()
+
+
+def test_ramping_kill_schedule_zero_before_start_and_saturates_toward_max_kill():
+    schedule = ramping_kill_schedule(horizon_days=200, start_day=50, ramp_days=21,
+                                     max_kill=.4, applicable_clones=np.array([1., 1., 0.]))
+    assert np.all(schedule[:50] == 0)
+    assert schedule[51, 2] == 0  # excluded clone never receives kill
+    assert schedule[199, 0] == pytest.approx(.4, rel=1e-2)
+    assert schedule[51, 0] < schedule[100, 0] < schedule[199, 0]
+
+
+def test_merge_injections_sums_overlapping_days():
+    a = {1: np.array([0., 1., 0.]), 2: np.array([0., 0., 1.])}
+    b = {1: np.array([0., 0., 5.]), 3: np.array([1., 0., 0.])}
+    merged = merge_injections(a, b)
+    np.testing.assert_allclose(merged[1], [0., 1., 5.])
+    np.testing.assert_allclose(merged[2], [0., 0., 1.])
+    np.testing.assert_allclose(merged[3], [1., 0., 0.])
+
+
+def test_simulate_resistance_additional_kill_suppresses_only_applicable_clones():
+    model = ResistanceModel(growth=np.array([.05, .05]), ic50_nM=np.array([1e6, 1e6]),
+                            max_kill=np.array([0., 0.]), mutation=np.eye(2))
+    additional_kill = np.zeros((60, 2))
+    additional_kill[:, 0] = .3  # only clone 0 is "recognized"
+    state = simulate_resistance(model, np.zeros(60), np.array([.1, .1]), additional_kill=additional_kill)
+    assert state[-1, 0] < state[0, 0]
+    assert state[-1, 1] > state[0, 1]
+
+
+def test_poisson_mutation_injections_explicit_clone_indices_and_k():
+    rng = np.random.default_rng(0)
+    trajectory = np.full(30, 1.0)
+    injections = poisson_mutation_injections(rng, trajectory, np.array([5.0]), seed_fraction=1e-8,
+                                             clone_indices=[4], k=5)
+    assert injections
+    for vector in injections.values():
+        assert len(vector) == 5
+        assert vector[4] > 0
+        assert vector[:4].sum() == 0
+
+
+def _vaccine_model() -> ResistanceModel:
+    dog = _dog_like_model()
+    escape_growth = dog.growth[1] * .85
+    return ResistanceModel(
+        growth=np.append(dog.growth, escape_growth),
+        ic50_nM=np.append(dog.ic50_nM, dog.ic50_nM[1]),
+        max_kill=np.append(dog.max_kill, dog.max_kill[1]),
+        mutation=np.eye(5),
+    )
+
+
+def test_run_monte_carlo_with_vaccine_shape_and_immune_escape_clone_name():
+    model = _vaccine_model()
+    seeding_rates = 0.012 * np.array([.85, .10, .05])
+    clone_names = CLONE_NAMES + ["immune_escape"]
+    outcome = run_monte_carlo_with_vaccine(
+        model, css_reference=1640., horizon_days=400, seeding_rates=seeding_rates,
+        vaccine_start_day=90, vaccine_ramp_days=21, vaccine_max_kill=.05,
+        immune_escape_seeding_rate=6e-5, clone_names=clone_names, trials=25,
+        preexisting_prob=.3, seed=11)
+    assert outcome.trajectories.shape == (25, 401, 5)
+    assert all(label in {"durable_response", *clone_names[1:]} for label in outcome.dominant_mechanism)
+
+
+def test_poisson_injections_never_land_on_zero_weight_days():
+    """Underpins run_monte_carlo_with_vaccine's guarantee that immune-escape seeding never occurs
+    before vaccine_start_day: zeroing the source trajectory before that day (as the vaccine model
+    does) must make those days impossible to draw, not merely unlikely."""
+    rng = np.random.default_rng(3)
+    trajectory = np.zeros(100)
+    trajectory[50:] = 1.0
+    injections = poisson_mutation_injections(rng, trajectory, np.array([50.0]), seed_fraction=1e-8,
+                                             clone_indices=[4], k=5)
+    assert injections
+    assert all(day >= 50 for day in injections)
+
+
+def test_vaccine_can_suppress_pathway_reactivation_at_high_potency():
+    """Sanity check on the model's own shared premise: since pathway_reactivation still expresses
+    the original driver antigen (see ANTIGEN_PERSISTENCE_NOTE), a high enough vaccine max_kill
+    should suppress it too, not just leave it untouched like the MEK inhibitor does."""
+    model = _vaccine_model()
+    seeding_rates = 0.012 * np.array([.85, .10, .05])
+    clone_names = CLONE_NAMES + ["immune_escape"]
+    durability = {}
+    for vaccine_max_kill in (0.0, 0.3):
+        outcome = run_monte_carlo_with_vaccine(
+            model, css_reference=1640., horizon_days=1000, seeding_rates=seeding_rates,
+            vaccine_start_day=90, vaccine_ramp_days=21, vaccine_max_kill=vaccine_max_kill,
+            immune_escape_seeding_rate=6e-5, clone_names=clone_names, trials=80,
+            preexisting_prob=.3, seed=11)
+        durability[vaccine_max_kill] = 1 - outcome.progressed.mean()
+    assert durability[0.3] >= durability[0.0]

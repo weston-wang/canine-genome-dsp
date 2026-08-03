@@ -45,6 +45,18 @@ durable-response probability is in the same ballpark as the case reports above -
 those are a handful of case reports published specifically because the outcome was durable
 (survivorship/publication bias), so the true rate is almost certainly lower than "durable in all
 of them."
+
+`run_monte_carlo_with_vaccine` extends this to a follow-on shared/hotspot-mutation-targeted mRNA
+cancer vaccine, layered on top of MAPK-inhibitor (+/- CDK4/6-inhibitor) therapy. Shared-neoantigen
+mRNA vaccines targeting a small, recurrent set of driver mutations -- rather than a fully
+personalized, per-patient neoantigen set -- are a real, active approach in human oncology:
+mRNA-5671 (Moderna/Merck), a Phase 1 lipid-nanoparticle vaccine targeting four frequent KRAS
+mutations (G12D, G13D, G12C, G12V) as monotherapy or with pembrolizumab in KRAS-mutant NSCLC/CRC/
+pancreatic cancer; and a KRAS G12V-specific mRNA vaccine combined with pembrolizumab reporting
+clinical benefit in advanced solid tumors (Cell Research, 2024). Canine HS's own PTPN11/KRAS
+hotspot mutations, if confirmed present in a given case, are the same kind of small, recurrent,
+shareable target -- no canine-specific vaccine data exists, so this remains this module's own
+hypothesis-generating extension, not a validated finding.
 """
 
 from dataclasses import dataclass, replace
@@ -93,7 +105,8 @@ def drug_kill_rate(concentration, ic50_nM, hill: float, max_kill) -> np.ndarray:
 
 def simulate_resistance(model: ResistanceModel, concentration: np.ndarray, initial: np.ndarray,
                         injections: dict[int, np.ndarray] | None = None,
-                        concentration_2: np.ndarray | None = None) -> np.ndarray:
+                        concentration_2: np.ndarray | None = None,
+                        additional_kill: np.ndarray | None = None) -> np.ndarray:
     """Simulate density-dependent multiclone tumor burden under a daily drug-concentration series.
 
     Net growth is logistic growth minus an Emax drug kill-rate term, so a clone whose kill rate
@@ -103,7 +116,9 @@ def simulate_resistance(model: ResistanceModel, concentration: np.ndarray, initi
     `poisson_mutation_injections`), on top of whatever `model.mutation` transfers that day.
     `concentration_2`, if given alongside `model.ic50_nM_2`/`max_kill_2`, adds a second,
     per-clone-identical kill-rate term -- see `ResistanceModel` for why it's uniform, not
-    per-clone, unlike the first drug.
+    per-clone, unlike the first drug. `additional_kill`, if given, is a precomputed `(days, k)`
+    per-clone kill-rate array added directly on top of both drug terms -- used for a time-gated
+    (not concentration-gated) mechanism like vaccine-induced immunity, see `ramping_kill_schedule`.
     """
     initial = np.asarray(initial, float)
     state = np.zeros((len(concentration) + 1, len(initial)))
@@ -115,12 +130,41 @@ def simulate_resistance(model: ResistanceModel, concentration: np.ndarray, initi
         kill = drug_kill_rate(c, model.ic50_nM, model.hill, model.max_kill)
         if has_second_drug:
             kill = kill + drug_kill_rate(concentration_2[t], model.ic50_nM_2, model.hill_2, model.max_kill_2)
+        if additional_kill is not None:
+            kill = kill + additional_kill[t]
         net = model.growth * (1 - density) - kill
         grown = current * np.exp(np.clip(net, -30, 30))
         state[t + 1] = grown @ model.mutation
         if injections and (t + 1) in injections:
             state[t + 1] = state[t + 1] + injections[t + 1]
     return state
+
+
+def ramping_kill_schedule(horizon_days: int, start_day: int, ramp_days: float, max_kill: float,
+                          applicable_clones: np.ndarray) -> np.ndarray:
+    """Time-gated, saturating kill-rate schedule for a vaccine-type mechanism.
+
+    Zero before `start_day`; rises as `1 - exp(-elapsed / ramp_days)` toward `max_kill` after,
+    representing T-cell priming/expansion kinetics (a real ~1-3 week immunology timescale, not
+    vaccine- or antigen-specific measured data) -- deliberately time-dependent rather than the
+    concentration-dependent Emax shape used for the small-molecule drugs, since immune effector
+    buildup is not governed by a plasma concentration. Applied only to clones flagged 1 in
+    `applicable_clones` (a length-k 0/1 mask): an antigen-loss/immune-escape clone is excluded by
+    construction, since the entire premise of that clone is that the vaccine no longer sees it.
+    """
+    days = np.arange(horizon_days)
+    ramp = np.where(days >= start_day, 1 - np.exp(-(days - start_day) / ramp_days), 0.0)
+    mask = np.asarray(applicable_clones, dtype=float)
+    return np.outer(ramp * max_kill, mask)
+
+
+def merge_injections(a: dict[int, np.ndarray], b: dict[int, np.ndarray]) -> dict[int, np.ndarray]:
+    """Combine two day-keyed Poisson-injection dictionaries (see `poisson_mutation_injections`),
+    summing population vectors on days present in both."""
+    merged = {day: vector.copy() for day, vector in a.items()}
+    for day, vector in b.items():
+        merged[day] = merged[day] + vector if day in merged else vector.copy()
+    return merged
 
 
 def build_mutation_matrix(seeding_rates: np.ndarray) -> np.ndarray:
@@ -151,23 +195,34 @@ def perturb_resistance_model(model: ResistanceModel, rng: np.random.Generator,
 
 
 def poisson_mutation_injections(rng: np.random.Generator, sensitive_trajectory: np.ndarray,
-                                seeding_rates: np.ndarray, seed_fraction: float = 1e-8
-                                ) -> dict[int, np.ndarray]:
-    """Schedule acquired-resistance establishment as a Poisson process over sensitive cell-days.
+                                seeding_rates: np.ndarray, seed_fraction: float = 1e-8,
+                                clone_indices: range | list[int] | None = None,
+                                k: int | None = None) -> dict[int, np.ndarray]:
+    """Schedule acquired-resistance establishment as a Poisson process over a source population's
+    cumulative cell-days (usually the sensitive clone's trajectory).
 
-    Expected establishment count for clone i is `seeding_rates[i] * sum(sensitive_trajectory)`.
+    Expected establishment count for `seeding_rates[i]` is `seeding_rates[i] * sum(trajectory)`.
     Unlike a constant per-day transfer fraction, a Poisson draw can come back exactly zero, so a
     resistant lineage can genuinely never arise in a given trial -- a rate small enough to make
     that likely is required to reproduce multi-year durable responses; a fixed nonzero daily
     seeding rate cannot, since it guarantees eventual outgrowth given enough follow-up time.
+
+    `clone_indices` defaults to `1, 2, ..., len(seeding_rates)` (the original single-source-clone
+    convention: seeding_rates[i] seeds clone i+1); pass explicit indices to seed a different clone
+    (e.g. a 5th, immune-escape clone) from a different source trajectory without reindexing.
+    `k`, the resulting vector length, defaults to `len(seeding_rates) + 1` for the same reason and
+    must be passed explicitly whenever `clone_indices` targets a clone beyond that range.
     """
     total_cell_days = float(sensitive_trajectory.sum())
     injections: dict[int, np.ndarray] = {}
     if total_cell_days <= 0:
         return injections
     weights = sensitive_trajectory / total_cell_days
-    k = len(seeding_rates) + 1
-    for clone_index, rate in enumerate(seeding_rates, start=1):
+    if clone_indices is None:
+        clone_indices = range(1, len(seeding_rates) + 1)
+    if k is None:
+        k = len(seeding_rates) + 1
+    for clone_index, rate in zip(clone_indices, seeding_rates):
         for _ in range(rng.poisson(rate * total_cell_days)):
             day = int(rng.choice(len(sensitive_trajectory), p=weights))
             vector = injections.setdefault(day, np.zeros(k))
@@ -208,13 +263,14 @@ class MonteCarloOutcome:
     dominant_mechanism: list[str]     # per trial, "durable_response" if not progressed
 
 
-def _dominant_mechanism(state_final: np.ndarray, progressed: bool) -> str:
+def _dominant_mechanism(state_final: np.ndarray, progressed: bool,
+                        clone_names: list[str] = CLONE_NAMES) -> str:
     if not progressed:
         return "durable_response"
     resistant = state_final[1:]
     if resistant.sum() <= 0:
         return "durable_response"
-    return CLONE_NAMES[1 + int(np.argmax(resistant))]
+    return clone_names[1 + int(np.argmax(resistant))]
 
 
 def run_monte_carlo(reference: ResistanceModel, css_reference: float, horizon_days: int,
@@ -277,4 +333,107 @@ def run_monte_carlo(reference: ResistanceModel, css_reference: float, horizon_da
         if trial_progressed:
             time_to_progression[trial] = nadir_day + progression_days[0]
         dominant_mechanism.append(_dominant_mechanism(state[-1], trial_progressed))
+    return MonteCarloOutcome(trajectories, progressed, time_to_progression, dominant_mechanism)
+
+
+def run_monte_carlo_with_vaccine(reference: ResistanceModel, css_reference: float, horizon_days: int,
+                                seeding_rates: np.ndarray, vaccine_start_day: int, vaccine_ramp_days: float,
+                                vaccine_max_kill: float, immune_escape_seeding_rate: float,
+                                clone_names: list[str], trials: int = 500, preexisting_prob: float = .3,
+                                exposure_scale: float = .3, seeding_rate_scale: float = .5,
+                                seed_fraction: float = 1e-8, detection_floor_fraction: float = .01,
+                                initial_burden: float = .3, css_reference_2: float | None = None,
+                                exposure_scale_2: float = .3, immune_escape_seed_fraction: float = 1e-8,
+                                seed: int = 7) -> MonteCarloOutcome:
+    """Adds a time-gated vaccine kill term and a 5th, antigen-loss/immune-escape clone on top of
+    `run_monte_carlo`'s drug-resistance model.
+
+    `reference` must have one more clone than its drug-resistance-only counterpart -- the last
+    index is treated as the immune-escape clone and is excluded from the vaccine's kill term (see
+    `ramping_kill_schedule`), since the entire premise of that clone is that it is not recognized.
+
+    Two independent Poisson processes seed resistant lineages, reflecting that they are
+    mechanistically unrelated: (1) the original acquired-drug-resistance mechanisms
+    (`seeding_rates`, clones 1..len(seeding_rates)) are seeded from the sensitive clone's
+    cell-days exactly as in `run_monte_carlo`; (2) the immune-escape clone (last index) is seeded
+    from the "antigen-positive" population's cell-days -- the sum of every clone except itself --
+    restricted to days on or after `vaccine_start_day`. That restriction is a simplifying
+    assumption, not a claim that the underlying mutation only becomes physically possible once
+    the vaccine starts: an antigen-loss variant confers no survival advantage before immune
+    pressure exists, so it has no plausible route to establish and expand before that point,
+    making its pre-vaccine contribution negligible to omit rather than model.
+
+    None of the three original drug-resistance mechanisms requires losing the driver-mutation
+    antigen a vaccine would target -- they all add a resistance mechanism upstream or on-target,
+    without shedding the original hotspot mutation -- so a vaccine targeting that hotspot should
+    still recognize cells using any of those three routes; only a genuinely new antigen-loss
+    event (this 5th clone) evades it. The immune-escape clone's own growth/IC50/kill parameters
+    are set by the caller to inherit the pathway_reactivation clone's drug-susceptibility with an
+    added fitness cost (see `mapk_cli.vaccine_followon_scenarios`), reflecting the assumption
+    that an antigen-loss variant most plausibly arises from a cell lineage that already survived
+    MAPK-inhibitor-based selection -- an illustrative, labeled assumption, not a measured one.
+    """
+    rng = np.random.default_rng(seed)
+    k = len(reference.growth)
+    immune_escape_index = k - 1
+    applicable_clones = np.ones(k)
+    applicable_clones[immune_escape_index] = 0.0
+    identity_model = replace(reference, mutation=np.eye(k))
+    detection_floor = detection_floor_fraction * reference.carrying_capacity
+    vaccine_kill = ramping_kill_schedule(horizon_days, vaccine_start_day, vaccine_ramp_days,
+                                        vaccine_max_kill, applicable_clones)
+    # immune escape is not modeled as pre-existing at treatment start (weight 0): there is no
+    # immune pressure yet to select for it, unlike the three drug-resistance mechanisms.
+    mechanism_weights = np.concatenate([np.asarray(seeding_rates, dtype=float), [0.0]])
+    days_index = np.arange(horizon_days + 1)
+
+    trajectories = np.zeros((trials, horizon_days + 1, k))
+    progressed = np.zeros(trials, dtype=bool)
+    time_to_progression = np.full(trials, np.nan)
+    dominant_mechanism = []
+    for trial in range(trials):
+        model = perturb_resistance_model(identity_model, rng)
+        css = css_reference * rng.lognormal(0, exposure_scale)
+        concentration = np.full(horizon_days, css)
+        concentration_2 = None
+        if css_reference_2 is not None:
+            css_2 = css_reference_2 * rng.lognormal(0, exposure_scale_2)
+            concentration_2 = np.full(horizon_days, css_2)
+        initial = sample_initial_state(rng, k, preexisting_prob, mechanism_weights=mechanism_weights,
+                                       initial_burden=initial_burden)
+        sensitive_only = np.zeros(k)
+        sensitive_only[0] = initial[0]
+        sensitive_trajectory = simulate_resistance(model, concentration, sensitive_only,
+                                                    concentration_2=concentration_2)[:, 0]
+        jittered_rates = seeding_rates * rng.lognormal(0, seeding_rate_scale, len(seeding_rates))
+        drug_injections = poisson_mutation_injections(rng, sensitive_trajectory, jittered_rates,
+                                                       seed_fraction,
+                                                       clone_indices=range(1, immune_escape_index), k=k)
+
+        # provisional run (drug + vaccine pressure, drug-resistance escapes seeded, no immune
+        # escape yet) purely to obtain the antigen-positive population's cell-days for seeding
+        # the immune-escape clone -- not itself a reported trajectory.
+        provisional = simulate_resistance(model, concentration, initial, drug_injections,
+                                          concentration_2, additional_kill=vaccine_kill)
+        antigen_positive_trajectory = provisional[:, :immune_escape_index].sum(axis=1)
+        antigen_positive_trajectory = np.where(days_index >= vaccine_start_day,
+                                               antigen_positive_trajectory, 0.0)
+        jittered_escape_rate = immune_escape_seeding_rate * rng.lognormal(0, seeding_rate_scale)
+        escape_injections = poisson_mutation_injections(rng, antigen_positive_trajectory,
+                                                        np.array([jittered_escape_rate]),
+                                                        immune_escape_seed_fraction,
+                                                        clone_indices=[immune_escape_index], k=k)
+        injections = merge_injections(drug_injections, escape_injections)
+        state = simulate_resistance(model, concentration, initial, injections, concentration_2,
+                                    additional_kill=vaccine_kill)
+        trajectories[trial] = state
+        total = state.sum(axis=1)
+        nadir_day = int(np.argmin(total))
+        threshold = max(PROGRESSION_THRESHOLD * total[nadir_day], detection_floor)
+        progression_days = np.flatnonzero(total[nadir_day:] >= threshold)
+        trial_progressed = progression_days.size > 0 and progression_days[0] > 0
+        progressed[trial] = trial_progressed
+        if trial_progressed:
+            time_to_progression[trial] = nadir_day + progression_days[0]
+        dominant_mechanism.append(_dominant_mechanism(state[-1], trial_progressed, clone_names))
     return MonteCarloOutcome(trajectories, progressed, time_to_progression, dominant_mechanism)

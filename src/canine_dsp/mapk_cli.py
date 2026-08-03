@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 
 from .alphafold import align_residue_numbers, download_structure, read_plddt_track
-from .mapk_resistance import CLONE_NAMES, ResistanceModel, run_monte_carlo
+from .mapk_resistance import CLONE_NAMES, ResistanceModel, run_monte_carlo, run_monte_carlo_with_vaccine
 from .uniprot import DOG_TAXID, HUMAN_TAXID, resolve_uniprot_accession
 
 _SHARED_GROWTH = np.array([.06, .05, .055, .058])  # per-day; illustrative, not fitted
@@ -719,6 +719,208 @@ def durability_horizon_demo(out: Path, breed: str = "bmd", debulking_fraction: f
             "Read probability_durable_response at any single horizon as a snapshot, not the "
             "answer -- the honest answer to \"how long is durable\" is the whole curve in "
             "durability_horizon_sensitivity.csv, not one number."
+        ),
+    }
+    (out / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")
+
+
+# mRNA vaccine follow-on --------------------------------------------------------------------
+# Real precedent for a shared/hotspot-mutation-targeted ("off-the-shelf", not fully personalized)
+# mRNA cancer vaccine: mRNA-5671 (Moderna/Merck), a Phase 1 lipid-nanoparticle vaccine targeting
+# four frequent KRAS mutations (G12D, G13D, G12C, G12V) as monotherapy or with pembrolizumab, in
+# KRAS-mutant NSCLC/CRC/pancreatic cancer; and a KRAS G12V-specific mRNA vaccine + pembrolizumab
+# combination reporting clinical benefit in advanced solid tumors (Cell Research 2024). Corgi
+# PIHS's own PTPN11/KRAS hotspot mutations, if confirmed present (unverified -- see
+# canine_cns_hs_scenarios), would be the same kind of small, recurrent, shareable target: this is
+# what makes a vaccine plausible without per-patient neoantigen sequencing/manufacture, unlike a
+# fully personalized vaccine, which would be impractical for a rare veterinary disease.
+VACCINE_PRECEDENT_NOTE = (
+    "Shared/hotspot-mutation mRNA vaccines are a real, active human-oncology approach, not "
+    "something this module invents: mRNA-5671 targets four recurrent KRAS mutations "
+    "(G12D/G13D/G12C/G12V) as monotherapy or with pembrolizumab (Phase 1, KRAS-mutant NSCLC/CRC/"
+    "pancreatic cancer); a KRAS G12V-specific mRNA vaccine plus pembrolizumab reported clinical "
+    "benefit in advanced solid tumors (Cell Research 2024). No canine cancer vaccine trial of "
+    "any kind was found for this disease -- everything below is this module's own extension of "
+    "that human precedent onto Corgi PIHS's own (unconfirmed) PTPN11/KRAS driver hypothesis."
+)
+
+ANTIGEN_PERSISTENCE_NOTE = (
+    "None of this module's three drug-resistance escape mechanisms requires losing the driver-"
+    "mutation antigen a vaccine would target: pathway_reactivation adds a secondary RAS/RAF hit "
+    "on top of the original mutation, rtk_bypass reactivates parallel signaling around it, and "
+    "target_site_mutation only changes the MEK-inhibitor binding site -- all three keep "
+    "expressing the original PTPN11/KRAS hotspot peptide. A vaccine targeting that hotspot should "
+    "therefore still recognize cells using any of those three routes; only a genuinely new, "
+    "separate antigen-loss/immune-evasion event (the immune_escape clone modeled here) would "
+    "evade it. This is why the model adds a 5th clone rather than assuming the existing three "
+    "drug-resistance mechanisms already confer vaccine resistance."
+)
+
+DENDRITIC_CELL_VACCINE_CAVEAT = (
+    "PIHS is itself a tumor of dendritic cells -- the same lineage that antigen presentation "
+    "(and therefore vaccine efficacy) depends on. This is worth flagging as an open biological "
+    "question, not dismissing: however, it is the patient's normal, non-malignant dendritic "
+    "cells (and other professional antigen-presenting cells) that would actually process and "
+    "present the vaccine antigen to T cells, not the malignant clone itself, which only partially "
+    "-- not fully -- allays the concern, since it is not established whether malignant "
+    "transformation of this lineage locally impairs normal antigen presentation nearby (e.g. via "
+    "local immunosuppression). A human primary CNS HS case report noted PD-L1/PD-L2 expression "
+    "on tumor cells, consistent with a broader T-cell-exhaustion phenotype that could blunt "
+    "vaccine-induced killing independent of antigen loss -- not modeled explicitly here, and a "
+    "reason a checkpoint-inhibitor combination (as in the real KRAS G12V vaccine + pembrolizumab "
+    "trial above) might matter for this application specifically, not just as a generic add-on."
+)
+
+VACCINE_CLONE_NAMES = CLONE_NAMES + ["immune_escape"]
+
+# Illustrative, not measured: no canine cancer vaccine trial exists to time this from.
+# vaccine_start_day allows time for post-debulking recovery plus an initial MAPK(+CDK4/6)-
+# inhibitor course before layering on a second modality; vaccine_ramp_days reflects general
+# T-cell priming/expansion kinetics (a real ~1-3 week immunology timescale), not vaccine- or
+# antigen-specific measured data.
+VACCINE_START_DAY = 90
+VACCINE_RAMP_DAYS = 21
+VACCINE_MAX_KILL_SWEEP = [0.0, 0.01, 0.03, 0.05, 0.08]
+
+# Illustrative fitness cost of antigen/MHC-I loss (a real, general immunoediting phenomenon, not
+# a number measured for this disease): the immune_escape clone otherwise inherits
+# pathway_reactivation's drug susceptibility, reflecting the assumption that an antigen-loss
+# variant most plausibly arises from a lineage that already survived MAPK-inhibitor selection,
+# rather than arising independently from the drug-sensitive population.
+IMMUNE_ESCAPE_GROWTH_PENALTY = 0.85
+
+# Illustrative, not measured: set an order of magnitude below the rarest of the three existing
+# acquired-resistance mechanisms (target_site_mutation, weight .05 of _SEEDING_RATE_TOTAL for the
+# bmd/systemic-reference spectrum), reflecting that antigen/MHC loss is generally considered a
+# rarer route to immune escape than pathway-level drug-resistance mutations, not a fitted value.
+IMMUNE_ESCAPE_SEEDING_RATE = _SEEDING_RATE_TOTAL * 0.05 * 0.1
+
+
+def vaccine_followon_scenarios(breed: str = "bmd", debulking_fraction: float = DEBULKING_FRACTION,
+                               cdk46_max_kill: float = 0.05,
+                               vaccine_max_kill_values: list[float] = VACCINE_MAX_KILL_SWEEP,
+                               location_penetration_multiplier: float = 1.0,
+                               ) -> dict[float, tuple[ResistanceModel, float, np.ndarray, float, dict]]:
+    """Trametinib + CDK4/6i (fixed at `cdk46_max_kill`, the combination's near-full-suppression
+    potency from `combination_control_demo`) plus a swept-potency mRNA vaccine layered on top.
+
+    Builds a 5th clone (`immune_escape`) onto the 4-clone combination model, inheriting
+    `pathway_reactivation`'s drug-susceptibility with `IMMUNE_ESCAPE_GROWTH_PENALTY` applied --
+    see the module-level notes above for why. `vaccine_max_kill=0.0` gives a drug-only baseline
+    with the 5th clone present but never seeded before `VACCINE_START_DAY` and never subject to
+    vaccine kill (the mask always excludes it) -- i.e. behaviorally identical to the 4-clone
+    combination model, just carried in a 5-wide state vector for a consistent comparison.
+    """
+    combo_scenarios = combination_scenarios(breed, debulking_fraction, [cdk46_max_kill],
+                                            location_penetration_multiplier)
+    model, css, seeding_rates, initial_burden, provenance = combo_scenarios[cdk46_max_kill]
+    escape_growth = model.growth[1] * IMMUNE_ESCAPE_GROWTH_PENALTY
+    model5 = ResistanceModel(
+        growth=np.append(model.growth, escape_growth),
+        ic50_nM=np.append(model.ic50_nM, model.ic50_nM[1]),
+        max_kill=np.append(model.max_kill, model.max_kill[1]),
+        mutation=np.eye(len(model.growth) + 1),
+        hill=model.hill, carrying_capacity=model.carrying_capacity,
+        ic50_nM_2=model.ic50_nM_2, max_kill_2=model.max_kill_2, hill_2=model.hill_2,
+    )
+    scenarios = {}
+    for vaccine_max_kill in vaccine_max_kill_values:
+        scenarios[vaccine_max_kill] = (model5, css, seeding_rates, initial_burden, {
+            **provenance, "vaccine_max_kill": vaccine_max_kill,
+            "vaccine_start_day": VACCINE_START_DAY, "vaccine_ramp_days": VACCINE_RAMP_DAYS,
+            "immune_escape_seeding_rate": IMMUNE_ESCAPE_SEEDING_RATE,
+            "immune_escape_growth_penalty": IMMUNE_ESCAPE_GROWTH_PENALTY,
+        })
+    return scenarios
+
+
+def vaccine_followon_demo(out: Path, breed: str = "bmd", debulking_fraction: float = DEBULKING_FRACTION,
+                          cdk46_max_kill: float = 0.05, trials: int = 300, horizon_days: int = 1825,
+                          preexisting_prob: float = _PREEXISTING_PROB_CENTRAL,
+                          location_penetration_multiplier: float = 1.0, seed: int = 7) -> None:
+    """Does a follow-on mRNA vaccine close the long-horizon durability gap `durability_horizon_demo`
+    found (durable-response probability eroding out to 5-10 years, driven by pathway_reactivation)?
+
+    Defaults to a 5-year (1825-day) horizon specifically because that is where the gap this demo
+    is testing shows up; a 2-year run would not exercise the effect being investigated. Sweeps
+    VACCINE_MAX_KILL_SWEEP at fixed combination-drug potency (`cdk46_max_kill`).
+    """
+    out.mkdir(parents=True, exist_ok=True)
+    scenarios = vaccine_followon_scenarios(breed, debulking_fraction, cdk46_max_kill,
+                                           VACCINE_MAX_KILL_SWEEP, location_penetration_multiplier)
+
+    rows, outcomes = [], {}
+    for vaccine_max_kill, (model, css, seeding_rates, initial_burden, _) in scenarios.items():
+        outcome = run_monte_carlo_with_vaccine(
+            model, css, horizon_days, seeding_rates, vaccine_start_day=VACCINE_START_DAY,
+            vaccine_ramp_days=VACCINE_RAMP_DAYS, vaccine_max_kill=vaccine_max_kill,
+            immune_escape_seeding_rate=IMMUNE_ESCAPE_SEEDING_RATE, clone_names=VACCINE_CLONE_NAMES,
+            trials=trials, preexisting_prob=preexisting_prob, initial_burden=initial_burden,
+            css_reference_2=CDK46_ILLUSTRATIVE_CSS_NM, seed=seed)
+        outcomes[vaccine_max_kill] = outcome
+        ttp = outcome.time_to_progression[outcome.progressed]
+        mechanism_counts = pd.Series(outcome.dominant_mechanism).value_counts()
+        mechanism_fractions = (mechanism_counts.reindex(["durable_response"] + VACCINE_CLONE_NAMES[1:], fill_value=0)
+                              / len(outcome.dominant_mechanism))
+        rows.append({
+            "vaccine_max_kill": vaccine_max_kill,
+            "probability_durable_response": float(1 - outcome.progressed.mean()),
+            "probability_progression": float(outcome.progressed.mean()),
+            "median_time_to_progression_days": float(np.median(ttp)) if ttp.size else None,
+            **{f"mechanism_{mechanism}": float(value) for mechanism, value in mechanism_fractions.items()},
+        })
+    table = pd.DataFrame(rows)
+    table.to_csv(out / "vaccine_followon_sensitivity.csv", index=False)
+
+    days = np.arange(horizon_days + 1)
+    fig, axes = plt.subplots(1, 3, figsize=(15.5, 4.5))
+    for vaccine_max_kill in VACCINE_MAX_KILL_SWEEP:
+        outcome = outcomes[vaccine_max_kill]
+        median_burden = np.median(outcome.trajectories.sum(axis=2), axis=0)
+        axes[0].plot(days, median_burden, label=f"vaccine max_kill={vaccine_max_kill}")
+    axes[0].axvline(VACCINE_START_DAY, color="gray", linestyle=":", linewidth=.9)
+    axes[0].set(xlabel="day", ylabel="median total tumor burden",
+               title=f"drug + vaccine: breed={breed}, horizon={horizon_days / 365:.0f}y")
+    axes[0].legend(fontsize=7)
+    axes[1].plot(table["vaccine_max_kill"], table["probability_durable_response"],
+                marker="o", color="tab:green")
+    axes[1].set(xlabel="vaccine max_kill (illustrative, unmeasured)", ylabel="P(durable response)",
+               title=f"does the vaccine close the {horizon_days / 365:.0f}-year gap?", ylim=(0, 1))
+    mechanism_columns = [f"mechanism_{name}" for name in ["durable_response"] + VACCINE_CLONE_NAMES[1:]]
+    table.set_index("vaccine_max_kill")[mechanism_columns].plot(kind="bar", stacked=True, ax=axes[2])
+    axes[2].set(ylabel="fraction of trials",
+               title="closing pathway_reactivation vs. opening immune_escape")
+    axes[2].legend(fontsize=6)
+    fig.tight_layout(); fig.savefig(out / "vaccine_followon.png", dpi=160); plt.close(fig)
+
+    summary = {
+        "breed_context": breed, "cdk46_max_kill_used": cdk46_max_kill, "horizon_days": horizon_days,
+        "preexisting_prob_used": preexisting_prob, "sensitivity": rows,
+        "vaccine_precedent": VACCINE_PRECEDENT_NOTE,
+        "antigen_persistence_rationale": ANTIGEN_PERSISTENCE_NOTE,
+        "dendritic_cell_vaccine_caveat": DENDRITIC_CELL_VACCINE_CAVEAT,
+        "unverified_extrapolations": [
+            ("no canine cancer vaccine trial of any kind exists for this disease; "
+             "vaccine_start_day, vaccine_ramp_days, and vaccine_max_kill are all illustrative, "
+             "not fit to measured data"),
+            ("assumes Corgi PIHS carries a PTPN11/KRAS hotspot mutation at all (the premise of "
+             "every scenario in this module) that would be shareable/targetable across cases -- "
+             "unconfirmed, no canine CNS-specific sequencing exists"),
+            ("immune_escape_seeding_rate and immune_escape_growth_penalty are illustrative "
+             "placeholders, not measured for this or any histiocytic sarcoma"),
+            ("PIHS's dendritic-cell lineage of origin (see dendritic_cell_vaccine_caveat) is a "
+             "biologically real reason antigen-presentation efficacy could differ from other "
+             "tumor types; not modeled quantitatively here"),
+            ("stacks on top of every extrapolation already listed in combination_control_demo's "
+             "and durability_horizon_demo's summary.json"),
+        ],
+        "warning": (
+            "The most speculative scenario in this module: it exists to show the *shape* of "
+            "whether a shared-neoantigen vaccine can suppress a slowly-emerging, antigen-"
+            "preserving escape route (pathway_reactivation) at long horizons, and whether doing "
+            "so trades that risk for a new, smaller antigen-loss risk -- not to estimate a real "
+            "probability for an actual dog. Read the stacked mechanism panel and the vaccine_max_kill "
+            "sensitivity curve together, not any single durable-response number, as the result."
         ),
     }
     (out / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")

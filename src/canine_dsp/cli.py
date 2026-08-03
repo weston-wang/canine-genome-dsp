@@ -18,6 +18,7 @@ from .mapk_cli import (
     localized_control_demo,
     mapk_cns_demo,
     mapk_resistance_demo,
+    vaccine_followon_demo,
 )
 from .signals import eiip, variant_density, windowed_gc
 from .spectral import coherence, multitaper_psd, spectral_entropy, welch_psd
@@ -184,6 +185,17 @@ def main() -> None:
     mapk_durability.add_argument("--location-penetration-multiplier", type=float, default=1.0)
     mapk_durability.add_argument("--seed", type=int, default=7)
     mapk_durability.add_argument("--out", type=Path, required=True)
+    mapk_vaccine = sub.add_parser("mapk-vaccine-followon-demo",
+                                  help="does a follow-on mRNA vaccine close the long-horizon durability gap?")
+    mapk_vaccine.add_argument("--breed", choices=["bmd", "flat_coated_retriever"], default="bmd")
+    mapk_vaccine.add_argument("--debulking-fraction", type=float, default=0.97)
+    mapk_vaccine.add_argument("--cdk46-max-kill", type=float, default=0.05)
+    mapk_vaccine.add_argument("--trials", type=int, default=300)
+    mapk_vaccine.add_argument("--horizon-days", type=int, default=1825)
+    mapk_vaccine.add_argument("--preexisting-prob", type=float, default=0.30)
+    mapk_vaccine.add_argument("--location-penetration-multiplier", type=float, default=1.0)
+    mapk_vaccine.add_argument("--seed", type=int, default=7)
+    mapk_vaccine.add_argument("--out", type=Path, required=True)
     args = parser.parse_args()
     if args.command == "demo":
         rng = np.random.default_rng(42)
@@ -236,10 +248,14 @@ def main() -> None:
         combination_toxicity_demo(args.out, args.breed, args.debulking_fraction, args.max_kill_2,
                                   args.trials, args.horizon_days, args.preexisting_prob,
                                   args.location_penetration_multiplier, args.seed)
-    else:
+    elif args.command == "mapk-durability-horizon-demo":
         durability_horizon_demo(args.out, args.breed, args.debulking_fraction, args.max_kill_2,
                                 args.trials, args.preexisting_prob,
                                 args.location_penetration_multiplier, args.seed)
+    else:
+        vaccine_followon_demo(args.out, args.breed, args.debulking_fraction, args.cdk46_max_kill,
+                              args.trials, args.horizon_days, args.preexisting_prob,
+                              args.location_penetration_multiplier, args.seed)
 
 
 if __name__ == "__main__":
