@@ -514,16 +514,60 @@ canine-dsp mapk-durability-horizon-demo --breed bmd --max-kill-2 0.05 --out resu
 ```
 
 The reason is identifiable, not just numeric drift: the combination *slows* the
-`pathway_reactivation` escape route rather than eliminating it. Without CDK4/6i its net growth
-margin is clearly positive (+0.03/day); with it, the margin flips to only slightly negative
-(-0.02/day) -- decaying, but barely. Given enough years, per-trial parameter variability (the
-same lognormal jitter every scenario in this module applies) lets an increasing minority of
-trials draw a combination just weak enough for that route to cross the detection threshold late.
-The mechanism breakdown confirms it directly: `pathway_reactivation` accounts for essentially all
-of the growth in relapses between year 2 and year 10 (0% to 17%), while the other two escape
-routes stay flat near zero across the same horizons. So "cure" language anywhere in this module
-should be read as "no relapse detected in the tested window," with the actual multi-year erosion
-rate reported in `durability_horizon_sensitivity.csv`, not assumed to be zero.
+`pathway_reactivation` escape route rather than eliminating it. `clone_growth_margins` (an exact,
+deterministic per-clone growth-minus-kill calculation, not a simulated estimate) shows its net
+margin at these central parameters is **still +0.004/day, positive, not reversed** -- a clone with
+a genuinely positive margin will eventually regrow given enough time from any nonzero foothold,
+independent of luck. Given enough years, that shows up as a growing minority of trials crossing the
+detection threshold late. The mechanism breakdown confirms it directly: `pathway_reactivation`
+accounts for essentially all of the growth in relapses between year 2 and year 10 (0% to 17%),
+while the other two escape routes stay flat near zero across the same horizons. So "cure" language
+anywhere in this module should be read as "no relapse detected in the tested window," with the
+actual multi-year erosion rate reported in `durability_horizon_sensitivity.csv`, not assumed to be
+zero. (An earlier draft of this section described the margin as flipping to slightly *negative*;
+direct calculation via `clone_growth_margins` -- added later, see "Feasibility of curing one
+specific dog" below -- corrects that: it stays slightly positive, which is in fact the more
+consistent explanation for why relapse risk keeps growing rather than plateauing.)
+
+### Is there a purely pharmacological path forward, without any immune/vaccine mechanism?
+
+`clone_growth_margins` makes the erosion problem above precisely diagnosable, and precisely
+fixable without invoking a vaccine at all: sweeping `max_kill_2` past the 0.05 value used
+everywhere above shows exactly where every resistant clone's margin actually flips negative.
+
+```bash
+canine-dsp mapk-combination-toxicity-demo --breed bmd --max-kill-2 0.08 --out results/mapk-tox-08
+canine-dsp mapk-durability-horizon-demo --breed bmd --max-kill-2 0.08 --out results/mapk-durability-08
+```
+
+| `max_kill_2` | pathway_reactivation | rtk_bypass | target_site_mutation |
+|---|---|---|---|
+| 0.05 (used above) | +0.004/day | -0.010/day | +0.012/day |
+| **0.08** | **-0.024/day** | -0.038/day | **-0.016/day** |
+| 0.12 | -0.060/day | -0.074/day | -0.052/day |
+
+At `max_kill_2=0.08`, every resistant clone's margin goes negative -- a genuine mechanistic
+elimination, not just a low probability of detection within a given follow-up window. Verified two
+ways, not just asserted: (1) the reversal survives this module's own `COMBINED_EXPOSURE_DERATING`
+sweep at every level tested, down to 40% of full illustrative dose; (2) run through the actual
+Monte Carlo, durable response is **100% flat across 1, 2, 5, and 10 years** at `max_kill_2=0.08`
+(`durability_horizon_sensitivity.csv`), versus the 100%->99.5%->91.5%->81% erosion at 0.05 -- the
+long-horizon problem doesn't just improve, it disappears.
+
+This route doesn't depend on antigen presentation, DLA genotype, or which driver mutation (PTPN11
+or KRAS) a given dog carries at all -- it works purely by suppressing the shared downstream node
+harder, which is exactly why it matters as a fallback for a KRAS Q61H-driven case where the vaccine
+antigen-binding check below came back unsupported. One honest, load-bearing caveat: **this is not
+simply "give a higher dose of the same drug."** `drug_kill_rate`'s own Emax shape means kill
+asymptotically approaches `max_kill` as concentration rises but can never exceed it -- confirmed
+directly: at `max_kill_2=0.05`, even a 1000x-higher concentration than the illustrative dose (50 µM
+vs. 500 nM) only reaches kill=0.05, never more. Reaching the 0.08 regime requires a genuinely more
+potent CDK4/6 inhibitor (a different molecule, or a favorable resolution of the real uncertainty in
+this module's own illustrative potency guess), not a dose-escalation decision about the one already
+discussed. It also reopens the toxicity question from a different direction than before: the
+earlier toxicity analysis asked whether the *0.05* benefit survives *dose reduction*; a more potent
+drug reaching 0.08 has not been checked for tolerability at all, and myelosuppression risk plausibly
+scales with how potent the drug actually is, not just how much of it is given.
 
 ### Following the combination with a tailored mRNA vaccine
 

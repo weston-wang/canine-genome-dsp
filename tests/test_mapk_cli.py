@@ -25,7 +25,7 @@ from canine_dsp.mapk_cli import (
     vaccine_followon_demo,
     vaccine_followon_scenarios,
 )
-from canine_dsp.mapk_resistance import run_monte_carlo, run_monte_carlo_with_vaccine
+from canine_dsp.mapk_resistance import clone_growth_margins, run_monte_carlo, run_monte_carlo_with_vaccine
 
 
 def test_cns_scenarios_scale_css_by_brain_penetration_fraction():
@@ -212,6 +212,52 @@ def test_durable_response_probability_is_not_flat_across_horizons():
                                   initial_burden=initial_burden, css_reference_2=500., seed=7)
         durability[horizon_days] = 1 - outcome.progressed.mean()
     assert durability[730] > durability[3650]
+
+
+def test_higher_cdk46_potency_reverses_every_resistant_clones_growth_margin():
+    """The purely pharmacological path forward that doesn't depend on antigen presentation at
+    all: at the illustrative central parameters, max_kill_2=0.05 (used throughout most of this
+    module) leaves pathway_reactivation and target_site_mutation with a small POSITIVE margin
+    (they are slowed, not reversed); max_kill_2=0.08 should reverse every resistant clone's
+    margin to negative -- a genuine mechanistic elimination, not just a low detection
+    probability within a given follow-up window."""
+    scenarios_partial = combination_scenarios(breed="bmd", max_kill_2_values=[0.05])
+    scenarios_full = combination_scenarios(breed="bmd", max_kill_2_values=[0.08])
+    model_partial, css, _, _, _ = scenarios_partial[0.05]
+    model_full, _, _, _, _ = scenarios_full[0.08]
+    margins_partial = clone_growth_margins(model_partial, css, 500.0)
+    margins_full = clone_growth_margins(model_full, css, 500.0)
+    assert (margins_partial[1:] > 0).any()  # at least one resistant clone still net-positive
+    assert (margins_full[1:] < 0).all()     # every resistant clone reversed
+
+
+def test_higher_cdk46_potency_survives_combined_dose_derating():
+    """The reversal at max_kill_2=0.08 should not be a knife's-edge result: it should hold
+    across this module's own combined-dose de-rating range, not just at full illustrative dose,
+    since that's the realistic concern raised by TOXICITY_EXTRAPOLATION_NOTE."""
+    from canine_dsp.mapk_cli import COMBINED_EXPOSURE_DERATING as DERATING
+
+    scenarios = combination_scenarios(breed="bmd", max_kill_2_values=[0.08])
+    model, css, _, _, _ = scenarios[0.08]
+    for derating in DERATING:
+        margins = clone_growth_margins(model, css * derating, 500.0 * derating)
+        assert (margins[1:] < 0).all(), f"derating={derating} should still reverse every clone"
+
+
+def test_higher_cdk46_potency_eliminates_long_horizon_erosion():
+    """The direct Monte Carlo confirmation of the margin finding above: durability should not
+    erode from 2 to 10 years at max_kill_2=0.08 the way it does at 0.05 (see
+    test_durable_response_probability_is_not_flat_across_horizons), because none of the
+    resistant clones has a positive margin left to slowly regrow into detectability."""
+    scenarios = combination_scenarios(breed="bmd", max_kill_2_values=[0.08])
+    model, css, seeding_rates, initial_burden, _ = scenarios[0.08]
+    durability = {}
+    for horizon_days in (730, 3650):
+        outcome = run_monte_carlo(model, css, horizon_days, seeding_rates, trials=300,
+                                  initial_burden=initial_burden, css_reference_2=500., seed=7)
+        durability[horizon_days] = 1 - outcome.progressed.mean()
+    assert durability[3650] >= durability[730] - 0.02  # no meaningful erosion, unlike at 0.05
+    assert durability[3650] > 0.95
 
 
 def test_vaccine_followon_scenarios_adds_fifth_clone_inheriting_pathway_reactivation():
