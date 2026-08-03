@@ -308,16 +308,23 @@ pharmacology will match.
 
 ### Primary CNS histiocytic sarcoma
 
-Canine HS can present as a primary, localized CNS disease, and two clinicopathologic studies
-(Thongtharb et al. 2016, J Vet Med Sci 78(4):593-599; Toyoda et al. 2020, J Vet Intern Med
-34(2):828-837, n=102 CNS cases) report a strong -- not absolute -- predilection for the
-rostrotentorial cerebrum, with a real minority of infratentorial (cerebellar/brainstem) and
-spinal-cord-only cases. Toyoda's data also shows primary and disseminated CNS HS are
-pathophysiologically distinct (CSF pleocytosis 170 vs. 4 cells/uL) with sharply different breed
-skew: Corgis and Shetland Sheepdogs get almost exclusively the primary form, Rottweilers almost
-exclusively the disseminated form. No canine CNS-specific mutation sequencing has been published,
-so `canine_dsp.mapk_cli.canine_cns_hs_scenarios`/`mapk_cns_demo` extrapolate from the systemic
-model in `dog_preset` rather than a real CNS dataset:
+Canine HS can present as a primary, localized CNS disease (PIHS). Kishimoto et al. 2020 (J Vet
+Med Sci 82(1):77-83, University of Tokyo, 9,270 dogs screened, 20 PIHS cases) found this is by far
+the most breed-concentrated tumor type in their cohort: Pembroke Welsh Corgi accounted for 10 of
+the 20 PIHS cases -- 50%, from a breed that was only 4.6% of the hospital population (odds ratio
+21.5, 95% CI 8.9-51.8, P<0.001) -- and, in the 16 cases with known location, PIHS occurred
+exclusively in the cerebrum (100%; temporal lobe most common at 25.0%, then frontal 18.8%), with
+zero cerebellar or brainstem cases. Toyoda et al. 2020 (J Vet Intern Med 34(2):828-837, n=102 CNS
+HS across multiple US institutions) corroborates the strong cerebral predilection but does report
+a real infratentorial (cerebellar/brainstem) minority -- so cerebellar primary CNS HS is not
+fictional, just rare wherever it has been counted, and apparently absent in Kishimoto's cohort
+specifically. Toyoda's data also shows primary and disseminated CNS HS are pathophysiologically
+distinct (CSF pleocytosis 170 vs. 4 cells/uL), with sharply different breed skew: Corgis and
+Shetland Sheepdogs get almost exclusively the primary form, Rottweilers almost exclusively the
+disseminated form. Neither paper reports PTPN11/KRAS/BRAF mutation status for any CNS case --
+this concentration is anatomic and epidemiologic, not (yet) molecular. So
+`canine_dsp.mapk_cli.canine_cns_hs_scenarios`/`mapk_cns_demo` extrapolate from the systemic model
+in `dog_preset` rather than a real CNS dataset:
 
 ```bash
 canine-dsp mapk-cns-demo --breed bmd --out results/mapk-cns-bmd
@@ -349,8 +356,13 @@ separate GWAS findings that different breeds carry different germline predisposi
 is a concrete, testable hypothesis, not because any study has connected them. It's a different
 kind of homogeneity claim than the anatomic one: breed argues for a shared germline background,
 which is not the same thing as a shared acquired driver mutation, and doesn't by itself make one
-CNS location more molecularly uniform than another. `summary.json` lists every extrapolation this
-scenario stacks on top of `mapk_resistance_demo`'s already-uncalibrated systemic model explicitly,
+CNS location more molecularly uniform than another. There's deliberately no `corgi` option here
+despite Corgi being the single most striking breed association in the PIHS literature above:
+`bmd`/`flat_coated_retriever` each rest on a published germline GWAS locus this module extends;
+no such locus (germline or somatic) has been published for Corgi PIHS, so adding one would be
+fabricating a number rather than extending a real one -- exactly the mistake this module is
+trying not to make. `summary.json` lists every extrapolation this scenario stacks on top of
+`mapk_resistance_demo`'s already-uncalibrated systemic model explicitly,
 under `unverified_extrapolations`.
 
 ## Research path

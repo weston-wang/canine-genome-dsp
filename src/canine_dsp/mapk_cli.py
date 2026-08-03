@@ -159,19 +159,41 @@ def mapk_cns_demo(out: Path, breed: str = "bmd", trials: int = 300, horizon_days
         "location_penetration_multiplier": location_penetration_multiplier,
         "scenarios": rows,
         "location_note": (
-            "Rostrotentorial (cerebral, most common presentation) and infratentorial "
-            "(cerebellar/brainstem, minority presentation) primary CNS HS are modeled "
-            "identically: both sit fully behind the blood-brain barrier, and no directional "
-            "difference in BBB permeability between the two compartments was found in the "
-            "literature. Regional BBB heterogeneity is real, and cerebellum is one of the "
-            "regions recent profiling calls out as differentially specialized -- but without a "
-            "quantified comparison, treating the two locations the same is more honest than "
-            "inventing a difference. Use location_penetration_multiplier to explore a "
-            "hypothesis, not because this default represents a verified finding."
+            "Rostrotentorial (cerebral) and infratentorial (cerebellar/brainstem) primary CNS "
+            "HS are modeled identically here, but the largest breed-and-location-linked series "
+            "found (Kishimoto et al. 2020, n=20 PIHS cases, 16 with known location) reports 0 "
+            "cerebellar/brainstem cases: 100% were cerebral (temporal 25.0%, frontal 18.8%, "
+            "parietal 12.5%, occipital 12.5%, 31.3% diffuse). Toyoda et al. 2020's larger, "
+            "multi-institution series does report a real infratentorial minority, so cerebellar "
+            "primary CNS HS is not fictional -- just rare wherever it has been counted, and "
+            "apparently absent in Kishimoto's single-institution Japanese cohort specifically. "
+            "Both locations are still modeled with the same brain_penetration_fraction here: "
+            "regional BBB heterogeneity is real and cerebellum is one of the regions recent "
+            "profiling calls a differentially specialized compartment, but no quantified "
+            "cerebrum-vs-cerebellum comparison was found, so asserting a numeric difference "
+            "would be less honest than exposing location_penetration_multiplier for anyone who "
+            "wants to test a hypothesis about one."
+        ),
+        "corgi_pihs_context": (
+            "Kishimoto et al. 2020 (J Vet Med Sci 82(1):77-83, University of Tokyo, 186 "
+            "intracranial tumors, 9,270 dogs screened) found Pembroke Welsh Corgi carries by "
+            "far the strongest breed association of any tumor type in the study: 16 of 422 "
+            "Corgis had a primary intracranial tumor, 10 of which were PIHS specifically -- 50% "
+            "of all 20 PIHS cases in the cohort, odds ratio 21.5 (95% CI 8.9-51.8, P<0.001). "
+            "Combined with the cerebrum-only, temporal/frontal-lobe-predominant localization "
+            "above, this is a genuinely striking clinical concentration -- but it is anatomic "
+            "and epidemiologic, not molecular: this paper is histopathology/epidemiology only "
+            "and reports no PTPN11/KRAS/BRAF mutation data for these or any other CNS cases. "
+            "No canine study has sequenced Corgi PIHS specifically. A 'corgi' breed option is "
+            "deliberately not offered here (unlike bmd/flat_coated_retriever): those two rest on "
+            "published germline GWAS loci this module extrapolates from; Corgi PIHS has no "
+            "published germline or somatic locus to extrapolate from at all, so adding one would "
+            "be fabricating a number rather than extending a real one."
         ),
         "unverified_extrapolations": [
             ("canine primary CNS HS carries the same PTPN11/KRAS-dominated driver spectrum as "
-             "systemic HS -- no canine CNS-specific sequencing exists to confirm this"),
+             "systemic HS -- no canine CNS-specific sequencing exists to confirm this, Corgi "
+             "PIHS included"),
             ("the breed-to-mechanism-weight link (bmd vs. flat_coated_retriever) is this "
              "module's own speculative extension of germline GWAS loci to acquired-resistance "
              "mechanisms; no published study connects them"),
@@ -180,8 +202,9 @@ def mapk_cns_demo(out: Path, breed: str = "bmd", trials: int = 300, horizon_days
              "applied here to a potency number measured from cobimetinib specifically"),
         ],
         "citations": {
-            "location_and_breed_clinicopathology": "Thongtharb et al. 2016, J Vet Med Sci "
-                "78(4):593-599; Toyoda et al. 2020, J Vet Intern Med 34(2):828-837",
+            "location_and_breed_clinicopathology": "Kishimoto et al. 2020, J Vet Med Sci "
+                "82(1):77-83 (n=20 PIHS, breed table); Toyoda et al. 2020, J Vet Intern Med "
+                "34(2):828-837 (n=102 CNS HS, primary vs. disseminated comparison)",
             "bmd_germline_locus": "CFA11 MTAP/CDKN2A haplotype GWAS, 96% of affected BMDs",
             "flat_coated_retriever_germline_loci": "CFA5 (PIK3R6) and CFA19 GWAS loci",
             "brain_penetration_fractions": "trametinib ~15%, cobimetinib ~2.7% brain-to-plasma "
