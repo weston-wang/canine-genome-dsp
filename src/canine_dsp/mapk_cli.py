@@ -26,6 +26,34 @@ _SHARED_MUTATION = np.eye(4)  # acquired resistance is scheduled stochastically,
 # is almost certainly lower than "3 of 3 durable." Treat this constant as a dial, not a result.
 _SEEDING_RATE_TOTAL = 0.012
 
+# probability that a resistant subclone already exists at treatment start is the single most
+# influential, least-grounded parameter in this model (see mapk_resistance_demo). Swept rather
+# than fixed to one asserted value, because a point estimate here was found to be effectively
+# tuning the headline result rather than discovering it.
+_PREEXISTING_PROB_SWEEP = [0.05, 0.15, 0.30, 0.50, 0.70]
+_PREEXISTING_PROB_CENTRAL = 0.30
+
+# Two published lomustine (non-targeted chemotherapy) studies in unselected canine HS, included
+# as an automatic sanity check against this module's synthetic MAPK-inhibitor projections. The
+# two studies disagree with each other (29% vs 46% response rate) and report different endpoints
+# (response duration vs. overall survival) -- a reminder that even a "real" benchmark here is not
+# one settled number, before comparing it to an entirely uncalibrated synthetic model.
+LOMUSTINE_BENCHMARK = {
+    "population": "unselected canine HS (not restricted to MAPK-pathway-mutant cases)",
+    "studies": [
+        {"citation": "Rassnick et al. 2010, J Vet Intern Med, PMID 21155191",
+         "design": "21 previously untreated dogs, single-agent CCNU 90 mg/m^2 every 4 weeks",
+         "overall_response_rate": 0.29, "median_response_duration_days": 96},
+        {"citation": "Skorupski et al. 2007, J Vet Intern Med, PMID 17338159",
+         "design": "56-59 dogs, CCNU 60-90 mg/m^2",
+         "overall_response_rate": 0.46, "median_overall_survival_days": 106,
+         "median_survival_responders_days": 172, "median_survival_nonresponders_days": 60},
+    ],
+    "caveat": "Provided for scale, not as a like-for-like comparator: lomustine's population is "
+             "not restricted to MAPK-mutant dogs, and neither study's endpoint matches this "
+             "module's RECIST-style progression-from-nadir definition.",
+}
+
 
 def dog_preset() -> tuple[ResistanceModel, float, np.ndarray, dict]:
     """Cobimetinib vs. canine PTPN11/KRAS-mutant HS; sensitive-clone IC50 and Cmax are real.
@@ -91,12 +119,35 @@ def human_preset() -> tuple[ResistanceModel, float, np.ndarray, dict]:
 SPECIES_PRESETS = {"dog": dog_preset, "human": human_preset}
 
 
-def mapk_resistance_demo(out: Path, species: str = "dog", trials: int = 500,
+def mapk_resistance_demo(out: Path, species: str = "dog", trials: int = 300,
                          horizon_days: int = 730, seed: int = 7) -> None:
+    """Run the Monte Carlo escape model across a `preexisting_prob` sweep, not one fixed value.
+
+    `preexisting_prob` (whether a resistant subclone already exists at treatment start) is the
+    single most influential parameter in this model and has no HS-specific source; reporting a
+    durable-response probability at one asserted value would mostly reflect that choice, not a
+    result. The sweep is reported as a range; only the sweep value matching
+    `_PREEXISTING_PROB_CENTRAL` is used for the illustrative trajectory and mechanism plots.
+    """
     out.mkdir(parents=True, exist_ok=True)
     model, css_reference, seeding_rates, provenance = SPECIES_PRESETS[species]()
-    outcome = run_monte_carlo(model, css_reference, horizon_days, seeding_rates, trials, seed=seed)
 
+    sweep_rows, outcomes_by_prob = [], {}
+    for prob in _PREEXISTING_PROB_SWEEP:
+        outcome = run_monte_carlo(model, css_reference, horizon_days, seeding_rates, trials,
+                                  preexisting_prob=prob, seed=seed)
+        outcomes_by_prob[prob] = outcome
+        ttp = outcome.time_to_progression[outcome.progressed]
+        sweep_rows.append({
+            "preexisting_prob": prob,
+            "probability_durable_response": float(1 - outcome.progressed.mean()),
+            "probability_progression": float(outcome.progressed.mean()),
+            "median_time_to_progression_days": float(np.median(ttp)) if ttp.size else None,
+        })
+    sweep_table = pd.DataFrame(sweep_rows)
+    sweep_table.to_csv(out / "preexisting_prob_sensitivity.csv", index=False)
+
+    outcome = outcomes_by_prob[_PREEXISTING_PROB_CENTRAL]
     total = outcome.trajectories.sum(axis=2)
     days = np.arange(horizon_days + 1)
     quantiles = np.quantile(total, [.1, .5, .9], axis=0)
@@ -108,32 +159,43 @@ def mapk_resistance_demo(out: Path, species: str = "dog", trials: int = 500,
     mechanism_table = (mechanism_table / len(outcome.dominant_mechanism)).rename("trial_fraction")
     mechanism_table.to_csv(out / "escape_mechanism_breakdown.csv")
 
-    fig, axes = plt.subplots(1, 2, figsize=(11, 4.5))
+    fig, axes = plt.subplots(1, 3, figsize=(15.5, 4.5))
     axes[0].fill_between(days, quantiles[0], quantiles[2], alpha=.25, color="tab:blue")
     axes[0].plot(days, quantiles[1], color="tab:blue")
     axes[0].axhline(model.carrying_capacity, color="gray", linestyle="--", linewidth=.8)
-    axes[0].set(xlabel="day", ylabel="total tumor burden", title=f"{species}: burden (median, 10-90%)")
+    axes[0].set(xlabel="day", ylabel="total tumor burden",
+               title=f"{species}: burden at preexisting_prob={_PREEXISTING_PROB_CENTRAL}")
     mechanism_table.plot(kind="bar", ax=axes[1], color="tab:orange")
-    axes[1].set(ylabel="fraction of trials", title="dominant outcome at horizon")
+    axes[1].set(ylabel="fraction of trials", title="dominant outcome (this preexisting_prob only)")
     axes[1].tick_params(axis="x", rotation=30)
+    axes[2].plot(sweep_table["preexisting_prob"], sweep_table["probability_durable_response"],
+                marker="o", color="tab:blue")
+    for study in LOMUSTINE_BENCHMARK["studies"]:
+        axes[2].axhline(study["overall_response_rate"], color="gray", linestyle=":", linewidth=.9)
+    axes[2].set(xlabel="assumed P(pre-existing resistant subclone)", ylabel="P(durable response)",
+               title="sensitivity to the least-grounded input\n(gray: lomustine response rates, different endpoint)",
+               ylim=(0, 1))
     fig.tight_layout(); fig.savefig(out / "resistance_monte_carlo.png", dpi=160); plt.close(fig)
 
-    progressed_ttp = outcome.time_to_progression[outcome.progressed]
     summary = {
         "species": species, "trials": trials, "horizon_days": horizon_days,
-        "probability_durable_response": float(1 - outcome.progressed.mean()),
-        "probability_progression": float(outcome.progressed.mean()),
-        "median_time_to_progression_days": float(np.median(progressed_ttp)) if progressed_ttp.size else None,
-        "escape_mechanism_breakdown": mechanism_table.to_dict(),
+        "preexisting_prob_sensitivity": sweep_table.to_dict(orient="records"),
+        "central_scenario": {
+            "preexisting_prob": _PREEXISTING_PROB_CENTRAL,
+            **{k: v for k, v in sweep_rows[_PREEXISTING_PROB_SWEEP.index(_PREEXISTING_PROB_CENTRAL)].items()
+               if k != "preexisting_prob"},
+            "escape_mechanism_breakdown": mechanism_table.to_dict(),
+        },
+        "lomustine_benchmark": LOMUSTINE_BENCHMARK,
         "provenance": provenance,
         "warning": "Synthetic Monte Carlo exploration of plausible escape dynamics; only the "
                   "fields under provenance.calibrated_from_data are anchored to a published "
-                  "dataset. Not a validated predictive or clinical model. Acquired resistance is "
-                  "modeled as a Poisson process (a resistant lineage can genuinely never arise "
-                  "in a given trial), with its rate loosely tuned toward a handful of "
-                  "publication-biased case reports of durable multi-year responses -- treat "
-                  "probability_durable_response as illustrative of the qualitative dynamics, "
-                  "not a calibrated risk estimate.",
+                  "dataset. Not a validated predictive or clinical model. Read the "
+                  "preexisting_prob_sensitivity range, not any single number in central_scenario, "
+                  "as the headline result -- a fixed point estimate here mostly reflects an "
+                  "unsourced assumption, not a finding. The model also omits treatment-limiting "
+                  "toxicity, non-adherence, and death from other causes, all of which would push "
+                  "real-world durability below what is shown here.",
     }
     (out / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")
 

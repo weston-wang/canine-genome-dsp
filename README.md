@@ -251,8 +251,8 @@ pre-existing resistant subclone before treatment starts, using the same mechanis
 acquired resistance (PTPN11-dominated for dog, more even for human):
 
 ```bash
-canine-dsp mapk-resistance-demo --species dog --trials 500 --horizon-days 730 --out results/mapk-dog
-canine-dsp mapk-resistance-demo --species human --trials 500 --horizon-days 730 --out results/mapk-human
+canine-dsp mapk-resistance-demo --species dog --trials 300 --horizon-days 730 --out results/mapk-dog
+canine-dsp mapk-resistance-demo --species human --trials 300 --horizon-days 730 --out results/mapk-human
 ```
 
 Only the dog preset's sensitive-clone IC50 and reference plasma concentration are anchored to the
@@ -264,12 +264,32 @@ are three case reports, published specifically because the response was durable,
 is almost certainly lower than "durable in 3 of 3." The human preset reuses the same
 pharmacodynamic shape with no fitted PK/IC50 numbers (none were found in the literature) and a
 broader, less concentrated resistance-seeding spectrum reflecting the wider mutational
-heterogeneity reported in human HS. Outputs are `trajectory_quantiles.csv` (median and 10-90%
-burden over time), `escape_mechanism_breakdown.csv` (which mechanism dominates at the horizon, or
-durable response), a two-panel plot, and `summary.json`. Progression is flagged using a
-RECIST-style >=20% increase from nadir, but only once burden clears an absolute detection floor --
-without that floor, a regrowth ratio computed against a numerically negligible nadir can trigger
-"progression" while the tumor is still undetectable.
+heterogeneity reported in human HS.
+
+**The single most influential parameter -- whether a resistant subclone already exists at
+treatment start (`preexisting_prob`) -- has no HS-specific source at all.** Rather than fix it to
+one asserted value and report a point estimate that would mostly reflect that choice, the demo
+sweeps it over `[0.05, 0.15, 0.30, 0.50, 0.70]` and reports durable-response probability as a
+range (`preexisting_prob_sensitivity.csv`/`summary.json`), swinging from roughly 0.9 down to 0.3
+across that range in testing. `summary.json` also carries `lomustine_benchmark`, two published
+non-targeted-chemo studies in unselected canine HS (Rassnick et al. 2010, J Vet Intern Med, PMID
+21155191: 29% response, 96-day median duration; Skorupski et al. 2007, J Vet Intern Med, PMID
+17338159: 46% response, 106-day median survival) -- included as an automatic scale check, not a
+like-for-like comparator, since their population and endpoints both differ from this module's.
+The third plot panel shows where the durability-vs-`preexisting_prob` curve crosses those
+published response rates, since a synthetic result several-fold better than the real-world
+chemotherapy benchmark for the same disease is exactly the kind of thing worth checking rather
+than reporting at face value.
+
+The `preexisting_prob` value matching `_PREEXISTING_PROB_CENTRAL` (0.3) is used only for the
+illustrative trajectory (`trajectory_quantiles.csv`: median and 10-90% burden over time) and
+mechanism breakdown (`escape_mechanism_breakdown.csv`: which mechanism dominates at the horizon,
+or durable response) plots -- read those as *a* scenario, not *the* answer. Progression is
+flagged using a RECIST-style >=20% increase from nadir, but only once burden clears an absolute
+detection floor -- without that floor, a regrowth ratio computed against a numerically negligible
+nadir can trigger "progression" while the tumor is still undetectable. The model also has no
+representation of treatment-limiting toxicity, non-adherence, or death from other causes, all of
+which would push real-world durability below anything shown here.
 
 Before assuming a MAPK-inhibitor finding transfers across species, check whether the two
 orthologs are even structurally comparable at the relevant residues:
