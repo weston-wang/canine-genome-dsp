@@ -10,7 +10,13 @@ from .alphafold_cli import analyze_structure, fetch_structure
 from .hybrid_cli import inverse_demo, prepare_dog10k_aging, prepare_gse9794
 from .immunotherapy_cli import immunotherapy_demo
 from .io import read_first_fasta, read_vcf_positions
-from .mapk_cli import compare_orthologs, localized_control_demo, mapk_cns_demo, mapk_resistance_demo
+from .mapk_cli import (
+    combination_control_demo,
+    compare_orthologs,
+    localized_control_demo,
+    mapk_cns_demo,
+    mapk_resistance_demo,
+)
 from .signals import eiip, variant_density, windowed_gc
 from .spectral import coherence, multitaper_psd, spectral_entropy, welch_psd
 from .vaccine_eval import run_gse102459, run_gse190001
@@ -145,6 +151,16 @@ def main() -> None:
     mapk_local.add_argument("--location-penetration-multiplier", type=float, default=1.0)
     mapk_local.add_argument("--seed", type=int, default=7)
     mapk_local.add_argument("--out", type=Path, required=True)
+    mapk_combo = sub.add_parser("mapk-combination-demo",
+                                help="trametinib +/- swept-potency CDK4/6 inhibitor, debulked CNS context")
+    mapk_combo.add_argument("--breed", choices=["bmd", "flat_coated_retriever"], default="bmd")
+    mapk_combo.add_argument("--debulking-fraction", type=float, default=0.97)
+    mapk_combo.add_argument("--trials", type=int, default=300)
+    mapk_combo.add_argument("--horizon-days", type=int, default=730)
+    mapk_combo.add_argument("--preexisting-prob", type=float, default=0.30)
+    mapk_combo.add_argument("--location-penetration-multiplier", type=float, default=1.0)
+    mapk_combo.add_argument("--seed", type=int, default=7)
+    mapk_combo.add_argument("--out", type=Path, required=True)
     args = parser.parse_args()
     if args.command == "demo":
         rng = np.random.default_rng(42)
@@ -185,10 +201,14 @@ def main() -> None:
     elif args.command == "mapk-cns-demo":
         mapk_cns_demo(args.out, args.breed, args.trials, args.horizon_days,
                      args.preexisting_prob, args.location_penetration_multiplier, args.seed)
-    else:
+    elif args.command == "mapk-localized-control-demo":
         localized_control_demo(args.out, args.breed, args.debulking_fraction, args.trials,
                                args.horizon_days, args.preexisting_prob,
                                args.location_penetration_multiplier, args.seed)
+    else:
+        combination_control_demo(args.out, args.breed, args.debulking_fraction, args.trials,
+                                 args.horizon_days, args.preexisting_prob,
+                                 args.location_penetration_multiplier, args.seed)
 
 
 if __name__ == "__main__":

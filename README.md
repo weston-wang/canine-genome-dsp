@@ -411,6 +411,43 @@ hypothesis, the debulking fraction, the survival benchmark's location match -- i
 `summary.json` under `unverified_extrapolations`, alongside the full multidisciplinary
 `reasoning_chain` behind the scenario.
 
+### Adding a second, mechanism-agnostic drug
+
+`mapk_resistance.ResistanceModel` optionally carries a second drug (`ic50_nM_2`/`max_kill_2`)
+applied as a single scalar identical across every clone, rather than per-clone values like the
+MEK inhibitor -- modeling a CDK4/6 inhibitor acting on the shared cyclin D/CDK4/6 node downstream
+of MAPK signaling, which all three escape mechanisms still have to drive through to actually
+divide, unlike the MEK inhibitor itself, which each route was specifically built to evade. This
+mirrors a real combination strategy in RAS/RAF-mutant human cancers (adaptive MEK-inhibitor
+resistance commonly proceeds through cyclin D1 upregulation and CDK4/6 dependence), but no
+canine, or even confirmed human, potency/exposure number exists for a CDK4/6 inhibitor in this
+disease, so `mapk_cli.combination_control_demo` sweeps its illustrative potency rather than
+picking one value -- the same reason `preexisting_prob` is swept rather than fixed.
+
+```bash
+canine-dsp mapk-combination-demo --breed bmd --out results/mapk-combo
+```
+
+In testing (debulked CNS context, trametinib plus a swept CDK4/6-inhibitor `max_kill_2` against
+an illustrative, unmeasured exposure): durable response was 69% at `max_kill_2=0` (trametinib
+alone, matching `localized_control_demo`), 72% at 0.02, then jumped to **99.5% at 0.05** and 100%
+at 0.08-0.12 -- a sharp threshold, not a gradual improvement, and the stacked-mechanism plot shows
+all three escape routes collapsing toward zero at the same potency step rather than being picked
+off one at a time. That's the shared-downstream-node hypothesis behaving exactly as advertised
+*if* it holds: because every modeled escape route's growth-rate margin over the MEK inhibitor's
+residual kill is small (0.02-0.043/day) and similarly sized, a second kill-rate contribution of
+comparable magnitude tips all three negative at roughly the same potency, rather than closing
+routes off gradually one by one. That sharpness is itself partly a property of these particular
+illustrative growth-rate parameters being clustered close together -- if the escape routes had
+more widely separated fitness advantages, closing them off would look more gradual, not a cliff.
+
+This is offered as a demonstration of the mechanism's *shape*, not a probability estimate: no
+canine PK/safety data for any CDK4/6 inhibitor exists, combined-drug toxicity commonly forces
+both agents below their single-agent doses in human trials (not modeled here), and the scenario
+still assumes Corgi PIHS is MAPK-driven at all -- the load-bearing, unverified premise beneath
+every scenario in this module. `summary.json` lists these under `unverified_extrapolations`
+alongside `mechanism_agnostic_rationale`.
+
 ## Research path
 
 1. Pin an assembly and record accessions/checksums in `data/README.md`.

@@ -63,6 +63,14 @@ class ResistanceModel:
     mutation: np.ndarray      # (k,k) row-stochastic per-day clone transition matrix
     hill: float = 1.5
     carrying_capacity: float = 1.0
+    # Optional second, mechanism-agnostic drug (e.g. a CDK4/6 inhibitor acting on the shared
+    # cyclin D/CDK4/6 node downstream of MAPK signaling): a single scalar ic50/max_kill applied
+    # identically to every clone, rather than per-clone values, because the premise being tested
+    # is that this node doesn't care *how* a clone reactivated proliferative signaling upstream.
+    # None (default) leaves single-drug behavior unchanged.
+    ic50_nM_2: float | None = None
+    max_kill_2: float | None = None
+    hill_2: float = 1.5
 
     def __post_init__(self):
         k = len(np.asarray(self.growth))
@@ -76,7 +84,7 @@ class ResistanceModel:
             raise ValueError("mutation rows must sum to one")
 
 
-def drug_kill_rate(concentration, ic50_nM: np.ndarray, hill: float, max_kill: np.ndarray) -> np.ndarray:
+def drug_kill_rate(concentration, ic50_nM, hill: float, max_kill) -> np.ndarray:
     """Emax pharmacodynamic model: per-day kill rate rising toward `max_kill` with concentration."""
     c = np.maximum(np.asarray(concentration, dtype=float), 0.0)
     ic50 = np.maximum(np.asarray(ic50_nM, dtype=float), 1e-9)
@@ -84,7 +92,8 @@ def drug_kill_rate(concentration, ic50_nM: np.ndarray, hill: float, max_kill: np
 
 
 def simulate_resistance(model: ResistanceModel, concentration: np.ndarray, initial: np.ndarray,
-                        injections: dict[int, np.ndarray] | None = None) -> np.ndarray:
+                        injections: dict[int, np.ndarray] | None = None,
+                        concentration_2: np.ndarray | None = None) -> np.ndarray:
     """Simulate density-dependent multiclone tumor burden under a daily drug-concentration series.
 
     Net growth is logistic growth minus an Emax drug kill-rate term, so a clone whose kill rate
@@ -92,14 +101,20 @@ def simulate_resistance(model: ResistanceModel, concentration: np.ndarray, initi
     then progression from nadir" dynamics, rather than the drug only ever capping growth at zero.
     `injections` optionally adds a population vector at specific days (see
     `poisson_mutation_injections`), on top of whatever `model.mutation` transfers that day.
+    `concentration_2`, if given alongside `model.ic50_nM_2`/`max_kill_2`, adds a second,
+    per-clone-identical kill-rate term -- see `ResistanceModel` for why it's uniform, not
+    per-clone, unlike the first drug.
     """
     initial = np.asarray(initial, float)
     state = np.zeros((len(concentration) + 1, len(initial)))
     state[0] = initial
+    has_second_drug = concentration_2 is not None and model.ic50_nM_2 is not None
     for t, c in enumerate(np.asarray(concentration, float)):
         current = state[t]
         density = current.sum() / model.carrying_capacity
         kill = drug_kill_rate(c, model.ic50_nM, model.hill, model.max_kill)
+        if has_second_drug:
+            kill = kill + drug_kill_rate(concentration_2[t], model.ic50_nM_2, model.hill_2, model.max_kill_2)
         net = model.growth * (1 - density) - kill
         grown = current * np.exp(np.clip(net, -30, 30))
         state[t + 1] = grown @ model.mutation
@@ -129,7 +144,10 @@ def perturb_resistance_model(model: ResistanceModel, rng: np.random.Generator,
         for j in off_diagonal:
             mutation[i, j] *= rng.lognormal(0, mutation_scale)
         mutation[i, i] = 1 - sum(mutation[i, j] for j in off_diagonal)
-    return replace(model, ic50_nM=ic50, mutation=mutation)
+    updates = {"ic50_nM": ic50, "mutation": mutation}
+    if model.ic50_nM_2 is not None:
+        updates["ic50_nM_2"] = model.ic50_nM_2 * rng.lognormal(0, ic50_scale)
+    return replace(model, **updates)
 
 
 def poisson_mutation_injections(rng: np.random.Generator, sensitive_trajectory: np.ndarray,
@@ -203,7 +221,8 @@ def run_monte_carlo(reference: ResistanceModel, css_reference: float, horizon_da
                    seeding_rates: np.ndarray, trials: int = 500, preexisting_prob: float = .3,
                    exposure_scale: float = .3, seeding_rate_scale: float = .5,
                    seed_fraction: float = 1e-8, detection_floor_fraction: float = .01,
-                   initial_burden: float = .3, seed: int = 7) -> MonteCarloOutcome:
+                   initial_burden: float = .3, css_reference_2: float | None = None,
+                   exposure_scale_2: float = .3, seed: int = 7) -> MonteCarloOutcome:
     """Run a Monte Carlo ensemble over parameter, exposure, and acquired-mutation-timing uncertainty.
 
     Acquired resistance is scheduled with `poisson_mutation_injections` rather than a constant
@@ -219,6 +238,9 @@ def run_monte_carlo(reference: ResistanceModel, css_reference: float, horizon_da
     surgical/radiation debulking step ahead of drug therapy is modeled by simply lowering this
     value, which also proportionally shrinks any pre-existing resistant subclone (see
     `sample_initial_state`) -- a debulking step removes resistant and sensitive cells alike.
+
+    `css_reference_2`, if given (with `reference.ic50_nM_2`/`max_kill_2` set), simulates a second,
+    mechanism-agnostic drug alongside the first -- see `ResistanceModel`.
     """
     rng = np.random.default_rng(seed)
     k = len(reference.growth)
@@ -232,14 +254,19 @@ def run_monte_carlo(reference: ResistanceModel, css_reference: float, horizon_da
         model = perturb_resistance_model(identity_model, rng)
         css = css_reference * rng.lognormal(0, exposure_scale)
         concentration = np.full(horizon_days, css)
+        concentration_2 = None
+        if css_reference_2 is not None:
+            css_2 = css_reference_2 * rng.lognormal(0, exposure_scale_2)
+            concentration_2 = np.full(horizon_days, css_2)
         initial = sample_initial_state(rng, k, preexisting_prob, mechanism_weights=seeding_rates,
                                        initial_burden=initial_burden)
         sensitive_only = np.zeros(k)
         sensitive_only[0] = initial[0]
-        sensitive_trajectory = simulate_resistance(model, concentration, sensitive_only)[:, 0]
+        sensitive_trajectory = simulate_resistance(model, concentration, sensitive_only,
+                                                    concentration_2=concentration_2)[:, 0]
         jittered_rates = seeding_rates * rng.lognormal(0, seeding_rate_scale, len(seeding_rates))
         injections = poisson_mutation_injections(rng, sensitive_trajectory, jittered_rates, seed_fraction)
-        state = simulate_resistance(model, concentration, initial, injections)
+        state = simulate_resistance(model, concentration, initial, injections, concentration_2)
         trajectories[trial] = state
         total = state.sum(axis=1)
         nadir_day = int(np.argmin(total))

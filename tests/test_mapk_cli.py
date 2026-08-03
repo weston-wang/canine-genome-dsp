@@ -6,7 +6,10 @@ import pytest
 
 from canine_dsp.mapk_cli import (
     BRAIN_PENETRATION_FRACTION,
+    CDK46_MAX_KILL_SWEEP,
     canine_cns_hs_scenarios,
+    combination_control_demo,
+    combination_scenarios,
     localized_control_demo,
     localized_pihs_scenarios,
     mapk_cns_demo,
@@ -89,3 +92,37 @@ def test_debulking_delays_but_does_not_eliminate_relapse_risk():
     intact_durable = 1 - outcomes["intact_trametinib"].progressed.mean()
     debulked_durable = 1 - outcomes["debulked_trametinib"].progressed.mean()
     assert abs(debulked_durable - intact_durable) < 0.15
+
+
+def test_combination_scenarios_zero_kill_matches_trametinib_only():
+    scenarios = combination_scenarios(breed="bmd", max_kill_2_values=[0.0, 0.05])
+    zero_model, css, seeding_rates, initial_burden, _ = scenarios[0.0]
+    outcome_zero = run_monte_carlo(zero_model, css, 200, seeding_rates, trials=40,
+                                   initial_burden=initial_burden, css_reference_2=None, seed=5)
+    trametinib_only = localized_pihs_scenarios(breed="bmd")["debulked_trametinib"]
+    model2, css2, seeding_rates2, initial_burden2, _ = trametinib_only
+    outcome_only = run_monte_carlo(model2, css2, 200, seeding_rates2, trials=40,
+                                   initial_burden=initial_burden2, seed=5)
+    np.testing.assert_allclose(outcome_zero.trajectories, outcome_only.trajectories)
+
+
+def test_higher_cdk46_potency_does_not_reduce_durable_response():
+    """More kill from a mechanism-agnostic second drug should never make outcomes worse."""
+    scenarios = combination_scenarios(breed="bmd", max_kill_2_values=[0.0, 0.12])
+    durability = {}
+    for max_kill_2, (model, css, seeding_rates, initial_burden, _) in scenarios.items():
+        css_2 = 500.0 if max_kill_2 > 0 else None
+        outcome = run_monte_carlo(model, css, 400, seeding_rates, trials=80,
+                                  initial_burden=initial_burden, css_reference_2=css_2, seed=9)
+        durability[max_kill_2] = 1 - outcome.progressed.mean()
+    assert durability[0.12] >= durability[0.0]
+
+
+def test_combination_control_demo_writes_full_sweep(tmp_path):
+    combination_control_demo(tmp_path, breed="bmd", trials=20, horizon_days=90, seed=1)
+    table = pd.read_csv(tmp_path / "combination_sensitivity.csv")
+    assert len(table) == len(CDK46_MAX_KILL_SWEEP)
+    assert "mechanism_pathway_reactivation" in table.columns
+    summary = json.loads((tmp_path / "summary.json").read_text())
+    assert "mechanism_agnostic_rationale" in summary
+    assert (tmp_path / "combination_sensitivity.png").exists()

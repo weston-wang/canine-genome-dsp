@@ -1,4 +1,5 @@
 import json
+from dataclasses import replace
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -366,6 +367,133 @@ def localized_control_demo(out: Path, breed: str = "bmd", debulking_fraction: fl
             "speculative CNS extrapolation. Read the four-arm comparison as a demonstration of "
             "*why* combining local and systemic therapy could plausibly matter more here than "
             "for disseminated disease, not as a survival prediction for an actual dog."
+        ),
+    }
+    (out / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")
+
+
+# Everything below is illustrative placeholder pharmacology, not a measurement: no canine, and
+# no confirmed human, potency/exposure number exists for a CDK4/6 inhibitor in this disease.
+# CDK46_MAX_KILL_SWEEP is swept rather than fixed to one value for the same reason
+# _PREEXISTING_PROB_SWEEP is: presenting a single chosen potency as if it were the answer would
+# mostly reflect that choice, not a finding.
+CDK46_ILLUSTRATIVE_IC50_NM = 100.0
+CDK46_ILLUSTRATIVE_CSS_NM = 500.0  # ~5x the illustrative IC50; an assumed, not measured, margin
+CDK46_MAX_KILL_SWEEP = [0.0, 0.02, 0.05, 0.08, 0.12]
+
+MECHANISM_AGNOSTIC_RATIONALE = (
+    "A CDK4/6 inhibitor is modeled as a single scalar (ic50_nM_2/max_kill_2) applied identically "
+    "to every clone, rather than per-clone values like the MEK inhibitor -- the premise being "
+    "tested is that cyclin D/CDK4/6 sits downstream of, and is shared by, all three modeled "
+    "escape routes (a secondary RAS/RAF hit, RTK/PI3K bypass, or reduced MEK-inhibitor binding "
+    "all still have to drive the cell cycle through cyclin D/CDK4/6/Rb/E2F to actually divide), "
+    "so blocking that node should suppress growth regardless of which upstream route a clone "
+    "used, unlike the MEK inhibitor itself, which each escape route was specifically built to "
+    "evade. This is a real, published rationale for MEK+CDK4/6 combination therapy in RAS/RAF-"
+    "mutant human cancers (adaptive resistance to MEK inhibitors commonly proceeds through "
+    "cyclin D1 upregulation and CDK4/6 dependence) -- but combined toxicity in human trials "
+    "often forces both drugs below their single-agent doses, and no canine PK/safety data for "
+    "any CDK4/6 inhibitor was found, so this scenario cannot be exposure-calibrated the way "
+    "trametinib was."
+)
+
+
+def combination_scenarios(breed: str = "bmd", debulking_fraction: float = DEBULKING_FRACTION,
+                          max_kill_2_values: list[float] = CDK46_MAX_KILL_SWEEP,
+                          location_penetration_multiplier: float = 1.0
+                          ) -> dict[float, tuple[ResistanceModel, float, np.ndarray, float, dict]]:
+    """Trametinib (debulked CNS context) +/- a swept-potency mechanism-agnostic CDK4/6 inhibitor.
+
+    max_kill_2=0.0 leaves ic50_nM_2/max_kill_2 unset (None) rather than setting a zero-effect
+    value, so that sweep point is an exact RNG-for-RNG match to the trametinib-only arm -- a
+    true null baseline, not just a mathematically-inert-but-differently-perturbed one (setting
+    ic50_nM_2 at all, even to a value with no pharmacological effect, still consumes an extra
+    random draw in perturb_resistance_model's per-trial jitter).
+    """
+    arms = localized_pihs_scenarios(breed, debulking_fraction, location_penetration_multiplier)
+    model, css, seeding_rates, initial_burden, provenance = arms["debulked_trametinib"]
+    scenarios = {}
+    for max_kill_2 in max_kill_2_values:
+        if max_kill_2 > 0:
+            combo_model = replace(model, ic50_nM_2=CDK46_ILLUSTRATIVE_IC50_NM, max_kill_2=max_kill_2)
+        else:
+            combo_model = model
+        scenarios[max_kill_2] = (combo_model, css, seeding_rates, initial_burden,
+                                 {**provenance, "cdk46_max_kill": max_kill_2})
+    return scenarios
+
+
+def combination_control_demo(out: Path, breed: str = "bmd", debulking_fraction: float = DEBULKING_FRACTION,
+                             trials: int = 300, horizon_days: int = 730,
+                             preexisting_prob: float = _PREEXISTING_PROB_CENTRAL,
+                             location_penetration_multiplier: float = 1.0, seed: int = 7) -> None:
+    out.mkdir(parents=True, exist_ok=True)
+    scenarios = combination_scenarios(breed, debulking_fraction, CDK46_MAX_KILL_SWEEP,
+                                      location_penetration_multiplier)
+
+    rows, outcomes = [], {}
+    for max_kill_2, (model, css, seeding_rates, initial_burden, _) in scenarios.items():
+        css_2 = CDK46_ILLUSTRATIVE_CSS_NM if max_kill_2 > 0 else None
+        outcome = run_monte_carlo(model, css, horizon_days, seeding_rates, trials,
+                                  preexisting_prob=preexisting_prob, initial_burden=initial_burden,
+                                  css_reference_2=css_2, seed=seed)
+        outcomes[max_kill_2] = outcome
+        ttp = outcome.time_to_progression[outcome.progressed]
+        mechanism_counts = pd.Series(outcome.dominant_mechanism).value_counts()
+        mechanism_fractions = (mechanism_counts.reindex(["durable_response"] + CLONE_NAMES[1:], fill_value=0)
+                              / len(outcome.dominant_mechanism))
+        rows.append({
+            "cdk46_max_kill": max_kill_2,
+            "probability_durable_response": float(1 - outcome.progressed.mean()),
+            "probability_progression": float(outcome.progressed.mean()),
+            "median_time_to_progression_days": float(np.median(ttp)) if ttp.size else None,
+            **{f"mechanism_{mechanism}": float(value) for mechanism, value in mechanism_fractions.items()},
+        })
+    table = pd.DataFrame(rows)
+    table.to_csv(out / "combination_sensitivity.csv", index=False)
+
+    days = np.arange(horizon_days + 1)
+    fig, axes = plt.subplots(1, 3, figsize=(15.5, 4.5))
+    for max_kill_2, outcome in outcomes.items():
+        median_burden = np.median(outcome.trajectories.sum(axis=2), axis=0)
+        axes[0].plot(days, median_burden, label=f"cdk46 max_kill={max_kill_2}")
+    axes[0].set(xlabel="day", ylabel="median total tumor burden",
+               title=f"debulked+trametinib +/- CDK4/6i: breed={breed}")
+    axes[0].legend(fontsize=7)
+    axes[1].plot(table["cdk46_max_kill"], table["probability_durable_response"], marker="o", color="tab:blue")
+    axes[1].set(xlabel="CDK4/6i max_kill (illustrative, unmeasured)", ylabel="P(durable response)",
+               title="sensitivity to unknown CDK4/6i potency", ylim=(0, 1))
+    mechanism_columns = [f"mechanism_{name}" for name in ["durable_response"] + CLONE_NAMES[1:]]
+    table.set_index("cdk46_max_kill")[mechanism_columns].plot(kind="bar", stacked=True, ax=axes[2])
+    axes[2].set(ylabel="fraction of trials", title="does it close ALL escape routes, or just one?")
+    axes[2].legend(fontsize=6)
+    fig.tight_layout(); fig.savefig(out / "combination_sensitivity.png", dpi=160); plt.close(fig)
+
+    summary = {
+        "breed_context": breed, "debulking_fraction": debulking_fraction,
+        "preexisting_prob_used": preexisting_prob, "cdk46_ic50_nM": CDK46_ILLUSTRATIVE_IC50_NM,
+        "cdk46_css_nM": CDK46_ILLUSTRATIVE_CSS_NM, "sensitivity": rows,
+        "mechanism_agnostic_rationale": MECHANISM_AGNOSTIC_RATIONALE,
+        "unverified_extrapolations": [
+            ("no canine or confirmed human CDK4/6-inhibitor potency/exposure number exists; "
+             "cdk46_ic50_nM and cdk46_css_nM are round illustrative placeholders, and "
+             "cdk46_max_kill is swept rather than fixed for the same reason "
+             "preexisting_prob is swept in mapk_resistance_demo"),
+            ("assumes Corgi PIHS carries a MAPK driver at all (the premise of every scenario in "
+             "this module) AND that CDK4/6 dependence specifically (not just any downstream "
+             "node) is the relevant shared mechanism -- neither is confirmed in dogs"),
+            ("combined-drug toxicity is not modeled: real MEK+CDK4/6 combinations in human "
+             "trials often require dose-reducing both agents below their monotherapy doses, "
+             "which would lower css_reference/css_reference_2 below what is used here"),
+            ("stacks on top of every extrapolation already listed in localized_control_demo's "
+             "and mapk_cns_demo's summary.json"),
+        ],
+        "warning": (
+            "The most speculative scenario in this module, by design: it exists to show the "
+            "*shape* of the shared-downstream-node hypothesis (does closing one node suppress "
+            "all three escape mechanisms at once, or only some?), not to estimate a real "
+            "probability. Read the stacked-bar mechanism panel, not the single durable-response "
+            "number at any one cdk46_max_kill value, as the result."
         ),
     }
     (out / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")
