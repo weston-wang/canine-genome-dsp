@@ -14,6 +14,7 @@ from .mapk_cli import (
     combination_control_demo,
     combination_toxicity_demo,
     compare_orthologs,
+    durability_horizon_demo,
     localized_control_demo,
     mapk_cns_demo,
     mapk_resistance_demo,
@@ -173,6 +174,16 @@ def main() -> None:
     mapk_tox.add_argument("--location-penetration-multiplier", type=float, default=1.0)
     mapk_tox.add_argument("--seed", type=int, default=7)
     mapk_tox.add_argument("--out", type=Path, required=True)
+    mapk_durability = sub.add_parser("mapk-durability-horizon-demo",
+                                     help="how does durable-response probability change with years of follow-up?")
+    mapk_durability.add_argument("--breed", choices=["bmd", "flat_coated_retriever"], default="bmd")
+    mapk_durability.add_argument("--debulking-fraction", type=float, default=0.97)
+    mapk_durability.add_argument("--max-kill-2", type=float, default=0.05)
+    mapk_durability.add_argument("--trials", type=int, default=300)
+    mapk_durability.add_argument("--preexisting-prob", type=float, default=0.30)
+    mapk_durability.add_argument("--location-penetration-multiplier", type=float, default=1.0)
+    mapk_durability.add_argument("--seed", type=int, default=7)
+    mapk_durability.add_argument("--out", type=Path, required=True)
     args = parser.parse_args()
     if args.command == "demo":
         rng = np.random.default_rng(42)
@@ -221,10 +232,14 @@ def main() -> None:
         combination_control_demo(args.out, args.breed, args.debulking_fraction, args.trials,
                                  args.horizon_days, args.preexisting_prob,
                                  args.location_penetration_multiplier, args.seed)
-    else:
+    elif args.command == "mapk-combination-toxicity-demo":
         combination_toxicity_demo(args.out, args.breed, args.debulking_fraction, args.max_kill_2,
                                   args.trials, args.horizon_days, args.preexisting_prob,
                                   args.location_penetration_multiplier, args.seed)
+    else:
+        durability_horizon_demo(args.out, args.breed, args.debulking_fraction, args.max_kill_2,
+                                args.trials, args.preexisting_prob,
+                                args.location_penetration_multiplier, args.seed)
 
 
 if __name__ == "__main__":

@@ -8,10 +8,12 @@ from canine_dsp.mapk_cli import (
     BRAIN_PENETRATION_FRACTION,
     CDK46_MAX_KILL_SWEEP,
     COMBINED_EXPOSURE_DERATING,
+    DURABILITY_HORIZON_SWEEP,
     canine_cns_hs_scenarios,
     combination_control_demo,
     combination_scenarios,
     combination_toxicity_demo,
+    durability_horizon_demo,
     localized_control_demo,
     localized_pihs_scenarios,
     mapk_cns_demo,
@@ -178,3 +180,28 @@ def test_toxicity_derating_can_erode_the_combination_benefit():
                                   css_reference_2=500. * derating, seed=6)
         durability[derating] = 1 - outcome.progressed.mean()
     assert durability[1.0] >= durability[0.4]
+
+
+def test_durability_horizon_demo_writes_full_sweep(tmp_path):
+    durability_horizon_demo(tmp_path, breed="bmd", max_kill_2=0.05, trials=20, seed=1)
+    table = pd.read_csv(tmp_path / "durability_horizon_sensitivity.csv")
+    assert len(table) == len(DURABILITY_HORIZON_SWEEP)
+    assert list(table["horizon_days"]) == DURABILITY_HORIZON_SWEEP
+    summary = json.loads((tmp_path / "summary.json").read_text())
+    assert "note" in summary
+    assert (tmp_path / "durability_horizon.png").exists()
+
+
+def test_durable_response_probability_is_not_flat_across_horizons():
+    """The core claim behind adding this demo: at a potency that looks like a cure at 2 years,
+    "durable" is not permanent -- durability should decline (not stay flat or rise) as the
+    simulated follow-up window is extended toward a decade, because the combination slows the
+    pathway_reactivation escape route rather than eliminating it."""
+    scenarios = combination_scenarios(breed="bmd", max_kill_2_values=[0.05])
+    model, css, seeding_rates, initial_burden, _ = scenarios[0.05]
+    durability = {}
+    for horizon_days in (730, 3650):
+        outcome = run_monte_carlo(model, css, horizon_days, seeding_rates, trials=300,
+                                  initial_burden=initial_burden, css_reference_2=500., seed=7)
+        durability[horizon_days] = 1 - outcome.progressed.mean()
+    assert durability[730] > durability[3650]

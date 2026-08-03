@@ -501,6 +501,30 @@ not "is dosing safe" -- real toxicity still depends on a combination dose-findin
 doesn't exist yet for this drug pair. `summary.json` carries `toxicity_extrapolation_rationale`
 alongside the same `unverified_extrapolations` discipline as every other scenario in this module.
 
+### How long does "durable response" actually mean?
+
+Everywhere else in this module, "durable response" means only *no relapse detected within the
+horizon that specific run used* -- almost always 730 days (2 years). That is not a claim of
+permanence, and it matters: at the potency that looked like a near-cure at 2 years (99.5% durable,
+full-dose combination), extending simulated follow-up erodes it -- **91.5% at 5 years, 81% at 10
+years**.
+
+```bash
+canine-dsp mapk-durability-horizon-demo --breed bmd --max-kill-2 0.05 --out results/mapk-durability
+```
+
+The reason is identifiable, not just numeric drift: the combination *slows* the
+`pathway_reactivation` escape route rather than eliminating it. Without CDK4/6i its net growth
+margin is clearly positive (+0.03/day); with it, the margin flips to only slightly negative
+(-0.02/day) -- decaying, but barely. Given enough years, per-trial parameter variability (the
+same lognormal jitter every scenario in this module applies) lets an increasing minority of
+trials draw a combination just weak enough for that route to cross the detection threshold late.
+The mechanism breakdown confirms it directly: `pathway_reactivation` accounts for essentially all
+of the growth in relapses between year 2 and year 10 (0% to 17%), while the other two escape
+routes stay flat near zero across the same horizons. So "cure" language anywhere in this module
+should be read as "no relapse detected in the tested window," with the actual multi-year erosion
+rate reported in `durability_horizon_sensitivity.csv`, not assumed to be zero.
+
 ## Research path
 
 1. Pin an assembly and record accessions/checksums in `data/README.md`.

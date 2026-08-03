@@ -642,6 +642,88 @@ def combination_toxicity_demo(out: Path, breed: str = "bmd", debulking_fraction:
     (out / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")
 
 
+# "Durable response" everywhere else in this module means only "no detected relapse within
+# whatever horizon_days that specific run used" -- typically 730 days (2 years). It is not a
+# claim of permanence, and testing at longer horizons shows it is not flat: the combination
+# slows the pathway_reactivation escape route (its net growth margin goes from clearly positive
+# without CDK4/6i to only slightly negative with it, in this parameterization) rather than
+# eliminating it, so per-trial parameter variability lets a slowly growing minority cross the
+# detection threshold given enough years. DURABILITY_HORIZON_SWEEP makes that horizon-dependence
+# an explicit, checkable output instead of an unstated assumption baked into a fixed 2-year run.
+DURABILITY_HORIZON_SWEEP = [365, 730, 1825, 3650]  # 1, 2, 5, 10 years
+
+
+def durability_horizon_demo(out: Path, breed: str = "bmd", debulking_fraction: float = DEBULKING_FRACTION,
+                            max_kill_2: float = 0.05, trials: int = 300,
+                            preexisting_prob: float = _PREEXISTING_PROB_CENTRAL,
+                            location_penetration_multiplier: float = 1.0, seed: int = 7) -> None:
+    """How long does "durable response" actually mean, for the best-performing combination arm?
+
+    Sweeps DURABILITY_HORIZON_SWEEP at fixed full-dose combination therapy (max_kill_2, defaults
+    to the threshold that closed off all escape routes at 2 years in combination_control_demo),
+    reporting durable-response probability and which mechanism drives relapse at each horizon --
+    since which mechanism dominates can itself change with horizon (see summary.json).
+    """
+    out.mkdir(parents=True, exist_ok=True)
+    scenarios = combination_scenarios(breed, debulking_fraction, [max_kill_2],
+                                      location_penetration_multiplier)
+    model, css, seeding_rates, initial_burden, _ = scenarios[max_kill_2]
+
+    rows = []
+    for horizon_days in DURABILITY_HORIZON_SWEEP:
+        outcome = run_monte_carlo(model, css, horizon_days, seeding_rates, trials,
+                                  preexisting_prob=preexisting_prob, initial_burden=initial_burden,
+                                  css_reference_2=CDK46_ILLUSTRATIVE_CSS_NM, seed=seed)
+        ttp = outcome.time_to_progression[outcome.progressed]
+        mechanism_counts = pd.Series(outcome.dominant_mechanism).value_counts()
+        mechanism_fractions = (mechanism_counts.reindex(["durable_response"] + CLONE_NAMES[1:], fill_value=0)
+                              / len(outcome.dominant_mechanism))
+        rows.append({
+            "horizon_days": horizon_days, "horizon_years": horizon_days / 365,
+            "probability_durable_response": float(1 - outcome.progressed.mean()),
+            "probability_progression": float(outcome.progressed.mean()),
+            "median_time_to_progression_days": float(np.median(ttp)) if ttp.size else None,
+            **{f"mechanism_{mechanism}": float(value) for mechanism, value in mechanism_fractions.items()},
+        })
+    table = pd.DataFrame(rows)
+    table.to_csv(out / "durability_horizon_sensitivity.csv", index=False)
+
+    fig, ax = plt.subplots(figsize=(7, 4.5))
+    ax.plot(table["horizon_years"], table["probability_durable_response"], marker="o", color="tab:green")
+    ax.set(xlabel="years of follow-up simulated", ylabel="P(no relapse detected by this horizon)",
+          title=f"how long is \"durable\"? breed={breed}, cdk46 max_kill={max_kill_2}", ylim=(0, 1.02))
+    fig.tight_layout(); fig.savefig(out / "durability_horizon.png", dpi=160); plt.close(fig)
+
+    summary = {
+        "breed_context": breed, "max_kill_2_tested": max_kill_2,
+        "preexisting_prob_used": preexisting_prob, "sensitivity": rows,
+        "note": (
+            "\"Durable response\" throughout this module means only \"no relapse detected "
+            "within the horizon that specific run used,\" not permanence. In testing here, "
+            "durable-response probability was not flat across horizons: it declined from the "
+            "2-year figure reported elsewhere in this module as follow-up was extended to 5 and "
+            "10 years, driven almost entirely by the same pathway_reactivation route that "
+            "dominates escape without CDK4/6i -- the combination slows that route (its net "
+            "growth margin goes from clearly positive to only slightly negative in this "
+            "parameterization) rather than eliminating it, so per-trial parameter variability "
+            "lets a slowly growing minority cross the detection threshold given enough years."
+        ),
+        "unverified_extrapolations": [
+            ("stacks on top of every extrapolation already listed in combination_control_demo's "
+             "and combination_toxicity_demo's summary.json"),
+            ("long-horizon behavior is sensitive to the illustrative growth-rate/kill-rate "
+             "margins chosen for each escape mechanism, which are not fit to any measured "
+             "canine data"),
+        ],
+        "warning": (
+            "Read probability_durable_response at any single horizon as a snapshot, not the "
+            "answer -- the honest answer to \"how long is durable\" is the whole curve in "
+            "durability_horizon_sensitivity.csv, not one number."
+        ),
+    }
+    (out / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")
+
+
 def dog_preset() -> tuple[ResistanceModel, float, np.ndarray, dict]:
     """Cobimetinib vs. canine PTPN11/KRAS-mutant HS; sensitive-clone IC50 and Cmax are real.
 
