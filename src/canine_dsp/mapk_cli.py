@@ -7,7 +7,14 @@ import numpy as np
 import pandas as pd
 
 from .alphafold import align_residue_numbers, download_structure, read_plddt_track
-from .mapk_resistance import CLONE_NAMES, ResistanceModel, run_monte_carlo, run_monte_carlo_with_vaccine
+from .mapk_resistance import (
+    CLONE_NAMES,
+    ResistanceModel,
+    decompose_patient_uncertainty,
+    run_monte_carlo,
+    run_monte_carlo_fixed_patient,
+    run_monte_carlo_with_vaccine,
+)
 from .uniprot import DOG_TAXID, HUMAN_TAXID, resolve_uniprot_accession
 
 _SHARED_GROWTH = np.array([.06, .05, .055, .058])  # per-day; illustrative, not fitted
@@ -921,6 +928,176 @@ def vaccine_followon_demo(out: Path, breed: str = "bmd", debulking_fraction: flo
             "so trades that risk for a new, smaller antigen-loss risk -- not to estimate a real "
             "probability for an actual dog. Read the stacked mechanism panel and the vaccine_max_kill "
             "sensitivity curve together, not any single durable-response number, as the result."
+        ),
+    }
+    (out / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")
+
+
+# Feasibility of curing a *single* dog, as opposed to a population-level response rate ----------
+# Every demo above reports an ensemble probability across many different hypothetical dogs (a new
+# perturbed model, drug exposure, and starting tumor state redrawn every trial) -- useful for a
+# population-level question ("what fraction of dogs..."), but it does not by itself answer "what
+# can be done for one specific dog." Two things a population ensemble doesn't separate matter for
+# that framing: (1) how much of the outcome uncertainty is about *which* dog this is -- resolvable
+# in principle by biopsy, deep/ctDNA sequencing, or serial imaging on that specific dog -- versus
+# genuinely irreducible chance in how the tumor evolves even with perfect knowledge of that dog's
+# biology (see decompose_patient_uncertainty); and (2) given the two knowable-but-currently-
+# unmeasured facts that matter most for one dog -- does a resistant subclone already exist, and
+# where does this dog's own drug exposure/mutation propensity fall in the plausible range -- what
+# is the realistic best-to-worst-case bracket, rather than one blended population average.
+
+# Representative pre-existing-subclone size if a deep-sequencing/ctDNA diagnostic on a specific
+# dog were to detect one: the upper end of sample_initial_state's own 1e-6 to 1e-3 illustrative
+# range, i.e. a subclone large enough to plausibly be detectable with current sequencing depth.
+_DETECTABLE_SUBCLONE_FRACTION = 1e-3
+
+# 5th/95th-percentile z-score for a standard normal distribution, used to convert this module's
+# own lognormal uncertainty parameters (exposure_scale, seeding_rate_scale, ic50 jitter) into
+# concrete "pessimistic dog" / "optimistic dog" multipliers for the worst/best-case bracket below
+# -- a stress test of the *edges* of the uncertainty this module already assumes, not a new one.
+_PERCENTILE_Z = 1.645
+
+
+def single_patient_feasibility_demo(out: Path, breed: str = "bmd",
+                                    debulking_fraction: float = DEBULKING_FRACTION,
+                                    cdk46_max_kill: float = 0.05, horizon_days: int = 1825,
+                                    n_dogs: int = 40, repeats_per_dog: int = 60,
+                                    preexisting_prob: float = _PREEXISTING_PROB_CENTRAL,
+                                    location_penetration_multiplier: float = 1.0, seed: int = 7) -> None:
+    """Reframes the full-potency combination model (trametinib + CDK4/6i at `cdk46_max_kill`)
+    around a single dog rather than a population, with three analyses:
+
+    1. `decompose_patient_uncertainty`'s between-vs-within-dog variance split: how much of the
+       outcome is "which dog you are" (in principle knowable about a specific dog) versus pure
+       chance (not knowable about any dog, no matter how well characterized).
+    2. The value of knowing, for one dog, whether a resistant subclone already exists before
+       treatment (a real, if not yet clinically applied, diagnostic question -- deep/ctDNA
+       sequencing for a known hotspot at low variant-allele frequency), compared against the
+       population-average number reported elsewhere in this module.
+    3. A worst-/best-case bracket at the edges of this module's own assumed exposure- and
+       mutation-rate uncertainty (its 5th/95th percentiles), combined with subclone status --
+       the realistic range for one dog, as opposed to a single blended average.
+    """
+    out.mkdir(parents=True, exist_ok=True)
+    scenarios = combination_scenarios(breed, debulking_fraction, [cdk46_max_kill],
+                                      location_penetration_multiplier)
+    model, css, seeding_rates, initial_burden, provenance = scenarios[cdk46_max_kill]
+    css_2 = CDK46_ILLUSTRATIVE_CSS_NM
+    k = len(model.growth)
+
+    population_outcome = run_monte_carlo(model, css, horizon_days, seeding_rates, trials=300,
+                                         preexisting_prob=preexisting_prob, initial_burden=initial_burden,
+                                         css_reference_2=css_2, seed=seed)
+    population_average = float(1 - population_outcome.progressed.mean())
+
+    decomposition = decompose_patient_uncertainty(
+        model, css, horizon_days, seeding_rates, n_dogs=n_dogs, repeats_per_dog=repeats_per_dog,
+        preexisting_prob=preexisting_prob, initial_burden=initial_burden,
+        css_reference_2=css_2, seed=seed)
+
+    no_subclone_initial = np.zeros(k)
+    no_subclone_initial[0] = initial_burden
+    dominant_index = 1 + int(np.argmax(seeding_rates))
+    has_subclone_initial = no_subclone_initial.copy()
+    has_subclone_initial[0] *= (1 - _DETECTABLE_SUBCLONE_FRACTION)
+    has_subclone_initial[dominant_index] = initial_burden * _DETECTABLE_SUBCLONE_FRACTION
+    subclone_outcomes = {}
+    for label, initial in (("subclone_absent", no_subclone_initial), ("subclone_present", has_subclone_initial)):
+        outcome = run_monte_carlo_fixed_patient(model, css, horizon_days, seeding_rates, initial,
+                                                repeats=repeats_per_dog * 2, css_2=css_2, seed=seed)
+        subclone_outcomes[label] = float(1 - outcome.progressed.mean())
+
+    low_exposure = np.exp(-_PERCENTILE_Z * .3)   # 5th pctile css multiplier: less drug (worse)
+    high_exposure = np.exp(_PERCENTILE_Z * .3)   # 95th pctile css multiplier: more drug (better)
+    low_ic50 = np.exp(-_PERCENTILE_Z * .2)       # 5th pctile ic50 multiplier: more sensitive (better)
+    high_ic50 = np.exp(_PERCENTILE_Z * .2)       # 95th pctile ic50 multiplier: less sensitive (worse)
+    low_rate = np.exp(-_PERCENTILE_Z * .5)       # 5th pctile mutation-rate multiplier (better)
+    high_rate = np.exp(_PERCENTILE_Z * .5)       # 95th pctile mutation-rate multiplier (worse)
+    bracket_scenarios = {
+        "worst_case": (low_exposure, high_ic50, high_rate, has_subclone_initial),
+        "best_case": (high_exposure, low_ic50, low_rate, no_subclone_initial),
+    }
+    bracket_outcomes = {}
+    for label, (css_mult, ic50_mult, rate_mult, initial) in bracket_scenarios.items():
+        bracket_model = replace(model, ic50_nM=model.ic50_nM * ic50_mult)
+        outcome = run_monte_carlo_fixed_patient(bracket_model, css * css_mult, horizon_days,
+                                                seeding_rates * rate_mult, initial,
+                                                repeats=repeats_per_dog * 2, css_2=css_2 * css_mult, seed=seed)
+        bracket_outcomes[label] = float(1 - outcome.progressed.mean())
+
+    fig, axes = plt.subplots(1, 3, figsize=(15.5, 4.5))
+    axes[0].hist(decomposition.per_dog_durable_probability, bins=12, color="tab:blue", alpha=.85)
+    axes[0].axvline(population_average, color="gray", linestyle="--", linewidth=1,
+                    label=f"population average ({population_average:.2f})")
+    axes[0].set(xlabel="a given dog's own true P(durable response)", ylabel="number of simulated dogs",
+               title=f"between-dog spread (ICC={decomposition.intraclass_correlation:.2f})")
+    axes[0].legend(fontsize=7)
+    axes[1].bar(["subclone\nabsent", "population\naverage", "subclone\npresent"],
+               [subclone_outcomes["subclone_absent"], population_average, subclone_outcomes["subclone_present"]],
+               color=["tab:green", "tab:gray", "tab:red"])
+    axes[1].set(ylabel="P(durable response)", title="value of knowing subclone status", ylim=(0, 1))
+    axes[2].bar(["worst\ncase", "population\naverage", "best\ncase"],
+               [bracket_outcomes["worst_case"], population_average, bracket_outcomes["best_case"]],
+               color=["tab:red", "tab:gray", "tab:green"])
+    axes[2].set(ylabel="P(durable response)", title="realistic range for one dog", ylim=(0, 1))
+    fig.tight_layout(); fig.savefig(out / "single_patient_feasibility.png", dpi=160); plt.close(fig)
+
+    pd.DataFrame([
+        {"dog_index": i, "durable_response_probability": p}
+        for i, p in enumerate(decomposition.per_dog_durable_probability)
+    ]).to_csv(out / "per_dog_probability.csv", index=False)
+
+    summary = {
+        "breed_context": breed, "cdk46_max_kill_used": cdk46_max_kill, "horizon_days": horizon_days,
+        "population_average_durable_response": population_average,
+        "uncertainty_decomposition": {
+            "between_dog_variance": decomposition.between_dog_variance,
+            "within_dog_variance": decomposition.within_dog_variance,
+            "intraclass_correlation": decomposition.intraclass_correlation,
+            "n_dogs": n_dogs, "repeats_per_dog": repeats_per_dog,
+        },
+        "subclone_value_of_information": {
+            **subclone_outcomes, "population_average": population_average,
+            "detectable_subclone_fraction_assumed": _DETECTABLE_SUBCLONE_FRACTION,
+        },
+        "worst_best_case_bracket": {**bracket_outcomes, "population_average": population_average},
+        "interpretation": (
+            f"Intraclass correlation (ICC) = {decomposition.intraclass_correlation:.2f}: this "
+            "fraction of the total outcome variance is 'which dog you are' (in principle "
+            "resolvable by testing that specific dog), and the rest is chance that no test on "
+            "that dog could predict, because it depends on whether/when a resistant mutation "
+            "happens to arise -- a Poisson process, not a deterministic property of the dog. A "
+            "high ICC means personalized diagnostics (biopsy, deep sequencing, drug-level "
+            "monitoring) could meaningfully narrow this dog's individual prognosis; a low ICC "
+            "means the outcome is dominated by chance no diagnostic could have predicted, and "
+            "only a more broadly effective treatment (not better patient selection) would move "
+            "the needle. Read the subclone and bracket panels as answering a related but "
+            "distinct question: not how much uncertainty exists, but which direction it's "
+            "plausible to expect for a dog whose actual biology and drug exposure could in "
+            "principle be measured."
+        ),
+        "unverified_extrapolations": [
+            ("no real diagnostic pipeline for pretreatment subclone detection, drug-exposure "
+             "monitoring, or per-dog mutation-rate estimation exists for canine HS; this demo "
+             "quantifies what such diagnostics *could* be worth if they existed and were "
+             "accurate, not a claim that they are currently available or validated"),
+            ("_DETECTABLE_SUBCLONE_FRACTION and the bracket's percentile multipliers are applied "
+             "to this module's own already-illustrative uncertainty parameters (exposure_scale, "
+             "ic50_scale, seeding_rate_scale); they inherit every caveat already attached to "
+             "those in combination_control_demo and mapk_resistance_demo"),
+            ("the between-dog/within-dog variance split is a method-of-moments estimate that can "
+             "be noisy or biased toward zero (an artificially low ICC) when n_dogs and "
+             "repeats_per_dog are small; increase both before trusting a precise ICC value"),
+            ("stacks on top of every extrapolation already listed in combination_control_demo's "
+             "summary.json"),
+        ],
+        "warning": (
+            "This demo answers a different question than the rest of the module: not 'what "
+            "fraction of dogs respond' but 'how much of one dog's fate is knowable in advance, "
+            "and in which direction.' It is not a replacement for the population-level analyses "
+            "elsewhere, and it does not identify a real diagnostic test -- it quantifies the "
+            "hypothetical value of information a perfect one would provide, within this "
+            "module's own already-speculative model."
         ),
     }
     (out / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")

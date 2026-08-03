@@ -336,6 +336,114 @@ def run_monte_carlo(reference: ResistanceModel, css_reference: float, horizon_da
     return MonteCarloOutcome(trajectories, progressed, time_to_progression, dominant_mechanism)
 
 
+def run_monte_carlo_fixed_patient(model: ResistanceModel, css: float, horizon_days: int,
+                                  seeding_rates: np.ndarray, initial: np.ndarray, repeats: int = 200,
+                                  seed_fraction: float = 1e-8, detection_floor_fraction: float = .01,
+                                  css_2: float | None = None, additional_kill: np.ndarray | None = None,
+                                  clone_names: list[str] = CLONE_NAMES, seed: int = 7
+                                  ) -> MonteCarloOutcome:
+    """Repeats only the stochastic mutation-establishment process for one *given* dog's fixed
+    model, drug exposure, and starting tumor state, instead of redrawing a new hypothetical dog
+    every trial the way `run_monte_carlo` does.
+
+    `run_monte_carlo` reports population variability: which dog you are. This function holds that
+    fixed at whatever the caller supplies -- ideally, for a real dog, a model/exposure/initial
+    state informed by actual biopsy, imaging, and drug-level data for that specific animal -- and
+    re-samples only the Poisson mutation-timing draw (see `poisson_mutation_injections`), isolating
+    the residual, irreducible uncertainty that remains even with perfect knowledge of that one
+    dog's biology: whether and when a resistant mutation actually establishes is inherently
+    stochastic, not just unmeasured. See `decompose_patient_uncertainty` for why this split
+    matters when the question is "can this one dog be cured," not "what fraction of dogs respond."
+    """
+    k = len(model.growth)
+    rng = np.random.default_rng(seed)
+    concentration = np.full(horizon_days, css)
+    concentration_2 = np.full(horizon_days, css_2) if css_2 is not None else None
+    detection_floor = detection_floor_fraction * model.carrying_capacity
+    sensitive_only = np.zeros(k)
+    sensitive_only[0] = initial[0]
+    # Deterministic given a fixed model/concentration/initial state -- computed once, not per
+    # repeat, since only the Poisson mutation-timing draw below is meant to vary across repeats.
+    sensitive_trajectory = simulate_resistance(model, concentration, sensitive_only,
+                                                concentration_2=concentration_2)[:, 0]
+
+    trajectories = np.zeros((repeats, horizon_days + 1, k))
+    progressed = np.zeros(repeats, dtype=bool)
+    time_to_progression = np.full(repeats, np.nan)
+    dominant_mechanism = []
+    for trial in range(repeats):
+        injections = poisson_mutation_injections(rng, sensitive_trajectory, seeding_rates, seed_fraction)
+        state = simulate_resistance(model, concentration, initial, injections, concentration_2,
+                                    additional_kill=additional_kill)
+        trajectories[trial] = state
+        total = state.sum(axis=1)
+        nadir_day = int(np.argmin(total))
+        threshold = max(PROGRESSION_THRESHOLD * total[nadir_day], detection_floor)
+        progression_days = np.flatnonzero(total[nadir_day:] >= threshold)
+        trial_progressed = progression_days.size > 0 and progression_days[0] > 0
+        progressed[trial] = trial_progressed
+        if trial_progressed:
+            time_to_progression[trial] = nadir_day + progression_days[0]
+        dominant_mechanism.append(_dominant_mechanism(state[-1], trial_progressed, clone_names))
+    return MonteCarloOutcome(trajectories, progressed, time_to_progression, dominant_mechanism)
+
+
+@dataclass
+class UncertaintyDecomposition:
+    per_dog_durable_probability: np.ndarray  # (n_dogs,) each dog's own true durable-response rate
+    between_dog_variance: float    # uncertainty a real diagnostic on THIS dog could resolve
+    within_dog_variance: float     # irreducible: exists even with perfect knowledge of the dog
+    intraclass_correlation: float  # between / (between + within); near 1 => "which dog" dominates
+
+
+def decompose_patient_uncertainty(reference: ResistanceModel, css_reference: float, horizon_days: int,
+                                  seeding_rates: np.ndarray, n_dogs: int = 40, repeats_per_dog: int = 60,
+                                  preexisting_prob: float = .3, exposure_scale: float = .3,
+                                  seeding_rate_scale: float = .5, ic50_scale: float = .2,
+                                  seed_fraction: float = 1e-8, detection_floor_fraction: float = .01,
+                                  initial_burden: float = .3, css_reference_2: float | None = None,
+                                  exposure_scale_2: float = .3, seed: int = 7) -> UncertaintyDecomposition:
+    """Decomposes `run_monte_carlo`'s population variability into between-dog and within-dog parts.
+
+    Draws `n_dogs` distinct hypothetical dogs from the same distributions `run_monte_carlo` uses
+    (perturbed model, drug exposure, starting tumor state, mutation-rate jitter), then for each one
+    runs `repeats_per_dog` fixed-patient trials (`run_monte_carlo_fixed_patient`) to estimate that
+    dog's own true durable-response probability.
+
+    For any single real dog, Var(outcome) = Var(p_dog) [between-dog: uncertainty about *which* dog
+    this is -- in principle resolvable by biopsy, deep/ctDNA sequencing, or serial imaging on that
+    specific dog] + E[p_dog * (1 - p_dog)] [within-dog: irreducible, since whether a resistant
+    mutation actually establishes is a Poisson draw, not a deterministic consequence of the dog's
+    true parameters]. `between_dog_variance` corrects the naive sample variance of the
+    `repeats_per_dog`-trial probability estimates for their own finite-sample noise (a standard
+    method-of-moments/ANOVA-style variance-components estimate, biased toward zero when
+    `repeats_per_dog` is small relative to `n_dogs` -- both should be reasonably large for the
+    split to be trustworthy, not just directionally suggestive).
+    """
+    rng = np.random.default_rng(seed)
+    k = len(reference.growth)
+    identity_model = replace(reference, mutation=np.eye(k))
+    per_dog_probability = np.zeros(n_dogs)
+    for dog in range(n_dogs):
+        model = perturb_resistance_model(identity_model, rng, ic50_scale=ic50_scale)
+        css = css_reference * rng.lognormal(0, exposure_scale)
+        css_2 = (css_reference_2 * rng.lognormal(0, exposure_scale_2)
+                if css_reference_2 is not None else None)
+        initial = sample_initial_state(rng, k, preexisting_prob, mechanism_weights=seeding_rates,
+                                       initial_burden=initial_burden)
+        jittered_rates = seeding_rates * rng.lognormal(0, seeding_rate_scale, len(seeding_rates))
+        outcome = run_monte_carlo_fixed_patient(
+            model, css, horizon_days, jittered_rates, initial, repeats=repeats_per_dog,
+            seed_fraction=seed_fraction, detection_floor_fraction=detection_floor_fraction,
+            css_2=css_2, seed=int(rng.integers(0, 2**32 - 1)))
+        per_dog_probability[dog] = 1 - outcome.progressed.mean()
+    within = float(np.mean(per_dog_probability * (1 - per_dog_probability)))
+    naive_between = float(np.var(per_dog_probability, ddof=1)) if n_dogs > 1 else 0.0
+    between = max(0.0, naive_between - within / repeats_per_dog)
+    icc = between / (between + within) if (between + within) > 0 else 0.0
+    return UncertaintyDecomposition(per_dog_probability, between, within, icc)
+
+
 def run_monte_carlo_with_vaccine(reference: ResistanceModel, css_reference: float, horizon_days: int,
                                 seeding_rates: np.ndarray, vaccine_start_day: int, vaccine_ramp_days: float,
                                 vaccine_max_kill: float, immune_escape_seeding_rate: float,

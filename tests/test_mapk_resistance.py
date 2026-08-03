@@ -6,11 +6,13 @@ from canine_dsp.mapk_resistance import (
     ResistanceModel,
     _dominant_mechanism,
     build_mutation_matrix,
+    decompose_patient_uncertainty,
     drug_kill_rate,
     merge_injections,
     poisson_mutation_injections,
     ramping_kill_schedule,
     run_monte_carlo,
+    run_monte_carlo_fixed_patient,
     run_monte_carlo_with_vaccine,
     simulate_resistance,
 )
@@ -211,6 +213,54 @@ def test_poisson_injections_never_land_on_zero_weight_days():
                                              clone_indices=[4], k=5)
     assert injections
     assert all(day >= 50 for day in injections)
+
+
+def test_run_monte_carlo_fixed_patient_holds_model_and_initial_state_fixed():
+    """Repeats should differ only via the stochastic mutation-timing draw: with a huge seeding
+    rate forced to zero, every repeat must be bit-identical (no other source of randomness)."""
+    model = _dog_like_model()
+    seeding_rates = np.zeros(3)
+    initial = np.array([.3, 0., 0., 0.])
+    outcome = run_monte_carlo_fixed_patient(model, 1640., 200, seeding_rates, initial, repeats=5, seed=1)
+    for trial in range(1, 5):
+        np.testing.assert_allclose(outcome.trajectories[trial], outcome.trajectories[0])
+    assert not outcome.progressed.any()  # no resistance mechanism can ever seed
+
+
+def test_run_monte_carlo_fixed_patient_still_stochastic_with_nonzero_seeding():
+    model = _dog_like_model()
+    seeding_rates = 0.05 * np.array([.85, .10, .05])  # high rate: some repeats should progress
+    initial = np.array([.3, 0., 0., 0.])
+    outcome = run_monte_carlo_fixed_patient(model, 1640., 400, seeding_rates, initial, repeats=40, seed=2)
+    assert outcome.progressed.any()
+    assert (~outcome.progressed).any()  # timing genuinely varies trial to trial
+
+
+def test_decompose_patient_uncertainty_reports_valid_variance_split():
+    model = _dog_like_model()
+    seeding_rates = 0.012 * np.array([.85, .10, .05])
+    decomposition = decompose_patient_uncertainty(model, 1640., 300, seeding_rates, n_dogs=15,
+                                                  repeats_per_dog=20, preexisting_prob=.3, seed=4)
+    assert decomposition.per_dog_durable_probability.shape == (15,)
+    assert (decomposition.per_dog_durable_probability >= 0).all()
+    assert (decomposition.per_dog_durable_probability <= 1).all()
+    assert decomposition.between_dog_variance >= 0
+    assert decomposition.within_dog_variance >= 0
+    assert 0 <= decomposition.intraclass_correlation <= 1
+
+
+def test_decompose_patient_uncertainty_zero_between_dog_variance_gives_zero_icc():
+    """If every dog is forced identical (no perturbation, no exposure variability, no preexisting
+    subclone), the only remaining variance is within-dog mutation-timing chance -- ICC should
+    collapse toward 0, not report spurious between-dog structure."""
+    model = ResistanceModel(growth=np.array([.06, .05, .055, .058]),
+                            ic50_nM=np.array([222., 222. * 40, 222. * 1.2, 222. * 60]),
+                            max_kill=np.array([.18, .02, .035, .015]), mutation=np.eye(4))
+    seeding_rates = 0.012 * np.array([.85, .10, .05])
+    decomposition = decompose_patient_uncertainty(
+        model, 1640., 300, seeding_rates, n_dogs=15, repeats_per_dog=30, preexisting_prob=0.0,
+        exposure_scale=1e-9, seeding_rate_scale=1e-9, ic50_scale=1e-9, seed=4)
+    assert decomposition.intraclass_correlation < 0.2
 
 
 def test_vaccine_can_suppress_pathway_reactivation_at_high_potency():

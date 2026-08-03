@@ -18,6 +18,7 @@ from .mapk_cli import (
     localized_control_demo,
     mapk_cns_demo,
     mapk_resistance_demo,
+    single_patient_feasibility_demo,
     vaccine_followon_demo,
 )
 from .signals import eiip, variant_density, windowed_gc
@@ -196,6 +197,19 @@ def main() -> None:
     mapk_vaccine.add_argument("--location-penetration-multiplier", type=float, default=1.0)
     mapk_vaccine.add_argument("--seed", type=int, default=7)
     mapk_vaccine.add_argument("--out", type=Path, required=True)
+    mapk_single = sub.add_parser("mapk-single-patient-feasibility-demo",
+                                 help="feasibility of curing one specific dog: between-dog vs. "
+                                      "within-dog uncertainty, and a worst/best-case bracket")
+    mapk_single.add_argument("--breed", choices=["bmd", "flat_coated_retriever"], default="bmd")
+    mapk_single.add_argument("--debulking-fraction", type=float, default=0.97)
+    mapk_single.add_argument("--cdk46-max-kill", type=float, default=0.05)
+    mapk_single.add_argument("--horizon-days", type=int, default=1825)
+    mapk_single.add_argument("--n-dogs", type=int, default=40)
+    mapk_single.add_argument("--repeats-per-dog", type=int, default=60)
+    mapk_single.add_argument("--preexisting-prob", type=float, default=0.30)
+    mapk_single.add_argument("--location-penetration-multiplier", type=float, default=1.0)
+    mapk_single.add_argument("--seed", type=int, default=7)
+    mapk_single.add_argument("--out", type=Path, required=True)
     args = parser.parse_args()
     if args.command == "demo":
         rng = np.random.default_rng(42)
@@ -252,10 +266,15 @@ def main() -> None:
         durability_horizon_demo(args.out, args.breed, args.debulking_fraction, args.max_kill_2,
                                 args.trials, args.preexisting_prob,
                                 args.location_penetration_multiplier, args.seed)
-    else:
+    elif args.command == "mapk-vaccine-followon-demo":
         vaccine_followon_demo(args.out, args.breed, args.debulking_fraction, args.cdk46_max_kill,
                               args.trials, args.horizon_days, args.preexisting_prob,
                               args.location_penetration_multiplier, args.seed)
+    else:
+        single_patient_feasibility_demo(args.out, args.breed, args.debulking_fraction,
+                                        args.cdk46_max_kill, args.horizon_days, args.n_dogs,
+                                        args.repeats_per_dog, args.preexisting_prob,
+                                        args.location_penetration_multiplier, args.seed)
 
 
 if __name__ == "__main__":

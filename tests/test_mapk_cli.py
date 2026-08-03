@@ -21,6 +21,7 @@ from canine_dsp.mapk_cli import (
     localized_control_demo,
     localized_pihs_scenarios,
     mapk_cns_demo,
+    single_patient_feasibility_demo,
     vaccine_followon_demo,
     vaccine_followon_scenarios,
 )
@@ -265,3 +266,59 @@ def test_vaccine_suppresses_pathway_reactivation_without_worsening_durability():
             initial_burden=initial_burden, css_reference_2=500., seed=9)
         durability[vaccine_max_kill] = 1 - outcome.progressed.mean()
     assert durability[0.05] >= durability[0.0]
+
+
+def test_single_patient_feasibility_demo_writes_expected_outputs(tmp_path):
+    single_patient_feasibility_demo(tmp_path, breed="bmd", horizon_days=200, n_dogs=8,
+                                    repeats_per_dog=10, seed=1)
+    summary = json.loads((tmp_path / "summary.json").read_text())
+    assert "uncertainty_decomposition" in summary
+    assert "subclone_value_of_information" in summary
+    assert "worst_best_case_bracket" in summary
+    assert "interpretation" in summary
+    assert "unverified_extrapolations" in summary
+    decomposition = summary["uncertainty_decomposition"]
+    assert 0 <= decomposition["intraclass_correlation"] <= 1
+    table = pd.read_csv(tmp_path / "per_dog_probability.csv")
+    assert len(table) == 8
+    assert (tmp_path / "single_patient_feasibility.png").exists()
+
+
+def test_worst_case_is_never_better_than_best_case_for_one_dog():
+    """Sanity check on the bracket's own construction: the worst-case combination (least drug
+    exposure, least drug-sensitive tumor, highest mutation rate, pre-existing subclone already
+    present) must not outperform the best-case combination (the opposite on every axis)."""
+    from canine_dsp.mapk_cli import (
+        _DETECTABLE_SUBCLONE_FRACTION,
+        _PERCENTILE_Z,
+        combination_scenarios,
+    )
+    from canine_dsp.mapk_resistance import run_monte_carlo_fixed_patient
+    from dataclasses import replace as dc_replace
+
+    scenarios = combination_scenarios(breed="bmd", max_kill_2_values=[0.05])
+    model, css, seeding_rates, initial_burden, _ = scenarios[0.05]
+    css_2 = 500.0
+    k = len(model.growth)
+
+    no_subclone = np.zeros(k); no_subclone[0] = initial_burden
+    dominant_index = 1 + int(np.argmax(seeding_rates))
+    has_subclone = no_subclone.copy()
+    has_subclone[0] *= (1 - _DETECTABLE_SUBCLONE_FRACTION)
+    has_subclone[dominant_index] = initial_burden * _DETECTABLE_SUBCLONE_FRACTION
+
+    low_exposure, high_exposure = np.exp(-_PERCENTILE_Z * .3), np.exp(_PERCENTILE_Z * .3)
+    low_ic50, high_ic50 = np.exp(-_PERCENTILE_Z * .2), np.exp(_PERCENTILE_Z * .2)
+    low_rate, high_rate = np.exp(-_PERCENTILE_Z * .5), np.exp(_PERCENTILE_Z * .5)
+
+    outcomes = {}
+    for label, css_mult, ic50_mult, rate_mult, initial in (
+        ("worst_case", low_exposure, high_ic50, high_rate, has_subclone),
+        ("best_case", high_exposure, low_ic50, low_rate, no_subclone),
+    ):
+        bracket_model = dc_replace(model, ic50_nM=model.ic50_nM * ic50_mult)
+        outcome = run_monte_carlo_fixed_patient(bracket_model, css * css_mult, 1825,
+                                                seeding_rates * rate_mult, initial, repeats=120,
+                                                css_2=css_2 * css_mult, seed=5)
+        outcomes[label] = 1 - outcome.progressed.mean()
+    assert outcomes["best_case"] >= outcomes["worst_case"]
