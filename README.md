@@ -180,6 +180,40 @@ show that its timing is clinically superior; that requires patient-level calibra
 prospective randomized comparison. See `docs/MELANOMA_DSP_BENCHMARK.md` and
 `docs/MELANOMA_DATA.md`.
 
+### Comparative osteosarcoma RNA-vaccine design
+
+The next disease program targets canine appendicular osteosarcoma after surgery, when occult
+pulmonary disease may remain. It combines a species-aware explicit-duration hidden semi-Markov
+model with bounded low-rank second-order Volterra terms in the state-transition logits. A separate
+robust inverse-design layer selects multivalent DLA/HLA cargo under clonality, presentation,
+subclone-coverage, normal-proteome safety, escape, and manufacturing constraints.
+
+Fetch the small real GSE76127 canine tumor/DFI cohort and run the complete benchmark:
+
+```bash
+python scripts/fetch_public_data.py gse76127
+canine-dsp osteosarcoma-rna-design \
+  --gse76127-matrix data/raw/gse76127/GSE76127_series_matrix.txt.gz \
+  --gse76127-supplements data/raw/gse76127/PMC4759767_SupplementaryFiles.zip \
+  --out results/osteosarcoma-rna-design
+```
+
+The default candidate-antigen panel is deliberately synthetic and exercises the constraints and
+visualizations. A real tumor-derived panel requires both a deidentified upstream candidate-feature
+CSV (`--candidates`) and a schema-v1 patient/cohort constraint manifest (`--design-spec`) containing
+the actual DLA and clone labels. The benchmark never substitutes its demo labels, and it still does
+not construct a manufacturing-ready nucleotide sequence or a patient treatment plan.
+
+Outputs include cargo and schedule rankings, exact fixed-prior state probabilities, schedule
+evidence flags, scenario-long escape stress tests with near-equivalence labels, state-conditioned
+Volterra memory plots, model ablations, a real held-out-dog static prognostic sensitivity analysis,
+separate dog/human clinical comparators, an identifiability audit, an atomically published
+checksum/size manifest, a prospective validation protocol, and a plain-language clinical
+interpretation. The clinical-superiority gate always fails closed because no completed randomized
+osteosarcoma RNA-vaccine dataset currently identifies the policy effect. See
+`docs/OSTEOSARCOMA_RNA_DESIGN.md` and
+`docs/OSTEOSARCOMA_DATA.md`.
+
 ## Real RNA data
 
 Fetch and prepare the small public canine tachypacing time course:
