@@ -204,6 +204,72 @@ a UniProt residue number, on the correct canonical isoform, is the caller's resp
 is a model-confidence estimate, not a measure of stability, function, or pathogenicity, and each
 model is a single static predicted conformation with no ligands, complexes, or dynamics.
 
+Human and dog UniProt accessions are resolved at call time from the UniProt REST API by gene
+symbol and NCBI taxonomy ID (`canine_dsp.uniprot`), rather than hardcoded: non-model genomes like
+dog are automatically annotated with several isoform/paralog hits per gene, and picking one by
+hand is easy to get wrong or leave stale.
+
+## MAPK inhibitor resistance in histiocytic sarcoma
+
+Canine histiocytic sarcoma (HS) is driven by recurrent MAPK-pathway mutations, dominated by two
+mutually exclusive PTPN11/SHP2 hotspots (E76K, G503V) and KRAS Q61H, altering the pathway in
+roughly 43-64% of cases across published cohorts (Takada et al., "Activating Mutations in PTPN11
+and KRAS in Canine Histiocytic Sarcomas," Genes 2019;10(7):505, PMID 31277422; "Canine
+Histiocytic and Hemophagocytic Histiocytic Sarcomas Display KRAS and Extensive PTPN11/SHP2
+Mutations and Respond In Vitro to MEK Inhibition by Cobimetinib," Genes 2024;15(8):1050, PMID
+39202410). Three canine HS cell lines respond in vitro to the MEK1/2 inhibitor cobimetinib at
+IC50 74-372 nM, well below the achievable canine plasma concentration (PMID 39202410). Human HS
+carries MAPK mutations spread across more genes (BRAF, MAP2K1, KRAS, NRAS, PTPN11, NF1, CBL) in
+about 57% of cases (Shanmugam et al., Mod Pathol. 2019;32(6):830-843), and a MAP2K1-mutant case
+had a complete response to the MEK inhibitor trametinib (Gounder et al., N Engl J Med.
+2018;378(20):1945-1947, PMID 29768143). No canine- or human-specific MAPK-inhibitor *resistance*
+data for HS has been published.
+
+`canine_dsp.mapk_resistance` fills that gap with a hypothesis-generating Monte Carlo model, not a
+fitted or validated one. A sensitive clone and three synthetic escape clones -- pathway
+reactivation (secondary upstream RAS/RAF alteration), RTK-mediated bypass (loss of ERK feedback
+reactivates parallel signaling), and on-target site mutation (reduced inhibitor binding, the
+generic kinase-inhibitor resistance category) -- compete under density-dependent growth and an
+Emax drug-kill term, with clones seeded from the sensitive population at a small per-day rate.
+Each Monte Carlo trial perturbs potency and mutation-rate parameters, samples plasma-exposure
+variability, and stochastically seeds (or omits) a pre-existing resistant subclone before
+treatment starts:
+
+```bash
+canine-dsp mapk-resistance-demo --species dog --trials 500 --horizon-days 180 --out results/mapk-dog
+canine-dsp mapk-resistance-demo --species human --trials 500 --horizon-days 180 --out results/mapk-human
+```
+
+Only the dog preset's sensitive-clone IC50 and reference plasma concentration are anchored to the
+published in vitro/PK values above; every growth rate, resistance-clone potency shift, kill
+ceiling, and mutation rate is illustrative and clearly marked as such in `summary.json`. The human
+preset reuses the same pharmacodynamic shape with no fitted PK/IC50 numbers (none were found in
+the literature) and a broader, less concentrated resistance-seeding spectrum reflecting the wider
+mutational heterogeneity reported in human HS. Outputs are `trajectory_quantiles.csv` (median and
+10-90% burden over time), `escape_mechanism_breakdown.csv` (which mechanism dominates at the
+horizon, or durable response), a two-panel plot, and `summary.json`. Progression is flagged using
+a RECIST-style >=20% increase from nadir, but only once burden clears an absolute detection floor
+-- without that floor, a regrowth ratio computed against a numerically negligible nadir can
+trigger "progression" while the tumor is still undetectable. Because the acquired-resistance
+kinetics in this parameterization are fairly deterministic, the durable-response probability can
+swing sharply with `--horizon-days`; treat any single run's numbers as illustrative, not a
+calibrated risk estimate.
+
+Before assuming a MAPK-inhibitor finding transfers across species, check whether the two
+orthologs are even structurally comparable at the relevant residues:
+
+```bash
+canine-dsp mapk-structure-compare --gene PTPN11 --hotspots 76 503 --out results/ptpn11-compare
+```
+
+This resolves human and dog UniProt accessions, fetches both AlphaFold models, and maps the given
+hotspot residue numbers (in human numbering) onto the dog structure by global sequence alignment
+-- not by assuming the same index applies to both, which indels can break -- before comparing
+local pLDDT and residue identity. For PTPN11 both hotspots land on identical, well-resolved
+(pLDDT > 85) residues in both species, consistent with the shared E76K/G503V nomenclature in the
+literature above; this is a structural confidence check, not evidence that the two species'
+pharmacology will match.
+
 ## Research path
 
 1. Pin an assembly and record accessions/checksums in `data/README.md`.
@@ -215,5 +281,6 @@ model is a single static predicted conformation with no ligands, complexes, or d
 ## Layout
 
 `src/canine_dsp/` contains signal encoding, spectral estimators, wavelets, I/O, AlphaFold structure
-parsing, and the CLI. `tests/` contains deterministic unit tests. `data/` stores only provenance
-documentation in Git.
+parsing, UniProt accession resolution, the MAPK-inhibitor resistance Monte Carlo model, and the
+CLI. `tests/` contains deterministic unit tests. `data/` stores only provenance documentation in
+Git.

@@ -2,7 +2,12 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from canine_dsp.alphafold import confidence_band, map_variants, read_plddt_track
+from canine_dsp.alphafold import (
+    align_residue_numbers,
+    confidence_band,
+    map_variants,
+    read_plddt_track,
+)
 
 ATOM_SITE_COLUMNS = [
     "group_PDB", "id", "type_symbol", "label_atom_id", "label_alt_id", "label_comp_id",
@@ -34,6 +39,44 @@ def test_read_plddt_track_extracts_ca_atoms_only(tmp_path):
     assert list(track["residue_number"]) == list(range(1, 33))
     np.testing.assert_allclose(track["plddt"], plddt, atol=1e-2)
     np.testing.assert_allclose(track["y"], 1.0)
+
+
+def _synthetic_cif_with_sequence(path, residues):
+    plddt = np.linspace(50, 95, len(residues))
+    lines = ["data_TEST", "#", "loop_"]
+    lines += [f"_atom_site.{name}" for name in ATOM_SITE_COLUMNS]
+    for i, resname in enumerate(residues):
+        seq = i + 1
+        lines.append(f"ATOM {2 * i + 1} N N . {resname} A 1 {seq} ? {i:.3f} 0.000 0.000 1.00 "
+                     f"{plddt[i]:.2f} ? {seq} {resname} A N 1")
+        lines.append(f"ATOM {2 * i + 2} C CA . {resname} A 1 {seq} ? {i + .5:.3f} 1.000 2.000 1.00 "
+                     f"{plddt[i]:.2f} ? {seq} {resname} A CA 1")
+    lines.append("#")
+    path.write_text("\n".join(lines) + "\n")
+
+
+def test_read_plddt_track_residue_type_column(tmp_path):
+    cif = tmp_path / "seq.cif"
+    _synthetic_cif_with_sequence(cif, ["ALA", "GLY", "VAL", "LEU"])
+    track = read_plddt_track(cif)
+    assert list(track["residue_type"]) == ["A", "G", "V", "L"]
+
+
+def test_align_residue_numbers_identity_for_identical_sequences():
+    seq = "MAGVLKQR"
+    mapping = align_residue_numbers(seq, seq)
+    assert all(target == source and identical for source, (target, identical) in mapping.items())
+    assert len(mapping) == len(seq)
+
+
+def test_align_residue_numbers_handles_insertion_shift():
+    source = "MAGVLKQR"
+    target = "MAGXVLKQR"
+    mapping = align_residue_numbers(source, target)
+    assert mapping[1] == (1, True)
+    assert mapping[3] == (3, True)
+    assert mapping[4] == (5, True)
+    assert mapping[8] == (9, True)
 
 
 def test_read_plddt_track_missing_loop_raises(tmp_path):

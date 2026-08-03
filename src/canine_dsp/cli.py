@@ -10,6 +10,7 @@ from .alphafold_cli import analyze_structure, fetch_structure
 from .hybrid_cli import inverse_demo, prepare_dog10k_aging, prepare_gse9794
 from .immunotherapy_cli import immunotherapy_demo
 from .io import read_first_fasta, read_vcf_positions
+from .mapk_cli import compare_orthologs, mapk_resistance_demo
 from .signals import eiip, variant_density, windowed_gc
 from .spectral import coherence, multitaper_psd, spectral_entropy, welch_psd
 from .vaccine_eval import run_gse102459, run_gse190001
@@ -113,6 +114,18 @@ def main() -> None:
     af_analyze.add_argument("--variants", type=Path)
     af_analyze.add_argument("--flank", type=int, default=5)
     af_analyze.add_argument("--out", type=Path, required=True)
+    mapk_demo = sub.add_parser("mapk-resistance-demo",
+                               help="Monte Carlo MAPK-inhibitor escape simulation for histiocytic sarcoma")
+    mapk_demo.add_argument("--species", choices=["dog", "human"], default="dog")
+    mapk_demo.add_argument("--trials", type=int, default=500)
+    mapk_demo.add_argument("--horizon-days", type=int, default=180)
+    mapk_demo.add_argument("--seed", type=int, default=7)
+    mapk_demo.add_argument("--out", type=Path, required=True)
+    mapk_structure = sub.add_parser("mapk-structure-compare",
+                                    help="compare human vs. dog AlphaFold confidence at MAPK-gene hotspots")
+    mapk_structure.add_argument("--gene", required=True)
+    mapk_structure.add_argument("--hotspots", type=int, nargs="+", required=True)
+    mapk_structure.add_argument("--out", type=Path, required=True)
     args = parser.parse_args()
     if args.command == "demo":
         rng = np.random.default_rng(42)
@@ -144,8 +157,12 @@ def main() -> None:
         run_gse102459(args.matrix, args.out, args.modules)
     elif args.command == "alphafold-fetch":
         fetch_structure(args.uniprot, args.out)
-    else:
+    elif args.command == "alphafold-analyze":
         analyze_structure(args.struct, args.out, args.variants, args.flank)
+    elif args.command == "mapk-resistance-demo":
+        mapk_resistance_demo(args.out, args.species, args.trials, args.horizon_days, args.seed)
+    else:
+        compare_orthologs(args.gene, args.hotspots, args.out)
 
 
 if __name__ == "__main__":

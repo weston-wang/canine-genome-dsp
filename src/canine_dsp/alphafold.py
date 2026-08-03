@@ -11,6 +11,11 @@ import pandas as pd
 API_URL = "https://alphafold.ebi.ac.uk/api/prediction/{}"
 USER_AGENT = "canine-genome-dsp/0.1 research"
 CONFIDENCE_BANDS = [(90, "very_high"), (70, "confident"), (50, "low"), (0, "very_low")]
+THREE_TO_ONE = {
+    "ALA": "A", "ARG": "R", "ASN": "N", "ASP": "D", "CYS": "C", "GLN": "Q", "GLU": "E",
+    "GLY": "G", "HIS": "H", "ILE": "I", "LEU": "L", "LYS": "K", "MET": "M", "PHE": "F",
+    "PRO": "P", "SER": "S", "THR": "T", "TRP": "W", "TYR": "Y", "VAL": "V", "SEC": "U", "PYL": "O",
+}
 
 
 def fetch_prediction_metadata(uniprot_id: str) -> list[dict]:
@@ -87,9 +92,41 @@ def read_plddt_track(path: str | Path) -> pd.DataFrame:
     ca = ca.sort_values("auth_seq_id").drop_duplicates("auth_seq_id")
     return pd.DataFrame({
         "residue_number": ca["auth_seq_id"].to_numpy(),
+        "residue_type": [THREE_TO_ONE.get(code, "X") for code in ca["auth_comp_id"]],
         "plddt": ca["B_iso_or_equiv"].to_numpy(),
         "x": ca["Cartn_x"].to_numpy(), "y": ca["Cartn_y"].to_numpy(), "z": ca["Cartn_z"].to_numpy(),
     })
+
+
+def align_residue_numbers(source_seq: str, target_seq: str) -> dict[int, tuple[int, bool]]:
+    """Global (Needleman-Wunsch) alignment mapping 1-based source residue numbers to target.
+
+    Returns {source_position: (target_position, identical)}; unaligned (gapped) source
+    positions are absent. Residue numbering is not guaranteed to match between orthologs
+    (indels shift it), so this is required before comparing a hotspot position across species
+    rather than assuming the same index applies to both structures.
+    """
+    match, mismatch, gap = 2, -1, -2
+    n, m = len(source_seq), len(target_seq)
+    score = np.zeros((n + 1, m + 1))
+    score[:, 0] = np.arange(n + 1) * gap
+    score[0, :] = np.arange(m + 1) * gap
+    for i in range(1, n + 1):
+        for j in range(1, m + 1):
+            diag = score[i - 1, j - 1] + (match if source_seq[i - 1] == target_seq[j - 1] else mismatch)
+            score[i, j] = max(diag, score[i - 1, j] + gap, score[i, j - 1] + gap)
+    mapping: dict[int, tuple[int, bool]] = {}
+    i, j = n, m
+    while i > 0 and j > 0:
+        diag = score[i - 1, j - 1] + (match if source_seq[i - 1] == target_seq[j - 1] else mismatch)
+        if score[i, j] == diag:
+            mapping[i] = (j, source_seq[i - 1] == target_seq[j - 1])
+            i, j = i - 1, j - 1
+        elif score[i, j] == score[i - 1, j] + gap:
+            i -= 1
+        else:
+            j -= 1
+    return mapping
 
 
 def confidence_band(plddt: float) -> str:

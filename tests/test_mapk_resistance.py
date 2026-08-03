@@ -1,0 +1,71 @@
+import numpy as np
+import pytest
+
+from canine_dsp.mapk_resistance import (
+    CLONE_NAMES,
+    ResistanceModel,
+    _dominant_mechanism,
+    build_mutation_matrix,
+    drug_kill_rate,
+    run_monte_carlo,
+    simulate_resistance,
+)
+
+
+def test_mutation_matrix_rows_sum_to_one():
+    mutation = build_mutation_matrix(np.array([.1, .05, .02]))
+    np.testing.assert_allclose(mutation.sum(axis=1), 1)
+    np.testing.assert_allclose(mutation[1:, 1:], np.eye(3))
+
+
+def test_resistance_model_rejects_bad_mutation_matrix():
+    with pytest.raises(ValueError):
+        ResistanceModel(growth=np.ones(2), ic50_nM=np.ones(2), max_kill=np.ones(2),
+                        mutation=np.array([[1, 0], [0, 0]]))
+
+
+def test_drug_kill_rate_saturates_at_max_kill():
+    assert drug_kill_rate(0, np.array([100.]), 1.5, np.array([.2]))[0] == 0
+    saturated = drug_kill_rate(1e9, np.array([100.]), 1.5, np.array([.2]))[0]
+    assert saturated == pytest.approx(.2, rel=1e-3)
+    half = drug_kill_rate(100., np.array([100.]), 1.0, np.array([.2]))[0]
+    assert half == pytest.approx(.1)
+
+
+def test_sensitive_clone_regresses_when_kill_exceeds_growth():
+    model = ResistanceModel(growth=np.array([.05]), ic50_nM=np.array([100.]),
+                            max_kill=np.array([.3]), mutation=np.array([[1.0]]), hill=1.5)
+    state = simulate_resistance(model, np.full(60, 1000.), np.array([.3]))
+    assert state[-1, 0] < state[0, 0]
+
+
+def test_clone_grows_without_drug():
+    model = ResistanceModel(growth=np.array([.05]), ic50_nM=np.array([100.]),
+                            max_kill=np.array([.3]), mutation=np.array([[1.0]]), hill=1.5)
+    state = simulate_resistance(model, np.zeros(60), np.array([.3]))
+    assert state[-1, 0] > state[0, 0]
+    assert state[-1, 0] < 1.0
+
+
+def test_dominant_mechanism_reports_durable_response_when_not_progressed():
+    assert _dominant_mechanism(np.array([.1, .8, .05, .05]), progressed=False) == "durable_response"
+
+
+def test_dominant_mechanism_picks_largest_resistant_clone():
+    label = _dominant_mechanism(np.array([.05, .1, .7, .15]), progressed=True)
+    assert label == CLONE_NAMES[2]
+
+
+def test_monte_carlo_forced_preexisting_resistance_eventually_progresses():
+    k = 4
+    model = ResistanceModel(
+        growth=np.array([.06, .05, .055, .058]),
+        ic50_nM=np.array([222., 222. * 40, 222. * 1.2, 222. * 60]),
+        max_kill=np.array([.18, .02, .035, .015]),
+        mutation=build_mutation_matrix(np.array([.85, .10, .05]) * 2e-6),
+    )
+    outcome = run_monte_carlo(model, css_reference=1640., horizon_days=200, trials=20,
+                             preexisting_prob=1.0, seed=3)
+    assert outcome.trajectories.shape == (20, 201, k)
+    assert outcome.progressed.any()
+    assert all(label in {"durable_response", *CLONE_NAMES[1:]} for label in outcome.dominant_mechanism)
