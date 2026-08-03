@@ -448,6 +448,23 @@ still assumes Corgi PIHS is MAPK-driven at all -- the load-bearing, unverified p
 every scenario in this module. `summary.json` lists these under `unverified_extrapolations`
 alongside `mechanism_agnostic_rationale`.
 
+**Combination and CDK4/6i monotherapy are not interchangeable at the same potency**, and
+`combination_control_demo` runs both side by side (`combination_scenarios(..., trametinib_active=`
+`False)` zeroes trametinib's concentration to isolate monotherapy) rather than leaving that as an
+untested assumption. In testing, CDK4/6i monotherapy stayed at **0% durable response through
+`max_kill_2=0.05`** -- the same potency at which combination already reached 99.7% -- and only
+caught up (99.3%) at `max_kill_2=0.08`. The reason is visible directly in the model's own
+parameters (`DIVISION_OF_LABOR` in `summary.json`): trametinib's job is suppressing the *bulk*
+tumor (the sensitive clone's net growth under trametinib alone is already -0.12/day: 0.06 growth
+minus 0.18 kill), while the resistant clones it can't touch have much smaller margins
+(0.02-0.043/day) that a modest additional CDK4/6i kill-rate easily tips negative. CDK4/6i
+monotherapy has no help on the bulk tumor, so it must beat the sensitive clone's own 0.06/day
+growth rate single-handedly before it does anything -- a higher bar than combination needs.
+Practically, this means the combination's advantage is dose-sparing the less-characterized drug
+(reaching the same endpoint at roughly 60% lower required CDK4/6i potency), not a mechanistic
+requirement that both drugs be present -- if a high enough CDK4/6i dose turns out to be
+achievable and tolerable on its own, monotherapy is mathematically viable in this model too.
+
 ## Research path
 
 1. Pin an assembly and record accessions/checksums in `data/README.md`.

@@ -121,8 +121,29 @@ def test_higher_cdk46_potency_does_not_reduce_durable_response():
 def test_combination_control_demo_writes_full_sweep(tmp_path):
     combination_control_demo(tmp_path, breed="bmd", trials=20, horizon_days=90, seed=1)
     table = pd.read_csv(tmp_path / "combination_sensitivity.csv")
-    assert len(table) == len(CDK46_MAX_KILL_SWEEP)
+    assert set(table["regimen"]) == {"combination", "cdk46_monotherapy"}
+    assert len(table) == 2 * len(CDK46_MAX_KILL_SWEEP)
     assert "mechanism_pathway_reactivation" in table.columns
     summary = json.loads((tmp_path / "summary.json").read_text())
     assert "mechanism_agnostic_rationale" in summary
+    assert "division_of_labor" in summary
     assert (tmp_path / "combination_sensitivity.png").exists()
+
+
+def test_monotherapy_needs_higher_potency_than_combination():
+    """The core claim from this turn's analysis: at a potency where combination already
+    achieves near-complete suppression, CDK4/6i monotherapy (no trametinib) should still be
+    failing, because it has no help suppressing the bulk (sensitive-clone) tumor."""
+    combo = combination_scenarios(breed="bmd", max_kill_2_values=[0.05], trametinib_active=True)
+    mono = combination_scenarios(breed="bmd", max_kill_2_values=[0.05], trametinib_active=False)
+    model_c, css_c, rates_c, burden_c, _ = combo[0.05]
+    model_m, css_m, rates_m, burden_m, _ = mono[0.05]
+    assert css_m == 0.0 and css_c > 0.0
+    outcome_c = run_monte_carlo(model_c, css_c, 730, rates_c, trials=150, initial_burden=burden_c,
+                                css_reference_2=500., seed=4)
+    outcome_m = run_monte_carlo(model_m, css_m, 730, rates_m, trials=150, initial_burden=burden_m,
+                                css_reference_2=500., seed=4)
+    durable_c = 1 - outcome_c.progressed.mean()
+    durable_m = 1 - outcome_m.progressed.mean()
+    assert durable_c > 0.9
+    assert durable_m < durable_c

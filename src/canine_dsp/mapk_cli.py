@@ -398,11 +398,34 @@ MECHANISM_AGNOSTIC_RATIONALE = (
 )
 
 
+DIVISION_OF_LABOR_NOTE = (
+    "Combination and CDK4/6i monotherapy are not interchangeable at the same potency, and the "
+    "reason is visible directly in the model's own parameters. Trametinib's job is suppressing "
+    "the *bulk* tumor: the sensitive clone's net growth under trametinib alone is already "
+    "strongly negative (growth 0.06/day minus its 0.18/day kill = -0.12/day). The three "
+    "resistant clones trametinib can't touch have much smaller growth margins (0.02-0.043/day), "
+    "so a modest additional CDK4/6i kill-rate is enough to tip all of them negative too -- that "
+    "is the combination's job: mopping up what's already nearly suppressed. CDK4/6i "
+    "monotherapy has no help on the bulk tumor, so it must single-handedly beat the sensitive "
+    "clone's own growth rate (0.06/day) before it does anything -- a higher potency bar than "
+    "combination needs (roughly 0.06-0.08 vs. roughly 0.05 in testing). Practically: combination "
+    "reaches full suppression at a lower required CDK4/6i dose than monotherapy would, which "
+    "matters because CDK4/6 inhibitors carry their own dose-limiting toxicity (myelosuppression "
+    "in human use) -- the combination's advantage here is dose-sparing the less-characterized "
+    "drug, not a mechanistic requirement that both drugs be present."
+)
+
+
 def combination_scenarios(breed: str = "bmd", debulking_fraction: float = DEBULKING_FRACTION,
                           max_kill_2_values: list[float] = CDK46_MAX_KILL_SWEEP,
-                          location_penetration_multiplier: float = 1.0
+                          location_penetration_multiplier: float = 1.0,
+                          trametinib_active: bool = True,
                           ) -> dict[float, tuple[ResistanceModel, float, np.ndarray, float, dict]]:
     """Trametinib (debulked CNS context) +/- a swept-potency mechanism-agnostic CDK4/6 inhibitor.
+
+    `trametinib_active=False` zeroes trametinib's reference concentration, isolating CDK4/6i as
+    monotherapy -- see DIVISION_OF_LABOR_NOTE for why that needs meaningfully higher potency to
+    reach the same endpoint as the combination.
 
     max_kill_2=0.0 leaves ic50_nM_2/max_kill_2 unset (None) rather than setting a zero-effect
     value, so that sweep point is an exact RNG-for-RNG match to the trametinib-only arm -- a
@@ -412,6 +435,8 @@ def combination_scenarios(breed: str = "bmd", debulking_fraction: float = DEBULK
     """
     arms = localized_pihs_scenarios(breed, debulking_fraction, location_penetration_multiplier)
     model, css, seeding_rates, initial_burden, provenance = arms["debulked_trametinib"]
+    if not trametinib_active:
+        css = 0.0
     scenarios = {}
     for max_kill_2 in max_kill_2_values:
         if max_kill_2 > 0:
@@ -419,7 +444,8 @@ def combination_scenarios(breed: str = "bmd", debulking_fraction: float = DEBULK
         else:
             combo_model = model
         scenarios[max_kill_2] = (combo_model, css, seeding_rates, initial_burden,
-                                 {**provenance, "cdk46_max_kill": max_kill_2})
+                                 {**provenance, "cdk46_max_kill": max_kill_2,
+                                  "trametinib_active": trametinib_active})
     return scenarios
 
 
@@ -428,44 +454,52 @@ def combination_control_demo(out: Path, breed: str = "bmd", debulking_fraction: 
                              preexisting_prob: float = _PREEXISTING_PROB_CENTRAL,
                              location_penetration_multiplier: float = 1.0, seed: int = 7) -> None:
     out.mkdir(parents=True, exist_ok=True)
-    scenarios = combination_scenarios(breed, debulking_fraction, CDK46_MAX_KILL_SWEEP,
-                                      location_penetration_multiplier)
+    regimens = [("combination", True), ("cdk46_monotherapy", False)]
 
     rows, outcomes = [], {}
-    for max_kill_2, (model, css, seeding_rates, initial_burden, _) in scenarios.items():
-        css_2 = CDK46_ILLUSTRATIVE_CSS_NM if max_kill_2 > 0 else None
-        outcome = run_monte_carlo(model, css, horizon_days, seeding_rates, trials,
-                                  preexisting_prob=preexisting_prob, initial_burden=initial_burden,
-                                  css_reference_2=css_2, seed=seed)
-        outcomes[max_kill_2] = outcome
-        ttp = outcome.time_to_progression[outcome.progressed]
-        mechanism_counts = pd.Series(outcome.dominant_mechanism).value_counts()
-        mechanism_fractions = (mechanism_counts.reindex(["durable_response"] + CLONE_NAMES[1:], fill_value=0)
-                              / len(outcome.dominant_mechanism))
-        rows.append({
-            "cdk46_max_kill": max_kill_2,
-            "probability_durable_response": float(1 - outcome.progressed.mean()),
-            "probability_progression": float(outcome.progressed.mean()),
-            "median_time_to_progression_days": float(np.median(ttp)) if ttp.size else None,
-            **{f"mechanism_{mechanism}": float(value) for mechanism, value in mechanism_fractions.items()},
-        })
+    for regimen, trametinib_active in regimens:
+        scenarios = combination_scenarios(breed, debulking_fraction, CDK46_MAX_KILL_SWEEP,
+                                          location_penetration_multiplier, trametinib_active)
+        for max_kill_2, (model, css, seeding_rates, initial_burden, _) in scenarios.items():
+            css_2 = CDK46_ILLUSTRATIVE_CSS_NM if max_kill_2 > 0 else None
+            outcome = run_monte_carlo(model, css, horizon_days, seeding_rates, trials,
+                                      preexisting_prob=preexisting_prob, initial_burden=initial_burden,
+                                      css_reference_2=css_2, seed=seed)
+            outcomes[(regimen, max_kill_2)] = outcome
+            ttp = outcome.time_to_progression[outcome.progressed]
+            mechanism_counts = pd.Series(outcome.dominant_mechanism).value_counts()
+            mechanism_fractions = (mechanism_counts.reindex(["durable_response"] + CLONE_NAMES[1:], fill_value=0)
+                                  / len(outcome.dominant_mechanism))
+            rows.append({
+                "regimen": regimen, "cdk46_max_kill": max_kill_2,
+                "probability_durable_response": float(1 - outcome.progressed.mean()),
+                "probability_progression": float(outcome.progressed.mean()),
+                "median_time_to_progression_days": float(np.median(ttp)) if ttp.size else None,
+                **{f"mechanism_{mechanism}": float(value) for mechanism, value in mechanism_fractions.items()},
+            })
     table = pd.DataFrame(rows)
     table.to_csv(out / "combination_sensitivity.csv", index=False)
 
     days = np.arange(horizon_days + 1)
     fig, axes = plt.subplots(1, 3, figsize=(15.5, 4.5))
-    for max_kill_2, outcome in outcomes.items():
+    combination_table = table[table["regimen"] == "combination"]
+    for max_kill_2 in CDK46_MAX_KILL_SWEEP:
+        outcome = outcomes[("combination", max_kill_2)]
         median_burden = np.median(outcome.trajectories.sum(axis=2), axis=0)
         axes[0].plot(days, median_burden, label=f"cdk46 max_kill={max_kill_2}")
     axes[0].set(xlabel="day", ylabel="median total tumor burden",
-               title=f"debulked+trametinib +/- CDK4/6i: breed={breed}")
+               title=f"combination trajectories: breed={breed}")
     axes[0].legend(fontsize=7)
-    axes[1].plot(table["cdk46_max_kill"], table["probability_durable_response"], marker="o", color="tab:blue")
+    for regimen, color in (("combination", "tab:blue"), ("cdk46_monotherapy", "tab:red")):
+        subset = table[table["regimen"] == regimen]
+        axes[1].plot(subset["cdk46_max_kill"], subset["probability_durable_response"],
+                    marker="o", label=regimen, color=color)
     axes[1].set(xlabel="CDK4/6i max_kill (illustrative, unmeasured)", ylabel="P(durable response)",
-               title="sensitivity to unknown CDK4/6i potency", ylim=(0, 1))
+               title="combination vs. monotherapy", ylim=(0, 1))
+    axes[1].legend(fontsize=8)
     mechanism_columns = [f"mechanism_{name}" for name in ["durable_response"] + CLONE_NAMES[1:]]
-    table.set_index("cdk46_max_kill")[mechanism_columns].plot(kind="bar", stacked=True, ax=axes[2])
-    axes[2].set(ylabel="fraction of trials", title="does it close ALL escape routes, or just one?")
+    combination_table.set_index("cdk46_max_kill")[mechanism_columns].plot(kind="bar", stacked=True, ax=axes[2])
+    axes[2].set(ylabel="fraction of trials", title="combination: does it close ALL routes at once?")
     axes[2].legend(fontsize=6)
     fig.tight_layout(); fig.savefig(out / "combination_sensitivity.png", dpi=160); plt.close(fig)
 
@@ -474,6 +508,7 @@ def combination_control_demo(out: Path, breed: str = "bmd", debulking_fraction: 
         "preexisting_prob_used": preexisting_prob, "cdk46_ic50_nM": CDK46_ILLUSTRATIVE_IC50_NM,
         "cdk46_css_nM": CDK46_ILLUSTRATIVE_CSS_NM, "sensitivity": rows,
         "mechanism_agnostic_rationale": MECHANISM_AGNOSTIC_RATIONALE,
+        "division_of_labor": DIVISION_OF_LABOR_NOTE,
         "unverified_extrapolations": [
             ("no canine or confirmed human CDK4/6-inhibitor potency/exposure number exists; "
              "cdk46_ic50_nM and cdk46_css_nM are round illustrative placeholders, and "
