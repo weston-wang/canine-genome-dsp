@@ -6,6 +6,7 @@ from canine_dsp.mapk_resistance import (
     ResistanceModel,
     _dominant_mechanism,
     build_mutation_matrix,
+    clone_growth_margins,
     decompose_patient_uncertainty,
     drug_kill_rate,
     merge_injections,
@@ -213,6 +214,22 @@ def test_poisson_injections_never_land_on_zero_weight_days():
                                              clone_indices=[4], k=5)
     assert injections
     assert all(day >= 50 for day in injections)
+
+
+def test_clone_growth_margins_matches_hand_computed_values():
+    model = ResistanceModel(growth=np.array([.06, .05]), ic50_nM=np.array([100., 100.]),
+                            max_kill=np.array([.2, .0]), mutation=np.eye(2))
+    margins = clone_growth_margins(model, concentration=100.)  # at IC50, kill = max_kill/2
+    np.testing.assert_allclose(margins, [.06 - .1, .05 - .0])
+
+
+def test_clone_growth_margins_includes_second_drug_when_given():
+    model = ResistanceModel(growth=np.array([.05]), ic50_nM=np.array([1e9]), max_kill=np.array([0.]),
+                            mutation=np.array([[1.0]]), ic50_nM_2=100., max_kill_2=.2)
+    without_drug2 = clone_growth_margins(model, concentration=0.0)
+    with_drug2 = clone_growth_margins(model, concentration=0.0, concentration_2=100.)
+    assert without_drug2[0] == pytest.approx(.05)
+    assert with_drug2[0] == pytest.approx(.05 - .1)
 
 
 def test_run_monte_carlo_fixed_patient_holds_model_and_initial_state_fixed():

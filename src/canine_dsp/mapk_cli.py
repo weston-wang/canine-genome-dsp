@@ -10,6 +10,7 @@ from .alphafold import align_residue_numbers, download_structure, read_plddt_tra
 from .mapk_resistance import (
     CLONE_NAMES,
     ResistanceModel,
+    clone_growth_margins,
     decompose_patient_uncertainty,
     run_monte_carlo,
     run_monte_carlo_fixed_patient,
@@ -990,6 +991,9 @@ def single_patient_feasibility_demo(out: Path, breed: str = "bmd",
                                          css_reference_2=css_2, seed=seed)
     population_average = float(1 - population_outcome.progressed.mean())
 
+    margins = clone_growth_margins(model, css, css_2)
+    clone_margins = dict(zip(CLONE_NAMES, (float(m) for m in margins)))
+
     decomposition = decompose_patient_uncertainty(
         model, css, horizon_days, seeding_rates, n_dogs=n_dogs, repeats_per_dog=repeats_per_dog,
         preexisting_prob=preexisting_prob, initial_burden=initial_burden,
@@ -1047,9 +1051,12 @@ def single_patient_feasibility_demo(out: Path, breed: str = "bmd",
         for i, p in enumerate(decomposition.per_dog_durable_probability)
     ]).to_csv(out / "per_dog_probability.csv", index=False)
 
+    positive_margin_clones = [name for name, margin in clone_margins.items()
+                             if name != "sensitive" and margin > 0]
     summary = {
         "breed_context": breed, "cdk46_max_kill_used": cdk46_max_kill, "horizon_days": horizon_days,
         "population_average_durable_response": population_average,
+        "central_model_clone_growth_margins_per_day": clone_margins,
         "uncertainty_decomposition": {
             "between_dog_variance": decomposition.between_dog_variance,
             "within_dog_variance": decomposition.within_dog_variance,
@@ -1066,15 +1073,26 @@ def single_patient_feasibility_demo(out: Path, breed: str = "bmd",
             "fraction of the total outcome variance is 'which dog you are' (in principle "
             "resolvable by testing that specific dog), and the rest is chance that no test on "
             "that dog could predict, because it depends on whether/when a resistant mutation "
-            "happens to arise -- a Poisson process, not a deterministic property of the dog. A "
-            "high ICC means personalized diagnostics (biopsy, deep sequencing, drug-level "
-            "monitoring) could meaningfully narrow this dog's individual prognosis; a low ICC "
-            "means the outcome is dominated by chance no diagnostic could have predicted, and "
-            "only a more broadly effective treatment (not better patient selection) would move "
-            "the needle. Read the subclone and bracket panels as answering a related but "
-            "distinct question: not how much uncertainty exists, but which direction it's "
-            "plausible to expect for a dog whose actual biology and drug exposure could in "
-            "principle be measured."
+            "happens to arise -- a Poisson process, not a deterministic property of the dog. In "
+            "this parameterization, ICC came out extremely high (near 1): the per-dog histogram "
+            "is sharply bimodal (most simulated dogs land at ~100% or ~0% durable response, few "
+            "in between), because `central_model_clone_growth_margins_per_day` shows the "
+            f"combination reduces but does not reverse every resistant clone's growth advantage: "
+            f"{', '.join(positive_margin_clones) if positive_margin_clones else 'none'} still "
+            "have a small POSITIVE net margin at the central (unperturbed) parameter estimate, "
+            "meaning that if such a clone is present at all (whether pre-existing or acquired) "
+            "and large enough for the remaining follow-up window, it will deterministically "
+            "regrow regardless of mutation-timing luck -- explaining why 'subclone present' "
+            "below is not merely worse but essentially guaranteed to progress. This is a more "
+            "precise statement than earlier framing elsewhere in this module describing the "
+            "combination as merely 'slowing' these routes: at this illustrative potency, for two "
+            "of three resistant clones, it slows the sensitive bulk and shrinks (without "
+            "reversing) the resistant clones' own advantage -- whether a specific dog experiences "
+            "that as a cure or a delayed relapse depends almost entirely on whether one of those "
+            "clones gets a large enough foothold, not on chance once it has. A high ICC therefore "
+            "means personalized diagnostics (biopsy, deep/ctDNA sequencing for a pre-existing "
+            "subclone, therapeutic drug monitoring) could be unusually informative for this "
+            "specific combination and dose -- not a general property of all cancer therapies."
         ),
         "unverified_extrapolations": [
             ("no real diagnostic pipeline for pretreatment subclone detection, drug-exposure "

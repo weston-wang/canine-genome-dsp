@@ -336,6 +336,27 @@ def run_monte_carlo(reference: ResistanceModel, css_reference: float, horizon_da
     return MonteCarloOutcome(trajectories, progressed, time_to_progression, dominant_mechanism)
 
 
+def clone_growth_margins(model: ResistanceModel, concentration: float,
+                         concentration_2: float | None = None) -> np.ndarray:
+    """Deterministic per-clone net growth margin (growth minus drug kill) at a fixed, sustained
+    drug concentration, ignoring density-dependence (valid at low tumor burden, where the
+    logistic term is negligible) and mutation transfer.
+
+    A positive margin means that clone's fitness advantage is not reversed at this exposure: it
+    will eventually regrow given enough follow-up time from *any* nonzero foothold, however
+    small -- unlike a Monte Carlo trial's empirical progression outcome, which also depends on
+    whether/when that foothold is seeded at all and how much follow-up time remains to detect it.
+    For one specific, fully-characterized dog (measured IC50s, measured achieved drug levels),
+    this is directly computable with no simulation -- the single most concrete, checkable fact
+    available about whether a given escape route is actually closed for that dog, as opposed to
+    merely delayed or made statistically unlikely to be observed within a given follow-up window.
+    """
+    kill = drug_kill_rate(concentration, model.ic50_nM, model.hill, model.max_kill)
+    if concentration_2 is not None and model.ic50_nM_2 is not None:
+        kill = kill + drug_kill_rate(concentration_2, model.ic50_nM_2, model.hill_2, model.max_kill_2)
+    return model.growth - kill
+
+
 def run_monte_carlo_fixed_patient(model: ResistanceModel, css: float, horizon_days: int,
                                   seeding_rates: np.ndarray, initial: np.ndarray, repeats: int = 200,
                                   seed_fraction: float = 1e-8, detection_floor_fraction: float = .01,
