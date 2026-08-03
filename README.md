@@ -365,6 +365,52 @@ trying not to make. `summary.json` lists every extrapolation this scenario stack
 `mapk_resistance_demo`'s already-uncalibrated systemic model explicitly,
 under `unverified_extrapolations`.
 
+### Debulking plus adjuvant therapy for a localized, single-lineage tumor
+
+Corgi PIHS's anatomic/breed concentration is more than an epidemiological curiosity: it's the
+kind of profile (anatomically predictable, likely non-disseminating, arising from one dendritic
+cell population) that in other cancers has changed the prognosis ceiling when local therapy is
+combined with a targeted drug, rather than relying on either alone. PIHS arises from dendritic
+cells resident specifically in the meninges and choroid plexus -- developmentally distinct from
+the body-wide interstitial dendritic cells behind disseminated HS. In mice, that specific
+CNS-resident population has a documented dependency on FLT3-ligand signaling and the
+transcription factors BATF3, IRF8, and ID2 (Anandasabapathy et al. 2011, J Exp Med
+208:1695-1705) -- unverified in dogs, and offered here only as a candidate-gene hypothesis for
+what a Corgi germline variant might affect, distinct from BMD's generic CDKN2A/MTAP mechanism.
+Combining local and systemic therapy is not speculative for canine HS generally: Skorupski et al.
+2009 (Vet Comp Oncol) reported 568-day median survival across 16 dogs with localized HS on
+aggressive local therapy plus adjuvant CCNU, against 96-106 days for disseminated/unresectable
+disease on CCNU alone (that cohort's CNS-specific fraction isn't confirmed, so treat it as
+suggestive scale, not a location-matched number) -- and a single CNS-specific case report
+(frontal-lobe PIHS, resection plus low-dose CCNU) survived recurrence-free past a year.
+
+```bash
+canine-dsp mapk-localized-control-demo --breed bmd --out results/mapk-localized
+```
+
+This runs a four-arm factorial comparison -- debulking (a `debulking_fraction=0.97` reduction in
+starting tumor burden, modeling surgery/focal radiation) crossed with adjuvant trametinib -- by
+substituting a MAPK inhibitor for CCNU as the adjuvant. In testing: `intact_untreated` and
+`debulked_untreated` both progress almost immediately (median ~4-5 days) and converge to full
+tumor burden by day ~150-200, confirming that debulking alone, without adjuvant drug therapy,
+buys essentially no durable benefit in this model -- consistent with why adjuvant chemotherapy is
+standard practice for canine HS already. `intact_trametinib` reached ~67% durable response;
+`debulked_trametinib` reached ~69% -- barely different -- but median time to progression among
+the dogs that do relapse extended from ~165 to ~211 days (roughly +28%), and the escape-mechanism
+mix among relapses was nearly identical between the two arms (still `pathway_reactivation`
+dominant for the bmd preset in both). That pattern has a specific mechanistic explanation in the
+model, not just noise: debulking shrinks a pre-existing resistant subclone proportionally (it
+removes resistant and sensitive cells alike), which delays how long it takes that subclone to
+regrow to a detectable size, but does not change *whether* one was already present at the time of
+surgery. **Debulking's modeled benefit here is buying time, not preventing relapse** -- and
+whether real Corgi PIHS ever reaches a durable cure depends on a question this model cannot
+answer: whether a resistant subclone is typically already present by the time these tumors are
+diagnosed and resected, which nobody has measured. Every extrapolation this scenario relies on
+-- that Corgi PIHS is MAPK-driven at all, that it doesn't disseminate, the candidate-gene
+hypothesis, the debulking fraction, the survival benchmark's location match -- is listed in
+`summary.json` under `unverified_extrapolations`, alongside the full multidisciplinary
+`reasoning_chain` behind the scenario.
+
 ## Research path
 
 1. Pin an assembly and record accessions/checksums in `data/README.md`.

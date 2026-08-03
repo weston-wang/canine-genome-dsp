@@ -10,7 +10,7 @@ from .alphafold_cli import analyze_structure, fetch_structure
 from .hybrid_cli import inverse_demo, prepare_dog10k_aging, prepare_gse9794
 from .immunotherapy_cli import immunotherapy_demo
 from .io import read_first_fasta, read_vcf_positions
-from .mapk_cli import compare_orthologs, mapk_cns_demo, mapk_resistance_demo
+from .mapk_cli import compare_orthologs, localized_control_demo, mapk_cns_demo, mapk_resistance_demo
 from .signals import eiip, variant_density, windowed_gc
 from .spectral import coherence, multitaper_psd, spectral_entropy, welch_psd
 from .vaccine_eval import run_gse102459, run_gse190001
@@ -135,6 +135,16 @@ def main() -> None:
     mapk_cns.add_argument("--location-penetration-multiplier", type=float, default=1.0)
     mapk_cns.add_argument("--seed", type=int, default=7)
     mapk_cns.add_argument("--out", type=Path, required=True)
+    mapk_local = sub.add_parser("mapk-localized-control-demo",
+                                help="local debulking x adjuvant trametinib for primary CNS HS")
+    mapk_local.add_argument("--breed", choices=["bmd", "flat_coated_retriever"], default="bmd")
+    mapk_local.add_argument("--debulking-fraction", type=float, default=0.97)
+    mapk_local.add_argument("--trials", type=int, default=300)
+    mapk_local.add_argument("--horizon-days", type=int, default=730)
+    mapk_local.add_argument("--preexisting-prob", type=float, default=0.30)
+    mapk_local.add_argument("--location-penetration-multiplier", type=float, default=1.0)
+    mapk_local.add_argument("--seed", type=int, default=7)
+    mapk_local.add_argument("--out", type=Path, required=True)
     args = parser.parse_args()
     if args.command == "demo":
         rng = np.random.default_rng(42)
@@ -172,9 +182,13 @@ def main() -> None:
         mapk_resistance_demo(args.out, args.species, args.trials, args.horizon_days, args.seed)
     elif args.command == "mapk-structure-compare":
         compare_orthologs(args.gene, args.hotspots, args.out)
-    else:
+    elif args.command == "mapk-cns-demo":
         mapk_cns_demo(args.out, args.breed, args.trials, args.horizon_days,
                      args.preexisting_prob, args.location_penetration_multiplier, args.seed)
+    else:
+        localized_control_demo(args.out, args.breed, args.debulking_fraction, args.trials,
+                               args.horizon_days, args.preexisting_prob,
+                               args.location_penetration_multiplier, args.seed)
 
 
 if __name__ == "__main__":

@@ -203,7 +203,7 @@ def run_monte_carlo(reference: ResistanceModel, css_reference: float, horizon_da
                    seeding_rates: np.ndarray, trials: int = 500, preexisting_prob: float = .3,
                    exposure_scale: float = .3, seeding_rate_scale: float = .5,
                    seed_fraction: float = 1e-8, detection_floor_fraction: float = .01,
-                   seed: int = 7) -> MonteCarloOutcome:
+                   initial_burden: float = .3, seed: int = 7) -> MonteCarloOutcome:
     """Run a Monte Carlo ensemble over parameter, exposure, and acquired-mutation-timing uncertainty.
 
     Acquired resistance is scheduled with `poisson_mutation_injections` rather than a constant
@@ -214,6 +214,11 @@ def run_monte_carlo(reference: ResistanceModel, css_reference: float, horizon_da
     absolute `detection_floor_fraction * carrying_capacity`: without a floor, a regrowth ratio
     computed against a numerically negligible nadir (e.g. 1e-9) can trip the 20% rule while the
     tumor is still clinically undetectable, which is not a real progression event.
+
+    `initial_burden` models the starting tumor fraction (of carrying capacity) at day 0; a
+    surgical/radiation debulking step ahead of drug therapy is modeled by simply lowering this
+    value, which also proportionally shrinks any pre-existing resistant subclone (see
+    `sample_initial_state`) -- a debulking step removes resistant and sensitive cells alike.
     """
     rng = np.random.default_rng(seed)
     k = len(reference.growth)
@@ -227,7 +232,8 @@ def run_monte_carlo(reference: ResistanceModel, css_reference: float, horizon_da
         model = perturb_resistance_model(identity_model, rng)
         css = css_reference * rng.lognormal(0, exposure_scale)
         concentration = np.full(horizon_days, css)
-        initial = sample_initial_state(rng, k, preexisting_prob, mechanism_weights=seeding_rates)
+        initial = sample_initial_state(rng, k, preexisting_prob, mechanism_weights=seeding_rates,
+                                       initial_burden=initial_burden)
         sensitive_only = np.zeros(k)
         sensitive_only[0] = initial[0]
         sensitive_trajectory = simulate_resistance(model, concentration, sensitive_only)[:, 0]

@@ -225,6 +225,152 @@ def mapk_cns_demo(out: Path, breed: str = "bmd", trials: int = 300, horizon_days
     (out / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")
 
 
+# Fraction of tumor burden removed by local therapy (surgery and/or focal radiation) ahead of
+# systemic drug treatment. Illustrative -- not fit to a specific reported canine
+# resection-completeness statistic -- chosen to represent a real neurosurgical gross-total
+# resection while leaving microscopic residual disease, which is why adjuvant systemic therapy
+# still matters in this scenario rather than replacing it.
+DEBULKING_FRACTION = 0.97
+
+DENDRITIC_CELL_ORIGIN_NOTE = (
+    "Primary intracranial histiocytic sarcoma (PIHS) arises from dendritic cells resident in "
+    "the meninges and choroid plexus -- a population that is developmentally and anatomically "
+    "distinct from the body-wide interstitial dendritic cells that give rise to disseminated "
+    "HS (Kishimoto et al. 2020; Moore 2014, Vet Pathol 51:167-184). In mice, this specific "
+    "CNS-resident dendritic-cell population has a documented dependency on FLT3-ligand "
+    "signaling and the transcription factors BATF3, IRF8, and ID2 for its development "
+    "(Anandasabapathy et al. 2011, J Exp Med 208:1695-1705) -- not verified in dogs, and "
+    "included here as this module's own candidate-gene hypothesis for what a Corgi germline "
+    "PIHS-risk variant might affect, distinct from BMD's generic CDKN2A/MTAP tumor-suppressor "
+    "mechanism. If real, a lineage-restricted germline mechanism would explain both the "
+    "anatomic restriction to the cerebrum and the near-absence of dissemination with one "
+    "mechanism, rather than requiring two independent explanations."
+)
+
+LOCALIZED_THERAPY_PRECEDENT = (
+    "Combining local therapy with systemic therapy is not speculative for canine HS generally: "
+    "Skorupski et al. 2009 (Vet Comp Oncol) reported a 568-day median survival across 16 dogs "
+    "with localized HS treated with aggressive local therapy (surgery/radiation) plus adjuvant "
+    "CCNU, versus 96-106 days for disseminated/unresectable disease on CCNU alone (Rassnick et "
+    "al. 2010; Skorupski et al. 2007) -- though that cohort's CNS-specific fraction is not "
+    "confirmed, so this is a suggestive, not a location-matched, benchmark. A single CNS-specific "
+    "case report (frontal-lobe PIHS, surgical resection plus low-dose CCNU) survived "
+    "recurrence-free past one year. DEBULKING_FRACTION substitutes a MAPK inhibitor "
+    "(trametinib, the real canine trial drug) for CCNU as the adjuvant in this scenario."
+)
+
+
+def localized_pihs_scenarios(breed: str = "bmd", debulking_fraction: float = DEBULKING_FRACTION,
+                             location_penetration_multiplier: float = 1.0
+                             ) -> dict[str, tuple[ResistanceModel, float, np.ndarray, float, dict]]:
+    """Four-arm comparison: local debulking x adjuvant MAPK-inhibitor therapy for primary CNS HS.
+
+    Debulking is modeled by lowering `initial_burden` alone (see
+    `mapk_resistance.run_monte_carlo`), which also proportionally shrinks any pre-existing
+    resistant subclone -- a resection removes resistant and sensitive cells alike, it doesn't
+    selectively spare resistant ones. This is a hypothesis-generating comparison, not a
+    validated prediction: see DENDRITIC_CELL_ORIGIN_NOTE and LOCALIZED_THERAPY_PRECEDENT for
+    what is and isn't established.
+    """
+    cns_scenarios = canine_cns_hs_scenarios(breed, location_penetration_multiplier)
+    _, trametinib_css, seeding_rates, base_provenance = cns_scenarios["trametinib"]
+    baseline_burden = .3
+
+    arms = {}
+    for debulked in (False, True):
+        initial_burden = baseline_burden * (1 - debulking_fraction) if debulked else baseline_burden
+        for treated in (False, True):
+            css = trametinib_css if treated else 0.0
+            name = f"{'debulked' if debulked else 'intact'}_{'trametinib' if treated else 'untreated'}"
+            provenance = {**base_provenance, "debulked": debulked, "treated": treated,
+                         "initial_burden": initial_burden}
+            arms[name] = (cns_scenarios["trametinib"][0], css, seeding_rates, initial_burden, provenance)
+    return arms
+
+
+def localized_control_demo(out: Path, breed: str = "bmd", debulking_fraction: float = DEBULKING_FRACTION,
+                           trials: int = 300, horizon_days: int = 730,
+                           preexisting_prob: float = _PREEXISTING_PROB_CENTRAL,
+                           location_penetration_multiplier: float = 1.0, seed: int = 7) -> None:
+    out.mkdir(parents=True, exist_ok=True)
+    arms = localized_pihs_scenarios(breed, debulking_fraction, location_penetration_multiplier)
+
+    rows, outcomes = [], {}
+    for name, (model, css, seeding_rates, initial_burden, _) in arms.items():
+        outcome = run_monte_carlo(model, css, horizon_days, seeding_rates, trials,
+                                  preexisting_prob=preexisting_prob, initial_burden=initial_burden,
+                                  seed=seed)
+        outcomes[name] = outcome
+        ttp = outcome.time_to_progression[outcome.progressed]
+        mechanism_counts = pd.Series(outcome.dominant_mechanism).value_counts()
+        mechanism_fractions = (mechanism_counts.reindex(["durable_response"] + CLONE_NAMES[1:], fill_value=0)
+                              / len(outcome.dominant_mechanism))
+        rows.append({
+            "arm": name, "initial_burden": initial_burden, "effective_css_nM": css,
+            "probability_durable_response": float(1 - outcome.progressed.mean()),
+            "probability_progression": float(outcome.progressed.mean()),
+            "median_time_to_progression_days": float(np.median(ttp)) if ttp.size else None,
+            **{f"mechanism_{mechanism}": float(value) for mechanism, value in mechanism_fractions.items()},
+        })
+    table = pd.DataFrame(rows)
+    table.to_csv(out / "localized_control_arms.csv", index=False)
+
+    days = np.arange(horizon_days + 1)
+    fig, axes = plt.subplots(1, 2, figsize=(11, 4.5))
+    for name, outcome in outcomes.items():
+        median_burden = np.median(outcome.trajectories.sum(axis=2), axis=0)
+        axes[0].plot(days, median_burden, label=name)
+    axes[0].set(xlabel="day", ylabel="median total tumor burden",
+               title=f"debulking x trametinib: breed={breed}")
+    axes[0].legend(fontsize=7)
+    table.plot(x="arm", y="probability_durable_response", kind="bar", ax=axes[1],
+              color="tab:blue", legend=False)
+    axes[1].set(ylabel="P(durable response)", title="four-arm comparison", ylim=(0, 1))
+    axes[1].tick_params(axis="x", rotation=30)
+    fig.tight_layout(); fig.savefig(out / "localized_control.png", dpi=160); plt.close(fig)
+
+    summary = {
+        "breed_context": breed, "debulking_fraction": debulking_fraction,
+        "preexisting_prob_used": preexisting_prob, "arms": rows,
+        "dendritic_cell_origin_hypothesis": DENDRITIC_CELL_ORIGIN_NOTE,
+        "localized_therapy_precedent": LOCALIZED_THERAPY_PRECEDENT,
+        "reasoning_chain": [
+            ("Kishimoto et al. 2020: Corgi accounts for 50% of all PIHS cases (OR 21.5), and "
+             "100% of location-known PIHS cases were cerebral -- an anatomic/breed concentration "
+             "on the same order as BMD's known germline-driven systemic-HS association."),
+            ("That magnitude of concentration in a closed breed population is the signature of "
+             "an as-yet-unidentified, high-frequency germline variant (geneticist's reading); no "
+             "GWAS has been done for Corgi PIHS to confirm this."),
+            ("PIHS arises from a CNS-resident dendritic-cell population that is developmentally "
+             "distinct from the interstitial DCs behind disseminated HS (cell biologist's "
+             "reading); a lineage-restricted germline mechanism would unify the anatomic and "
+             "non-disseminating observations rather than needing two explanations."),
+            ("A tumor this anatomically predictable, and plausibly non-disseminating, is exactly "
+             "the profile where local debulking plus systemic adjuvant therapy changes the "
+             "prognosis ceiling -- already demonstrated for canine HS in general with CCNU "
+             "(computational/clinical-translation reading); this scenario substitutes trametinib."),
+        ],
+        "unverified_extrapolations": [
+            ("Corgi PIHS is less prone to dissemination than other breeds' HS -- plausible from "
+             "the primary-vs-disseminated breed skew literature, but not directly measured, "
+             "and this model has no explicit dissemination/metastasis mechanic to test it with"),
+            ("the FLT3/BATF3/IRF8/ID2 candidate-gene hypothesis is extrapolated from mouse "
+             "biology, never tested in dogs, and not linked to any Corgi-specific variant"),
+            ("debulking_fraction=0.97 is illustrative, not fit to a reported canine "
+             "resection-completeness statistic"),
+            ("the 568-day localized-HS survival benchmark is not confirmed to be CNS-specific; "
+             "it is suggestive context, not a location-matched number"),
+        ],
+        "warning": (
+            "This stacks a local-therapy hypothesis on top of mapk_cns_demo's already-doubly-"
+            "speculative CNS extrapolation. Read the four-arm comparison as a demonstration of "
+            "*why* combining local and systemic therapy could plausibly matter more here than "
+            "for disseminated disease, not as a survival prediction for an actual dog."
+        ),
+    }
+    (out / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")
+
+
 def dog_preset() -> tuple[ResistanceModel, float, np.ndarray, dict]:
     """Cobimetinib vs. canine PTPN11/KRAS-mutant HS; sensitive-clone IC50 and Cmax are real.
 
