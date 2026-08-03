@@ -5,6 +5,7 @@ import pytest
 from canine_dsp.alphafold import (
     align_residue_numbers,
     confidence_band,
+    extract_mutant_peptide,
     map_variants,
     read_plddt_track,
 )
@@ -91,6 +92,32 @@ def test_confidence_band_thresholds():
     assert confidence_band(70) == "confident"
     assert confidence_band(55) == "low"
     assert confidence_band(10) == "very_low"
+
+
+def test_extract_mutant_peptide_substitutes_at_correct_position(tmp_path):
+    cif = tmp_path / "seq.cif"
+    residues = ["ALA"] * 20
+    residues[14] = "GLU"  # position 15 (1-based)
+    _synthetic_cif_with_sequence(cif, residues)
+    track = read_plddt_track(cif)
+    peptide = extract_mutant_peptide(track, position=15, wt_residue="E", mut_residue="K", flank=5)
+    assert peptide == "AAAAAKAAAAA"
+
+
+def test_extract_mutant_peptide_rejects_wrong_wildtype(tmp_path):
+    cif = tmp_path / "seq.cif"
+    _synthetic_cif_with_sequence(cif, ["ALA"] * 20)
+    track = read_plddt_track(cif)
+    with pytest.raises(ValueError):
+        extract_mutant_peptide(track, position=10, wt_residue="E", mut_residue="K", flank=3)
+
+
+def test_extract_mutant_peptide_rejects_window_running_off_structure(tmp_path):
+    cif = tmp_path / "seq.cif"
+    _synthetic_cif_with_sequence(cif, ["ALA"] * 10)
+    track = read_plddt_track(cif)
+    with pytest.raises(ValueError):
+        extract_mutant_peptide(track, position=2, wt_residue="A", mut_residue="K", flank=5)
 
 
 def test_map_variants_reports_local_window_and_missing_positions(tmp_path):

@@ -595,6 +595,87 @@ antigen it targets), not as a probability estimate for an actual dog: `vaccine_s
 cost are all illustrative placeholders, and the premise that Corgi PIHS carries a shareable
 PTPN11/KRAS hotspot at all remains unconfirmed in dogs.
 
+### Feasibility of curing one specific dog
+
+Every scenario above reports a population-level probability (a new hypothetical dog's parameters
+are redrawn every trial), which doesn't directly answer "can this one dog be cured" -- that
+requires separating uncertainty about *which dog this is* (in principle resolvable by testing that
+specific dog) from genuinely irreducible chance (whether/when a resistant mutation happens to
+strike, which no test on that dog could predict).
+
+```bash
+canine-dsp mapk-single-patient-feasibility-demo --breed bmd --cdk46-max-kill 0.05 --out results/mapk-single-patient
+```
+
+`run_monte_carlo_fixed_patient` holds one dog's model, drug exposure, and starting tumor state
+fixed and repeats only the stochastic mutation-timing draw; `decompose_patient_uncertainty` draws
+many such dogs and splits the population variance into between-dog and within-dog components
+(a method-of-moments/ANOVA-style variance-components estimate). In testing (60 simulated dogs, 80
+repeats each, 5-year horizon): **99.8% of the outcome variance was "which dog you are," not
+chance** -- the per-dog histogram was sharply bimodal (52/60 dogs at ~100% durable response, 7/60
+at ~0%, almost none in between). Tracing why led to a real refinement of the earlier combination
+narrative: `clone_growth_margins` shows the combination *reduces but does not reverse* two of the
+three resistant clones' growth advantage at the illustrative central parameters
+(`pathway_reactivation`: +0.004/day, `target_site_mutation`: +0.012/day, both still positive; only
+`rtk_bypass` flips negative, at -0.010/day). A clone with a genuinely positive margin will
+eventually regrow given enough time from *any* nonzero foothold -- so whether a specific dog is
+cured or relapses is driven almost entirely by whether it already harbors (or develops) such a
+foothold, not by luck once one exists. Directly confirming this: for the same fixed dog, a
+detectable pre-existing subclone (10⁻³ of tumor burden) flips durable response from 100% to 0%; a
+worst-/best-case bracket at this module's own 5th/95th-percentile exposure and mutation-rate
+assumptions likewise collapses to 0%/100%, not a smooth range.
+
+This reframes what would actually matter for one dog in front of a clinician: not "what's the
+expected response rate," but "does this dog's tumor already carry a resistant subclone" -- a real,
+if not yet clinically applied, diagnostic question (deep/ctDNA sequencing for the known hotspot at
+low variant-allele frequency), rather than a question luck can answer. It also sharpens the
+vaccine case above: since the two surviving-margin clones both still express the original driver
+antigen, the "already harbors a subclone" scenario -- otherwise a deterministic treatment failure
+-- is exactly the case a shared-antigen vaccine is built to rescue (confirmed directly: the same
+fixed "doomed" dog goes from 0% to 100% durable response with even the mildest vaccine potency
+tested). No real diagnostic pipeline for pretreatment subclone detection exists for canine HS; this
+quantifies what one *would* be worth if it existed and were accurate, not a claim that it does.
+
+### What the vaccine actually is: antigen design and real canine MHC-I binding prediction
+
+"The vaccine" above was an abstract kill-rate parameter. Concretely, it would be an mRNA-LNP
+multi-epitope construct (mirroring the real mRNA-5671 KRAS-multi-mutation design) encoding a
+25-residue synthetic long peptide around each candidate driver mutation, so it works regardless of
+which one a given dog's tumor carries -- PTPN11 p.E76K (N-SH2 domain), PTPN11 p.G503V (PTP
+catalytic domain), and KRAS p.Q61H (switch II region).
+
+```bash
+canine-dsp mapk-vaccine-epitope-binding-demo --out results/mapk-epitope
+```
+
+`vaccine_antigen_peptides` builds each peptide *fresh* from the real canine AlphaFold/UniProt
+sequence (`extract_mutant_peptide`, with a hard wild-type-residue check against numbering
+mistakes) rather than a hardcoded string. Cross-species check: all three 25-residue windows are
+100% sequence-identical between dog and human, so the canine peptide is exactly what a human
+trial would encode, substitution for substitution -- not guaranteed in general, but true here.
+
+Two different tools were asked about, and only one exists in reusable form (see `dla_binding`'s
+module docstring): a canine epitope-*prediction* tool -- yes, real. NetMHCpan-EL 4.1's training
+set explicitly includes dog (DLA) alongside cattle/pig/primate/equine non-human species, exposed
+live via IEDB's public REST API; confirmed directly (not assumed) by querying
+`method=netmhcpan_el&species=dog`, which returns exactly three allele names: DLA-88\*034:01,
+DLA-88\*501:01, DLA-88\*508:01 -- the same three alleles that happen to be the only
+functionally-characterized DLA-88 allotypes in the published literature. A DLA allele *typing*
+tool (calling one specific dog's actual genotype from its own sequencing reads, the way
+OptiType/HLA-HD do for human HLA) -- no: published canine DLA genotyping work describes bespoke
+amplicon-sequencing-plus-reference-matching protocols against the curated IPD-MHC Canine database,
+not a single reusable program, and this project has no dog's sequencing reads to type regardless.
+
+Real result from the live query: PTPN11 p.E76K and p.G503V each predict as a **strong binder**
+(percentile rank 0.05 and 0.32) against DLA-88\*034:01, with weaker/no predicted binding against
+the other two characterized alleles; **KRAS p.Q61H predicts no binding to any of the three
+characterized alleles tested** (percentile ranks 3.0-15.0). That asymmetry is reported as found,
+not smoothed over -- a real, if partial, structural check on whether these candidate antigens
+could plausibly be presented at all, not a guarantee they would be in any specific dog. Predicted
+affinity is necessary but not sufficient for actual immunogenicity, no specific dog's real DLA
+genotype was typed (the three alleles are literature stand-ins, not any dog's measured genotype),
+and whether Corgi PIHS carries any of these three mutations at all remains unconfirmed.
+
 ## Research path
 
 1. Pin an assembly and record accessions/checksums in `data/README.md`.

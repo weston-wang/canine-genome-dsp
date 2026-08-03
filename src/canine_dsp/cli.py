@@ -19,6 +19,7 @@ from .mapk_cli import (
     mapk_cns_demo,
     mapk_resistance_demo,
     single_patient_feasibility_demo,
+    vaccine_epitope_binding_demo,
     vaccine_followon_demo,
 )
 from .signals import eiip, variant_density, windowed_gc
@@ -210,6 +211,10 @@ def main() -> None:
     mapk_single.add_argument("--location-penetration-multiplier", type=float, default=1.0)
     mapk_single.add_argument("--seed", type=int, default=7)
     mapk_single.add_argument("--out", type=Path, required=True)
+    mapk_epitope = sub.add_parser("mapk-vaccine-epitope-binding-demo",
+                                  help="check candidate vaccine peptides against real, "
+                                       "published canine DLA-I alleles via the live IEDB API")
+    mapk_epitope.add_argument("--out", type=Path, required=True)
     args = parser.parse_args()
     if args.command == "demo":
         rng = np.random.default_rng(42)
@@ -270,11 +275,13 @@ def main() -> None:
         vaccine_followon_demo(args.out, args.breed, args.debulking_fraction, args.cdk46_max_kill,
                               args.trials, args.horizon_days, args.preexisting_prob,
                               args.location_penetration_multiplier, args.seed)
-    else:
+    elif args.command == "mapk-single-patient-feasibility-demo":
         single_patient_feasibility_demo(args.out, args.breed, args.debulking_fraction,
                                         args.cdk46_max_kill, args.horizon_days, args.n_dogs,
                                         args.repeats_per_dog, args.preexisting_prob,
                                         args.location_penetration_multiplier, args.seed)
+    else:
+        vaccine_epitope_binding_demo(args.out)
 
 
 if __name__ == "__main__":

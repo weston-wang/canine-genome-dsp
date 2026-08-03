@@ -6,7 +6,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from .alphafold import align_residue_numbers, download_structure, read_plddt_track
+from .alphafold import align_residue_numbers, download_structure, extract_mutant_peptide, read_plddt_track
+from .dla_binding import CHARACTERIZED_DLA_I_ALLELES, fetch_binding_predictions
 from .mapk_resistance import (
     CLONE_NAMES,
     ResistanceModel,
@@ -1116,6 +1117,123 @@ def single_patient_feasibility_demo(out: Path, breed: str = "bmd",
             "elsewhere, and it does not identify a real diagnostic test -- it quantifies the "
             "hypothetical value of information a perfect one would provide, within this "
             "module's own already-speculative model."
+        ),
+    }
+    (out / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")
+
+
+# Concrete vaccine antigen design + real canine MHC-I binding prediction -----------------------
+# Formalizes "what the vaccine actually is" as three synthetic long-peptide antigens (mirroring
+# the real mRNA-5671 multi-epitope design pattern) built fresh from each gene's actual canine
+# AlphaFold/UniProt sequence -- not hardcoded strings -- then checks them against real,
+# published, characterized canine DLA-I alleles via IEDB's live NetMHCpan-EL API. See
+# dla_binding module docstring for exactly which of "epitope prediction" and "DLA typing" are
+# real, existing tools (prediction: yes; typing a specific dog: no such tool, and no dog here).
+VACCINE_ANTIGEN_TARGETS = [
+    {"gene": "PTPN11", "position": 76, "wt_residue": "E", "mut_residue": "K",
+     "mutation_label": "PTPN11 p.E76K",
+     "domain_context": "N-SH2 domain -- disrupts the autoinhibitory N-SH2/PTP interface, the "
+                       "canonical activating mechanism for this hotspot"},
+    {"gene": "PTPN11", "position": 503, "wt_residue": "G", "mut_residue": "V",
+     "mutation_label": "PTPN11 p.G503V", "domain_context": "PTP catalytic domain"},
+    {"gene": "KRAS", "position": 61, "wt_residue": "Q", "mut_residue": "H",
+     "mutation_label": "KRAS p.Q61H",
+     "domain_context": "switch II region -- impairs intrinsic and GAP-stimulated GTP hydrolysis, "
+                       "the canonical RAS-activating mechanism for this hotspot"},
+]
+
+VACCINE_ANTIGEN_FLANK = 12  # 25-mer peptides, matching mRNA-5671's synthetic long-peptide design
+
+
+def vaccine_antigen_peptides(structure_cache: Path) -> dict[str, str]:
+    """Fetches the real canine AlphaFold structures for PTPN11 and KRAS (via UniProt accession
+    resolution) and builds the mutant 25-mer peptide for each `VACCINE_ANTIGEN_TARGETS` entry.
+
+    Built fresh from the actual structure-derived sequence each call (with a hard wild-type-
+    residue check in `extract_mutant_peptide`), not hardcoded, so it stays correct if either
+    database is ever revised. Requires network access; structures are cached under
+    `structure_cache` so repeated calls for the same gene reuse the download.
+    """
+    peptides = {}
+    tracks = {}
+    for target in VACCINE_ANTIGEN_TARGETS:
+        gene = target["gene"]
+        if gene not in tracks:
+            accession = resolve_uniprot_accession(gene, DOG_TAXID)
+            struct = download_structure(accession, structure_cache / gene)
+            tracks[gene] = read_plddt_track(struct)
+        peptides[target["mutation_label"]] = extract_mutant_peptide(
+            tracks[gene], target["position"], target["wt_residue"], target["mut_residue"],
+            flank=VACCINE_ANTIGEN_FLANK)
+    return peptides
+
+
+def vaccine_epitope_binding_demo(out: Path, lengths: list[int] = (9, 10, 11)) -> None:
+    """Runs each `vaccine_antigen_peptides` candidate against every `CHARACTERIZED_DLA_I_ALLELES`
+    allele via the real, live IEDB NetMHCpan-EL API, reporting the best (lowest) percentile rank
+    and binding class per (peptide, allele) pair.
+
+    Requires network access (UniProt, AlphaFold DB, and IEDB). See `dla_binding`'s module
+    docstring for what is and isn't a real, existing tool here.
+    """
+    out.mkdir(parents=True, exist_ok=True)
+    structure_cache = out / "structures"
+    peptides = vaccine_antigen_peptides(structure_cache)
+    lengths = list(lengths)
+
+    rows = []
+    all_predictions = []
+    for mutation_label, peptide in peptides.items():
+        predictions = fetch_binding_predictions(peptide, list(CHARACTERIZED_DLA_I_ALLELES), lengths)
+        predictions.insert(0, "mutation", mutation_label)
+        predictions.insert(1, "vaccine_peptide", peptide)
+        all_predictions.append(predictions)
+        for allele, info in CHARACTERIZED_DLA_I_ALLELES.items():
+            allele_predictions = predictions[predictions["allele"] == allele]
+            best = allele_predictions.loc[allele_predictions["percentile_rank"].idxmin()]
+            rows.append({
+                "mutation": mutation_label, "vaccine_peptide": peptide,
+                "dla_allele": info["common_name"], "best_predicted_9to11mer": best["peptide"],
+                "best_percentile_rank": float(best["percentile_rank"]),
+                "binding_class": best["binding_class"],
+            })
+    summary_table = pd.DataFrame(rows)
+    summary_table.to_csv(out / "vaccine_epitope_binding.csv", index=False)
+    pd.concat(all_predictions, ignore_index=True).to_csv(out / "vaccine_epitope_binding_raw.csv", index=False)
+
+    summary = {
+        "peptides": peptides,
+        "antigen_targets": VACCINE_ANTIGEN_TARGETS,
+        "alleles_tested": CHARACTERIZED_DLA_I_ALLELES,
+        "lengths_tested": lengths,
+        "results": rows,
+        "tool_provenance": (
+            "Real, live query to IEDB's NetMHCpan-EL 4.1 MHC-I binding-prediction API "
+            "(tools-cluster-interface.iedb.org/tools_api/mhci/), which explicitly trains on dog "
+            "(DLA) among its non-human species -- confirmed by directly querying "
+            "method=netmhcpan_el&species=dog rather than assumed. Vaccine peptides are built "
+            "fresh from the real canine AlphaFold/UniProt sequence via vaccine_antigen_peptides, "
+            "not hardcoded."
+        ),
+        "unverified_extrapolations": [
+            ("no specific dog's actual DLA genotype was typed -- no such tool exists in "
+             "reusable, off-the-shelf form (see dla_binding module docstring), and no dog's "
+             "sequencing reads exist in this project to type; the three alleles tested are the "
+             "most-studied, published DLA-88 allotypes standing in for 'a dog', not any "
+             "particular dog's real, unmeasured genotype"),
+            ("a strong predicted binding percentile rank is necessary but not sufficient for "
+             "actual T-cell immunogenicity in vivo -- it predicts peptide-MHC affinity, not "
+             "whether a functional T-cell repertoire against that peptide-MHC complex exists, "
+             "escapes central tolerance, or survives suppression in the tumor microenvironment"),
+            ("whether Corgi PIHS specifically carries any of these three mutations remains "
+             "entirely unconfirmed, as flagged throughout this module"),
+        ],
+        "warning": (
+            "This checks whether the candidate vaccine peptides *could* plausibly be presented "
+            "by real, characterized canine MHC-I molecules -- a real, structurally meaningful "
+            "question -- not whether the vaccine would work in any given dog, which also "
+            "depends on that dog's own (untyped) DLA genotype, T-cell repertoire, and tumor "
+            "immune microenvironment, none of which this checks."
         ),
     }
     (out / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")

@@ -129,6 +129,31 @@ def align_residue_numbers(source_seq: str, target_seq: str) -> dict[int, tuple[i
     return mapping
 
 
+def extract_mutant_peptide(track: pd.DataFrame, position: int, wt_residue: str, mut_residue: str,
+                           flank: int = 12) -> str:
+    """Build a mutant peptide window (length `2*flank + 1`) centered on `position`, substituting
+    `mut_residue` in for the wild-type residue -- for designing a synthetic long-peptide/mRNA
+    vaccine antigen around a specific point mutation.
+
+    Verifies the wild-type residue at `position` actually matches `wt_residue` before
+    substituting, rather than trusting the caller's numbering -- a real, structure-derived
+    sequence can silently disagree with a hand-transcribed literature position (isoform
+    differences, off-by-one errors, stale annotations), and this is the one check that catches
+    that class of mistake outright rather than producing a subtly wrong peptide.
+    """
+    seq = track.set_index("residue_number")["residue_type"]
+    observed = seq.get(position)
+    if observed != wt_residue:
+        raise ValueError(f"expected wild-type residue {wt_residue} at position {position}, "
+                         f"found {observed!r} in the supplied structure")
+    window = seq.reindex(range(position - flank, position + flank + 1))
+    if window.isna().any():
+        raise ValueError(f"peptide window around position {position} runs off the end of the "
+                         f"resolved structure (need {flank} residues of flank on each side)")
+    wt_peptide = "".join(window)
+    return wt_peptide[:flank] + mut_residue + wt_peptide[flank + 1:]
+
+
 def confidence_band(plddt: float) -> str:
     """AlphaFold's published pLDDT bands: >=90 very high, >=70 confident, >=50 low, else very low."""
     for threshold, label in CONFIDENCE_BANDS:
