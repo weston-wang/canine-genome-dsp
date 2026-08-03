@@ -173,6 +173,37 @@ multi-module outputs. Reports include its parameter count, seed variability, and
 GSE190001 and the external GSE102459 study. The inverse controller continues to use the interpretable
 model until a neural residual demonstrates stable external improvement.
 
+## Protein structure signals from AlphaFold
+
+The project also treats a predicted structure's per-residue confidence (pLDDT) as a signal, and
+lets curated OMIA/variant tables be joined onto it by UniProt residue number. Fetch a canine
+protein model from the [AlphaFold DB](https://alphafold.ebi.ac.uk/) by its UniProt accession:
+
+```bash
+canine-dsp alphafold-fetch --uniprot Q9N2A1 --out data/raw/alphafold
+```
+
+This writes the mmCIF model plus a manifest recording the source URL, AlphaFold version, byte
+count, and SHA-256 checksum, matching the provenance conventions in `data/README.md`.
+
+Run spectral analysis on the pLDDT confidence track, reusing the same Welch/multitaper estimators
+as the DNA-signal workflow:
+
+```bash
+canine-dsp alphafold-analyze --struct data/raw/alphafold/Q9N2A1.cif --out results/alphafold
+```
+
+Optionally map known variants onto the structure with `--variants variants.csv`, where the CSV
+has at least a `protein_position` column using the same 1-based UniProt residue numbering as the
+structure (e.g. an export from OMIA or a VEP/UniProt coordinate lookup). Each variant is annotated
+with its local pLDDT, a flanking-window mean, and AlphaFold's own confidence band (very high/
+confident/low/very low).
+
+This tool does not perform genome-to-protein coordinate liftover: mapping a genomic variant onto
+a UniProt residue number, on the correct canonical isoform, is the caller's responsibility. pLDDT
+is a model-confidence estimate, not a measure of stability, function, or pathogenicity, and each
+model is a single static predicted conformation with no ligands, complexes, or dynamics.
+
 ## Research path
 
 1. Pin an assembly and record accessions/checksums in `data/README.md`.
@@ -183,5 +214,6 @@ model until a neural residual demonstrates stable external improvement.
 
 ## Layout
 
-`src/canine_dsp/` contains signal encoding, spectral estimators, wavelets, I/O, and the CLI.
-`tests/` contains deterministic unit tests. `data/` stores only provenance documentation in Git.
+`src/canine_dsp/` contains signal encoding, spectral estimators, wavelets, I/O, AlphaFold structure
+parsing, and the CLI. `tests/` contains deterministic unit tests. `data/` stores only provenance
+documentation in Git.

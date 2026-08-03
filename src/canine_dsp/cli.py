@@ -6,14 +6,15 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
+from .alphafold_cli import analyze_structure, fetch_structure
+from .hybrid_cli import inverse_demo, prepare_dog10k_aging, prepare_gse9794
+from .immunotherapy_cli import immunotherapy_demo
 from .io import read_first_fasta, read_vcf_positions
 from .signals import eiip, variant_density, windowed_gc
 from .spectral import coherence, multitaper_psd, spectral_entropy, welch_psd
-from .wavelets import cwt_power
-from .volterra_cli import run_volterra, synthetic_table
-from .hybrid_cli import inverse_demo, prepare_dog10k_aging, prepare_gse9794
 from .vaccine_eval import run_gse102459, run_gse190001
-from .immunotherapy_cli import immunotherapy_demo
+from .volterra_cli import run_volterra, synthetic_table
+from .wavelets import cwt_power
 
 
 def _save_spectrum(x: np.ndarray, out: Path, title: str, sample_spacing: float = 1.0) -> dict:
@@ -104,6 +105,14 @@ def main() -> None:
     external.add_argument("--matrix", type=Path, required=True)
     external.add_argument("--modules", type=int, default=3)
     external.add_argument("--out", type=Path, required=True)
+    af_fetch = sub.add_parser("alphafold-fetch", help="download an AlphaFold DB model by UniProt accession")
+    af_fetch.add_argument("--uniprot", required=True)
+    af_fetch.add_argument("--out", type=Path, required=True)
+    af_analyze = sub.add_parser("alphafold-analyze", help="spectral analysis of an AlphaFold confidence track")
+    af_analyze.add_argument("--struct", type=Path, required=True)
+    af_analyze.add_argument("--variants", type=Path)
+    af_analyze.add_argument("--flank", type=int, default=5)
+    af_analyze.add_argument("--out", type=Path, required=True)
     args = parser.parse_args()
     if args.command == "demo":
         rng = np.random.default_rng(42)
@@ -131,8 +140,12 @@ def main() -> None:
         immunotherapy_demo(args.out, args.scenarios, args.maxiter)
     elif args.command == "evaluate-gse190001":
         run_gse190001(args.prime, args.boost, args.soft, args.out)
-    else:
+    elif args.command == "evaluate-gse102459":
         run_gse102459(args.matrix, args.out, args.modules)
+    elif args.command == "alphafold-fetch":
+        fetch_structure(args.uniprot, args.out)
+    else:
+        analyze_structure(args.struct, args.out, args.variants, args.flank)
 
 
 if __name__ == "__main__":

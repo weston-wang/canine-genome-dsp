@@ -9,3 +9,4 @@ human_melanoma_neovax,human,melanoma,WES_plus_RNA,longitudinal_personal_vaccine,
 canine_toxocara,dog,infection,bulk_RNA,infected_and_control_at_4_times,PRJNA673639,open,immune_dynamics_transfer,https://www.ncbi.nlm.nih.gov/bioproject/PRJNA673639
 human_mrna_dense_timecourse,human,healthy_vaccination,bulk_RNA,23_subject_prime_boost_daily_timecourse,GSE190001,open,volterra_kernel_validation,https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE190001
 human_tb_two_dose,human,healthy_vaccination,microarray,two_doses_30_days_apart_dense_postboost,GSE102459,open,external_kernel_replication,https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE102459
+alphafold_canine_proteome,dog,na,predicted_protein_structure,one_static_model_per_uniprot_entry,UP000002254,open,structure_confidence_signal,https://alphafold.ebi.ac.uk/api/prediction/
