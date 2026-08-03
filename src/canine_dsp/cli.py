@@ -118,7 +118,7 @@ def main() -> None:
                                help="Monte Carlo MAPK-inhibitor escape simulation for histiocytic sarcoma")
     mapk_demo.add_argument("--species", choices=["dog", "human"], default="dog")
     mapk_demo.add_argument("--trials", type=int, default=500)
-    mapk_demo.add_argument("--horizon-days", type=int, default=180)
+    mapk_demo.add_argument("--horizon-days", type=int, default=730)
     mapk_demo.add_argument("--seed", type=int, default=7)
     mapk_demo.add_argument("--out", type=Path, required=True)
     mapk_structure = sub.add_parser("mapk-structure-compare",

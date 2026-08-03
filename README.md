@@ -220,40 +220,56 @@ Mutations and Respond In Vitro to MEK Inhibition by Cobimetinib," Genes 2024;15(
 39202410). Three canine HS cell lines respond in vitro to the MEK1/2 inhibitor cobimetinib at
 IC50 74-372 nM, well below the achievable canine plasma concentration (PMID 39202410). Human HS
 carries MAPK mutations spread across more genes (BRAF, MAP2K1, KRAS, NRAS, PTPN11, NF1, CBL) in
-about 57% of cases (Shanmugam et al., Mod Pathol. 2019;32(6):830-843), and a MAP2K1-mutant case
-had a complete response to the MEK inhibitor trametinib (Gounder et al., N Engl J Med.
-2018;378(20):1945-1947, PMID 29768143). No canine- or human-specific MAPK-inhibitor *resistance*
-data for HS has been published.
+about 57% of cases (Shanmugam et al., Mod Pathol. 2019;32(6):830-843). A MAP2K1-mutant human HS
+case had a complete response to the MEK inhibitor trametinib maintained for more than two years
+with no relapse reported (Gounder et al., N Engl J Med. 2018;378(20):1945-1947, PMID 29768143);
+independent case reports of KRAS- and BRAF-mutant HS on MEK/BRAF inhibitors describe similarly
+long remissions (31 months; 3 years). The drug actually in canine clinical development is
+trametinib, not cobimetinib: two Phase II trials are open (University of Florida; Michigan State
+University, VCT25005905), following a completed Phase I dose-escalation study that set the
+recommended dose at 0.5 mg/m^2/day PO, with dose-limiting grade 3 toxicities (hypertension,
+proteinuria, lethargy, elevated ALP) and a steady-state concentration of ~10 ng/mL (~16 nM)
+reached in ~70% of dogs after about two weeks (Takada et al. 2024, Vet Comp Oncol). No published
+trametinib-specific canine HS cellular potency number was found, so the model below still anchors
+to cobimetinib's measured cell-line IC50s -- the only MEK inhibitor with a direct canine HS
+cellular potency measurement -- while noting the real trametinib trial context in its
+`provenance.clinical_development` field rather than converting between drugs by assumption.
 
-`canine_dsp.mapk_resistance` fills that gap with a hypothesis-generating Monte Carlo model, not a
-fitted or validated one. A sensitive clone and three synthetic escape clones -- pathway
-reactivation (secondary upstream RAS/RAF alteration), RTK-mediated bypass (loss of ERK feedback
-reactivates parallel signaling), and on-target site mutation (reduced inhibitor binding, the
-generic kinase-inhibitor resistance category) -- compete under density-dependent growth and an
-Emax drug-kill term, with clones seeded from the sensitive population at a small per-day rate.
-Each Monte Carlo trial perturbs potency and mutation-rate parameters, samples plasma-exposure
-variability, and stochastically seeds (or omits) a pre-existing resistant subclone before
-treatment starts:
+`canine_dsp.mapk_resistance` fills the *resistance* data gap (still entirely unpublished for HS in
+either species) with a hypothesis-generating Monte Carlo model, not a fitted or validated one. A
+sensitive clone and three synthetic escape clones -- pathway reactivation (secondary upstream
+RAS/RAF alteration), RTK-mediated bypass (loss of ERK feedback reactivates parallel signaling),
+and on-target site mutation (reduced inhibitor binding, the generic kinase-inhibitor resistance
+category) -- compete under density-dependent growth and an Emax drug-kill term. Acquired
+resistance is scheduled as a Poisson process over the sensitive clone's cell-days of drug exposure
+rather than a constant daily transfer: a fixed nonzero daily seeding rate mathematically
+guarantees eventual outgrowth given enough follow-up (a 100x rate cut only delayed it by degrees),
+which cannot reproduce a genuinely durable, years-long response; the Poisson formulation lets a
+resistant lineage truly never arise in a given trial. Each Monte Carlo trial also perturbs potency
+parameters, samples plasma-exposure variability, and stochastically seeds (or omits) a
+pre-existing resistant subclone before treatment starts, using the same mechanism weighting as
+acquired resistance (PTPN11-dominated for dog, more even for human):
 
 ```bash
-canine-dsp mapk-resistance-demo --species dog --trials 500 --horizon-days 180 --out results/mapk-dog
-canine-dsp mapk-resistance-demo --species human --trials 500 --horizon-days 180 --out results/mapk-human
+canine-dsp mapk-resistance-demo --species dog --trials 500 --horizon-days 730 --out results/mapk-dog
+canine-dsp mapk-resistance-demo --species human --trials 500 --horizon-days 730 --out results/mapk-human
 ```
 
 Only the dog preset's sensitive-clone IC50 and reference plasma concentration are anchored to the
-published in vitro/PK values above; every growth rate, resistance-clone potency shift, kill
-ceiling, and mutation rate is illustrative and clearly marked as such in `summary.json`. The human
-preset reuses the same pharmacodynamic shape with no fitted PK/IC50 numbers (none were found in
-the literature) and a broader, less concentrated resistance-seeding spectrum reflecting the wider
-mutational heterogeneity reported in human HS. Outputs are `trajectory_quantiles.csv` (median and
-10-90% burden over time), `escape_mechanism_breakdown.csv` (which mechanism dominates at the
-horizon, or durable response), a two-panel plot, and `summary.json`. Progression is flagged using
-a RECIST-style >=20% increase from nadir, but only once burden clears an absolute detection floor
--- without that floor, a regrowth ratio computed against a numerically negligible nadir can
-trigger "progression" while the tumor is still undetectable. Because the acquired-resistance
-kinetics in this parameterization are fairly deterministic, the durable-response probability can
-swing sharply with `--horizon-days`; treat any single run's numbers as illustrative, not a
-calibrated risk estimate.
+published in vitro/PK values above; every growth rate, resistance-clone potency shift, and kill
+ceiling is illustrative and clearly marked as such in `summary.json`. The overall acquired/
+pre-existing seeding rate was loosely tuned so the dog preset's durable-response probability lands
+in the same ballpark as the handful of published case reports above -- explicitly not a fit: those
+are three case reports, published specifically because the response was durable, so the true rate
+is almost certainly lower than "durable in 3 of 3." The human preset reuses the same
+pharmacodynamic shape with no fitted PK/IC50 numbers (none were found in the literature) and a
+broader, less concentrated resistance-seeding spectrum reflecting the wider mutational
+heterogeneity reported in human HS. Outputs are `trajectory_quantiles.csv` (median and 10-90%
+burden over time), `escape_mechanism_breakdown.csv` (which mechanism dominates at the horizon, or
+durable response), a two-panel plot, and `summary.json`. Progression is flagged using a
+RECIST-style >=20% increase from nadir, but only once burden clears an absolute detection floor --
+without that floor, a regrowth ratio computed against a numerically negligible nadir can trigger
+"progression" while the tumor is still undetectable.
 
 Before assuming a MAPK-inhibitor finding transfers across species, check whether the two
 orthologs are even structurally comparable at the relevant residues:

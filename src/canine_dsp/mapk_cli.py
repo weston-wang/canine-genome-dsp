@@ -6,12 +6,7 @@ import numpy as np
 import pandas as pd
 
 from .alphafold import align_residue_numbers, download_structure, read_plddt_track
-from .mapk_resistance import (
-    CLONE_NAMES,
-    ResistanceModel,
-    build_mutation_matrix,
-    run_monte_carlo,
-)
+from .mapk_resistance import CLONE_NAMES, ResistanceModel, run_monte_carlo
 from .uniprot import DOG_TAXID, HUMAN_TAXID, resolve_uniprot_accession
 
 _SHARED_GROWTH = np.array([.06, .05, .055, .058])  # per-day; illustrative, not fitted
@@ -21,16 +16,32 @@ _SHARED_GROWTH = np.array([.06, .05, .055, .058])  # per-day; illustrative, not 
 # IC50 and cap kill low, leaving them with net-positive growth throughout treatment.
 _SHARED_MAX_KILL = np.array([.18, .02, .035, .015])
 _SHARED_IC50_RATIOS = np.array([1.0, 40.0, 1.2, 60.0])
+_SHARED_MUTATION = np.eye(4)  # acquired resistance is scheduled stochastically, not via this matrix
+
+# Loosely tuned so the dog preset's durable-response probability is in the same ballpark as the
+# handful of published MAPK-inhibitor HS case reports at ~2 years follow-up (Gounder et al. 2018,
+# NEJM, PMID 29768143: >2 years, no relapse; a KRAS-mutant case at 31 months without relapse; a
+# BRAF-mutant case in partial remission at 3 years) -- not a fit: n=3 case reports, all published
+# specifically because the response was durable (survivorship/publication bias), so the true rate
+# is almost certainly lower than "3 of 3 durable." Treat this constant as a dial, not a result.
+_SEEDING_RATE_TOTAL = 0.012
 
 
-def dog_preset() -> tuple[ResistanceModel, float, dict]:
-    """Cobimetinib vs. canine PTPN11/KRAS-mutant HS; sensitive-clone IC50 and Cmax are real."""
+def dog_preset() -> tuple[ResistanceModel, float, np.ndarray, dict]:
+    """Cobimetinib vs. canine PTPN11/KRAS-mutant HS; sensitive-clone IC50 and Cmax are real.
+
+    The drug actually in canine clinical development is trametinib, not cobimetinib -- see the
+    "clinical_development" provenance field. Cobimetinib is used here because it is the only MEK
+    inhibitor with a published cellular IC50 measured directly on canine HS lines; no published
+    trametinib-specific canine HS cellular potency number was found, and estimating one by
+    converting from cobimetinib would stack an unverified assumption on top of a proxy substance,
+    so this preset does not attempt that.
+    """
     cell_line_ic50_nM = {"BD": 74.0, "OD": 91.0, "DH82": 372.0}
     ic50_sensitive = float(np.mean(list(cell_line_ic50_nM.values())))
-    model = ResistanceModel(
-        growth=_SHARED_GROWTH, ic50_nM=ic50_sensitive * _SHARED_IC50_RATIOS,
-        max_kill=_SHARED_MAX_KILL, mutation=build_mutation_matrix(np.array([.85, .10, .05]) * 2e-6),
-    )
+    seeding_rates = _SEEDING_RATE_TOTAL * np.array([.85, .10, .05])
+    model = ResistanceModel(growth=_SHARED_GROWTH, ic50_nM=ic50_sensitive * _SHARED_IC50_RATIOS,
+                            max_kill=_SHARED_MAX_KILL, mutation=_SHARED_MUTATION)
     css_reference = 1640.0
     provenance = {
         "species": "dog", "drug": "cobimetinib (MEK1/2 inhibitor)",
@@ -39,42 +50,52 @@ def dog_preset() -> tuple[ResistanceModel, float, dict]:
             "css_reference_nM": "canine plasma Cmax at 5 mg/kg",
         },
         "illustrative_only": ["growth rates", "resistant-clone IC50 shifts and kill ceilings",
-                              "mutation/seeding rates", "carrying capacity"],
+                              "seeding rates (loosely tuned to case-report durability, not fit)",
+                              "carrying capacity"],
         "citation": "Genes 2024;15(8):1050, PMID 39202410",
+        "clinical_development": (
+            "Two Phase II trials of trametinib (not cobimetinib) for canine HS are open "
+            "(University of Florida; Michigan State University, VCT25005905), following a "
+            "completed Phase I dose-escalation PK/safety study (Takada et al. 2024, Vet Comp "
+            "Oncol) that set the recommended dose at 0.5 mg/m^2/day PO (dose-limiting grade 3 "
+            "hypertension, proteinuria, lethargy, elevated ALP), reaching a steady-state "
+            "concentration of ~10 ng/mL (~16 nM) in ~70% of dogs after ~2 weeks -- a threshold "
+            "associated with efficacy in human trials, not derived from canine HS response data."
+        ),
     }
-    return model, css_reference, provenance
+    return model, css_reference, seeding_rates, provenance
 
 
-def human_preset() -> tuple[ResistanceModel, float, dict]:
+def human_preset() -> tuple[ResistanceModel, float, np.ndarray, dict]:
     """Same illustrative pharmacodynamic shape; broader resistance-mutation spectrum, no fitted PK."""
     ic50_sensitive = 150.0
-    model = ResistanceModel(
-        growth=_SHARED_GROWTH, ic50_nM=ic50_sensitive * _SHARED_IC50_RATIOS,
-        max_kill=_SHARED_MAX_KILL, mutation=build_mutation_matrix(np.array([.40, .35, .25]) * 2e-6),
-    )
+    seeding_rates = _SEEDING_RATE_TOTAL * np.array([.40, .35, .25])
+    model = ResistanceModel(growth=_SHARED_GROWTH, ic50_nM=ic50_sensitive * _SHARED_IC50_RATIOS,
+                            max_kill=_SHARED_MAX_KILL, mutation=_SHARED_MUTATION)
     css_reference = ic50_sensitive * 10
     provenance = {
         "species": "human", "drug": "MEK inhibitor (e.g. trametinib)",
         "calibrated_from_data": {},
         "illustrative_only": [("all pharmacodynamic and pharmacokinetic values in this preset; "
-                              "no published human HS in vitro IC50 or Cmax was found")],
+                              "no published human HS in vitro IC50 or Cmax was found; seeding "
+                              "rates are loosely tuned to case-report durability, not fit")],
         "resistance_spectrum_rationale": "broader mutation seeding across mechanisms reflects "
             "MAPK-pathway mutations spread across BRAF/MAP2K1/KRAS/NRAS/PTPN11/NF1/CBL in human "
             "HS, versus PTPN11-dominated canine HS",
         "citation": "Mod Pathol. 2019;32(6):830-843 (mutation spectrum); "
                     "N Engl J Med. 2018;378(20):1945-1947, PMID 29768143 (trametinib response)",
     }
-    return model, css_reference, provenance
+    return model, css_reference, seeding_rates, provenance
 
 
 SPECIES_PRESETS = {"dog": dog_preset, "human": human_preset}
 
 
 def mapk_resistance_demo(out: Path, species: str = "dog", trials: int = 500,
-                         horizon_days: int = 180, seed: int = 7) -> None:
+                         horizon_days: int = 730, seed: int = 7) -> None:
     out.mkdir(parents=True, exist_ok=True)
-    model, css_reference, provenance = SPECIES_PRESETS[species]()
-    outcome = run_monte_carlo(model, css_reference, horizon_days, trials, seed=seed)
+    model, css_reference, seeding_rates, provenance = SPECIES_PRESETS[species]()
+    outcome = run_monte_carlo(model, css_reference, horizon_days, seeding_rates, trials, seed=seed)
 
     total = outcome.trajectories.sum(axis=2)
     days = np.arange(horizon_days + 1)
@@ -107,10 +128,12 @@ def mapk_resistance_demo(out: Path, species: str = "dog", trials: int = 500,
         "provenance": provenance,
         "warning": "Synthetic Monte Carlo exploration of plausible escape dynamics; only the "
                   "fields under provenance.calibrated_from_data are anchored to a published "
-                  "dataset. Not a validated predictive or clinical model. In this "
-                  "parameterization the acquired-resistance kinetics are fairly deterministic, "
-                  "so probability_durable_response can shift sharply with horizon_days near "
-                  "its transition point -- read it as illustrative, not a calibrated risk.",
+                  "dataset. Not a validated predictive or clinical model. Acquired resistance is "
+                  "modeled as a Poisson process (a resistant lineage can genuinely never arise "
+                  "in a given trial), with its rate loosely tuned toward a handful of "
+                  "publication-biased case reports of durable multi-year responses -- treat "
+                  "probability_durable_response as illustrative of the qualitative dynamics, "
+                  "not a calibrated risk estimate.",
     }
     (out / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")
 

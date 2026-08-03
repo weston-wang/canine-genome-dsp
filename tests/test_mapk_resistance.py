@@ -7,6 +7,7 @@ from canine_dsp.mapk_resistance import (
     _dominant_mechanism,
     build_mutation_matrix,
     drug_kill_rate,
+    poisson_mutation_injections,
     run_monte_carlo,
     simulate_resistance,
 )
@@ -56,16 +57,46 @@ def test_dominant_mechanism_picks_largest_resistant_clone():
     assert label == CLONE_NAMES[2]
 
 
-def test_monte_carlo_forced_preexisting_resistance_eventually_progresses():
-    k = 4
-    model = ResistanceModel(
+def _dog_like_model() -> ResistanceModel:
+    return ResistanceModel(
         growth=np.array([.06, .05, .055, .058]),
         ic50_nM=np.array([222., 222. * 40, 222. * 1.2, 222. * 60]),
         max_kill=np.array([.18, .02, .035, .015]),
-        mutation=build_mutation_matrix(np.array([.85, .10, .05]) * 2e-6),
+        mutation=np.eye(4),
     )
-    outcome = run_monte_carlo(model, css_reference=1640., horizon_days=200, trials=20,
-                             preexisting_prob=1.0, seed=3)
+
+
+def test_poisson_mutation_injections_can_be_empty_at_low_rate():
+    rng = np.random.default_rng(0)
+    trajectory = np.full(30, 1e-6)  # tiny population -> tiny cell-days -> usually zero events
+    injections = poisson_mutation_injections(rng, trajectory, np.array([1e-4, 1e-4, 1e-4]))
+    assert injections == {}
+
+
+def test_poisson_mutation_injections_fires_at_high_rate():
+    rng = np.random.default_rng(0)
+    trajectory = np.full(30, 1.0)
+    injections = poisson_mutation_injections(rng, trajectory, np.array([5.0, 0.0, 0.0]), seed_fraction=1e-8)
+    assert injections
+    total_seeded = sum(vector[1] for vector in injections.values())
+    assert total_seeded > 0
+    assert all(vector[2] == 0 and vector[3] == 0 for vector in injections.values())
+
+
+def test_monte_carlo_forced_preexisting_resistance_eventually_progresses():
+    k = 4
+    model = _dog_like_model()
+    seeding_rates = 0.012 * np.array([.85, .10, .05])
+    outcome = run_monte_carlo(model, css_reference=1640., horizon_days=200, seeding_rates=seeding_rates,
+                             trials=20, preexisting_prob=1.0, seed=3)
     assert outcome.trajectories.shape == (20, 201, k)
     assert outcome.progressed.any()
     assert all(label in {"durable_response", *CLONE_NAMES[1:]} for label in outcome.dominant_mechanism)
+
+
+def test_monte_carlo_can_produce_durable_response_with_no_preexisting_clone():
+    model = _dog_like_model()
+    seeding_rates = 0.012 * np.array([.85, .10, .05])
+    outcome = run_monte_carlo(model, css_reference=1640., horizon_days=730, seeding_rates=seeding_rates,
+                             trials=60, preexisting_prob=0.0, seed=5)
+    assert (~outcome.progressed).any()
