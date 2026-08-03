@@ -12,6 +12,7 @@ from .immunotherapy_cli import immunotherapy_demo
 from .io import read_first_fasta, read_vcf_positions
 from .mapk_cli import (
     combination_control_demo,
+    combination_toxicity_demo,
     compare_orthologs,
     localized_control_demo,
     mapk_cns_demo,
@@ -161,6 +162,17 @@ def main() -> None:
     mapk_combo.add_argument("--location-penetration-multiplier", type=float, default=1.0)
     mapk_combo.add_argument("--seed", type=int, default=7)
     mapk_combo.add_argument("--out", type=Path, required=True)
+    mapk_tox = sub.add_parser("mapk-combination-toxicity-demo",
+                              help="stress-test the combination benefit against combined-dose de-rating")
+    mapk_tox.add_argument("--breed", choices=["bmd", "flat_coated_retriever"], default="bmd")
+    mapk_tox.add_argument("--debulking-fraction", type=float, default=0.97)
+    mapk_tox.add_argument("--max-kill-2", type=float, default=0.05)
+    mapk_tox.add_argument("--trials", type=int, default=300)
+    mapk_tox.add_argument("--horizon-days", type=int, default=730)
+    mapk_tox.add_argument("--preexisting-prob", type=float, default=0.30)
+    mapk_tox.add_argument("--location-penetration-multiplier", type=float, default=1.0)
+    mapk_tox.add_argument("--seed", type=int, default=7)
+    mapk_tox.add_argument("--out", type=Path, required=True)
     args = parser.parse_args()
     if args.command == "demo":
         rng = np.random.default_rng(42)
@@ -205,10 +217,14 @@ def main() -> None:
         localized_control_demo(args.out, args.breed, args.debulking_fraction, args.trials,
                                args.horizon_days, args.preexisting_prob,
                                args.location_penetration_multiplier, args.seed)
-    else:
+    elif args.command == "mapk-combination-demo":
         combination_control_demo(args.out, args.breed, args.debulking_fraction, args.trials,
                                  args.horizon_days, args.preexisting_prob,
                                  args.location_penetration_multiplier, args.seed)
+    else:
+        combination_toxicity_demo(args.out, args.breed, args.debulking_fraction, args.max_kill_2,
+                                  args.trials, args.horizon_days, args.preexisting_prob,
+                                  args.location_penetration_multiplier, args.seed)
 
 
 if __name__ == "__main__":

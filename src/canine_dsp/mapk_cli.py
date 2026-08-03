@@ -391,10 +391,15 @@ MECHANISM_AGNOSTIC_RATIONALE = (
     "used, unlike the MEK inhibitor itself, which each escape route was specifically built to "
     "evade. This is a real, published rationale for MEK+CDK4/6 combination therapy in RAS/RAF-"
     "mutant human cancers (adaptive resistance to MEK inhibitors commonly proceeds through "
-    "cyclin D1 upregulation and CDK4/6 dependence) -- but combined toxicity in human trials "
-    "often forces both drugs below their single-agent doses, and no canine PK/safety data for "
-    "any CDK4/6 inhibitor was found, so this scenario cannot be exposure-calibrated the way "
-    "trametinib was."
+    "cyclin D1 upregulation and CDK4/6 dependence). Palbociclib specifically has real, published "
+    "in vitro efficacy against canine histiocytic disease cell lines -- localized HS, "
+    "disseminated HS, systemic histiocytosis, and Langerhans cell histiocytosis all showed "
+    "growth inhibition, with significant activity also demonstrated in a disseminated-HS mouse "
+    "xenograft model (Hirabayashi et al. 2022, Vet Comp Oncol 20(3):587-601) -- real evidence "
+    "this drug class works on this cell type, though no canine dosing/toxicity study "
+    "accompanied it and no specific IC50 was extracted from that paper for this module. See "
+    "TOXICITY_EXTRAPOLATION_NOTE and combination_toxicity_demo for what is and isn't known "
+    "about combined-regimen safety."
 )
 
 
@@ -413,6 +418,31 @@ DIVISION_OF_LABOR_NOTE = (
     "matters because CDK4/6 inhibitors carry their own dose-limiting toxicity (myelosuppression "
     "in human use) -- the combination's advantage here is dose-sparing the less-characterized "
     "drug, not a mechanistic requirement that both drugs be present."
+)
+
+# Real combination-trial dose-finding practice: even with non-overlapping toxicity organ
+# systems, Phase I/Ib combination trials commonly still de-escalate BOTH agents below their
+# single-agent MTDs when starting a combination, reflecting patient-level cumulative burden
+# beyond any one organ system -- a general, well-documented empirical pattern in combination
+# oncology trial design, not a number measured for this specific drug pair. Swept, not fixed,
+# for the same reason every other genuinely unknown quantity in this module is swept.
+COMBINED_EXPOSURE_DERATING = [1.0, 0.8, 0.6, 0.4]
+
+TOXICITY_EXTRAPOLATION_NOTE = (
+    "Trametinib's canine dose-limiting toxicities are vascular/hepatic (hypertension, "
+    "proteinuria, elevated ALP; Takada et al. 2024). CDK4/6 inhibitors' dose-limiting toxicity "
+    "in human use is neutropenia -- an on-target, mechanism-driven effect (CDK4/6 inhibition "
+    "halts proliferation of any rapidly dividing cell, including marrow progenitors), not an "
+    "idiosyncratic host reaction, so extrapolating this specific toxicity to dogs is reasonable "
+    "even without canine-specific confirmation: the same cell-cycle machinery is being blocked "
+    "regardless of species. These are different organ systems -- the standard rationale for why "
+    "combinations are often feasible near full dose -- but real combination Phase I/Ib trials "
+    "still typically de-escalate both agents below their single-agent MTDs when starting out, "
+    "reflecting patient-level cumulative burden beyond any one organ system. "
+    "COMBINED_EXPOSURE_DERATING applies that possibility to both css_reference and "
+    "css_reference_2 simultaneously (see combination_toxicity_demo), to test whether the "
+    "combination's benefit survives realistic dose reduction rather than silently assuming "
+    "full, unconstrained dosing of both drugs holds."
 )
 
 
@@ -529,6 +559,84 @@ def combination_control_demo(out: Path, breed: str = "bmd", debulking_fraction: 
             "all three escape mechanisms at once, or only some?), not to estimate a real "
             "probability. Read the stacked-bar mechanism panel, not the single durable-response "
             "number at any one cdk46_max_kill value, as the result."
+        ),
+    }
+    (out / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")
+
+
+def combination_toxicity_demo(out: Path, breed: str = "bmd", debulking_fraction: float = DEBULKING_FRACTION,
+                              max_kill_2: float = 0.05, trials: int = 300, horizon_days: int = 730,
+                              preexisting_prob: float = _PREEXISTING_PROB_CENTRAL,
+                              location_penetration_multiplier: float = 1.0, seed: int = 7) -> None:
+    """Stress-tests the combination finding against realistic combined-dosing de-rating.
+
+    Fixes CDK4/6i potency at `max_kill_2` (default 0.05, the threshold that closed off all
+    escape routes at full illustrative dose in `combination_control_demo`) and sweeps
+    COMBINED_EXPOSURE_DERATING, applying it multiplicatively to *both* the trametinib and
+    CDK4/6i reference concentrations, to see whether the benefit survives the kind of dose
+    reduction real combination trials commonly require -- see TOXICITY_EXTRAPOLATION_NOTE --
+    rather than silently assuming full, unconstrained dosing of both drugs holds.
+    """
+    out.mkdir(parents=True, exist_ok=True)
+    scenarios = combination_scenarios(breed, debulking_fraction, [max_kill_2],
+                                      location_penetration_multiplier)
+    model, css, seeding_rates, initial_burden, _ = scenarios[max_kill_2]
+
+    rows, outcomes = [], {}
+    for derating in COMBINED_EXPOSURE_DERATING:
+        outcome = run_monte_carlo(model, css * derating, horizon_days, seeding_rates, trials,
+                                  preexisting_prob=preexisting_prob, initial_burden=initial_burden,
+                                  css_reference_2=CDK46_ILLUSTRATIVE_CSS_NM * derating, seed=seed)
+        outcomes[derating] = outcome
+        ttp = outcome.time_to_progression[outcome.progressed]
+        mechanism_counts = pd.Series(outcome.dominant_mechanism).value_counts()
+        mechanism_fractions = (mechanism_counts.reindex(["durable_response"] + CLONE_NAMES[1:], fill_value=0)
+                              / len(outcome.dominant_mechanism))
+        rows.append({
+            "combined_exposure_derating": derating,
+            "trametinib_css_nM": css * derating, "cdk46_css_nM": CDK46_ILLUSTRATIVE_CSS_NM * derating,
+            "probability_durable_response": float(1 - outcome.progressed.mean()),
+            "probability_progression": float(outcome.progressed.mean()),
+            "median_time_to_progression_days": float(np.median(ttp)) if ttp.size else None,
+            **{f"mechanism_{mechanism}": float(value) for mechanism, value in mechanism_fractions.items()},
+        })
+    table = pd.DataFrame(rows)
+    table.to_csv(out / "toxicity_derating_sensitivity.csv", index=False)
+
+    days = np.arange(horizon_days + 1)
+    fig, axes = plt.subplots(1, 2, figsize=(11, 4.5))
+    for derating, outcome in outcomes.items():
+        median_burden = np.median(outcome.trajectories.sum(axis=2), axis=0)
+        axes[0].plot(days, median_burden, label=f"{int(derating * 100)}% of illustrative exposure")
+    axes[0].set(xlabel="day", ylabel="median total tumor burden",
+               title=f"combined-dose de-rating: breed={breed}, cdk46 max_kill={max_kill_2}")
+    axes[0].legend(fontsize=7)
+    axes[1].plot(table["combined_exposure_derating"], table["probability_durable_response"],
+                marker="o", color="tab:purple")
+    axes[1].set(xlabel="fraction of illustrative full exposure (both drugs)", ylabel="P(durable response)",
+               title="does the benefit survive realistic dose reduction?", ylim=(0, 1))
+    fig.tight_layout(); fig.savefig(out / "toxicity_derating.png", dpi=160); plt.close(fig)
+
+    summary = {
+        "breed_context": breed, "max_kill_2_tested": max_kill_2,
+        "preexisting_prob_used": preexisting_prob, "sensitivity": rows,
+        "toxicity_extrapolation_rationale": TOXICITY_EXTRAPOLATION_NOTE,
+        "mechanism_agnostic_rationale": MECHANISM_AGNOSTIC_RATIONALE,
+        "unverified_extrapolations": [
+            ("no canine combination dose-finding trial exists for trametinib plus any CDK4/6 "
+             "inhibitor; COMBINED_EXPOSURE_DERATING is a plausible range grounded in general "
+             "combination-trial practice, not a measured value for this drug pair"),
+            ("CDK4/6-inhibitor-induced neutropenia is extrapolated from human pharmacology on "
+             "mechanistic (on-target, conserved cell-cycle biology) grounds; no canine "
+             "hematologic toxicity data for any CDK4/6 inhibitor was found"),
+            ("stacks on top of every extrapolation already listed in combination_control_demo's, "
+             "localized_control_demo's, and mapk_cns_demo's summary.json"),
+        ],
+        "warning": (
+            "Tests whether the combination's benefit is robust to realistic dose reduction, not "
+            "whether the combination is actually safe: real toxicity depends on a combination "
+            "dose-finding trial that has not been run in dogs for this drug pair. Read this as "
+            "a sensitivity analysis stacked on an efficacy model, not a safety assessment."
         ),
     }
     (out / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")

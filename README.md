@@ -442,11 +442,15 @@ illustrative growth-rate parameters being clustered close together -- if the esc
 more widely separated fitness advantages, closing them off would look more gradual, not a cliff.
 
 This is offered as a demonstration of the mechanism's *shape*, not a probability estimate: no
-canine PK/safety data for any CDK4/6 inhibitor exists, combined-drug toxicity commonly forces
-both agents below their single-agent doses in human trials (not modeled here), and the scenario
-still assumes Corgi PIHS is MAPK-driven at all -- the load-bearing, unverified premise beneath
-every scenario in this module. `summary.json` lists these under `unverified_extrapolations`
-alongside `mechanism_agnostic_rationale`.
+canine PK/safety data for any CDK4/6 inhibitor exists, and the scenario still assumes Corgi PIHS
+is MAPK-driven at all -- the load-bearing, unverified premise beneath every scenario in this
+module. The efficacy side is stronger than pure speculation, though: palbociclib has real,
+published in vitro growth-inhibitory activity against canine histiocytic disease cell lines
+specifically -- localized HS, disseminated HS, systemic histiocytosis, and Langerhans cell
+histiocytosis all responded, with significant activity also shown in a disseminated-HS mouse
+xenograft model (Hirabayashi et al. 2022, Vet Comp Oncol 20(3):587-601) -- though that study
+didn't dose actual dogs, so it speaks to efficacy, not safety. `summary.json` lists every
+extrapolation under `unverified_extrapolations` alongside `mechanism_agnostic_rationale`.
 
 **Combination and CDK4/6i monotherapy are not interchangeable at the same potency**, and
 `combination_control_demo` runs both side by side (`combination_scenarios(..., trametinib_active=`
@@ -464,6 +468,38 @@ Practically, this means the combination's advantage is dose-sparing the less-cha
 (reaching the same endpoint at roughly 60% lower required CDK4/6i potency), not a mechanistic
 requirement that both drugs be present -- if a high enough CDK4/6i dose turns out to be
 achievable and tolerable on its own, monotherapy is mathematically viable in this model too.
+
+### Does the combination stay under tolerable combined toxicity?
+
+No real combination dose-finding trial has been run in dogs for trametinib plus any CDK4/6
+inhibitor, so this can't be answered directly -- but it can be extrapolated on real mechanistic
+grounds rather than left as a bare assumption. Trametinib's canine dose-limiting toxicities are
+vascular/hepatic (hypertension, proteinuria, elevated ALP). CDK4/6 inhibitors' dose-limiting
+toxicity in human use is neutropenia -- an on-target, mechanism-driven effect (CDK4/6 inhibition
+halts proliferation of any rapidly dividing cell, including marrow progenitors), not an
+idiosyncratic host reaction, so extrapolating this specific toxicity to dogs is reasonable even
+without canine-specific confirmation: the same cell-cycle machinery is being blocked regardless
+of species. These are different organ systems -- the standard reason combinations are often
+feasible near full dose -- but real combination Phase I/Ib trials still typically de-escalate
+both agents below their single-agent MTDs when starting out, reflecting patient-level cumulative
+burden beyond any one organ system.
+
+```bash
+canine-dsp mapk-combination-toxicity-demo --breed bmd --max-kill-2 0.05 --out results/mapk-tox
+```
+
+This fixes CDK4/6i potency at the threshold that closed off all escape routes in
+`combination_control_demo` (0.05) and sweeps `COMBINED_EXPOSURE_DERATING` (`[1.0, 0.8, 0.6, 0.4]`)
+applied to *both* drugs' reference concentrations simultaneously, to see whether the benefit
+survives realistic dose reduction rather than silently assuming full, unconstrained dosing holds.
+In testing, the benefit degraded gracefully, not as a cliff: durable response was 99.5% at full
+illustrative dose, 99.3% at 80%, 96% at 60%, and 83% at just 40% of that dose -- still well above
+trametinib monotherapy's ~69-70% even under an aggressive four-fold dose reduction. That's a
+genuinely reassuring shape (the combination doesn't need to be pushed to its full illustrative
+dose to keep most of its benefit), but it answers "is the benefit robust to dose reduction,"
+not "is dosing safe" -- real toxicity still depends on a combination dose-finding trial that
+doesn't exist yet for this drug pair. `summary.json` carries `toxicity_extrapolation_rationale`
+alongside the same `unverified_extrapolations` discipline as every other scenario in this module.
 
 ## Research path
 

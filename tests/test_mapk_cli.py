@@ -7,9 +7,11 @@ import pytest
 from canine_dsp.mapk_cli import (
     BRAIN_PENETRATION_FRACTION,
     CDK46_MAX_KILL_SWEEP,
+    COMBINED_EXPOSURE_DERATING,
     canine_cns_hs_scenarios,
     combination_control_demo,
     combination_scenarios,
+    combination_toxicity_demo,
     localized_control_demo,
     localized_pihs_scenarios,
     mapk_cns_demo,
@@ -147,3 +149,32 @@ def test_monotherapy_needs_higher_potency_than_combination():
     durable_m = 1 - outcome_m.progressed.mean()
     assert durable_c > 0.9
     assert durable_m < durable_c
+
+
+def test_combination_toxicity_demo_derating_scales_both_drug_exposures(tmp_path):
+    combination_toxicity_demo(tmp_path, breed="bmd", max_kill_2=0.05, trials=20,
+                              horizon_days=90, seed=1)
+    table = pd.read_csv(tmp_path / "toxicity_derating_sensitivity.csv")
+    assert len(table) == len(COMBINED_EXPOSURE_DERATING)
+    full_dose = table[table["combined_exposure_derating"] == 1.0].iloc[0]
+    half_ish = table[table["combined_exposure_derating"] == 0.4].iloc[0]
+    assert half_ish["trametinib_css_nM"] == pytest.approx(full_dose["trametinib_css_nM"] * 0.4)
+    assert half_ish["cdk46_css_nM"] == pytest.approx(full_dose["cdk46_css_nM"] * 0.4)
+    summary = json.loads((tmp_path / "summary.json").read_text())
+    assert "toxicity_extrapolation_rationale" in summary
+    assert (tmp_path / "toxicity_derating.png").exists()
+
+
+def test_toxicity_derating_can_erode_the_combination_benefit():
+    """The whole point of the de-rating sweep: durable response at full illustrative dose
+    should not be worse than at a meaningfully reduced dose (monotonic in the derating, or at
+    least not inverted), so the sweep can actually show whether dose reduction costs efficacy."""
+    scenarios = combination_scenarios(breed="bmd", max_kill_2_values=[0.05])
+    model, css, seeding_rates, initial_burden, _ = scenarios[0.05]
+    durability = {}
+    for derating in (1.0, 0.4):
+        outcome = run_monte_carlo(model, css * derating, 730, seeding_rates, trials=150,
+                                  initial_burden=initial_burden,
+                                  css_reference_2=500. * derating, seed=6)
+        durability[derating] = 1 - outcome.progressed.mean()
+    assert durability[1.0] >= durability[0.4]
