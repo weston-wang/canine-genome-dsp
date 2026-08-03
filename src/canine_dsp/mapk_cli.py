@@ -54,6 +54,153 @@ LOMUSTINE_BENCHMARK = {
              "module's RECIST-style progression-from-nadir definition.",
 }
 
+# Fraction of plasma drug concentration reached in brain tissue -- real, drug-specific PK
+# measurements (P-gp/BCRP-limited), not distinguished below by brain region (rostrotentorial
+# cerebrum, the common presentation, vs. infratentorial cerebellum/brainstem, the minority one).
+# Regional BBB heterogeneity is real and documented -- cerebellum is specifically named as one of
+# several differentially specialized regions in recent single-cell BBB profiling -- but no
+# quantified cerebrum-vs-cerebellum comparison was found; asserting a numeric difference would be
+# less honest than treating them the same and exposing `location_penetration_multiplier` below
+# for anyone who wants to stress-test an assumed difference.
+BRAIN_PENETRATION_FRACTION = {
+    "systemic_reference": 1.0,
+    "trametinib": 0.15,    # the drug actually in canine clinical trials
+    "cobimetinib": 0.027,  # the drug this model's cellular IC50s are measured from
+}
+
+# Two germline GWAS findings, included because they argue for *breed-level* homogeneity through
+# a different mechanism than anatomic location does (see the conversation this module resulted
+# from): a shared inherited background, not a shared acquired driver mutation. Both loci are real
+# (published GWAS); the mechanism-weight link to acquired-resistance routes below is this
+# module's own speculative extension, not a published association -- flagged in each preset's
+# provenance rather than presented as a finding.
+BREED_GERMLINE_LOCI = {
+    "bmd": "CFA11 haplotype spanning MTAP/CDKN2A, present in 96% of affected Bernese Mountain "
+          "Dogs (GWAS) -- a cell-cycle/tumor-suppressor locus. CDKN2A/MTAP loss is a known "
+          "cooperating lesion with RAS/MAPK activation in several human cancers; if that holds "
+          "here, it is a plausible (unproven) mechanistic link to BMD HS's PTPN11/KRAS-dominated "
+          "acquired-driver spectrum.",
+    "flat_coated_retriever": "Two distinct loci on CFA5 and CFA19 (GWAS); the CFA5 locus "
+          "implicates PIK3R6, a PI3K-pathway gene -- a different germline background entirely "
+          "from BMD's. Speculative extension used here: weight this breed's acquired-resistance "
+          "spectrum toward the PI3K/AKT-linked rtk_bypass mechanism rather than PTPN11-like "
+          "pathway_reactivation.",
+}
+
+
+def canine_cns_hs_scenarios(breed: str = "bmd", location_penetration_multiplier: float = 1.0
+                            ) -> dict[str, tuple[ResistanceModel, float, np.ndarray, dict]]:
+    """Primary CNS histiocytic sarcoma scenarios, one per reference drug's brain penetration.
+
+    This is doubly extrapolated relative to `dog_preset`: no canine CNS-specific mutation study
+    exists, so it still assumes the systemic PTPN11/KRAS-dominated spectrum applies intracranially
+    (unverified), and effective drug exposure is discounted by each drug's real brain-to-plasma
+    ratio applied to the same cellular potency numbers (which are cobimetinib's, not trametinib's
+    -- see `dog_preset`). `location_penetration_multiplier` defaults to 1.0 (no assumed cerebrum
+    vs. cerebellum difference); override it only to explore a hypothesis, not because a real
+    number supports one direction over the other.
+    """
+    base_model, systemic_css, base_rates, base_provenance = dog_preset()
+    if breed == "flat_coated_retriever":
+        seeding_rates = _SEEDING_RATE_TOTAL * np.array([.20, .60, .20])
+    else:
+        seeding_rates = base_rates
+
+    scenarios = {}
+    for drug, fraction in BRAIN_PENETRATION_FRACTION.items():
+        effective_css = systemic_css * fraction * location_penetration_multiplier
+        provenance = {
+            **base_provenance, "site": "primary CNS (extrapolated from systemic data)",
+            "breed_context": breed, "breed_germline_locus": BREED_GERMLINE_LOCI.get(breed),
+            "brain_penetration_reference_drug": drug, "brain_penetration_fraction": fraction,
+            "location_penetration_multiplier": location_penetration_multiplier,
+        }
+        scenarios[drug] = (base_model, effective_css, seeding_rates, provenance)
+    return scenarios
+
+
+def mapk_cns_demo(out: Path, breed: str = "bmd", trials: int = 300, horizon_days: int = 730,
+                  preexisting_prob: float = _PREEXISTING_PROB_CENTRAL,
+                  location_penetration_multiplier: float = 1.0, seed: int = 7) -> None:
+    out.mkdir(parents=True, exist_ok=True)
+    scenarios = canine_cns_hs_scenarios(breed, location_penetration_multiplier)
+
+    rows, outcomes = [], {}
+    for drug, (model, css_reference, seeding_rates, provenance) in scenarios.items():
+        outcome = run_monte_carlo(model, css_reference, horizon_days, seeding_rates, trials,
+                                  preexisting_prob=preexisting_prob, seed=seed)
+        outcomes[drug] = outcome
+        ttp = outcome.time_to_progression[outcome.progressed]
+        rows.append({
+            "scenario": drug, "brain_penetration_fraction": BRAIN_PENETRATION_FRACTION[drug],
+            "effective_css_nM": css_reference,
+            "probability_durable_response": float(1 - outcome.progressed.mean()),
+            "probability_progression": float(outcome.progressed.mean()),
+            "median_time_to_progression_days": float(np.median(ttp)) if ttp.size else None,
+        })
+    table = pd.DataFrame(rows)
+    table.to_csv(out / "cns_penetration_sensitivity.csv", index=False)
+
+    days = np.arange(horizon_days + 1)
+    fig, axes = plt.subplots(1, 2, figsize=(11, 4.5))
+    for drug, outcome in outcomes.items():
+        median_burden = np.median(outcome.trajectories.sum(axis=2), axis=0)
+        axes[0].plot(days, median_burden, label=f"{drug} (f={BRAIN_PENETRATION_FRACTION[drug]})")
+    axes[0].set(xlabel="day", ylabel="median total tumor burden",
+               title=f"CNS scenario: breed={breed}, preexisting_prob={preexisting_prob}")
+    axes[0].legend(fontsize=8)
+    table.plot(x="scenario", y="probability_durable_response", kind="bar", ax=axes[1],
+              color="tab:blue", legend=False)
+    axes[1].set(ylabel="P(durable response)", title="sensitivity to brain penetration", ylim=(0, 1))
+    fig.tight_layout(); fig.savefig(out / "cns_penetration.png", dpi=160); plt.close(fig)
+
+    summary = {
+        "breed_context": breed, "preexisting_prob_used": preexisting_prob,
+        "location_penetration_multiplier": location_penetration_multiplier,
+        "scenarios": rows,
+        "location_note": (
+            "Rostrotentorial (cerebral, most common presentation) and infratentorial "
+            "(cerebellar/brainstem, minority presentation) primary CNS HS are modeled "
+            "identically: both sit fully behind the blood-brain barrier, and no directional "
+            "difference in BBB permeability between the two compartments was found in the "
+            "literature. Regional BBB heterogeneity is real, and cerebellum is one of the "
+            "regions recent profiling calls out as differentially specialized -- but without a "
+            "quantified comparison, treating the two locations the same is more honest than "
+            "inventing a difference. Use location_penetration_multiplier to explore a "
+            "hypothesis, not because this default represents a verified finding."
+        ),
+        "unverified_extrapolations": [
+            ("canine primary CNS HS carries the same PTPN11/KRAS-dominated driver spectrum as "
+             "systemic HS -- no canine CNS-specific sequencing exists to confirm this"),
+            ("the breed-to-mechanism-weight link (bmd vs. flat_coated_retriever) is this "
+             "module's own speculative extension of germline GWAS loci to acquired-resistance "
+             "mechanisms; no published study connects them"),
+            ("cellular potency is still cobimetinib's (dog_preset's proxy drug); the trametinib "
+             "and cobimetinib brain-penetration fractions are each drug's own real measurement, "
+             "applied here to a potency number measured from cobimetinib specifically"),
+        ],
+        "citations": {
+            "location_and_breed_clinicopathology": "Thongtharb et al. 2016, J Vet Med Sci "
+                "78(4):593-599; Toyoda et al. 2020, J Vet Intern Med 34(2):828-837",
+            "bmd_germline_locus": "CFA11 MTAP/CDKN2A haplotype GWAS, 96% of affected BMDs",
+            "flat_coated_retriever_germline_loci": "CFA5 (PIK3R6) and CFA19 GWAS loci",
+            "brain_penetration_fractions": "trametinib ~15%, cobimetinib ~2.7% brain-to-plasma "
+                "ratio; P-gp/BCRP-limited (melanoma brain-metastasis CNS-distribution literature)",
+            "cns_undertreatment_precedent": "Erdheim-Chester disease (a related MAPK-driven "
+                "histiocytic neoplasm): single-agent BRAF inhibitor can under-control CNS "
+                "lesions despite systemic response; adding a MEK inhibitor rescued CNS "
+                "responses in a small case series",
+        },
+        "warning": (
+            "Doubly speculative relative to mapk_resistance_demo's systemic model: this "
+            "extrapolates both the driver-mutation spectrum and the treatment response into a "
+            "disease site and cell population that has never been directly studied in dogs. "
+            "Read this as a structured hypothesis meant to motivate real CNS-specific canine "
+            "sequencing and PK work, not as a prediction of how a dog with CNS HS will respond."
+        ),
+    }
+    (out / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")
+
 
 def dog_preset() -> tuple[ResistanceModel, float, np.ndarray, dict]:
     """Cobimetinib vs. canine PTPN11/KRAS-mutant HS; sensitive-clone IC50 and Cmax are real.

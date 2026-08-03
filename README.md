@@ -306,6 +306,53 @@ local pLDDT and residue identity. For PTPN11 both hotspots land on identical, we
 literature above; this is a structural confidence check, not evidence that the two species'
 pharmacology will match.
 
+### Primary CNS histiocytic sarcoma
+
+Canine HS can present as a primary, localized CNS disease, and two clinicopathologic studies
+(Thongtharb et al. 2016, J Vet Med Sci 78(4):593-599; Toyoda et al. 2020, J Vet Intern Med
+34(2):828-837, n=102 CNS cases) report a strong -- not absolute -- predilection for the
+rostrotentorial cerebrum, with a real minority of infratentorial (cerebellar/brainstem) and
+spinal-cord-only cases. Toyoda's data also shows primary and disseminated CNS HS are
+pathophysiologically distinct (CSF pleocytosis 170 vs. 4 cells/uL) with sharply different breed
+skew: Corgis and Shetland Sheepdogs get almost exclusively the primary form, Rottweilers almost
+exclusively the disseminated form. No canine CNS-specific mutation sequencing has been published,
+so `canine_dsp.mapk_cli.canine_cns_hs_scenarios`/`mapk_cns_demo` extrapolate from the systemic
+model in `dog_preset` rather than a real CNS dataset:
+
+```bash
+canine-dsp mapk-cns-demo --breed bmd --out results/mapk-cns-bmd
+canine-dsp mapk-cns-demo --breed flat_coated_retriever --out results/mapk-cns-fcr
+```
+
+This scales the systemic reference plasma concentration by each drug's real brain-to-plasma
+ratio (trametinib ~15%, cobimetinib ~2.7%; both P-gp/BCRP-limited) to get an effective CNS
+concentration, then runs the same Monte Carlo escape model against it. In testing this produced a
+sharp, mechanistic finding: at trametinib's exposure the model looks nearly as effective
+intracranially as systemically (durable response ~0.69 vs. ~0.68 systemic), while at cobimetinib's
+much lower exposure the effective concentration falls below most of the measured cellular IC50s
+and the tumor barely responds at all (durable response ~0.03, median time to progression ~9
+days) -- the same drug class, two different real potency/exposure profiles, two very different
+outcomes. Rostrotentorial and infratentorial (cerebellar) locations are modeled identically via
+`location_penetration_multiplier` (default 1.0): both sit fully behind the blood-brain barrier,
+and while regional BBB heterogeneity is real and documented (cerebellum is one of the regions
+recent single-cell profiling calls a differentially specialized compartment), no quantified
+cerebrum-vs-cerebellum comparison was found, so asserting a numeric difference would be less
+honest than exposing the multiplier for anyone who wants to test a hypothesis about one.
+
+`--breed` also switches the resistance-mechanism-weighting spectrum, motivated by real but
+separate GWAS findings that different breeds carry different germline predisposition loci: `bmd`
+(chromosome 11, spanning *MTAP*/*CDKN2A*, present in 96% of affected Bernese Mountain Dogs) keeps
+`dog_preset`'s PTPN11-dominated weighting; `flat_coated_retriever` (two loci on chromosomes 5 and
+19, one implicating the PI3K-pathway gene *PIK3R6*) shifts weight toward the PI3K/AKT-linked
+`rtk_bypass` mechanism instead. That specific link from a germline predisposition locus to an
+*acquired*-resistance mechanism is this module's own speculative extension -- included because it
+is a concrete, testable hypothesis, not because any study has connected them. It's a different
+kind of homogeneity claim than the anatomic one: breed argues for a shared germline background,
+which is not the same thing as a shared acquired driver mutation, and doesn't by itself make one
+CNS location more molecularly uniform than another. `summary.json` lists every extrapolation this
+scenario stacks on top of `mapk_resistance_demo`'s already-uncalibrated systemic model explicitly,
+under `unverified_extrapolations`.
+
 ## Research path
 
 1. Pin an assembly and record accessions/checksums in `data/README.md`.
