@@ -225,8 +225,11 @@ case had a complete response to the MEK inhibitor trametinib maintained for more
 with no relapse reported (Gounder et al., N Engl J Med. 2018;378(20):1945-1947, PMID 29768143);
 independent case reports of KRAS- and BRAF-mutant HS on MEK/BRAF inhibitors describe similarly
 long remissions (31 months; 3 years). The drug actually in canine clinical development is
-trametinib, not cobimetinib: two Phase II trials are open (University of Florida; Michigan State
-University, VCT25005905), following a completed Phase I dose-escalation study that set the
+trametinib, not cobimetinib: a Phase II trial is open (Michigan State University, University of
+Florida, University of Wisconsin, Virginia Tech; VCT24005793 in the Veterinary Clinical Trials
+Registry -- corrected here from an earlier, unverifiable VCT25005905 after a direct search turned
+up no real registry entry under that ID), following a completed Phase I dose-escalation study that
+set the
 recommended dose at 0.5 mg/m^2/day PO, with dose-limiting grade 3 toxicities (hypertension,
 proteinuria, lethargy, elevated ALP) and a steady-state concentration of ~10 ng/mL (~16 nM)
 reached in ~70% of dogs after about two weeks (Takada et al. 2024, Vet Comp Oncol). No published
@@ -698,27 +701,43 @@ mistakes) rather than a hardcoded string. Cross-species check: all three 25-resi
 100% sequence-identical between dog and human, so the canine peptide is exactly what a human
 trial would encode, substitution for substitution -- not guaranteed in general, but true here.
 
-Two different tools were asked about, and only one exists in reusable form (see `dla_binding`'s
-module docstring): a canine epitope-*prediction* tool -- yes, real. NetMHCpan-EL 4.1's training
-set explicitly includes dog (DLA) alongside cattle/pig/primate/equine non-human species, exposed
-live via IEDB's public REST API; confirmed directly (not assumed) by querying
+Two different tools were asked about. A canine epitope-*prediction* tool -- yes, real. NetMHCpan's
+training data explicitly includes dog (DLA) alongside cattle/pig/primate/equine non-human species,
+exposed live via IEDB's public REST API; confirmed directly (not assumed) by querying
 `method=netmhcpan_el&species=dog`, which returns exactly three allele names: DLA-88\*034:01,
 DLA-88\*501:01, DLA-88\*508:01 -- the same three alleles that happen to be the only
-functionally-characterized DLA-88 allotypes in the published literature. A DLA allele *typing*
-tool (calling one specific dog's actual genotype from its own sequencing reads, the way
-OptiType/HLA-HD do for human HLA) -- no: published canine DLA genotyping work describes bespoke
-amplicon-sequencing-plus-reference-matching protocols against the curated IPD-MHC Canine database,
-not a single reusable program, and this project has no dog's sequencing reads to type regardless.
+functionally-characterized DLA-88 allotypes in the published literature. Checking further turned
+up a real *consensus* opportunity, the way real neoantigen-vaccine pipelines like pVACtools trust
+an ensemble rather than one algorithm: of IEDB's several MHC-I methods, only `netmhcpan_el`
+(trained on mass-spec-eluted ligand data) and `netmhcpan_ba` (trained on quantitative binding-
+affinity data) return any canine allele at all (`ann`, `smm`, `smmpmbec`, `pickpocket`,
+`consensus`, `netmhccons` all return none) -- two real, differently-trained methods, not thirteen,
+but a genuine agreement check rather than one algorithm's unverified opinion.
+`fetch_consensus_binding_predictions` queries both and flags disagreement.
 
-Real result from the live query: PTPN11 p.E76K and p.G503V each predict as a **strong binder**
-(percentile rank 0.05 and 0.32) against DLA-88\*034:01, with weaker/no predicted binding against
-the other two characterized alleles; **KRAS p.Q61H predicts no binding to any of the three
-characterized alleles tested** (percentile ranks 3.0-15.0). That asymmetry is reported as found,
-not smoothed over -- a real, if partial, structural check on whether these candidate antigens
-could plausibly be presented at all, not a guarantee they would be in any specific dog. Predicted
-affinity is necessary but not sufficient for actual immunogenicity, no specific dog's real DLA
-genotype was typed (the three alleles are literature stand-ins, not any dog's measured genotype),
-and whether Corgi PIHS carries any of these three mutations at all remains unconfirmed.
+A DLA allele *typing* tool (calling one specific dog's actual genotype from its own sequencing
+reads, the way OptiType/HLA-HD do for human HLA) -- also turned out to exist, contradicting an
+earlier pass over this question: **KPR** (Hess et al. 2023, iScience 26(2), PMID 36798440;
+https://github.com/ZhaoS-Lab/KPR) genotypes DLA-I directly from an individual dog's paired-end
+RNA-seq reads and was validated on 152 real dogs. It doesn't close the actual gap here, though:
+this project has no dog's real RNA-seq reads to feed it, so the missing piece is now "no input
+data," not "no tool" -- worth keeping on file for whenever real sequencing exists.
+
+Real result from the live consensus query: on the method used as primary throughout this module
+(`netmhcpan_el`), PTPN11 p.E76K and p.G503V each predict as a **strong binder** (percentile rank
+0.05 and 0.32) against DLA-88\*034:01. The two methods agree on only 6 of 9 (mutation x allele)
+pairs tested; the disagreements matter. Most notably, **KRAS p.Q61H against DLA-88\*034:01** was
+first reported as clean "no predicted binding" under `netmhcpan_el` alone (percentile rank 3.0) --
+under `netmhcpan_ba` it comes back as a **weak binder** (1.6). That earlier clean negative doesn't
+hold up unqualified: it's method-dependent, not a settled result, which is exactly the failure
+mode a consensus check exists to catch. KRAS Q61H is still the weakest of the three candidates (the
+only one with zero full-agreement binder hits across all three alleles), just not as cleanly
+negative as the single-method result first suggested. Predicted affinity is necessary but not
+sufficient for actual immunogenicity, no specific dog's real DLA genotype was typed (the three
+alleles are literature stand-ins, not any dog's measured genotype), canine MHC class II (the CD4+
+axis) has no supporting method in IEDB at all for any DLA allele -- checked directly, not assumed
+-- so it is unchecked here rather than approximated with a human-allele substitute, and whether
+Corgi PIHS carries any of these three mutations at all remains unconfirmed.
 
 ### Does the approach transfer to localized pulmonary Corgi HS?
 
@@ -774,6 +793,105 @@ are both illustrative placeholders, no lymphadenectomy option is modeled, and --
 other scenario in this module -- whether Corgi pulmonary HS actually carries the same PTPN11/KRAS
 driver spectrum has never been directly confirmed.
 
+### Is the simulation engine's own math actually right?
+
+Every scenario above trusts one core stochastic mechanism: acquired resistance is scheduled as a
+Poisson process over a source clone's cumulative cell-days (`poisson_mutation_injections`), not a
+constant daily transfer rate, specifically because a Poisson draw can come back exactly zero --
+the property that lets a resistant lineage genuinely never arise in a given trial. That claim has
+an exact, closed-form answer from real point-process theory (the same mutation-supply framework
+used in mathematical-oncology branching-process models): for a fixed source trajectory, the
+probability a clone receives zero seeded events should equal `exp(-rate * total_cell_days)`. A
+regression test (`test_poisson_injections_zero_event_probability_matches_analytical_poisson_process`)
+checks the simulation's empirical zero-event rate against that exact formula across 20,000 repeats
+-- it matched within statistical tolerance, confirming the engine correctly implements the theory
+it's supposed to implement, rather than assuming it does.
+
+### Is the three-drug combination actually the best option tested?
+
+"Inhibitors plus vaccine" reads like a conclusion, but nothing in this module searches therapy
+space for one -- every regimen tested is a scenario someone wrote by hand, and the three-part
+combination (trametinib + CDK4/6i + vaccine) had never actually been compared against a *simpler*
+two-part alternative until asked directly. The vaccine's kill term in
+`run_monte_carlo_with_vaccine` applies to every clone except the immune-escape one -- meaning it
+should in principle suppress `pathway_reactivation`, `rtk_bypass`, and `target_site_mutation` on
+its own, not just mop up what CDK4/6i already weakened. Testing that directly (1000 trials, 5-year
+horizon): **trametinib + vaccine alone, with no CDK4/6i at all, reached 98.2% durable response**,
+versus 100% for the full three-part combination -- CDK4/6i's entire marginal contribution on top of
+the vaccine was closing the last ~1.8 percentage points, and specifically only the
+`target_site_mutation` route. Given CDK4/6 inhibitors carry real added toxicity risk
+(myelosuppression) for that small a gain once a vaccine is already present, this is a genuine,
+if narrow, case for questioning whether CDK4/6i belongs in the regimen at all -- not something the
+earlier "combination is best" framing surfaced, because the two-drug alternative had simply never
+been run.
+
+### Searching for real data to de-risk the placeholders
+
+A broad search for published libraries/databases that could replace this module's illustrative
+constants with real, clinically-grounded numbers turned up a mix of genuine finds and dead ends,
+each checked directly rather than taken on a search summary's word:
+
+- **Used**: the KPR DLA-typing tool above; the corrected VCT24005793 trial ID; and
+  `MAPK_INHIBITOR_HUMAN_BENCHMARK` (Schreuer et al. 2016, J Transl Med, PMID 27095081) -- a real
+  111-day median time-to-progression from 36 human BRAF-mutant melanoma patients on
+  dabrafenib+trametinib, added to `durability_horizon_demo`'s output as a labeled sanity-check
+  comparator, the same role the lomustine benchmark already plays. On closer reading this paper is
+  weaker than it first sounded, though: it's a ctDNA-monitoring report, not a full efficacy trial
+  writeup (no response rate, no PFS-from-treatment-start, no OS, no toxicity data), and its 111-day
+  clock starts at ctDNA-monitoring enrollment, not confirmed treatment start -- corrected in the
+  benchmark's own `caveat` field once that came up.
+- **Checked and not used**: a BRAF/MEK+checkpoint-inhibitor systems-pharmacology model
+  turned out to be calibrated against mouse xenograft data, not patients, and models no resistance
+  dynamics at all -- using its numbers would have been worse than not having them. A 2026
+  Communications Biology paper was paywalled and no number from it could be verified, so nothing
+  from it was cited. SIApopr/ESTIpop (real branching-process simulation packages) have no
+  drug-kill term and no clinical calibration -- they'd replace this module's already-validated
+  simulation plumbing with unvalidated plumbing, not worth the migration.
+- **Real trial data that exists but wasn't folded in as a model parameter**: dabrafenib+trametinib's
+  actual pivotal-trial efficacy in melanoma is far more complete than the benchmark above --
+  COMBI-d/COMBI-v report median PFS 11.0-11.4 months, median OS up to 25.1 months, objective
+  response 64-69%, and a 5-year pooled follow-up showing 19% PFS / 34% OS at 5 years overall but
+  **71% five-year OS among the 19% of patients who achieved a complete response** -- a real-world
+  echo of this module's own high-intraclass-correlation finding that outcome is sharply bimodal
+  depending on whether a resistant route gets a foothold, not smoothly distributed. Not used as a
+  fitted parameter for the same reason the ctDNA benchmark isn't: mapping a human/melanoma/BRAF
+  cohort onto a canine/HS/PTPN11-KRAS model would stack a cross-species extrapolation on top of an
+  already-illustrative one.
+- **The real canine trial's own status**: the actual trametinib-for-canine-HS trial (VCT24005793)
+  is live -- University of Florida's own page shows "Currently Enrolling," and a 2023 Morris
+  Animal Foundation announcement confirms dosing had already begun by then. No public source gives
+  a target enrollment number or an expected results date. It is also, as far as could be
+  determined, testing trametinib **monotherapy**, not the drug+vaccine combination this module
+  spends most of its effort exploring -- so even a full readout of that trial would only speak to
+  the weakest arm modeled here.
+
+## Where this leaves things
+
+`canine_dsp.mapk_resistance` (the generic Monte Carlo/branching-process engine) and
+`canine_dsp.mapk_scenarios` (every illustrative breed/drug/disease-site preset, case-series
+citation, and placeholder constant) are now deliberately separate modules, with
+`canine_dsp.mapk_cli`'s demo functions consuming a scenario and producing CSV/plot/summary.json
+output without needing to change when the scenario does. The point of that split: once real data
+lands for this disease -- tumor sequencing, canine-specific drug PK, DLA genotyping, vaccine
+immunogenicity, relapse-timing/ctDNA kinetics -- a new scenario module built from that data can
+reuse every demo function and every line of the engine unchanged. Nothing here is an optimizer;
+it's a consistent battery of analyses pointed at whichever scenario, real or illustrative, gets
+handed to it.
+
+What's actually anchored to real data, end to end: the sensitive clone's IC50 (canine HS cell
+lines), the systemic reference plasma concentration and dose-limiting toxicities (a real Phase I
+trial), the epitope-binding predictions (a live query to real prediction methods against real
+characterized alleles), and the two comparators added this pass (lomustine response rates, the
+human BRAF+MEK-inhibitor benchmark). Everything else -- every growth rate, resistance-clone potency
+shift, kill ceiling, seeding rate, CDK4/6i potency, and vaccine parameter -- remains an illustrative
+placeholder, swept across a range rather than asserted as a point estimate wherever the module
+itself is the reason to doubt a single value. The load-bearing, unconfirmed premise underneath
+every scenario is unchanged by any of this work: whether Corgi PIHS or Corgi pulmonary HS actually
+carries a PTPN11/KRAS hotspot mutation at all. Nothing here can answer that; the actual canine
+trametinib trial is running but hasn't reported results, and no shortcut to canine HS tumor
+sequencing was found in a broad search for one. That is the single highest-leverage next step this
+whole module points at, and the one piece no amount of modeling can substitute for.
+
 ## Research path
 
 1. Pin an assembly and record accessions/checksums in `data/README.md`.
@@ -785,6 +903,9 @@ driver spectrum has never been directly confirmed.
 ## Layout
 
 `src/canine_dsp/` contains signal encoding, spectral estimators, wavelets, I/O, AlphaFold structure
-parsing, UniProt accession resolution, the MAPK-inhibitor resistance Monte Carlo model, and the
-CLI. `tests/` contains deterministic unit tests. `data/` stores only provenance documentation in
-Git.
+parsing, UniProt accession resolution, and the CLI. The MAPK-inhibitor resistance work is split
+three ways: `mapk_resistance.py` (the generic Monte Carlo/branching-process engine), `mapk_scenarios.py`
+(illustrative breed/drug/disease-site presets and case-series citations), and `mapk_cli.py` (demo
+functions that consume a scenario and produce CSV/plot/summary.json output); `dla_binding.py` is
+the real IEDB MHC-I epitope-binding client. `tests/` contains deterministic unit tests. `data/`
+stores only provenance documentation in Git.
