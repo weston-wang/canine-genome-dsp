@@ -93,7 +93,15 @@ MAPK_INHIBITOR_HUMAN_BENCHMARK = {
              "stage than any scenario in this module -- provided for scale (does this module's "
              "own median_time_to_progression_days land in a remotely plausible range once a "
              "resistant clone is present, compared to a real MAPK-inhibitor-treated cohort), not "
-             "as a validation of this module's specific numbers.",
+             "as a validation of this module's specific numbers. Weaker than that framing implies "
+             "on its own terms, too: this is a ctDNA-biomarker-monitoring report, not a full "
+             "efficacy trial writeup -- no objective response rate, no PFS measured from "
+             "treatment start, no overall survival, and no systematic toxicity data are given in "
+             "the source paper. The 111-day figure is time from when ctDNA monitoring began to "
+             "clinical progression, and monitoring 'began at variable timepoints relative to "
+             "treatment initiation' (the paper's own wording) -- some patients may already have "
+             "been on drug before entering ctDNA monitoring, so real time-from-treatment-start-"
+             "to-progression could run longer than 111 days for at least some of the cohort.",
 }
 
 # Fraction of plasma drug concentration reached in brain tissue -- real, drug-specific PK
