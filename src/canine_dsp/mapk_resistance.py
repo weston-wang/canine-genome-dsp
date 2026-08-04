@@ -504,7 +504,7 @@ def run_monte_carlo_with_vaccine(reference: ResistanceModel, css_reference: floa
     still recognize cells using any of those three routes; only a genuinely new antigen-loss
     event (this 5th clone) evades it. The immune-escape clone's own growth/IC50/kill parameters
     are set by the caller to inherit the pathway_reactivation clone's drug-susceptibility with an
-    added fitness cost (see `mapk_cli.vaccine_followon_scenarios`), reflecting the assumption
+    added fitness cost (see `mapk_scenarios.vaccine_followon_scenarios`), reflecting the assumption
     that an antigen-loss variant most plausibly arises from a cell lineage that already survived
     MAPK-inhibitor-based selection -- an illustrative, labeled assumption, not a measured one.
     """

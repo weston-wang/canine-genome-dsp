@@ -5,6 +5,16 @@ import pandas as pd
 import pytest
 
 from canine_dsp.mapk_cli import (
+    combination_control_demo,
+    combination_toxicity_demo,
+    durability_horizon_demo,
+    localized_control_demo,
+    mapk_cns_demo,
+    pulmonary_two_compartment_demo,
+    single_patient_feasibility_demo,
+    vaccine_followon_demo,
+)
+from canine_dsp.mapk_scenarios import (
     BRAIN_PENETRATION_FRACTION,
     CDK46_MAX_KILL_SWEEP,
     COMBINED_EXPOSURE_DERATING,
@@ -15,18 +25,10 @@ from canine_dsp.mapk_cli import (
     VACCINE_MAX_KILL_SWEEP,
     VACCINE_START_DAY,
     canine_cns_hs_scenarios,
-    combination_control_demo,
     combination_scenarios,
-    combination_toxicity_demo,
     dog_preset,
-    durability_horizon_demo,
-    localized_control_demo,
     localized_pihs_scenarios,
-    mapk_cns_demo,
     pulmonary_corgi_scenarios,
-    pulmonary_two_compartment_demo,
-    single_patient_feasibility_demo,
-    vaccine_followon_demo,
     vaccine_followon_scenarios,
 )
 from canine_dsp.mapk_resistance import (
