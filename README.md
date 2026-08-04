@@ -892,6 +892,80 @@ trametinib trial is running but hasn't reported results, and no shortcut to cani
 sequencing was found in a broad search for one. That is the single highest-leverage next step this
 whole module points at, and the one piece no amount of modeling can substitute for.
 
+## PI3K/mTOR-inhibitor resistance in canine hemangiosarcoma
+
+A second, deliberately separate pipeline (`hsa_scenarios.py`/`hsa_cli.py`, reusing
+`mapk_resistance.py`'s generic engine unchanged) for canine hemangiosarcoma (HSA) -- started by
+running the same grounding-research discipline as the histiocytic-sarcoma module above, not by
+assuming the same MEK-inhibitor-resistance story would transfer to a different disease.
+
+HSA turned out to need a different framing than HS. Real, published somatic-mutation cohorts
+(Megquier et al. 2019, Mol Cancer Res, whole-exome sequencing of 47 golden retriever HSA cases +
+RNA-seq of 74 tumors, Broad/NHGRI Lindblad-Toh lab; Estabrooks et al. 2023, Vet Comp Oncol, PMID
+37734854; Wong et al. 2017, PLOS ONE, PMID 29190660) find TP53 loss-of-function in up to ~66% of
+cases, activating PIK3CA mutations (H1047R the dominant hotspot) in ~30-46%, PTEN loss-of-function
+in 3-10%, and NRAS Q61 hotspot mutations (splenic-only, largely mutually exclusive with TP53) in
+~7-24% -- heterogeneous and subtype-stratified, not one clean shared hotspot the way HS's
+PTPN11/KRAS story is. The obvious first instinct -- build an NRAS-driven scenario mirroring HS's
+MEK-inhibitor structure -- was checked against real data and dropped: a 508-dog real-world-evidence
+cohort (Rodrigues et al. 2025, Sci Rep, PMID 40368987, PMC12078565, the FidoCure precision-medicine
+platform) found trametinib conferred **no survival benefit** in NRAS-mutant HSA (241 vs. 259 days,
+p=0.7775, n=71 vs. 26), despite real in vitro MEK-dependence data existing for NRAS-mutant HSA cell
+lines. Building an optimistic hypothetical there would have contradicted a real result already in
+hand -- exactly the mistake the histiocytic-sarcoma module's own "don't fabricate a Corgi locus"
+discipline exists to avoid.
+
+The PI3K/mTOR angle instead has three real anchors verified directly against source, not taken
+from a summary: a real in vitro cellular potency measurement (Pyuen et al. 2018, PLOS ONE
+13(7):e0200634, PMID 30011343 -- the dual PI3K/mTOR inhibitor VDC-597 gave IC50 0.23, 0.69, and
+0.71 uM on three canine HSA cell lines, additive with doxorubicin); real canine PK/PD for the
+clinically relevant drug in this class, rapamycin (Paoloni et al. 2010, PLOS ONE 5(6):e11013, PMID
+20543980 -- a comparative-oncology dose-escalation study in dogs *with cancer*, not HSA
+specifically, found trough concentrations exceeding 10 ng/mL at 0.06-0.08 mg/kg IM daily with
+confirmed target inhibition and no MTD reached); and, in that same FidoCure cohort, a real HSA
+survival benchmark: TP53-mutant dogs given rapamycin had a median survival of 193 vs. 118 days
+without it (p<0.0001), and PIK3CA-mutant dogs 179 vs. 119 days (p=0.005).
+
+```bash
+canine-dsp hsa-resistance-demo --trials 300 --horizon-days 730 --out results/hsa-resistance
+```
+
+`dog_hsa_preset` anchors the sensitive clone's IC50 to VDC-597's real cell-line measurement, and
+models three illustrative escape mechanisms chosen for general applicability to any mTORC1
+inhibitor (loss of mTORC1-negative-feedback reactivating PI3K/AKT; parallel MAPK/ERK bypass;
+on-target FKBP12-mTOR binding-site mutation) -- the same "chosen for general applicability, not
+HSA-specific evidence" discipline the HS module uses for its own three mechanisms, since no
+HSA-specific resistance data exists either. One problem surfaced and fixed before publishing this
+preset, not after: naively pairing VDC-597's real IC50 (mean 543 nM) with rapamycin's real ~10.9 nM
+trough would put achievable exposure roughly 50x *below* IC50 -- predicting the drug barely works
+at all, directly contradicting the real, significant FidoCure survival benefit just cited for the
+same drug. That's a more severe version of the cobimetinib/trametinib proxy-drug mismatch the
+HS module documents (there, both numbers came from the *same* drug's own measurements, so pairing
+them was internally consistent; here, no drug has both halves). Rather than publish a
+self-contradictory model, `css_reference` is kept illustrative (5x the mean measured IC50, the
+same "assumed, not measured, margin" convention `mapk_cli.CDK46_ILLUSTRATIVE_CSS_NM` already uses),
+and rapamycin's real PK/PD and survival numbers are reported as separate real-world context to
+sanity-check this scenario's *output* durability numbers against, not fed into its kill-rate math.
+
+In testing (300 trials, 2-year horizon, `preexisting_prob` swept as the least-grounded input, same
+as the HS module): durable-response probability ranged from 90% at `preexisting_prob=0.05` down to
+31% at 0.70, with median time-to-progression among progressors 168-277 days across that sweep --
+landing in a broadly plausible range next to the real standard-of-care benchmarks (splenectomy
+alone: 48-day median survival, Wendelburg et al. 2015, JAVMA 247(4):393-403, PMID 26225611;
+splenectomy+doxorubicin: ~120-180 days per a 2026 review's citation of Ogilvie et al. 1996, not
+independently verified against that primary source) without being a fit to them -- the endpoints
+aren't the same thing (this module's synthetic progression-from-nadir vs. real overall survival
+mixing unstandardized concurrent treatments), so read this as "not absurd," not "validated."
+
+This is a first scenario, not a finished pipeline: no vaccine, immunotoxin, or combination-therapy
+layer exists yet for HSA the way the HS module built those up incrementally over many turns. Two
+real candidates for that next layer, both already grounded in real completed trials rather than a
+built-from-scratch hypothesis the way HS's vaccine started: **eVim** (an anti-vimentin vaccine +
+doxorubicin, real Phase 2 single-arm trial, MST 235 vs. 136 days, 1-year survival 44% vs. 14%,
+p=0.034) and **eBAT** (a bispecific EGF/uPAR-targeted immunotoxin, real Phase I-II dose-finding
+trial, ~70% vs. <40% historical 6-month survival) -- deliberately not built out in this pass, per
+the same incremental approach the HS module's own growth followed.
+
 ## Research path
 
 1. Pin an assembly and record accessions/checksums in `data/README.md`.
@@ -907,5 +981,7 @@ parsing, UniProt accession resolution, and the CLI. The MAPK-inhibitor resistanc
 three ways: `mapk_resistance.py` (the generic Monte Carlo/branching-process engine), `mapk_scenarios.py`
 (illustrative breed/drug/disease-site presets and case-series citations), and `mapk_cli.py` (demo
 functions that consume a scenario and produce CSV/plot/summary.json output); `dla_binding.py` is
-the real IEDB MHC-I epitope-binding client. `tests/` contains deterministic unit tests. `data/`
-stores only provenance documentation in Git.
+the real IEDB MHC-I epitope-binding client. `hsa_scenarios.py`/`hsa_cli.py` follow the same
+scenarios/demo split for canine hemangiosarcoma, reusing `mapk_resistance.py`'s engine directly
+rather than duplicating it. `tests/` contains deterministic unit tests. `data/` stores only
+provenance documentation in Git.

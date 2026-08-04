@@ -7,6 +7,7 @@ import numpy as np
 import pandas as pd
 
 from .alphafold_cli import analyze_structure, fetch_structure
+from .hsa_cli import hsa_resistance_demo
 from .hybrid_cli import inverse_demo, prepare_dog10k_aging, prepare_gse9794
 from .immunotherapy_cli import immunotherapy_demo
 from .io import read_first_fasta, read_vcf_positions
@@ -133,6 +134,13 @@ def main() -> None:
     mapk_demo.add_argument("--horizon-days", type=int, default=730)
     mapk_demo.add_argument("--seed", type=int, default=7)
     mapk_demo.add_argument("--out", type=Path, required=True)
+    hsa_demo = sub.add_parser("hsa-resistance-demo",
+                              help="Monte Carlo PI3K/mTOR-inhibitor escape simulation for the "
+                                   "PIK3CA/PTEN-driven subtype of canine hemangiosarcoma")
+    hsa_demo.add_argument("--trials", type=int, default=300)
+    hsa_demo.add_argument("--horizon-days", type=int, default=730)
+    hsa_demo.add_argument("--seed", type=int, default=7)
+    hsa_demo.add_argument("--out", type=Path, required=True)
     mapk_structure = sub.add_parser("mapk-structure-compare",
                                     help="compare human vs. dog AlphaFold confidence at MAPK-gene hotspots")
     mapk_structure.add_argument("--gene", required=True)
@@ -261,6 +269,8 @@ def main() -> None:
         analyze_structure(args.struct, args.out, args.variants, args.flank)
     elif args.command == "mapk-resistance-demo":
         mapk_resistance_demo(args.out, args.species, args.trials, args.horizon_days, args.seed)
+    elif args.command == "hsa-resistance-demo":
+        hsa_resistance_demo(args.out, args.trials, args.horizon_days, args.seed)
     elif args.command == "mapk-structure-compare":
         compare_orthologs(args.gene, args.hotspots, args.out)
     elif args.command == "mapk-cns-demo":
