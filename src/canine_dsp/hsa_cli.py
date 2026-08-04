@@ -7,6 +7,9 @@ import pandas as pd
 
 from .hsa_scenarios import (
     HSA_CLONE_NAMES,
+    HSA_EBAT_ILLUSTRATIVE_CSS_NM,
+    HSA_EBAT_MAX_KILL_SWEEP,
+    HSA_EBAT_TRIAL,
     HSA_IMMUNE_ESCAPE_SEEDING_RATE,
     HSA_RAPAMYCIN_BENCHMARK,
     HSA_STANDARD_OF_CARE_BENCHMARK,
@@ -18,6 +21,7 @@ from .hsa_scenarios import (
     _PREEXISTING_PROB_CENTRAL,
     _PREEXISTING_PROB_SWEEP,
     dog_hsa_preset,
+    hsa_combination_scenarios,
     hsa_vaccine_followon_scenarios,
 )
 from .mapk_resistance import run_monte_carlo, run_monte_carlo_with_vaccine
@@ -139,12 +143,83 @@ def hsa_resistance_demo(out: Path, trials: int = 300, horizon_days: int = 730, s
     (out / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")
 
 
-def hsa_vaccine_followon_demo(out: Path, horizon_days: int = 730, trials: int = 300,
-                              preexisting_prob: float = _PREEXISTING_PROB_CENTRAL,
+def hsa_combination_control_demo(out: Path, trials: int = 300, horizon_days: int = 730,
+                                 preexisting_prob: float = _PREEXISTING_PROB_CENTRAL,
+                                 seed: int = 7) -> None:
+    """PI3K/mTOR inhibitor vs. eBAT vs. their combination, mirroring
+    `mapk_cli.combination_control_demo`'s side-by-side monotherapy/combination comparison.
+
+    eBAT has no real multi-dose-level response curve (see `HSA_EBAT_TRIAL`), so its potency is
+    swept across an illustrative range the same way `mapk_scenarios.CDK46_MAX_KILL_SWEEP` sweeps
+    histiocytic sarcoma's own real-but-unquantified second agent.
+    """
+    out.mkdir(parents=True, exist_ok=True)
+    regimens = [("combination", True), ("ebat_monotherapy", False)]
+
+    rows, outcomes = [], {}
+    for regimen, inhibitor_active in regimens:
+        scenarios = hsa_combination_scenarios(inhibitor_active, HSA_EBAT_MAX_KILL_SWEEP)
+        for ebat_max_kill, (model, css, seeding_rates, _) in scenarios.items():
+            css_2 = HSA_EBAT_ILLUSTRATIVE_CSS_NM if ebat_max_kill > 0 else None
+            outcome = run_monte_carlo(model, css, horizon_days, seeding_rates, trials,
+                                      preexisting_prob=preexisting_prob,
+                                      css_reference_2=css_2, seed=seed)
+            outcomes[(regimen, ebat_max_kill)] = outcome
+            ttp = outcome.time_to_progression[outcome.progressed]
+            mechanism_counts = pd.Series(outcome.dominant_mechanism).value_counts()
+            mechanism_fractions = (mechanism_counts.reindex(["durable_response"] + HSA_CLONE_NAMES[1:],
+                                                            fill_value=0)
+                                  / len(outcome.dominant_mechanism))
+            rows.append({
+                "regimen": regimen, "ebat_max_kill": ebat_max_kill,
+                "probability_durable_response": float(1 - outcome.progressed.mean()),
+                "probability_progression": float(outcome.progressed.mean()),
+                "median_time_to_progression_days": float(np.median(ttp)) if ttp.size else None,
+                **{f"mechanism_{mechanism}": float(value) for mechanism, value in mechanism_fractions.items()},
+            })
+    table = pd.DataFrame(rows)
+    table.to_csv(out / "hsa_combination_sensitivity.csv", index=False)
+
+    fig, ax = plt.subplots(figsize=(7, 4.5))
+    for regimen, color in (("combination", "tab:blue"), ("ebat_monotherapy", "tab:red")):
+        subset = table[table["regimen"] == regimen]
+        ax.plot(subset["ebat_max_kill"], subset["probability_durable_response"],
+               marker="o", label=regimen, color=color)
+    ax.set(xlabel="eBAT max_kill (illustrative, unmeasured)", ylabel="P(durable response)",
+          title="HSA: inhibitor+eBAT combination vs. eBAT monotherapy", ylim=(0, 1))
+    ax.legend(fontsize=8)
+    fig.tight_layout(); fig.savefig(out / "hsa_combination_sensitivity.png", dpi=160); plt.close(fig)
+
+    summary = {
+        "preexisting_prob_used": preexisting_prob, "sensitivity": rows,
+        "real_ebat_trial": HSA_EBAT_TRIAL,
+        "unverified_extrapolations": [
+            ("eBAT is modeled as a mechanism-agnostic second node (like CDK4/6i for histiocytic "
+             "sarcoma), applied identically to every clone -- real, but not measured for eBAT "
+             "specifically; see hsa_scenarios module docstring for the mechanistic rationale"),
+            ("ebat_max_kill has no real dose-response curve to anchor to (HSA_EBAT_TRIAL "
+             "identified one active dose, not a titratable relationship) -- swept, not fitted"),
+            ("stacks on top of every extrapolation already listed in hsa_resistance_demo's "
+             "summary.json"),
+        ],
+        "warning": (
+            "eBAT's real trial data (~70% vs. <40% 6-month survival) is not restricted to, or "
+            "reported by, PIK3CA/PTEN driver status, and was never tested in combination with a "
+            "PI3K/mTOR inhibitor -- this demo tests the *shape* of whether a mechanism-agnostic "
+            "second node closes this scenario's own modeled resistance routes, not a validated "
+            "prediction for the real combination."
+        ),
+    }
+    (out / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")
+
+
+def hsa_vaccine_followon_demo(out: Path, ebat_max_kill: float = 0.0, horizon_days: int = 730,
+                              trials: int = 300, preexisting_prob: float = _PREEXISTING_PROB_CENTRAL,
                               seed: int = 7) -> None:
-    """Does layering a cancer vaccine on top of PI3K/mTOR-inhibitor therapy close the gap left by
-    drug resistance alone, the same question `mapk_cli.vaccine_followon_demo` asks for
-    histiocytic sarcoma?
+    """Does layering a cancer vaccine on top of PI3K/mTOR-inhibitor (+/- eBAT) therapy close the
+    gap left by drug resistance alone, the same question `mapk_cli.vaccine_followon_demo` asks for
+    histiocytic sarcoma? `ebat_max_kill=0.0` (the default) tests inhibitor+vaccine only, with no
+    eBAT contribution -- pass a nonzero value to test the full three-way combination instead.
 
     Real HSA vaccines don't target this scenario's driver mutation (PIK3CA/PTEN) at all -- see
     `hsa_scenarios` module docstring for the real trials (ERstrePs, eVim, autologous whole-cell,
@@ -153,7 +228,8 @@ def hsa_vaccine_followon_demo(out: Path, horizon_days: int = 730, trials: int = 
     not less.
     """
     out.mkdir(parents=True, exist_ok=True)
-    scenarios = hsa_vaccine_followon_scenarios(vaccine_max_kill_values=HSA_VACCINE_MAX_KILL_SWEEP)
+    scenarios = hsa_vaccine_followon_scenarios(ebat_max_kill, HSA_VACCINE_MAX_KILL_SWEEP)
+    css_2 = HSA_EBAT_ILLUSTRATIVE_CSS_NM if ebat_max_kill > 0 else None
 
     rows, outcomes = [], {}
     for vaccine_max_kill, (model, css, seeding_rates, _) in scenarios.items():
@@ -162,7 +238,7 @@ def hsa_vaccine_followon_demo(out: Path, horizon_days: int = 730, trials: int = 
             vaccine_ramp_days=HSA_VACCINE_RAMP_DAYS, vaccine_max_kill=vaccine_max_kill,
             immune_escape_seeding_rate=HSA_IMMUNE_ESCAPE_SEEDING_RATE,
             clone_names=HSA_VACCINE_CLONE_NAMES, trials=trials,
-            preexisting_prob=preexisting_prob, seed=seed)
+            preexisting_prob=preexisting_prob, css_reference_2=css_2, seed=seed)
         outcomes[vaccine_max_kill] = outcome
         ttp = outcome.time_to_progression[outcome.progressed]
         mechanism_counts = pd.Series(outcome.dominant_mechanism).value_counts()
@@ -202,7 +278,7 @@ def hsa_vaccine_followon_demo(out: Path, horizon_days: int = 730, trials: int = 
 
     summary = {
         "horizon_days": horizon_days, "preexisting_prob_used": preexisting_prob,
-        "sensitivity": rows,
+        "ebat_max_kill_used": ebat_max_kill, "sensitivity": rows,
         "real_hsa_vaccine_trials": HSA_VACCINE_TRIALS,
         "unverified_extrapolations": [
             ("no canine hemangiosarcoma vaccine trial measures this scenario's own PIK3CA/PTEN "
@@ -212,11 +288,11 @@ def hsa_vaccine_followon_demo(out: Path, horizon_days: int = 730, trials: int = 
             ("vaccine_start_day, vaccine_ramp_days, vaccine_max_kill, and the immune-escape "
              "clone's seeding rate and fitness penalty are all illustrative placeholders, not "
              "fit to any of the four real trials in HSA_VACCINE_TRIALS"),
-            ("this scenario has no second drug (CDK4/6i-equivalent) layer -- unlike the "
-             "histiocytic-sarcoma module's full drug+drug+vaccine combination, this tests "
-             "single-drug (PI3K/mTOR inhibitor) plus vaccine only"),
-            ("stacks on top of every extrapolation already listed in hsa_resistance_demo's "
-             "summary.json"),
+            ("if ebat_max_kill > 0: eBAT's real trial (HSA_EBAT_TRIAL) was never tested "
+             "alongside a PI3K/mTOR inhibitor or a vaccine -- this tests the shape of a "
+             "three-way combination none of the real trials above evaluated"),
+            ("stacks on top of every extrapolation already listed in hsa_resistance_demo's and "
+             "hsa_combination_control_demo's summary.json"),
         ],
         "warning": (
             "The real vaccines in HSA_VACCINE_TRIALS are real, but none of them were tested "
@@ -226,6 +302,107 @@ def hsa_vaccine_followon_demo(out: Path, horizon_days: int = 730, trials: int = 
             "scenario's vaccine_max_kill sweep is calibrated to match any of them. Read this as "
             "a demonstration of the antigen-persistence argument's *shape*, the same role "
             "vaccine_followon_demo plays for histiocytic sarcoma, not a probability estimate."
+        ),
+    }
+    (out / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")
+
+
+def hsa_combination_search_demo(out: Path, trials: int = 300, horizon_days: int = 730,
+                                preexisting_prob: float = _PREEXISTING_PROB_CENTRAL,
+                                seed: int = 7) -> None:
+    """Searches combination space directly rather than assuming which pairing wins: a full grid
+    over eBAT potency x vaccine potency, inhibitor always present as the base -- reports which
+    combinations reach durable response and which don't, plus the eBAT-monotherapy (no inhibitor)
+    comparison point, so "does the inhibitor matter at all" is also answered rather than assumed.
+
+    This exists because it's easy to build one combination, declare it good enough, and never
+    check whether a simpler alternative does just as well, or whether a piece assumed necessary
+    actually is -- exactly the check that found histiocytic sarcoma's drug+vaccine (no CDK4/6i)
+    alternative performed almost as well as the full three-drug combination there.
+    """
+    out.mkdir(parents=True, exist_ok=True)
+    rows = {}
+    for ebat_max_kill in HSA_EBAT_MAX_KILL_SWEEP:
+        scenarios = hsa_vaccine_followon_scenarios(ebat_max_kill, HSA_VACCINE_MAX_KILL_SWEEP)
+        css_2 = HSA_EBAT_ILLUSTRATIVE_CSS_NM if ebat_max_kill > 0 else None
+        for vaccine_max_kill, (model, css, seeding_rates, _) in scenarios.items():
+            outcome = run_monte_carlo_with_vaccine(
+                model, css, horizon_days, seeding_rates, vaccine_start_day=HSA_VACCINE_START_DAY,
+                vaccine_ramp_days=HSA_VACCINE_RAMP_DAYS, vaccine_max_kill=vaccine_max_kill,
+                immune_escape_seeding_rate=HSA_IMMUNE_ESCAPE_SEEDING_RATE,
+                clone_names=HSA_VACCINE_CLONE_NAMES, trials=trials,
+                preexisting_prob=preexisting_prob, css_reference_2=css_2, seed=seed)
+            rows[(ebat_max_kill, vaccine_max_kill)] = float(1 - outcome.progressed.mean())
+
+    grid = pd.DataFrame(
+        [{"ebat_max_kill": e, "vaccine_max_kill": v, "probability_durable_response": p}
+         for (e, v), p in rows.items()])
+    grid.to_csv(out / "hsa_combination_search_grid.csv", index=False)
+    pivot = grid.pivot(index="ebat_max_kill", columns="vaccine_max_kill",
+                       values="probability_durable_response")
+
+    ebat_alone_scenarios = hsa_combination_scenarios(inhibitor_active=False,
+                                                     ebat_max_kill_values=HSA_EBAT_MAX_KILL_SWEEP)
+    ebat_alone_durable = {}
+    for ebat_max_kill, (model, css, seeding_rates, _) in ebat_alone_scenarios.items():
+        css_2 = HSA_EBAT_ILLUSTRATIVE_CSS_NM if ebat_max_kill > 0 else None
+        outcome = run_monte_carlo(model, css, horizon_days, seeding_rates, trials,
+                                  preexisting_prob=preexisting_prob, css_reference_2=css_2, seed=seed)
+        ebat_alone_durable[ebat_max_kill] = float(1 - outcome.progressed.mean())
+
+    fig, ax = plt.subplots(figsize=(7, 5.5))
+    im = ax.imshow(pivot.values, origin="lower", aspect="auto", vmin=0, vmax=1, cmap="viridis")
+    ax.set_xticks(range(len(pivot.columns))); ax.set_xticklabels(pivot.columns)
+    ax.set_yticks(range(len(pivot.index))); ax.set_yticklabels(pivot.index)
+    ax.set(xlabel="vaccine max_kill", ylabel="eBAT max_kill",
+          title="P(durable response): inhibitor always on")
+    fig.colorbar(im, ax=ax, label="P(durable response)")
+    fig.tight_layout(); fig.savefig(out / "hsa_combination_search_grid.png", dpi=160); plt.close(fig)
+
+    durable_threshold = 0.95
+    sufficient = grid[grid["probability_durable_response"] >= durable_threshold]
+    minimal_combinations = []
+    if len(sufficient):
+        for ebat_max_kill in sorted(sufficient["ebat_max_kill"].unique()):
+            min_vaccine = sufficient[sufficient["ebat_max_kill"] == ebat_max_kill]["vaccine_max_kill"].min()
+            minimal_combinations.append({"ebat_max_kill": float(ebat_max_kill),
+                                        "min_vaccine_max_kill_needed": float(min_vaccine)})
+
+    minimal_combinations_display = (minimal_combinations if minimal_combinations
+                                    else "no grid point tested reached this threshold")
+    summary = {
+        "trials": trials, "horizon_days": horizon_days, "preexisting_prob_used": preexisting_prob,
+        "durable_response_threshold": durable_threshold,
+        "grid": grid.to_dict(orient="records"),
+        "ebat_monotherapy_no_inhibitor": ebat_alone_durable,
+        "minimal_combinations_reaching_threshold": minimal_combinations,
+        "interpretation": (
+            f"At >= {durable_threshold:.0%} durable response ({horizon_days}-day horizon, "
+            f"inhibitor always present): {minimal_combinations_display}. Compare against "
+            "inhibitor+eBAT alone (vaccine_max_kill=0 rows above) and inhibitor+vaccine alone "
+            "(ebat_max_kill=0 rows) to see whether either single addition suffices, or whether "
+            "both are needed -- "
+            "read the grid, not just this summary line, since the minimal-combination search "
+            "only reports the *first* vaccine potency that clears the threshold per eBAT level, "
+            "not the full shape. ebat_monotherapy_no_inhibitor answers a different question: "
+            "does the PI3K/mTOR inhibitor matter at all, or could eBAT alone substitute for it."
+        ),
+        "unverified_extrapolations": [
+            ("this grid answers 'which combination closes this scenario's own modeled "
+             "resistance routes,' not 'which combination cures a real dog' -- every "
+             "extrapolation listed in hsa_resistance_demo's, hsa_combination_control_demo's, "
+             "and hsa_vaccine_followon_demo's summary.json applies here too"),
+            ("no real trial has tested inhibitor+eBAT+vaccine together, or reported outcomes "
+             "by PIK3CA/PTEN driver status, so nothing in this grid can be checked against real "
+             "combination data the way histiocytic sarcoma's single-agent scenarios could be "
+             "checked against real case reports"),
+        ],
+        "warning": (
+            "A search over this module's own parameter space, not a search over real treatment "
+            "options -- it can only ever be as good as the illustrative growth/kill/seeding-rate "
+            "constants underneath it. Read 'combination X reaches 95% durable response here' as "
+            "'given everything else this module assumes, X closes the gap in this model,' not "
+            "as a treatment recommendation."
         ),
     }
     (out / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")

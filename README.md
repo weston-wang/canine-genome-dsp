@@ -1004,10 +1004,46 @@ significant, benefit in canine HSA generally -- none of them were tested specifi
 PI3K/mTOR inhibitor, none report outcomes by driver mutation, and `vaccine_max_kill` here is
 swept, not fit to any of them.
 
-An immunotoxin layer (**eBAT**, a bispecific EGF/uPAR-targeted agent with real Phase I-II
-dose-finding data, ~70% vs. <40% historical 6-month survival) and a second-drug combination layer
-remain the next candidates, deliberately not built out in this pass, per the same incremental
-approach the HS module's own growth followed.
+### Searching combination space directly, not assuming a winner
+
+The goal here was never "does the inhibitor work" or "does the vaccine work" in isolation --
+it's finding *a combination that yields durable response*, which means not artificially
+restricting the search to two ingredients once a third real option exists. **eBAT** (a
+bispecific EGF/uPAR-targeted immunotoxin, mechanistically distinct from a small-molecule pathway
+inhibitor) has real Phase I/II dose-finding data (Kim et al. 2017, Mol Cancer Ther 16(9):1996-2006,
+PMID 28193671): a single IV cycle at 50 ug/kg, 6-month survival ~70% (n=17) vs. <40% historical,
+6 long-term survivors past 450 days. Unlike VDC-597, no multi-dose-level response curve was
+reported -- one active dose, not a titratable relationship -- so `ebat_max_kill` is swept across
+an illustrative range, the same discipline `CDK46_MAX_KILL_SWEEP` uses for histiocytic sarcoma's
+own real-but-unquantified second agent. EGFR/uPAR are broadly expressed on tumor vasculature and
+aren't a documented target of any of this scenario's three drug-resistance mechanisms, so eBAT is
+modeled the same mechanism-agnostic way CDK4/6i is modeled for HS.
+
+```bash
+canine-dsp hsa-combination-control-demo --out results/hsa-combination
+canine-dsp hsa-combination-search-demo --out results/hsa-search
+```
+
+`hsa_combination_control_demo` compares inhibitor+eBAT against eBAT monotherapy (inhibitor
+inactive), mirroring `combination_control_demo`'s side-by-side structure. `hsa_combination_search_demo`
+goes further: a full grid over eBAT potency x vaccine potency (inhibitor always present), plus
+the eBAT-monotherapy point, so "does the inhibitor even matter" is answered rather than assumed.
+
+Two things worth knowing before treating any single combination as *the* answer. First, several
+different combinations reach >=95% durable response in testing, not just one: inhibitor+vaccine
+alone (`vaccine_max_kill>=0.05`, no eBAT needed); inhibitor+eBAT alone (`ebat_max_kill>=0.05`, no
+vaccine needed); and inhibitor+eBAT+vaccine together at lower potency in each (e.g.
+`ebat_max_kill=0.02` + `vaccine_max_kill>=0.03`) -- there is no single "the" combination in this
+model, there's a threshold surface, and which point on it is cheapest/safest in practice depends
+on real toxicity data this module doesn't have for either eBAT or any HSA vaccine. Second, and
+more surprising: **eBAT monotherapy (no inhibitor at all) also reaches 100% durable response**
+once its own potency crosses `ebat_max_kill=0.05` -- the same "sufficiently potent single
+mechanism-agnostic agent can substitute for the inhibitor" property `mapk_cli`'s own combination
+work already noted for CDK4/6i in histiocytic sarcoma. That's a property of how a
+mechanism-agnostic second node is modeled (it's applied identically to every clone, including the
+drug-sensitive one), not evidence that a real inhibitor is unnecessary -- but it's exactly the
+kind of assumption ("of course you need the targeted drug") this search exists to check rather
+than take for granted.
 
 ## Research path
 

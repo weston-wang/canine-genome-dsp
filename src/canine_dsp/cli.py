@@ -7,7 +7,12 @@ import numpy as np
 import pandas as pd
 
 from .alphafold_cli import analyze_structure, fetch_structure
-from .hsa_cli import hsa_resistance_demo, hsa_vaccine_followon_demo
+from .hsa_cli import (
+    hsa_combination_control_demo,
+    hsa_combination_search_demo,
+    hsa_resistance_demo,
+    hsa_vaccine_followon_demo,
+)
 from .hybrid_cli import inverse_demo, prepare_dog10k_aging, prepare_gse9794
 from .immunotherapy_cli import immunotherapy_demo
 from .io import read_first_fasta, read_vcf_positions
@@ -141,14 +146,33 @@ def main() -> None:
     hsa_demo.add_argument("--horizon-days", type=int, default=730)
     hsa_demo.add_argument("--seed", type=int, default=7)
     hsa_demo.add_argument("--out", type=Path, required=True)
+    hsa_combo_demo = sub.add_parser("hsa-combination-control-demo",
+                                    help="PI3K/mTOR inhibitor vs. eBAT vs. their combination "
+                                         "for canine hemangiosarcoma")
+    hsa_combo_demo.add_argument("--trials", type=int, default=300)
+    hsa_combo_demo.add_argument("--horizon-days", type=int, default=730)
+    hsa_combo_demo.add_argument("--preexisting-prob", type=float, default=0.30)
+    hsa_combo_demo.add_argument("--seed", type=int, default=7)
+    hsa_combo_demo.add_argument("--out", type=Path, required=True)
     hsa_vaccine_demo = sub.add_parser("hsa-vaccine-followon-demo",
-                                      help="PI3K/mTOR inhibitor plus a real-vaccine-inspired "
-                                           "follow-on for canine hemangiosarcoma")
+                                      help="PI3K/mTOR inhibitor (+/- eBAT) plus a "
+                                           "real-vaccine-inspired follow-on for canine "
+                                           "hemangiosarcoma")
+    hsa_vaccine_demo.add_argument("--ebat-max-kill", type=float, default=0.0)
     hsa_vaccine_demo.add_argument("--trials", type=int, default=300)
     hsa_vaccine_demo.add_argument("--horizon-days", type=int, default=730)
     hsa_vaccine_demo.add_argument("--preexisting-prob", type=float, default=0.30)
     hsa_vaccine_demo.add_argument("--seed", type=int, default=7)
     hsa_vaccine_demo.add_argument("--out", type=Path, required=True)
+    hsa_search_demo = sub.add_parser("hsa-combination-search-demo",
+                                     help="grid search over eBAT x vaccine potency for canine "
+                                          "hemangiosarcoma, to find which combination(s) reach "
+                                          "durable response rather than assuming one")
+    hsa_search_demo.add_argument("--trials", type=int, default=300)
+    hsa_search_demo.add_argument("--horizon-days", type=int, default=730)
+    hsa_search_demo.add_argument("--preexisting-prob", type=float, default=0.30)
+    hsa_search_demo.add_argument("--seed", type=int, default=7)
+    hsa_search_demo.add_argument("--out", type=Path, required=True)
     mapk_structure = sub.add_parser("mapk-structure-compare",
                                     help="compare human vs. dog AlphaFold confidence at MAPK-gene hotspots")
     mapk_structure.add_argument("--gene", required=True)
@@ -279,9 +303,15 @@ def main() -> None:
         mapk_resistance_demo(args.out, args.species, args.trials, args.horizon_days, args.seed)
     elif args.command == "hsa-resistance-demo":
         hsa_resistance_demo(args.out, args.trials, args.horizon_days, args.seed)
+    elif args.command == "hsa-combination-control-demo":
+        hsa_combination_control_demo(args.out, args.trials, args.horizon_days,
+                                     args.preexisting_prob, args.seed)
     elif args.command == "hsa-vaccine-followon-demo":
-        hsa_vaccine_followon_demo(args.out, args.horizon_days, args.trials,
+        hsa_vaccine_followon_demo(args.out, args.ebat_max_kill, args.horizon_days, args.trials,
                                   args.preexisting_prob, args.seed)
+    elif args.command == "hsa-combination-search-demo":
+        hsa_combination_search_demo(args.out, args.trials, args.horizon_days,
+                                    args.preexisting_prob, args.seed)
     elif args.command == "mapk-structure-compare":
         compare_orthologs(args.gene, args.hotspots, args.out)
     elif args.command == "mapk-cns-demo":

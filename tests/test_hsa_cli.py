@@ -1,12 +1,16 @@
 import json
 
-import pytest
-
-from canine_dsp.hsa_cli import hsa_resistance_demo, hsa_vaccine_followon_demo
+from canine_dsp.hsa_cli import (
+    hsa_combination_control_demo,
+    hsa_combination_search_demo,
+    hsa_resistance_demo,
+    hsa_vaccine_followon_demo,
+)
 from canine_dsp.hsa_scenarios import (
     HSA_CLONE_NAMES,
     HSA_VACCINE_CLONE_NAMES,
     dog_hsa_preset,
+    hsa_combination_scenarios,
     hsa_vaccine_followon_scenarios,
 )
 
@@ -58,9 +62,46 @@ def test_hsa_vaccine_followon_scenarios_adds_fifth_clone_inheriting_pi3k_akt_fee
     assert seeding_rates.shape == base_seeding_rates.shape
 
 
-def test_hsa_vaccine_followon_scenarios_rejects_nonzero_second_drug():
-    with pytest.raises(NotImplementedError):
-        hsa_vaccine_followon_scenarios(cdk46_max_kill=0.05)
+def test_hsa_combination_scenarios_zero_kill_matches_inhibitor_only():
+    scenarios = hsa_combination_scenarios(ebat_max_kill_values=[0.0])
+    combo_model, css, seeding_rates, _ = scenarios[0.0]
+    base_model, base_css, base_seeding_rates, _ = dog_hsa_preset()
+    assert combo_model.ic50_nM_2 is None and combo_model.max_kill_2 is None
+    assert css == base_css
+    assert (seeding_rates == base_seeding_rates).all()
+
+
+def test_hsa_combination_scenarios_inactive_inhibitor_zeros_css():
+    scenarios = hsa_combination_scenarios(inhibitor_active=False, ebat_max_kill_values=[0.05])
+    _, css, _, provenance = scenarios[0.05]
+    assert css == 0.0
+    assert provenance["inhibitor_active"] is False
+
+
+def test_hsa_vaccine_followon_scenarios_with_ebat_carries_second_drug_onto_fifth_clone():
+    scenarios = hsa_vaccine_followon_scenarios(ebat_max_kill=0.05, vaccine_max_kill_values=[0.0])
+    model, _, _, _ = scenarios[0.0]
+    assert model.max_kill_2 == 0.05
+    assert len(model.growth) == 5
+
+
+def test_hsa_combination_control_demo_writes_both_regimens(tmp_path):
+    hsa_combination_control_demo(tmp_path, trials=20, horizon_days=90, seed=1)
+    summary = json.loads((tmp_path / "summary.json").read_text())
+    regimens = {row["regimen"] for row in summary["sensitivity"]}
+    assert regimens == {"combination", "ebat_monotherapy"}
+    assert (tmp_path / "hsa_combination_sensitivity.csv").exists()
+    assert "real_ebat_trial" in summary
+
+
+def test_hsa_combination_search_demo_writes_grid_and_ebat_monotherapy_point(tmp_path):
+    hsa_combination_search_demo(tmp_path, trials=20, horizon_days=90, seed=1)
+    summary = json.loads((tmp_path / "summary.json").read_text())
+    assert (tmp_path / "hsa_combination_search_grid.csv").exists()
+    assert (tmp_path / "hsa_combination_search_grid.png").exists()
+    assert "ebat_monotherapy_no_inhibitor" in summary
+    assert "minimal_combinations_reaching_threshold" in summary
+    assert len(summary["grid"]) == 25  # 5 ebat values x 5 vaccine values
 
 
 def test_hsa_vaccine_followon_demo_writes_expected_outputs(tmp_path):

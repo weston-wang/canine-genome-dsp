@@ -306,25 +306,78 @@ HSA_VACCINE_MAX_KILL_SWEEP = [0.0, 0.01, 0.03, 0.05, 0.08]
 HSA_IMMUNE_ESCAPE_GROWTH_PENALTY = 0.85
 HSA_IMMUNE_ESCAPE_SEEDING_RATE = _SEEDING_RATE_TOTAL * 0.2 * 0.1
 
+# eBAT: a real, mechanistically distinct third option -- a bispecific EGF/uPAR-targeted
+# immunotoxin, not a small-molecule pathway inhibitor -- with real Phase I/II dose-finding data
+# (Kim et al. 2017, Mol Cancer Ther 16(9):1996-2006, PMID 28193671): a single IV cycle at 50
+# ug/kg (the biologically active dose identified across an adaptive 23-dog dose-finding cohort),
+# 6-month survival ~70% (n=17 at that dose) vs. <40% in historical controls, with 6 long-term
+# survivors past 450 days. Unlike VDC-597/rapamycin, no multi-dose-level response curve was
+# reported -- a single active dose, not a titratable Emax relationship -- so there is no real
+# number to anchor an IC50/kill-rate to the way VDC-597's cell-line IC50 anchors the sensitive
+# clone above. ebat_max_kill is swept across an illustrative range for that reason, the same
+# discipline `mapk_scenarios.CDK46_MAX_KILL_SWEEP` uses for histiocytic sarcoma's own real-but-
+# unquantified second agent. EGFR and uPAR are both broadly expressed on tumor vasculature and
+# are not documented targets of any of this scenario's three modeled drug-resistance mechanisms
+# (all of which evade rapamycin/VDC-597's pathway inhibition specifically, not receptor
+# expression), so eBAT is modeled the same "mechanism-agnostic, applies to every non-escape
+# clone identically" way CDK4/6i is modeled for histiocytic sarcoma.
+HSA_EBAT_TRIAL = {
+    "citation": "Kim et al. 2017, Mol Cancer Ther 16(9):1996-2006, PMID 28193671",
+    "agent": "eBAT (bispecific EGF/uPAR-targeted immunotoxin)",
+    "design": "adaptive Phase I/II dose-finding, 23 dogs with splenic HSA; single IV cycle",
+    "biologically_active_dose_ug_per_kg": 50.0,
+    "n_at_active_dose": 17,
+    "six_month_survival_at_active_dose": 0.70, "six_month_survival_historical_control": "<0.40",
+    "long_term_survivors_past_450_days": 6,
+    "caveat": "A single active dose was identified, not a multi-level dose-response curve -- "
+             "unlike VDC-597, there is no real IC50/kill-rate number to anchor to, so this "
+             "scenario's ebat_max_kill remains a swept illustrative range, not a fitted value.",
+}
+HSA_EBAT_ILLUSTRATIVE_IC50_NM = 100.0
+HSA_EBAT_ILLUSTRATIVE_CSS_NM = 500.0  # ~5x the illustrative IC50; an assumed, not measured, margin
+HSA_EBAT_MAX_KILL_SWEEP = [0.0, 0.02, 0.05, 0.08, 0.12]
 
-def hsa_vaccine_followon_scenarios(cdk46_max_kill: float = 0.0,
+
+def hsa_combination_scenarios(inhibitor_active: bool = True,
+                              ebat_max_kill_values: list[float] = HSA_EBAT_MAX_KILL_SWEEP,
+                              ) -> dict[float, tuple[ResistanceModel, float, np.ndarray, dict]]:
+    """PI3K/mTOR inhibitor (`dog_hsa_preset`) +/- a swept-potency, mechanism-agnostic eBAT term,
+    mirroring `mapk_scenarios.combination_scenarios`'s structure. `inhibitor_active=False` zeroes
+    the inhibitor's reference concentration, isolating eBAT as monotherapy -- see module docstring
+    for why eBAT is modeled as a mechanism-agnostic second node rather than a vaccine-style
+    time-gated kill term.
+    """
+    model, css, seeding_rates, provenance = dog_hsa_preset()
+    if not inhibitor_active:
+        css = 0.0
+    scenarios = {}
+    for ebat_max_kill in ebat_max_kill_values:
+        if ebat_max_kill > 0:
+            combo_model = ResistanceModel(growth=model.growth, ic50_nM=model.ic50_nM,
+                                          max_kill=model.max_kill, mutation=model.mutation,
+                                          hill=model.hill, carrying_capacity=model.carrying_capacity,
+                                          ic50_nM_2=HSA_EBAT_ILLUSTRATIVE_IC50_NM, max_kill_2=ebat_max_kill)
+        else:
+            combo_model = model
+        scenarios[ebat_max_kill] = (combo_model, css, seeding_rates,
+                                    {**provenance, "ebat_max_kill": ebat_max_kill,
+                                     "inhibitor_active": inhibitor_active})
+    return scenarios
+
+
+def hsa_vaccine_followon_scenarios(ebat_max_kill: float = 0.0,
                                    vaccine_max_kill_values: list[float] = HSA_VACCINE_MAX_KILL_SWEEP,
                                    ) -> dict[float, tuple[ResistanceModel, float, np.ndarray, dict]]:
-    """PI3K/mTOR inhibitor plus a swept-potency cancer vaccine layered on top, mirroring
-    `mapk_scenarios.vaccine_followon_scenarios`'s structure exactly (same 5th-clone
-    antigen/MHC-I-loss mechanic, reusing `mapk_resistance.run_monte_carlo_with_vaccine`
+    """PI3K/mTOR inhibitor + eBAT (fixed at `ebat_max_kill`) plus a swept-potency cancer vaccine
+    layered on top, mirroring `mapk_scenarios.vaccine_followon_scenarios`'s structure exactly
+    (same 5th-clone antigen/MHC-I-loss mechanic, reusing `mapk_resistance.run_monte_carlo_with_vaccine`
     unchanged) but built for a genotype-agnostic real vaccine antigen rather than a
     driver-mutation-specific one -- see module docstring for why that makes the
-    antigen-persistence argument, if anything, more secure here.
-
-    `cdk46_max_kill` is accepted for interface symmetry with the histiocytic-sarcoma module but
-    has no HSA equivalent yet (no second drug has been layered onto this scenario) -- passing a
-    nonzero value raises, rather than silently doing nothing.
+    antigen-persistence argument, if anything, more secure here. `ebat_max_kill=0.0` (the
+    default) gives an inhibitor-plus-vaccine-only baseline with no eBAT contribution.
     """
-    if cdk46_max_kill != 0.0:
-        raise NotImplementedError("no second-drug (e.g. CDK4/6i-equivalent) layer exists yet "
-                                  "for the HSA scenario -- pass cdk46_max_kill=0.0")
-    model, css, seeding_rates, provenance = dog_hsa_preset()
+    combo_scenarios = hsa_combination_scenarios(ebat_max_kill_values=[ebat_max_kill])
+    model, css, seeding_rates, provenance = combo_scenarios[ebat_max_kill]
     escape_growth = model.growth[1] * HSA_IMMUNE_ESCAPE_GROWTH_PENALTY
     model5 = ResistanceModel(
         growth=np.append(model.growth, escape_growth),
@@ -332,6 +385,7 @@ def hsa_vaccine_followon_scenarios(cdk46_max_kill: float = 0.0,
         max_kill=np.append(model.max_kill, model.max_kill[1]),
         mutation=np.eye(len(model.growth) + 1),
         hill=model.hill, carrying_capacity=model.carrying_capacity,
+        ic50_nM_2=model.ic50_nM_2, max_kill_2=model.max_kill_2, hill_2=model.hill_2,
     )
     scenarios = {}
     for vaccine_max_kill in vaccine_max_kill_values:
