@@ -121,6 +121,30 @@ def test_poisson_mutation_injections_fires_at_high_rate():
     assert all(vector[2] == 0 and vector[3] == 0 for vector in injections.values())
 
 
+def test_poisson_injections_zero_event_probability_matches_analytical_poisson_process():
+    """Cross-check against real point-process theory (the mutation-supply framework used in
+    mathematical oncology's multi-type branching-process resistance models, e.g. Iwasa/Nowak/
+    Michor): for a fixed source trajectory, the probability a clone receives zero Poisson-seeded
+    injection events over the whole trajectory should match the closed-form
+    P(zero events) = exp(-rate * total_cell_days) for an inhomogeneous Poisson process with that
+    expected count -- verified against the known analytical result, not just assumed correct.
+    """
+    rng = np.random.default_rng(0)
+    trajectory = np.linspace(1.0, 0.1, 60)
+    rate = 0.01
+    total_cell_days = float(trajectory.sum())
+    analytical_p_zero = np.exp(-rate * total_cell_days)
+
+    n_repeats = 20000
+    zero_count = sum(
+        1 for _ in range(n_repeats)
+        if not poisson_mutation_injections(rng, trajectory, np.array([rate]), seed_fraction=1e-8)
+    )
+    empirical_p_zero = zero_count / n_repeats
+    se = np.sqrt(analytical_p_zero * (1 - analytical_p_zero) / n_repeats)
+    assert abs(empirical_p_zero - analytical_p_zero) < 5 * se
+
+
 def test_monte_carlo_forced_preexisting_resistance_eventually_progresses():
     k = 4
     model = _dog_like_model()

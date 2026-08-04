@@ -11,6 +11,20 @@ allele names: DLA-8803401, DLA-8850101, DLA-8850801 (IEDB's compact nomenclature
 DLA-88*034:01, DLA-88*501:01, DLA-88*508:01). This module is a thin, real client for that live
 service -- not a reimplementation of NetMHCpan and not a synthetic stand-in.
 
+Consensus prediction: real neoantigen-vaccine pipelines (e.g. pVACtools) don't trust a single
+binding-prediction algorithm -- pVACtools runs an ensemble of up to 13 human-HLA methods and
+requires agreement. Checked live (not assumed) which of IEDB's several MHC-I methods support any
+canine DLA allele at all: only `netmhcpan_el` and `netmhcpan_ba` return a nonempty allele list for
+`species=dog`; `ann`, `smm`, `smmpmbec`, `pickpocket`, `consensus`, and `netmhccons` all return
+none. That narrows the achievable consensus here to two methods, not thirteen -- but EL (trained
+on mass-spectrometry-eluted ligand data) and BA (trained on quantitative binding-affinity data)
+are genuinely different training objectives within NetMHCpan, not the same method run twice, so
+comparing them is still a real, if narrower, version of the same idea. Also checked live whether
+canine MHC class II (DLA-DRB1/DQA1/DQB1) binding could be predicted the same way: no IEDB method
+supports any canine class II allele at all (every method's own allele listing was checked, none
+returned a DLA entry) -- so, unlike class I, there is currently no real tool to check the CD4+
+T-cell axis with, and this module does not attempt to fake one with a human-allele substitute.
+
 DLA allele *typing* (calling a specific dog's actual DLA genotype from its own sequencing reads,
 the way OptiType/HLA-HD/arcasHLA do for human HLA) has no equivalent single, widely-adopted
 open-source tool: published canine DLA genotyping work (e.g. NGS-based DLA-88 genotyping papers;
@@ -104,6 +118,35 @@ def fetch_binding_predictions(sequence: str, alleles: list[str], lengths: list[i
     with urlopen(request, timeout=120) as response:
         text = response.read().decode()
     return parse_mhci_response(text)
+
+
+# The only two IEDB MHC-I methods confirmed live to support any canine DLA allele (see module
+# docstring) -- not IEDB's full method list, most of which returns no dog allele at all.
+CONSENSUS_METHODS = ("netmhcpan_el", "netmhcpan_ba")
+
+
+def fetch_consensus_binding_predictions(sequence: str, alleles: list[str], lengths: list[int],
+                                        methods: tuple[str, ...] = CONSENSUS_METHODS) -> pd.DataFrame:
+    """Query multiple independently-trained IEDB methods for the same peptide/allele set and
+    merge them into one table keyed by (allele, peptide), with per-method percentile-rank and
+    binding-class columns plus a `methods_agree` flag (True iff every queried method assigns the
+    same binding_class to that peptide/allele pair).
+
+    A real, if narrower-than-pVACtools, consensus check -- see module docstring for why only two
+    methods are available for canine alleles at all, and why they're a genuine pair (different
+    training objectives), not the same predictor queried twice.
+    """
+    merged = None
+    for method in methods:
+        table = fetch_binding_predictions(sequence, alleles, lengths, method=method)
+        indexed = table.set_index(["allele", "peptide"])[["percentile_rank", "binding_class"]]
+        renamed = indexed.rename(columns={"percentile_rank": f"percentile_rank_{method}",
+                                          "binding_class": f"binding_class_{method}"})
+        merged = renamed if merged is None else merged.join(renamed, how="outer")
+    merged = merged.reset_index()
+    binding_class_columns = [f"binding_class_{method}" for method in methods]
+    merged["methods_agree"] = merged[binding_class_columns].nunique(axis=1) == 1
+    return merged
 
 
 def list_supported_alleles(species: str = "dog", method: str = "netmhcpan_el") -> list[str]:

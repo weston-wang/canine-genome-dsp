@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 
 from .alphafold import align_residue_numbers, download_structure, extract_mutant_peptide, read_plddt_track
-from .dla_binding import CHARACTERIZED_DLA_I_ALLELES, fetch_binding_predictions
+from .dla_binding import CHARACTERIZED_DLA_I_ALLELES, CONSENSUS_METHODS, fetch_consensus_binding_predictions
 from .mapk_resistance import (
     CLONE_NAMES,
     ResistanceModel,
@@ -1171,32 +1171,38 @@ def vaccine_antigen_peptides(structure_cache: Path) -> dict[str, str]:
 
 def vaccine_epitope_binding_demo(out: Path, lengths: list[int] = (9, 10, 11)) -> None:
     """Runs each `vaccine_antigen_peptides` candidate against every `CHARACTERIZED_DLA_I_ALLELES`
-    allele via the real, live IEDB NetMHCpan-EL API, reporting the best (lowest) percentile rank
-    and binding class per (peptide, allele) pair.
+    allele via IEDB's two real MHC-I methods confirmed to support any canine allele
+    (`CONSENSUS_METHODS`: netmhcpan_el and netmhcpan_ba), reporting the best (by the EL method's
+    ranking, kept as the primary method for consistency with earlier phases of this module) window
+    per (peptide, allele) pair, both methods' percentile rank/class for that window, and whether
+    the two independently-trained methods agree.
 
     Requires network access (UniProt, AlphaFold DB, and IEDB). See `dla_binding`'s module
-    docstring for what is and isn't a real, existing tool here.
+    docstring for what is and isn't a real, existing tool here -- including why a canine MHC
+    class II check was not attempted (no method supports any canine class II allele).
     """
     out.mkdir(parents=True, exist_ok=True)
     structure_cache = out / "structures"
     peptides = vaccine_antigen_peptides(structure_cache)
     lengths = list(lengths)
+    primary_method = CONSENSUS_METHODS[0]
 
     rows = []
     all_predictions = []
     for mutation_label, peptide in peptides.items():
-        predictions = fetch_binding_predictions(peptide, list(CHARACTERIZED_DLA_I_ALLELES), lengths)
+        predictions = fetch_consensus_binding_predictions(peptide, list(CHARACTERIZED_DLA_I_ALLELES), lengths)
         predictions.insert(0, "mutation", mutation_label)
         predictions.insert(1, "vaccine_peptide", peptide)
         all_predictions.append(predictions)
         for allele, info in CHARACTERIZED_DLA_I_ALLELES.items():
             allele_predictions = predictions[predictions["allele"] == allele]
-            best = allele_predictions.loc[allele_predictions["percentile_rank"].idxmin()]
+            best = allele_predictions.loc[allele_predictions[f"percentile_rank_{primary_method}"].idxmin()]
             rows.append({
                 "mutation": mutation_label, "vaccine_peptide": peptide,
                 "dla_allele": info["common_name"], "best_predicted_9to11mer": best["peptide"],
-                "best_percentile_rank": float(best["percentile_rank"]),
-                "binding_class": best["binding_class"],
+                **{f"percentile_rank_{m}": float(best[f"percentile_rank_{m}"]) for m in CONSENSUS_METHODS},
+                **{f"binding_class_{m}": best[f"binding_class_{m}"] for m in CONSENSUS_METHODS},
+                "methods_agree": bool(best["methods_agree"]),
             })
     summary_table = pd.DataFrame(rows)
     summary_table.to_csv(out / "vaccine_epitope_binding.csv", index=False)
@@ -1206,15 +1212,23 @@ def vaccine_epitope_binding_demo(out: Path, lengths: list[int] = (9, 10, 11)) ->
         "peptides": peptides,
         "antigen_targets": VACCINE_ANTIGEN_TARGETS,
         "alleles_tested": CHARACTERIZED_DLA_I_ALLELES,
+        "methods_tested": list(CONSENSUS_METHODS),
         "lengths_tested": lengths,
         "results": rows,
+        "consensus_agreement_rate": float(summary_table["methods_agree"].mean()) if len(summary_table) else None,
         "tool_provenance": (
-            "Real, live query to IEDB's NetMHCpan-EL 4.1 MHC-I binding-prediction API "
-            "(tools-cluster-interface.iedb.org/tools_api/mhci/), which explicitly trains on dog "
-            "(DLA) among its non-human species -- confirmed by directly querying "
-            "method=netmhcpan_el&species=dog rather than assumed. Vaccine peptides are built "
-            "fresh from the real canine AlphaFold/UniProt sequence via vaccine_antigen_peptides, "
-            "not hardcoded."
+            "Real, live query to two of IEDB's MHC-I binding-prediction methods "
+            "(tools-cluster-interface.iedb.org/tools_api/mhci/): netmhcpan_el (trained on mass-"
+            "spectrometry-eluted ligand data) and netmhcpan_ba (trained on quantitative binding-"
+            "affinity data) -- the only two of IEDB's several MHC-I methods confirmed live to "
+            "support any canine DLA allele at all (ann, smm, smmpmbec, pickpocket, consensus, "
+            "and netmhccons were all checked and return none). A real, if narrower-than-"
+            "pVACtools'-13-algorithm-ensemble, consensus check: two genuinely different training "
+            "objectives, not the same predictor queried twice. Vaccine peptides are built fresh "
+            "from the real canine AlphaFold/UniProt sequence via vaccine_antigen_peptides, not "
+            "hardcoded. Canine MHC class II (CD4+ T-cell axis) was checked and found to have no "
+            "supporting method at all in IEDB for any DLA class II allele -- not attempted here "
+            "rather than approximated with a human-allele substitute."
         ),
         "unverified_extrapolations": [
             ("no specific dog's actual DLA genotype was typed -- no such tool exists in "
@@ -1226,15 +1240,19 @@ def vaccine_epitope_binding_demo(out: Path, lengths: list[int] = (9, 10, 11)) ->
              "actual T-cell immunogenicity in vivo -- it predicts peptide-MHC affinity, not "
              "whether a functional T-cell repertoire against that peptide-MHC complex exists, "
              "escapes central tolerance, or survives suppression in the tumor microenvironment"),
+            ("the CD4+/MHC class II axis is entirely unchecked here (no tool exists for canine "
+             "class II alleles), despite real human precedent for CD4+-T-cell-mediated tumor "
+             "regression against a KRAS-mutant peptide independent of MHC-I presentation"),
             ("whether Corgi PIHS specifically carries any of these three mutations remains "
              "entirely unconfirmed, as flagged throughout this module"),
         ],
         "warning": (
             "This checks whether the candidate vaccine peptides *could* plausibly be presented "
-            "by real, characterized canine MHC-I molecules -- a real, structurally meaningful "
-            "question -- not whether the vaccine would work in any given dog, which also "
-            "depends on that dog's own (untyped) DLA genotype, T-cell repertoire, and tumor "
-            "immune microenvironment, none of which this checks."
+            "by real, characterized canine MHC-I molecules, and whether two independently-"
+            "trained methods agree on that -- a real, structurally meaningful question -- not "
+            "whether the vaccine would work in any given dog, which also depends on that dog's "
+            "own (untyped) DLA genotype, T-cell repertoire (including the unchecked CD4+ axis), "
+            "and tumor immune microenvironment, none of which this checks."
         ),
     }
     (out / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")
