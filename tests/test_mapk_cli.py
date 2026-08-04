@@ -10,6 +10,7 @@ from canine_dsp.mapk_cli import (
     COMBINED_EXPOSURE_DERATING,
     DURABILITY_HORIZON_SWEEP,
     IMMUNE_ESCAPE_GROWTH_PENALTY,
+    NODAL_INVOLVEMENT_PROB_SWEEP,
     VACCINE_CLONE_NAMES,
     VACCINE_MAX_KILL_SWEEP,
     VACCINE_START_DAY,
@@ -17,15 +18,23 @@ from canine_dsp.mapk_cli import (
     combination_control_demo,
     combination_scenarios,
     combination_toxicity_demo,
+    dog_preset,
     durability_horizon_demo,
     localized_control_demo,
     localized_pihs_scenarios,
     mapk_cns_demo,
+    pulmonary_corgi_scenarios,
+    pulmonary_two_compartment_demo,
     single_patient_feasibility_demo,
     vaccine_followon_demo,
     vaccine_followon_scenarios,
 )
-from canine_dsp.mapk_resistance import clone_growth_margins, run_monte_carlo, run_monte_carlo_with_vaccine
+from canine_dsp.mapk_resistance import (
+    clone_growth_margins,
+    run_monte_carlo,
+    run_monte_carlo_two_compartment,
+    run_monte_carlo_with_vaccine,
+)
 
 
 def test_cns_scenarios_scale_css_by_brain_penetration_fraction():
@@ -368,3 +377,50 @@ def test_worst_case_is_never_better_than_best_case_for_one_dog():
                                                 css_2=css_2 * css_mult, seed=5)
         outcomes[label] = 1 - outcome.progressed.mean()
     assert outcomes["best_case"] >= outcomes["worst_case"]
+
+
+def test_pulmonary_corgi_scenarios_use_full_systemic_exposure_not_brain_discounted():
+    """Lung tissue has no blood-brain-barrier-type restriction; the pulmonary scenario should use
+    dog_preset's full systemic css, not the 15% brain-penetration-discounted CNS value."""
+    _, systemic_css, _, _ = dog_preset()
+    scenarios = pulmonary_corgi_scenarios(nodal_involvement_prob_values=[0.0])
+    _, css, _, _, provenance = scenarios[0.0]
+    assert css == systemic_css
+    assert provenance["site"] == "localized pulmonary (Corgi)"
+
+
+def test_pulmonary_two_compartment_demo_writes_expected_outputs(tmp_path):
+    pulmonary_two_compartment_demo(tmp_path, trials=20, horizon_days=90, seed=1)
+    table = pd.read_csv(tmp_path / "pulmonary_two_compartment_sensitivity.csv")
+    assert len(table) == len(NODAL_INVOLVEMENT_PROB_SWEEP)
+    assert "fraction_trials_with_nodal_disease" in table.columns
+    assert "relapse_from_primary" in table.columns and "relapse_from_nodal" in table.columns
+    summary = json.loads((tmp_path / "summary.json").read_text())
+    assert "case_series" in summary
+    assert "full_systemic_exposure_note" in summary
+    assert "unverified_extrapolations" in summary
+    assert (tmp_path / "pulmonary_two_compartment.png").exists()
+
+
+def test_higher_nodal_involvement_probability_does_not_improve_durability():
+    """Core claim of adding the two-compartment model: undetected regional disease that surgery
+    can't reach should not improve durable-response probability.
+
+    Uses the CDK4/6i-combination arm (cdk46_max_kill=0.05, near the threshold where it matters
+    whether a resistant reservoir is small (debulked primary) or large (untouched nodal disease))
+    rather than trametinib monotherapy: at the default trametinib-only potency, both resistant
+    escape routes have such strongly positive growth margins at full systemic exposure that any
+    existing subclone is already close to guaranteed to reach detectable size within the tested
+    horizon regardless of which compartment it started in, making the nodal-vs-no-nodal
+    distinction genuinely hard to detect above ordinary Monte Carlo noise at moderate trial
+    counts -- a real property of this model, not a reason to expect a large effect everywhere.
+    """
+    scenarios = pulmonary_corgi_scenarios(cdk46_max_kill=0.05, nodal_involvement_prob_values=[0.0, 1.0])
+    durability = {}
+    for nodal_prob, (model, css, seeding_rates, debulk, _) in scenarios.items():
+        outcome = run_monte_carlo_two_compartment(
+            model, css, 1825, seeding_rates, nodal_involvement_prob=nodal_prob,
+            nodal_seed_fraction=0.8, debulking_fraction=debulk, trials=250,
+            preexisting_prob=.4, css_reference_2=500., seed=4)
+        durability[nodal_prob] = 1 - outcome.progressed.mean()
+    assert durability[0.0] > durability[1.0]

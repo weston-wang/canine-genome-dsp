@@ -57,6 +57,12 @@ clinical benefit in advanced solid tumors (Cell Research, 2024). Canine HS's own
 hotspot mutations, if confirmed present in a given case, are the same kind of small, recurrent,
 shareable target -- no canine-specific vaccine data exists, so this remains this module's own
 hypothesis-generating extension, not a validated finding.
+
+`run_monte_carlo_two_compartment` extends the single-compartment model to a resectable primary
+tumor plus possible regional (e.g. lymph node) disease that a local resection cannot reach --
+relevant wherever "debulk the primary, then treat systemically" is being modeled for a tumor type
+that isn't always strictly localized at diagnosis, unlike this module's single-compartment
+CNS/PIHS scenarios, which are built around clinical evidence of near-zero dissemination.
 """
 
 from dataclasses import dataclass, replace
@@ -566,3 +572,104 @@ def run_monte_carlo_with_vaccine(reference: ResistanceModel, css_reference: floa
             time_to_progression[trial] = nadir_day + progression_days[0]
         dominant_mechanism.append(_dominant_mechanism(state[-1], trial_progressed, clone_names))
     return MonteCarloOutcome(trajectories, progressed, time_to_progression, dominant_mechanism)
+
+
+@dataclass
+class TwoCompartmentOutcome:
+    primary_trajectories: np.ndarray    # (trials, days+1, k)
+    nodal_trajectories: np.ndarray      # (trials, days+1, k) -- all-zero for trials with no nodal disease
+    has_nodal_involvement: np.ndarray   # (trials,) bool
+    progressed: np.ndarray              # (trials,) bool, based on primary+nodal combined burden
+    time_to_progression: np.ndarray
+    dominant_mechanism: list[str]
+    dominant_compartment: list[str]     # "primary", "nodal", or "none" (durable response)
+
+
+def run_monte_carlo_two_compartment(reference: ResistanceModel, css_reference: float, horizon_days: int,
+                                    seeding_rates: np.ndarray, nodal_involvement_prob: float,
+                                    nodal_seed_fraction: float, debulking_fraction: float = 0.0,
+                                    trials: int = 500, preexisting_prob: float = .3,
+                                    exposure_scale: float = .3, seeding_rate_scale: float = .5,
+                                    seed_fraction: float = 1e-8, detection_floor_fraction: float = .01,
+                                    initial_burden: float = .3, css_reference_2: float | None = None,
+                                    exposure_scale_2: float = .3, seed: int = 7) -> TwoCompartmentOutcome:
+    """A two-compartment extension of `run_monte_carlo` for a resectable primary tumor that may
+    already have seeded regional (e.g. lymph node) disease before surgery -- unlike
+    `run_monte_carlo`'s single-compartment model, which implicitly assumes debulking reaches
+    every tumor cell wherever it is.
+
+    Per trial: a single perturbed model, drug exposure, and primary-tumor initial state are drawn
+    exactly as in `run_monte_carlo`. With probability `nodal_involvement_prob`, a nodal deposit is
+    also seeded, at `nodal_seed_fraction` of the *pre-debulking* primary tumor's size and clonal
+    composition -- pre-debulking because metastatic spread is a biological event that already
+    happened before a later surgical decision, so a resistant subclone present in the primary at
+    the time of spread is carried into the node too, not independently re-sampled. `debulking_fraction`
+    then shrinks the primary only; the nodal compartment (if present) is left untouched, modeling a
+    lobectomy-type resection that cannot reach disease outside the resected organ. Both
+    compartments receive the identical drug-concentration series (no barrier distinguishes them,
+    unlike the CNS case) and each seeds its own acquired resistance independently via its own
+    Poisson process, since they are physically separate, independently-dividing cell populations
+    after the point of metastatic seeding. Progression is judged on the combined (primary + nodal)
+    burden, matching how relapse would actually be detected clinically.
+    """
+    rng = np.random.default_rng(seed)
+    k = len(reference.growth)
+    identity_model = replace(reference, mutation=np.eye(k))
+    detection_floor = detection_floor_fraction * reference.carrying_capacity
+
+    primary_trajectories = np.zeros((trials, horizon_days + 1, k))
+    nodal_trajectories = np.zeros((trials, horizon_days + 1, k))
+    has_nodal_involvement = np.zeros(trials, dtype=bool)
+    progressed = np.zeros(trials, dtype=bool)
+    time_to_progression = np.full(trials, np.nan)
+    dominant_mechanism = []
+    dominant_compartment = []
+    for trial in range(trials):
+        model = perturb_resistance_model(identity_model, rng)
+        css = css_reference * rng.lognormal(0, exposure_scale)
+        concentration = np.full(horizon_days, css)
+        concentration_2 = None
+        if css_reference_2 is not None:
+            css_2 = css_reference_2 * rng.lognormal(0, exposure_scale_2)
+            concentration_2 = np.full(horizon_days, css_2)
+
+        pre_debulking_primary = sample_initial_state(rng, k, preexisting_prob,
+                                                      mechanism_weights=seeding_rates,
+                                                      initial_burden=initial_burden)
+        primary_initial = pre_debulking_primary * (1 - debulking_fraction)
+        has_nodal = bool(rng.random() < nodal_involvement_prob)
+        has_nodal_involvement[trial] = has_nodal
+        nodal_initial = pre_debulking_primary * nodal_seed_fraction if has_nodal else np.zeros(k)
+
+        compartment_states = []
+        for initial in (primary_initial, nodal_initial):
+            sensitive_only = np.zeros(k)
+            sensitive_only[0] = initial[0]
+            sensitive_trajectory = simulate_resistance(model, concentration, sensitive_only,
+                                                        concentration_2=concentration_2)[:, 0]
+            jittered_rates = seeding_rates * rng.lognormal(0, seeding_rate_scale, len(seeding_rates))
+            injections = poisson_mutation_injections(rng, sensitive_trajectory, jittered_rates, seed_fraction)
+            state = simulate_resistance(model, concentration, initial, injections, concentration_2)
+            compartment_states.append(state)
+        primary_state, nodal_state = compartment_states
+        primary_trajectories[trial] = primary_state
+        nodal_trajectories[trial] = nodal_state
+
+        total = primary_state.sum(axis=1) + nodal_state.sum(axis=1)
+        nadir_day = int(np.argmin(total))
+        threshold = max(PROGRESSION_THRESHOLD * total[nadir_day], detection_floor)
+        progression_days = np.flatnonzero(total[nadir_day:] >= threshold)
+        trial_progressed = progression_days.size > 0 and progression_days[0] > 0
+        progressed[trial] = trial_progressed
+        if trial_progressed:
+            time_to_progression[trial] = nadir_day + progression_days[0]
+        combined_final = primary_state[-1] + nodal_state[-1]
+        dominant_mechanism.append(_dominant_mechanism(combined_final, trial_progressed))
+        if not trial_progressed:
+            dominant_compartment.append("none")
+        else:
+            primary_resistant = primary_state[-1, 1:].sum()
+            nodal_resistant = nodal_state[-1, 1:].sum()
+            dominant_compartment.append("nodal" if nodal_resistant > primary_resistant else "primary")
+    return TwoCompartmentOutcome(primary_trajectories, nodal_trajectories, has_nodal_involvement,
+                                 progressed, time_to_progression, dominant_mechanism, dominant_compartment)

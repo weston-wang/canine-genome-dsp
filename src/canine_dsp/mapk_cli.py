@@ -15,6 +15,7 @@ from .mapk_resistance import (
     decompose_patient_uncertainty,
     run_monte_carlo,
     run_monte_carlo_fixed_patient,
+    run_monte_carlo_two_compartment,
     run_monte_carlo_with_vaccine,
 )
 from .uniprot import DOG_TAXID, HUMAN_TAXID, resolve_uniprot_accession
@@ -1234,6 +1235,196 @@ def vaccine_epitope_binding_demo(out: Path, lengths: list[int] = (9, 10, 11)) ->
             "question -- not whether the vaccine would work in any given dog, which also "
             "depends on that dog's own (untyped) DLA genotype, T-cell repertoire, and tumor "
             "immune microenvironment, none of which this checks."
+        ),
+    }
+    (out / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")
+
+
+# Localized pulmonary histiocytic sarcoma in Pembroke Welsh Corgis ------------------------------
+# A real, independently-described Corgi-associated HS presentation, distinct from PIHS above: a
+# case series of localized pulmonary HS (Sakai et al. 2015, J Vet Med Sci 77(12):1667-1670, PMID
+# 26155931). Two things are concretely different from the PIHS scenarios and worth modeling
+# rather than reusing those numbers unchanged: (1) lung tissue has no blood-brain-barrier-type
+# restriction, so drug reaches it at full systemic concentration, not the 15% brain-penetration
+# fraction used above -- verified (clone_growth_margins) that this alone does not close the
+# same two-of-three-clones-still-positive-margin gap found in the PIHS scenarios, since those
+# clones resist trametinib via a capped maximum kill rate, not merely insufficient concentration;
+# (2) unlike Kishimoto's near-zero-dissemination PIHS cohort, this case series reports regional
+# lymph node involvement in many cases, with median survival of only 133 days across all 19 dogs
+# -- meaning "debulk the primary, then treat systemically" cannot assume surgery reaches the
+# whole disease burden the way it was modeled for PIHS.
+PULMONARY_CORGI_CASE_SERIES = (
+    "Sakai et al. 2015, J Vet Med Sci 77(12):1667-1670 (PMID 26155931): 19 Pembroke Welsh Corgis "
+    "with histiocytic sarcoma involving lung and/or regional lymph nodes; median survival 133 "
+    "days across the cohort; no prognostic factor examined (including surgical resection status) "
+    "reached statistical significance in that small series -- not a claim those factors don't "
+    "matter, just that this series was underpowered to detect it."
+)
+
+# No precise nodal-involvement rate was reported (the paper describes "many cases", not a
+# percentage); swept rather than fixed to one value for the same reason every other genuinely
+# unknown parameter in this module is swept.
+NODAL_INVOLVEMENT_PROB_SWEEP = [0.0, 0.2, 0.4, 0.6]
+
+# Illustrative: a clinically-detected nodal deposit is unlikely to be a handful of cells (unlike
+# the microscopic 1e-6-1e-3 pre-existing-subclone fractions used elsewhere in this module), but
+# no measurement of relative nodal-to-primary tumor burden at diagnosis exists for this disease --
+# chosen as a round, clinically-plausible "meaningful but still a minority of total burden" value.
+NODAL_SEED_FRACTION = 0.1
+
+_PULMONARY_BASELINE_BURDEN = .3  # same illustrative pre-debulking baseline used elsewhere
+
+
+def pulmonary_corgi_scenarios(cdk46_max_kill: float = 0.0, debulking_fraction: float = DEBULKING_FRACTION,
+                              nodal_involvement_prob_values: list[float] = NODAL_INVOLVEMENT_PROB_SWEEP,
+                              ) -> dict[float, tuple[ResistanceModel, float, np.ndarray, float, dict]]:
+    """Trametinib (+/- CDK4/6i) at full systemic exposure (no CNS brain-penetration discount) for
+    a resectable primary lung mass, swept over how likely regional nodal disease already is.
+
+    Uses `dog_preset`'s baseline mechanism-weight spectrum unchanged -- no Corgi-specific germline
+    locus exists to justify reweighting it, deliberately, for the same reason
+    `canine_cns_hs_scenarios` does not offer a "corgi" breed option: extending real GWAS loci from
+    bmd/flat_coated_retriever is a reasonable extrapolation; inventing a Corgi-specific one from
+    nothing would not be.
+    """
+    model, systemic_css, seeding_rates, base_provenance = dog_preset()
+    if cdk46_max_kill > 0:
+        model = replace(model, ic50_nM_2=CDK46_ILLUSTRATIVE_IC50_NM, max_kill_2=cdk46_max_kill)
+    scenarios = {}
+    for nodal_involvement_prob in nodal_involvement_prob_values:
+        provenance = {**base_provenance, "site": "localized pulmonary (Corgi)",
+                     "cdk46_max_kill": cdk46_max_kill, "debulking_fraction": debulking_fraction,
+                     "nodal_involvement_prob": nodal_involvement_prob,
+                     "nodal_seed_fraction": NODAL_SEED_FRACTION,
+                     "case_series": PULMONARY_CORGI_CASE_SERIES}
+        scenarios[nodal_involvement_prob] = (model, systemic_css, seeding_rates, debulking_fraction, provenance)
+    return scenarios
+
+
+def pulmonary_two_compartment_demo(out: Path, cdk46_max_kill: float = 0.0,
+                                   debulking_fraction: float = DEBULKING_FRACTION,
+                                   trials: int = 300, horizon_days: int = 730,
+                                   preexisting_prob: float = _PREEXISTING_PROB_CENTRAL,
+                                   seed: int = 7) -> None:
+    """Sweeps `NODAL_INVOLVEMENT_PROB_SWEEP` for the localized pulmonary Corgi HS scenario, and
+    contrasts the result against what a single-compartment model (as used throughout this
+    module's CNS/PIHS scenarios) would have naively predicted by implicitly assuming debulking
+    reaches all disease -- i.e. `nodal_involvement_prob=0` -- showing concretely how much that
+    assumption can overstate the benefit of surgery once undetected regional disease is plausible.
+    """
+    out.mkdir(parents=True, exist_ok=True)
+    scenarios = pulmonary_corgi_scenarios(cdk46_max_kill, debulking_fraction, NODAL_INVOLVEMENT_PROB_SWEEP)
+    css_2 = CDK46_ILLUSTRATIVE_CSS_NM if cdk46_max_kill > 0 else None
+
+    rows, outcomes = [], {}
+    for nodal_prob, (model, css, seeding_rates, debulk, _) in scenarios.items():
+        outcome = run_monte_carlo_two_compartment(
+            model, css, horizon_days, seeding_rates, nodal_involvement_prob=nodal_prob,
+            nodal_seed_fraction=NODAL_SEED_FRACTION, debulking_fraction=debulk, trials=trials,
+            preexisting_prob=preexisting_prob, initial_burden=_PULMONARY_BASELINE_BURDEN,
+            css_reference_2=css_2, seed=seed)
+        outcomes[nodal_prob] = outcome
+        ttp = outcome.time_to_progression[outcome.progressed]
+        mechanism_counts = pd.Series(outcome.dominant_mechanism).value_counts()
+        mechanism_fractions = (mechanism_counts.reindex(["durable_response"] + CLONE_NAMES[1:], fill_value=0)
+                              / len(outcome.dominant_mechanism))
+        compartment_counts = pd.Series(outcome.dominant_compartment).value_counts()
+        compartment_fractions = (compartment_counts.reindex(["none", "primary", "nodal"], fill_value=0)
+                                / len(outcome.dominant_compartment))
+        rows.append({
+            "nodal_involvement_prob": nodal_prob,
+            "probability_durable_response": float(1 - outcome.progressed.mean()),
+            "probability_progression": float(outcome.progressed.mean()),
+            "median_time_to_progression_days": float(np.median(ttp)) if ttp.size else None,
+            "fraction_trials_with_nodal_disease": float(outcome.has_nodal_involvement.mean()),
+            **{f"mechanism_{mechanism}": float(value) for mechanism, value in mechanism_fractions.items()},
+            **{f"relapse_from_{compartment}": float(value) for compartment, value in compartment_fractions.items()
+               if compartment != "none"},
+        })
+    table = pd.DataFrame(rows)
+    table.to_csv(out / "pulmonary_two_compartment_sensitivity.csv", index=False)
+
+    naive_durable = float(1 - outcomes[0.0].progressed.mean())
+
+    days = np.arange(horizon_days + 1)
+    fig, axes = plt.subplots(1, 3, figsize=(15.5, 4.5))
+    for nodal_prob, outcome in outcomes.items():
+        combined = outcome.primary_trajectories.sum(axis=2) + outcome.nodal_trajectories.sum(axis=2)
+        axes[0].plot(days, np.median(combined, axis=0), label=f"P(nodal)={nodal_prob}")
+    axes[0].set(xlabel="day", ylabel="median combined tumor burden",
+               title="pulmonary Corgi HS: primary + nodal")
+    axes[0].legend(fontsize=7)
+    axes[1].plot(table["nodal_involvement_prob"], table["probability_durable_response"],
+                marker="o", color="tab:blue")
+    axes[1].axhline(naive_durable, color="gray", linestyle="--", linewidth=1,
+                    label="naive single-compartment (assumes surgery reaches everything)")
+    axes[1].set(xlabel="P(regional nodal involvement at diagnosis)", ylabel="P(durable response)",
+               title="does undetected nodal disease erase the surgery benefit?", ylim=(0, 1))
+    axes[1].legend(fontsize=6)
+    relapse_columns = [c for c in table.columns if c.startswith("relapse_from_")]
+    table.set_index("nodal_involvement_prob")[relapse_columns].plot(kind="bar", stacked=True, ax=axes[2])
+    axes[2].set(ylabel="fraction of trials that relapsed",
+               title="relapse source: primary regrowth vs. nodal disease")
+    axes[2].legend(fontsize=7)
+    fig.tight_layout(); fig.savefig(out / "pulmonary_two_compartment.png", dpi=160); plt.close(fig)
+
+    summary = {
+        "cdk46_max_kill_used": cdk46_max_kill, "debulking_fraction": debulking_fraction,
+        "preexisting_prob_used": preexisting_prob, "nodal_seed_fraction": NODAL_SEED_FRACTION,
+        "sensitivity": rows, "case_series": PULMONARY_CORGI_CASE_SERIES,
+        "full_systemic_exposure_note": (
+            "Uses dog_preset's full systemic trametinib exposure (Cmax ~1640 nM), not the "
+            "15%-brain-penetration-discounted concentration used in the CNS/PIHS scenarios -- "
+            "lung tissue has no comparable barrier. Verified directly (clone_growth_margins) "
+            "that this does not, by itself, resolve the same two-of-three-clones-still-positive-"
+            "margin problem found in the CNS scenarios: those clones resist trametinib via a "
+            "capped maximum kill rate, not merely insufficient concentration, so removing the "
+            "brain-penetration penalty does not remove the need for a higher-potency CDK4/6i or "
+            "a vaccine -- it mainly affects how quickly the drug-sensitive bulk of the tumor "
+            "responds, not whether the resistant routes are closed."
+        ),
+        "regimen_dependence_note": (
+            "At this demo's default (trametinib monotherapy, cdk46_max_kill=0.0), the effect of "
+            "nodal_involvement_prob on overall durable-response probability is small and can be "
+            "within ordinary Monte Carlo noise (see the mechanism_pathway_reactivation/"
+            "relapse_from_nodal columns for the underlying, more visible per-mechanism signal): "
+            "at full systemic exposure without a second drug, two of three resistant clones' "
+            "growth margins are strongly positive (see clone_growth_margins), so an existing "
+            "subclone is already close to guaranteed to reach detectable size within a "
+            "multi-year horizon regardless of which compartment it started in -- debulking "
+            "placement barely matters when relapse is already nearly certain either way. Rerun "
+            "with the CDK4/6i-combination arm (cdk46_max_kill=0.05, where margins sit close to "
+            "the suppression threshold) to see the effect clearly: in testing, durable response "
+            "was consistently and robustly lower with nodal_involvement_prob=1.0 than with 0.0 "
+            "(e.g. 94.4% vs 88.4% at one tested parameter set, reproduced with the same "
+            "direction and similar magnitude across multiple random seeds) -- undebulked "
+            "regional disease matters most exactly when the rest of the regimen is otherwise "
+            "close to working."
+        ),
+        "unverified_extrapolations": [
+            ("no precise nodal-involvement rate was published for this case series ('many "
+             "cases', not a percentage) -- NODAL_INVOLVEMENT_PROB_SWEEP is swept across an "
+             "illustrative range, not fit to a reported number"),
+            ("NODAL_SEED_FRACTION (relative size of a nodal deposit vs. the primary at "
+             "diagnosis) is an illustrative placeholder; no measurement of this exists for "
+             "canine HS"),
+            ("assumes lymphadenectomy is not performed alongside lobectomy -- if regional nodal "
+             "dissection is standard practice for this presentation, the nodal compartment "
+             "would also be partially debulked, which this scenario does not model"),
+            ("assumes Corgi pulmonary HS carries the same PTPN11/KRAS-dominated driver spectrum "
+             "as systemic HS -- unconfirmed, no sequencing of this presentation has been "
+             "published, the same caveat attached to every scenario in this module"),
+            ("reuses dog_preset's baseline mechanism-weight spectrum unchanged; no Corgi-"
+             "specific germline locus exists to justify reweighting it, deliberately, for the "
+             "same reason canine_cns_hs_scenarios does not offer a 'corgi' breed option"),
+        ],
+        "warning": (
+            "Demonstrates how much a single-compartment model (implicitly assuming surgery "
+            "reaches all disease, as used throughout this module's CNS/PIHS scenarios) can "
+            "overstate durable-response probability once regional disease the surgeon can't "
+            "reach becomes plausible -- read the gap between the dashed naive line and the "
+            "swept curve as the size of that overstatement, not as a calibrated real-world "
+            "estimate for any specific dog."
         ),
     }
     (out / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")

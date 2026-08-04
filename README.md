@@ -720,6 +720,60 @@ affinity is necessary but not sufficient for actual immunogenicity, no specific 
 genotype was typed (the three alleles are literature stand-ins, not any dog's measured genotype),
 and whether Corgi PIHS carries any of these three mutations at all remains unconfirmed.
 
+### Does the approach transfer to localized pulmonary Corgi HS?
+
+A real, independently-described Corgi-associated HS presentation exists distinct from PIHS:
+localized pulmonary histiocytic sarcoma (Sakai et al. 2015, J Vet Med Sci 77(12):1667-1670, PMID
+26155931; 19 Pembroke Welsh Corgis, median survival 133 days). Two things are concretely
+different from the PIHS scenarios above, both checked directly rather than assumed:
+
+1. **Lung tissue has no blood-brain-barrier-type restriction** -- drug reaches it at full
+   systemic concentration (Cmax ~1640 nM), not the 15% brain-penetration-discounted value used
+   for the CNS scenarios. Verified (`clone_growth_margins`) that this alone does *not* close the
+   same two-of-three-clones-still-positive-margin gap found in the CNS scenarios: those clones
+   resist trametinib via a capped maximum kill rate, not merely insufficient concentration, so
+   removing the brain-penetration penalty mainly speeds up how fast the drug-sensitive bulk
+   responds, not whether the resistant routes are actually closed.
+2. **Unlike Kishimoto's near-zero-dissemination PIHS cohort, this case series reports regional
+   lymph node involvement in many cases.** The single-compartment model used throughout this
+   module implicitly assumes debulking (surgery) reaches all disease -- an assumption this
+   presentation's own published natural history argues against.
+
+```bash
+canine-dsp mapk-pulmonary-two-compartment-demo --cdk46-max-kill 0.05 --out results/mapk-pulmonary
+```
+
+`run_monte_carlo_two_compartment` models a resectable primary plus a possible nodal deposit that
+surgery can't reach: the nodal compartment, if present, is seeded from the *pre-debulking*
+primary's clonal composition (metastasis is a biological event that already happened before the
+later surgical decision), left untouched by `debulking_fraction`, and swept across
+`NODAL_INVOLVEMENT_PROB_SWEEP` since no precise nodal-involvement rate was published (the paper
+says "many cases," not a percentage).
+
+A genuinely interesting, non-obvious finding surfaced by actually running this rather than
+assuming a clean story: **at trametinib monotherapy (this demo's default), nodal disease's effect
+on overall durable-response probability is small and can sit within ordinary Monte Carlo noise**
+-- because at full systemic exposure without a second drug, two of three resistant clones' growth
+margins are already strongly positive (not just barely, the way they are at CNS-discounted
+exposure), so an existing subclone is close to guaranteed to reach detectable size within a
+multi-year horizon regardless of which compartment it started in. The stacked relapse-source panel
+still shows the *mechanism* working correctly -- nodal disease's share of relapses rises cleanly
+from 0% to 6% of trials as `nodal_involvement_prob` rises from 0 to 0.6 -- it just doesn't move the
+*overall* probability much when relapse is already nearly certain either way. Switching to the
+CDK4/6i-combination arm (`--cdk46-max-kill 0.05`), where margins sit close to the suppression
+threshold instead of far above it, makes the effect clearly visible and robust: durable response
+was consistently and meaningfully lower with guaranteed nodal involvement than without it across
+multiple random seeds (e.g. 94.4% vs. 88.4% at one tested parameter set) -- **undebulked regional
+disease matters most exactly when the rest of the regimen would otherwise be close to working**,
+which is also exactly the situation where surgery's real limits are easiest to overlook.
+
+This is offered as a demonstration that reusing a single-compartment model's numbers for a
+disease presentation with a different natural history can be actively misleading, not as a
+calibrated estimate for a real dog: `NODAL_SEED_FRACTION` and the involvement-probability sweep
+are both illustrative placeholders, no lymphadenectomy option is modeled, and -- as with every
+other scenario in this module -- whether Corgi pulmonary HS actually carries the same PTPN11/KRAS
+driver spectrum has never been directly confirmed.
+
 ## Research path
 
 1. Pin an assembly and record accessions/checksums in `data/README.md`.

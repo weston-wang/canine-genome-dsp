@@ -18,6 +18,7 @@ from .mapk_cli import (
     localized_control_demo,
     mapk_cns_demo,
     mapk_resistance_demo,
+    pulmonary_two_compartment_demo,
     single_patient_feasibility_demo,
     vaccine_epitope_binding_demo,
     vaccine_followon_demo,
@@ -215,6 +216,16 @@ def main() -> None:
                                   help="check candidate vaccine peptides against real, "
                                        "published canine DLA-I alleles via the live IEDB API")
     mapk_epitope.add_argument("--out", type=Path, required=True)
+    mapk_pulmonary = sub.add_parser("mapk-pulmonary-two-compartment-demo",
+                                    help="localized pulmonary Corgi HS: does undetected regional "
+                                         "nodal disease erase the surgery benefit?")
+    mapk_pulmonary.add_argument("--cdk46-max-kill", type=float, default=0.0)
+    mapk_pulmonary.add_argument("--debulking-fraction", type=float, default=0.97)
+    mapk_pulmonary.add_argument("--trials", type=int, default=300)
+    mapk_pulmonary.add_argument("--horizon-days", type=int, default=730)
+    mapk_pulmonary.add_argument("--preexisting-prob", type=float, default=0.30)
+    mapk_pulmonary.add_argument("--seed", type=int, default=7)
+    mapk_pulmonary.add_argument("--out", type=Path, required=True)
     args = parser.parse_args()
     if args.command == "demo":
         rng = np.random.default_rng(42)
@@ -280,8 +291,12 @@ def main() -> None:
                                         args.cdk46_max_kill, args.horizon_days, args.n_dogs,
                                         args.repeats_per_dog, args.preexisting_prob,
                                         args.location_penetration_multiplier, args.seed)
-    else:
+    elif args.command == "mapk-vaccine-epitope-binding-demo":
         vaccine_epitope_binding_demo(args.out)
+    else:
+        pulmonary_two_compartment_demo(args.out, args.cdk46_max_kill, args.debulking_fraction,
+                                       args.trials, args.horizon_days, args.preexisting_prob,
+                                       args.seed)
 
 
 if __name__ == "__main__":

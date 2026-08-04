@@ -14,6 +14,7 @@ from canine_dsp.mapk_resistance import (
     ramping_kill_schedule,
     run_monte_carlo,
     run_monte_carlo_fixed_patient,
+    run_monte_carlo_two_compartment,
     run_monte_carlo_with_vaccine,
     simulate_resistance,
 )
@@ -296,3 +297,61 @@ def test_vaccine_can_suppress_pathway_reactivation_at_high_potency():
             preexisting_prob=.3, seed=11)
         durability[vaccine_max_kill] = 1 - outcome.progressed.mean()
     assert durability[0.3] >= durability[0.0]
+
+
+def test_two_compartment_no_nodal_disease_when_probability_zero():
+    model = _dog_like_model()
+    seeding_rates = 0.012 * np.array([.85, .10, .05])
+    outcome = run_monte_carlo_two_compartment(
+        model, css_reference=1640., horizon_days=200, seeding_rates=seeding_rates,
+        nodal_involvement_prob=0.0, nodal_seed_fraction=0.1, debulking_fraction=0.9,
+        trials=20, preexisting_prob=.3, seed=3)
+    assert not outcome.has_nodal_involvement.any()
+    assert np.all(outcome.nodal_trajectories == 0)
+    assert "nodal" not in outcome.dominant_compartment
+
+
+def test_two_compartment_debulking_only_shrinks_primary_not_nodal():
+    """Debulking (surgical resection of the primary) should shrink the primary's starting burden
+    but leave the nodal deposit's size determined only by nodal_seed_fraction -- a lobectomy
+    cannot resect disease outside the resected organ."""
+    model = _dog_like_model()
+    seeding_rates = 0.012 * np.array([.85, .10, .05])
+    outcomes = {}
+    for debulking_fraction in (0.0, 0.9):
+        outcomes[debulking_fraction] = run_monte_carlo_two_compartment(
+            model, css_reference=1640., horizon_days=5, seeding_rates=seeding_rates,
+            nodal_involvement_prob=1.0, nodal_seed_fraction=0.1, debulking_fraction=debulking_fraction,
+            trials=10, preexisting_prob=0.0, seed=9)
+    primary_day0 = {d: outcomes[d].primary_trajectories[:, 0].sum(axis=1) for d in outcomes}
+    nodal_day0 = {d: outcomes[d].nodal_trajectories[:, 0].sum(axis=1) for d in outcomes}
+    assert np.all(primary_day0[0.9] < primary_day0[0.0])
+    np.testing.assert_allclose(nodal_day0[0.9], nodal_day0[0.0])
+
+
+def test_two_compartment_nodal_seeded_from_predebulking_primary_composition():
+    """The nodal deposit's starting composition should be a fixed fraction of what the primary
+    tumor looked like BEFORE debulking (metastasis is a pre-existing biological event), not of
+    the post-debulking primary and not independently resampled."""
+    model = _dog_like_model()
+    seeding_rates = 0.012 * np.array([.85, .10, .05])
+    outcome = run_monte_carlo_two_compartment(
+        model, css_reference=1640., horizon_days=5, seeding_rates=seeding_rates,
+        nodal_involvement_prob=1.0, nodal_seed_fraction=0.2, debulking_fraction=0.9,
+        trials=15, preexisting_prob=0.0, seed=5)
+    primary_predebulking = outcome.primary_trajectories[:, 0] / (1 - 0.9)
+    nodal_day0 = outcome.nodal_trajectories[:, 0]
+    np.testing.assert_allclose(nodal_day0, primary_predebulking * 0.2, atol=1e-12)
+
+
+def test_two_compartment_progression_reflects_combined_burden():
+    """A dog whose primary alone would look durably controlled (aggressively debulked) should
+    still be flagged as progressed if the (untouched) nodal compartment, seeded with a large
+    enough deposit, regrows past the detection threshold."""
+    model = _dog_like_model()
+    seeding_rates = 0.012 * np.array([.85, .10, .05])
+    outcome = run_monte_carlo_two_compartment(
+        model, css_reference=1640., horizon_days=400, seeding_rates=seeding_rates,
+        nodal_involvement_prob=1.0, nodal_seed_fraction=0.5, debulking_fraction=0.99,
+        trials=10, preexisting_prob=1.0, seed=6)
+    assert outcome.progressed.any()
