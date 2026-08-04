@@ -32,6 +32,7 @@ from .mapk_scenarios import (
     IMMUNE_ESCAPE_SEEDING_RATE,
     LOCALIZED_THERAPY_PRECEDENT,
     LOMUSTINE_BENCHMARK,
+    MAPK_INHIBITOR_HUMAN_BENCHMARK,
     MECHANISM_AGNOSTIC_RATIONALE,
     NODAL_INVOLVEMENT_PROB_SWEEP,
     NODAL_SEED_FRACTION,
@@ -461,9 +462,29 @@ def durability_horizon_demo(out: Path, breed: str = "bmd", debulking_fraction: f
           title=f"how long is \"durable\"? breed={breed}, cdk46 max_kill={max_kill_2}", ylim=(0, 1.02))
     fig.tight_layout(); fig.savefig(out / "durability_horizon.png", dpi=160); plt.close(fig)
 
+    progressor_medians = [row["median_time_to_progression_days"] for row in rows
+                          if row["median_time_to_progression_days"] is not None]
     summary = {
         "breed_context": breed, "max_kill_2_tested": max_kill_2,
         "preexisting_prob_used": preexisting_prob, "sensitivity": rows,
+        "human_mapk_inhibitor_benchmark": MAPK_INHIBITOR_HUMAN_BENCHMARK,
+        "human_benchmark_comparison": (
+            f"This module's own median_time_to_progression_days among progressors ranges "
+            f"{min(progressor_medians):.0f}-{max(progressor_medians):.0f} days across the "
+            f"horizons tested, versus a real 111-day [95% CI 98-124] median in "
+            "MAPK_INHIBITOR_HUMAN_BENCHMARK's human BRAF+MEK-inhibitor melanoma cohort -- this "
+            "module's progressors take far longer to progress once a resistant clone exists "
+            "than that real human cohort did. Plausible, non-exclusive reasons: a debulked, "
+            "adjuvant-therapy canine scenario against a smaller disease burden than metastatic "
+            "melanoma; a different driver mutation and resistance-mechanism spectrum; or this "
+            "module's own growth/kill-rate margins being tuned looser than real resistant-clone "
+            "kinetics actually are. Not evidence either model is right -- read it as one more "
+            "reason to treat this module's specific day-counts as illustrative, the same "
+            "caveat LOMUSTINE_BENCHMARK's response-rate comparison already carries."
+            if progressor_medians else
+            "No trial in this run had any progressor to compare against "
+            "MAPK_INHIBITOR_HUMAN_BENCHMARK's 111-day human median."
+        ),
         "note": (
             "\"Durable response\" throughout this module means only \"no relapse detected "
             "within the horizon that specific run used,\" not permanence. In testing here, "

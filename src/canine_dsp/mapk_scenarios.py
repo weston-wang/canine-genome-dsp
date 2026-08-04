@@ -66,6 +66,36 @@ LOMUSTINE_BENCHMARK = {
              "module's RECIST-style progression-from-nadir definition.",
 }
 
+# A second real sanity-check benchmark, this time from the human side of the same driver pathway:
+# real patients, a real MAPK-inhibitor combination, real measured time-to-progression -- found by
+# searching for published mathematical-oncology models fit to real clinical resistance-timing
+# data for BRAF/MEK-inhibitor therapy (the search that also turned up KPR above). Most candidates
+# found either weren't fit to human clinical data at all (one systems-pharmacology BRAF/MEK +
+# checkpoint-inhibitor model was calibrated against mouse xenograft experiments, not patients, and
+# doesn't model resistance dynamics) or were inaccessible to verify -- this is the one number that
+# held up on direct inspection of the source paper, not a model parameter, and is used the same
+# way LOMUSTINE_BENCHMARK is: a labeled reference line to compare this module's own
+# median_time_to_progression_days against, not something fit into any growth/kill/seeding-rate
+# constant above (mapping a human-melanoma, BRAF-mutant, ctDNA-monitored cohort onto a canine-HS,
+# PTPN11/KRAS-mutant, imaging-monitored model would stack a cross-species and cross-mutation
+# extrapolation on top of an already-illustrative one).
+MAPK_INHIBITOR_HUMAN_BENCHMARK = {
+    "citation": "Schreuer et al. 2016, J Transl Med 14:95, PMID 27095081",
+    "population": "36 metastatic (mostly stage IVc) BRAF-V600-mutant melanoma patients on "
+                  "dabrafenib+trametinib (BRAF+MEK inhibitor combination -- a real precedent for "
+                  "combining a MEK inhibitor with a second MAPK-pathway-targeted agent, though "
+                  "the second agent, mutation, tumor type, and species all differ from this "
+                  "module's own scenarios)",
+    "median_days_to_clinical_progression": 111,  # 95% CI 98-124; 27 of 36 patients progressed
+    "confidence_interval_days": [98, 124],
+    "progressed_fraction": 27 / 36,
+    "caveat": "A different species, mutation (BRAF, not PTPN11/KRAS), drug pair, and disease "
+             "stage than any scenario in this module -- provided for scale (does this module's "
+             "own median_time_to_progression_days land in a remotely plausible range once a "
+             "resistant clone is present, compared to a real MAPK-inhibitor-treated cohort), not "
+             "as a validation of this module's specific numbers.",
+}
+
 # Fraction of plasma drug concentration reached in brain tissue -- real, drug-specific PK
 # measurements (P-gp/BCRP-limited), not distinguished below by brain region (rostrotentorial
 # cerebrum, the common presentation, vs. infratentorial cerebellum/brainstem, the minority one).
@@ -555,7 +585,8 @@ def dog_preset() -> tuple[ResistanceModel, float, np.ndarray, dict]:
         "citation": "Genes 2024;15(8):1050, PMID 39202410",
         "clinical_development": (
             "Two Phase II trials of trametinib (not cobimetinib) for canine HS are open "
-            "(University of Florida; Michigan State University, VCT25005905), following a "
+            "(University of Florida; Michigan State University, VCT24005793 per the Veterinary "
+            "Clinical Trials Registry), following a "
             "completed Phase I dose-escalation PK/safety study (Takada et al. 2024, Vet Comp "
             "Oncol) that set the recommended dose at 0.5 mg/m^2/day PO (dose-limiting grade 3 "
             "hypertension, proteinuria, lethargy, elevated ALP), reaching a steady-state "

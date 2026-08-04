@@ -26,15 +26,21 @@ returned a DLA entry) -- so, unlike class I, there is currently no real tool to 
 T-cell axis with, and this module does not attempt to fake one with a human-allele substitute.
 
 DLA allele *typing* (calling a specific dog's actual DLA genotype from its own sequencing reads,
-the way OptiType/HLA-HD/arcasHLA do for human HLA) has no equivalent single, widely-adopted
-open-source tool: published canine DLA genotyping work (e.g. NGS-based DLA-88 genotyping papers;
-PacBio full-length DLA-88/DRB1 typing) describes bespoke amplicon-sequencing-plus-reference-
-matching protocols against the curated IPD-MHC Canine database
+the way OptiType/HLA-HD/arcasHLA do for human HLA) update: a real, runnable, reusable tool for
+this was found after all -- KPR (Kmer-based Paired-end Read de novo assembler and genotyper; Hess
+et al. 2023, iScience 26(2), PMID 36798440; https://github.com/ZhaoS-Lab/KPR), built specifically
+because human-HLA-style typing software fails on dogs' far sparser known-allele databases. It
+genotypes DLA-I directly from an individual dog's paired-end RNA-seq reads (maps reads to DLA-I
+reference alleles, assembles the mapped reads de novo per-locus, then genotypes the assembled
+contig against the reference panel) and was validated on 152 real dogs from a published dataset,
+recovering 33 putative new alleles. It does not remove the other real gap, though: this project
+has no actual dog's RNA-seq reads to feed it, so a typing step still has no real input here --
+KPR is the right tool for whenever that changes, not something usable today. (No DRB1/class-II-
+specific equivalent was found; DLA-I is as far as real, off-the-shelf typing software currently
+reaches.) The curated IPD-MHC Canine database remains the reference panel typing works against
 (https://www.ebi.ac.uk/ipd/mhc/group/DLA/, 173 DLA-I + 297 DLA-II alleles as of the 2026 search
-that informed this module), not a single reusable typing program. This project also has no
-actual dog's sequencing reads to type in the first place, so a typing step has no real input
-here regardless of whether a tool existed. What this module adds instead is the binding-
-prediction half only, using the three real, published, functionally characterized DLA-88 alleles
+that informed this module). What this module adds is the binding-prediction half only, using the
+three real, published, functionally characterized DLA-88 alleles
 below as population-representative stand-ins for "a dog's DLA-88 genotype" -- not a claim about
 any specific dog's actual, unmeasured genotype.
 """
