@@ -1,5 +1,7 @@
 import json
+import sys
 
+from canine_dsp import cli
 from canine_dsp.hsa_cli import (
     hsa_combination_control_demo,
     hsa_combination_search_demo,
@@ -9,10 +11,34 @@ from canine_dsp.hsa_cli import (
 from canine_dsp.hsa_scenarios import (
     HSA_CLONE_NAMES,
     HSA_VACCINE_CLONE_NAMES,
+    _PREEXISTING_PROB_CENTRAL,
     dog_hsa_preset,
     hsa_combination_scenarios,
     hsa_vaccine_followon_scenarios,
 )
+
+
+def test_preexisting_prob_central_recentered_to_pessimistic_end():
+    # Recentered from 0.30 to 0.70 after comparing this scenario's output against the one real
+    # HSA efficacy benchmark available (eBAT) -- see hsa_scenarios.py's comment for the reasoning
+    # and its limits. This pins the value so a future edit can't silently drift it back.
+    assert _PREEXISTING_PROB_CENTRAL == 0.70
+
+
+def test_cli_hsa_demo_defaults_do_not_drift_from_the_recentered_constant(tmp_path, monkeypatch):
+    # Regression test for a real bug: cli.py's argparse --preexisting-prob defaults were once
+    # hardcoded literals (0.30) duplicating hsa_scenarios._PREEXISTING_PROB_CENTRAL, so when that
+    # constant was recentered to 0.70, every hsa_* CLI command silently kept using the stale 0.30
+    # default unless --preexisting-prob was passed explicitly. cli.py now imports the constant
+    # directly instead of duplicating its value; this checks the CLI path end-to-end, not just
+    # that the Python-level function default is correct.
+    monkeypatch.setattr(sys, "argv", [
+        "canine-dsp", "hsa-vaccine-followon-demo", "--trials", "10", "--horizon-days", "60",
+        "--out", str(tmp_path),
+    ])
+    cli.main()
+    summary = json.loads((tmp_path / "summary.json").read_text())
+    assert summary["preexisting_prob_used"] == _PREEXISTING_PROB_CENTRAL
 
 
 def test_dog_hsa_preset_ic50_anchored_to_real_cell_line_mean():

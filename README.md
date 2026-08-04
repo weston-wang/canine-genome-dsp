@@ -995,10 +995,12 @@ canine-dsp hsa-vaccine-followon-demo --trials 300 --horizon-days 730 --out resul
 
 `hsa_vaccine_followon_scenarios` layers a vaccine kill term and the same antigen/MHC-I-loss 5th
 clone onto the PI3K/mTOR resistance model, reusing `run_monte_carlo_with_vaccine` unchanged. In
-testing (2-year horizon, 300 trials): durable response was 68% at vaccine off, climbing to 77% at
-`vaccine_max_kill=0.03`, then **100% at 0.05 and 0.08** -- the same sharp-threshold shape found for
-histiocytic sarcoma's vaccine follow-on, and `immune_escape` never appeared as the dominant
-mechanism at any potency tested. Read this the same way as every other number in this pipeline:
+testing (2-year horizon, 300 trials, at the recentered `preexisting_prob=0.70` -- see "Checking
+the model's own outcome against the real eBAT trial" below for why): durable response was 32% at
+vaccine off, climbing to 53% at `vaccine_max_kill=0.03`, then **100% at 0.05 and 0.08** -- the same
+sharp-threshold shape found for histiocytic sarcoma's vaccine follow-on, and `immune_escape` never
+appeared as the dominant mechanism at any potency tested. Read this the same way as every other
+number in this pipeline:
 the four real trials above establish that cancer vaccines have real, in some cases statistically
 significant, benefit in canine HSA generally -- none of them were tested specifically with a
 PI3K/mTOR inhibitor, none report outcomes by driver mutation, and `vaccine_max_kill` here is
@@ -1044,6 +1046,54 @@ mechanism-agnostic second node is modeled (it's applied identically to every clo
 drug-sensitive one), not evidence that a real inhibitor is unnecessary -- but it's exactly the
 kind of assumption ("of course you need the targeted drug") this search exists to check rather
 than take for granted.
+
+### Checking the model's own outcome against the real eBAT trial -- and recalibrating on it
+
+Comparing this scenario's population-level output directly against the one real HSA efficacy
+number available (eBAT's own trial, not a different drug's) turned up a real mismatch, not a
+reassuring match: at this module's original default (`preexisting_prob=0.30`), inhibitor-alone
+durable response (~66-73% at a 2-year horizon) was several times higher than the real trial's
+1-year survival (26-29%, PMID 28193671) and its actual median survival (8.1-8.6 months). Two
+things contribute, and only one is fixable by a parameter change:
+
+- **A real, HSA-specific mechanism this model has no representation of at all.** Hemangiosarcoma's
+  signature complication is tumor rupture and acute internal hemorrhage -- death independent of
+  whether a resistant clone is regrowing. Histiocytic sarcoma kills more through progressive
+  infiltration and mass effect, which a growth-threshold proxy approximates reasonably well; HSA's
+  vascular/endothelial biology doesn't fit that proxy the same way. No parameter fixes a missing
+  mechanism, and this module does not add one without a real rate to calibrate it to.
+- **`preexisting_prob` was probably set too optimistically.** Sweeping it (as the module already
+  did) shows durable response at `preexisting_prob=0.70` (the pessimistic end of the module's own
+  range) drops to ~31% -- landing in the real trial's range. `_PREEXISTING_PROB_CENTRAL` is
+  recentered to 0.70 on that basis. This is a loose analogy, not a same-drug calibration -- eBAT
+  is mechanistically distinct from this scenario's modeled PI3K/mTOR inhibitor -- so treat it as
+  "moved in the direction the one comparison available supports," not as validated.
+
+Checked deeper into progression specifically (excluding survival's confound with rupture/other
+extreme events) via the one real HSA disease-free-interval (DFI) number found -- Gardner et al.'s
+toceranib trial, a *negative* result: median DFI 161 days with 81% of dogs developing metastatic
+disease. This scenario's own time-to-progression (182-238 days across the eBAT sweep, before this
+recentering) lands in the same range, but its progression *rate* (2-34% at any working potency)
+doesn't -- and there is no real DFI number from a trial where the treatment actually worked to
+check that specific mismatch against. That's a genuine data gap, not something this recentering
+resolves.
+
+```bash
+canine-dsp hsa-resistance-demo --out results/hsa-resistance-v2
+canine-dsp hsa-vaccine-followon-demo --out results/hsa-vaccine-v2
+```
+
+Rerunning after the recentering answers the actual question this section exists to ask: **does
+adding another therapy still reach durable response once the baseline is corrected to be less
+optimistic, or was the earlier "vaccine closes the gap" finding an artifact of an overoptimistic
+baseline?** It wasn't. The inhibitor-alone baseline drops from ~68% to **32%** durable response at
+`preexisting_prob=0.70` -- but adding vaccine still restores it to **100% at `vaccine_max_kill>=0.05`**,
+the identical threshold found before recentering. Rerunning the full combination grid confirms the
+same pattern holds throughout: the *baseline* got substantially worse, but the *thresholds* at
+which each combination becomes sufficient didn't move. Mechanistically this makes sense --
+`preexisting_prob` only changes how large a resistant population starts out, not whether a
+sufficiently potent kill term eventually reverses its growth margin; a stronger baseline pessimism
+mainly matters when nothing is added on top of the primary drug.
 
 ## Research path
 

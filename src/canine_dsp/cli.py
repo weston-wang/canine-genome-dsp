@@ -13,6 +13,7 @@ from .hsa_cli import (
     hsa_resistance_demo,
     hsa_vaccine_followon_demo,
 )
+from .hsa_scenarios import _PREEXISTING_PROB_CENTRAL as HSA_PREEXISTING_PROB_CENTRAL
 from .hybrid_cli import inverse_demo, prepare_dog10k_aging, prepare_gse9794
 from .immunotherapy_cli import immunotherapy_demo
 from .io import read_first_fasta, read_vcf_positions
@@ -151,7 +152,7 @@ def main() -> None:
                                          "for canine hemangiosarcoma")
     hsa_combo_demo.add_argument("--trials", type=int, default=300)
     hsa_combo_demo.add_argument("--horizon-days", type=int, default=730)
-    hsa_combo_demo.add_argument("--preexisting-prob", type=float, default=0.30)
+    hsa_combo_demo.add_argument("--preexisting-prob", type=float, default=HSA_PREEXISTING_PROB_CENTRAL)
     hsa_combo_demo.add_argument("--seed", type=int, default=7)
     hsa_combo_demo.add_argument("--out", type=Path, required=True)
     hsa_vaccine_demo = sub.add_parser("hsa-vaccine-followon-demo",
@@ -161,7 +162,7 @@ def main() -> None:
     hsa_vaccine_demo.add_argument("--ebat-max-kill", type=float, default=0.0)
     hsa_vaccine_demo.add_argument("--trials", type=int, default=300)
     hsa_vaccine_demo.add_argument("--horizon-days", type=int, default=730)
-    hsa_vaccine_demo.add_argument("--preexisting-prob", type=float, default=0.30)
+    hsa_vaccine_demo.add_argument("--preexisting-prob", type=float, default=HSA_PREEXISTING_PROB_CENTRAL)
     hsa_vaccine_demo.add_argument("--seed", type=int, default=7)
     hsa_vaccine_demo.add_argument("--out", type=Path, required=True)
     hsa_search_demo = sub.add_parser("hsa-combination-search-demo",
@@ -170,7 +171,7 @@ def main() -> None:
                                           "durable response rather than assuming one")
     hsa_search_demo.add_argument("--trials", type=int, default=300)
     hsa_search_demo.add_argument("--horizon-days", type=int, default=730)
-    hsa_search_demo.add_argument("--preexisting-prob", type=float, default=0.30)
+    hsa_search_demo.add_argument("--preexisting-prob", type=float, default=HSA_PREEXISTING_PROB_CENTRAL)
     hsa_search_demo.add_argument("--seed", type=int, default=7)
     hsa_search_demo.add_argument("--out", type=Path, required=True)
     mapk_structure = sub.add_parser("mapk-structure-compare",

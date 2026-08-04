@@ -123,7 +123,21 @@ _SHARED_MUTATION = np.eye(4)  # acquired resistance is scheduled stochastically,
 # genuinely unknown quantity in the histiocytic-sarcoma module is swept.
 _SEEDING_RATE_TOTAL = 0.012
 _PREEXISTING_PROB_SWEEP = [0.05, 0.15, 0.30, 0.50, 0.70]
-_PREEXISTING_PROB_CENTRAL = 0.30
+
+# Recentered from 0.30 to 0.70 (the pessimistic end of the module's own sweep) after directly
+# comparing this scenario's population-level output against the one real HSA efficacy benchmark
+# available: at 0.30, inhibitor-alone durable response (~66-73% at a 2-year horizon) was several
+# times higher than the real eBAT trial's 1-year survival (26-29%, n=23/17 -- HSA_EBAT_TRIAL); at
+# 0.70, durable response drops to ~31%, landing in the same range. This is a loose analogy, not a
+# same-drug calibration -- the real benchmark is for eBAT, a mechanistically distinct immunotoxin,
+# not this scenario's modeled PI3K/mTOR inhibitor, so "the model's output magnitude at prob=0.70
+# resembles a different drug's real outcome magnitude" is weaker evidence than fitting a model to
+# its own drug's real data would be. It's also not the whole story: a real, disease-specific
+# catastrophic-event pathway (tumor rupture/hemorrhage, HSA's signature complication, not modeled
+# at all here) plausibly explains some of the original gap on its own, and no parameter choice
+# fixes that. Treat this recentering as "moved in the direction the one comparison we have
+# supports," not as validated.
+_PREEXISTING_PROB_CENTRAL = 0.70
 
 # Real-world survival benchmark from the same 508-dog FidoCure cohort the module docstring
 # describes -- retrospective, not a controlled trial, and mixes whatever other concurrent
@@ -321,6 +335,16 @@ HSA_IMMUNE_ESCAPE_SEEDING_RATE = _SEEDING_RATE_TOTAL * 0.2 * 0.1
 # (all of which evade rapamycin/VDC-597's pathway inhibition specifically, not receptor
 # expression), so eBAT is modeled the same "mechanism-agnostic, applies to every non-escape
 # clone identically" way CDK4/6i is modeled for histiocytic sarcoma.
+#
+# That design has a real consequence worth flagging explicitly rather than letting the output
+# speak for itself: because every modeled clone's growth margin sits close to the others at this
+# scenario's illustrative parameters, durable-response probability doesn't rise gradually with
+# ebat_max_kill/vaccine_max_kill -- it jumps sharply from near-0% to near-100% once potency
+# crosses a narrow threshold (hsa_combination_search_demo's grid shows this directly). That
+# sharpness is a property of these particular illustrative growth-rate parameters being clustered
+# close together, not a real biological cliff -- the same caveat mapk_cli's own combination work
+# already makes for histiocytic sarcoma's CDK4/6i sweep. Read "combination X reaches 100% here"
+# as "X crossed this parameterization's threshold," not as a real all-or-nothing efficacy claim.
 HSA_EBAT_TRIAL = {
     "citation": "Kim et al. 2017, Mol Cancer Ther 16(9):1996-2006, PMID 28193671",
     "agent": "eBAT (bispecific EGF/uPAR-targeted immunotoxin)",
