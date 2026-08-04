@@ -957,14 +957,57 @@ independently verified against that primary source) without being a fit to them 
 aren't the same thing (this module's synthetic progression-from-nadir vs. real overall survival
 mixing unstandardized concurrent treatments), so read this as "not absurd," not "validated."
 
-This is a first scenario, not a finished pipeline: no vaccine, immunotoxin, or combination-therapy
-layer exists yet for HSA the way the HS module built those up incrementally over many turns. Two
-real candidates for that next layer, both already grounded in real completed trials rather than a
-built-from-scratch hypothesis the way HS's vaccine started: **eVim** (an anti-vimentin vaccine +
-doxorubicin, real Phase 2 single-arm trial, MST 235 vs. 136 days, 1-year survival 44% vs. 14%,
-p=0.034) and **eBAT** (a bispecific EGF/uPAR-targeted immunotoxin, real Phase I-II dose-finding
-trial, ~70% vs. <40% historical 6-month survival) -- deliberately not built out in this pass, per
-the same incremental approach the HS module's own growth followed.
+### Cancer-vaccine follow-on
+
+Checking "is there real vaccine work in HSA" directly turned up more than a first pass found, and
+caught a real mistake in the process: an earlier draft of this section named a single vaccine,
+"eVim," with numbers that turned out on closer inspection to belong to a *different*, unrelated
+real trial. There are at least four real, distinct HSA vaccine programs, plus one still enrolling:
+
+- **ERstrePs** (endoplasmic-reticulum-stress peptides from Salmonella-infected HSA cells) --
+  the strongest real result: Marconato et al. 2023, Cancers (Basel) 15(17):4402, PMID 37686485;
+  28 vaccinated dogs vs. 32 historical controls, median OS 276 vs. 175 days (**p=0.002**), 1-year
+  survival 35.7% vs. 6.3%.
+- **eVim** (extracellular vimentin, "iBoost" conjugate technology) -- a second, independent real
+  trial, not the same one: Engbersen et al. 2025, Int J Mol Sci, PMID 41009669; 23 vs. 22 dogs,
+  median OS 235 vs. 136 days (**not significant on its own**), but 1-year survival 44% vs. 14%
+  (p=0.034) and a restricted-mean-survival advantage of 81 days at one year (p=0.02) both were.
+- **Autologous whole-cell vaccine** -- real but far weaker evidence: Lucroy et al. 2020, BMC Vet
+  Res 16:447, PMID 33208160; n=8, uncontrolled, metastatic (Stage III) dogs only.
+- **Xenogeneic VEGFR-2 DNA vaccine** -- a real negative signal, included deliberately rather than
+  omitted, the same discipline as the NRAS/trametinib result above: reliably raised antibodies in
+  healthy dogs, but produced *no increase* in cytotoxic response against a real HSA cell line
+  (Oncotarget, DOI 10.18632/oncotarget.7265, PMC4905448, 2016).
+- **Calviri frameshift-peptide vaccine** -- real, currently enrolling (Wisconsin, Colorado State,
+  UC Davis, as of late 2024), no results yet, the same "real trial running, no readout" situation
+  as the canine trametinib-for-HS trial.
+
+None of the four targets a driver-mutation neoantigen the way the HS module's mRNA-vaccine
+hypothesis does -- a real, deliberate design choice by vaccine developers that independently
+confirms this module's own earlier scoping decision (HSA has no single shared hotspot to build a
+mutation-specific vaccine around). If anything, that makes the antigen-persistence argument more
+secure here than for HS: none of the three modeled drug-resistance mechanisms has any documented
+reason to alter vimentin expression, ER-stress signaling, or whole-tumor antigen presentation.
+
+```bash
+canine-dsp hsa-vaccine-followon-demo --trials 300 --horizon-days 730 --out results/hsa-vaccine
+```
+
+`hsa_vaccine_followon_scenarios` layers a vaccine kill term and the same antigen/MHC-I-loss 5th
+clone onto the PI3K/mTOR resistance model, reusing `run_monte_carlo_with_vaccine` unchanged. In
+testing (2-year horizon, 300 trials): durable response was 68% at vaccine off, climbing to 77% at
+`vaccine_max_kill=0.03`, then **100% at 0.05 and 0.08** -- the same sharp-threshold shape found for
+histiocytic sarcoma's vaccine follow-on, and `immune_escape` never appeared as the dominant
+mechanism at any potency tested. Read this the same way as every other number in this pipeline:
+the four real trials above establish that cancer vaccines have real, in some cases statistically
+significant, benefit in canine HSA generally -- none of them were tested specifically with a
+PI3K/mTOR inhibitor, none report outcomes by driver mutation, and `vaccine_max_kill` here is
+swept, not fit to any of them.
+
+An immunotoxin layer (**eBAT**, a bispecific EGF/uPAR-targeted agent with real Phase I-II
+dose-finding data, ~70% vs. <40% historical 6-month survival) and a second-drug combination layer
+remain the next candidates, deliberately not built out in this pass, per the same incremental
+approach the HS module's own growth followed.
 
 ## Research path
 

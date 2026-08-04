@@ -38,6 +38,57 @@ rapamycin's real trough would put achievable exposure ~50x *below* IC50, predict
 barely works -- directly contradicting the real survival benefit just cited. `dog_hsa_preset`
 resolves this by keeping the reference concentration illustrative rather than publishing that
 self-contradictory pairing; see its own docstring for the exact reasoning.
+
+Cancer-vaccine work in canine HSA turns out to be more extensive than a first pass found, and
+checking it directly (not trusting a search summary) corrected a real mistake in an earlier draft
+of this module, which had misattributed one trial's numbers to a different, unrelated vaccine
+under the wrong name. There are at least four real, distinct programs, none of which targets a
+specific driver-mutation neoantigen the way the histiocytic-sarcoma module's mRNA-vaccine
+hypothesis does -- a real, deliberate design choice by vaccine developers that independently
+confirms this module's own earlier scoping decision: HSA has no single shared hotspot to build a
+mutation-specific vaccine around the way HS's PTPN11/KRAS does, so real HSA vaccine programs
+target broader, genotype-agnostic tumor antigens instead.
+
+- **ERstrePs** (endoplasmic-reticulum-stress-related peptides released from Salmonella-infected
+  HSA cells): the strongest real result found. Marconato et al. 2023, Cancers (Basel) 15(17):4402,
+  PMID 37686485 -- Phase 2, single-arm, 28 vaccinated dogs (post-splenectomy, adjuvant to standard
+  chemotherapy) vs. 32 historical controls. Median overall survival 276 vs. 175 days (p=0.002);
+  1-year survival 35.7% vs. 6.3%.
+- **eVim** (extracellular vimentin, delivered via "iBoost" conjugate technology): a second, later,
+  independent real trial. Engbersen et al. 2025, Int J Mol Sci, PMID 41009669 -- Phase 2,
+  single-arm, 23 vaccinated dogs vs. 22 historical controls (Stage I+II). Median overall survival
+  235 vs. 136 days -- *not* statistically significant on its own; but 1-year survival 44% vs. 14%
+  (p=0.0344) and a restricted-mean-survival-time advantage of 81 days at one year (p=0.02) both
+  were. Read alongside ERstrePs, not in place of it: two different real vaccines, two different
+  significance profiles, on overlapping but not identical patient populations.
+- **Autologous whole-cell vaccine** (mechanically dissociated, chemically inactivated tumor cells
+  plus a small-intestine-submucosa-derived adjuvant): real but far weaker evidence. Lucroy et al.
+  2020, BMC Vet Res 16:447, PMID 33208160 -- a small (n=8), uncontrolled, Stage III (metastatic)
+  cohort; median survival 142 days against a historical 41-day surgery-alone reference, no
+  concurrent control arm.
+- **Xenogeneic VEGFR-2 DNA vaccine**: a real, informative negative signal, included for the same
+  reason the NRAS/trametinib negative result is included above -- not omitted because it's
+  inconvenient. Real immunogenicity/safety study in *healthy* dogs (not an HSA efficacy trial):
+  vaccination reliably raised anti-VEGFR-2 antibodies, but co-incubating vaccinated dogs' PBMCs
+  with a real canine HSA cell line showed *no increase* in cytotoxic response after the final
+  vaccination (Oncotarget, DOI 10.18632/oncotarget.7265, PMC4905448, 2016). Antibody response
+  did not translate to the specific cell-killing readout that would predict tumor efficacy.
+- **Calviri frameshift-peptide vaccine**: a real, currently enrolling therapeutic trial (adjuvant,
+  post-splenectomy, same design pattern as ERstrePs/eVim) across three US veterinary schools
+  (Wisconsin, Colorado State, UC Davis) as of late 2024, targeting "frame-shift peptides" --
+  neoantigens shared across patients and tumor types, arising from RNA processing errors rather
+  than point mutations. No results published yet -- the same "real trial running, no readout yet"
+  situation as the canine trametinib-for-histiocytic-sarcoma trial.
+
+`hsa_vaccine_followon_scenarios`/`hsa_cli.hsa_vaccine_followon_demo` layer a vaccine kill term on
+top of the PI3K/mTOR resistance model above, reusing `mapk_resistance.run_monte_carlo_with_vaccine`
+unchanged. The antigen-persistence argument is, if anything, more secure here than in the
+histiocytic-sarcoma module, precisely because real HSA vaccines don't target a driver mutation:
+none of this module's three modeled resistance mechanisms (all *drug*-resistance routes, evading
+rapamycin/VDC-597 specifically) has any documented reason to alter vimentin expression, ER-stress
+signaling, or whole-tumor antigen presentation, so a vaccine built around any of those real targets
+should keep recognizing cells using any of the three routes. Only genuine antigen/MHC-I loss --
+modeled, as in the histiocytic-sarcoma module, as a 5th clone -- would evade it.
 """
 
 import numpy as np
@@ -181,3 +232,113 @@ def dog_hsa_preset() -> tuple[ResistanceModel, float, np.ndarray, dict]:
         ),
     }
     return model, css_reference, seeding_rates, provenance
+
+
+# Real, distinct HSA cancer-vaccine programs -- see module docstring for what's real, what's
+# strong vs. weak evidence, and why none targets a driver-mutation neoantigen the way the
+# histiocytic-sarcoma module's vaccine hypothesis does.
+HSA_VACCINE_TRIALS = {
+    "erstreps": {
+        "citation": "Marconato et al. 2023, Cancers (Basel) 15(17):4402, PMID 37686485",
+        "antigen": "endoplasmic-reticulum-stress-related peptides (ERstrePs) from "
+                  "Salmonella-infected HSA cells -- not a driver-mutation neoantigen",
+        "design": "Phase 2 single-arm; 28 vaccinated dogs (post-splenectomy, adjuvant to "
+                 "standard chemotherapy) vs. 32 historical controls",
+        "median_survival_vaccinated_days": 276, "median_survival_control_days": 175,
+        "p_value_overall_survival": 0.002,
+        "one_year_survival_vaccinated": 0.357, "one_year_survival_control": 0.063,
+        "strength": "strongest real result of the four -- significant on median OS itself, "
+                   "not only on a secondary endpoint",
+    },
+    "evim": {
+        "citation": "Engbersen et al. 2025, Int J Mol Sci, PMID 41009669",
+        "antigen": "extracellular vimentin (eVim), iBoost conjugate technology -- a "
+                  "mesenchymal/tumor-vasculature marker, not a driver-mutation neoantigen",
+        "design": "Phase 2 single-arm; 23 vaccinated dogs vs. 22 historical controls, Stage I+II",
+        "median_survival_vaccinated_days": 235, "median_survival_control_days": 136,
+        "p_value_overall_survival": None,  # not statistically significant on its own
+        "one_year_survival_vaccinated": 0.44, "one_year_survival_control": 0.14,
+        "p_value_one_year_survival": 0.0344,
+        "restricted_mean_survival_advantage_at_1yr_days": 81, "p_value_rmst": 0.02,
+        "strength": "real and significant on 1-year survival/RMST, but median OS itself did "
+                   "not reach significance -- weaker than ERstrePs on that specific endpoint",
+    },
+    "autologous_whole_cell": {
+        "citation": "Lucroy et al. 2020, BMC Vet Res 16:447, PMID 33208160",
+        "antigen": "whole, chemically-inactivated autologous tumor cells -- non-genotype-specific",
+        "design": "small (n=8), uncontrolled, Stage III (metastatic) HSA; compared only to a "
+                 "historical 41-day surgery-alone reference, no concurrent control arm",
+        "median_survival_vaccinated_days": 142,
+        "strength": "weakest real evidence of the four -- real but small, uncontrolled, and in "
+                   "a more advanced (metastatic) population than the other three",
+    },
+    "vegfr2_dna_negative_control": {
+        "citation": "Oncotarget, DOI 10.18632/oncotarget.7265, PMC4905448, 2016",
+        "antigen": "xenogeneic human VEGFR-2 DNA vaccine",
+        "design": "immunogenicity/safety study in healthy dogs, not an HSA efficacy trial",
+        "finding": "reliably raised anti-VEGFR-2 antibodies, but produced no increase in "
+                  "cytotoxic response against a real canine HSA cell line after vaccination",
+        "note": "included deliberately, not omitted: a real negative signal on the specific "
+               "readout (does this actually help kill HSA cells) that would predict efficacy",
+    },
+    "calviri_frameshift_peptide": {
+        "status": "real, currently enrolling therapeutic trial (adjuvant, post-splenectomy) "
+                 "across University of Wisconsin, Colorado State University, and UC Davis as "
+                 "of late 2024; no results published yet",
+        "antigen": "frame-shift peptides -- neoantigens shared across patients and tumor types, "
+                  "arising from RNA processing errors rather than point mutations",
+    },
+}
+
+# Illustrative, not measured: no canine cancer vaccine trial reports the kind of granular timing
+# data (start day relative to when immune response develops, ramp kinetics) this module's engine
+# needs -- the same situation the histiocytic-sarcoma module's own vaccine constants are in.
+HSA_VACCINE_CLONE_NAMES = HSA_CLONE_NAMES + ["immune_escape"]
+HSA_VACCINE_START_DAY = 30   # illustrative: all four real trials vaccinate starting shortly
+                             # after splenectomy, alongside chemotherapy, not after a drug-only lead-in
+HSA_VACCINE_RAMP_DAYS = 21
+HSA_VACCINE_MAX_KILL_SWEEP = [0.0, 0.01, 0.03, 0.05, 0.08]
+
+# Illustrative fitness cost of antigen/MHC-I loss, and its seeding rate an order of magnitude
+# below the rarest existing drug-resistance mechanism -- the same conventions, and the same
+# "not measured for this or any hemangiosarcoma" caveat, as the histiocytic-sarcoma module's
+# IMMUNE_ESCAPE_GROWTH_PENALTY/IMMUNE_ESCAPE_SEEDING_RATE.
+HSA_IMMUNE_ESCAPE_GROWTH_PENALTY = 0.85
+HSA_IMMUNE_ESCAPE_SEEDING_RATE = _SEEDING_RATE_TOTAL * 0.2 * 0.1
+
+
+def hsa_vaccine_followon_scenarios(cdk46_max_kill: float = 0.0,
+                                   vaccine_max_kill_values: list[float] = HSA_VACCINE_MAX_KILL_SWEEP,
+                                   ) -> dict[float, tuple[ResistanceModel, float, np.ndarray, dict]]:
+    """PI3K/mTOR inhibitor plus a swept-potency cancer vaccine layered on top, mirroring
+    `mapk_scenarios.vaccine_followon_scenarios`'s structure exactly (same 5th-clone
+    antigen/MHC-I-loss mechanic, reusing `mapk_resistance.run_monte_carlo_with_vaccine`
+    unchanged) but built for a genotype-agnostic real vaccine antigen rather than a
+    driver-mutation-specific one -- see module docstring for why that makes the
+    antigen-persistence argument, if anything, more secure here.
+
+    `cdk46_max_kill` is accepted for interface symmetry with the histiocytic-sarcoma module but
+    has no HSA equivalent yet (no second drug has been layered onto this scenario) -- passing a
+    nonzero value raises, rather than silently doing nothing.
+    """
+    if cdk46_max_kill != 0.0:
+        raise NotImplementedError("no second-drug (e.g. CDK4/6i-equivalent) layer exists yet "
+                                  "for the HSA scenario -- pass cdk46_max_kill=0.0")
+    model, css, seeding_rates, provenance = dog_hsa_preset()
+    escape_growth = model.growth[1] * HSA_IMMUNE_ESCAPE_GROWTH_PENALTY
+    model5 = ResistanceModel(
+        growth=np.append(model.growth, escape_growth),
+        ic50_nM=np.append(model.ic50_nM, model.ic50_nM[1]),
+        max_kill=np.append(model.max_kill, model.max_kill[1]),
+        mutation=np.eye(len(model.growth) + 1),
+        hill=model.hill, carrying_capacity=model.carrying_capacity,
+    )
+    scenarios = {}
+    for vaccine_max_kill in vaccine_max_kill_values:
+        scenarios[vaccine_max_kill] = (model5, css, seeding_rates, {
+            **provenance, "vaccine_max_kill": vaccine_max_kill,
+            "vaccine_start_day": HSA_VACCINE_START_DAY, "vaccine_ramp_days": HSA_VACCINE_RAMP_DAYS,
+            "immune_escape_seeding_rate": HSA_IMMUNE_ESCAPE_SEEDING_RATE,
+            "immune_escape_growth_penalty": HSA_IMMUNE_ESCAPE_GROWTH_PENALTY,
+        })
+    return scenarios

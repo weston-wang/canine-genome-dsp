@@ -7,13 +7,20 @@ import pandas as pd
 
 from .hsa_scenarios import (
     HSA_CLONE_NAMES,
+    HSA_IMMUNE_ESCAPE_SEEDING_RATE,
     HSA_RAPAMYCIN_BENCHMARK,
     HSA_STANDARD_OF_CARE_BENCHMARK,
+    HSA_VACCINE_CLONE_NAMES,
+    HSA_VACCINE_MAX_KILL_SWEEP,
+    HSA_VACCINE_RAMP_DAYS,
+    HSA_VACCINE_START_DAY,
+    HSA_VACCINE_TRIALS,
     _PREEXISTING_PROB_CENTRAL,
     _PREEXISTING_PROB_SWEEP,
     dog_hsa_preset,
+    hsa_vaccine_followon_scenarios,
 )
-from .mapk_resistance import run_monte_carlo
+from .mapk_resistance import run_monte_carlo, run_monte_carlo_with_vaccine
 
 
 def hsa_resistance_demo(out: Path, trials: int = 300, horizon_days: int = 730, seed: int = 7) -> None:
@@ -127,6 +134,98 @@ def hsa_resistance_demo(out: Path, trials: int = 300, horizon_days: int = 730, s
             "predictive or clinical model. The real rapamycin PK/PD and FidoCure survival "
             "numbers are reported for scale, not fit into this scenario's own parameters -- see "
             "human_benchmark_comparison."
+        ),
+    }
+    (out / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")
+
+
+def hsa_vaccine_followon_demo(out: Path, horizon_days: int = 730, trials: int = 300,
+                              preexisting_prob: float = _PREEXISTING_PROB_CENTRAL,
+                              seed: int = 7) -> None:
+    """Does layering a cancer vaccine on top of PI3K/mTOR-inhibitor therapy close the gap left by
+    drug resistance alone, the same question `mapk_cli.vaccine_followon_demo` asks for
+    histiocytic sarcoma?
+
+    Real HSA vaccines don't target this scenario's driver mutation (PIK3CA/PTEN) at all -- see
+    `hsa_scenarios` module docstring for the real trials (ERstrePs, eVim, autologous whole-cell,
+    a real vaccine that failed on a key readout, and one still-enrolling trial) and why targeting
+    a genotype-agnostic antigen instead makes the antigen-persistence argument more secure here,
+    not less.
+    """
+    out.mkdir(parents=True, exist_ok=True)
+    scenarios = hsa_vaccine_followon_scenarios(vaccine_max_kill_values=HSA_VACCINE_MAX_KILL_SWEEP)
+
+    rows, outcomes = [], {}
+    for vaccine_max_kill, (model, css, seeding_rates, _) in scenarios.items():
+        outcome = run_monte_carlo_with_vaccine(
+            model, css, horizon_days, seeding_rates, vaccine_start_day=HSA_VACCINE_START_DAY,
+            vaccine_ramp_days=HSA_VACCINE_RAMP_DAYS, vaccine_max_kill=vaccine_max_kill,
+            immune_escape_seeding_rate=HSA_IMMUNE_ESCAPE_SEEDING_RATE,
+            clone_names=HSA_VACCINE_CLONE_NAMES, trials=trials,
+            preexisting_prob=preexisting_prob, seed=seed)
+        outcomes[vaccine_max_kill] = outcome
+        ttp = outcome.time_to_progression[outcome.progressed]
+        mechanism_counts = pd.Series(outcome.dominant_mechanism).value_counts()
+        mechanism_fractions = (mechanism_counts.reindex(["durable_response"] + HSA_VACCINE_CLONE_NAMES[1:],
+                                                        fill_value=0)
+                              / len(outcome.dominant_mechanism))
+        rows.append({
+            "vaccine_max_kill": vaccine_max_kill,
+            "probability_durable_response": float(1 - outcome.progressed.mean()),
+            "probability_progression": float(outcome.progressed.mean()),
+            "median_time_to_progression_days": float(np.median(ttp)) if ttp.size else None,
+            **{f"mechanism_{mechanism}": float(value) for mechanism, value in mechanism_fractions.items()},
+        })
+    table = pd.DataFrame(rows)
+    table.to_csv(out / "hsa_vaccine_followon_sensitivity.csv", index=False)
+
+    days = np.arange(horizon_days + 1)
+    fig, axes = plt.subplots(1, 3, figsize=(15.5, 4.5))
+    for vaccine_max_kill in HSA_VACCINE_MAX_KILL_SWEEP:
+        outcome = outcomes[vaccine_max_kill]
+        median_burden = np.median(outcome.trajectories.sum(axis=2), axis=0)
+        axes[0].plot(days, median_burden, label=f"vaccine max_kill={vaccine_max_kill}")
+    axes[0].axvline(HSA_VACCINE_START_DAY, color="gray", linestyle=":", linewidth=.9)
+    axes[0].set(xlabel="day", ylabel="median total tumor burden",
+               title="HSA (PI3K/mTOR subtype): drug + vaccine")
+    axes[0].legend(fontsize=7)
+    axes[1].plot(table["vaccine_max_kill"], table["probability_durable_response"],
+                marker="o", color="tab:green")
+    axes[1].set(xlabel="vaccine max_kill (illustrative, unmeasured)", ylabel="P(durable response)",
+               title="does the vaccine close the resistance gap?", ylim=(0, 1))
+    mechanism_columns = [f"mechanism_{name}" for name in ["durable_response"] + HSA_VACCINE_CLONE_NAMES[1:]]
+    table.set_index("vaccine_max_kill")[mechanism_columns].plot(kind="bar", stacked=True, ax=axes[2])
+    axes[2].set(ylabel="fraction of trials",
+               title="closing drug-resistance routes vs. opening immune_escape")
+    axes[2].legend(fontsize=6)
+    fig.tight_layout(); fig.savefig(out / "hsa_vaccine_followon.png", dpi=160); plt.close(fig)
+
+    summary = {
+        "horizon_days": horizon_days, "preexisting_prob_used": preexisting_prob,
+        "sensitivity": rows,
+        "real_hsa_vaccine_trials": HSA_VACCINE_TRIALS,
+        "unverified_extrapolations": [
+            ("no canine hemangiosarcoma vaccine trial measures this scenario's own PIK3CA/PTEN "
+             "driver mutation status in its enrolled dogs, as far as could be determined -- "
+             "the real trials above are not restricted to (or even reported by) genotype, so "
+             "they cannot directly validate a subtype-specific model like this one"),
+            ("vaccine_start_day, vaccine_ramp_days, vaccine_max_kill, and the immune-escape "
+             "clone's seeding rate and fitness penalty are all illustrative placeholders, not "
+             "fit to any of the four real trials in HSA_VACCINE_TRIALS"),
+            ("this scenario has no second drug (CDK4/6i-equivalent) layer -- unlike the "
+             "histiocytic-sarcoma module's full drug+drug+vaccine combination, this tests "
+             "single-drug (PI3K/mTOR inhibitor) plus vaccine only"),
+            ("stacks on top of every extrapolation already listed in hsa_resistance_demo's "
+             "summary.json"),
+        ],
+        "warning": (
+            "The real vaccines in HSA_VACCINE_TRIALS are real, but none of them were tested "
+            "specifically in combination with a PI3K/mTOR inhibitor, and none report outcomes "
+            "by driver mutation -- they establish that cancer vaccines have real, in some cases "
+            "statistically significant, benefit in canine HSA generally, not that this specific "
+            "scenario's vaccine_max_kill sweep is calibrated to match any of them. Read this as "
+            "a demonstration of the antigen-persistence argument's *shape*, the same role "
+            "vaccine_followon_demo plays for histiocytic sarcoma, not a probability estimate."
         ),
     }
     (out / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")
