@@ -1415,7 +1415,8 @@ predictions about real eBAT or real vaccine dosing. Exactly one row carries real
 | Regimen | 1yr | 2yr | 5yr | 10yr | Dominant relapse mechanism | Grounded in a real dose? |
 |---|---|---|---|---|---|---|
 | **Inhibitor alone** | 34.7% | 32.3% | 29.7% | **30.0%** | pi3k_akt_feedback (35%), mapk_crosstalk (17%), target_site (13%) | **Yes** -- see below |
-| eBAT alone, no inhibitor (0.05) | 99.7% | 100% | 100% | 100% | none | No -- arbitrary point past an artificial cliff |
+| eBAT alone, no inhibitor, **pessimistic side of the cliff (0.02)** | 0% | 0% | 0% | **0%** | -- (sensitive clone never controlled) | No, but the more plausible side of the two |
+| eBAT alone, no inhibitor, **optimistic side of the cliff (0.05)** | 99.7% | 100% | 100% | 100% | none | No -- arbitrary point past an artificial cliff |
 | Vaccine alone, no inhibitor (0.05) | 100% | 97.3% | 96.7% | 89.0% | immune_escape only, growing 0%->11% | No -- no real dose-response curve exists |
 | eBAT(0.02)+vaccine(0.03), no inhibitor | 100% | 100% | 96.7% | 89.0% | immune_escape only | No |
 | eBAT(0.05)+vaccine(0.05), no inhibitor | 100% | 100% | 100% | 100% | none | No |
@@ -1432,6 +1433,17 @@ still a loose, cross-drug analogy, but a real comparison against real data, not 
 sweep value. Every other row's number is a byproduct of picking *some* point on an unfitted
 potency axis, and should be read only as "what this model's mechanics do at that point," never as
 "what eBAT or this vaccine actually achieves."
+
+The two eBAT-alone rows exist specifically to make that unresolvable: `max_kill=0.02` (0% durable
+at every horizon -- the sensitive clone is never controlled at all) and `max_kill=0.05` (100%) are
+both arbitrary points on the same unfitted axis, one on each side of the cliff, and nothing in
+this module says which one -- if either -- the real 50 ug/kg dose corresponds to. The real trial's
+own outcome (survival capping out around 30-35%, never close to 0% or 100%) is, if anything,
+better matched by the *pessimistic* side than the optimistic one, since the real drug clearly
+does something (0% would mean no effect at all) but nowhere close to eliminating resistance (100%
+would mean a functional cure, which the trial's own long-term survival numbers rule out). Treat
+the 100% row as a demonstration of the model's structure at an extreme, not as evidence that eBAT
+alone would work.
 
 What the table demonstrates *structurally*, independent of any specific percentage: the inhibitor
 is consistently the variable that erodes long-horizon durability wherever it's present at less
