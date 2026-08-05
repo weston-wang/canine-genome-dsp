@@ -5,7 +5,9 @@ import pytest
 from canine_dsp.alphafold import (
     align_residue_numbers,
     confidence_band,
+    contact_number_burial,
     extract_mutant_peptide,
+    find_exposed_linear_epitopes,
     map_variants,
     read_plddt_track,
     whole_sequence_identity,
@@ -152,3 +154,56 @@ def test_map_variants_reports_local_window_and_missing_positions(tmp_path):
     assert mapped.loc[0, "local_mean_plddt"] == pytest.approx(expected_local_mean)
     assert pd.isna(mapped.loc[1, "confidence_band"])
     assert np.isnan(mapped.loc[1, "plddt"])
+
+
+def test_contact_number_burial_ranks_isolated_residue_as_least_contacted():
+    track = pd.DataFrame({
+        "residue_number": [1, 2, 3, 4],
+        "residue_type": list("ABCD"),
+        "plddt": [90.0, 90.0, 90.0, 90.0],
+        "x": [0.0, 1.0, 0.0, 100.0],
+        "y": [0.0, 0.0, 1.0, 100.0],
+        "z": [0.0, 0.0, 0.0, 100.0],
+    })
+    result = contact_number_burial(track, radius=10.0)
+    # A, B, C sit within 1-1.4 A of each other (radius=10 covers all pairs among them);
+    # D sits ~173 A away from the cluster, so it should have zero contacts -- the most
+    # solvent-exposed residue -- while A/B/C each see the other two.
+    contacts = result.set_index("residue_number")["contact_number"]
+    assert contacts[4] == 0
+    assert contacts[1] == contacts[2] == contacts[3] == 2
+
+
+def test_find_exposed_linear_epitopes_picks_lowest_contact_nonoverlapping_windows():
+    track = pd.DataFrame({
+        "residue_number": list(range(1, 13)),
+        "residue_type": list("ABCDEFGHIJKL"),
+        "plddt": [80.0] * 12,
+        "contact_number": [9, 9, 1, 1, 1, 9, 9, 9, 2, 2, 2, 9],
+        "x": np.zeros(12), "y": np.zeros(12), "z": np.zeros(12),
+    })
+    top_one = find_exposed_linear_epitopes(track, window=3, top_n=1)
+    assert len(top_one) == 1
+    assert (top_one.loc[0, "start_residue"], top_one.loc[0, "end_residue"]) == (3, 5)
+    assert top_one.loc[0, "sequence"] == "CDE"
+    assert top_one.loc[0, "mean_contact_number"] == pytest.approx(1.0)
+
+    top_two = find_exposed_linear_epitopes(track, window=3, top_n=2)
+    assert len(top_two) == 2
+    windows = set(zip(top_two["start_residue"], top_two["end_residue"]))
+    # The second-lowest-contact window (residues 9-11, mean=2.0) is far enough from the
+    # first (residues 3-5) not to overlap, so both should be returned rather than the
+    # window search collapsing onto near-duplicates of the same low-contact stretch.
+    assert windows == {(3, 5), (9, 11)}
+
+
+def test_find_exposed_linear_epitopes_rejects_window_longer_than_structure():
+    track = pd.DataFrame({
+        "residue_number": [1, 2, 3],
+        "residue_type": list("ABC"),
+        "plddt": [80.0, 80.0, 80.0],
+        "contact_number": [1, 2, 3],
+        "x": np.zeros(3), "y": np.zeros(3), "z": np.zeros(3),
+    })
+    with pytest.raises(ValueError):
+        find_exposed_linear_epitopes(track, window=5, top_n=1)

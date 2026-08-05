@@ -12,6 +12,7 @@ from .hsa_cli import (
     hsa_combination_search_demo,
     hsa_receptor_conservation_demo,
     hsa_resistance_demo,
+    hsa_vaccine_antigen_design_demo,
     hsa_vaccine_followon_demo,
 )
 from .hsa_scenarios import _PREEXISTING_PROB_CENTRAL as HSA_PREEXISTING_PROB_CENTRAL
@@ -183,6 +184,13 @@ def main() -> None:
                                             "and eVim's real molecular targets (EGFR, PLAUR, VIM)")
     hsa_receptor_demo.add_argument("--genes", nargs="+", default=None)
     hsa_receptor_demo.add_argument("--out", type=Path, required=True)
+    hsa_antigen_demo = sub.add_parser("hsa-vaccine-antigen-design-demo",
+                                      help="structure-based candidate B-cell epitope selection "
+                                           "on a real HSA vaccine antigen (default: VIM/eVim)")
+    hsa_antigen_demo.add_argument("--gene", default="VIM")
+    hsa_antigen_demo.add_argument("--window", type=int, default=9)
+    hsa_antigen_demo.add_argument("--top-n", type=int, default=3)
+    hsa_antigen_demo.add_argument("--out", type=Path, required=True)
     mapk_structure = sub.add_parser("mapk-structure-compare",
                                     help="compare human vs. dog AlphaFold confidence at MAPK-gene hotspots")
     mapk_structure.add_argument("--gene", required=True)
@@ -327,6 +335,8 @@ def main() -> None:
             hsa_receptor_conservation_demo(args.out)
         else:
             hsa_receptor_conservation_demo(args.out, args.genes)
+    elif args.command == "hsa-vaccine-antigen-design-demo":
+        hsa_vaccine_antigen_design_demo(args.out, args.gene, args.window, args.top_n)
     elif args.command == "mapk-structure-compare":
         compare_orthologs(args.gene, args.hotspots, args.out)
     elif args.command == "mapk-cns-demo":

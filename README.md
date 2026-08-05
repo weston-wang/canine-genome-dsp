@@ -1253,7 +1253,56 @@ vimentin fusion protein designed to raise an **antibody** response, not a short 
 on MHC-I to T cells. That makes IEDB/NetMHCpan-style MHC-binding prediction -- the tool built for
 histiocytic sarcoma's driver-mutation neoantigen vaccine -- **the wrong tool for eVim entirely**;
 applying it here would have been a category error, not a finding. No real B-cell/antibody-epitope
-prediction tool was substituted for it; the mismatch is reported rather than papered over.
+prediction tool was substituted for it at the time; the mismatch was reported rather than papered
+over. The structural half of that gap -- not a full B-cell epitope predictor, but the piece
+AlphaFold can actually contribute -- is addressed directly below.
+
+### Replacing the vaccine's generic placeholder with a structure-based candidate antigen
+
+AlphaFold predicts structure from a known sequence; it does not generate or invent new antigen
+sequences the way a generative protein-design tool would. So "use AlphaFold to design a vaccine"
+has to mean something narrower and checkable: for an antibody vaccine like eVim, only the parts
+of the folded antigen actually exposed on its surface are reachable by a circulating antibody at
+all -- a buried residue is a useless target no matter how promising it looks in the raw sequence.
+That's a question AlphaFold's own output can answer, using structure this module had already
+fetched (dog VIM, A0A8C0N8E3) but never analyzed past pLDDT and whole-sequence identity.
+
+`alphafold.contact_number_burial` adds a CA-CA contact-number calculation: for each residue,
+how many other residues' alpha-carbons fall within 10 A. A densely surrounded residue is packed
+into the core; a sparsely surrounded one has open space on at least one side and is more likely
+solvent-exposed. This is a coarse, honestly-labeled proxy for true solvent-accessible surface
+area (SASA), not a replacement for it -- a real Shrake-Rupley SASA calculation needs every atom's
+coordinates, and this module's mmCIF parser reads alpha-carbons only. `alphafold.
+find_exposed_linear_epitopes` then slides a window across the sequence and ranks the least-packed,
+non-overlapping stretches -- contiguous exposed loops, the shape a real linear B-cell epitope
+needs, not isolated exposed points.
+
+```bash
+canine-dsp hsa-vaccine-antigen-design-demo --out results/hsa-antigen-design
+```
+
+Run against dog VIM: the three top candidates are residues **1-9** (`MSTRSVSSS`), **20-28**
+(`TGSRPSSTR`), and **418-426** (`FSSLNLRET`) of 466 -- vimentin's N-terminal head and C-terminal
+tail domains, not anywhere in its long central body. That's independently corroborated by a
+second, unrelated signal: AlphaFold's own per-residue confidence (pLDDT) drops sharply in exactly
+these same regions (down to 30-50, versus 90-99 through the central coiled-coil rod) --
+AlphaFold's confidence collapses in genuinely disordered regions, and intrinsically disordered
+regions are, independently, the regions a folded structure leaves solvent-exposed. Two different
+computations (contact number from coordinates, confidence from the prediction itself) landing on
+the same three stretches is a real consistency check, not a single tool agreeing with itself.
+Cross-referencing conservation: residues 1-9 and 418-426 are 100% identical to human VIM, and
+20-28 is 77.8% identical -- so a human-vaccine-derived epitope from either terminal domain would
+plausibly transfer to dogs, and vice versa.
+
+What this does *not* do, stated as directly as the finding itself: it does not produce a
+`vaccine_max_kill` value or feed anything into the Monte Carlo model. No structural tool predicts
+immunogenicity, antibody titer, or in vivo tumor-clearing efficacy from a folded structure alone
+-- solvent exposure is necessary but nowhere near sufficient for a good antibody target, and this
+ranks candidates within one structure, unvalidated against any real epitope-mapping experiment for
+VIM. `vaccine_max_kill` remains exactly as illustrative and swept as before this analysis, for any
+vaccine construct, real or hypothetical. What changed is narrower and real: "eVim's antigen: some
+generic antibody target" is now "eVim's antigen has two independently-corroborated, actually-
+exposed, human-conserved candidate epitope regions, structurally identifiable rather than assumed."
 
 ### Does this change whether a durable-response combination exists for HSA?
 
@@ -1290,19 +1339,25 @@ can actually bear, and the answer is uneven across the two "extra" ingredients:
   potency knob standing in for "some vaccine, some mechanism" -- not eVim, not ERstrePs (whose
   antigen composition couldn't even be pinned down earlier), and the >=95% thresholds found above
   should be read that way: a property of the model's generic vaccine term, not a projection for
-  any specific real vaccine's actual behavior.
+  any specific real vaccine's actual behavior. The antigen-design work above narrows one part of
+  this gap -- eVim's antigen now has identified, structurally-exposed, human-conserved candidate
+  epitopes instead of being an unexamined black box -- but it doesn't touch the resistance-
+  mechanism mismatch at all: `immune_escape` is still MHC-I-loss, still the wrong escape route for
+  an antibody vaccine, regardless of which epitope on VIM is targeted. Knowing *where* on the
+  antigen a real vaccine could bind says nothing about *how* a real HSA tumor would evade it.
 
 Net: the model still finds parameter regions that reach the durable-response threshold, and that
-hasn't changed. What genomics did was sharpen *which* piece of that finding is solid versus
-illustrative rather than answer the underlying question -- eBAT/EGFR engagement is now backed by
-both structure and outcome data; eBAT/uPAR and the vaccine's resistance mechanism remain open,
-now-named gaps rather than diffuse uncertainty. That's a real improvement in honesty about what's
-known, not a new answer to "is there a real combination": neither confirmed, nor refuted, just a
-more precisely located hole than before this pass. The HS module's own "does the durable-response
-finding hold up" check (above) reached a related but distinct honest conclusion from a different
-angle: not a new gap in the mechanism, but a caught mistake in how a real comparator was used --
-a reminder that "we checked against real data" is not automatically rigorous just because the data
-is real; the comparison itself has to actually match on the axes that matter.
+hasn't changed. What genomics and structure did was sharpen *which* piece of that finding is solid
+versus illustrative rather than answer the underlying question -- eBAT/EGFR engagement is now
+backed by both structure and outcome data; eVim's antigen now has real candidate epitopes instead
+of an unexamined placeholder; eBAT/uPAR and the vaccine's resistance-mechanism mismatch remain
+open, now-named gaps rather than diffuse uncertainty. That's a real improvement in honesty about
+what's known, not a new answer to "is there a real combination": neither confirmed, nor refuted,
+just a more precisely located hole than before this pass. The HS module's own "does the durable-
+response finding hold up" check (above) reached a related but distinct honest conclusion from a
+different angle: not a new gap in the mechanism, but a caught mistake in how a real comparator was
+used -- a reminder that "we checked against real data" is not automatically rigorous just because
+the data is real; the comparison itself has to actually match on the axes that matter.
 
 ## Research path
 

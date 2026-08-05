@@ -5,7 +5,14 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from .alphafold import download_structure, read_plddt_track, whole_sequence_identity
+from .alphafold import (
+    align_residue_numbers,
+    contact_number_burial,
+    download_structure,
+    find_exposed_linear_epitopes,
+    read_plddt_track,
+    whole_sequence_identity,
+)
 from .hsa_scenarios import (
     HSA_CLONE_NAMES,
     HSA_EBAT_ILLUSTRATIVE_CSS_NM,
@@ -465,5 +472,81 @@ def hsa_receptor_conservation_demo(out: Path,
             "it cannot confirm the real trials' reported outcomes are caused by the mechanism "
             "this module assumes, or rule out other explanations."
         ),
+    }
+    (out / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")
+
+
+def hsa_vaccine_antigen_design_demo(out: Path, gene: str = "VIM", window: int = 9,
+                                    top_n: int = 3) -> None:
+    """Replaces "vaccine antigen: generic placeholder" with an actual structure-based candidate:
+    which part of the real dog antigen is solvent-exposed enough to plausibly be reachable by a
+    circulating antibody, using the dog structure already fetched for `hsa_receptor_conservation_
+    demo` (default gene VIM -- eVim's real antigen, the one HSA vaccine confirmed to work through
+    an antibody, not a T-cell, mechanism).
+
+    This does not, and cannot, produce a `vaccine_max_kill` number: no structural tool predicts
+    immunogenicity, antibody titer, or in vivo efficacy from a folded structure alone. What it
+    can do is answer a narrower, checkable question -- is there a real, contiguous, solvent-
+    exposed loop on the actual dog protein to target at all, as opposed to only buried residues a
+    real antibody could never reach -- and whether that loop is conserved with the human ortholog
+    (relevant if a human vaccine's exact epitope is meant to transfer to dogs) or dog-specific.
+
+    Requires network access (UniProt, AlphaFold DB).
+    """
+    out.mkdir(parents=True, exist_ok=True)
+    dog_accession = resolve_uniprot_accession(gene, DOG_TAXID)
+    human_accession = resolve_uniprot_accession(gene, HUMAN_TAXID)
+    dog_struct = download_structure(dog_accession, out / "structures" / f"{gene}_dog")
+    human_struct = download_structure(human_accession, out / "structures" / f"{gene}_human")
+    dog_track = read_plddt_track(dog_struct)
+    human_seq = "".join(read_plddt_track(human_struct)["residue_type"])
+    dog_seq = "".join(dog_track["residue_type"])
+
+    burial = contact_number_burial(dog_track)
+    candidates = find_exposed_linear_epitopes(burial, window=window, top_n=top_n)
+    dog_to_human = align_residue_numbers(dog_seq, human_seq)
+    conservation = []
+    for _, candidate in candidates.iterrows():
+        positions = list(range(int(candidate["start_residue"]), int(candidate["end_residue"]) + 1))
+        aligned = [dog_to_human[p] for p in positions if p in dog_to_human]
+        identical = sum(1 for _, is_identical in aligned if is_identical)
+        conservation.append({
+            "fraction_aligned_to_human": len(aligned) / len(positions),
+            "fraction_identical_to_human": identical / len(aligned) if aligned else None,
+        })
+    candidates = pd.concat([candidates, pd.DataFrame(conservation)], axis=1)
+    candidates.to_csv(out / "candidate_epitopes.csv", index=False)
+
+    fig, axes = plt.subplots(2, 1, figsize=(9, 6), sharex=True)
+    axes[0].plot(burial["residue_number"], burial["contact_number"], color="tab:blue")
+    axes[1].plot(burial["residue_number"], burial["plddt"], color="tab:orange")
+    for _, candidate in candidates.iterrows():
+        for ax in axes:
+            ax.axvspan(candidate["start_residue"], candidate["end_residue"], color="tab:green", alpha=.3)
+    axes[0].set(ylabel="CA contact number\n(lower = more exposed)")
+    axes[1].set(ylabel="pLDDT", xlabel="residue number",
+               title="pLDDT (shaded bands = candidate exposed epitope windows)")
+    axes[0].set_title(f"{gene} (dog, {dog_accession}): burial track with candidate epitope windows")
+    fig.tight_layout(); fig.savefig(out / "candidate_epitopes.png", dpi=160); plt.close(fig)
+
+    summary = {
+        "gene": gene, "dog_uniprot": dog_accession, "human_uniprot": human_accession,
+        "window": window, "top_n": top_n, "method": "CA contact-number burial (radius=10 A)",
+        "candidate_epitopes": candidates.to_dict(orient="records"),
+        "unverified_extrapolations": [
+            "solvent exposure (even true SASA, which this coarse CA-only proxy approximates) is "
+            "necessary but not sufficient for a good antibody epitope -- it says nothing about "
+            "immunogenicity, whether the region is glycosylated or otherwise shielded in vivo, or "
+            "whether raising antibodies against it actually disrupts the antigen's function or "
+            "helps clear the tumor",
+            "this ranks windows within one structure; it is not validated against any real "
+            "epitope-mapping experiment for VIM or any other HSA antigen",
+            "does not produce a vaccine_max_kill value or any other Monte Carlo model parameter -- "
+            "vaccine_max_kill remains an illustrative, swept potency number regardless of which "
+            "epitope a real vaccine construct targets",
+        ],
+        "warning": "Structural plausibility for antibody accessibility, not a vaccine design tool "
+                  "and not an efficacy prediction. AlphaFold predicts structure from a known "
+                  "sequence; it does not generate or invent new antigen sequences.",
     }
     (out / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")

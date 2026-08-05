@@ -174,6 +174,69 @@ def extract_mutant_peptide(track: pd.DataFrame, position: int, wt_residue: str, 
     return wt_peptide[:flank] + mut_residue + wt_peptide[flank + 1:]
 
 
+def contact_number_burial(track: pd.DataFrame, radius: float = 10.0) -> pd.DataFrame:
+    """CA-CA contact-number burial estimate: for each residue, count how many other residues'
+    alpha-carbons fall within `radius` angstroms. A densely surrounded residue (high count) is
+    packed into the protein core; a sparsely surrounded one (low count) has open space on at
+    least one side and is more likely solvent-exposed.
+
+    This is a coarse proxy for true solvent-accessible surface area (SASA), not a replacement for
+    it: a real Shrake-Rupley SASA calculation needs every atom's coordinates and van der Waals
+    radius, but `read_plddt_track` (this module's only structure parser) reads alpha-carbons
+    only -- the AlphaFold mmCIF files it's built for carry full atomic detail, but no side-chain
+    atoms are parsed out. Contact number from CA coordinates alone is a real, if coarse, burial
+    signal used for exactly this kind of ranking when full atomic detail isn't available, not
+    something invented for this module. `radius=10.0` is a standard order-of-magnitude choice for
+    CA-based contact counting, not fit to any specific protein -- treat exposure comparisons as
+    relative ranks within one structure, not as calibrated absolute solvent-accessibility numbers.
+    """
+    coords = track[["x", "y", "z"]].to_numpy()
+    dist = np.sqrt(((coords[:, None, :] - coords[None, :, :]) ** 2).sum(-1))
+    np.fill_diagonal(dist, np.inf)
+    result = track.copy()
+    result["contact_number"] = (dist <= radius).sum(axis=1)
+    return result
+
+
+def find_exposed_linear_epitopes(track_with_contact: pd.DataFrame, window: int = 9,
+                                 top_n: int = 3) -> pd.DataFrame:
+    """Slide a `window`-residue frame across the sequence and rank windows by mean contact
+    number (ascending -- least-packed first) to surface candidate linear B-cell epitopes: a
+    contiguous, solvent-exposed surface loop is a plausible antibody target, unlike an isolated
+    exposed residue or a buried stretch no circulating antibody could reach regardless of how
+    immunogenic the raw sequence looks. Requires `contact_number_burial`'s output.
+
+    Returns the top `top_n` non-overlapping windows (each starting at least `window` residues
+    from the previous one, so results aren't near-duplicates of the same loop), ordered most-
+    exposed first. This ranks *within* one structure; it says nothing about immunogenicity,
+    antibody titer, or in vivo efficacy -- no structural tool can predict those.
+    """
+    track_with_contact = track_with_contact.sort_values("residue_number").reset_index(drop=True)
+    n = len(track_with_contact)
+    if n < window:
+        raise ValueError(f"structure has {n} residues, shorter than window={window}")
+    means = np.array([track_with_contact["contact_number"].iloc[i:i + window].mean()
+                      for i in range(n - window + 1)])
+    order = np.argsort(means)
+    chosen: list[int] = []
+    for start in order:
+        if all(abs(start - c) >= window for c in chosen):
+            chosen.append(int(start))
+        if len(chosen) == top_n:
+            break
+    rows = []
+    for start in chosen:
+        segment = track_with_contact.iloc[start:start + window]
+        rows.append({
+            "start_residue": int(segment["residue_number"].iloc[0]),
+            "end_residue": int(segment["residue_number"].iloc[-1]),
+            "sequence": "".join(segment["residue_type"]),
+            "mean_contact_number": float(segment["contact_number"].mean()),
+            "mean_plddt": float(segment["plddt"].mean()),
+        })
+    return pd.DataFrame(rows)
+
+
 def confidence_band(plddt: float) -> str:
     """AlphaFold's published pLDDT bands: >=90 very high, >=70 confident, >=50 low, else very low."""
     for threshold, label in CONFIDENCE_BANDS:
