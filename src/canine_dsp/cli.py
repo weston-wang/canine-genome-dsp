@@ -10,6 +10,7 @@ from .alphafold_cli import analyze_structure, fetch_structure
 from .hsa_cli import (
     hsa_combination_control_demo,
     hsa_combination_search_demo,
+    hsa_receptor_conservation_demo,
     hsa_resistance_demo,
     hsa_vaccine_followon_demo,
 )
@@ -176,6 +177,11 @@ def main() -> None:
     hsa_search_demo.add_argument("--preexisting-prob", type=float, default=HSA_PREEXISTING_PROB_CENTRAL)
     hsa_search_demo.add_argument("--seed", type=int, default=7)
     hsa_search_demo.add_argument("--out", type=Path, required=True)
+    hsa_receptor_demo = sub.add_parser("hsa-receptor-conservation-demo",
+                                       help="human-vs-dog whole-protein conservation for eBAT's "
+                                            "and eVim's real molecular targets (EGFR, PLAUR, VIM)")
+    hsa_receptor_demo.add_argument("--genes", nargs="+", default=None)
+    hsa_receptor_demo.add_argument("--out", type=Path, required=True)
     mapk_structure = sub.add_parser("mapk-structure-compare",
                                     help="compare human vs. dog AlphaFold confidence at MAPK-gene hotspots")
     mapk_structure.add_argument("--gene", required=True)
@@ -315,6 +321,11 @@ def main() -> None:
     elif args.command == "hsa-combination-search-demo":
         hsa_combination_search_demo(args.out, args.trials, args.horizon_days,
                                     args.preexisting_prob, args.seed)
+    elif args.command == "hsa-receptor-conservation-demo":
+        if args.genes is None:
+            hsa_receptor_conservation_demo(args.out)
+        else:
+            hsa_receptor_conservation_demo(args.out, args.genes)
     elif args.command == "mapk-structure-compare":
         compare_orthologs(args.gene, args.hotspots, args.out)
     elif args.command == "mapk-cns-demo":

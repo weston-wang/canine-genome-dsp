@@ -129,6 +129,26 @@ def align_residue_numbers(source_seq: str, target_seq: str) -> dict[int, tuple[i
     return mapping
 
 
+def whole_sequence_identity(source_seq: str, target_seq: str) -> dict:
+    """Overall ortholog conservation, not a single hotspot: reuses `align_residue_numbers`'s
+    alignment but reports identity across the whole protein.
+
+    Useful for questions `align_residue_numbers`/a single-hotspot comparison can't answer --
+    e.g. whether a whole-protein antigen (an antibody target, not a point-mutation neoepitope)
+    or a receptor a human-designed ligand/toxin binds is conserved enough across species for a
+    human precedent to plausibly transfer, as opposed to whether one specific residue matches.
+    """
+    mapping = align_residue_numbers(source_seq, target_seq)
+    identical = sum(1 for _, is_identical in mapping.values() if is_identical)
+    aligned = len(mapping)
+    return {
+        "source_length": len(source_seq), "target_length": len(target_seq),
+        "aligned_positions": aligned, "identical_positions": identical,
+        "identity_fraction_of_aligned": identical / aligned if aligned else 0.0,
+        "identity_fraction_of_source_length": identical / len(source_seq) if source_seq else 0.0,
+    }
+
+
 def extract_mutant_peptide(track: pd.DataFrame, position: int, wt_residue: str, mut_residue: str,
                            flank: int = 12) -> str:
     """Build a mutant peptide window (length `2*flank + 1`) centered on `position`, substituting

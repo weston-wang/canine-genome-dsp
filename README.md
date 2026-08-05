@@ -1127,6 +1127,85 @@ which each combination becomes sufficient didn't move. Mechanistically this make
 sufficiently potent kill term eventually reverses its growth margin; a stronger baseline pessimism
 mainly matters when nothing is added on top of the primary drug.
 
+**Can vaccine alone -- no inhibitor -- do the job?** Worth testing directly, and worth asking for
+a real reason: none of the four real HSA vaccine trials above were actually combined with a
+PI3K/mTOR inhibitor (surgery +/- doxorubicin was the backbone in the ones that used one at all),
+so vaccine-without-this-inhibitor is closer to how these vaccines have actually been used than
+vaccine-with-inhibitor is. `hsa_vaccine_followon_scenarios`/`hsa_vaccine_followon_demo` take
+`inhibitor_active=False` (`--no-inhibitor`) to isolate this, mirroring eBAT's existing monotherapy
+flag.
+
+```bash
+canine-dsp hsa-vaccine-followon-demo --no-inhibitor --out results/hsa-vaccine-only
+```
+
+At low vaccine potency with no drug suppressing the bulk tumor at all, durable response was
+**0%** (median time to progression 5 days) -- unsurprising, nothing is holding the sensitive clone
+back before the vaccine ramps up. At `vaccine_max_kill>=0.05`, it jumps to **97-98%**, nearly
+matching the drug-combined case. Not quite as clean, though: unlike drug+vaccine (where
+`immune_escape` never appeared), vaccine-alone showed a small nonzero `immune_escape` fraction
+(1.7-2.7%) among relapses -- plausibly because tumor burden stays higher for longer during the
+vaccine's ramp-up window without a drug knocking down the bulk population first, giving the
+antigen-loss escape route more cell-days to arise from. A real, mechanistic reason to prefer
+pairing a vaccine with *something* that suppresses bulk disease first, not just an assumption
+that combination is always better.
+
+One important caveat surfaced by checking this claim more carefully, not by assuming it: only
+one of the four real trials (Lucroy et al. 2020, the autologous whole-cell vaccine) actually
+tested a vaccine with zero concurrent systemic therapy -- confirmed directly (dogs were
+*excluded* if they received adjuvant chemotherapy). Its real result was unremarkable: median
+survival 142 days, only 12.5% (1/8) alive at one year. But that trial also differs from this
+scenario on two axes at once, not one -- **disease stage** (Stage III/metastatic, versus this
+scenario's post-splenectomy adjuvant framing) and **vaccine mechanism** (whole-cell autologous,
+not the genotype-agnostic antigen types like vimentin/ER-stress peptides this scenario's
+antigen-persistence argument is built around). The trials that *do* match this scenario's disease
+stage (ERstrePs, eVim) were never tested without a chemo backbone. There is no real trial that
+matches this scenario on both axes simultaneously, so the honest position is that this specific
+prediction (vaccine alone reaching 97-98%) is neither confirmed nor refuted by real data --
+genuinely unknown, not validated and not contradicted.
+
+### Grounding the mechanism in genomics and structure, not just (confounded) outcome data
+
+The eBAT comparison above found a real gap between this scenario's output and a real trial's
+outcome, and part of that gap turned out to be a missing mechanism (tumor rupture/hemorrhage) no
+amount of outcome-data comparison could have identified on its own. That's a reason to check what
+genomics and structure can answer *directly* -- independent of any clinical trial's confounds --
+rather than lean only on outcome comparisons for everything.
+
+**The driver mutation itself**: PIK3CA H1047R, checked with the same tool built for histiocytic
+sarcoma's PTPN11/KRAS hotspots --
+
+```bash
+canine-dsp mapk-structure-compare --gene PIK3CA --hotspots 1047 --out results/pik3ca-compare
+```
+
+-- confirms the hotspot residue is identical between human and dog (H1047, both proteins 1068
+aa): real, direct structural support that a PIK3CA-driven HSA subtype is chemically plausible in
+dogs, independent of the somatic-mutation-frequency numbers cited earlier.
+
+**The real drugs' molecular targets** needed a different tool, since none of eBAT's two targets
+or eVim's antigen is a point-mutation neoepitope -- a single-hotspot comparison doesn't apply.
+`alphafold.whole_sequence_identity` (new: overall ortholog conservation, not one residue) answers
+"conserved enough to matter" for a whole-protein target instead:
+
+```bash
+canine-dsp hsa-receptor-conservation-demo --out results/hsa-receptors
+```
+
+Real results: **EGFR** (eBAT's first target) is 91.6% identical across 1154 aligned positions
+(human P00533, dog A0A8D6L9C2) -- real structural support for why a human-EGF-ligand-based
+immunotoxin could plausibly still engage canine EGFR. **PLAUR/uPAR** (eBAT's second target):
+checked directly and found to have **no curated UniProt entry for dog at all** -- confirmed live
+(a broader search than the exact gene symbol returns only an unrelated gene, LYPD3), not assumed
+-- a real, unresolved data gap, not a negative finding. **VIM/vimentin** (eVim's antigen): 98.1%
+identical (human P08670, dog A0A8C0N8E3, both 466 aa) -- but checking the actual paper directly
+surfaced something more important than the number itself: eVim is a full-length recombinant
+vimentin fusion protein designed to raise an **antibody** response, not a short peptide presented
+on MHC-I to T cells. That makes IEDB/NetMHCpan-style MHC-binding prediction -- the tool built for
+histiocytic sarcoma's driver-mutation neoantigen vaccine -- **the wrong tool for eVim entirely**;
+applying it here would have been a category error, not a finding. No real B-cell/antibody-epitope
+prediction tool was substituted for it; the mismatch is reported rather than papered over.
+
 ## Research path
 
 1. Pin an assembly and record accessions/checksums in `data/README.md`.

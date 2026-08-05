@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
+from .alphafold import download_structure, read_plddt_track, whole_sequence_identity
 from .hsa_scenarios import (
     HSA_CLONE_NAMES,
     HSA_EBAT_ILLUSTRATIVE_CSS_NM,
@@ -12,6 +13,7 @@ from .hsa_scenarios import (
     HSA_EBAT_TRIAL,
     HSA_IMMUNE_ESCAPE_SEEDING_RATE,
     HSA_RAPAMYCIN_BENCHMARK,
+    HSA_RECEPTOR_CONSERVATION_TARGETS,
     HSA_STANDARD_OF_CARE_BENCHMARK,
     HSA_VACCINE_CLONE_NAMES,
     HSA_VACCINE_MAX_KILL_SWEEP,
@@ -25,6 +27,7 @@ from .hsa_scenarios import (
     hsa_vaccine_followon_scenarios,
 )
 from .mapk_resistance import run_monte_carlo, run_monte_carlo_with_vaccine
+from .uniprot import DOG_TAXID, HUMAN_TAXID, resolve_uniprot_accession
 
 
 def hsa_resistance_demo(out: Path, trials: int = 300, horizon_days: int = 730, seed: int = 7) -> None:
@@ -407,6 +410,60 @@ def hsa_combination_search_demo(out: Path, trials: int = 300, horizon_days: int 
             "constants underneath it. Read 'combination X reaches 95% durable response here' as "
             "'given everything else this module assumes, X closes the gap in this model,' not "
             "as a treatment recommendation."
+        ),
+    }
+    (out / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")
+
+
+def hsa_receptor_conservation_demo(out: Path,
+                                   genes: list[str] = list(HSA_RECEPTOR_CONSERVATION_TARGETS)
+                                   ) -> None:
+    """Checks whether the real drugs' molecular targets are conserved enough between human and
+    dog for a human precedent to plausibly transfer, using genomics/structure directly rather
+    than depending on clinical-trial outcome data (which the eBAT comparison found to be
+    confounded by a real, unmodeled mechanism). See `HSA_RECEPTOR_CONSERVATION_TARGETS` and the
+    `hsa_scenarios` module docstring for what each gene means and what was found.
+
+    Requires network access (UniProt, AlphaFold DB). Genes with no UniProt entry for either
+    species are reported as `"found": false` rather than raising -- a real data gap (confirmed
+    live, e.g. PLAUR has no curated dog entry at all) is a finding, not an error to hide.
+    """
+    out.mkdir(parents=True, exist_ok=True)
+    rows = []
+    for gene in genes:
+        row = {"gene": gene, "context": HSA_RECEPTOR_CONSERVATION_TARGETS[gene], "found": False}
+        try:
+            human_accession = resolve_uniprot_accession(gene, HUMAN_TAXID)
+            dog_accession = resolve_uniprot_accession(gene, DOG_TAXID)
+            human_struct = download_structure(human_accession, out / "structures" / f"{gene}_human")
+            dog_struct = download_structure(dog_accession, out / "structures" / f"{gene}_dog")
+            human_seq = "".join(read_plddt_track(human_struct)["residue_type"])
+            dog_seq = "".join(read_plddt_track(dog_struct)["residue_type"])
+            stats = whole_sequence_identity(human_seq, dog_seq)
+            row.update(found=True, human_uniprot=human_accession, dog_uniprot=dog_accession, **stats)
+        except (ValueError, OSError) as error:
+            row["error"] = str(error)
+        rows.append(row)
+    table = pd.DataFrame(rows)
+    table.to_csv(out / "receptor_conservation.csv", index=False)
+
+    summary = {
+        "genes_checked": list(genes), "results": rows,
+        "unverified_extrapolations": [
+            ("sequence identity is not the same as functional conservation -- a receptor could "
+             "be highly identical overall but differ at the specific ligand-binding residues "
+             "that determine whether a human-designed ligand/toxin actually binds, or vice "
+             "versa; this checks whole-protein identity, not the binding interface specifically"),
+            ("a gene with no UniProt entry for dog (found=false) does not mean the gene is "
+             "absent from the dog genome -- it means UniProt has no curated/predicted entry "
+             "under that exact gene symbol as of this check, which could reflect an annotation "
+             "gap rather than biology"),
+        ],
+        "warning": (
+            "This checks molecular conservation, not efficacy -- it can support or undercut the "
+            "plausibility of a human-designed drug/vaccine's mechanism transferring to dogs, but "
+            "it cannot confirm the real trials' reported outcomes are caused by the mechanism "
+            "this module assumes, or rule out other explanations."
         ),
     }
     (out / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")

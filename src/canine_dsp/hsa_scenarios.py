@@ -424,3 +424,46 @@ def hsa_vaccine_followon_scenarios(ebat_max_kill: float = 0.0, inhibitor_active:
             "immune_escape_growth_penalty": HSA_IMMUNE_ESCAPE_GROWTH_PENALTY,
         })
     return scenarios
+
+
+# Grounding the drug/vaccine mechanisms in genomics and structure directly, rather than only in
+# clinical-trial outcome data (which turned out, in the eBAT comparison above, to be confounded
+# by a real missing mechanism the model doesn't represent). Two real questions this can actually
+# answer that outcome data can't: is the driver mutation this scenario models even the same
+# residue in dogs as in humans, and are the real drugs' molecular targets conserved enough
+# across species for a human precedent to plausibly transfer at all.
+#
+# PIK3CA H1047R (checked via `compare_orthologs`/`mapk-structure-compare --gene PIK3CA
+# --hotspots 1047`, the same tool built for histiocytic sarcoma's PTPN11/KRAS hotspots): the
+# hotspot residue is identical between human and dog (H1047, both proteins 1068 aa) -- real,
+# direct structural support that a PIK3CA-driven HSA subtype is chemically plausible in dogs,
+# independent of the somatic-sequencing-frequency numbers cited above.
+#
+# eBAT's two targets and eVim's antigen needed a different check than a single hotspot, since
+# none of these is a point-mutation neoepitope -- `whole_sequence_identity` (whole-protein
+# ortholog conservation, not one residue) answers "conserved enough to matter" instead.
+# EGFR: 91.6% identity across 1154 aligned positions (human P00533, dog A0A8D6L9C2) -- real
+# structural support for why a human-EGF-ligand-based immunotoxin could plausibly still engage
+# canine EGFR, independent of the trial's own reported efficacy numbers. PLAUR (uPAR), eBAT's
+# other target: checked directly and found to have no curated UniProt entry for dog at all
+# (confirmed live, not assumed -- a broader search than gene_exact:PLAUR returns only an
+# unrelated gene, LYPD3) -- a real, unresolved data gap, not a negative finding, and not
+# something this module papers over with an assumption. VIM (vimentin), eVim's antigen: 98.1%
+# identical (human P08670, dog A0A8C0N8E3, both 466 aa) -- but checking the actual paper
+# directly surfaced something more important than the identity number: eVim is a full-length
+# recombinant vimentin fusion protein designed to raise an antibody (humoral) response, not a
+# short peptide presented on MHC-I to T cells. That makes IEDB/NetMHCpan-style MHC-binding
+# prediction -- the tool built for histiocytic sarcoma's driver-mutation neoantigen vaccine --
+# the wrong tool for eVim entirely; applying it here would have been a category error, not a
+# finding. No real B-cell/antibody-epitope prediction tool was substituted for it; this module
+# reports the mismatch rather than forcing an answer with the wrong instrument.
+HSA_RECEPTOR_CONSERVATION_TARGETS = {
+    "EGFR": "eBAT's first target -- a human EGF-ligand-based immunotoxin's function in dogs "
+           "depends on canine EGFR being conserved enough to bind it.",
+    "PLAUR": "eBAT's second target (uPAR) -- checked and found to have no curated dog UniProt "
+            "entry at all; a real data gap, not a negative result.",
+    "VIM": "eVim's antigen -- highly conserved, but the vaccine is an antibody-inducing "
+          "whole-protein construct, not an MHC-I-presented peptide, so this identity number "
+          "is real context, not evidence for or against T-cell recognition (the wrong "
+          "mechanism for this specific vaccine).",
+}

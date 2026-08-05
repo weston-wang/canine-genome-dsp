@@ -8,6 +8,7 @@ from canine_dsp.alphafold import (
     extract_mutant_peptide,
     map_variants,
     read_plddt_track,
+    whole_sequence_identity,
 )
 
 ATOM_SITE_COLUMNS = [
@@ -78,6 +79,26 @@ def test_align_residue_numbers_handles_insertion_shift():
     assert mapping[3] == (3, True)
     assert mapping[4] == (5, True)
     assert mapping[8] == (9, True)
+
+
+def test_whole_sequence_identity_perfect_match():
+    seq = "MAGVLKQR"
+    stats = whole_sequence_identity(seq, seq)
+    assert stats["aligned_positions"] == len(seq)
+    assert stats["identical_positions"] == len(seq)
+    assert stats["identity_fraction_of_aligned"] == 1.0
+    assert stats["identity_fraction_of_source_length"] == 1.0
+
+
+def test_whole_sequence_identity_partial_match_with_substitution():
+    source = "MAGVLKQR"
+    target = "MAGVLKQX"  # last residue substituted -- a real mismatch, not just an insertion
+    stats = whole_sequence_identity(source, target)
+    assert stats["source_length"] == stats["target_length"] == 8
+    assert stats["aligned_positions"] == 8
+    assert stats["identical_positions"] == 7
+    assert stats["identity_fraction_of_aligned"] == pytest.approx(7 / 8)
+    assert stats["identity_fraction_of_source_length"] == pytest.approx(7 / 8)
 
 
 def test_read_plddt_track_missing_loop_raises(tmp_path):
