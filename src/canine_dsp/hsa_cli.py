@@ -213,13 +213,17 @@ def hsa_combination_control_demo(out: Path, trials: int = 300, horizon_days: int
     (out / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")
 
 
-def hsa_vaccine_followon_demo(out: Path, ebat_max_kill: float = 0.0, horizon_days: int = 730,
-                              trials: int = 300, preexisting_prob: float = _PREEXISTING_PROB_CENTRAL,
+def hsa_vaccine_followon_demo(out: Path, ebat_max_kill: float = 0.0, inhibitor_active: bool = True,
+                              horizon_days: int = 730, trials: int = 300,
+                              preexisting_prob: float = _PREEXISTING_PROB_CENTRAL,
                               seed: int = 7) -> None:
     """Does layering a cancer vaccine on top of PI3K/mTOR-inhibitor (+/- eBAT) therapy close the
     gap left by drug resistance alone, the same question `mapk_cli.vaccine_followon_demo` asks for
     histiocytic sarcoma? `ebat_max_kill=0.0` (the default) tests inhibitor+vaccine only, with no
     eBAT contribution -- pass a nonzero value to test the full three-way combination instead.
+    `inhibitor_active=False` tests vaccine (+/- eBAT) with no PI3K/mTOR inhibitor at all -- the
+    combination actually closest to how the four real HSA vaccine trials were tested (surgery
+    +/- doxorubicin-based chemo, never with a PI3K/mTOR inhibitor).
 
     Real HSA vaccines don't target this scenario's driver mutation (PIK3CA/PTEN) at all -- see
     `hsa_scenarios` module docstring for the real trials (ERstrePs, eVim, autologous whole-cell,
@@ -228,7 +232,7 @@ def hsa_vaccine_followon_demo(out: Path, ebat_max_kill: float = 0.0, horizon_day
     not less.
     """
     out.mkdir(parents=True, exist_ok=True)
-    scenarios = hsa_vaccine_followon_scenarios(ebat_max_kill, HSA_VACCINE_MAX_KILL_SWEEP)
+    scenarios = hsa_vaccine_followon_scenarios(ebat_max_kill, inhibitor_active, HSA_VACCINE_MAX_KILL_SWEEP)
     css_2 = HSA_EBAT_ILLUSTRATIVE_CSS_NM if ebat_max_kill > 0 else None
 
     rows, outcomes = [], {}
@@ -278,7 +282,7 @@ def hsa_vaccine_followon_demo(out: Path, ebat_max_kill: float = 0.0, horizon_day
 
     summary = {
         "horizon_days": horizon_days, "preexisting_prob_used": preexisting_prob,
-        "ebat_max_kill_used": ebat_max_kill, "sensitivity": rows,
+        "ebat_max_kill_used": ebat_max_kill, "inhibitor_active": inhibitor_active, "sensitivity": rows,
         "real_hsa_vaccine_trials": HSA_VACCINE_TRIALS,
         "unverified_extrapolations": [
             ("no canine hemangiosarcoma vaccine trial measures this scenario's own PIK3CA/PTEN "

@@ -143,6 +143,24 @@ def test_hsa_vaccine_followon_demo_writes_expected_outputs(tmp_path):
     }
 
 
+def test_hsa_vaccine_followon_scenarios_inhibitor_inactive_zeros_css():
+    scenarios = hsa_vaccine_followon_scenarios(inhibitor_active=False,
+                                               vaccine_max_kill_values=[0.0])
+    _, css, _, _ = scenarios[0.0]
+    assert css == 0.0
+
+
+def test_hsa_vaccine_alone_needs_high_potency_to_reach_durable_response(tmp_path):
+    # Vaccine with no inhibitor and no eBAT: low potency should fail almost immediately (no drug
+    # is suppressing the bulk tumor at all), but sufficiently high vaccine potency should still
+    # close the gap on its own, matching the potency threshold found for the drug-combined case.
+    hsa_vaccine_followon_demo(tmp_path, inhibitor_active=False, horizon_days=730, trials=200, seed=4)
+    sensitivity = json.loads((tmp_path / "summary.json").read_text())["sensitivity"]
+    by_potency = {row["vaccine_max_kill"]: row["probability_durable_response"] for row in sensitivity}
+    assert by_potency[0.0] < 0.1
+    assert by_potency[0.08] > 0.9
+
+
 def test_hsa_vaccine_followon_demo_higher_potency_does_not_reduce_durable_response(tmp_path):
     hsa_vaccine_followon_demo(tmp_path, horizon_days=365, trials=150, seed=2)
     sensitivity = json.loads((tmp_path / "summary.json").read_text())["sensitivity"]

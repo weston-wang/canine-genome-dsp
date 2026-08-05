@@ -160,6 +160,8 @@ def main() -> None:
                                            "real-vaccine-inspired follow-on for canine "
                                            "hemangiosarcoma")
     hsa_vaccine_demo.add_argument("--ebat-max-kill", type=float, default=0.0)
+    hsa_vaccine_demo.add_argument("--no-inhibitor", action="store_true",
+                                  help="test vaccine (+/- eBAT) with no PI3K/mTOR inhibitor at all")
     hsa_vaccine_demo.add_argument("--trials", type=int, default=300)
     hsa_vaccine_demo.add_argument("--horizon-days", type=int, default=730)
     hsa_vaccine_demo.add_argument("--preexisting-prob", type=float, default=HSA_PREEXISTING_PROB_CENTRAL)
@@ -308,8 +310,8 @@ def main() -> None:
         hsa_combination_control_demo(args.out, args.trials, args.horizon_days,
                                      args.preexisting_prob, args.seed)
     elif args.command == "hsa-vaccine-followon-demo":
-        hsa_vaccine_followon_demo(args.out, args.ebat_max_kill, args.horizon_days, args.trials,
-                                  args.preexisting_prob, args.seed)
+        hsa_vaccine_followon_demo(args.out, args.ebat_max_kill, not args.no_inhibitor,
+                                  args.horizon_days, args.trials, args.preexisting_prob, args.seed)
     elif args.command == "hsa-combination-search-demo":
         hsa_combination_search_demo(args.out, args.trials, args.horizon_days,
                                     args.preexisting_prob, args.seed)

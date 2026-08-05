@@ -389,18 +389,22 @@ def hsa_combination_scenarios(inhibitor_active: bool = True,
     return scenarios
 
 
-def hsa_vaccine_followon_scenarios(ebat_max_kill: float = 0.0,
+def hsa_vaccine_followon_scenarios(ebat_max_kill: float = 0.0, inhibitor_active: bool = True,
                                    vaccine_max_kill_values: list[float] = HSA_VACCINE_MAX_KILL_SWEEP,
                                    ) -> dict[float, tuple[ResistanceModel, float, np.ndarray, dict]]:
-    """PI3K/mTOR inhibitor + eBAT (fixed at `ebat_max_kill`) plus a swept-potency cancer vaccine
+    """PI3K/mTOR inhibitor (+/- eBAT, fixed at `ebat_max_kill`) plus a swept-potency cancer vaccine
     layered on top, mirroring `mapk_scenarios.vaccine_followon_scenarios`'s structure exactly
     (same 5th-clone antigen/MHC-I-loss mechanic, reusing `mapk_resistance.run_monte_carlo_with_vaccine`
     unchanged) but built for a genotype-agnostic real vaccine antigen rather than a
     driver-mutation-specific one -- see module docstring for why that makes the
     antigen-persistence argument, if anything, more secure here. `ebat_max_kill=0.0` (the
     default) gives an inhibitor-plus-vaccine-only baseline with no eBAT contribution.
+    `inhibitor_active=False` isolates vaccine (+/- eBAT) as monotherapy, no PI3K/mTOR inhibitor
+    at all -- none of the four real HSA vaccine trials this scenario is grounded in were actually
+    combined with a PI3K/mTOR inhibitor (see module docstring), so vaccine-without-inhibitor is,
+    if anything, closer to how these vaccines have actually been tested than vaccine-with-inhibitor is.
     """
-    combo_scenarios = hsa_combination_scenarios(ebat_max_kill_values=[ebat_max_kill])
+    combo_scenarios = hsa_combination_scenarios(inhibitor_active, [ebat_max_kill])
     model, css, seeding_rates, provenance = combo_scenarios[ebat_max_kill]
     escape_growth = model.growth[1] * HSA_IMMUNE_ESCAPE_GROWTH_PENALTY
     model5 = ResistanceModel(

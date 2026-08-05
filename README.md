@@ -1006,6 +1006,38 @@ significant, benefit in canine HSA generally -- none of them were tested specifi
 PI3K/mTOR inhibitor, none report outcomes by driver mutation, and `vaccine_max_kill` here is
 swept, not fit to any of them.
 
+**Can vaccine alone -- no inhibitor at all -- do the job?** Worth asking directly rather than
+assuming the answer, and worth asking for a reason beyond curiosity: none of the four real HSA
+vaccine trials this scenario is grounded in were actually combined with a PI3K/mTOR inhibitor --
+they were tested with surgery +/- doxorubicin-based chemo, so vaccine-without-this-inhibitor is,
+if anything, closer to how these vaccines have actually been used than vaccine-with-inhibitor is.
+`hsa_vaccine_followon_scenarios`/`hsa_vaccine_followon_demo` now take `inhibitor_active=False`
+(`--no-inhibitor` on the CLI) to isolate this directly, mirroring the same monotherapy-isolation
+pattern eBAT already had.
+
+```bash
+canine-dsp hsa-vaccine-followon-demo --no-inhibitor --out results/hsa-vaccine-only
+```
+
+In testing: at low vaccine potency (`vaccine_max_kill<=0.03`) with no drug of any kind
+suppressing the bulk tumor, durable response was **0%**, with a median time to progression of
+just 5 days -- unsurprising, since nothing is holding the sensitive clone back before the vaccine
+itself ramps up. But at `vaccine_max_kill>=0.05`, durable response jumps to **97-98%** -- nearly
+matching the drug-combined case, on vaccine potency alone. It isn't quite as clean, though: unlike
+the drug+vaccine combination (where `immune_escape` never appeared), vaccine-alone showed a small
+but nonzero `immune_escape` fraction (1.7-2.7%) among the relapses that did occur. The likely
+mechanism: without a drug knocking down the bulk sensitive-clone population first, tumor burden
+stays higher for longer during the vaccine's ramp-up window, giving the antigen-loss escape
+route (seeded from the antigen-positive population) more cell-days to arise from before the
+vaccine's kill fully engages -- a real, mechanistically sensible reason drug+vaccine could be
+more robust than vaccine alone, not just an assumption.
+
+So: yes, in this model, a sufficiently potent vaccine can reach durable response on its own --
+but "sufficiently potent" is doing real work in that sentence (the same illustrative,
+unmeasured-for-any-real-vaccine potency threshold as everywhere else in this section), and it
+comes with a small, real reason (the immune-escape route) to prefer pairing it with *something*
+that suppresses bulk disease first, not necessarily this specific inhibitor.
+
 ### Searching combination space directly, not assuming a winner
 
 The goal here was never "does the inhibitor work" or "does the vaccine work" in isolation --
