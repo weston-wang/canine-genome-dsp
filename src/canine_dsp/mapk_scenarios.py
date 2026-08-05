@@ -43,7 +43,28 @@ _SEEDING_RATE_TOTAL = 0.012
 # than fixed to one asserted value, because a point estimate here was found to be effectively
 # tuning the headline result rather than discovering it.
 _PREEXISTING_PROB_SWEEP = [0.05, 0.15, 0.30, 0.50, 0.70]
-_PREEXISTING_PROB_CENTRAL = 0.30
+# Recentered from 0.30 to the pessimistic end of the sweep (0.70) after stress-testing this
+# module's headline "durable response" combination-therapy finding
+# (`mapk_durability_horizon_demo`, MAPK inhibitor + illustrative low-potency second-node drug,
+# max_kill_2=0.05) against COMBI_D_V_FIVE_YEAR_BENCHMARK below. At 0.30 the model's 5-year
+# durable-response probability (92%) overshoots even the *most favorable* real comparator (71%
+# 5-year OS among the complete-response subgroup) by 21 points; at 0.70 the gap shrinks to 11
+# points (82% vs 71%) -- the best fit available anywhere in the swept range. This is the same
+# kind of loose, cross-species/cross-drug analogy used to recenter HSA's equivalent constant
+# against the eBAT trial (see hsa_scenarios.py) -- not a same-disease, same-drug calibration --
+# and even this "best fit" leaves a real, unresolved 11-point residual gap. Comparing instead
+# against the *full trial population's* 5-year PFS (19%) is not reconcilable at any point in the
+# swept range: the closest this model gets is 54% at preexisting_prob=0.70, still ~3x too
+# optimistic. That population-level comparison is arguably not fair to begin with, since this
+# model's durability demo starts from an already-debulked, good-initial-response state
+# (`DEBULKING_FRACTION`) rather than an unselected treatment population -- which is why the
+# complete-response subgroup, not the full population, is treated as the fairer comparator above.
+# Either way, the honest conclusion is that this module's optimistic tail is not well grounded:
+# pushing preexisting_prob further past 0.70 narrows the gap further (spot-checked to ~6-9 points
+# at 0.80-0.85) but was not adopted as the central value, because stretching a single seeding-
+# probability parameter that far, on the strength of one cross-species/cross-drug/cross-endpoint
+# comparison, would overstate the precision this constant can actually claim.
+_PREEXISTING_PROB_CENTRAL = 0.70
 
 # Two published lomustine (non-targeted chemotherapy) studies in unselected canine HS, included
 # as an automatic sanity check against this module's synthetic MAPK-inhibitor projections. The
@@ -102,6 +123,35 @@ MAPK_INHIBITOR_HUMAN_BENCHMARK = {
              "treatment initiation' (the paper's own wording) -- some patients may already have "
              "been on drug before entering ctDNA monitoring, so real time-from-treatment-start-"
              "to-progression could run longer than 111 days for at least some of the cohort.",
+}
+
+# The comparator actually used to stress-test this module's own "durable response" combination-
+# therapy claim (mapk_durability_horizon_demo): the pivotal, pooled 5-year follow-up of the same
+# BRAF+MEK inhibitor combination in human metastatic melanoma. Verified directly against the
+# source paper (not taken from a summary or a research agent). Same species/disease/drug-pair
+# caveats as MAPK_INHIBITOR_HUMAN_BENCHMARK apply -- this is a different, later paper from the
+# same trials (COMBI-d, COMBI-v), reporting durability endpoints instead of ctDNA-based
+# progression timing.
+COMBI_D_V_FIVE_YEAR_BENCHMARK = {
+    "citation": "Robert C, Grob JJ, Stroyakovskiy D, et al. Five-Year Outcomes with Dabrafenib "
+               "plus Trametinib in Metastatic Melanoma. N Engl J Med. 2019;381:626-636, "
+               "PMID 31166680",
+    "population": "563 previously untreated, unresectable/metastatic BRAF V600E/K-mutant "
+                  "melanoma patients, pooled from the COMBI-d and COMBI-v phase III trials, "
+                  "first-line dabrafenib (BRAF inhibitor) + trametinib (MEK inhibitor)",
+    "five_year_progression_free_survival_full_population": 0.19,
+    "five_year_overall_survival_full_population": 0.34,
+    "complete_response_fraction": 109 / 563,
+    "five_year_overall_survival_complete_responders": 0.71,
+    "caveat": "Different species (human vs. dog), disease (metastatic melanoma vs. HS), and drug "
+             "pair (two real MAPK-pathway inhibitors used together, vs. this module's MAPK "
+             "inhibitor + an illustrative, mechanism-agnostic, low-potency second-node drug) -- "
+             "a loose analogy, not a same-disease, same-drug calibration. The full-population "
+             "5-year PFS (19%) is a population that mostly never achieved a deep response, unlike "
+             "this module's durability demo, which starts from an already-debulked, good-"
+             "initial-response state -- so the complete-response subgroup's 71% 5-year OS is the "
+             "fairer of the two numbers to compare against, and even that comparison leaves this "
+             "module's central estimate (see _PREEXISTING_PROB_CENTRAL) with an 11-point gap.",
 }
 
 # Fraction of plasma drug concentration reached in brain tissue -- real, drug-specific PK

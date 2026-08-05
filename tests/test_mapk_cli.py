@@ -1,9 +1,11 @@
 import json
+import sys
 
 import numpy as np
 import pandas as pd
 import pytest
 
+from canine_dsp import cli
 from canine_dsp.mapk_cli import (
     combination_control_demo,
     combination_toxicity_demo,
@@ -24,6 +26,7 @@ from canine_dsp.mapk_scenarios import (
     VACCINE_CLONE_NAMES,
     VACCINE_MAX_KILL_SWEEP,
     VACCINE_START_DAY,
+    _PREEXISTING_PROB_CENTRAL,
     canine_cns_hs_scenarios,
     combination_scenarios,
     dog_preset,
@@ -208,6 +211,31 @@ def test_durability_horizon_demo_writes_full_sweep(tmp_path):
     summary = json.loads((tmp_path / "summary.json").read_text())
     assert "note" in summary
     assert (tmp_path / "durability_horizon.png").exists()
+
+
+def test_preexisting_prob_central_recentered_to_pessimistic_end():
+    # Recentered from 0.30 to 0.70 after stress-testing durability_horizon_demo's output against
+    # the real COMBI-d/COMBI-v 5-year human melanoma benchmark (COMBI_D_V_FIVE_YEAR_BENCHMARK in
+    # mapk_scenarios.py) -- at 0.30 the model overshot even the most favorable real comparator by
+    # 21 points; 0.70 is the best fit available within the swept range (11-point residual gap).
+    # This pins the value so a future edit can't silently drift it back.
+    assert _PREEXISTING_PROB_CENTRAL == 0.70
+
+
+def test_cli_mapk_demo_defaults_do_not_drift_from_the_recentered_constant(tmp_path, monkeypatch):
+    # Regression test for the same bug class fixed in hsa_scenarios/cli.py: cli.py's argparse
+    # --preexisting-prob defaults for the mapk_* commands were hardcoded literals (0.30)
+    # duplicating mapk_scenarios._PREEXISTING_PROB_CENTRAL, so recentering that constant would
+    # have silently had no effect on CLI behavior unless --preexisting-prob was passed explicitly.
+    # cli.py now imports the constant directly instead of duplicating its value; this checks the
+    # CLI path end-to-end, not just that the Python-level function default is correct.
+    monkeypatch.setattr(sys, "argv", [
+        "canine-dsp", "mapk-durability-horizon-demo", "--breed", "bmd", "--trials", "10",
+        "--out", str(tmp_path),
+    ])
+    cli.main()
+    summary = json.loads((tmp_path / "summary.json").read_text())
+    assert summary["preexisting_prob_used"] == _PREEXISTING_PROB_CENTRAL
 
 
 def test_durable_response_probability_is_not_flat_across_horizons():

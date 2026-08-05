@@ -510,10 +510,14 @@ Everywhere else in this module, "durable response" means only *no relapse detect
 horizon that specific run used* -- almost always 730 days (2 years). That is not a claim of
 permanence, and it matters: at the potency that looked like a near-cure at 2 years (99.5% durable,
 full-dose combination), extending simulated follow-up erodes it -- **91.5% at 5 years, 81% at 10
-years**.
+years** (at `preexisting_prob=0.30`, this module's *original* central value; see "Does the
+durable-response finding hold up against real human data?" below for why the erosion is actually
+worse than this once `preexisting_prob` is recentered against real data -- 82.3%/54.0% at
+`preexisting_prob=0.70`, the module's current default).
 
 ```bash
-canine-dsp mapk-durability-horizon-demo --breed bmd --max-kill-2 0.05 --out results/mapk-durability
+canine-dsp mapk-durability-horizon-demo --breed bmd --max-kill-2 0.05 \
+  --preexisting-prob 0.30 --out results/mapk-durability
 ```
 
 The reason is identifiable, not just numeric drift: the combination *slows* the
@@ -865,6 +869,78 @@ each checked directly rather than taken on a search summary's word:
   spends most of its effort exploring -- so even a full readout of that trial would only speak to
   the weakest arm modeled here.
 
+### Does the durable-response finding hold up against real human data?
+
+Every durability number above (99.5%/91.5%/81% at 2/5/10 years) was computed at this module's
+original `preexisting_prob=0.30`. The "real trial data that exists but wasn't folded in as a model
+parameter" bullet above already found the closest available real analog -- COMBI-d/COMBI-v's
+pooled 5-year follow-up of dabrafenib+trametinib in human BRAF-mutant melanoma -- but stopped short
+of actually comparing this module's own output against it, for the same reason the eBAT comparison
+in the HSA section below hadn't been run yet at that point either. Doing that comparison directly,
+the same way it was done for HSA, turned up a real, sizeable gap, not a reassuring match.
+
+```bash
+for p in 0.05 0.15 0.30 0.50 0.70; do
+  canine-dsp mapk-durability-horizon-demo --breed bmd --max-kill-2 0.05 \
+    --preexisting-prob $p --out results/hs-durability-check-$p
+done
+```
+
+| `preexisting_prob` | 5yr durable | 10yr durable |
+|---|---|---|
+| 0.05 | 99.0% | 95.3% |
+| 0.15 | 98.7% | 92.7% |
+| 0.30 (old default) | 92.0% | 81.0% |
+| 0.50 | 91.3% | 68.3% |
+| **0.70 (new default)** | **82.3%** | **54.0%** |
+
+Two real comparators, and they disagree sharply on how bad the gap is:
+
+- **Against the full trial population's 5-year PFS (19%)**: not reconcilable anywhere in the
+  swept range -- even at `preexisting_prob=0.70`, this module's 10-year durable-response rate
+  (54%) is still nearly 3x more optimistic. But this comparison is arguably not fair to begin
+  with: COMBI-d/COMBI-v's population includes everyone who started treatment, most of whom never
+  achieved a deep response, while this module's durability demo starts from an already-debulked,
+  good-initial-response state (`DEBULKING_FRACTION`) -- a different, more favorable starting point
+  by design.
+- **Against the complete-response subgroup's 5-year OS (71%, the 109/563 patients -- 19% -- who
+  achieved a CR)**: the fairer comparator, since it's conditioned on a good initial response the
+  way this module's scenario already is. Here the old default (92.0%, a 21-point gap) is
+  substantially worse than `preexisting_prob=0.70` (82.3%, an 11-point gap) -- the best fit
+  available anywhere in the swept range. `_PREEXISTING_PROB_CENTRAL` is recentered to 0.70 on that
+  basis (verified citation: Robert et al. 2019, N Engl J Med 381:626-636, PMID 31166680; see
+  `COMBI_D_V_FIVE_YEAR_BENCHMARK` in `mapk_scenarios.py`).
+
+This is the same kind of loose, cross-species/cross-drug analogy used to recenter HSA's equivalent
+constant against the eBAT trial -- two real MAPK-pathway inhibitors used together in human
+melanoma, versus this module's MAPK inhibitor + an illustrative, mechanism-agnostic, low-potency
+second-node drug in dog HS -- not a same-disease, same-drug calibration. And unlike the HSA
+recalibration, there's no clean single-point match here even after recentering: an 11-point
+residual gap remains at the "best fit" value, and pushing `preexisting_prob` further past 0.70
+(spot-checked to 0.80-0.85) only narrows it to 6-9 points, not adopted as the central value because
+stretching one seeding-probability parameter that far on the strength of a single cross-species
+comparison would overstate the precision it can actually claim. The honest conclusion: this
+module's optimistic tail was not well grounded, the recentering makes it less wrong, and it is
+still not validated.
+
+The same CLI-default-drift bug found and fixed in the HSA module existed here too:
+`cli.py`'s `--preexisting-prob` defaults for all eight `mapk-*` commands were hardcoded `0.30`
+literals duplicating `mapk_scenarios._PREEXISTING_PROB_CENTRAL`, so recentering that constant would
+have silently had no effect on CLI behavior. Fixed the same way -- `cli.py` now imports the
+constant directly -- with a regression test exercising the actual CLI path, not just the Python
+function default.
+
+**Does this undo any of the combination-therapy findings above?** Re-checked directly rather than
+assumed: rerunning the `max_kill_2=0.08` "purely pharmacological path forward" case
+(where every resistant clone's growth margin was shown to flip negative) at the new
+`preexisting_prob=0.70` default still gives **100% durable response, flat across 1, 2, 5, and 10
+years** -- identical to the result at the old default. This mirrors exactly what the HSA
+recalibration found: `preexisting_prob` only changes how large a resistant population starts out,
+not whether a sufficiently potent kill term eventually reverses its growth margin, so a harsher
+baseline mainly erodes the *undertreated* regime (`max_kill_2=0.05`) rather than moving the
+threshold at which resistance is genuinely, mechanistically eliminated (`max_kill_2=0.08`). The
+gap against real data is in the erosion-rate claim at 0.05, not in the elimination claim at 0.08.
+
 ## Where this leaves things
 
 `canine_dsp.mapk_resistance` (the generic Monte Carlo/branching-process engine) and
@@ -1205,6 +1281,53 @@ on MHC-I to T cells. That makes IEDB/NetMHCpan-style MHC-binding prediction -- t
 histiocytic sarcoma's driver-mutation neoantigen vaccine -- **the wrong tool for eVim entirely**;
 applying it here would have been a category error, not a finding. No real B-cell/antibody-epitope
 prediction tool was substituted for it; the mismatch is reported rather than papered over.
+
+### Does this change whether a durable-response combination exists for HSA?
+
+None of the three genomics/structure findings above were fed into the Monte Carlo model as a
+parameter -- they're an independent plausibility check, not a calibration input -- so the
+combination-search grid's own numbers (multiple threshold combinations reaching >=95% durable
+response: inhibitor+vaccine alone, inhibitor+eBAT alone, or both together at lower potency in
+each) are unchanged by any of this. What changed is how much weight each piece of that finding
+can actually bear, and the answer is uneven across the two "extra" ingredients:
+
+- **eBAT is better grounded now than before, on two independent axes.** Its first target, EGFR,
+  is structurally conserved enough in dogs (91.6% identical) that a human-EGF-ligand-based
+  immunotoxin engaging it is plausible, not just asserted from the trial having worked. That sits
+  on top of eBAT already being the one drug in this module with real trial outcome data at all
+  (Kim et al. 2017) -- two different kinds of evidence, structural and clinical, both pointing the
+  same direction.
+- **eBAT's second target, uPAR, is not similarly grounded, and can't be with the tools used here.**
+  No curated dog PLAUR entry exists to check -- a real gap in the evidence, not a negative result.
+  eBAT's real-world efficacy signal doesn't depend on this check succeeding (the trial data stands
+  on its own), but half of its stated dual-target mechanism remains unconfirmed at the sequence
+  level, and the same trial data needed `preexisting_prob` recentered to 0.70 (an admittedly loose
+  analogy) before this module's own output even landed in the trial's neighborhood -- so "eBAT
+  works" rests on outcome data with its own acknowledged looseness, not on a clean structural story.
+- **The vaccine half of the combination search turns out to be more of a generic placeholder than
+  it looked.** `immune_escape` in this module represents MHC-I/antigen-presentation loss -- the
+  right resistance mechanism for a T-cell peptide vaccine, which is exactly how histiocytic
+  sarcoma's vaccine is modeled and checked (IEDB/NetMHCpan against a real neoantigen). But the one
+  real HSA vaccine with both a statistically significant efficacy signal and a fully verified
+  mechanism, eVim, is antibody-based -- its actual escape routes would be antigen shedding,
+  extracellular-epitope mutation, or surface-vimentin downregulation, not MHC-I loss. So unlike
+  HS, where the mechanism-matched check was run and came back unsupported for one specific case
+  (KRAS Q61H), here the vaccine resistance mechanism itself was never mechanism-matched to the
+  strongest real candidate in the first place. `vaccine_max_kill` remains a swept, unfitted
+  potency knob standing in for "some vaccine, some mechanism" -- not eVim, not ERstrePs (whose
+  antigen composition couldn't even be pinned down earlier), and the >=95% thresholds found above
+  should be read that way: a property of the model's generic vaccine term, not a projection for
+  any specific real vaccine's actual behavior.
+
+Net: the model still finds parameter regions that reach the durable-response threshold, and that
+hasn't changed. What genomics did was sharpen *which* piece of that finding is solid versus
+illustrative rather than answer the underlying question -- eBAT/EGFR engagement is now backed by
+both structure and outcome data; eBAT/uPAR and the vaccine's resistance mechanism remain open,
+now-named gaps rather than diffuse uncertainty. That's a real improvement in honesty about what's
+known, not a new answer to "is there a real combination" -- the same conclusion the HS stress-test
+above reached from the opposite direction (an outcome-data gap, not a mechanism-data gap): neither
+disease's "durable response" finding is confirmed, and neither is refuted -- each now has a more
+precisely located hole in it than before this pass.
 
 ## Research path
 
