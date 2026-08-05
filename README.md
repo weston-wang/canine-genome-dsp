@@ -1093,7 +1093,7 @@ The goal here was never "does the inhibitor work" or "does the vaccine work" in 
 it's finding *a combination that yields durable response*, which means not artificially
 restricting the search to two ingredients once a third real option exists. **eBAT** (a
 bispecific EGF/uPAR-targeted immunotoxin, mechanistically distinct from a small-molecule pathway
-inhibitor) has real Phase I/II dose-finding data (Kim et al. 2017, Mol Cancer Ther 16(9):1996-2006,
+inhibitor) has real Phase I/II dose-finding data (Borgatti et al. 2017, Mol Cancer Ther 16(5):956-965,
 PMID 28193671): a single IV cycle at 50 ug/kg, 6-month survival ~70% (n=17) vs. <40% historical,
 6 long-term survivors past 450 days. Unlike VDC-597, no multi-dose-level response curve was
 reported -- one active dose, not a titratable relationship -- so `ebat_max_kill` is swept across
@@ -1268,8 +1268,8 @@ can actually bear, and the answer is uneven across the two "extra" ingredients:
   is structurally conserved enough in dogs (91.6% identical) that a human-EGF-ligand-based
   immunotoxin engaging it is plausible, not just asserted from the trial having worked. That sits
   on top of eBAT already being the one drug in this module with real trial outcome data at all
-  (Kim et al. 2017) -- two different kinds of evidence, structural and clinical, both pointing the
-  same direction.
+  (Borgatti et al. 2017) -- two different kinds of evidence, structural and clinical, both
+  pointing the same direction.
 - **eBAT's second target, uPAR, is not similarly grounded, and can't be with the tools used here.**
   No curated dog PLAUR entry exists to check -- a real gap in the evidence, not a negative result.
   eBAT's real-world efficacy signal doesn't depend on this check succeeding (the trial data stands

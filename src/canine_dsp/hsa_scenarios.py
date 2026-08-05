@@ -322,7 +322,7 @@ HSA_IMMUNE_ESCAPE_SEEDING_RATE = _SEEDING_RATE_TOTAL * 0.2 * 0.1
 
 # eBAT: a real, mechanistically distinct third option -- a bispecific EGF/uPAR-targeted
 # immunotoxin, not a small-molecule pathway inhibitor -- with real Phase I/II dose-finding data
-# (Kim et al. 2017, Mol Cancer Ther 16(9):1996-2006, PMID 28193671): a single IV cycle at 50
+# (Borgatti et al. 2017, Mol Cancer Ther 16(5):956-965, PMID 28193671): a single IV cycle at 50
 # ug/kg (the biologically active dose identified across an adaptive 23-dog dose-finding cohort),
 # 6-month survival ~70% (n=17 at that dose) vs. <40% in historical controls, with 6 long-term
 # survivors past 450 days. Unlike VDC-597/rapamycin, no multi-dose-level response curve was
@@ -346,7 +346,7 @@ HSA_IMMUNE_ESCAPE_SEEDING_RATE = _SEEDING_RATE_TOTAL * 0.2 * 0.1
 # already makes for histiocytic sarcoma's CDK4/6i sweep. Read "combination X reaches 100% here"
 # as "X crossed this parameterization's threshold," not as a real all-or-nothing efficacy claim.
 HSA_EBAT_TRIAL = {
-    "citation": "Kim et al. 2017, Mol Cancer Ther 16(9):1996-2006, PMID 28193671",
+    "citation": "Borgatti et al. 2017, Mol Cancer Ther 16(5):956-965, PMID 28193671",
     "agent": "eBAT (bispecific EGF/uPAR-targeted immunotoxin)",
     "design": "adaptive Phase I/II dose-finding, 23 dogs with splenic HSA; single IV cycle",
     "biologically_active_dose_ug_per_kg": 50.0,
