@@ -207,6 +207,19 @@ def test_adding_inhibitor_to_ebat_can_erode_long_horizon_durability_more_than_eb
     assert ten_year_without["probability_durable_response"] > 0.99
 
 
+def test_inhibitor_alone_plateaus_rather_than_continuing_to_erode(tmp_path):
+    """The inhibitor-alone baseline reaches a stable ~30% durable-response floor by year 2 and
+    stays there through year 10, rather than continuing to decay the way the borderline
+    inhibitor+eBAT combination does -- the one row in the full endurance picture anchored to
+    anything real (see hsa_scenarios' eBAT-trial-based preexisting_prob recentering)."""
+    hsa_durability_horizon_demo(tmp_path, ebat_max_kill=0.0, vaccine_max_kill=0.0,
+                               inhibitor_active=True, trials=300, seed=1)
+    table = pd.read_csv(tmp_path / "hsa_durability_horizon_sensitivity.csv")
+    five_year = table.loc[table["horizon_days"] == 1825, "probability_durable_response"].iloc[0]
+    ten_year = table.loc[table["horizon_days"] == 3650, "probability_durable_response"].iloc[0]
+    assert abs(five_year - ten_year) < 0.05
+
+
 def test_hsa_durability_horizon_demo_runs_vaccine_only_and_ebat_only_paths(tmp_path):
     # vaccine_max_kill=0.0 must still route through the 5-clone vaccine model without crashing
     # (a harmless immune-escape clone), so both eBAT-only and vaccine-only regimens go through
