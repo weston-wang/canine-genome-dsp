@@ -213,22 +213,25 @@ def test_durability_horizon_demo_writes_full_sweep(tmp_path):
     assert (tmp_path / "durability_horizon.png").exists()
 
 
-def test_preexisting_prob_central_recentered_to_pessimistic_end():
-    # Recentered from 0.30 to 0.70 after stress-testing durability_horizon_demo's output against
-    # the real COMBI-d/COMBI-v 5-year human melanoma benchmark (COMBI_D_V_FIVE_YEAR_BENCHMARK in
-    # mapk_scenarios.py) -- at 0.30 the model overshot even the most favorable real comparator by
-    # 21 points; 0.70 is the best fit available within the swept range (11-point residual gap).
-    # This pins the value so a future edit can't silently drift it back.
-    assert _PREEXISTING_PROB_CENTRAL == 0.70
+def test_preexisting_prob_central_not_recentered_against_mismatched_human_benchmark():
+    # COMBI_D_V_FIVE_YEAR_BENCHMARK (human, BRAF-mutant melanoma, dual same-pathway MAPK
+    # inhibition) was considered as a basis for recentering this constant the same way HSA's
+    # equivalent constant was recentered against the real eBAT trial -- and rejected. Unlike the
+    # eBAT case (same species, same disease, drug mechanism differs), this comparator stacks
+    # species, disease/cell-lineage, driver-mutation, and drug-mechanism mismatches at once, and
+    # melanoma's unusually high UV-driven mutational burden makes it a poor proxy for a canine
+    # sarcoma's clonal heterogeneity specifically. Pinned at the original 0.30 so a future edit
+    # can't silently repeat that mistake.
+    assert _PREEXISTING_PROB_CENTRAL == 0.30
 
 
-def test_cli_mapk_demo_defaults_do_not_drift_from_the_recentered_constant(tmp_path, monkeypatch):
+def test_cli_mapk_demo_defaults_do_not_drift_from_the_scenario_constant(tmp_path, monkeypatch):
     # Regression test for the same bug class fixed in hsa_scenarios/cli.py: cli.py's argparse
-    # --preexisting-prob defaults for the mapk_* commands were hardcoded literals (0.30)
-    # duplicating mapk_scenarios._PREEXISTING_PROB_CENTRAL, so recentering that constant would
-    # have silently had no effect on CLI behavior unless --preexisting-prob was passed explicitly.
-    # cli.py now imports the constant directly instead of duplicating its value; this checks the
-    # CLI path end-to-end, not just that the Python-level function default is correct.
+    # --preexisting-prob defaults for the mapk_* commands were once hardcoded literals (0.30)
+    # duplicating mapk_scenarios._PREEXISTING_PROB_CENTRAL, so any future change to that constant
+    # would have silently had no effect on CLI behavior unless --preexisting-prob was passed
+    # explicitly. cli.py now imports the constant directly instead of duplicating its value; this
+    # checks the CLI path end-to-end, not just that the Python-level function default is correct.
     monkeypatch.setattr(sys, "argv", [
         "canine-dsp", "mapk-durability-horizon-demo", "--breed", "bmd", "--trials", "10",
         "--out", str(tmp_path),

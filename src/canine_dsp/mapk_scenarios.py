@@ -43,28 +43,28 @@ _SEEDING_RATE_TOTAL = 0.012
 # than fixed to one asserted value, because a point estimate here was found to be effectively
 # tuning the headline result rather than discovering it.
 _PREEXISTING_PROB_SWEEP = [0.05, 0.15, 0.30, 0.50, 0.70]
-# Recentered from 0.30 to the pessimistic end of the sweep (0.70) after stress-testing this
-# module's headline "durable response" combination-therapy finding
-# (`mapk_durability_horizon_demo`, MAPK inhibitor + illustrative low-potency second-node drug,
-# max_kill_2=0.05) against COMBI_D_V_FIVE_YEAR_BENCHMARK below. At 0.30 the model's 5-year
-# durable-response probability (92%) overshoots even the *most favorable* real comparator (71%
-# 5-year OS among the complete-response subgroup) by 21 points; at 0.70 the gap shrinks to 11
-# points (82% vs 71%) -- the best fit available anywhere in the swept range. This is the same
-# kind of loose, cross-species/cross-drug analogy used to recenter HSA's equivalent constant
-# against the eBAT trial (see hsa_scenarios.py) -- not a same-disease, same-drug calibration --
-# and even this "best fit" leaves a real, unresolved 11-point residual gap. Comparing instead
-# against the *full trial population's* 5-year PFS (19%) is not reconcilable at any point in the
-# swept range: the closest this model gets is 54% at preexisting_prob=0.70, still ~3x too
-# optimistic. That population-level comparison is arguably not fair to begin with, since this
-# model's durability demo starts from an already-debulked, good-initial-response state
-# (`DEBULKING_FRACTION`) rather than an unselected treatment population -- which is why the
-# complete-response subgroup, not the full population, is treated as the fairer comparator above.
-# Either way, the honest conclusion is that this module's optimistic tail is not well grounded:
-# pushing preexisting_prob further past 0.70 narrows the gap further (spot-checked to ~6-9 points
-# at 0.80-0.85) but was not adopted as the central value, because stretching a single seeding-
-# probability parameter that far, on the strength of one cross-species/cross-drug/cross-endpoint
-# comparison, would overstate the precision this constant can actually claim.
-_PREEXISTING_PROB_CENTRAL = 0.70
+# NOT recentered against COMBI_D_V_FIVE_YEAR_BENCHMARK below, on reflection -- an earlier version
+# of this comment did recenter it to 0.70 on that basis, which was a mistake caught on further
+# scrutiny of how weak that comparison actually is. The two situations look superficially similar
+# but are not: HSA's equivalent constant (hsa_scenarios.py) was recentered against the real eBAT
+# trial, which differs from that module's modeled drug in *mechanism only* -- same species (dog),
+# same disease (HSA), same drug class question (does a real HSA treatment's outcome data suggest
+# more pre-existing resistance than assumed). COMBI_D_V_FIVE_YEAR_BENCHMARK stacks four mismatches
+# at once: different species (human), different disease/cell lineage (melanoma, not histiocytic
+# sarcoma), different driver mutation/pathway node (BRAF V600 vs. this module's PTPN11/KRAS), and
+# a mechanistically different drug pairing (COMBI-d/v is two real MAPK-pathway inhibitors blocking
+# the *same* pathway at sequential nodes, versus this module's MAPK inhibitor + an illustrative,
+# deliberately mechanism-agnostic second-node drug hitting a *different* pathway entirely). It is
+# also specifically a bad source for calibrating *this* parameter: melanoma has an unusually high,
+# UV-mutagenesis-driven tumor mutational burden, so whatever rate of pre-existing resistant clones
+# it implies is not evidence about a UV-unrelated canine sarcoma's clonal heterogeneity. This is
+# exactly the same "different disease and different mechanism" mismatch MAPK_INHIBITOR_HUMAN_
+# BENCHMARK below was already written to avoid stacking onto any fitted constant -- reusing a
+# closely related paper from the same trials to justify moving a parameter anyway was inconsistent
+# with that standard. COMBI_D_V_FIVE_YEAR_BENCHMARK is kept as a scale-only reference (see its own
+# caveat), the same role LOMUSTINE_BENCHMARK and MAPK_INHIBITOR_HUMAN_BENCHMARK already play, not
+# as a recentering basis.
+_PREEXISTING_PROB_CENTRAL = 0.30
 
 # Two published lomustine (non-targeted chemotherapy) studies in unselected canine HS, included
 # as an automatic sanity check against this module's synthetic MAPK-inhibitor projections. The
@@ -143,15 +143,23 @@ COMBI_D_V_FIVE_YEAR_BENCHMARK = {
     "five_year_overall_survival_full_population": 0.34,
     "complete_response_fraction": 109 / 563,
     "five_year_overall_survival_complete_responders": 0.71,
-    "caveat": "Different species (human vs. dog), disease (metastatic melanoma vs. HS), and drug "
-             "pair (two real MAPK-pathway inhibitors used together, vs. this module's MAPK "
-             "inhibitor + an illustrative, mechanism-agnostic, low-potency second-node drug) -- "
-             "a loose analogy, not a same-disease, same-drug calibration. The full-population "
-             "5-year PFS (19%) is a population that mostly never achieved a deep response, unlike "
-             "this module's durability demo, which starts from an already-debulked, good-"
-             "initial-response state -- so the complete-response subgroup's 71% 5-year OS is the "
-             "fairer of the two numbers to compare against, and even that comparison leaves this "
-             "module's central estimate (see _PREEXISTING_PROB_CENTRAL) with an 11-point gap.",
+    "caveat": "Provided for scale only, not as a calibration target -- do not use this to justify "
+             "moving any constant above. Stacks four mismatches against this module's own "
+             "scenarios at once: different species (human vs. dog), different disease/cell "
+             "lineage (melanocyte-derived metastatic melanoma vs. histiocyte-derived HS), "
+             "different driver mutation/pathway node (BRAF V600E/K vs. this module's PTPN11/"
+             "KRAS), and a mechanistically different drug pairing (two real MAPK-pathway "
+             "inhibitors blocking the *same* pathway at sequential nodes here, vs. this module's "
+             "MAPK inhibitor + an illustrative, deliberately mechanism-agnostic second-node drug "
+             "hitting a *different* pathway). It is also a poor source specifically for "
+             "calibrating a pre-existing-resistant-clone-prevalence parameter: melanoma carries "
+             "an unusually high, UV-mutagenesis-driven tumor mutational burden, so whatever rate "
+             "of pre-existing resistant clones it implies says little about a UV-unrelated canine "
+             "sarcoma's clonal heterogeneity. Even the fairer of its two headline numbers (71% "
+             "5-year OS among the 19% of patients who achieved a complete response, versus the "
+             "full population's cruder 19% 5-year PFS / 34% 5-year OS) does not change this -- "
+             "the mismatch is in what disease and mutation produced the number, not in which "
+             "endpoint was picked.",
 }
 
 # Fraction of plasma drug concentration reached in brain tissue -- real, drug-specific PK
