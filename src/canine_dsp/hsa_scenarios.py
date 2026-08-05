@@ -361,6 +361,39 @@ HSA_EBAT_ILLUSTRATIVE_IC50_NM = 100.0
 HSA_EBAT_ILLUSTRATIVE_CSS_NM = 500.0  # ~5x the illustrative IC50; an assumed, not measured, margin
 HSA_EBAT_MAX_KILL_SWEEP = [0.0, 0.02, 0.05, 0.08, 0.12]
 
+# Unlike histiocytic sarcoma's trametinib+CDK4/6i pair (different organ systems: vascular/hepatic
+# vs. myelosuppression), the two real drugs behind this scenario's inhibitor+eBAT combination have
+# been directly, separately confirmed to hit the *same* organ system: rapamycin-class PI3K/mTOR
+# inhibitors cause real, sometimes severe canine GI and hepatic toxicity (diarrhea, vomiting,
+# inappetence, hemorrhagic gastroenteritis, and liver enzyme changes were reported across 192
+# dogs), and eBAT itself caused reversible grade 1-3 ALT/AST/ALP elevations in 10.2% of dogs in
+# its own trial, plus hypotensive collapse (15.3%) and nausea/vomiting (10.2%) (Borgatti et al.
+# 2017). Real, documented, overlapping hepatic/GI toxicity between the two specific drugs actually
+# in this combination -- not an extrapolated mechanism-class argument the way histiocytic
+# sarcoma's CDK4/6i neutropenia reasoning is -- is if anything a *stronger* real-world reason to
+# expect combined dosing would need to be de-rated below each drug's illustrative full-dose
+# exposure, not a weaker one. Swept the same way and range as mapk_scenarios.
+# COMBINED_EXPOSURE_DERATING for comparability, not because the evidence differs in severity.
+HSA_COMBINED_EXPOSURE_DERATING = [1.0, 0.8, 0.6, 0.4]
+HSA_TOXICITY_EXTRAPOLATION_NOTE = (
+    "Real, same-organ-system (hepatic/GI) toxicity is documented for both the PI3K/mTOR inhibitor "
+    "class in dogs and for eBAT specifically (Borgatti et al. 2017) -- unlike histiocytic "
+    "sarcoma's trametinib+CDK4/6i pair, which hits two different organ systems, giving the "
+    "standard 'combinations are often feasible near full dose' rationale less room to apply here. "
+    "No canine dose-finding trial has actually combined a PI3K/mTOR inhibitor with eBAT, so no "
+    "real de-rating fraction is known; HSA_COMBINED_EXPOSURE_DERATING applies to css_reference "
+    "and css_reference_2 simultaneously (see hsa_combination_toxicity_demo) to test whether the "
+    "combination's benefit survives realistic dose reduction rather than assuming full, "
+    "unconstrained dosing of both drugs holds."
+)
+
+# Same sweep mapk_scenarios.DURABILITY_HORIZON_SWEEP uses: 1, 2, 5, and 10 years. No HSA demo
+# had ever been run past the default 730-day (2-year) horizon before this was added -- unlike
+# histiocytic sarcoma, where the same sweep found durability eroding materially between 2 and 10
+# years, HSA's long-horizon behavior was previously simply unexamined, not separately confirmed
+# to be flat.
+HSA_DURABILITY_HORIZON_SWEEP = [365, 730, 1825, 3650]
+
 
 def hsa_combination_scenarios(inhibitor_active: bool = True,
                               ebat_max_kill_values: list[float] = HSA_EBAT_MAX_KILL_SWEEP,

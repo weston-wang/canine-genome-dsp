@@ -10,6 +10,8 @@ from .alphafold_cli import analyze_structure, fetch_structure
 from .hsa_cli import (
     hsa_combination_control_demo,
     hsa_combination_search_demo,
+    hsa_combination_toxicity_demo,
+    hsa_durability_horizon_demo,
     hsa_receptor_conservation_demo,
     hsa_resistance_demo,
     hsa_vaccine_antigen_design_demo,
@@ -191,6 +193,26 @@ def main() -> None:
     hsa_antigen_demo.add_argument("--window", type=int, default=9)
     hsa_antigen_demo.add_argument("--top-n", type=int, default=3)
     hsa_antigen_demo.add_argument("--out", type=Path, required=True)
+    hsa_tox_demo = sub.add_parser("hsa-combination-toxicity-demo",
+                                  help="does the inhibitor+eBAT combination for canine "
+                                       "hemangiosarcoma survive realistic combined-dose de-rating")
+    hsa_tox_demo.add_argument("--ebat-max-kill", type=float, default=0.05)
+    hsa_tox_demo.add_argument("--trials", type=int, default=300)
+    hsa_tox_demo.add_argument("--horizon-days", type=int, default=730)
+    hsa_tox_demo.add_argument("--preexisting-prob", type=float, default=HSA_PREEXISTING_PROB_CENTRAL)
+    hsa_tox_demo.add_argument("--seed", type=int, default=7)
+    hsa_tox_demo.add_argument("--out", type=Path, required=True)
+    hsa_durability_demo = sub.add_parser("hsa-durability-horizon-demo",
+                                         help="how long does \"durable response\" mean for a given "
+                                              "HSA combination -- sweeps 1/2/5/10-year horizons")
+    hsa_durability_demo.add_argument("--ebat-max-kill", type=float, default=0.05)
+    hsa_durability_demo.add_argument("--vaccine-max-kill", type=float, default=0.0)
+    hsa_durability_demo.add_argument("--no-inhibitor", action="store_true",
+                                     help="test vaccine (+/- eBAT) with no PI3K/mTOR inhibitor at all")
+    hsa_durability_demo.add_argument("--trials", type=int, default=300)
+    hsa_durability_demo.add_argument("--preexisting-prob", type=float, default=HSA_PREEXISTING_PROB_CENTRAL)
+    hsa_durability_demo.add_argument("--seed", type=int, default=7)
+    hsa_durability_demo.add_argument("--out", type=Path, required=True)
     mapk_structure = sub.add_parser("mapk-structure-compare",
                                     help="compare human vs. dog AlphaFold confidence at MAPK-gene hotspots")
     mapk_structure.add_argument("--gene", required=True)
@@ -337,6 +359,13 @@ def main() -> None:
             hsa_receptor_conservation_demo(args.out, args.genes)
     elif args.command == "hsa-vaccine-antigen-design-demo":
         hsa_vaccine_antigen_design_demo(args.out, args.gene, args.window, args.top_n)
+    elif args.command == "hsa-combination-toxicity-demo":
+        hsa_combination_toxicity_demo(args.out, args.ebat_max_kill, args.trials, args.horizon_days,
+                                      args.preexisting_prob, args.seed)
+    elif args.command == "hsa-durability-horizon-demo":
+        hsa_durability_horizon_demo(args.out, args.ebat_max_kill, args.vaccine_max_kill,
+                                    not args.no_inhibitor, args.trials, args.preexisting_prob,
+                                    args.seed)
     elif args.command == "mapk-structure-compare":
         compare_orthologs(args.gene, args.hotspots, args.out)
     elif args.command == "mapk-cns-demo":

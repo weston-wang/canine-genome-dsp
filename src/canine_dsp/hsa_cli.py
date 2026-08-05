@@ -15,6 +15,8 @@ from .alphafold import (
 )
 from .hsa_scenarios import (
     HSA_CLONE_NAMES,
+    HSA_COMBINED_EXPOSURE_DERATING,
+    HSA_DURABILITY_HORIZON_SWEEP,
     HSA_EBAT_ILLUSTRATIVE_CSS_NM,
     HSA_EBAT_MAX_KILL_SWEEP,
     HSA_EBAT_TRIAL,
@@ -22,6 +24,7 @@ from .hsa_scenarios import (
     HSA_RAPAMYCIN_BENCHMARK,
     HSA_RECEPTOR_CONSERVATION_TARGETS,
     HSA_STANDARD_OF_CARE_BENCHMARK,
+    HSA_TOXICITY_EXTRAPOLATION_NOTE,
     HSA_VACCINE_CLONE_NAMES,
     HSA_VACCINE_MAX_KILL_SWEEP,
     HSA_VACCINE_RAMP_DAYS,
@@ -548,5 +551,140 @@ def hsa_vaccine_antigen_design_demo(out: Path, gene: str = "VIM", window: int = 
         "warning": "Structural plausibility for antibody accessibility, not a vaccine design tool "
                   "and not an efficacy prediction. AlphaFold predicts structure from a known "
                   "sequence; it does not generate or invent new antigen sequences.",
+    }
+    (out / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")
+
+
+def hsa_combination_toxicity_demo(out: Path, ebat_max_kill: float = 0.05, trials: int = 300,
+                                  horizon_days: int = 730,
+                                  preexisting_prob: float = _PREEXISTING_PROB_CENTRAL,
+                                  seed: int = 7) -> None:
+    """Stress-tests the inhibitor+eBAT combination against realistic combined-dosing de-rating,
+    mirroring `mapk_cli.combination_toxicity_demo` -- but grounded in real, documented, same-
+    organ-system (hepatic/GI) toxicity for both drugs specifically, not an extrapolated
+    mechanism-class argument. See `HSA_TOXICITY_EXTRAPOLATION_NOTE`.
+
+    Fixes eBAT potency at `ebat_max_kill` (default 0.05, the threshold that reached durable
+    response in `hsa_combination_search_demo`) and sweeps `HSA_COMBINED_EXPOSURE_DERATING`,
+    applying it multiplicatively to both the inhibitor and eBAT reference concentrations.
+    """
+    out.mkdir(parents=True, exist_ok=True)
+    scenarios = hsa_combination_scenarios(True, [ebat_max_kill])
+    model, css, seeding_rates, _ = scenarios[ebat_max_kill]
+
+    rows, outcomes = [], {}
+    for derating in HSA_COMBINED_EXPOSURE_DERATING:
+        outcome = run_monte_carlo(model, css * derating, horizon_days, seeding_rates, trials,
+                                  preexisting_prob=preexisting_prob,
+                                  css_reference_2=HSA_EBAT_ILLUSTRATIVE_CSS_NM * derating, seed=seed)
+        outcomes[derating] = outcome
+        ttp = outcome.time_to_progression[outcome.progressed]
+        mechanism_counts = pd.Series(outcome.dominant_mechanism).value_counts()
+        mechanism_fractions = (mechanism_counts.reindex(["durable_response"] + HSA_CLONE_NAMES[1:],
+                                                        fill_value=0)
+                              / len(outcome.dominant_mechanism))
+        rows.append({
+            "combined_exposure_derating": derating,
+            "inhibitor_css_nM": css * derating,
+            "ebat_css_nM": HSA_EBAT_ILLUSTRATIVE_CSS_NM * derating,
+            "probability_durable_response": float(1 - outcome.progressed.mean()),
+            "probability_progression": float(outcome.progressed.mean()),
+            "median_time_to_progression_days": float(np.median(ttp)) if ttp.size else None,
+            **{f"mechanism_{mechanism}": float(value) for mechanism, value in mechanism_fractions.items()},
+        })
+    table = pd.DataFrame(rows)
+    table.to_csv(out / "hsa_toxicity_derating_sensitivity.csv", index=False)
+
+    fig, ax = plt.subplots(figsize=(7, 4.5))
+    ax.plot(table["combined_exposure_derating"], table["probability_durable_response"],
+           marker="o", color="tab:purple")
+    ax.set(xlabel="fraction of illustrative full exposure (both drugs)", ylabel="P(durable response)",
+          title=f"does inhibitor+eBAT (max_kill={ebat_max_kill}) survive realistic dose reduction?",
+          ylim=(0, 1.02))
+    fig.tight_layout(); fig.savefig(out / "hsa_toxicity_derating.png", dpi=160); plt.close(fig)
+
+    summary = {
+        "ebat_max_kill_tested": ebat_max_kill, "preexisting_prob_used": preexisting_prob,
+        "sensitivity": rows, "toxicity_extrapolation_rationale": HSA_TOXICITY_EXTRAPOLATION_NOTE,
+        "unverified_extrapolations": [
+            "no canine dose-finding trial has combined a PI3K/mTOR inhibitor with eBAT; "
+            "HSA_COMBINED_EXPOSURE_DERATING is a plausible range grounded in the drugs' separate "
+            "real toxicity profiles overlapping on organ system, not a measured combination-trial "
+            "de-escalation schedule",
+            "assumes both drugs de-rate by the same fraction simultaneously; a real Phase Ib "
+            "trial could de-escalate one drug more than the other depending on which toxicity "
+            "proves dose-limiting first",
+        ],
+        "warning": "A parameter-space stress test of this module's own illustrative model, not a "
+                  "real combined-dosing safety study.",
+    }
+    (out / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")
+
+
+def hsa_durability_horizon_demo(out: Path, ebat_max_kill: float = 0.05, vaccine_max_kill: float = 0.0,
+                                inhibitor_active: bool = True, trials: int = 300,
+                                preexisting_prob: float = _PREEXISTING_PROB_CENTRAL,
+                                seed: int = 7) -> None:
+    """How long does "durable response" actually mean for a given HSA combination, the same
+    question `mapk_cli.durability_horizon_demo` asks for histiocytic sarcoma? No HSA demo had
+    ever been run past the default 730-day horizon before this was added -- every "durable
+    response" figure quoted for HSA up to this point meant only "no relapse detected within 2
+    years," unverified at longer horizons.
+
+    Sweeps `HSA_DURABILITY_HORIZON_SWEEP` (1, 2, 5, 10 years) at a fixed `(ebat_max_kill,
+    vaccine_max_kill)` combination, reusing `hsa_vaccine_followon_scenarios` (vaccine_max_kill=0.0
+    still runs the 5-clone vaccine model with a harmless immune-escape clone, so eBAT-only and
+    vaccine-only regimens can both be tested through the same code path as the full combination).
+    """
+    out.mkdir(parents=True, exist_ok=True)
+    scenarios = hsa_vaccine_followon_scenarios(ebat_max_kill, inhibitor_active, [vaccine_max_kill])
+    model, css, seeding_rates, _ = scenarios[vaccine_max_kill]
+    css_2 = HSA_EBAT_ILLUSTRATIVE_CSS_NM if ebat_max_kill > 0 else None
+
+    rows = []
+    for horizon_days in HSA_DURABILITY_HORIZON_SWEEP:
+        outcome = run_monte_carlo_with_vaccine(
+            model, css, horizon_days, seeding_rates, vaccine_start_day=HSA_VACCINE_START_DAY,
+            vaccine_ramp_days=HSA_VACCINE_RAMP_DAYS, vaccine_max_kill=vaccine_max_kill,
+            immune_escape_seeding_rate=HSA_IMMUNE_ESCAPE_SEEDING_RATE,
+            clone_names=HSA_VACCINE_CLONE_NAMES, trials=trials,
+            preexisting_prob=preexisting_prob, css_reference_2=css_2, seed=seed)
+        ttp = outcome.time_to_progression[outcome.progressed]
+        mechanism_counts = pd.Series(outcome.dominant_mechanism).value_counts()
+        mechanism_fractions = (mechanism_counts.reindex(["durable_response"] + HSA_VACCINE_CLONE_NAMES[1:],
+                                                        fill_value=0)
+                              / len(outcome.dominant_mechanism))
+        rows.append({
+            "horizon_days": horizon_days, "horizon_years": horizon_days / 365,
+            "probability_durable_response": float(1 - outcome.progressed.mean()),
+            "probability_progression": float(outcome.progressed.mean()),
+            "median_time_to_progression_days": float(np.median(ttp)) if ttp.size else None,
+            **{f"mechanism_{mechanism}": float(value) for mechanism, value in mechanism_fractions.items()},
+        })
+    table = pd.DataFrame(rows)
+    table.to_csv(out / "hsa_durability_horizon_sensitivity.csv", index=False)
+
+    fig, ax = plt.subplots(figsize=(7, 4.5))
+    ax.plot(table["horizon_years"], table["probability_durable_response"], marker="o", color="tab:green")
+    ax.set(xlabel="years of follow-up simulated", ylabel="P(no relapse detected by this horizon)",
+          title=f"how long is \"durable\"? ebat={ebat_max_kill}, vaccine={vaccine_max_kill}, "
+                f"inhibitor_active={inhibitor_active}",
+          ylim=(0, 1.02))
+    fig.tight_layout(); fig.savefig(out / "hsa_durability_horizon.png", dpi=160); plt.close(fig)
+
+    summary = {
+        "ebat_max_kill_tested": ebat_max_kill, "vaccine_max_kill_tested": vaccine_max_kill,
+        "inhibitor_active": inhibitor_active, "preexisting_prob_used": preexisting_prob,
+        "sensitivity": rows,
+        "unverified_extrapolations": [
+            "this scenario has never been followed anywhere near 5 or 10 years in any real dog; "
+            "every horizon beyond the ~2 years the real eBAT/vaccine trials actually followed "
+            "patients is a pure extrapolation of this module's own illustrative growth/kill rates",
+            "HSA's real-world catastrophic-event mechanism (tumor rupture/hemorrhage) is still not "
+            "modeled at any horizon -- a long simulated horizon with no relapse detected is not "
+            "the same claim as a real dog surviving that long without a fatal bleed",
+        ],
+        "warning": "Extends this module's own parameter space to horizons no real trial has "
+                  "observed; not a projection of what any real dog's long-term outcome would be.",
     }
     (out / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")

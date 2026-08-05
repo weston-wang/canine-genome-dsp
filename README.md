@@ -1304,6 +1304,67 @@ vaccine construct, real or hypothetical. What changed is narrower and real: "eVi
 generic antibody target" is now "eVim's antigen has two independently-corroborated, actually-
 exposed, human-conserved candidate epitope regions, structurally identifiable rather than assumed."
 
+### Does the inhibitor+eBAT combination survive realistic dose reduction?
+
+Histiocytic sarcoma's toxicity check (`combination_toxicity_demo`) rests on an extrapolated,
+mechanism-class argument: CDK4/6 inhibitors cause neutropenia in humans via on-target cell-cycle
+blockade, so it's reasonable to expect the same in dogs even without canine-specific data, and
+that toxicity hits a different organ system than trametinib's (vascular/hepatic) -- the standard
+reason combinations are often feasible near full dose. HSA's inhibitor+eBAT pairing doesn't get
+that reassurance: both drugs have *directly documented*, real, same-organ-system toxicity.
+Rapamycin-class PI3K/mTOR inhibitors cause real canine GI and hepatic adverse effects (diarrhea,
+vomiting, inappetence, hemorrhagic gastroenteritis, liver enzyme changes, reported across 192
+dogs); eBAT's own trial reported reversible grade 1-3 ALT/AST/ALP elevations in 10.2% of dogs,
+plus hypotensive collapse (15.3%) and nausea/vomiting (10.2%) (Borgatti et al. 2017). Same organ
+systems, in both real drugs -- a stronger, not weaker, real-world reason to expect combined dosing
+would need de-escalation below each drug's illustrative full-dose exposure.
+
+```bash
+canine-dsp hsa-combination-toxicity-demo --ebat-max-kill 0.05 --out results/hsa-toxicity
+```
+
+Sweeping the same de-rating range HS uses (100%/80%/60%/40% of illustrative exposure, applied to
+both drugs at once): durable response drops from **97.3% (full dose) to 92.3% (80%) to 81.7%
+(60%) to 65.3% (40%)** -- a real, substantial erosion, not a negligible one. Unlike HS's
+`max_kill_2=0.05` toxicity check (where the benefit degrades more gently across the same sweep),
+this combination's benefit is meaningfully dose-dependent -- consistent with the real,
+overlapping-organ-system toxicity finding above, and a genuine reason for caution about assuming
+full illustrative dosing of both drugs is achievable together in practice.
+
+### Does HSA's durable response endure or erode over a longer horizon?
+
+Every HSA "durable response" number quoted anywhere above -- including the combination-search
+grid's 95-100% figures -- was computed at a single, hardcoded 730-day (2-year) horizon. Unlike
+histiocytic sarcoma (swept out to 10 years from early on), HSA's long-horizon behavior had simply
+never been checked. `hsa_durability_horizon_demo` (`HSA_DURABILITY_HORIZON_SWEEP`, the same
+1/2/5/10-year sweep) fixes that.
+
+```bash
+canine-dsp hsa-durability-horizon-demo --ebat-max-kill 0.05 --vaccine-max-kill 0.0 --out results/hsa-durability-ebat
+canine-dsp hsa-durability-horizon-demo --ebat-max-kill 0.0 --vaccine-max-kill 0.05 --out results/hsa-durability-vaccine
+canine-dsp hsa-durability-horizon-demo --ebat-max-kill 0.02 --vaccine-max-kill 0.03 --out results/hsa-durability-combo
+canine-dsp hsa-durability-horizon-demo --ebat-max-kill 0.08 --vaccine-max-kill 0.0 --out results/hsa-durability-ebat-08
+```
+
+| Combination | 1yr | 2yr | 5yr | 10yr |
+|---|---|---|---|---|
+| eBAT alone, `max_kill=0.05` (the borderline threshold) | 99.7% | 96.0% | 79.7% | **57.0%** |
+| Vaccine alone, `max_kill=0.05` | 100% | 100% | 96.7% | 92.0% |
+| eBAT=0.02 + vaccine=0.03 (lower potency, combined) | 100% | 99.0% | 92.3% | 82.3% |
+| eBAT alone, `max_kill=0.08` (above the borderline) | 100% | 100% | 100% | **100%** |
+
+The same pattern HS already showed, reproduced independently here: at a potency that just barely
+clears the 2-year, 95% threshold (eBAT alone at 0.05), durability erodes substantially by 10 years
+-- down to 57%, a real and large drop, not a rounding effect. Pushed to a meaningfully higher
+potency (0.08), the same combination holds flat at 100% out to 10 years -- a genuine mechanistic
+elimination, not just a slower relapse clock, mirroring exactly what `clone_growth_margins`
+explained for HS's `max_kill_2=0.08` case. The vaccine-alone arm erodes far more gently than eBAT
+alone (92% vs. 57% at 10 years) at the same nominal potency value, and the combined lower-potency
+pairing lands in between. So "does HSA endure or erode" doesn't have one answer -- it depends
+entirely on which specific combination and potency, exactly as it does for HS, and the borderline
+combinations that just barely reach the 2-year threshold are the ones least likely to actually
+endure.
+
 ### Does this change whether a durable-response combination exists for HSA?
 
 None of the three genomics/structure findings above were fed into the Monte Carlo model as a
