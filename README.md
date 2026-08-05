@@ -1340,30 +1340,58 @@ never been checked. `hsa_durability_horizon_demo` (`HSA_DURABILITY_HORIZON_SWEEP
 1/2/5/10-year sweep) fixes that.
 
 ```bash
-canine-dsp hsa-durability-horizon-demo --ebat-max-kill 0.05 --vaccine-max-kill 0.0 --out results/hsa-durability-ebat
+canine-dsp hsa-durability-horizon-demo --ebat-max-kill 0.05 --vaccine-max-kill 0.0 --out results/hsa-durability-inhib-ebat
+canine-dsp hsa-durability-horizon-demo --ebat-max-kill 0.05 --vaccine-max-kill 0.0 --no-inhibitor --out results/hsa-durability-ebat-alone
 canine-dsp hsa-durability-horizon-demo --ebat-max-kill 0.0 --vaccine-max-kill 0.05 --out results/hsa-durability-vaccine
 canine-dsp hsa-durability-horizon-demo --ebat-max-kill 0.02 --vaccine-max-kill 0.03 --out results/hsa-durability-combo
-canine-dsp hsa-durability-horizon-demo --ebat-max-kill 0.08 --vaccine-max-kill 0.0 --out results/hsa-durability-ebat-08
+canine-dsp hsa-durability-horizon-demo --ebat-max-kill 0.08 --vaccine-max-kill 0.0 --out results/hsa-durability-inhib-ebat-08
 ```
 
-| Combination | 1yr | 2yr | 5yr | 10yr |
+| Combination (inhibitor active unless noted) | 1yr | 2yr | 5yr | 10yr |
 |---|---|---|---|---|
-| eBAT alone, `max_kill=0.05` (the borderline threshold) | 99.7% | 96.0% | 79.7% | **57.0%** |
-| Vaccine alone, `max_kill=0.05` | 100% | 100% | 96.7% | 92.0% |
-| eBAT=0.02 + vaccine=0.03 (lower potency, combined) | 100% | 99.0% | 92.3% | 82.3% |
-| eBAT alone, `max_kill=0.08` (above the borderline) | 100% | 100% | 100% | **100%** |
+| Inhibitor + eBAT, `max_kill=0.05` (the borderline threshold) | 99.7% | 96.0% | 79.7% | **57.0%** |
+| **eBAT truly alone, no inhibitor**, `max_kill=0.05` | 99.7% | 100% | 100% | **100%** |
+| Inhibitor + vaccine, `max_kill=0.05` | 100% | 100% | 96.7% | 92.0% |
+| Inhibitor + eBAT=0.02 + vaccine=0.03 (lower potency, combined) | 100% | 99.0% | 92.3% | 82.3% |
+| Inhibitor + eBAT, `max_kill=0.08` (above the borderline) | 100% | 100% | 100% | **100%** |
 
-The same pattern HS already showed, reproduced independently here: at a potency that just barely
-clears the 2-year, 95% threshold (eBAT alone at 0.05), durability erodes substantially by 10 years
--- down to 57%, a real and large drop, not a rounding effect. Pushed to a meaningfully higher
-potency (0.08), the same combination holds flat at 100% out to 10 years -- a genuine mechanistic
-elimination, not just a slower relapse clock, mirroring exactly what `clone_growth_margins`
-explained for HS's `max_kill_2=0.08` case. The vaccine-alone arm erodes far more gently than eBAT
-alone (92% vs. 57% at 10 years) at the same nominal potency value, and the combined lower-potency
-pairing lands in between. So "does HSA endure or erode" doesn't have one answer -- it depends
-entirely on which specific combination and potency, exactly as it does for HS, and the borderline
-combinations that just barely reach the 2-year threshold are the ones least likely to actually
-endure.
+Two findings here, and the first was caught only by directly checking a claim against real data
+rather than trusting the swept parameter values at face value. **The `max_kill=0.05`/`0.08` values
+above are not calibrated to the real 50 ug/kg eBAT dose** -- they're the same illustrative
+threshold values used elsewhere in this module as "the potency that clears the combination-search
+grid's 95% bar," never fit to the trial's actual single measured dose (no dose-response curve
+exists for eBAT to fit against). Sweeping eBAT-alone potency finely to see what it would take to
+reproduce the real trial's ~29-35% one-year-ish survival found **no stable value that does**: the
+model jumps from 0% durable response at `max_kill<=0.035` to 78%+ at `max_kill>=0.04` -- a razor-
+thin transition, not a smooth curve with a representable middle. This is the sharp-threshold
+artifact already flagged elsewhere in this module ("jumps sharply from near-0% to near-100% ...
+not a real biological cliff"), now concretely demonstrated: for eBAT-alone specifically, this
+model cannot represent the real world's actual moderate, partial outcome at *any* stable potency.
+Every eBAT-related durability number in this module, including the table above, should be read as
+"what a hypothetical, more-potent-than-anything-demonstrated eBAT would predict," not as "what the
+real trial dose predicts."
+
+**Second, and unexpected: adding the inhibitor to eBAT can make long-term durability *worse* than
+eBAT alone**, not better -- confirmed across three seeds (10-year durable response 57-63% with the
+inhibitor active vs. 99.7-100% without it, same eBAT potency). The mechanism, read directly from
+the dominant-escape-route breakdown: with the inhibitor active, relapse is driven by
+`pi3k_akt_feedback_reactivation` (24.7% of trials) and `target_site_mutation` (12.7%) -- resistance
+mechanisms specifically defined as resistant *to the PI3K/mTOR inhibitor*, which gain a selective
+foothold only because the inhibitor's own selection pressure exists. eBAT's mechanism-agnostic
+kill term doesn't fully compensate, since those clones' resistance is specific to the inhibitor,
+not to eBAT. Without the inhibitor, there is no inhibitor-specific selection pressure at all, so
+neither escape route ever establishes, and eBAT's uniform kill holds everything flat indefinitely.
+This is the same "is the extra drug actually earning its place" question HS's own two-drug-vs-
+three-drug check raised (there, the third drug's marginal benefit was small; here, in this specific
+long-horizon regime, adding the inhibitor is actively counterproductive in the model) -- and it
+was invisible at the 2-year horizon everything had been checked at before (96% vs. 100%, a small
+enough gap to miss), only becoming obvious once the horizon was extended to 10 years.
+
+So "does HSA endure or erode" doesn't have one answer, on two separate axes: it depends on which
+specific potency is assumed (and most of the eBAT-specific potencies discussed have never been
+shown to correspond to any real, achievable dose), and, more surprisingly, on whether adding the
+inhibitor helps or actively hurts long-term durability for a given eBAT potency -- a question this
+module had never asked before being pushed to check it.
 
 ### Does this change whether a durable-response combination exists for HSA?
 

@@ -183,6 +183,30 @@ def test_hsa_durability_horizon_demo_writes_full_sweep(tmp_path):
     assert (tmp_path / "hsa_durability_horizon.png").exists()
 
 
+def test_adding_inhibitor_to_ebat_can_erode_long_horizon_durability_more_than_ebat_alone(tmp_path):
+    """Real, seed-robust finding surfaced by extending HSA's durability check to 10 years: at
+    ebat_max_kill=0.05, relapse under inhibitor+eBAT is driven by resistance mechanisms specific
+    to the *inhibitor* (pi3k_akt_feedback_reactivation, target_site_mutation), which only gain a
+    foothold because the inhibitor's own selection pressure exists -- eBAT alone, with no
+    inhibitor to select against, never lets either route establish. This pins that the combined
+    regimen is NOT simply better than or equal to eBAT alone in this model, so a future change
+    that silently reverses this (making combination >= monotherapy everywhere) doesn't slip by
+    unnoticed."""
+    with_inhibitor = tmp_path / "with_inhibitor"
+    hsa_durability_horizon_demo(with_inhibitor, ebat_max_kill=0.05, vaccine_max_kill=0.0,
+                                inhibitor_active=True, trials=300, seed=1)
+    without_inhibitor = tmp_path / "without_inhibitor"
+    hsa_durability_horizon_demo(without_inhibitor, ebat_max_kill=0.05, vaccine_max_kill=0.0,
+                                inhibitor_active=False, trials=300, seed=1)
+
+    with_summary = json.loads((with_inhibitor / "summary.json").read_text())
+    without_summary = json.loads((without_inhibitor / "summary.json").read_text())
+    ten_year_with = [r for r in with_summary["sensitivity"] if r["horizon_days"] == 3650][0]
+    ten_year_without = [r for r in without_summary["sensitivity"] if r["horizon_days"] == 3650][0]
+    assert ten_year_with["probability_durable_response"] < ten_year_without["probability_durable_response"]
+    assert ten_year_without["probability_durable_response"] > 0.99
+
+
 def test_hsa_durability_horizon_demo_runs_vaccine_only_and_ebat_only_paths(tmp_path):
     # vaccine_max_kill=0.0 must still route through the 5-clone vaccine model without crashing
     # (a harmless immune-escape clone), so both eBAT-only and vaccine-only regimens go through
