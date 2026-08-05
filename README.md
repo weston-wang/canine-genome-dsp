@@ -1393,42 +1393,53 @@ shown to correspond to any real, achievable dose), and, more surprisingly, on wh
 inhibitor helps or actively hurts long-term durability for a given eBAT potency -- a question this
 module had never asked before being pushed to check it.
 
-### The complete picture: every regimen this model can run, out to 10 years
+### The complete picture, and a second calibration mistake caught in the same breath as the first
 
-Filling out the rest of the combinations this comparison implied but hadn't actually been run
-(inhibitor alone to 10 years; vaccine alone with no inhibitor; eBAT+vaccine combined with no
-inhibitor) turns the two findings above into one coherent, corrected picture of what "endurance"
-actually means in this model:
+Filling out the rest of the combinations the comparison above implied but hadn't actually been
+run (inhibitor alone to 10 years; vaccine alone with no inhibitor; eBAT+vaccine combined with no
+inhibitor) surfaced a second instance of the exact mistake just corrected two sections up: every
+one of those runs still used the same uncalibrated `max_kill=0.05`/`0.08` values, and a full
+table was built presenting their output as clean, informative percentages -- without repeating,
+next to each number, that those specific potencies sit on a razor-thin, structurally artificial
+step-function threshold (0.035 -> 0% durable, 0.04 -> 78%, 0.05 -> ~100%) already shown two
+sections up to have no connection to any real, demonstrated eBAT dose. A number computed at an
+arbitrary point on a cliff is not a real characterization of eBAT's behavior just because it's
+been dressed up in a comparison table -- and the same is true of every vaccine-potency number
+here, for the identical reason (no dose-response curve exists for any of the four real HSA
+vaccine trials either), even though the vaccine's own transition is less razor-thin than eBAT's.
 
-| Regimen | 1yr | 2yr | 5yr | 10yr | Dominant relapse mechanism |
-|---|---|---|---|---|---|
-| Inhibitor alone | 34.7% | 32.3% | 29.7% | **30.0%** | pi3k_akt_feedback (35%), mapk_crosstalk (17%), target_site (13%) |
-| eBAT alone, no inhibitor (0.05) | 99.7% | 100% | 100% | **100%** | none |
-| Vaccine alone, no inhibitor (0.05) | 100% | 97.3% | 96.7% | **89.0%** | immune_escape only, growing 0%->11% |
-| eBAT(0.02)+vaccine(0.03), no inhibitor | 100% | 100% | 96.7% | **89.0%** | immune_escape only -- eBAT adds nothing by 10yr |
-| eBAT(0.05)+vaccine(0.05), no inhibitor | 100% | 100% | 100% | **100%** | none |
-| Inhibitor+eBAT (0.05) | 99.7% | 96.0% | 79.7% | **57.0%** | pi3k_akt_feedback + target_site (inhibitor-specific) |
-| Inhibitor+eBAT (0.08) | 100% | 100% | 100% | **100%** | none |
-| Inhibitor+vaccine (0.05) | 100% | 100% | 96.7% | **92.0%** | mostly immune_escape |
-| Inhibitor+eBAT(0.02)+vaccine(0.03) | 100% | 99.0% | 92.3% | **82.3%** | target_site + pi3k_akt still dominate over immune_escape |
-| Inhibitor+eBAT(0.05)+vaccine(0.05) | 100% | 100% | 100% | **100%** | none |
+So the table below is kept only as a *structural* demonstration -- how mechanism-agnostic potency
+and inhibitor-specific resistance interact inside this model's own math -- not as a set of
+predictions about real eBAT or real vaccine dosing. Exactly one row carries real-world weight:
 
-The one number here anchored to anything real is the inhibitor's own baseline: it reaches a
-stable ~30% plateau by year 2 and stays there through year 10 -- not eroding further, but never
-close to durable either. (Its proximity to the real eBAT trial's survival figures is by
-construction, not coincidence: that's literally how `preexisting_prob` was recentered -- see
-"Checking the model's own outcome against the real eBAT trial" above -- so this is the one row in
-the table that carries any real-world weight at all.)
+| Regimen | 1yr | 2yr | 5yr | 10yr | Dominant relapse mechanism | Grounded in a real dose? |
+|---|---|---|---|---|---|---|
+| **Inhibitor alone** | 34.7% | 32.3% | 29.7% | **30.0%** | pi3k_akt_feedback (35%), mapk_crosstalk (17%), target_site (13%) | **Yes** -- see below |
+| eBAT alone, no inhibitor (0.05) | 99.7% | 100% | 100% | 100% | none | No -- arbitrary point past an artificial cliff |
+| Vaccine alone, no inhibitor (0.05) | 100% | 97.3% | 96.7% | 89.0% | immune_escape only, growing 0%->11% | No -- no real dose-response curve exists |
+| eBAT(0.02)+vaccine(0.03), no inhibitor | 100% | 100% | 96.7% | 89.0% | immune_escape only | No |
+| eBAT(0.05)+vaccine(0.05), no inhibitor | 100% | 100% | 100% | 100% | none | No |
+| Inhibitor+eBAT (0.05) | 99.7% | 96.0% | 79.7% | 57.0% | pi3k_akt_feedback + target_site | No |
+| Inhibitor+eBAT (0.08) | 100% | 100% | 100% | 100% | none | No |
+| Inhibitor+vaccine (0.05) | 100% | 100% | 96.7% | 92.0% | mostly immune_escape | No |
+| Inhibitor+eBAT(0.02)+vaccine(0.03) | 100% | 99.0% | 92.3% | 82.3% | target_site + pi3k_akt dominate | No |
+| Inhibitor+eBAT(0.05)+vaccine(0.05) | 100% | 100% | 100% | 100% | none | No |
 
-Every other row's durability is illustrative-potency-dependent, and the inhibitor is consistently
-the variable that erodes it: remove the inhibitor and eBAT/vaccine hold up well alone at the same
-nominal potencies (89-100% at 10 years) -- but those specific potency values are exactly the ones
-already shown to have no real dose behind them. Add the inhibitor back at anything less than a
-high add-on potency, and the inhibitor-specific resistance routes take over as the dominant
-relapse mechanism -- even with a vaccine layered on top, `target_site_mutation`+
-`pi3k_akt_feedback_reactivation` (12.3%+4.7%) still outweigh the vaccine's own `immune_escape`
-route (0.7%) at low combined potency. Only once the add-on potency is pushed high enough (both at
-0.05, or eBAT alone at 0.08) does that inhibitor-specific cost get fully swamped and durability
+The inhibitor-alone row is grounded because it's a direct readout of `preexisting_prob=0.70`,
+which was itself set by comparing this exact regimen's model output against the real eBAT trial's
+survival numbers (see "Checking the model's own outcome against the real eBAT trial" above) --
+still a loose, cross-drug analogy, but a real comparison against real data, not an arbitrary
+sweep value. Every other row's number is a byproduct of picking *some* point on an unfitted
+potency axis, and should be read only as "what this model's mechanics do at that point," never as
+"what eBAT or this vaccine actually achieves."
+
+What the table demonstrates *structurally*, independent of any specific percentage: the inhibitor
+is consistently the variable that erodes long-horizon durability wherever it's present at less
+than a high add-on potency, because it introduces resistance routes (`pi3k_akt_feedback_
+reactivation`, `target_site_mutation`) specific to itself -- even outweighing a vaccine's own
+`immune_escape` route (0.7%) at low combined potency (12.3%+4.7%). Only once the add-on potency
+is pushed high enough (both at 0.05, or eBAT alone at 0.08 -- again, arbitrary points, not real
+doses) does that inhibitor-specific cost get fully swamped and durability
 returns to 100% flat.
 
 Read plainly: in this model, the inhibitor is a net liability for long-term durability unless
