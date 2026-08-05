@@ -1128,6 +1128,14 @@ drug-sensitive one), not evidence that a real inhibitor is unnecessary -- but it
 kind of assumption ("of course you need the targeted drug") this search exists to check rather
 than take for granted.
 
+**Caveat added on a later pass, and important enough to flag here too, not just where it was
+found:** `ebat_max_kill=0.05` is an arbitrary point on an unfitted potency axis, not a calibrated
+stand-in for the real 50 ug/kg dose -- immediately below it (`0.02-0.035`), the same eBAT-alone
+regimen gives 0% durable response instead of 100%, with no stable value in between and nothing in
+this module saying which side (if either) the real dose falls on. See "The complete picture" in
+the HSA section below for the full accounting; read this paragraph's "100%" the same way that
+section's table does -- as one extreme of an uncalibrated range, not a finding about real eBAT.
+
 ### Checking the model's own outcome against the real eBAT trial -- and recalibrating on it
 
 Comparing this scenario's population-level output directly against the one real HSA efficacy
@@ -1350,10 +1358,15 @@ canine-dsp hsa-durability-horizon-demo --ebat-max-kill 0.08 --vaccine-max-kill 0
 | Combination (inhibitor active unless noted) | 1yr | 2yr | 5yr | 10yr |
 |---|---|---|---|---|
 | Inhibitor + eBAT, `max_kill=0.05` (the borderline threshold) | 99.7% | 96.0% | 79.7% | **57.0%** |
-| **eBAT truly alone, no inhibitor**, `max_kill=0.05` | 99.7% | 100% | 100% | **100%** |
+| eBAT truly alone, no inhibitor, `max_kill=0.02` (pessimistic side of the same cliff) | 0% | 0% | 0% | **0%** |
+| eBAT truly alone, no inhibitor, `max_kill=0.05` (optimistic side of the same cliff) | 99.7% | 100% | 100% | **100%** |
 | Inhibitor + vaccine, `max_kill=0.05` | 100% | 100% | 96.7% | 92.0% |
 | Inhibitor + eBAT=0.02 + vaccine=0.03 (lower potency, combined) | 100% | 99.0% | 92.3% | 82.3% |
 | Inhibitor + eBAT, `max_kill=0.08` (above the borderline) | 100% | 100% | 100% | **100%** |
+
+(The two "eBAT truly alone" rows bracket the same unfitted cliff discussed below -- neither is
+validated, and the real trial's own outcome, capping around 30-35% survival, is arguably closer
+to the pessimistic side than the one first shown here.)
 
 Two findings here, and the first was caught only by directly checking a claim against real data
 rather than trusting the swept parameter values at face value. **The `max_kill=0.05`/`0.08` values
