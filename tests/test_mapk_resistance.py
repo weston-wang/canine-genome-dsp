@@ -51,6 +51,60 @@ def test_run_monte_carlo_accepts_second_drug():
     assert outcome.trajectories.shape == (20, 201, 4)
 
 
+def test_css_reference_2_duration_days_defaults_to_always_on():
+    # None (the default) must reproduce the exact original always-on behavior for every existing
+    # caller -- this is a backward-compatible addition, not a change to prior results.
+    model = ResistanceModel(growth=np.array([.06, .05, .055, .058]),
+                            ic50_nM=np.array([222., 222. * 40, 222. * 1.2, 222. * 60]),
+                            max_kill=np.array([.18, .02, .035, .015]), mutation=np.eye(4),
+                            ic50_nM_2=100., max_kill_2=.05)
+    seeding_rates = build_mutation_matrix(np.array([.85, .10, .05]) * 2e-6)[0, 1:]
+    always_on = run_monte_carlo(model, 1640., 200, seeding_rates, trials=20,
+                               css_reference_2=500., seed=2)
+    explicit_none = run_monte_carlo(model, 1640., 200, seeding_rates, trials=20,
+                                   css_reference_2=500., css_reference_2_duration_days=None, seed=2)
+    np.testing.assert_allclose(always_on.trajectories, explicit_none.trajectories)
+
+
+def test_css_reference_2_duration_days_zeroes_second_drug_after_the_window():
+    # A single front-loaded eBAT-style cycle: the second drug should behave exactly like the
+    # always-on case up through the cutoff, then like no second drug at all afterward -- checked
+    # directly via clone_growth_margins-style intuition, by comparing trajectories against a
+    # second run with css_reference_2=None from the cutoff day onward would require re-seeding
+    # the RNG mid-simulation, so instead this checks the concentration profile driving
+    # simulate_resistance directly, which is the mechanism the duration cutoff actually modifies.
+    model = ResistanceModel(growth=np.array([.05]), ic50_nM=np.array([1e6]),
+                            max_kill=np.array([0.]), mutation=np.array([[1.0]]),
+                            ic50_nM_2=100., max_kill_2=.2)
+    horizon_days = 60
+    duration = 20
+    always_on = np.full(horizon_days, 1e6)
+    front_loaded = always_on.copy()
+    front_loaded[duration:] = 0.0
+    state_always_on = simulate_resistance(model, np.zeros(horizon_days), np.array([.1]),
+                                          concentration_2=always_on)
+    state_front_loaded = simulate_resistance(model, np.zeros(horizon_days), np.array([.1]),
+                                             concentration_2=front_loaded)
+    # identical while the second drug is still "on"
+    np.testing.assert_allclose(state_always_on[:duration + 1], state_front_loaded[:duration + 1])
+    # diverges afterward: front-loaded exposure lets the population regrow, always-on keeps
+    # suppressing it
+    assert state_front_loaded[-1, 0] > state_always_on[-1, 0]
+
+
+def test_run_monte_carlo_with_vaccine_accepts_css_reference_2_duration_days():
+    model = ResistanceModel(growth=np.array([.06, .05, .055, .058, .0425]),
+                            ic50_nM=np.array([222., 222. * 40, 222. * 1.2, 222. * 60, 222. * 40]),
+                            max_kill=np.array([.18, .02, .035, .015, .02]), mutation=np.eye(5),
+                            ic50_nM_2=100., max_kill_2=.05)
+    seeding_rates = build_mutation_matrix(np.array([.85, .10, .05]) * 2e-6)[0, 1:]
+    outcome = run_monte_carlo_with_vaccine(
+        model, 1640., 200, seeding_rates, vaccine_start_day=30, vaccine_ramp_days=21,
+        vaccine_max_kill=.05, immune_escape_seeding_rate=1e-7, clone_names=CLONE_NAMES + ["immune_escape"],
+        trials=10, css_reference_2=500., css_reference_2_duration_days=20, seed=2)
+    assert outcome.trajectories.shape == (10, 201, 5)
+
+
 def test_mutation_matrix_rows_sum_to_one():
     mutation = build_mutation_matrix(np.array([.1, .05, .02]))
     np.testing.assert_allclose(mutation.sum(axis=1), 1)

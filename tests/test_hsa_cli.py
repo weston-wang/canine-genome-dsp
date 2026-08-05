@@ -183,28 +183,45 @@ def test_hsa_durability_horizon_demo_writes_full_sweep(tmp_path):
     assert (tmp_path / "hsa_durability_horizon.png").exists()
 
 
-def test_adding_inhibitor_to_ebat_can_erode_long_horizon_durability_more_than_ebat_alone(tmp_path):
-    """Real, seed-robust finding surfaced by extending HSA's durability check to 10 years: at
-    ebat_max_kill=0.05, relapse under inhibitor+eBAT is driven by resistance mechanisms specific
-    to the *inhibitor* (pi3k_akt_feedback_reactivation, target_site_mutation), which only gain a
-    foothold because the inhibitor's own selection pressure exists -- eBAT alone, with no
-    inhibitor to select against, never lets either route establish. This pins that the combined
-    regimen is NOT simply better than or equal to eBAT alone in this model, so a future change
-    that silently reverses this (making combination >= monotherapy everywhere) doesn't slip by
-    unnoticed."""
-    with_inhibitor = tmp_path / "with_inhibitor"
-    hsa_durability_horizon_demo(with_inhibitor, ebat_max_kill=0.05, vaccine_max_kill=0.0,
-                                inhibitor_active=True, trials=300, seed=1)
-    without_inhibitor = tmp_path / "without_inhibitor"
-    hsa_durability_horizon_demo(without_inhibitor, ebat_max_kill=0.05, vaccine_max_kill=0.0,
-                                inhibitor_active=False, trials=300, seed=1)
+def test_ebat_alone_cannot_sustain_durable_response_with_front_loaded_exposure(tmp_path):
+    """Supersedes an earlier finding (kept in git history, not here) that eBAT alone appeared to
+    hold 100% durable response flat for 10 years while inhibitor+eBAT eroded to 57-63% -- that
+    result depended entirely on the engine's old always-on second-drug exposure assumption. Once
+    eBAT's kill pressure is correctly capped to a front-loaded window
+    (`HSA_EBAT_EXPOSURE_DURATION_DAYS`, modeling its real single-IV-cycle dosing instead of
+    chronic exposure), eBAT alone -- with nothing else suppressing the tumor once its window ends
+    -- gives 0% durable response at every horizon, regardless of potency. This is the more
+    biologically sensible result: a single treatment cycle with no maintenance therapy shouldn't
+    provide years of durable control on its own."""
+    for ebat_max_kill in (0.02, 0.05):
+        result = tmp_path / f"ebat_alone_{ebat_max_kill}"
+        hsa_durability_horizon_demo(result, ebat_max_kill=ebat_max_kill, vaccine_max_kill=0.0,
+                                    inhibitor_active=False, trials=300, seed=1)
+        summary = json.loads((result / "summary.json").read_text())
+        ten_year = [r for r in summary["sensitivity"] if r["horizon_days"] == 3650][0]
+        assert ten_year["probability_durable_response"] == pytest.approx(0.0, abs=0.05)
 
-    with_summary = json.loads((with_inhibitor / "summary.json").read_text())
-    without_summary = json.loads((without_inhibitor / "summary.json").read_text())
-    ten_year_with = [r for r in with_summary["sensitivity"] if r["horizon_days"] == 3650][0]
-    ten_year_without = [r for r in without_summary["sensitivity"] if r["horizon_days"] == 3650][0]
-    assert ten_year_with["probability_durable_response"] < ten_year_without["probability_durable_response"]
-    assert ten_year_without["probability_durable_response"] > 0.99
+
+def test_inhibitor_plus_ebat_converges_to_inhibitor_alone_baseline_regardless_of_ebat_potency(tmp_path):
+    """With front-loaded eBAT exposure, inhibitor+eBAT's 10-year durable response lands close to
+    the inhibitor-alone baseline (~30%) regardless of which eBAT potency is assumed (0.02 through
+    0.08) -- eBAT's early contribution fades once its exposure window ends, leaving the
+    inhibitor's own ceiling as what actually determines long-horizon durability. This replaces the
+    earlier "adding the inhibitor is a net liability" finding, which was an artifact of assuming
+    eBAT's exposure never ends."""
+    inhibitor_alone = tmp_path / "inhibitor_alone"
+    hsa_durability_horizon_demo(inhibitor_alone, ebat_max_kill=0.0, vaccine_max_kill=0.0,
+                               inhibitor_active=True, trials=300, seed=1)
+    baseline = [r for r in json.loads((inhibitor_alone / "summary.json").read_text())["sensitivity"]
+               if r["horizon_days"] == 3650][0]["probability_durable_response"]
+
+    for ebat_max_kill in (0.02, 0.05, 0.08):
+        result = tmp_path / f"combo_{ebat_max_kill}"
+        hsa_durability_horizon_demo(result, ebat_max_kill=ebat_max_kill, vaccine_max_kill=0.0,
+                                    inhibitor_active=True, trials=300, seed=1)
+        summary = json.loads((result / "summary.json").read_text())
+        ten_year = [r for r in summary["sensitivity"] if r["horizon_days"] == 3650][0]
+        assert ten_year["probability_durable_response"] == pytest.approx(baseline, abs=0.05)
 
 
 def test_inhibitor_alone_plateaus_rather_than_continuing_to_erode(tmp_path):

@@ -1112,29 +1112,19 @@ inactive), mirroring `combination_control_demo`'s side-by-side structure. `hsa_c
 goes further: a full grid over eBAT potency x vaccine potency (inhibitor always present), plus
 the eBAT-monotherapy point, so "does the inhibitor even matter" is answered rather than assumed.
 
-Two things worth knowing before treating any single combination as *the* answer. First, several
-different combinations reach >=95% durable response in testing, not just one: inhibitor+vaccine
-alone (`vaccine_max_kill>=0.05`, no eBAT needed); inhibitor+eBAT alone (`ebat_max_kill>=0.05`, no
-vaccine needed); and inhibitor+eBAT+vaccine together at lower potency in each (e.g.
-`ebat_max_kill=0.02` + `vaccine_max_kill>=0.03`) -- there is no single "the" combination in this
-model, there's a threshold surface, and which point on it is cheapest/safest in practice depends
-on real toxicity data this module doesn't have for either eBAT or any HSA vaccine. Second, and
-more surprising: **eBAT monotherapy (no inhibitor at all) also reaches 100% durable response**
-once its own potency crosses `ebat_max_kill=0.05` -- the same "sufficiently potent single
-mechanism-agnostic agent can substitute for the inhibitor" property `mapk_cli`'s own combination
-work already noted for CDK4/6i in histiocytic sarcoma. That's a property of how a
-mechanism-agnostic second node is modeled (it's applied identically to every clone, including the
-drug-sensitive one), not evidence that a real inhibitor is unnecessary -- but it's exactly the
-kind of assumption ("of course you need the targeted drug") this search exists to check rather
-than take for granted.
-
-**Caveat added on a later pass, and important enough to flag here too, not just where it was
-found:** `ebat_max_kill=0.05` is an arbitrary point on an unfitted potency axis, not a calibrated
-stand-in for the real 50 ug/kg dose -- immediately below it (`0.02-0.035`), the same eBAT-alone
-regimen gives 0% durable response instead of 100%, with no stable value in between and nothing in
-this module saying which side (if either) the real dose falls on. See "The complete picture" in
-the HSA section below for the full accounting; read this paragraph's "100%" the same way that
-section's table does -- as one extreme of an uncalibrated range, not a finding about real eBAT.
+**Updated after a later fix -- this section originally claimed eBAT alone or inhibitor+eBAT alone
+could each reach >=95% durable response without any vaccine at all. That claim depended on
+modeling eBAT's exposure as constant for the entire simulated horizon, which was never realistic
+(see "A real biological gap in the engine" further down this HSA section): the real drug was given
+as a single treatment cycle, not sustained for years.** Corrected: `ebat_max_kill` alone,
+at any potency tested (0.0 through 0.12), no longer moves this grid's durable-response probability
+meaningfully above the inhibitor's own ~30-38% baseline -- once eBAT's kill pressure is capped to
+a realistic, front-loaded window, its total contribution to a 730-day outcome is small regardless
+of how potent it was assumed to be while active. The vaccine is the only lever in this grid that
+reaches the >=95% threshold on its own: every eBAT potency level needs `vaccine_max_kill>=0.05` to
+cross it, with or without eBAT alongside. There is no eBAT-alone or inhibitor+eBAT-alone route to
+durable response left in this corrected grid -- the vaccine is doing essentially all of the work
+this section originally credited to either eBAT or the inhibitor+eBAT pairing.
 
 ### Checking the model's own outcome against the real eBAT trial -- and recalibrating on it
 
@@ -1312,189 +1302,117 @@ vaccine construct, real or hypothetical. What changed is narrower and real: "eVi
 generic antibody target" is now "eVim's antigen has two independently-corroborated, actually-
 exposed, human-conserved candidate epitope regions, structurally identifiable rather than assumed."
 
-### Does the inhibitor+eBAT combination survive realistic dose reduction?
+### A real biological gap in the engine, found by asking why the results were this poor
 
-Histiocytic sarcoma's toxicity check (`combination_toxicity_demo`) rests on an extrapolated,
-mechanism-class argument: CDK4/6 inhibitors cause neutropenia in humans via on-target cell-cycle
-blockade, so it's reasonable to expect the same in dogs even without canine-specific data, and
-that toxicity hits a different organ system than trametinib's (vascular/hepatic) -- the standard
-reason combinations are often feasible near full dose. HSA's inhibitor+eBAT pairing doesn't get
-that reassurance: both drugs have *directly documented*, real, same-organ-system toxicity.
-Rapamycin-class PI3K/mTOR inhibitors cause real canine GI and hepatic adverse effects (diarrhea,
-vomiting, inappetence, hemorrhagic gastroenteritis, liver enzyme changes, reported across 192
-dogs); eBAT's own trial reported reversible grade 1-3 ALT/AST/ALP elevations in 10.2% of dogs,
-plus hypotensive collapse (15.3%) and nausea/vomiting (10.2%) (Borgatti et al. 2017). Same organ
-systems, in both real drugs -- a stronger, not weaker, real-world reason to expect combined dosing
-would need de-escalation below each drug's illustrative full-dose exposure.
+Everything through the last two sections rested on one simplification that had gone unquestioned:
+`css_reference_2` (the second drug's exposure) was held *constant for the entire simulated
+horizon* -- years, in the durability-horizon runs -- exactly like the continuously-dosed,
+oral-pill inhibitor. Real eBAT was never dosed that way. The pivotal trial gave it as a single IV
+cycle (three doses on alternating days) before starting chemotherapy, not ongoing maintenance
+(Borgatti et al. 2017); its own toxicity profile paper also documents real neutralizing anti-toxin
+antibodies developing in ~30% of dogs despite deliberate deimmunization -- a real immunological
+ceiling on how many cycles can ever be given, unlike a small molecule dosed daily indefinitely. No
+eBAT-specific pharmacokinetic half-life was found in a search for one, but modeling years of
+sustained kill pressure from a single treatment cycle was never defensible regardless of the exact
+number.
 
-```bash
-canine-dsp hsa-combination-toxicity-demo --ebat-max-kill 0.05 --out results/hsa-toxicity
-```
-
-Sweeping the same de-rating range HS uses (100%/80%/60%/40% of illustrative exposure, applied to
-both drugs at once): durable response drops from **97.3% (full dose) to 92.3% (80%) to 81.7%
-(60%) to 65.3% (40%)** -- a real, substantial erosion, not a negligible one. Unlike HS's
-`max_kill_2=0.05` toxicity check (where the benefit degrades more gently across the same sweep),
-this combination's benefit is meaningfully dose-dependent -- consistent with the real,
-overlapping-organ-system toxicity finding above, and a genuine reason for caution about assuming
-full illustrative dosing of both drugs is achievable together in practice.
-
-### Does HSA's durable response endure or erode over a longer horizon?
-
-Every HSA "durable response" number quoted anywhere above -- including the combination-search
-grid's 95-100% figures -- was computed at a single, hardcoded 730-day (2-year) horizon. Unlike
-histiocytic sarcoma (swept out to 10 years from early on), HSA's long-horizon behavior had simply
-never been checked. `hsa_durability_horizon_demo` (`HSA_DURABILITY_HORIZON_SWEEP`, the same
-1/2/5/10-year sweep) fixes that.
+`mapk_resistance.run_monte_carlo`/`run_monte_carlo_with_vaccine` now accept
+`css_reference_2_duration_days`: after that many days, the second drug's concentration drops to
+zero instead of persisting for the rest of the horizon. `None` (the default for every *other*
+caller, including every HS scenario, where the second drug is a small-molecule CDK4/6 inhibitor
+that genuinely could be dosed chronically) preserves the original always-on behavior exactly --
+this is a targeted, backward-compatible fix, not a change to HS's own results. HSA's eBAT-using
+demos now default to `HSA_EBAT_EXPOSURE_DURATION_DAYS = 28` -- a generous, explicitly illustrative
+upper bound (one dosing cycle plus a plausible tail for cellular kill to play out), not a fitted
+or measured clearance time.
 
 ```bash
 canine-dsp hsa-durability-horizon-demo --ebat-max-kill 0.05 --vaccine-max-kill 0.0 --out results/hsa-durability-inhib-ebat
 canine-dsp hsa-durability-horizon-demo --ebat-max-kill 0.05 --vaccine-max-kill 0.0 --no-inhibitor --out results/hsa-durability-ebat-alone
-canine-dsp hsa-durability-horizon-demo --ebat-max-kill 0.0 --vaccine-max-kill 0.05 --out results/hsa-durability-vaccine
-canine-dsp hsa-durability-horizon-demo --ebat-max-kill 0.02 --vaccine-max-kill 0.03 --out results/hsa-durability-combo
-canine-dsp hsa-durability-horizon-demo --ebat-max-kill 0.08 --vaccine-max-kill 0.0 --out results/hsa-durability-inhib-ebat-08
+canine-dsp hsa-combination-toxicity-demo --ebat-max-kill 0.05 --out results/hsa-toxicity
 ```
 
-| Combination (inhibitor active unless noted) | 1yr | 2yr | 5yr | 10yr |
+This resolves both open threads from the last two sections at once, and reverses one of them:
+
+| Regimen | 1yr | 2yr | 5yr | 10yr |
 |---|---|---|---|---|
-| Inhibitor + eBAT, `max_kill=0.05` (the borderline threshold) | 99.7% | 96.0% | 79.7% | **57.0%** |
-| eBAT truly alone, no inhibitor, `max_kill=0.02` (pessimistic side of the same cliff) | 0% | 0% | 0% | **0%** |
-| eBAT truly alone, no inhibitor, `max_kill=0.05` (optimistic side of the same cliff) | 99.7% | 100% | 100% | **100%** |
-| Inhibitor + vaccine, `max_kill=0.05` | 100% | 100% | 96.7% | 92.0% |
-| Inhibitor + eBAT=0.02 + vaccine=0.03 (lower potency, combined) | 100% | 99.0% | 92.3% | 82.3% |
-| Inhibitor + eBAT, `max_kill=0.08` (above the borderline) | 100% | 100% | 100% | **100%** |
+| Inhibitor alone (unaffected by this fix -- unchanged) | 34.7% | 32.3% | 29.7% | **30.0%** |
+| eBAT alone, no inhibitor, potency 0.02 | 0% | 0% | 0% | **0%** |
+| eBAT alone, no inhibitor, potency 0.05 | 0% | 0% | 0% | **0%** |
+| Inhibitor + eBAT, potency 0.02 | 40.7% | 32.0% | 30.0% | **28.7%** |
+| Inhibitor + eBAT, potency 0.05 | 43.3% | 30.7% | 30.7% | **29.0%** |
+| Inhibitor + eBAT, potency 0.08 | 46.0% | 31.3% | 31.3% | **30.7%** |
 
-(The two "eBAT truly alone" rows bracket the same unfitted cliff discussed below -- neither is
-validated, and the real trial's own outcome, capping around 30-35% survival, is arguably closer
-to the pessimistic side than the one first shown here.)
+**First, the cliff-side ambiguity from the previous section is gone.** eBAT alone now gives 0%
+durable response at *every* potency tested, not just the pessimistic side of an arbitrary
+threshold -- with nothing else suppressing the tumor once its 28-day window closes, a transient
+pulse cannot hold off regrowth indefinitely, however potent it was while active. This is a more
+biologically sensible result than either side of the old cliff, and it matches the real trial's
+own design: eBAT was never given as monotherapy with no other treatment, which this result now
+explains rather than merely accommodates.
 
-Two findings here, and the first was caught only by directly checking a claim against real data
-rather than trusting the swept parameter values at face value. **The `max_kill=0.05`/`0.08` values
-above are not calibrated to the real 50 ug/kg eBAT dose** -- they're the same illustrative
-threshold values used elsewhere in this module as "the potency that clears the combination-search
-grid's 95% bar," never fit to the trial's actual single measured dose (no dose-response curve
-exists for eBAT to fit against). Sweeping eBAT-alone potency finely to see what it would take to
-reproduce the real trial's ~29-35% one-year-ish survival found **no stable value that does**: the
-model jumps from 0% durable response at `max_kill<=0.035` to 78%+ at `max_kill>=0.04` -- a razor-
-thin transition, not a smooth curve with a representable middle. This is the sharp-threshold
-artifact already flagged elsewhere in this module ("jumps sharply from near-0% to near-100% ...
-not a real biological cliff"), now concretely demonstrated: for eBAT-alone specifically, this
-model cannot represent the real world's actual moderate, partial outcome at *any* stable potency.
-Every eBAT-related durability number in this module, including the table above, should be read as
-"what a hypothetical, more-potent-than-anything-demonstrated eBAT would predict," not as "what the
-real trial dose predicts."
+**Second, and this reverses the previous section's headline finding: adding the inhibitor is not
+a net liability.** Inhibitor+eBAT now converges to essentially the *same* ~29-31% at 10 years
+regardless of which eBAT potency is assumed (0.02 through 0.08) -- indistinguishable from the
+inhibitor-alone baseline (30.0%) within Monte Carlo noise. eBAT still buys a real, modest early
+bump (32.3% -> 40-46% at 1 year, since it's doing something for its first 28 days), but that
+bump fades once its exposure ends, and by 10 years the inhibitor's own ceiling is what actually
+determines long-horizon durability -- not whichever potency eBAT was assumed to have. The earlier
+finding that inhibitor-specific resistance routes (`pi3k_akt_feedback_reactivation`,
+`target_site_mutation`) made the combination *worse* than eBAT alone was real given the model's
+prior assumptions, but those assumptions -- eBAT sustaining kill pressure for a decade -- were
+themselves the artifact. Once fixed, eBAT alone can no longer sustain anything at all (0% at every
+horizon), so there is no "worse than eBAT alone" left to be worse than.
 
-**Second, and unexpected: adding the inhibitor to eBAT can make long-term durability *worse* than
-eBAT alone**, not better -- confirmed across three seeds (10-year durable response 57-63% with the
-inhibitor active vs. 99.7-100% without it, same eBAT potency). The mechanism, read directly from
-the dominant-escape-route breakdown: with the inhibitor active, relapse is driven by
-`pi3k_akt_feedback_reactivation` (24.7% of trials) and `target_site_mutation` (12.7%) -- resistance
-mechanisms specifically defined as resistant *to the PI3K/mTOR inhibitor*, which gain a selective
-foothold only because the inhibitor's own selection pressure exists. eBAT's mechanism-agnostic
-kill term doesn't fully compensate, since those clones' resistance is specific to the inhibitor,
-not to eBAT. Without the inhibitor, there is no inhibitor-specific selection pressure at all, so
-neither escape route ever establishes, and eBAT's uniform kill holds everything flat indefinitely.
-This is the same "is the extra drug actually earning its place" question HS's own two-drug-vs-
-three-drug check raised (there, the third drug's marginal benefit was small; here, in this specific
-long-horizon regime, adding the inhibitor is actively counterproductive in the model) -- and it
-was invisible at the 2-year horizon everything had been checked at before (96% vs. 100%, a small
-enough gap to miss), only becoming obvious once the horizon was extended to 10 years.
+**The toxicity de-rating picture flattens for the same reason.** Re-run with the front-loaded
+window: durable response is **30.3% at full dose, 30.3% at 80%, 29.3% at 60%, 29.3% at 40%** --
+essentially flat, because eBAT's total contribution is now capped to a brief window regardless of
+concentration, so de-rating its dose barely moves the long-horizon outcome one way or the other.
+The inhibitor's own de-rating is what would matter most now, not eBAT's -- a genuinely different,
+and more defensible, picture than the substantial 97.3%->65.3% erosion shown before this fix.
 
-So "does HSA endure or erode" doesn't have one answer, on two separate axes: it depends on which
-specific potency is assumed (and most of the eBAT-specific potencies discussed have never been
-shown to correspond to any real, achievable dose), and, more surprisingly, on whether adding the
-inhibitor helps or actively hurts long-term durability for a given eBAT potency -- a question this
-module had never asked before being pushed to check it.
+One combination-space result is worth flagging rather than silently updating: eBAT(0.02)+vaccine
+(0.03) with no inhibitor now shows 0% durable response at every horizon, down from ~89% before
+this fix. Checked directly (not assumed): this isn't a new interaction effect -- `eBAT` at potency
+0.02 was already shown incapable of controlling tumor growth *at all*, even during its own active
+window (median burden actually *increases* from day 0, since its kill rate doesn't exceed the
+sensitive clone's own growth rate). Pairing an already-inadequate eBAT dose with a vaccine that
+doesn't start suppressing anything until day 30 doesn't change that. Consistent with, not
+contradicting, what potency 0.02 was already shown to do alone.
 
-### The complete picture, and a second calibration mistake caught in the same breath as the first
+**Does HS have fewer escape mechanisms than HSA -- is that why HS's combination could reach a
+clean mechanistic elimination while HSA's picture stayed this murky?** Checked directly with
+`clone_growth_margins` (the same deterministic tool used for HS) rather than assumed: no. Both
+scenarios model exactly three non-sensitive resistance clones, and at matched potency the margins
+are nearly identical in structure and magnitude:
 
-Filling out the rest of the combinations the comparison above implied but hadn't actually been
-run (inhibitor alone to 10 years; vaccine alone with no inhibitor; eBAT+vaccine combined with no
-inhibitor) surfaced a second instance of the exact mistake just corrected two sections up: every
-one of those runs still used the same uncalibrated `max_kill=0.05`/`0.08` values, and a full
-table was built presenting their output as clean, informative percentages -- without repeating,
-next to each number, that those specific potencies sit on a razor-thin, structurally artificial
-step-function threshold (0.035 -> 0% durable, 0.04 -> 78%, 0.05 -> ~100%) already shown two
-sections up to have no connection to any real, demonstrated eBAT dose. A number computed at an
-arbitrary point on a cliff is not a real characterization of eBAT's behavior just because it's
-been dressed up in a comparison table -- and the same is true of every vaccine-potency number
-here, for the identical reason (no dose-response curve exists for any of the four real HSA
-vaccine trials either), even though the vaccine's own transition is less razor-thin than eBAT's.
+| | HS, `max_kill_2=0.05` | HSA, `ebat_max_kill=0.05` |
+|---|---|---|
+| Route 1 (feedback/pathway reactivation) | +0.0040/day | +0.0031/day |
+| Route 2 (parallel-pathway/receptor bypass) | -0.0102/day (already negative) | -0.0229/day (already negative) |
+| Route 3 (target-site mutation) | +0.0121/day | +0.0056/day |
+| At `max_kill=0.08`: all three routes | negative | negative |
 
-So the table below is kept only as a *structural* demonstration -- how mechanism-agnostic potency
-and inhibitor-specific resistance interact inside this model's own math -- not as a set of
-predictions about real eBAT or real vaccine dosing. Exactly one row carries real-world weight:
-
-| Regimen | 1yr | 2yr | 5yr | 10yr | Dominant relapse mechanism | Grounded in a real dose? |
-|---|---|---|---|---|---|---|
-| **Inhibitor alone** | 34.7% | 32.3% | 29.7% | **30.0%** | pi3k_akt_feedback (35%), mapk_crosstalk (17%), target_site (13%) | **Yes** -- see below |
-| eBAT alone, no inhibitor, **pessimistic side of the cliff (0.02)** | 0% | 0% | 0% | **0%** | -- (sensitive clone never controlled) | No, but the more plausible side of the two |
-| eBAT alone, no inhibitor, **optimistic side of the cliff (0.05)** | 99.7% | 100% | 100% | 100% | none | No -- arbitrary point past an artificial cliff |
-| Vaccine alone, no inhibitor (0.05) | 100% | 97.3% | 96.7% | 89.0% | immune_escape only, growing 0%->11% | No -- no real dose-response curve exists |
-| eBAT(0.02)+vaccine(0.03), no inhibitor | 100% | 100% | 96.7% | 89.0% | immune_escape only | No |
-| eBAT(0.05)+vaccine(0.05), no inhibitor | 100% | 100% | 100% | 100% | none | No |
-| Inhibitor+eBAT (0.02, pessimistic-side potency) | 51.7% | 48.0% | 35.0% | **30.3%** | -- | No |
-| Inhibitor+eBAT (0.05, optimistic-side potency) | 99.7% | 96.0% | 79.7% | 57.0% | pi3k_akt_feedback + target_site | No |
-| Inhibitor+eBAT (0.08) | 100% | 100% | 100% | 100% | none | No |
-| Inhibitor+vaccine (0.05) | 100% | 100% | 96.7% | 92.0% | mostly immune_escape | No |
-| Inhibitor+eBAT(0.02)+vaccine(0.03) | 100% | 99.0% | 92.3% | 82.3% | target_site + pi3k_akt dominate | No |
-| Inhibitor+eBAT(0.05)+vaccine(0.05) | 100% | 100% | 100% | 100% | none | No |
-
-The inhibitor-alone row is grounded because it's a direct readout of `preexisting_prob=0.70`,
-which was itself set by comparing this exact regimen's model output against the real eBAT trial's
-survival numbers (see "Checking the model's own outcome against the real eBAT trial" above) --
-still a loose, cross-drug analogy, but a real comparison against real data, not an arbitrary
-sweep value. Every other row's number is a byproduct of picking *some* point on an unfitted
-potency axis, and should be read only as "what this model's mechanics do at that point," never as
-"what eBAT or this vaccine actually achieves."
-
-The two eBAT-alone rows exist specifically to make that unresolvable: `max_kill=0.02` (0% durable
-at every horizon -- the sensitive clone is never controlled at all) and `max_kill=0.05` (100%) are
-both arbitrary points on the same unfitted axis, one on each side of the cliff, and nothing in
-this module says which one -- if either -- the real 50 ug/kg dose corresponds to. The real trial's
-own outcome (survival capping out around 30-35%, never close to 0% or 100%) is, if anything,
-better matched by the *pessimistic* side than the optimistic one, since the real drug clearly
-does something (0% would mean no effect at all) but nowhere close to eliminating resistance (100%
-would mean a functional cure, which the trial's own long-term survival numbers rule out). Treat
-the 100% row as a demonstration of the model's structure at an extreme, not as evidence that eBAT
-alone would work.
-
-**This resolves a question the table otherwise leaves hanging: is "inhibitor+eBAT is so much
-stronger than either drug alone" a real combination effect, or just an artifact of which side of
-the cliff eBAT's potency was set to?** Mostly the latter. Holding eBAT to the *same*, more
-plausible potency (0.02) on both sides of the comparison: inhibitor+eBAT(0.02) reaches 48.0% at 2
-years -- a real, modest improvement over the inhibitor's 32.3% alone, since eBAT is doing
-something even at low potency -- but by 10 years it has eroded back down to 30.3%, essentially
-indistinguishable from the inhibitor-alone baseline (30.0%). The dramatic-looking jump to 96%
-(2yr) / 57% (10yr) shown two rows below it comes entirely from moving eBAT's assumed potency up to
-0.05 -- the optimistic side of the same unfitted cliff, not a real strengthening of the
-combination. Compared consistently, at the low end of the range, the combination buys a real but
-temporary bump, not the transformative effect the higher, uncalibrated potency value implies.
-
-What the table demonstrates *structurally*, independent of any specific percentage: the inhibitor
-is consistently the variable that erodes long-horizon durability wherever it's present at less
-than a high add-on potency, because it introduces resistance routes (`pi3k_akt_feedback_
-reactivation`, `target_site_mutation`) specific to itself -- even outweighing a vaccine's own
-`immune_escape` route (0.7%) at low combined potency (12.3%+4.7%). Only once the add-on potency
-is pushed high enough (both at 0.05, or eBAT alone at 0.08 -- again, arbitrary points, not real
-doses) does that inhibitor-specific cost get fully swamped and durability
-returns to 100% flat.
-
-Read plainly: in this model, the inhibitor is a net liability for long-term durability unless
-paired with an add-on potent enough to fully suppress the resistance routes its own presence
-creates -- and that required potency has never been shown to be a real, achievable dose for either
-eBAT or any HSA vaccine. The only number in this whole table backed by anything real is the
-inhibitor's ~30% ceiling, which is durable in the sense of being stable, not in the sense of
-helping most dogs.
+Both diseases show the identical qualitative pattern -- one route already suppressed at the
+lower potency, two barely positive, all three flipping negative at a meaningfully higher potency
+-- because HSA's illustrative growth/kill parameters were deliberately built reusing HS's own
+shared conventions, not because either disease's biology is intrinsically easier or harder. The
+real differences driving the very different-looking outcomes are elsewhere: HSA's
+`preexisting_prob` was recentered to a far more pessimistic value (0.70 vs. HS's 0.30) against
+real eBAT survival data; HSA's primary drug exposure is an illustrative margin rather than a
+canine-PK-anchored real dose the way HS's trametinib is; and, until this section, HSA's second
+drug was modeled as chronically dosed when the real drug never was -- a difference in how each
+scenario was built and calibrated, not in how many ways either tumor can escape its treatment.
 
 ### Does this change whether a durable-response combination exists for HSA?
 
 None of the three genomics/structure findings above were fed into the Monte Carlo model as a
-parameter -- they're an independent plausibility check, not a calibration input -- so the
-combination-search grid's own numbers (multiple threshold combinations reaching >=95% durable
-response: inhibitor+vaccine alone, inhibitor+eBAT alone, or both together at lower potency in
-each) are unchanged by any of this. What changed is how much weight each piece of that finding
-can actually bear, and the answer is uneven across the two "extra" ingredients:
+parameter -- they're an independent plausibility check, not a calibration input -- so they don't
+change the combination-search grid's own numbers (which have since been corrected for a separate
+reason -- eBAT's exposure duration, see above -- and now show the vaccine as the only route to
+>=95% durable response in that grid; eBAT no longer contributes enough on its own to matter).
+What changed here is how much weight each piece of that finding can actually bear, and the answer
+is uneven across the two "extra" ingredients:
 
 - **eBAT is better grounded now than before, on two independent axes.** Its first target, EGFR,
   is structurally conserved enough in dogs (91.6% identical) that a human-EGF-ligand-based

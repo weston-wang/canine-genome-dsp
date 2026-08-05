@@ -17,6 +17,7 @@ from .hsa_cli import (
     hsa_vaccine_antigen_design_demo,
     hsa_vaccine_followon_demo,
 )
+from .hsa_scenarios import HSA_EBAT_EXPOSURE_DURATION_DAYS
 from .hsa_scenarios import _PREEXISTING_PROB_CENTRAL as HSA_PREEXISTING_PROB_CENTRAL
 from .hybrid_cli import inverse_demo, prepare_dog10k_aging, prepare_gse9794
 from .immunotherapy_cli import immunotherapy_demo
@@ -158,6 +159,8 @@ def main() -> None:
     hsa_combo_demo.add_argument("--trials", type=int, default=300)
     hsa_combo_demo.add_argument("--horizon-days", type=int, default=730)
     hsa_combo_demo.add_argument("--preexisting-prob", type=float, default=HSA_PREEXISTING_PROB_CENTRAL)
+    hsa_combo_demo.add_argument("--ebat-exposure-duration-days", type=int,
+                                default=HSA_EBAT_EXPOSURE_DURATION_DAYS)
     hsa_combo_demo.add_argument("--seed", type=int, default=7)
     hsa_combo_demo.add_argument("--out", type=Path, required=True)
     hsa_vaccine_demo = sub.add_parser("hsa-vaccine-followon-demo",
@@ -170,6 +173,8 @@ def main() -> None:
     hsa_vaccine_demo.add_argument("--trials", type=int, default=300)
     hsa_vaccine_demo.add_argument("--horizon-days", type=int, default=730)
     hsa_vaccine_demo.add_argument("--preexisting-prob", type=float, default=HSA_PREEXISTING_PROB_CENTRAL)
+    hsa_vaccine_demo.add_argument("--ebat-exposure-duration-days", type=int,
+                                  default=HSA_EBAT_EXPOSURE_DURATION_DAYS)
     hsa_vaccine_demo.add_argument("--seed", type=int, default=7)
     hsa_vaccine_demo.add_argument("--out", type=Path, required=True)
     hsa_search_demo = sub.add_parser("hsa-combination-search-demo",
@@ -179,6 +184,8 @@ def main() -> None:
     hsa_search_demo.add_argument("--trials", type=int, default=300)
     hsa_search_demo.add_argument("--horizon-days", type=int, default=730)
     hsa_search_demo.add_argument("--preexisting-prob", type=float, default=HSA_PREEXISTING_PROB_CENTRAL)
+    hsa_search_demo.add_argument("--ebat-exposure-duration-days", type=int,
+                                 default=HSA_EBAT_EXPOSURE_DURATION_DAYS)
     hsa_search_demo.add_argument("--seed", type=int, default=7)
     hsa_search_demo.add_argument("--out", type=Path, required=True)
     hsa_receptor_demo = sub.add_parser("hsa-receptor-conservation-demo",
@@ -200,6 +207,8 @@ def main() -> None:
     hsa_tox_demo.add_argument("--trials", type=int, default=300)
     hsa_tox_demo.add_argument("--horizon-days", type=int, default=730)
     hsa_tox_demo.add_argument("--preexisting-prob", type=float, default=HSA_PREEXISTING_PROB_CENTRAL)
+    hsa_tox_demo.add_argument("--ebat-exposure-duration-days", type=int,
+                              default=HSA_EBAT_EXPOSURE_DURATION_DAYS)
     hsa_tox_demo.add_argument("--seed", type=int, default=7)
     hsa_tox_demo.add_argument("--out", type=Path, required=True)
     hsa_durability_demo = sub.add_parser("hsa-durability-horizon-demo",
@@ -211,6 +220,8 @@ def main() -> None:
                                      help="test vaccine (+/- eBAT) with no PI3K/mTOR inhibitor at all")
     hsa_durability_demo.add_argument("--trials", type=int, default=300)
     hsa_durability_demo.add_argument("--preexisting-prob", type=float, default=HSA_PREEXISTING_PROB_CENTRAL)
+    hsa_durability_demo.add_argument("--ebat-exposure-duration-days", type=int,
+                                     default=HSA_EBAT_EXPOSURE_DURATION_DAYS)
     hsa_durability_demo.add_argument("--seed", type=int, default=7)
     hsa_durability_demo.add_argument("--out", type=Path, required=True)
     mapk_structure = sub.add_parser("mapk-structure-compare",
@@ -345,13 +356,19 @@ def main() -> None:
         hsa_resistance_demo(args.out, args.trials, args.horizon_days, args.seed)
     elif args.command == "hsa-combination-control-demo":
         hsa_combination_control_demo(args.out, args.trials, args.horizon_days,
-                                     args.preexisting_prob, args.seed)
+                                     args.preexisting_prob,
+                                     ebat_exposure_duration_days=args.ebat_exposure_duration_days,
+                                     seed=args.seed)
     elif args.command == "hsa-vaccine-followon-demo":
         hsa_vaccine_followon_demo(args.out, args.ebat_max_kill, not args.no_inhibitor,
-                                  args.horizon_days, args.trials, args.preexisting_prob, args.seed)
+                                  args.horizon_days, args.trials, args.preexisting_prob,
+                                  ebat_exposure_duration_days=args.ebat_exposure_duration_days,
+                                  seed=args.seed)
     elif args.command == "hsa-combination-search-demo":
         hsa_combination_search_demo(args.out, args.trials, args.horizon_days,
-                                    args.preexisting_prob, args.seed)
+                                    args.preexisting_prob,
+                                    ebat_exposure_duration_days=args.ebat_exposure_duration_days,
+                                    seed=args.seed)
     elif args.command == "hsa-receptor-conservation-demo":
         if args.genes is None:
             hsa_receptor_conservation_demo(args.out)
@@ -361,11 +378,14 @@ def main() -> None:
         hsa_vaccine_antigen_design_demo(args.out, args.gene, args.window, args.top_n)
     elif args.command == "hsa-combination-toxicity-demo":
         hsa_combination_toxicity_demo(args.out, args.ebat_max_kill, args.trials, args.horizon_days,
-                                      args.preexisting_prob, args.seed)
+                                      args.preexisting_prob,
+                                      ebat_exposure_duration_days=args.ebat_exposure_duration_days,
+                                      seed=args.seed)
     elif args.command == "hsa-durability-horizon-demo":
         hsa_durability_horizon_demo(args.out, args.ebat_max_kill, args.vaccine_max_kill,
                                     not args.no_inhibitor, args.trials, args.preexisting_prob,
-                                    args.seed)
+                                    ebat_exposure_duration_days=args.ebat_exposure_duration_days,
+                                    seed=args.seed)
     elif args.command == "mapk-structure-compare":
         compare_orthologs(args.gene, args.hotspots, args.out)
     elif args.command == "mapk-cns-demo":

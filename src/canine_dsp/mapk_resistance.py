@@ -284,7 +284,8 @@ def run_monte_carlo(reference: ResistanceModel, css_reference: float, horizon_da
                    exposure_scale: float = .3, seeding_rate_scale: float = .5,
                    seed_fraction: float = 1e-8, detection_floor_fraction: float = .01,
                    initial_burden: float = .3, css_reference_2: float | None = None,
-                   exposure_scale_2: float = .3, seed: int = 7) -> MonteCarloOutcome:
+                   exposure_scale_2: float = .3, css_reference_2_duration_days: int | None = None,
+                   seed: int = 7) -> MonteCarloOutcome:
     """Run a Monte Carlo ensemble over parameter, exposure, and acquired-mutation-timing uncertainty.
 
     Acquired resistance is scheduled with `poisson_mutation_injections` rather than a constant
@@ -302,7 +303,12 @@ def run_monte_carlo(reference: ResistanceModel, css_reference: float, horizon_da
     `sample_initial_state`) -- a debulking step removes resistant and sensitive cells alike.
 
     `css_reference_2`, if given (with `reference.ic50_nM_2`/`max_kill_2` set), simulates a second,
-    mechanism-agnostic drug alongside the first -- see `ResistanceModel`.
+    mechanism-agnostic drug alongside the first -- see `ResistanceModel`. `css_reference_2_duration_
+    days`, if given, zeroes the second drug's exposure after that many days instead of holding it
+    at `css_reference_2` for the entire horizon -- models a single, front-loaded treatment course
+    (e.g. a short course of an immunotoxin given as one cycle) rather than chronic, small-molecule-
+    style dosing sustained indefinitely. `None` (the default) preserves the original always-on
+    behavior for every existing caller.
     """
     rng = np.random.default_rng(seed)
     k = len(reference.growth)
@@ -320,6 +326,8 @@ def run_monte_carlo(reference: ResistanceModel, css_reference: float, horizon_da
         if css_reference_2 is not None:
             css_2 = css_reference_2 * rng.lognormal(0, exposure_scale_2)
             concentration_2 = np.full(horizon_days, css_2)
+            if css_reference_2_duration_days is not None:
+                concentration_2[css_reference_2_duration_days:] = 0.0
         initial = sample_initial_state(rng, k, preexisting_prob, mechanism_weights=seeding_rates,
                                        initial_burden=initial_burden)
         sensitive_only = np.zeros(k)
@@ -479,6 +487,7 @@ def run_monte_carlo_with_vaccine(reference: ResistanceModel, css_reference: floa
                                 seed_fraction: float = 1e-8, detection_floor_fraction: float = .01,
                                 initial_burden: float = .3, css_reference_2: float | None = None,
                                 exposure_scale_2: float = .3, immune_escape_seed_fraction: float = 1e-8,
+                                css_reference_2_duration_days: int | None = None,
                                 seed: int = 7) -> MonteCarloOutcome:
     """Adds a time-gated vaccine kill term and a 5th, antigen-loss/immune-escape clone on top of
     `run_monte_carlo`'s drug-resistance model.
@@ -507,6 +516,11 @@ def run_monte_carlo_with_vaccine(reference: ResistanceModel, css_reference: floa
     added fitness cost (see `mapk_scenarios.vaccine_followon_scenarios`), reflecting the assumption
     that an antigen-loss variant most plausibly arises from a cell lineage that already survived
     MAPK-inhibitor-based selection -- an illustrative, labeled assumption, not a measured one.
+
+    `css_reference_2_duration_days`, if given, zeroes the second drug's exposure after that many
+    days instead of holding it at `css_reference_2` for the entire horizon -- see `run_monte_carlo`
+    for the rationale (a single front-loaded treatment cycle vs. chronic dosing). `None` (the
+    default) preserves the original always-on behavior for every existing caller.
     """
     rng = np.random.default_rng(seed)
     k = len(reference.growth)
@@ -534,6 +548,8 @@ def run_monte_carlo_with_vaccine(reference: ResistanceModel, css_reference: floa
         if css_reference_2 is not None:
             css_2 = css_reference_2 * rng.lognormal(0, exposure_scale_2)
             concentration_2 = np.full(horizon_days, css_2)
+            if css_reference_2_duration_days is not None:
+                concentration_2[css_reference_2_duration_days:] = 0.0
         initial = sample_initial_state(rng, k, preexisting_prob, mechanism_weights=mechanism_weights,
                                        initial_burden=initial_burden)
         sensitive_only = np.zeros(k)

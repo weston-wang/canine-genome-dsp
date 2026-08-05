@@ -361,6 +361,20 @@ HSA_EBAT_ILLUSTRATIVE_IC50_NM = 100.0
 HSA_EBAT_ILLUSTRATIVE_CSS_NM = 500.0  # ~5x the illustrative IC50; an assumed, not measured, margin
 HSA_EBAT_MAX_KILL_SWEEP = [0.0, 0.02, 0.05, 0.08, 0.12]
 
+# A real biological gap this module's own drug-kill math didn't previously represent at all: every
+# eBAT demo held css_reference_2 constant across the entire simulated horizon (years), as if eBAT
+# were dosed chronically like the small-molecule inhibitor. The real trial gave eBAT as a single
+# IV cycle -- three doses on alternating days -- before starting chemotherapy, not ongoing
+# maintenance dosing (Borgatti et al. 2017); the drug's own toxicity profile paper also notes real
+# neutralizing anti-toxin antibodies developed in ~30% of dogs despite deliberate deimmunization,
+# a biological ceiling on how many cycles can realistically be given. No eBAT-specific
+# pharmacokinetic half-life was found in a search for one, so this duration is a generous,
+# explicitly illustrative upper bound -- one full dosing cycle (~5 days) plus a plausible tail for
+# cellular kill to actually play out after the last dose -- not a fitted or measured clearance
+# time. Used via `mapk_resistance.run_monte_carlo`'s new `css_reference_2_duration_days` parameter
+# to stop assuming eBAT's kill pressure persists for years it was never re-dosed to cover.
+HSA_EBAT_EXPOSURE_DURATION_DAYS = 28
+
 # Unlike histiocytic sarcoma's trametinib+CDK4/6i pair (different organ systems: vascular/hepatic
 # vs. myelosuppression), the two real drugs behind this scenario's inhibitor+eBAT combination have
 # been directly, separately confirmed to hit the *same* organ system: rapamycin-class PI3K/mTOR

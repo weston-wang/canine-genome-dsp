@@ -17,6 +17,7 @@ from .hsa_scenarios import (
     HSA_CLONE_NAMES,
     HSA_COMBINED_EXPOSURE_DERATING,
     HSA_DURABILITY_HORIZON_SWEEP,
+    HSA_EBAT_EXPOSURE_DURATION_DAYS,
     HSA_EBAT_ILLUSTRATIVE_CSS_NM,
     HSA_EBAT_MAX_KILL_SWEEP,
     HSA_EBAT_TRIAL,
@@ -158,13 +159,16 @@ def hsa_resistance_demo(out: Path, trials: int = 300, horizon_days: int = 730, s
 
 def hsa_combination_control_demo(out: Path, trials: int = 300, horizon_days: int = 730,
                                  preexisting_prob: float = _PREEXISTING_PROB_CENTRAL,
+                                 ebat_exposure_duration_days: int | None = HSA_EBAT_EXPOSURE_DURATION_DAYS,
                                  seed: int = 7) -> None:
     """PI3K/mTOR inhibitor vs. eBAT vs. their combination, mirroring
     `mapk_cli.combination_control_demo`'s side-by-side monotherapy/combination comparison.
 
     eBAT has no real multi-dose-level response curve (see `HSA_EBAT_TRIAL`), so its potency is
     swept across an illustrative range the same way `mapk_scenarios.CDK46_MAX_KILL_SWEEP` sweeps
-    histiocytic sarcoma's own real-but-unquantified second agent.
+    histiocytic sarcoma's own real-but-unquantified second agent. `ebat_exposure_duration_days`
+    (default `HSA_EBAT_EXPOSURE_DURATION_DAYS`) caps eBAT's kill pressure to a front-loaded window
+    rather than the whole horizon -- see `hsa_durability_horizon_demo` for the rationale.
     """
     out.mkdir(parents=True, exist_ok=True)
     regimens = [("combination", True), ("ebat_monotherapy", False)]
@@ -174,9 +178,11 @@ def hsa_combination_control_demo(out: Path, trials: int = 300, horizon_days: int
         scenarios = hsa_combination_scenarios(inhibitor_active, HSA_EBAT_MAX_KILL_SWEEP)
         for ebat_max_kill, (model, css, seeding_rates, _) in scenarios.items():
             css_2 = HSA_EBAT_ILLUSTRATIVE_CSS_NM if ebat_max_kill > 0 else None
+            duration_2 = ebat_exposure_duration_days if ebat_max_kill > 0 else None
             outcome = run_monte_carlo(model, css, horizon_days, seeding_rates, trials,
                                       preexisting_prob=preexisting_prob,
-                                      css_reference_2=css_2, seed=seed)
+                                      css_reference_2=css_2,
+                                      css_reference_2_duration_days=duration_2, seed=seed)
             outcomes[(regimen, ebat_max_kill)] = outcome
             ttp = outcome.time_to_progression[outcome.progressed]
             mechanism_counts = pd.Series(outcome.dominant_mechanism).value_counts()
@@ -229,6 +235,7 @@ def hsa_combination_control_demo(out: Path, trials: int = 300, horizon_days: int
 def hsa_vaccine_followon_demo(out: Path, ebat_max_kill: float = 0.0, inhibitor_active: bool = True,
                               horizon_days: int = 730, trials: int = 300,
                               preexisting_prob: float = _PREEXISTING_PROB_CENTRAL,
+                              ebat_exposure_duration_days: int | None = HSA_EBAT_EXPOSURE_DURATION_DAYS,
                               seed: int = 7) -> None:
     """Does layering a cancer vaccine on top of PI3K/mTOR-inhibitor (+/- eBAT) therapy close the
     gap left by drug resistance alone, the same question `mapk_cli.vaccine_followon_demo` asks for
@@ -243,10 +250,15 @@ def hsa_vaccine_followon_demo(out: Path, ebat_max_kill: float = 0.0, inhibitor_a
     a real vaccine that failed on a key readout, and one still-enrolling trial) and why targeting
     a genotype-agnostic antigen instead makes the antigen-persistence argument more secure here,
     not less.
+
+    `ebat_exposure_duration_days` (default `HSA_EBAT_EXPOSURE_DURATION_DAYS`) caps eBAT's kill
+    pressure to a front-loaded window rather than the whole horizon -- see
+    `hsa_durability_horizon_demo` for the rationale.
     """
     out.mkdir(parents=True, exist_ok=True)
     scenarios = hsa_vaccine_followon_scenarios(ebat_max_kill, inhibitor_active, HSA_VACCINE_MAX_KILL_SWEEP)
     css_2 = HSA_EBAT_ILLUSTRATIVE_CSS_NM if ebat_max_kill > 0 else None
+    duration_2 = ebat_exposure_duration_days if ebat_max_kill > 0 else None
 
     rows, outcomes = [], {}
     for vaccine_max_kill, (model, css, seeding_rates, _) in scenarios.items():
@@ -255,7 +267,8 @@ def hsa_vaccine_followon_demo(out: Path, ebat_max_kill: float = 0.0, inhibitor_a
             vaccine_ramp_days=HSA_VACCINE_RAMP_DAYS, vaccine_max_kill=vaccine_max_kill,
             immune_escape_seeding_rate=HSA_IMMUNE_ESCAPE_SEEDING_RATE,
             clone_names=HSA_VACCINE_CLONE_NAMES, trials=trials,
-            preexisting_prob=preexisting_prob, css_reference_2=css_2, seed=seed)
+            preexisting_prob=preexisting_prob, css_reference_2=css_2,
+            css_reference_2_duration_days=duration_2, seed=seed)
         outcomes[vaccine_max_kill] = outcome
         ttp = outcome.time_to_progression[outcome.progressed]
         mechanism_counts = pd.Series(outcome.dominant_mechanism).value_counts()
@@ -326,6 +339,7 @@ def hsa_vaccine_followon_demo(out: Path, ebat_max_kill: float = 0.0, inhibitor_a
 
 def hsa_combination_search_demo(out: Path, trials: int = 300, horizon_days: int = 730,
                                 preexisting_prob: float = _PREEXISTING_PROB_CENTRAL,
+                                ebat_exposure_duration_days: int | None = HSA_EBAT_EXPOSURE_DURATION_DAYS,
                                 seed: int = 7) -> None:
     """Searches combination space directly rather than assuming which pairing wins: a full grid
     over eBAT potency x vaccine potency, inhibitor always present as the base -- reports which
@@ -336,19 +350,25 @@ def hsa_combination_search_demo(out: Path, trials: int = 300, horizon_days: int 
     check whether a simpler alternative does just as well, or whether a piece assumed necessary
     actually is -- exactly the check that found histiocytic sarcoma's drug+vaccine (no CDK4/6i)
     alternative performed almost as well as the full three-drug combination there.
+
+    `ebat_exposure_duration_days` (default `HSA_EBAT_EXPOSURE_DURATION_DAYS`) caps eBAT's kill
+    pressure to a front-loaded window rather than the whole horizon -- see
+    `hsa_durability_horizon_demo` for the rationale.
     """
     out.mkdir(parents=True, exist_ok=True)
     rows = {}
     for ebat_max_kill in HSA_EBAT_MAX_KILL_SWEEP:
         scenarios = hsa_vaccine_followon_scenarios(ebat_max_kill, HSA_VACCINE_MAX_KILL_SWEEP)
         css_2 = HSA_EBAT_ILLUSTRATIVE_CSS_NM if ebat_max_kill > 0 else None
+        duration_2 = ebat_exposure_duration_days if ebat_max_kill > 0 else None
         for vaccine_max_kill, (model, css, seeding_rates, _) in scenarios.items():
             outcome = run_monte_carlo_with_vaccine(
                 model, css, horizon_days, seeding_rates, vaccine_start_day=HSA_VACCINE_START_DAY,
                 vaccine_ramp_days=HSA_VACCINE_RAMP_DAYS, vaccine_max_kill=vaccine_max_kill,
                 immune_escape_seeding_rate=HSA_IMMUNE_ESCAPE_SEEDING_RATE,
                 clone_names=HSA_VACCINE_CLONE_NAMES, trials=trials,
-                preexisting_prob=preexisting_prob, css_reference_2=css_2, seed=seed)
+                preexisting_prob=preexisting_prob, css_reference_2=css_2,
+                css_reference_2_duration_days=duration_2, seed=seed)
             rows[(ebat_max_kill, vaccine_max_kill)] = float(1 - outcome.progressed.mean())
 
     grid = pd.DataFrame(
@@ -363,8 +383,10 @@ def hsa_combination_search_demo(out: Path, trials: int = 300, horizon_days: int 
     ebat_alone_durable = {}
     for ebat_max_kill, (model, css, seeding_rates, _) in ebat_alone_scenarios.items():
         css_2 = HSA_EBAT_ILLUSTRATIVE_CSS_NM if ebat_max_kill > 0 else None
+        duration_2 = ebat_exposure_duration_days if ebat_max_kill > 0 else None
         outcome = run_monte_carlo(model, css, horizon_days, seeding_rates, trials,
-                                  preexisting_prob=preexisting_prob, css_reference_2=css_2, seed=seed)
+                                  preexisting_prob=preexisting_prob, css_reference_2=css_2,
+                                  css_reference_2_duration_days=duration_2, seed=seed)
         ebat_alone_durable[ebat_max_kill] = float(1 - outcome.progressed.mean())
 
     fig, ax = plt.subplots(figsize=(7, 5.5))
@@ -558,6 +580,7 @@ def hsa_vaccine_antigen_design_demo(out: Path, gene: str = "VIM", window: int = 
 def hsa_combination_toxicity_demo(out: Path, ebat_max_kill: float = 0.05, trials: int = 300,
                                   horizon_days: int = 730,
                                   preexisting_prob: float = _PREEXISTING_PROB_CENTRAL,
+                                  ebat_exposure_duration_days: int | None = HSA_EBAT_EXPOSURE_DURATION_DAYS,
                                   seed: int = 7) -> None:
     """Stress-tests the inhibitor+eBAT combination against realistic combined-dosing de-rating,
     mirroring `mapk_cli.combination_toxicity_demo` -- but grounded in real, documented, same-
@@ -567,6 +590,9 @@ def hsa_combination_toxicity_demo(out: Path, ebat_max_kill: float = 0.05, trials
     Fixes eBAT potency at `ebat_max_kill` (default 0.05, the threshold that reached durable
     response in `hsa_combination_search_demo`) and sweeps `HSA_COMBINED_EXPOSURE_DERATING`,
     applying it multiplicatively to both the inhibitor and eBAT reference concentrations.
+    `ebat_exposure_duration_days` (default `HSA_EBAT_EXPOSURE_DURATION_DAYS`) caps eBAT's kill
+    pressure to a front-loaded window rather than the whole horizon -- see
+    `hsa_durability_horizon_demo` for the rationale.
     """
     out.mkdir(parents=True, exist_ok=True)
     scenarios = hsa_combination_scenarios(True, [ebat_max_kill])
@@ -576,7 +602,8 @@ def hsa_combination_toxicity_demo(out: Path, ebat_max_kill: float = 0.05, trials
     for derating in HSA_COMBINED_EXPOSURE_DERATING:
         outcome = run_monte_carlo(model, css * derating, horizon_days, seeding_rates, trials,
                                   preexisting_prob=preexisting_prob,
-                                  css_reference_2=HSA_EBAT_ILLUSTRATIVE_CSS_NM * derating, seed=seed)
+                                  css_reference_2=HSA_EBAT_ILLUSTRATIVE_CSS_NM * derating,
+                                  css_reference_2_duration_days=ebat_exposure_duration_days, seed=seed)
         outcomes[derating] = outcome
         ttp = outcome.time_to_progression[outcome.progressed]
         mechanism_counts = pd.Series(outcome.dominant_mechanism).value_counts()
@@ -605,6 +632,7 @@ def hsa_combination_toxicity_demo(out: Path, ebat_max_kill: float = 0.05, trials
 
     summary = {
         "ebat_max_kill_tested": ebat_max_kill, "preexisting_prob_used": preexisting_prob,
+        "ebat_exposure_duration_days_used": ebat_exposure_duration_days,
         "sensitivity": rows, "toxicity_extrapolation_rationale": HSA_TOXICITY_EXTRAPOLATION_NOTE,
         "unverified_extrapolations": [
             "no canine dose-finding trial has combined a PI3K/mTOR inhibitor with eBAT; "
@@ -624,6 +652,7 @@ def hsa_combination_toxicity_demo(out: Path, ebat_max_kill: float = 0.05, trials
 def hsa_durability_horizon_demo(out: Path, ebat_max_kill: float = 0.05, vaccine_max_kill: float = 0.0,
                                 inhibitor_active: bool = True, trials: int = 300,
                                 preexisting_prob: float = _PREEXISTING_PROB_CENTRAL,
+                                ebat_exposure_duration_days: int | None = HSA_EBAT_EXPOSURE_DURATION_DAYS,
                                 seed: int = 7) -> None:
     """How long does "durable response" actually mean for a given HSA combination, the same
     question `mapk_cli.durability_horizon_demo` asks for histiocytic sarcoma? No HSA demo had
@@ -635,11 +664,18 @@ def hsa_durability_horizon_demo(out: Path, ebat_max_kill: float = 0.05, vaccine_
     vaccine_max_kill)` combination, reusing `hsa_vaccine_followon_scenarios` (vaccine_max_kill=0.0
     still runs the 5-clone vaccine model with a harmless immune-escape clone, so eBAT-only and
     vaccine-only regimens can both be tested through the same code path as the full combination).
+
+    `ebat_exposure_duration_days` (default `HSA_EBAT_EXPOSURE_DURATION_DAYS`) caps eBAT's kill
+    pressure to a front-loaded window instead of holding it constant for the whole horizon -- the
+    real trial gave eBAT as a single IV cycle, not chronic dosing. Pass `None` to recover the
+    original always-on assumption (e.g. to reproduce earlier results or explore a hypothetical
+    repeated-cycles regimen manually).
     """
     out.mkdir(parents=True, exist_ok=True)
     scenarios = hsa_vaccine_followon_scenarios(ebat_max_kill, inhibitor_active, [vaccine_max_kill])
     model, css, seeding_rates, _ = scenarios[vaccine_max_kill]
     css_2 = HSA_EBAT_ILLUSTRATIVE_CSS_NM if ebat_max_kill > 0 else None
+    duration_2 = ebat_exposure_duration_days if ebat_max_kill > 0 else None
 
     rows = []
     for horizon_days in HSA_DURABILITY_HORIZON_SWEEP:
@@ -648,7 +684,8 @@ def hsa_durability_horizon_demo(out: Path, ebat_max_kill: float = 0.05, vaccine_
             vaccine_ramp_days=HSA_VACCINE_RAMP_DAYS, vaccine_max_kill=vaccine_max_kill,
             immune_escape_seeding_rate=HSA_IMMUNE_ESCAPE_SEEDING_RATE,
             clone_names=HSA_VACCINE_CLONE_NAMES, trials=trials,
-            preexisting_prob=preexisting_prob, css_reference_2=css_2, seed=seed)
+            preexisting_prob=preexisting_prob, css_reference_2=css_2,
+            css_reference_2_duration_days=duration_2, seed=seed)
         ttp = outcome.time_to_progression[outcome.progressed]
         mechanism_counts = pd.Series(outcome.dominant_mechanism).value_counts()
         mechanism_fractions = (mechanism_counts.reindex(["durable_response"] + HSA_VACCINE_CLONE_NAMES[1:],
@@ -675,6 +712,7 @@ def hsa_durability_horizon_demo(out: Path, ebat_max_kill: float = 0.05, vaccine_
     summary = {
         "ebat_max_kill_tested": ebat_max_kill, "vaccine_max_kill_tested": vaccine_max_kill,
         "inhibitor_active": inhibitor_active, "preexisting_prob_used": preexisting_prob,
+        "ebat_exposure_duration_days_used": duration_2,
         "sensitivity": rows,
         "unverified_extrapolations": [
             "this scenario has never been followed anywhere near 5 or 10 years in any real dog; "
@@ -683,6 +721,9 @@ def hsa_durability_horizon_demo(out: Path, ebat_max_kill: float = 0.05, vaccine_
             "HSA's real-world catastrophic-event mechanism (tumor rupture/hemorrhage) is still not "
             "modeled at any horizon -- a long simulated horizon with no relapse detected is not "
             "the same claim as a real dog surviving that long without a fatal bleed",
+            "ebat_exposure_duration_days=28 is a generous, explicitly illustrative upper bound on "
+            "eBAT's single-cycle window, not a measured pharmacokinetic half-life -- no eBAT-"
+            "specific PK data was found in a search for one",
         ],
         "warning": "Extends this module's own parameter space to horizons no real trial has "
                   "observed; not a projection of what any real dog's long-term outcome would be.",
