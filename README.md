@@ -1433,7 +1433,8 @@ predictions about real eBAT or real vaccine dosing. Exactly one row carries real
 | Vaccine alone, no inhibitor (0.05) | 100% | 97.3% | 96.7% | 89.0% | immune_escape only, growing 0%->11% | No -- no real dose-response curve exists |
 | eBAT(0.02)+vaccine(0.03), no inhibitor | 100% | 100% | 96.7% | 89.0% | immune_escape only | No |
 | eBAT(0.05)+vaccine(0.05), no inhibitor | 100% | 100% | 100% | 100% | none | No |
-| Inhibitor+eBAT (0.05) | 99.7% | 96.0% | 79.7% | 57.0% | pi3k_akt_feedback + target_site | No |
+| Inhibitor+eBAT (0.02, pessimistic-side potency) | 51.7% | 48.0% | 35.0% | **30.3%** | -- | No |
+| Inhibitor+eBAT (0.05, optimistic-side potency) | 99.7% | 96.0% | 79.7% | 57.0% | pi3k_akt_feedback + target_site | No |
 | Inhibitor+eBAT (0.08) | 100% | 100% | 100% | 100% | none | No |
 | Inhibitor+vaccine (0.05) | 100% | 100% | 96.7% | 92.0% | mostly immune_escape | No |
 | Inhibitor+eBAT(0.02)+vaccine(0.03) | 100% | 99.0% | 92.3% | 82.3% | target_site + pi3k_akt dominate | No |
@@ -1457,6 +1458,18 @@ does something (0% would mean no effect at all) but nowhere close to eliminating
 would mean a functional cure, which the trial's own long-term survival numbers rule out). Treat
 the 100% row as a demonstration of the model's structure at an extreme, not as evidence that eBAT
 alone would work.
+
+**This resolves a question the table otherwise leaves hanging: is "inhibitor+eBAT is so much
+stronger than either drug alone" a real combination effect, or just an artifact of which side of
+the cliff eBAT's potency was set to?** Mostly the latter. Holding eBAT to the *same*, more
+plausible potency (0.02) on both sides of the comparison: inhibitor+eBAT(0.02) reaches 48.0% at 2
+years -- a real, modest improvement over the inhibitor's 32.3% alone, since eBAT is doing
+something even at low potency -- but by 10 years it has eroded back down to 30.3%, essentially
+indistinguishable from the inhibitor-alone baseline (30.0%). The dramatic-looking jump to 96%
+(2yr) / 57% (10yr) shown two rows below it comes entirely from moving eBAT's assumed potency up to
+0.05 -- the optimistic side of the same unfitted cliff, not a real strengthening of the
+combination. Compared consistently, at the low end of the range, the combination buys a real but
+temporary bump, not the transformative effect the higher, uncalibrated potency value implies.
 
 What the table demonstrates *structurally*, independent of any specific percentage: the inhibitor
 is consistently the variable that erodes long-horizon durability wherever it's present at less

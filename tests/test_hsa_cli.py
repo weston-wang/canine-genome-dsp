@@ -220,6 +220,29 @@ def test_inhibitor_alone_plateaus_rather_than_continuing_to_erode(tmp_path):
     assert abs(five_year - ten_year) < 0.05
 
 
+def test_low_dose_ebat_converges_to_inhibitor_alone_baseline_by_10_years(tmp_path):
+    """Resolves whether "inhibitor+eBAT is far stronger than either drug alone" is a real
+    combination effect or an artifact of which side of the eBAT potency cliff was chosen. Held to
+    the same, low/pessimistic-side potency (0.02) that gives 0% durable response for eBAT alone,
+    the combination's 10-year durable response should land close to the inhibitor-alone baseline
+    (~30%), not anywhere near the 57-100% figures the optimistic-side potency (0.05) produces --
+    confirming the earlier dramatic-looking gap was mostly about potency choice, not synergy."""
+    inhibitor_alone = tmp_path / "inhibitor_alone"
+    hsa_durability_horizon_demo(inhibitor_alone, ebat_max_kill=0.0, vaccine_max_kill=0.0,
+                               inhibitor_active=True, trials=300, seed=1)
+    low_dose_combo = tmp_path / "low_dose_combo"
+    hsa_durability_horizon_demo(low_dose_combo, ebat_max_kill=0.02, vaccine_max_kill=0.0,
+                               inhibitor_active=True, trials=300, seed=1)
+
+    alone_table = pd.read_csv(inhibitor_alone / "hsa_durability_horizon_sensitivity.csv")
+    combo_table = pd.read_csv(low_dose_combo / "hsa_durability_horizon_sensitivity.csv")
+    alone_10yr = alone_table.loc[alone_table["horizon_days"] == 3650,
+                                "probability_durable_response"].iloc[0]
+    combo_10yr = combo_table.loc[combo_table["horizon_days"] == 3650,
+                                "probability_durable_response"].iloc[0]
+    assert abs(alone_10yr - combo_10yr) < 0.10
+
+
 def test_hsa_durability_horizon_demo_runs_vaccine_only_and_ebat_only_paths(tmp_path):
     # vaccine_max_kill=0.0 must still route through the 5-clone vaccine model without crashing
     # (a harmless immune-escape clone), so both eBAT-only and vaccine-only regimens go through
