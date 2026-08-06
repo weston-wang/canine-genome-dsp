@@ -37,6 +37,7 @@ from .mapk_cli import (
     vaccine_followon_demo,
 )
 from .mapk_scenarios import _PREEXISTING_PROB_CENTRAL as MAPK_PREEXISTING_PROB_CENTRAL
+from .pharmacology_cli import cdk46_achievability_demo
 from .signals import eiip, variant_density, windowed_gc
 from .spectral import coherence, multitaper_psd, spectral_entropy, welch_psd
 from .vaccine_eval import run_gse102459, run_gse190001
@@ -225,6 +226,13 @@ def main() -> None:
                                      default=HSA_EBAT_EXPOSURE_DURATION_DAYS)
     hsa_durability_demo.add_argument("--seed", type=int, default=7)
     hsa_durability_demo.add_argument("--out", type=Path, required=True)
+    cdk46_feas = sub.add_parser("cdk46-achievability-demo",
+                                help="is the second-drug potency the resistance model needs "
+                                     "pharmacologically reachable by a real CDK4/6 inhibitor?")
+    cdk46_feas.add_argument("--breed", choices=["bmd", "flat_coated_retriever"], default="bmd")
+    cdk46_feas.add_argument("--target-max-kill", type=float, default=0.08)
+    cdk46_feas.add_argument("--location-penetration-multiplier", type=float, default=1.0)
+    cdk46_feas.add_argument("--out", type=Path, required=True)
     corgi_driver = sub.add_parser("corgi-driver-hypothesis-demo",
                                   help="structural/DSP triage of candidate driver genes for "
                                        "Corgi primary CNS / pulmonary histiocytic sarcoma")
@@ -395,6 +403,9 @@ def main() -> None:
                                     not args.no_inhibitor, args.trials, args.preexisting_prob,
                                     ebat_exposure_duration_days=args.ebat_exposure_duration_days,
                                     seed=args.seed)
+    elif args.command == "cdk46-achievability-demo":
+        cdk46_achievability_demo(args.out, args.breed, target_max_kill=args.target_max_kill,
+                                 location_penetration_multiplier=args.location_penetration_multiplier)
     elif args.command == "corgi-driver-hypothesis-demo":
         corgi_driver_hypothesis_demo(args.out, args.genes, args.bicoherence_nperseg,
                                      args.permutations, args.seed)

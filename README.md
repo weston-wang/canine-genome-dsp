@@ -914,6 +914,91 @@ Fixed by importing the constant directly, with a regression test exercising the 
 not just the Python function default -- this is worth keeping even though the specific recentering
 that motivated finding the bug was itself wrong.
 
+### Is the potency the model needs actually achievable?
+
+Every "100% durable response, flat to ten years" figure above rests on `max_kill_2 = 0.08`, and the
+model could not say whether that is reachable, because `max_kill_2` entered it as a bare asserted
+number with no link to anything measurable. `pharmacology.py` closes that gap — converting real in
+vitro and PK observables into `max_kill_2`/`ic50_nM_2` so achievability becomes a question about
+named, individually-checkable inputs.
+
+```bash
+canine-dsp cdk46-achievability-demo --target-max-kill 0.08 --out results/cdk46-achievability
+```
+
+**The answer is no, and it fails two independent checks that would need different fixes.**
+
+**Constraint 1 — the cytostatic ceiling.** `max_kill` is a per-day rate and only means anything
+against a clone's own growth rate. A drug that arrests the cell cycle can at most drive *net* growth
+to zero; it cannot remove cells, because arrested cells are still there. So for a cytostatic agent
+`max_kill <= growth_rate`. That is arithmetic, not a modeling convention, and it needs no PK data at
+all. CDK4/6 inhibitors are the textbook cytostatic class, and this was checked in *canine* cells
+rather than assumed from human pharmacology: in canine melanoma lines abemaciclib inhibited
+proliferation "primarily through G1 phase arrest and senescence," with cleaved PARP showing "only
+weak signal intensity, suggesting that apoptosis may not be a major mechanism" (PMC12240792).
+
+| Clone | growth/day | cytostatic ceiling | is 0.08 above it? |
+|---|---|---|---|
+| sensitive | 0.0600 | 0.0600 | yes |
+| pathway_reactivation | 0.0500 | 0.0500 | yes |
+| rtk_bypass | 0.0550 | 0.0550 | yes |
+| target_site_mutation | 0.0580 | 0.0580 | yes |
+
+0.08 exceeds every resistant clone's ceiling by **38–60%**. No dose reaches it, because it is not a
+dosing question. And the corollary is stronger than the headline: even at infinite concentration
+with perfect arrest of every cell, a purely cytostatic second drug drives each margin to *exactly
+zero* — stasis — never negative. So it cannot produce the **mechanistic elimination** this module
+attributes to `max_kill_2=0.08` at all; indefinite stasis is its theoretical best case.
+
+**Constraint 2 — real canine potency is 9–31x weaker than assumed.** Independently:
+`CDK46_ILLUSTRATIVE_IC50_NM = 100.0` was always labeled illustrative, and the real measured value in
+canine cells is **910–3090 nM** (abemaciclib, five canine melanoma lines; normal fibroblasts 5230 nM,
+so there is real selectivity). `CDK46_ILLUSTRATIVE_CSS_NM = 500.0` was set as a 5x margin over the
+*assumed* IC50 — against the real range it sits at or below the IC50:
+
+| IC50 | saturation reached at the modeled 500 nM |
+|---|---|
+| 100 nM (assumed) | 0.918 |
+| 910 nM (real, most potent line) | 0.289 |
+| 3090 nM (real, least potent line) | 0.061 |
+
+This compounds rather than offsets constraint 1, because the requirement scales as
+1/saturation_fraction — operating below saturation *raises* the Emax you would need. Required
+`max_kill` to reverse the worst resistant clone (margin 0.0579/day on trametinib alone):
+
+| IC50 | exposure | saturation | required max_kill | vs. ceiling (0.058) |
+|---|---|---|---|---|
+| 100 nM | 500 nM | 0.918 | 0.0631 | **above — impossible** |
+| 100 nM | 2000 nM | 0.989 | 0.0586 | **above — impossible** |
+| 910 nM | 2000 nM | 0.765 | 0.0757 | **above — impossible** |
+| 3090 nM | 500 nM | 0.061 | 0.9482 | **above — impossible** |
+
+Note the first row: the requirement exceeded the cytostatic ceiling *even at this module's own
+optimistic assumptions*. The real-IC50 discovery did not create the problem, it deepened it by an
+order of magnitude. In the most generous defensible cytostatic case — perfect arrest, real canine
+potency, modeled exposure — achieved kill is 0.003–0.004/day against margins of 0.036–0.058, short
+by roughly 15x.
+
+**What would change the answer** (recorded in `summary.json` so it is actionable rather than
+rhetorical): a genuinely **cytotoxic** second agent is the only route that lifts constraint 1, and
+that means a different drug class, not a different dose of a CDK4/6 inhibitor. Beyond that: a real
+canine *HS* dose-response measurement (every potency number here comes from melanoma/mammary/lymphoma
+lines — no CDK4/6 inhibitor has ever been tested against a canine HS line); real canine PK for a
+specific CDK4/6 inhibitor (none found, so exposure is swept, not known); or better primary-drug
+suppression, since the bar for drug 2 is set by what trametinib leaves behind.
+
+The demo also emits a **feasibility frontier** over (IC50 x exposure) with the cytostatic ceiling
+drawn as a contour, so a future real measurement can be located on it directly instead of re-arguing
+from scratch.
+
+**What this means for everything above.** The `max_kill_2=0.08` results are not wrong as model
+output — they are correct arithmetic on a parameter now shown to be pharmacologically unreachable
+for the drug class named. The honest reading of this module's HS durability story therefore shifts
+to the `max_kill_2=0.05` regime (100% → 99.7% → 92% → 81% at 1/2/5/10 years, with erosion driven by
+`pathway_reactivation`) — and even 0.05 requires potency this analysis suggests is optimistic. The
+"purely pharmacological path to mechanistic elimination" section above should be read as
+*conditional on a cytotoxic agent that has not been identified*, not as an available option.
+
 ### Reasoning toward the driver mutation instead of looking it up
 
 The load-bearing unverified premise of this whole module is that Corgi primary CNS / primary
