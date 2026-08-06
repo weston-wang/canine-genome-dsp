@@ -210,6 +210,64 @@ def handoff_timing(cytotoxic_exposure_days: int, vaccine_start_day: int,
     }
 
 
+def vaccine_potency_threshold(growth_rates: np.ndarray, clone_names: list[str],
+                              margin: float = 0.002) -> dict:
+    """The vaccine potency at which pre-existing resistance stops mattering at all.
+
+    This is the sharpest consequence of antigen convergence, and it is a *structural* result rather
+    than a better number. Because the vaccine covers every drug-resistance clone (see
+    `verify_antigen_convergence`) and is subject to neither the cytostatic ceiling nor a
+    cumulative-dose duration cap (`mechanism_constraint_matrix`), a potency exceeding the fastest
+    covered clone's growth rate drives every such clone to a negative net margin *permanently* --
+    not for a dosing window.
+
+    The consequence for the model's uncertainty structure:
+
+      * BELOW threshold, the outcome is essentially `1 - preexisting_prob`, because the two N=1 arms
+        saturate near 1.0 and 0.0 (see `single_patient.partition_by_preexisting_subclone`). The
+        result is then dominated by the single parameter every sequencing assay was shown unable to
+        measure (`single_patient.posterior_preexisting_prob`).
+      * AT OR ABOVE threshold, a pre-existing subclone is suppressed indefinitely rather than
+        outgrowing, so the outcome becomes *insensitive* to `preexisting_prob`.
+
+    That is why crossing this threshold matters more than any calibration argument: it does not
+    improve an estimate of an unmeasurable quantity, it removes the dependence on it. `margin` is a
+    small headroom added so the threshold is strictly above the growth rate rather than exactly at
+    it, where the net margin would be zero (stasis, not suppression).
+
+    Excludes the immune-escape clone, which the vaccine cannot see by construction -- so this is a
+    threshold for *drug*-resistance coverage, and the antigen-loss route remains outside it.
+    """
+    growth_rates = np.asarray(growth_rates, dtype=float)
+    if len(growth_rates) != len(clone_names):
+        raise ValueError("growth_rates and clone_names must align")
+    if margin < 0:
+        raise ValueError("margin must be nonnegative")
+    covered = [(name, float(rate)) for name, rate in zip(clone_names, growth_rates)
+               if ANTIGEN_RETENTION.get(name, {}).get("retains_driver_antigen")
+               and name != "sensitive"]
+    if not covered:
+        raise ValueError("no vaccine-covered drug-resistance clones found in clone_names")
+    fastest_name, fastest_rate = max(covered, key=lambda item: item[1])
+    return {
+        "covered_drug_resistance_clones": dict(covered),
+        "fastest_covered_clone": fastest_name,
+        "fastest_covered_growth_rate": fastest_rate,
+        "threshold_vaccine_max_kill": fastest_rate + margin,
+        "margin": float(margin),
+        "below_threshold_behaviour": "outcome ~= 1 - preexisting_prob; dominated by a parameter no "
+                                    "assay can measure",
+        "at_or_above_threshold_behaviour": "outcome insensitive to preexisting_prob -- a pre-existing "
+                                          "subclone is suppressed indefinitely rather than outgrowing",
+        "why_this_is_the_real_result": "Crossing this threshold does not improve an estimate of an "
+                                     "unmeasurable quantity; it removes the model's dependence on "
+                                     "it. That is a qualitatively different kind of robustness than "
+                                     "any recalibration of preexisting_prob could provide.",
+        "still_outside_it": "the antigen-loss / immune-escape route, which the vaccine cannot cover "
+                           "by construction and whose seeding rate is an unmeasured constant",
+    }
+
+
 def mechanism_constraint_matrix() -> dict:
     """Which of the two hard constraints each candidate second mechanism is subject to.
 

@@ -1545,11 +1545,80 @@ That antigen loss never fires is doing real work and rests on an unmeasured cons
 seeding at day 90. A meaningfully higher antigen-loss rate would reintroduce the one leak the vaccine
 cannot cover by construction, and nothing in this repo constrains it.
 
-**So the honest form of the endurance case:** it rests on the vaccine, not on either drug — and it
-rests on the convergence argument being a deduction about *what resistance does to an antigen*, which
-says nothing about whether the antigen is there. `vaccine_max_kill` remains a swept, unfitted knob (no
-canine cancer vaccine trial exists for this disease), and the whole chain still sits on top of the
-oldest open premise in this repo: whether Corgi HS carries a PTPN11/KRAS hotspot at all.
+### The endurance numbers, with the vaccine on
+
+Full grid, trametinib + duration-capped lomustine + vaccine, 300 trials per cell. Reported at both
+`preexisting_prob = 0.30` (this module's central value) **and** `0.62` (what inverting the Skorupski
+benchmark implies for the BMD context), because that parameter is unmeasurable and reporting one value
+would hide the real uncertainty. Monte Carlo noise floor at n=300 is roughly ±5pp near 0.7, so
+differences under ~5pp aren't meaningful.
+
+**P(durable response), `preexisting_prob = 0.30`:**
+
+| vaccine `max_kill` | 1 yr | 2 yr | 5 yr | 10 yr |
+| --- | --- | --- | --- | --- |
+| 0 (drugs only) | 0.867 | 0.687 | 0.700 | 0.710 |
+| 0.03 | 1.000 | 0.877 | 0.727 | 0.723 |
+| 0.05 | 1.000 | 1.000 | 0.990 | 0.967 |
+| **0.06** | **1.000** | **1.000** | **1.000** | **1.000** |
+| 0.08 | 1.000 | 1.000 | 1.000 | 1.000 |
+
+**Same grid at `preexisting_prob = 0.62`:**
+
+| vaccine `max_kill` | 1 yr | 2 yr | 5 yr | 10 yr |
+| --- | --- | --- | --- | --- |
+| 0 (drugs only) | 0.707 | 0.377 | 0.403 | 0.420 |
+| 0.03 | 1.000 | 0.737 | 0.423 | 0.433 |
+| 0.05 | 1.000 | 1.000 | 0.987 | 0.980 |
+| **0.06** | **1.000** | **1.000** | **1.000** | **1.000** |
+
+**The structural result is in the comparison between those two tables, not in either one.** At
+10 years:
+
+| vaccine `max_kill` | p=0.30 | p=0.62 | spread |
+| --- | --- | --- | --- |
+| 0 | 0.710 | 0.420 | **0.290** |
+| 0.03 | 0.723 | 0.433 | **0.290** |
+| 0.05 | 0.967 | 0.980 | −0.013 |
+| 0.06 | 1.000 | 1.000 | **0.000** |
+
+Below threshold the outcome swings by 29 points with `preexisting_prob` — it is essentially a readout
+of the one parameter every sequencing assay was shown unable to measure. **At and above threshold that
+dependence doesn't shrink, it disappears.** `vaccine_potency_threshold` computes why: 0.058/day is the
+fastest vaccine-covered clone's growth rate (`target_site_mutation`), and a persistent, ceiling-free
+mechanism exceeding it drives every covered clone to a permanently negative margin — so a pre-existing
+subclone is suppressed indefinitely instead of eventually outgrowing.
+
+That is worth being precise about, because it is a different *kind* of result than a better number:
+crossing this threshold does not improve an estimate of an unmeasurable quantity, it removes the
+model's dependence on it. No recalibration of `preexisting_prob` — in either direction, including the
+pessimistic 0.62 — can do that.
+
+**Two practical readings:**
+
+- **The cytotoxic is nearly redundant above threshold.** Vaccine alone (no lomustine) at p=0.30 gives
+  0.993 / 0.983 / 0.993 at 2/5/10 years for `max_kill` 0.05, and flat 1.000 at 0.06 — statistically
+  indistinguishable from the with-lomustine column. Lomustine's value is concentrated at *sub*-threshold
+  vaccine potency (at 0.03, 2-year: 0.877 with it vs 0.740 without). It buys insurance against an
+  under-potent vaccine, not additive benefit against a good one.
+- **Sub-threshold potency only delays.** At p=0.62 the pre-existing-subclone arm at `max_kill` 0.03
+  runs 1.000 → 0.580 → 0.075 → 0.040 across 1/2/5/10 years — it collapses, just later. At 0.05 it holds
+  at 0.967, at 0.06 flat 1.000. This is a threshold, not a gradient, and being close to it is not
+  close to the benefit.
+
+**What this does not fix.** Antigen loss stays outside the threshold by construction — no vaccine
+potency covers a clone that shed the antigen. Its share of relapses never exceeds 3.3% anywhere in the
+grid, but that is a consequence of `IMMUNE_ESCAPE_SEEDING_RATE = 6×10⁻⁵` being an unmeasured constant
+~200× below the drug-resistance total. It is the one place where "just raise the potency" stops being
+the answer, and nothing in this repo constrains it.
+
+**So the honest form of the endurance case:** it rests on the vaccine, not on either drug; the number
+that matters is not a durability percentage but whether vaccine potency clears ~0.058/day; and above
+that line the result is robust to the model's least-measurable parameter in a way no drug arm was.
+All of which sits on top of two unfitted inputs — `vaccine_max_kill` is a swept knob (no canine cancer
+vaccine trial exists for this disease, so nothing here says 0.06 is reachable, which is exactly the
+question `pharmacology.py` had to ask about CDK4/6i and got a "no" for) and the antigen-loss rate — and
+on the oldest open premise in this repo: whether Corgi HS carries a PTPN11/KRAS hotspot at all.
 
 ## Where this leaves things
 

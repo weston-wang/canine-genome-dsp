@@ -190,3 +190,63 @@ def test_long_horizon_erosion_is_a_growth_rate_threshold_not_antigen_loss():
     assert counts_below.get("immune_escape", 0) == 0   # and it is NOT antigen loss
     assert counts_below.get("target_site_mutation", 0) > 0
     assert above > below                          # crossing the growth rate closes it
+
+
+def test_vaccine_potency_threshold_is_the_fastest_covered_clones_growth_rate():
+    """The threshold is set by the fastest clone the vaccine can see -- not by the sensitive clone
+    (which the drugs already handle) and not by the immune-escape clone (which the vaccine cannot see
+    at all, so no potency covers it)."""
+    from canine_dsp.antigen_convergence import vaccine_potency_threshold
+
+    growth = np.array([0.06, 0.05, 0.055, 0.058, 0.0425])
+    report = vaccine_potency_threshold(growth, VACCINE_CLONE_NAMES)
+    assert report["fastest_covered_clone"] == "target_site_mutation"
+    assert report["fastest_covered_growth_rate"] == pytest.approx(0.058)
+    assert report["threshold_vaccine_max_kill"] > 0.058
+    # the sensitive clone's 0.06 is higher but must not set the threshold, and immune_escape is out
+    assert "sensitive" not in report["covered_drug_resistance_clones"]
+    assert "immune_escape" not in report["covered_drug_resistance_clones"]
+    with pytest.raises(ValueError):
+        vaccine_potency_threshold(growth, VACCINE_CLONE_NAMES[:3])
+    with pytest.raises(ValueError):
+        vaccine_potency_threshold(growth, VACCINE_CLONE_NAMES, margin=-0.01)
+
+
+def test_crossing_the_threshold_makes_the_outcome_insensitive_to_preexisting_prob():
+    """The substantive endurance result, and the reason it matters more than any recalibration: below
+    threshold the 10-year outcome swings hugely with preexisting_prob (the parameter no assay can
+    measure); at/above threshold that dependence disappears rather than shrinking."""
+    from dataclasses import replace
+
+    from canine_dsp.antigen_convergence import vaccine_potency_threshold
+    from canine_dsp.mapk_resistance import run_monte_carlo_with_vaccine
+    from canine_dsp.mapk_scenarios import (
+        CCNU_EXPOSURE_DAYS,
+        CCNU_MATCHED_CSS_NM,
+        CCNU_MATCHED_IC50_NM,
+        IMMUNE_ESCAPE_SEEDING_RATE,
+        VACCINE_RAMP_DAYS,
+        VACCINE_START_DAY,
+        vaccine_followon_scenarios,
+    )
+
+    model, css, rates, burden, _ = vaccine_followon_scenarios(
+        cdk46_max_kill=0.08, vaccine_max_kill_values=[0.0])[0.0]
+    model = replace(model, ic50_nM_2=CCNU_MATCHED_IC50_NM, max_kill_2=0.08)
+    threshold = vaccine_potency_threshold(
+        np.asarray(model.growth), VACCINE_CLONE_NAMES)["threshold_vaccine_max_kill"]
+
+    def durable(vaccine_max_kill, preexisting_prob):
+        outcome = run_monte_carlo_with_vaccine(
+            model, css, 1825, rates, VACCINE_START_DAY, VACCINE_RAMP_DAYS, vaccine_max_kill,
+            IMMUNE_ESCAPE_SEEDING_RATE, VACCINE_CLONE_NAMES, trials=150,
+            preexisting_prob=preexisting_prob, initial_burden=burden,
+            css_reference_2=CCNU_MATCHED_CSS_NM,
+            css_reference_2_duration_days=CCNU_EXPOSURE_DAYS, seed=7)
+        return float(1 - outcome.progressed.mean())
+
+    below_spread = abs(durable(0.03, 0.30) - durable(0.03, 0.62))
+    above_spread = abs(durable(threshold, 0.30) - durable(threshold, 0.62))
+    assert below_spread > 0.15      # sub-threshold: dominated by the unmeasurable parameter
+    assert above_spread < 0.05      # above threshold: dependence essentially gone
+    assert above_spread < below_spread
