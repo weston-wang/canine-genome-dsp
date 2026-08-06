@@ -17,6 +17,7 @@ from .hsa_cli import (
     hsa_vaccine_antigen_design_demo,
     hsa_vaccine_followon_demo,
 )
+from .antigen_convergence_cli import antigen_convergence_demo
 from .histiocytic_cli import corgi_driver_hypothesis_demo
 from .hsa_scenarios import HSA_EBAT_EXPOSURE_DURATION_DAYS
 from .hsa_scenarios import _PREEXISTING_PROB_CENTRAL as HSA_PREEXISTING_PROB_CENTRAL
@@ -236,6 +237,17 @@ def main() -> None:
     cdk46_feas.add_argument("--target-max-kill", type=float, default=0.08)
     cdk46_feas.add_argument("--location-penetration-multiplier", type=float, default=1.0)
     cdk46_feas.add_argument("--out", type=Path, required=True)
+    antigen_conv = sub.add_parser("antigen-convergence-demo",
+                                  help="re-runs the three-component regimen with the vaccine ON: "
+                                       "every drug-resistance route keeps the driver antigen, so a "
+                                       "hotspot vaccine covers all of them")
+    antigen_conv.add_argument("--breed", choices=["bmd", "flat_coated_retriever"], default="bmd")
+    antigen_conv.add_argument("--debulking-fraction", type=float, default=DEBULKING_FRACTION)
+    antigen_conv.add_argument("--ccnu-max-kill", type=float, default=0.08)
+    antigen_conv.add_argument("--trials", type=int, default=400)
+    antigen_conv.add_argument("--preexisting-prob", type=float, default=0.30)
+    antigen_conv.add_argument("--seed", type=int, default=7)
+    antigen_conv.add_argument("--out", type=Path, required=True)
     mut_supply = sub.add_parser("mutational-supply-demo",
                                 help="does a low-mutation-burden tumor endure better in this model, "
                                      "and which parameter actually carries the effect?")
@@ -431,6 +443,9 @@ def main() -> None:
     elif args.command == "cdk46-achievability-demo":
         cdk46_achievability_demo(args.out, args.breed, target_max_kill=args.target_max_kill,
                                  location_penetration_multiplier=args.location_penetration_multiplier)
+    elif args.command == "antigen-convergence-demo":
+        antigen_convergence_demo(args.out, args.breed, args.debulking_fraction, args.ccnu_max_kill,
+                                 args.trials, args.preexisting_prob, args.seed)
     elif args.command == "mutational-supply-demo":
         mutational_supply_demo(args.out, args.breed, args.debulking_fraction, args.ccnu_max_kill,
                                args.horizon_days, args.trials, args.preexisting_prob, args.seed)

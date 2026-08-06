@@ -1466,6 +1466,91 @@ mismatch `driver_conditioned_arms` was rewritten to refuse — running in the *p
 which is exactly why it was easy to miss. A correction that makes a model look worse still has to be
 scoped correctly.
 
+### The correction: three analyses ran with the vaccine switched off
+
+Everything in the three preceding sections — the N=1 reframing, the lomustine work, the
+mutational-supply sweep — calls `run_monte_carlo`, **not** `run_monte_carlo_with_vaccine`. All of it
+ran with the vaccine at zero. That matters because this project derived a specific structural argument
+early on and then stopped using it:
+
+> **None of the three modeled drug-resistance escape mechanisms requires losing the driver-mutation
+> antigen a vaccine would target.** `pathway_reactivation` adds a secondary RAS/RAF hit *on top of*
+> the original mutation, `rtk_bypass` reactivates parallel signaling *around* it, and
+> `target_site_mutation` only alters the MEK-inhibitor *binding site*. All three keep expressing the
+> original PTPN11/KRAS hotspot peptide.
+
+That's a **convergence** claim, and it's a different kind from the pharmacological one about a shared
+CDK4/6 node. The pharmacological version says the escape routes share a *dependency* one drug can
+block — and it needs a potency threshold. This one says they share an *antigen they cannot shed while
+remaining what they are*, so the vaccine is escape-route-agnostic **by construction**, not by potency.
+
+```bash
+canine-dsp antigen-convergence-demo --breed bmd --out results/antigen-convergence
+```
+
+`verify_antigen_convergence` checks this against the engine's actual kill mask rather than restating
+it: every drug-resistance clone receives nonzero vaccine kill, exactly one clone (`immune_escape`)
+doesn't. It passes, and a deliberately broken mask makes it fail.
+
+**What switching the vaccine on does to the conclusions above** (trametinib + duration-capped
+lomustine, 2-year horizon):
+
+| vaccine `max_kill` | whole cohort | **pre-existing-subclone arm** |
+| --- | --- | --- |
+| 0 — *what the three prior analyses reported* | 0.688 | **0.000** |
+| 0.01 | 0.700 | 0.026 |
+| 0.03 | 0.872 | 0.579 |
+| 0.05 | **1.000** | **1.000** |
+
+The arm I reported three times as "flat 0%, lost to the duration cap regardless of any mutation rate"
+goes to 100% at a mid-sweep vaccine potency. That is exactly what antigen convergence predicts: a
+pre-existing drug-resistant subclone acquired resistance *without shedding the antigen*, so it is
+precisely the patient type a hotspot vaccine covers and the drug-only regimen cannot.
+
+**Two specific things this retracts:**
+
+1. *"Neither agent is the answer... what this regimen would need is a ceiling-free partner without a
+   cumulative-dose duration cap. Whether one exists for canine HS is not established here."* — a
+   mechanism satisfying both was **already implemented in this repo**. The two-drug analysis was
+   correct about the two drugs and wrong to generalize from them:
+
+   | | cytostatic ceiling? | cumulative-dose cap? | covers all routes? |
+   | --- | --- | --- | --- |
+   | CDK4/6 inhibitor | **yes** (fatal) | no | yes |
+   | Lomustine | no | **yes** (fatal) | yes |
+   | Hotspot vaccine | **no** | **no** | yes |
+
+   Immune cytolysis removes cells, so no arrest ceiling applies; immunological memory persists after
+   dosing, so no cumulative-organ-toxicity stop applies.
+
+2. *"The duration cap is the binding constraint for HS."* True only with nothing to hand off to.
+   `handoff_timing` reports the actual schedule: the vaccine starts ramping at day 90, **inside**
+   lomustine's 105-day window, and is at ~51% of maximum when the cumulative-dose cap forces the drug
+   to stop. Coverage is continuous — though not instantaneously full, since the ramp keeps climbing
+   for ~6 more days. Worth being clear that this favourable timing is a **coincidence of two
+   independently-set constants** (`VACCINE_START_DAY = 90` predates lomustine entering the model), not
+   a designed schedule.
+
+**Endurance, and what actually leaks.** At vaccine `max_kill = 0.05`: flat 100% to 2 years, ~98.8% at
+5 years, ~97.3% at 10. I initially wrote that the erosion was antigen loss — **the relapse breakdown
+does not support that.** Every 10-year relapse is `target_site_mutation`, and the `immune_escape`
+clone never establishes in any trial. The real reason is arithmetic: `target_site_mutation` grows at
+0.058/day and the swept potency 0.05 sits just below it, so after lomustine stops that one clone keeps
+a small positive margin. Raising vaccine potency just past that growth rate (0.06) gives **flat 100%
+at 10 years with no relapses of any kind** — the same threshold arithmetic as the cytostatic ceiling,
+except an immune mechanism is *permitted* to cross it.
+
+That antigen loss never fires is doing real work and rests on an unmeasured constant:
+`IMMUNE_ESCAPE_SEEDING_RATE` is 6×10⁻⁵, ~200× below the drug-resistance total, and it only begins
+seeding at day 90. A meaningfully higher antigen-loss rate would reintroduce the one leak the vaccine
+cannot cover by construction, and nothing in this repo constrains it.
+
+**So the honest form of the endurance case:** it rests on the vaccine, not on either drug — and it
+rests on the convergence argument being a deduction about *what resistance does to an antigen*, which
+says nothing about whether the antigen is there. `vaccine_max_kill` remains a swept, unfitted knob (no
+canine cancer vaccine trial exists for this disease), and the whole chain still sits on top of the
+oldest open premise in this repo: whether Corgi HS carries a PTPN11/KRAS hotspot at all.
+
 ## Where this leaves things
 
 `canine_dsp.mapk_resistance` (the generic Monte Carlo/branching-process engine) and
@@ -2039,6 +2124,8 @@ population Monte Carlo as an N=1 problem, quantifying what tumor sequencing can 
 into the patient types its cohort average hides; `mutational_supply.py` scales the engine's two
 mutation-supply parameters (`seeding_rates`, `preexisting_prob`) by a tumor-mutational-burden ratio,
 turning "a low-burden tumor should endure better" from a stated intuition into a swept, checkable
-transformation with the real canine TMB data attached. Each pairs with a `*_cli.py` demo module
-following the same split. `tests/` contains deterministic unit tests. `data/` stores only provenance documentation
+transformation with the real canine TMB data attached; `antigen_convergence.py` formalizes why every
+drug-resistance route in the model retains the vaccine's target antigen, verifies that claim against
+the engine's own kill mask rather than asserting it, and computes the cytotoxic-to-immune handoff
+timing. Each pairs with a `*_cli.py` demo module following the same split. `tests/` contains deterministic unit tests. `data/` stores only provenance documentation
 in Git.
