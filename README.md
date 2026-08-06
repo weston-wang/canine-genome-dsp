@@ -914,6 +914,111 @@ Fixed by importing the constant directly, with a regression test exercising the 
 not just the Python function default -- this is worth keeping even though the specific recentering
 that motivated finding the bug was itself wrong.
 
+### Reasoning toward the driver mutation instead of looking it up
+
+The load-bearing unverified premise of this whole module is that Corgi primary CNS / primary
+pulmonary HS carries a PTPN11 or KRAS hotspot at all. Searching confirmed that gap is real rather
+than an oversight: the paper that *defines* the Corgi pulmonary entity (19 Pembroke Welsh Corgis,
+PMID 26155931) is purely histopathologic and predates the canine HS mutation literature entirely;
+the largest canine HS sequencing cohort found (129 HS + 26 HHS, PMC11353564) contains exactly one
+Welsh corgi, pooled into an undifferentiated "other breeds" bucket. **No canine HS study stratifies
+mutations by anatomic site at all.** So the mutation can't be looked up — but it can be reasoned
+toward, which is what `histiocytic_origin.py` encodes.
+
+```bash
+canine-dsp corgi-driver-hypothesis-demo --out results/corgi-drivers
+```
+
+**The inference chain.** Two clinical observations do the work. (1) The tumors are **Iba-1
+positive** (AIF1 — macrophage/microglial lineage, not Langerhans or interdigitating-DC lineage).
+(2) The disease is **anatomically localized to lung and CNS**, unlike BMD HS's disseminated
+splenic/hepatic pattern. Those two facts intersect at something specific: lung and brain are
+precisely the two mammalian tissues whose macrophage compartments — alveolar macrophages and
+microglia — are seeded prenatally from yolk-sac erythro-myeloid progenitors, self-renew in situ,
+and are maintained largely independently of bone-marrow output in adults (Gomez Perdiguero et al.
+2015, *Nature*, PMID 25470051). That yields the **tissue-resident macrophage hypothesis**: Corgi HS
+may be a neoplasm of a prenatally-seeded, locally self-renewing macrophage compartment, and it
+stays localized because its cell of origin *does not circulate* — not because it was caught early.
+This is the same cell-of-origin logic already established for human LCH, where MAPK activation in
+an HSPC gives multisystem disease and the same lesion in a tissue-restricted precursor gives
+localized single-system disease (PMC7556147).
+
+**What the hypothesis predicts that a conventional candidate list wouldn't:** CSF1R. It is the
+master survival receptor for exactly those two compartments (CSF1R inhibition depletes essentially
+all microglia in healthy animals), so it explains the lung/CNS restriction rather than merely
+tolerating it. No canine HS study found has sequenced CSF1R. It also implies a *different second
+drug* than this module models: pexidartinib is FDA-approved (2019, for tenosynovial giant cell
+tumour — itself a CSF1-driven histiocytic proliferation), CSF1R IC50 ~20 nM, oral, and **BBB
+penetrant** — which speaks directly to the ~15% brain penetration ceiling recorded for trametinib
+in `BRAIN_PENETRATION_FRACTION`, the single worst structural problem facing the PIHS scenario.
+
+Separately, this pass turned up the **first real genetic rationale for the CDK4/6 inhibitor** this
+module already models as a deliberately mechanism-agnostic second node: the BMD HS susceptibility
+GWAS narrows to a 75 kb window spanning MTAP through the last exon of CDKN2A (Shearin et al. 2012,
+PMID 22623710). CDKN2A encodes p16INK4a, the endogenous brake on CDK4/6 — loss of that brake is the
+canonical setting for CDK4/6-inhibitor sensitivity. That was not why CDK4/6i was chosen, so this is
+retrospective support rather than circularity; whether Corgis share the BMD locus is unknown.
+
+**Structural triage of the 9-gene panel** (all resolved; human + dog AlphaFold models, real):
+
+| Gene | Tier | Dog identity | Human-dog pLDDT coherence | Hotspots conserved |
+|---|---|---|---|---|
+| NRAS | B | **100%** | 1.00 | Q61 ✓ |
+| MAP2K1 | B | 99.5% | 0.64 | Q56, K57, C121 ✓ |
+| PTPN11 | A | 99.3% | 0.81 | E76, G503 ✓ |
+| KRAS | A | 98.9% | 1.00 | Q61 ✓ |
+| BRAF | B | 98.8% | 0.53 | V600 ✓ |
+| MTAP | D | 95.4% | 1.00 | — |
+| **CSF1R** | **C** | **85.3%** | **0.21** | — |
+| CDKN2A | D | 83.0% | 1.00 | — |
+| CSF1 | C | 74.5% | 0.48 | — |
+
+Three real findings, one of them a caution against the module's own new hypothesis:
+
+- **All 8 checkable hotspots are conserved in dog**, and all 8 literature positions carried the
+  expected wild-type residue in the human structure (so no stale or mis-transcribed coordinate
+  slipped through). Every MAPK candidate is chemically plausible in dog; none can be excluded on
+  conservation grounds.
+- **Residue numbering does not transfer, and this is the most immediately actionable output.**
+  BRAF V600 aligns to dog position **583** (offset 17); MAP2K1 Q56/K57/C121 align to dog **97/98/162**
+  (offset −41). A lab sequencing a dog tumor at the human coordinate would interrogate the wrong
+  residue entirely. (Computed against the specific dog accessions listed; most dog entries are
+  automatically annotated and isoform choice can shift numbering, so confirm against whichever
+  reference a lab actually uses.)
+- **CSF1R is the most mechanistically motivated candidate but the least structurally assured** —
+  lowest identity of any MAPK-pathway candidate (85.3%) and by far the lowest human-dog pLDDT
+  coherence (0.21, versus 0.53–1.00 for everything else), with CSF1 worse still at 74.5%. Since
+  pexidartinib was designed against *human* CSF1R, that materially weakens the "an approved human
+  drug would work here" half of the CSF1R argument, while leaving the cell-of-origin reasoning
+  intact. This is the opposite of what the hypothesis would have preferred to find, and it was
+  found by checking rather than assuming.
+
+**The nonlinear analysis failed its own positive control, and is reported as failed.** A
+second-order Volterra model (reusing the repo's existing basis-reduced, elastic-net machinery
+unchanged, protein treated as one group so lag histories never cross a sequence boundary) was fit
+to predict structural confidence (pLDDT) from local Kyte-Doolittle hydropathy. The hypothesis: the
+residual — structure *not* explained by local chemistry — should be elevated at allosteric and
+autoinhibitory positions, which is where several known hotspots sit (PTPN11 E76 is at the
+N-SH2/PTP autoinhibitory interface). Tested against a 10,000-draw permutation null at the four
+verified control hotspots: **p = 0.70 (PTPN11), 0.10 (KRAS), 0.76 (BRAF) — none significant.** So
+the method does not earn the right to nominate residues in CSF1R or CSF1, and deliberately isn't
+used to. `summary.json` records `cleared_for_downstream_use: false`. The low power (1–2 positions
+per protein) cuts both ways: this is a failed validation, not proof no such signal exists.
+
+`spectral.bicoherence` was added as a genuinely nonlinear primitive (quadratic phase coupling; zero
+for a linear Gaussian process with the same PSD, so it sees what a power spectrum and coherence
+structurally cannot). Writing its test surfaced a real interpretation caveat now documented in the
+function: bicoherence measures phase-relationship *consistency across averaged segments*, so it
+saturates near 1 for any signal whose segments share an identical phase geometry — a deterministic
+sinusoid triplet scores ~1 whether or not its components are truly coupled. The per-gene values
+above the diagonal (0.07–0.43) are therefore reported descriptively, not as a finding.
+
+The honest bottom line: this narrows *what to sequence first* and supplies a mechanistically-matched,
+BBB-penetrant drug candidate nobody in this line of work had considered — but it does not identify
+the mutation, and the one novel analysis that might have gone further failed validation. The
+highest-value real-world action is unchanged and cannot be substituted for by modeling: **sequence a
+series of Corgi primary CNS and primary pulmonary HS tumors, stratified by anatomic site.**
+
 ## Where this leaves things
 
 `canine_dsp.mapk_resistance` (the generic Monte Carlo/branching-process engine) and

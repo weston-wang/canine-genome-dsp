@@ -17,6 +17,7 @@ from .hsa_cli import (
     hsa_vaccine_antigen_design_demo,
     hsa_vaccine_followon_demo,
 )
+from .histiocytic_cli import corgi_driver_hypothesis_demo
 from .hsa_scenarios import HSA_EBAT_EXPOSURE_DURATION_DAYS
 from .hsa_scenarios import _PREEXISTING_PROB_CENTRAL as HSA_PREEXISTING_PROB_CENTRAL
 from .hybrid_cli import inverse_demo, prepare_dog10k_aging, prepare_gse9794
@@ -224,6 +225,14 @@ def main() -> None:
                                      default=HSA_EBAT_EXPOSURE_DURATION_DAYS)
     hsa_durability_demo.add_argument("--seed", type=int, default=7)
     hsa_durability_demo.add_argument("--out", type=Path, required=True)
+    corgi_driver = sub.add_parser("corgi-driver-hypothesis-demo",
+                                  help="structural/DSP triage of candidate driver genes for "
+                                       "Corgi primary CNS / pulmonary histiocytic sarcoma")
+    corgi_driver.add_argument("--genes", nargs="+", default=None)
+    corgi_driver.add_argument("--bicoherence-nperseg", type=int, default=64)
+    corgi_driver.add_argument("--permutations", type=int, default=10000)
+    corgi_driver.add_argument("--seed", type=int, default=7)
+    corgi_driver.add_argument("--out", type=Path, required=True)
     mapk_structure = sub.add_parser("mapk-structure-compare",
                                     help="compare human vs. dog AlphaFold confidence at MAPK-gene hotspots")
     mapk_structure.add_argument("--gene", required=True)
@@ -386,6 +395,9 @@ def main() -> None:
                                     not args.no_inhibitor, args.trials, args.preexisting_prob,
                                     ebat_exposure_duration_days=args.ebat_exposure_duration_days,
                                     seed=args.seed)
+    elif args.command == "corgi-driver-hypothesis-demo":
+        corgi_driver_hypothesis_demo(args.out, args.genes, args.bicoherence_nperseg,
+                                     args.permutations, args.seed)
     elif args.command == "mapk-structure-compare":
         compare_orthologs(args.gene, args.hotspots, args.out)
     elif args.command == "mapk-cns-demo":
