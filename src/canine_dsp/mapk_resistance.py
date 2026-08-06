@@ -81,13 +81,23 @@ class ResistanceModel:
     mutation: np.ndarray      # (k,k) row-stochastic per-day clone transition matrix
     hill: float = 1.5
     carrying_capacity: float = 1.0
-    # Optional second, mechanism-agnostic drug (e.g. a CDK4/6 inhibitor acting on the shared
-    # cyclin D/CDK4/6 node downstream of MAPK signaling): a single scalar ic50/max_kill applied
-    # identically to every clone, rather than per-clone values, because the premise being tested
-    # is that this node doesn't care *how* a clone reactivated proliferative signaling upstream.
+    # Optional second drug. A scalar ic50/max_kill is applied identically to every clone, which is
+    # the right model for a *mechanism-agnostic* node -- e.g. a CDK4/6 inhibitor acting on the
+    # shared cyclin D/CDK4/6 cell-cycle machinery, which does not care how a clone reactivated
+    # proliferative signaling upstream of it.
+    #
+    # A (k,) array instead specifies per-clone values, which is required for a second drug that is
+    # NOT mechanism-agnostic -- specifically, one acting at a node *upstream, on the same serial
+    # pathway* as the resistance lesions themselves. A CSF1R inhibitor is the motivating case: every
+    # resistance mechanism this module models, and every candidate driver in `histiocytic_origin`
+    # (PTPN11/SHP2, KRAS, NRAS, BRAF, MAP2K1), is constitutively active *downstream* of CSF1R, so
+    # blocking the receptor cannot suppress them -- that is what "downstream activating mutation"
+    # means. Modeling such a drug with a scalar would silently credit it with resistance coverage it
+    # cannot have. See `mapk_scenarios.csf1r_combination_scenarios`.
+    #
     # None (default) leaves single-drug behavior unchanged.
-    ic50_nM_2: float | None = None
-    max_kill_2: float | None = None
+    ic50_nM_2: float | np.ndarray | None = None
+    max_kill_2: float | np.ndarray | None = None
     hill_2: float = 1.5
 
     def __post_init__(self):
@@ -95,6 +105,12 @@ class ResistanceModel:
         for name in ("ic50_nM", "max_kill"):
             if np.asarray(getattr(self, name)).shape != (k,):
                 raise ValueError(f"{name} must contain one value per clone")
+        for name in ("ic50_nM_2", "max_kill_2"):
+            value = getattr(self, name)
+            if value is not None and np.ndim(value) != 0 and np.asarray(value).shape != (k,):
+                raise ValueError(f"{name} must be a scalar (mechanism-agnostic) or contain one "
+                                 f"value per clone (pathway-specific); got shape "
+                                 f"{np.asarray(value).shape} for k={k} clones")
         mutation = np.asarray(self.mutation)
         if mutation.shape != (k, k) or np.any(mutation < 0):
             raise ValueError("mutation must be a nonnegative clone-by-clone matrix")

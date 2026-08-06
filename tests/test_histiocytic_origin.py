@@ -151,3 +151,58 @@ def test_bicoherence_rejects_out_of_range_parameters():
         bicoherence(x, nperseg=512)               # longer than the signal
     with pytest.raises(ValueError):
         bicoherence(x, nperseg=64, noverlap=64)   # noverlap must be < nperseg
+
+
+def test_resistance_model_accepts_scalar_or_per_clone_second_drug_and_rejects_wrong_length():
+    """A scalar second drug means "mechanism-agnostic, same kill on every clone"; a (k,) array
+    means "pathway-specific". Both are legitimate; a wrong-length array is a modeling error that
+    must not broadcast silently."""
+    import numpy as np
+    from canine_dsp.mapk_resistance import ResistanceModel
+
+    base = dict(growth=np.array([.06, .05, .055, .058]),
+                ic50_nM=np.array([222., 8880., 266., 13320.]),
+                max_kill=np.array([.18, .02, .035, .015]), mutation=np.eye(4))
+    ResistanceModel(**base, ic50_nM_2=100., max_kill_2=.05)                      # scalar
+    ResistanceModel(**base, ic50_nM_2=20., max_kill_2=np.array([.08, .012, .012, .012]))  # per-clone
+    with pytest.raises(ValueError, match="one value per clone"):
+        ResistanceModel(**base, ic50_nM_2=20., max_kill_2=np.array([.08, .012]))
+
+
+def test_csf1r_inhibitor_is_modeled_pathway_serial_not_mechanism_agnostic():
+    """The load-bearing modeling decision: CSF1R sits upstream of every resistance lesion on the
+    same serial cascade, so its kill term must be de-rated on the resistant clones. Modeling it
+    with a scalar would silently credit it with resistance coverage it cannot mechanistically have."""
+    import numpy as np
+    from canine_dsp.mapk_scenarios import (CSF1R_DOWNSTREAM_ESCAPE_FRACTION,
+                                           CSF1R_INHIBITOR_IC50_NM, csf1r_combination_scenarios)
+
+    model = csf1r_combination_scenarios(breed="bmd", csf1r_max_kill_values=[0.08])[0.08][0]
+    assert model.ic50_nM_2 == CSF1R_INHIBITOR_IC50_NM      # a REAL measured potency, not illustrative
+    per_clone = np.asarray(model.max_kill_2)
+    assert per_clone.shape == (4,)
+    assert per_clone[0] == pytest.approx(0.08)             # receptor-dependent sensitive clone
+    for resistant in per_clone[1:]:                        # downstream lesions largely escape it
+        assert resistant == pytest.approx(0.08 * CSF1R_DOWNSTREAM_ESCAPE_FRACTION)
+
+
+def test_csf1r_inhibitor_cannot_reverse_resistant_clone_margins_at_any_swept_potency():
+    """The mechanistic consequence, checked deterministically rather than simulated: because the
+    resistant clones are downstream of the receptor, no CSF1R-inhibitor potency in the swept range
+    flips their growth margins negative -- whereas a mechanism-agnostic CDK4/6i at 0.08 does. This
+    is why CSF1Ri is not the resistance-covering agent despite being the lineage-matched drug."""
+    import numpy as np
+    from canine_dsp.mapk_resistance import clone_growth_margins
+    from canine_dsp.mapk_scenarios import (CDK46_ILLUSTRATIVE_CSS_NM, CSF1R_MAX_KILL_SWEEP,
+                                           CSF1R_INHIBITOR_ILLUSTRATIVE_CSS_NM,
+                                           combination_scenarios, csf1r_combination_scenarios)
+
+    for potency in [p for p in CSF1R_MAX_KILL_SWEEP if p > 0]:
+        scenario = csf1r_combination_scenarios(breed="bmd", csf1r_max_kill_values=[potency])[potency]
+        margins = clone_growth_margins(scenario[0], scenario[1],
+                                       CSF1R_INHIBITOR_ILLUSTRATIVE_CSS_NM)
+        assert np.max(margins[1:]) > 0, f"CSF1Ri unexpectedly reversed a clone at {potency}"
+
+    cdk = combination_scenarios(breed="bmd", max_kill_2_values=[0.08])[0.08]
+    cdk_margins = clone_growth_margins(cdk[0], cdk[1], CDK46_ILLUSTRATIVE_CSS_NM)
+    assert np.max(cdk_margins[1:]) < 0, "CDK4/6i at 0.08 should reverse every resistant clone"

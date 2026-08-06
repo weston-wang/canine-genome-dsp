@@ -1019,6 +1019,89 @@ the mutation, and the one novel analysis that might have gone further failed val
 highest-value real-world action is unchanged and cannot be substituted for by modeling: **sequence a
 series of Corgi primary CNS and primary pulmonary HS tumors, stratified by anatomic site.**
 
+### Testing the CSF1R hypothesis in the model — and watching it lose
+
+The obvious next move was to swap the illustrative CDK4/6 inhibitor for a CSF1R inhibitor and see
+whether the better-matched, BBB-penetrant drug does better. Taking the biology seriously first
+predicted it wouldn't, and the model confirms it.
+
+**Why a scalar second drug is the wrong model for CSF1R.** The engine's second drug was documented
+and validated as a *scalar applied identically to every clone* — correct for CDK4/6i, which acts on
+the cyclin D/CDK4/6 cell-cycle node, a genuinely **parallel** axis that doesn't care how a clone
+reactivated upstream signaling. CSF1R is the opposite case. It sits at the top of the same **serial**
+cascade the resistance lesions live on:
+
+```
+CSF1R → SHP2/PTPN11 → RAS (KRAS/NRAS) → RAF (BRAF) → MEK (MAP2K1) → ERK
+```
+
+Every resistance mechanism this module models, and every Tier A/B candidate driver above, is
+constitutively active *downstream* of the receptor — and a downstream activating lesion is by
+definition insensitive to blocking an upstream receptor. Modeling CSF1Ri with a scalar would
+silently credit it with resistance coverage it cannot have. So `ResistanceModel` was generalized to
+accept a `(k,)` array for `ic50_nM_2`/`max_kill_2` (scalar still means mechanism-agnostic; the
+validator rejects wrong-length arrays rather than letting them broadcast), and
+`csf1r_combination_scenarios` de-rates the CSF1Ri kill term to `CSF1R_DOWNSTREAM_ESCAPE_FRACTION`
+on every resistant clone.
+
+Note this is the one place in the whole repo with a **real measured second-drug potency**:
+pexidartinib's CSF1R IC50 = 20 nM. Two caveats keep it from being the clean anchor it looks like —
+it's measured against *human* CSF1R, and the triage above found dog CSF1R the *least* conserved
+candidate (85.3% identity, 0.21 pLDDT coherence), so this is the candidate where cross-species
+potency transfer is least assured. And IC50 is not a kill ceiling: `max_kill` stays swept.
+
+**Deterministic growth margins at matched potency** (positive = clone still expands; the exact
+calculation, not a simulation):
+
+| Clone | MEK+CDK4/6i @0.08 | MEK+CSF1Ri @0.08 |
+|---|---|---|
+| sensitive | −0.1245 | −0.1245 |
+| pathway_reactivation | **−0.0236** | +0.0389 |
+| rtk_bypass | **−0.0377** | +0.0247 |
+| target_site_mutation | **−0.0155** | +0.0469 |
+
+CDK4/6i flips all three negative — the mechanistic elimination documented earlier. CSF1Ri leaves all
+three positive at *every* potency in the swept range (0.02–0.12), verified by test. **Monte Carlo:**
+
+| Regimen | 1yr | 2yr | 5yr | 10yr |
+|---|---|---|---|---|
+| MEK + CDK4/6i @0.05 | 100% | 99.7% | 92.0% | 81.0% |
+| MEK + CDK4/6i @0.08 | 100% | 100% | 100% | **100%** |
+| MEK + CSF1Ri @0.05 | 72.3% | 70.0% | 70.0% | **70.0%** |
+| MEK + CSF1Ri @0.08 | 73.7% | 70.0% | 70.0% | **70.0%** |
+
+CSF1Ri pins at **exactly 70.0%** regardless of potency or horizon, and that number is interpretable
+rather than arbitrary: it is `1 − preexisting_prob` (0.30). CSF1Ri rescues precisely the dogs who
+start *without* a pre-existing downstream-mutant clone and cannot help any dog who starts with one —
+so its ceiling is the fraction of patients with no pre-existing resistance, and raising its potency
+moves that ceiling not at all. A cleaner illustration of "potency cannot substitute for pathway
+coverage" than anything designed on purpose.
+
+**Even in the CNS, where CSF1Ri's BBB advantage should matter most, it still loses** (trametinib at
+its real 15% brain penetration):
+
+| Regimen | 1yr | 2yr | 5yr | 10yr |
+|---|---|---|---|---|
+| MEK alone (15% brain) | 0% | 0% | 0% | **0%** |
+| + CDK4/6i @0.08 | 100% | 100% | 100% | **100%** |
+| + CSF1Ri @0.08 | 70.7% | 70.0% | 70.0% | **70.0%** |
+
+The resistance-coverage deficit dominates the delivery advantage. **One honest caveat that could
+flip this specific comparison:** the CNS runs scale only *trametinib* by the brain-penetration
+factor — CDK4/6i is implicitly given full CNS availability, which is unverified and probably
+generous, since CDK4/6 inhibitors as a class penetrate the brain poorly. If real CDK4/6i brain
+penetration is bad, the CNS column could reverse. That is a genuine open question, not a settled
+result, and it is the strongest remaining argument for CSF1Ri.
+
+**So the combined-therapy answer, revised by its own findings:** the durable-response regimen
+remains **MEK inhibitor + CDK4/6 inhibitor** — and this pass *strengthened* the case for it, via the
+MTAP-CDKN2A locus giving that drug real genetic rationale for the first time. CSF1R's role is
+demoted from "better second drug" to, at most, **a debulking/CNS-delivery adjunct**: it kills the
+receptor-dependent bulk population and reaches the brain, but it cannot cover resistance and
+therefore cannot deliver durability on its own. The lineage-matched drug and the
+resistance-covering drug turn out to be different drugs, which is exactly the kind of conclusion
+that only shows up if the pathway topology is modeled rather than assumed away.
+
 ## Where this leaves things
 
 `canine_dsp.mapk_resistance` (the generic Monte Carlo/branching-process engine) and

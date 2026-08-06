@@ -455,6 +455,90 @@ DENDRITIC_CELL_VACCINE_CAVEAT = (
     "trial above) might matter for this application specifically, not just as a generic add-on."
 )
 
+# --- CSF1R inhibitor: a pathway-SERIAL second drug, not a mechanism-agnostic one ---------------
+#
+# Motivated by `histiocytic_origin`'s tissue-resident-macrophage hypothesis, which nominates CSF1R
+# as a candidate driver/dependency for Corgi primary CNS and pulmonary HS specifically, and
+# pexidartinib as a real, FDA-approved, BBB-penetrant agent against it. Adding it here is NOT a
+# straightforward swap for the CDK4/6 inhibitor, and the reason is the whole point:
+#
+# CSF1R sits at the TOP of the same serial cascade the resistance lesions live on:
+#     CSF1R -> SHP2/PTPN11 -> RAS (KRAS/NRAS) -> RAF (BRAF) -> MEK (MAP2K1) -> ERK
+# Every resistance mechanism this module models, and every Tier A/B candidate driver in
+# `histiocytic_origin.CANDIDATE_DRIVERS`, is constitutively active *downstream* of the receptor.
+# A downstream activating lesion is by definition insensitive to blocking an upstream receptor, so
+# a CSF1R inhibitor is predicted to be near-inert against exactly the clones that drive relapse,
+# however potent it is against the receptor-dependent bulk population. That is the opposite of
+# CDK4/6i's modeled role: the cyclin D/CDK4/6 node sits on a *parallel* axis (cell cycle) and so
+# genuinely does not care how upstream signaling was reactivated -- which is why CDK46 is a scalar
+# (all clones) and this is a per-clone array.
+#
+# CSF1R_INHIBITOR_IC50_NM is one of very few REAL potency numbers anywhere in this module:
+# pexidartinib's measured CSF1R IC50. Two caveats keep it from being a clean anchor. It is measured
+# against HUMAN CSF1R, and `histiocytic_cli`'s own structural triage found dog CSF1R to be the
+# least conserved candidate checked (85.3% identity, and by far the lowest human-dog pLDDT
+# coherence at 0.21) -- so this is the candidate where cross-species potency transfer is *least*
+# assured, not most. And IC50 is not a kill ceiling: max_kill remains swept and unfitted, exactly
+# as for CDK4/6i and eBAT.
+CSF1R_INHIBITOR_IC50_NM = 20.0   # real: pexidartinib vs. human CSF1R
+CSF1R_INHIBITOR_ILLUSTRATIVE_CSS_NM = 100.0  # ~5x IC50; assumed margin, no canine PK exists
+CSF1R_MAX_KILL_SWEEP = [0.0, 0.02, 0.05, 0.08, 0.12]
+
+# Fraction of the CSF1R inhibitor's kill rate that still applies to a clone carrying a lesion
+# downstream of the receptor. Not zero, because a downstream-mutant clone may retain partial
+# dependence on receptor-driven survival input beyond the mutated node -- but small, because the
+# defining property of an activating downstream mutation is receptor independence. Illustrative;
+# swept via `downstream_escape_fraction` rather than asserted.
+CSF1R_DOWNSTREAM_ESCAPE_FRACTION = 0.15
+
+# Pexidartinib depletes essentially all microglia in healthy animals at tolerated doses, which is
+# functional in vivo proof of CNS target engagement -- a qualitatively different and stronger
+# statement than trametinib's measured 15% brain:plasma ratio (BRAIN_PENETRATION_FRACTION). Modeled
+# as full CNS availability, the most favorable defensible reading, and flagged as such: no
+# quantitative canine brain:plasma ratio for pexidartinib was found.
+CSF1R_INHIBITOR_BRAIN_PENETRATION = 1.0
+
+
+def csf1r_combination_scenarios(breed: str = "bmd",
+                                debulking_fraction: float = DEBULKING_FRACTION,
+                                csf1r_max_kill_values: list[float] = CSF1R_MAX_KILL_SWEEP,
+                                downstream_escape_fraction: float = CSF1R_DOWNSTREAM_ESCAPE_FRACTION,
+                                location_penetration_multiplier: float = 1.0,
+                                trametinib_active: bool = True,
+                                ) -> dict[float, tuple[ResistanceModel, float, np.ndarray, float, dict]]:
+    """MAPK inhibitor +/- a swept-potency CSF1R inhibitor modeled as PATHWAY-SERIAL, i.e. with its
+    kill term de-rated to `downstream_escape_fraction` on every clone whose resistance lesion lies
+    downstream of the receptor.
+
+    Deliberately parallel in shape to `combination_scenarios` so the two second drugs can be
+    compared at matched assumed potency -- which is the only fair comparison, since neither drug's
+    max_kill is fitted. The difference between them in that comparison is then attributable to
+    pathway topology (serial vs. parallel node) rather than to one having been handed a more
+    flattering potency.
+    """
+    arms = localized_pihs_scenarios(breed, debulking_fraction, location_penetration_multiplier)
+    model, css, seeding_rates, initial_burden, provenance = arms["debulked_trametinib"]
+    if not trametinib_active:
+        css = 0.0
+    k = len(model.growth)
+    scenarios = {}
+    for csf1r_max_kill in csf1r_max_kill_values:
+        if csf1r_max_kill > 0:
+            # clone 0 (drug-sensitive, receptor-dependent) gets the full kill; every resistant clone
+            # carries a downstream lesion and keeps only `downstream_escape_fraction` of it.
+            per_clone_max_kill = np.full(k, csf1r_max_kill * downstream_escape_fraction)
+            per_clone_max_kill[0] = csf1r_max_kill
+            combo = replace(model, ic50_nM_2=CSF1R_INHIBITOR_IC50_NM,
+                            max_kill_2=per_clone_max_kill)
+        else:
+            combo = model
+        scenarios[csf1r_max_kill] = (combo, css, seeding_rates, initial_burden,
+                                     {**provenance, "csf1r_max_kill": csf1r_max_kill,
+                                      "downstream_escape_fraction": downstream_escape_fraction,
+                                      "second_drug_topology": "pathway-serial (upstream receptor)"})
+    return scenarios
+
+
 VACCINE_CLONE_NAMES = CLONE_NAMES + ["immune_escape"]
 
 # Illustrative, not measured: no canine cancer vaccine trial exists to time this from.
