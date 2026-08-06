@@ -624,7 +624,14 @@ def run_monte_carlo_two_compartment(reference: ResistanceModel, css_reference: f
                                     exposure_scale: float = .3, seeding_rate_scale: float = .5,
                                     seed_fraction: float = 1e-8, detection_floor_fraction: float = .01,
                                     initial_burden: float = .3, css_reference_2: float | None = None,
-                                    exposure_scale_2: float = .3, seed: int = 7) -> TwoCompartmentOutcome:
+                                    exposure_scale_2: float = .3,
+                                    css_reference_2_duration_days: int | None = None,
+                                    vaccine_start_day: int | None = None,
+                                    vaccine_ramp_days: float = 21.0, vaccine_max_kill: float = 0.0,
+                                    immune_escape_seeding_rate: float = 0.0,
+                                    immune_escape_seed_fraction: float = 1e-8,
+                                    clone_names: list[str] = CLONE_NAMES,
+                                    seed: int = 7) -> TwoCompartmentOutcome:
     """A two-compartment extension of `run_monte_carlo` for a resectable primary tumor that may
     already have seeded regional (e.g. lymph node) disease before surgery -- unlike
     `run_monte_carlo`'s single-compartment model, which implicitly assumes debulking reaches
@@ -643,11 +650,44 @@ def run_monte_carlo_two_compartment(reference: ResistanceModel, css_reference: f
     Poisson process, since they are physically separate, independently-dividing cell populations
     after the point of metastatic seeding. Progression is judged on the combined (primary + nodal)
     burden, matching how relapse would actually be detected clinically.
+
+    `vaccine_start_day`, if given, adds the same time-gated ramping vaccine mechanism as
+    `run_monte_carlo_with_vaccine` (`reference` must then carry one extra clone, the last index,
+    treated as antigen-loss/immune-escape and excluded from the vaccine's kill term). The vaccine is
+    applied **identically to both compartments**, which is the mechanistically important asymmetry in
+    this scenario: `debulking_fraction` cannot reach the nodal compartment at all, but a systemic
+    immune mechanism can, so the compartment surgery misses is exactly where a persistent systemic
+    agent matters most. Immune escape is seeded per compartment from that compartment's own
+    antigen-positive cell-days, since the two are physically separate populations after metastatic
+    seeding -- the same reasoning already applied to drug-resistance seeding here.
+
+    `css_reference_2_duration_days` zeroes the second drug's exposure after that many days, matching
+    `run_monte_carlo` -- needed to model a cumulative-dose-capped cytotoxic (e.g. lomustine) rather
+    than chronic dosing.
+
+    All vaccine parameters default to off (`vaccine_start_day=None`, `vaccine_max_kill=0.0`), so every
+    existing caller keeps byte-identical behavior including RNG draw order.
     """
     rng = np.random.default_rng(seed)
     k = len(reference.growth)
     identity_model = replace(reference, mutation=np.eye(k))
     detection_floor = detection_floor_fraction * reference.carrying_capacity
+    vaccine_active = vaccine_start_day is not None
+    if vaccine_active:
+        immune_escape_index = k - 1
+        applicable_clones = np.ones(k)
+        applicable_clones[immune_escape_index] = 0.0
+        vaccine_kill = ramping_kill_schedule(horizon_days, vaccine_start_day, vaccine_ramp_days,
+                                            vaccine_max_kill, applicable_clones)
+        # immune escape is never pre-existing: no immune pressure exists yet to select for it.
+        mechanism_weights = np.concatenate([np.asarray(seeding_rates, dtype=float), [0.0]])
+        drug_clone_indices = range(1, immune_escape_index)
+        days_index = np.arange(horizon_days + 1)
+    else:
+        vaccine_kill = None
+        mechanism_weights = seeding_rates
+        drug_clone_indices = None
+        days_index = None
 
     primary_trajectories = np.zeros((trials, horizon_days + 1, k))
     nodal_trajectories = np.zeros((trials, horizon_days + 1, k))
@@ -664,9 +704,11 @@ def run_monte_carlo_two_compartment(reference: ResistanceModel, css_reference: f
         if css_reference_2 is not None:
             css_2 = css_reference_2 * rng.lognormal(0, exposure_scale_2)
             concentration_2 = np.full(horizon_days, css_2)
+            if css_reference_2_duration_days is not None:
+                concentration_2[css_reference_2_duration_days:] = 0.0
 
         pre_debulking_primary = sample_initial_state(rng, k, preexisting_prob,
-                                                      mechanism_weights=seeding_rates,
+                                                      mechanism_weights=mechanism_weights,
                                                       initial_burden=initial_burden)
         primary_initial = pre_debulking_primary * (1 - debulking_fraction)
         has_nodal = bool(rng.random() < nodal_involvement_prob)
@@ -680,8 +722,25 @@ def run_monte_carlo_two_compartment(reference: ResistanceModel, css_reference: f
             sensitive_trajectory = simulate_resistance(model, concentration, sensitive_only,
                                                         concentration_2=concentration_2)[:, 0]
             jittered_rates = seeding_rates * rng.lognormal(0, seeding_rate_scale, len(seeding_rates))
-            injections = poisson_mutation_injections(rng, sensitive_trajectory, jittered_rates, seed_fraction)
-            state = simulate_resistance(model, concentration, initial, injections, concentration_2)
+            injections = poisson_mutation_injections(rng, sensitive_trajectory, jittered_rates,
+                                                     seed_fraction,
+                                                     clone_indices=drug_clone_indices, k=k)
+            if vaccine_active:
+                # Provisional run to get this compartment's own antigen-positive cell-days, exactly
+                # as run_monte_carlo_with_vaccine does -- seeded per compartment because the two are
+                # separate populations after metastatic spread.
+                provisional = simulate_resistance(model, concentration, initial, injections,
+                                                  concentration_2, additional_kill=vaccine_kill)
+                antigen_positive = provisional[:, :immune_escape_index].sum(axis=1)
+                antigen_positive = np.where(days_index >= vaccine_start_day, antigen_positive, 0.0)
+                jittered_escape_rate = immune_escape_seeding_rate * rng.lognormal(
+                    0, seeding_rate_scale)
+                escape_injections = poisson_mutation_injections(
+                    rng, antigen_positive, np.array([jittered_escape_rate]),
+                    immune_escape_seed_fraction, clone_indices=[immune_escape_index], k=k)
+                injections = merge_injections(injections, escape_injections)
+            state = simulate_resistance(model, concentration, initial, injections, concentration_2,
+                                        additional_kill=vaccine_kill)
             compartment_states.append(state)
         primary_state, nodal_state = compartment_states
         primary_trajectories[trial] = primary_state
@@ -696,7 +755,7 @@ def run_monte_carlo_two_compartment(reference: ResistanceModel, css_reference: f
         if trial_progressed:
             time_to_progression[trial] = nadir_day + progression_days[0]
         combined_final = primary_state[-1] + nodal_state[-1]
-        dominant_mechanism.append(_dominant_mechanism(combined_final, trial_progressed))
+        dominant_mechanism.append(_dominant_mechanism(combined_final, trial_progressed, clone_names))
         if not trial_progressed:
             dominant_compartment.append("none")
         else:

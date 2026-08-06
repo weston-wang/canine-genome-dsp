@@ -1620,6 +1620,96 @@ vaccine trial exists for this disease, so nothing here says 0.06 is reachable, w
 question `pharmacology.py` had to ask about CDK4/6i and got a "no" for) and the antigen-loss rate — and
 on the oldest open premise in this repo: whether Corgi HS carries a PTPN11/KRAS hotspot at all.
 
+## The answer: one Corgi, durable response
+
+```bash
+canine-dsp corgi-answer-demo --out results/corgi-answer
+```
+
+Everything above was BMD-context or generic. This assembles all of it for the actual target: the
+Corgi pulmonary presentation, in a single dog. Two code upgrades were needed first, both because the
+Corgi arm literally could not express the answer:
+
+- **`run_monte_carlo_two_compartment` had no vaccine support** — so the Corgi arm of
+  `single-patient-demo` was trametinib monotherapy, repeating the exact omission corrected for BMD
+  one section earlier. It now takes the same time-gated ramping vaccine plus
+  `css_reference_2_duration_days`, applied **identically to both compartments**, and seeds immune
+  escape per compartment. Vaccine-off defaults are byte-identical to before (asserted in tests).
+- **`pulmonary_corgi_scenarios` is 4-clone**, which cannot carry an immune-escape clone at all.
+  `corgi_full_regimen_scenarios` is the 5-clone pulmonary equivalent of `vaccine_followon_scenarios`.
+
+**Why the compartment structure matters here and doesn't break the answer:** Sakai et al. report
+regional nodal involvement in many Corgi cases, so "debulking reaches everything" is false. But
+debulking is the *only* modality with a reach problem — the MEK inhibitor (full systemic exposure, no
+brain-barrier discount in the lung), lomustine, and the vaccine all reach the node. Surgery misses the
+compartment; the systemic mechanisms don't.
+
+**10-year durable response, Corgi pulmonary, two-compartment, trametinib + duration-capped lomustine
++ vaccine** (columns = nodal involvement probability):
+
+| vaccine `max_kill` | 0.0 | 0.2 | 0.4 | 0.6 |
+| --- | --- | --- | --- | --- |
+| *at `preexisting_prob` = 0.30* | | | | |
+| 0 | 0.700 | 0.725 | 0.675 | 0.700 |
+| 0.03 | 0.733 | 0.767 | 0.725 | 0.792 |
+| 0.05 | 0.983 | 0.992 | 0.983 | 0.983 |
+| **0.06** | **1.000** | **1.000** | **1.000** | **1.000** |
+| *at `preexisting_prob` = 0.62* | | | | |
+| 0 | 0.400 | 0.400 | 0.383 | 0.383 |
+| 0.03 | 0.475 | 0.467 | 0.442 | 0.500 |
+| 0.05 | 0.983 | 1.000 | 0.967 | 0.983 |
+| **0.06** | **1.000** | **1.000** | **1.000** | **1.000** |
+
+At threshold potency the result is flat 1.000 across **every** nodal-involvement rate, **both**
+`preexisting_prob` values, and all four horizons (1/2/5/10 yr), with zero nodal relapses and zero
+antigen-loss relapses. Sensitivity to `preexisting_prob` — the parameter no assay can measure — is
+0.292 with the vaccine off and 0.000 above threshold.
+
+### So: what's the answer?
+
+**Conditionally yes, and the condition is unusually clean.** *If* this dog's tumor is sequenced and
+carries a targetable MAPK hotspot, *and* a vaccine against that hotspot reaches ~0.06/day of kill,
+*then* the model gives a durable response robust to everything else — including undebulkable nodal
+disease and the pre-existing-resistance question that cannot be answered for this patient at all.
+Below that potency the answer is no, and no amount of drug optimization substitutes.
+
+What makes this a usable answer rather than a hedge is that the uncertainties partition cleanly for
+**one** dog:
+
+| Measurable in this dog | Not measurable in this dog |
+| --- | --- |
+| **Driver hotspot status** — clonal, ~25–50% VAF, far above every assay floor. *Never done in any Corgi.* | **Pre-existing resistant subclone** — ≤0.05% VAF, below every clinical assay; plus spatial sampling as a second wall |
+| **Nodal involvement** — staging/imaging at diagnosis | **Vaccine potency in this dog** — no canine vaccine trial exists for this disease |
+| **Burden and resectability** — imaging, surgical margins | **Antigen-loss rate** — unmeasured constant |
+
+The useful asymmetry: **the Corgi-specific risk (nodal disease) is resolvable for an individual
+patient even though its cohort rate was never published, while the generic risk (subclonal resistance)
+is unresolvable at any sequencing depth.** That's the opposite of how the population model treats
+them — and above threshold, the unresolvable one stops mattering.
+
+**The regimen the model supports**, in order: (1) resect/irradiate the primary — necessary but
+worthless alone, both untreated arms regrow in ~150–200 days; (2) **sequence the specimen** — the
+gate; (3) trametinib at full systemic exposure; (4) lomustine as an optional ~105-day bridge —
+insurance against an under-potent vaccine, near-redundant above threshold; (5) the hotspot vaccine —
+the only mechanism subject to neither the cytostatic ceiling nor a cumulative-dose cap while still
+covering every drug-resistance route.
+
+**The single point of failure, stated plainly.** Two unmeasured quantities carry the whole result, and
+they are different in kind:
+
+- The **driver hotspot** is measurable and simply has not been measured in any Corgi. That is a
+  tissue-and-funding problem, resolvable by sequencing one tumor, and it gates everything downstream.
+- **Vaccine potency** is not measurable in advance at all — and the analogous achievability question,
+  asked of a CDK4/6 inhibitor by `pharmacology.py`, came back **no**. Nothing here establishes 0.06/day
+  is reachable by a real canine vaccine. That is the load-bearing gap, and it is not the kind that more
+  modeling can close.
+
+So the defensible statement is: **this is a well-posed strategy with one clearly identified point of
+failure and one clearly identified cheap first experiment — not a predicted outcome.** The first
+experiment is to sequence a Corgi HS specimen. Against a real benchmark of 133-day median survival
+(Sakai et al., 19 Corgis), the upside if both conditions hold is large; the probability that both hold
+is unknown, and one of them has never been tested in any species for this antigen.
+
 ## Where this leaves things
 
 `canine_dsp.mapk_resistance` (the generic Monte Carlo/branching-process engine) and

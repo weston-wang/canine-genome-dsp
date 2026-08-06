@@ -773,6 +773,57 @@ def pulmonary_corgi_scenarios(cdk46_max_kill: float = 0.0, debulking_fraction: f
     return scenarios
 
 
+def corgi_full_regimen_scenarios(debulking_fraction: float = DEBULKING_FRACTION,
+                                 ccnu_max_kill: float = 0.0,
+                                 nodal_involvement_prob_values: list[float] = NODAL_INVOLVEMENT_PROB_SWEEP,
+                                 ) -> dict[float, tuple[ResistanceModel, float, np.ndarray, float, dict]]:
+    """The localized pulmonary Corgi scenario carried in a 5-clone (vaccine-capable) state vector.
+
+    Exists because `pulmonary_corgi_scenarios` is 4-clone and therefore cannot express a vaccine at
+    all -- which is how the Corgi arm of `single_patient_demo` came to be built as trametinib
+    monotherapy while the whole endurance case rests on the vaccine. This is the Corgi equivalent of
+    `vaccine_followon_scenarios`, built on the pulmonary (full systemic exposure, no brain-penetration
+    discount) preset rather than the CNS one, and intended for
+    `run_monte_carlo_two_compartment(vaccine_start_day=...)` so the nodal compartment surgery cannot
+    reach is still exposed to both the systemic drug and the systemic immune mechanism.
+
+    `ccnu_max_kill > 0` adds lomustine as the second drug (real activity in canine HS, cytotoxic, and
+    CNS/tissue-penetrant); pair it with `css_reference_2_duration_days=CCNU_EXPOSURE_DAYS` at the call
+    site so its real cumulative-dose cap is respected rather than modeling chronic dosing.
+
+    The 5th clone inherits `pathway_reactivation`'s drug susceptibility with
+    `IMMUNE_ESCAPE_GROWTH_PENALTY` applied, matching `vaccine_followon_scenarios` exactly -- the same
+    illustrative, labeled assumption, not a Corgi-specific measurement (none exists).
+    """
+    model, systemic_css, seeding_rates, base_provenance = dog_preset()
+    escape_growth = model.growth[1] * IMMUNE_ESCAPE_GROWTH_PENALTY
+    model5 = ResistanceModel(
+        growth=np.append(model.growth, escape_growth),
+        ic50_nM=np.append(model.ic50_nM, model.ic50_nM[1]),
+        max_kill=np.append(model.max_kill, model.max_kill[1]),
+        mutation=np.eye(len(model.growth) + 1),
+        hill=model.hill, carrying_capacity=model.carrying_capacity,
+    )
+    if ccnu_max_kill > 0:
+        model5 = replace(model5, ic50_nM_2=CCNU_MATCHED_IC50_NM, max_kill_2=ccnu_max_kill)
+    scenarios = {}
+    for nodal_involvement_prob in nodal_involvement_prob_values:
+        scenarios[nodal_involvement_prob] = (model5, systemic_css, seeding_rates, debulking_fraction, {
+            **base_provenance, "site": "localized pulmonary (Corgi), 5-clone vaccine-capable",
+            "debulking_fraction": debulking_fraction,
+            "nodal_involvement_prob": nodal_involvement_prob,
+            "nodal_seed_fraction": NODAL_SEED_FRACTION,
+            "ccnu_max_kill": ccnu_max_kill,
+            "second_drug": "lomustine (CCNU)" if ccnu_max_kill > 0 else None,
+            "second_drug_exposure_days": CCNU_EXPOSURE_DAYS if ccnu_max_kill > 0 else None,
+            "vaccine_start_day": VACCINE_START_DAY, "vaccine_ramp_days": VACCINE_RAMP_DAYS,
+            "immune_escape_seeding_rate": IMMUNE_ESCAPE_SEEDING_RATE,
+            "immune_escape_growth_penalty": IMMUNE_ESCAPE_GROWTH_PENALTY,
+            "case_series": PULMONARY_CORGI_CASE_SERIES,
+        })
+    return scenarios
+
+
 def dog_preset() -> tuple[ResistanceModel, float, np.ndarray, dict]:
     """Cobimetinib vs. canine PTPN11/KRAS-mutant HS; sensitive-clone IC50 and Cmax are real.
 
