@@ -1385,6 +1385,87 @@ The corrected, complete statement of what N=1 sequencing buys, by breed:
 | Matched natural-history benchmark | Skorupski 2009, 568-day median survival | Sakai 2015, 133-day median survival |
 | Structural model | Single-compartment (debulking reaches all disease) | Two-compartment (regional nodal spread documented) |
 
+### The half of the argument this repo had been using in only one direction
+
+`_PREEXISTING_PROB_CENTRAL`'s comment rejects the human melanoma COMBI-d/v trial as a recentering
+basis, and one of its stated reasons is mutational burden: *"melanoma has an unusually high,
+UV-mutagenesis-driven tumor mutational burden, so whatever rate of pre-existing resistant clones it
+implies is not evidence about a UV-unrelated canine sarcoma's clonal heterogeneity."* That reasoning
+was only ever used **defensively** — to block a pessimistic recalibration — and never applied in its
+positive form. Both scenario modules still ship the identical `_SEEDING_RATE_TOTAL = 0.012`, meaning
+the model as written assumes HS is exactly as mutable as hemangiosarcoma.
+
+**The argument is a *rate* argument, not a *count* argument, and conflating those is a mistake made
+in this project's own discussion.** It does **not** claim a lineage-restricted tumor has fewer
+distinct escape mechanisms — nothing here changes the clone count, and an RTK-driven tumor hit with
+an RTK inhibitor generally accumulates a *rich* catalog of resistance routes. It claims that the rate
+at which each route gets populated scales with the tumor's mutation rate. In this engine those are
+exactly two parameters: `seeding_rates` and `preexisting_prob`.
+
+```bash
+canine-dsp mutational-supply-demo --breed bmd --out results/mutational-supply
+```
+
+`scale_preexisting_prob` gets the functional form right, which matters: `preexisting_prob` is a
+saturating probability ("at least one clone exists"), not a rate, so it scales as
+`p' = 1 − (1−p)^r`, not linearly. Linear scaling would understate the benefit at small `p` and
+overstate it near `p = 1`, where the reference tumor is already saturated and cutting supply can't
+help. Seeding rates *are* rates and do scale linearly.
+
+| HS burden vs. a high-burden comparator | `preexisting_prob` | durable response (MC) | analytic `1−p` |
+| --- | --- | --- | --- |
+| 1.0 — **status quo, as shipped** | 0.300 | 0.700 | 0.700 |
+| 0.5 | 0.163 | 0.837 | 0.837 |
+| 0.25 | 0.085 | **0.917** | 0.915 |
+| 0.1 | 0.035 | 0.960 | 0.965 |
+
+So yes — the derivation holds, and it's large: ~70% → ~92% durable response at a fourfold lower
+burden. The analytic shortcut tracks the simulation within half a point, but only because the two N=1
+arms are saturated (0.997 vs 0.000); that's asserted against the engine rather than assumed, since it
+would fail in a regime where the arms sat closer together.
+
+**The decomposition is the actual finding, and it narrows the argument.** Scaling each parameter
+separately at 0.25× burden:
+
+| arm | durable response | Δ |
+| --- | --- | --- |
+| baseline | 0.700 | — |
+| acquired seeding rate scaled only | 0.703 | **+0.003** |
+| `preexisting_prob` scaled only | 0.910 | **+0.210** |
+| both | 0.917 | +0.217 |
+
+Essentially all of it runs through pre-existing resistance; the acquired-mutation-rate half — the way
+the argument is usually stated — contributes ~0.3 of a point. Two saturation effects explain it: the
+no-subclone arm is already ~99.7% durable so a lower acquired rate has nothing left to improve, and
+the with-subclone arm is lost to lomustine's 105-day duration cap regardless of any mutation rate.
+**What matters is whether a resistant clone is already there at treatment start, not the rate at
+which new ones arise** — which is an uncomfortable landing, because that's precisely the parameter
+the detection-floor analysis above showed no assay can measure.
+
+**Empirically: partly confirmed, and not for HS.** Real pan-canine TMB data now exists
+([Alsaihati et al. 2021, *Nat Commun* 12:4670](https://www.nature.com/articles/s41467-021-24836-9);
+684 cases, >7 tumor types, >35 breeds) and it does three things:
+
+- **Confirms the defensive half in dogs** rather than by analogy to human UV biology: canine oral
+  melanoma really is high-burden (median ≥1 mut/Mb). The melanoma comparator's rejection now has
+  dog-specific support.
+- **Revises an earlier conclusion of this repo.** The HS-vs-HSA check concluded their differing
+  outcomes trace to calibration rather than biology. That was right about mechanism *counts* and
+  incomplete about *rates* — canine hemangiosarcoma is measured high-burden, so HSA's more
+  pessimistic calibration may be biologically justified rather than arbitrary.
+- **Does not measure histiocytic sarcoma.** HS is absent from that cohort, and the only canine HS
+  exome study found ([Tani et al. 2023](https://pmc.ncbi.nlm.nih.gov/articles/PMC10212919/), n=5)
+  reports 35 Sanger-validated mutations with no mutations/Mb figure. The ratio the whole argument
+  turns on is unmeasured, which is why it's swept rather than asserted, and why neither
+  `_SEEDING_RATE_TOTAL` nor `_PREEXISTING_PROB_CENTRAL` was changed.
+
+**One number must not travel with it.** `refuse_bmd_benchmark_transfer` records this explicitly: the
+Skorupski inversion implying `p ≈ 0.62` is BMD-context, breed-unstratified and mixed-treatment. If
+the low-burden argument holds for Corgi HS, carrying 0.62 over would be the same breed/stratification
+mismatch `driver_conditioned_arms` was rewritten to refuse — running in the *pessimistic* direction,
+which is exactly why it was easy to miss. A correction that makes a model look worse still has to be
+scoped correctly.
+
 ## Where this leaves things
 
 `canine_dsp.mapk_resistance` (the generic Monte Carlo/branching-process engine) and
@@ -1955,6 +2036,9 @@ about named, individually-checkable inputs (cytostatic ceiling, Emax/Hill satura
 cumulative-dose duration caps) rather than an unexaminable constant; `single_patient.py` reframes the
 population Monte Carlo as an N=1 problem, quantifying what tumor sequencing can and cannot resolve
 (assay detection floors, spatial sampling, driver conditioning) and splitting an existing ensemble
-into the patient types its cohort average hides. Both pair with `*_cli.py` demo modules following the
-same split. `tests/` contains deterministic unit tests. `data/` stores only provenance documentation
+into the patient types its cohort average hides; `mutational_supply.py` scales the engine's two
+mutation-supply parameters (`seeding_rates`, `preexisting_prob`) by a tumor-mutational-burden ratio,
+turning "a low-burden tumor should endure better" from a stated intuition into a swept, checkable
+transformation with the real canine TMB data attached. Each pairs with a `*_cli.py` demo module
+following the same split. `tests/` contains deterministic unit tests. `data/` stores only provenance documentation
 in Git.

@@ -38,6 +38,7 @@ from .mapk_cli import (
 )
 from .mapk_scenarios import DEBULKING_FRACTION
 from .mapk_scenarios import _PREEXISTING_PROB_CENTRAL as MAPK_PREEXISTING_PROB_CENTRAL
+from .mutational_supply_cli import mutational_supply_demo
 from .pharmacology_cli import cdk46_achievability_demo
 from .signals import eiip, variant_density, windowed_gc
 from .single_patient_cli import single_patient_demo
@@ -235,6 +236,17 @@ def main() -> None:
     cdk46_feas.add_argument("--target-max-kill", type=float, default=0.08)
     cdk46_feas.add_argument("--location-penetration-multiplier", type=float, default=1.0)
     cdk46_feas.add_argument("--out", type=Path, required=True)
+    mut_supply = sub.add_parser("mutational-supply-demo",
+                                help="does a low-mutation-burden tumor endure better in this model, "
+                                     "and which parameter actually carries the effect?")
+    mut_supply.add_argument("--breed", choices=["bmd", "flat_coated_retriever"], default="bmd")
+    mut_supply.add_argument("--debulking-fraction", type=float, default=DEBULKING_FRACTION)
+    mut_supply.add_argument("--ccnu-max-kill", type=float, default=0.08)
+    mut_supply.add_argument("--horizon-days", type=int, default=730)
+    mut_supply.add_argument("--trials", type=int, default=400)
+    mut_supply.add_argument("--preexisting-prob", type=float, default=0.30)
+    mut_supply.add_argument("--seed", type=int, default=7)
+    mut_supply.add_argument("--out", type=Path, required=True)
     single_patient = sub.add_parser("single-patient-demo",
                                     help="N=1 reframing: what sequencing one dog's tumor resolves, "
                                          "plus lomustine (real, cytotoxic, CNS-penetrant) as the "
@@ -419,6 +431,9 @@ def main() -> None:
     elif args.command == "cdk46-achievability-demo":
         cdk46_achievability_demo(args.out, args.breed, target_max_kill=args.target_max_kill,
                                  location_penetration_multiplier=args.location_penetration_multiplier)
+    elif args.command == "mutational-supply-demo":
+        mutational_supply_demo(args.out, args.breed, args.debulking_fraction, args.ccnu_max_kill,
+                               args.horizon_days, args.trials, args.preexisting_prob, args.seed)
     elif args.command == "single-patient-demo":
         single_patient_demo(args.out, args.breed, args.debulking_fraction, args.horizon_days,
                             args.trials, args.preexisting_prob, args.seed)
