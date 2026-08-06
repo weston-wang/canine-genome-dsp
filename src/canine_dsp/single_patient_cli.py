@@ -7,8 +7,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from .mapk_resistance import clone_growth_margins, run_monte_carlo
+from .mapk_resistance import clone_growth_margins, run_monte_carlo, run_monte_carlo_two_compartment
 from .mapk_scenarios import (
+    _PULMONARY_BASELINE_BURDEN,
     CCNU_CYCLE_INTERVAL_DAYS,
     CCNU_DOSE_MG_PER_M2,
     CCNU_EXPOSURE_DAYS,
@@ -16,8 +17,11 @@ from .mapk_scenarios import (
     CCNU_MAX_KILL_SWEEP,
     CDK46_ILLUSTRATIVE_CSS_NM,
     DEBULKING_FRACTION,
+    NODAL_INVOLVEMENT_PROB_SWEEP,
+    NODAL_SEED_FRACTION,
     ccnu_combination_scenarios,
     combination_scenarios,
+    pulmonary_corgi_scenarios,
 )
 from .pharmacology import (
     CCNU_CANINE_HS,
@@ -27,12 +31,14 @@ from .pharmacology import (
 )
 from .single_patient import (
     CANINE_HS_DRIVER_FREQUENCY,
+    CORGI_PULMONARY_HS_BENCHMARK,
     LOCALIZED_HS_CCNU_BENCHMARK,
     SEQUENCING_ASSAYS,
     driver_conditioned_arms,
     genome_equivalents_required,
     implied_preexisting_prob,
     partition_by_preexisting_subclone,
+    partition_two_compartment_by_preexisting_subclone,
     posterior_preexisting_prob,
     spatial_detection_probability,
     vaf_lod_to_cell_fraction,
@@ -51,7 +57,9 @@ def single_patient_demo(out: Path, breed: str = "bmd",
                         preexisting_prob: float = 0.30, seed: int = 7) -> None:
     """Re-asks this repo's central question as an N=1 question, and swaps in a cytotoxic partner.
 
-    Four analyses, in order of how much they change the answer:
+    Five analyses, in order of how much they change the answer. `breed` (must be 'bmd' or
+    'golden_retriever') governs findings 1-4 only -- see finding 5 for why a Corgi patient is
+    handled as a separate scenario rather than a value of this parameter.
 
       1. DRIVER CONDITIONING -- the largest effect. Only ~46% of BMD histiocytic sarcomas carry an
          identified MAPK-activating lesion, and the population model implicitly assumes 100%. A
@@ -64,11 +72,25 @@ def single_patient_demo(out: Path, breed: str = "bmd",
          it averages over, then re-runs it with lomustine (real, cytotoxic, CNS-penetrant,
          duration-capped) in place of the CDK4/6 inhibitor that the cytostatic ceiling ruled out,
          and compares against a genuinely matched canine benchmark.
+      5. THE CORGI CASE -- findings 1-4 are BMD-context end to end (driver frequency, tumor
+         scenario, calibration benchmark). Reusing them for a Corgi patient would repeat the same
+         species/lineage-mismatch error this session already caught with canine-melanoma CDK4/6i
+         potency data standing in for canine-HS potency. This runs the actual Corgi pulmonary
+         two-compartment scenario against the actual Corgi-matched benchmark instead.
     """
+    if breed not in ("bmd", "flat_coated_retriever"):
+        raise ValueError(
+            f"breed={breed!r} is not one of this repo's tumor-scenario presets ('bmd', "
+            "'flat_coated_retriever' -- see localized_pihs_scenarios/combination_scenarios). A "
+            "Corgi patient is NOT covered by this arm at all: see finding_5_corgi_is_a_different_"
+            "disease_not_a_different_breed_name below, which runs the actual Corgi pulmonary "
+            "two-compartment scenario against the actual Corgi-matched benchmark instead of "
+            "reusing this arm's numbers.")
     out.mkdir(parents=True, exist_ok=True)
 
     # 1. Driver conditioning ------------------------------------------------------------------
-    driver = driver_conditioned_arms()
+    driver = driver_conditioned_arms(breed=breed)
+    driver_corgi = driver_conditioned_arms(breed="corgi")
 
     # 2. What a negative sequencing result buys -----------------------------------------------
     assay_rows = []
@@ -190,6 +212,35 @@ def single_patient_demo(out: Path, breed: str = "bmd",
     right.legend(fontsize=8); right.grid(alpha=.3, axis="y")
     fig.tight_layout(); fig.savefig(out / "single_patient.png", dpi=160); plt.close(fig)
 
+    # 5. The actual Corgi case: a different scenario against a different, breed-matched benchmark --
+    # Everything above (findings 1-4) models BMD localized PIHS. Applying its numbers to a Corgi
+    # patient would repeat exactly the kind of breed/lineage mismatch the pharmacology-vs-melanoma
+    # objection already caught once this session -- so this runs the real Corgi-specific scenario
+    # (`pulmonary_corgi_scenarios`, the two-compartment nodal model) instead of reusing the BMD arm.
+    corgi_rows = []
+    for nodal_prob in NODAL_INVOLVEMENT_PROB_SWEEP:
+        model, corgi_css, corgi_rates, corgi_debulk, _ = pulmonary_corgi_scenarios(
+            cdk46_max_kill=0.0, debulking_fraction=debulking_fraction,
+            nodal_involvement_prob_values=[nodal_prob])[nodal_prob]
+        corgi_outcome = run_monte_carlo_two_compartment(
+            model, corgi_css, horizon_days, corgi_rates, nodal_involvement_prob=nodal_prob,
+            nodal_seed_fraction=NODAL_SEED_FRACTION, debulking_fraction=corgi_debulk, trials=trials,
+            preexisting_prob=preexisting_prob, initial_burden=_PULMONARY_BASELINE_BURDEN, seed=seed)
+        corgi_partition = partition_two_compartment_by_preexisting_subclone(corgi_outcome)
+        corgi_rows.append({
+            "nodal_involvement_prob": nodal_prob,
+            "probability_durable_response": float(1 - corgi_outcome.progressed.mean()),
+            "durable_without_preexisting_subclone":
+                corgi_partition["without_preexisting_subclone"]["durable_response_fraction"],
+            "durable_with_preexisting_subclone":
+                corgi_partition["with_preexisting_subclone"]["durable_response_fraction"],
+            "median_days_to_progression": (
+                float(np.nanmedian(corgi_outcome.time_to_progression))
+                if corgi_outcome.progressed.any() else None),
+        })
+    corgi_df = pd.DataFrame(corgi_rows)
+    corgi_df.to_csv(out / "corgi_pulmonary_arm.csv", index=False)
+
     best_capped = capped.loc[capped["probability_durable_response"].idxmax()]
     # The matched benchmark is admissible on all four axes, so inverting the mixture against it is a
     # legitimate calibration inference rather than the kind of mismatched comparison this repo
@@ -210,15 +261,33 @@ def single_patient_demo(out: Path, breed: str = "bmd",
                  "partner than a CDK4/6 inhibitor -- real activity in this exact disease and "
                  "species, cytotoxic so the ceiling does not bind, CNS-penetrant -- but it trades "
                  "the ceiling for a hard duration cap, and the model says the cap is what now "
-                 "limits durability.",
+                 "limits durability. All of that (findings 1-4) is scoped to BMD, the breed every "
+                 "input here comes from. Finding 5 checks whether it transfers to a Corgi patient "
+                 "and finds it does not: Corgi HS is a separately-published, worse-prognosis, "
+                 "structurally different presentation (regional nodal spread, no measured driver "
+                 "frequency at all), modeled here with its own real scenario and benchmark rather "
+                 "than by discounting the BMD numbers.",
         "finding_1_driver_conditioning_dominates": {
+            "for_breed": breed,
             **driver,
-            "why_it_is_the_biggest_lever": "This model has always assumed the MEK inhibitor engages "
-                f"a real driver. In the published canine HS cohort that holds for "
-                f"{driver['probability_mapk_driver_identified']:.0%} of BMD cases. Sequencing "
+            "why_it_is_the_biggest_lever": (
+                "This model has always assumed the MEK inhibitor engages a real driver. In the "
+                f"published canine HS cohort that holds for "
+                f"{driver['probability_mapk_driver_identified']:.0%} of {breed} cases. Sequencing "
                 "converts that from an unexamined premise into a measured fact, and it is the only "
-                "measurement here that changes the treatment plan rather than the error bars.",
+                "measurement here that changes the treatment plan rather than the error bars."
+            ) if driver["probability_mapk_driver_identified"] is not None else (
+                f"No published canine HS driver-frequency sequencing exists for {breed!r} either "
+                "-- it has its own real GWAS germline locus (BREED_GERMLINE_LOCI in mapk_scenarios) "
+                "but no Takada-et-al.-style driver-mutation cohort. This tumor scenario still "
+                "silently assumes the BMD PTPN11/KRAS-dominated spectrum applies (see "
+                "localized_pihs_scenarios), same open premise as breed='bmd' but with even less "
+                "specific evidence behind it."
+            ),
             "source": CANINE_HS_DRIVER_FREQUENCY,
+            "does_not_apply_to_corgi": "This finding is specific to the breed named in 'for_breed' "
+                "above. See finding_5 for what driver conditioning looks like for a Corgi, which is "
+                "a separately-modeled scenario, not a discount on this one.",
         },
         "finding_2_sequencing_cannot_see_preexisting_resistance": {
             "principle": "The resistance engine draws the pre-existing resistant fraction from "
@@ -314,6 +383,43 @@ def single_patient_demo(out: Path, breed: str = "bmd",
                 "retrospective series of 16 dogs and the timing could have several other causes -- "
                 "it is a coincidence worth noting, not evidence.",
         },
+        "finding_5_corgi_is_a_different_disease_not_a_different_breed_name": {
+            "why_this_section_exists": "Findings 1-4 model BMD localized PIHS end to end -- the "
+                "driver-frequency data (Takada 2019), the tumor scenario (`localized_pihs_"
+                "scenarios`), and the calibration benchmark (Skorupski 2009) are all BMD-context. "
+                "Corgi HS is a clinically distinct, separately-published presentation (Sakai et al. "
+                "2015) with regional nodal involvement in many cases and a 133-day median survival "
+                "-- roughly a quarter of the BMD-context benchmark's 568 days. Reusing findings 1-4 "
+                "for a Corgi patient would be the same category of mistake this session already "
+                "caught once (treating canine melanoma IC50 data as informative about canine HS "
+                "potency): a real, cited number applied across an unverified species/lineage-"
+                "equivalent boundary.",
+            "driver_conditioning_for_corgi": driver_corgi,
+            "scenario_used": "pulmonary_corgi_scenarios / run_monte_carlo_two_compartment -- the "
+                "two-compartment nodal model already built for this presentation, not the single-"
+                "compartment BMD PIHS model findings 1-4 use. Trametinib monotherapy, full systemic "
+                "exposure (no CNS brain-penetration discount, since this is the pulmonary "
+                "presentation), swept over NODAL_INVOLVEMENT_PROB_SWEEP since no nodal rate was "
+                "published.",
+            "sweep": corgi_rows,
+            "cdk46_or_ccnu_not_added_here": "Deliberately not layered onto this arm: doing so would "
+                "imply the CDK4/6i-achievability and lomustine-duration findings (derived from BMD-"
+                "context growth rates and CDK46_CANINE_POTENCY, itself from canine melanoma lines) "
+                "transfer to the Corgi tumor model, which is exactly the unverified cross-lineage "
+                "step this finding exists to avoid taking silently.",
+            "matched_benchmark": CORGI_PULMONARY_HS_BENCHMARK,
+            "why_no_calibration_inversion_here": "`implied_preexisting_prob` is not applied against "
+                "this benchmark the way it was against Skorupski for the BMD arm: Sakai's cohort "
+                "received mixed/unspecified treatment, not one systemic agent, so its outcome is "
+                "not attributable to a comparable regimen the way the CCNU-specific benchmark's is. "
+                "It is a scale check, not an estimator.",
+            "verdict": "The honest N=1 statement for a Corgi patient is not 'apply findings 1-4 with "
+                "a discount' -- it is that this repo's own best-evidenced Corgi-specific model "
+                "predicts a materially different disease course, its driver is undetermined rather "
+                "than known-at-46%, and no drug-specific finding above (CDK4/6i ceiling, lomustine "
+                "duration cap) has been checked against Corgi-specific growth rates or potency data, "
+                "because none exist.",
+        },
         "synthesis_the_two_candidates_fail_on_opposite_axes": {
             "requirement": "Reversing this model's resistant clones needs two things at once: a "
                           "kill rate at or above their growth rates, AND that kill rate sustained "
@@ -356,8 +462,12 @@ def single_patient_demo(out: Path, breed: str = "bmd",
             "the pre-existing-fraction prior 10^U(-6,-3) is the resistance engine's own convention. "
             "Findings 2 and 3 are statements about detectability *given that prior*; a different "
             "prior would move them, and nothing here independently validates it",
-            "driver frequencies are from 96 Bernese mountain dogs, and no Corgi-specific or "
-            "anatomic-site-stratified canine HS sequencing cohort exists",
+            "the Corgi arm's own scenario (pulmonary_corgi_scenarios) still reuses the BMD growth-"
+            "rate/resistance-mechanism spectrum unchanged, per that function's own documented "
+            "reasoning: no Corgi-specific germline locus or driver panel is established enough to "
+            "justify inventing a different one from nothing. Finding 5 answers 'does the disease "
+            "course differ', not 'does the underlying resistance biology differ' -- the latter "
+            "remains open",
         ],
         "warning": "This reframes an illustrative model as an individual-patient question. It does "
                   "not establish that any regimen works in this disease, and no part of it is a "

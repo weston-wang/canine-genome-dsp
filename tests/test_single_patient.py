@@ -5,6 +5,7 @@ from canine_dsp.mapk_resistance import MonteCarloOutcome
 from canine_dsp.pharmacology import CCNU_CANINE_HS, CYTOTOXIC, cumulative_dose_limited_days
 from canine_dsp.single_patient import (
     CANINE_HS_DRIVER_FREQUENCY,
+    CORGI_PULMONARY_HS_BENCHMARK,
     LOCALIZED_HS_CCNU_BENCHMARK,
     SEQUENCING_ASSAYS,
     detectable_prior_mass,
@@ -12,6 +13,7 @@ from canine_dsp.single_patient import (
     genome_equivalents_required,
     implied_preexisting_prob,
     partition_by_preexisting_subclone,
+    partition_two_compartment_by_preexisting_subclone,
     posterior_preexisting_prob,
     spatial_detection_probability,
     vaf_lod_to_cell_fraction,
@@ -103,13 +105,35 @@ def test_driver_conditioning_reports_the_real_cohort_split_not_a_certainty():
     """The model has always assumed the MEK inhibitor engages a driver. Real canine HS sequencing
     says that holds for well under two thirds of BMD cases, and this must surface as a two-arm
     conditioning rather than a discount factor on one arm."""
-    arms = driver_conditioned_arms()
+    arms = driver_conditioned_arms(breed="bmd")
     assert arms["probability_mapk_driver_identified"] == pytest.approx(44 / 96)
     assert arms["probability_mapk_driver_identified"] < 0.5
     assert (arms["probability_mapk_driver_identified"]
             + arms["probability_no_mapk_driver_identified"]) == pytest.approx(1.0)
     bmd = CANINE_HS_DRIVER_FREQUENCY["bmd"]
     assert bmd["PTPN11"] + bmd["KRAS"] == pytest.approx(44 / 96)
+
+
+def test_driver_conditioning_refuses_to_apply_bmd_frequency_to_a_corgi():
+    """The regression this test guards against is a real mistake this module made once: presenting
+    BMD driver frequency as though it were generically informative for 'one sequenced dog'. Corgi
+    HS is a separately-published, clinically distinct presentation with zero sequenced cases, so
+    breed='corgi' must return an explicit unknown rather than a borrowed number."""
+    corgi = driver_conditioned_arms(breed="corgi")
+    assert corgi["probability_mapk_driver_identified"] is None
+    assert "no published canine HS driver sequencing exists" in corgi["source"]
+    assert "category error" in corgi["do_not_borrow_bmd_frequency"]
+    # flat-coated retriever is a real tumor-scenario preset elsewhere in this repo (its own GWAS
+    # germline locus) but was never in Takada et al.'s sequenced cohort either -- this must return
+    # the same "no data" branch as corgi, generically, not raise or silently borrow BMD's number.
+    flat_coated = driver_conditioned_arms(breed="flat_coated_retriever")
+    assert flat_coated["probability_mapk_driver_identified"] is None
+
+
+def test_driver_conditioning_golden_retriever_uses_its_own_smaller_cohort():
+    arms = driver_conditioned_arms(breed="golden_retriever")
+    assert arms["probability_mapk_driver_identified"] == pytest.approx(3 / 13)
+    assert arms["cohort_n"] == 13
 
 
 def _fake_outcome(initial_states, progressed, ttp):
@@ -173,6 +197,56 @@ def test_the_matched_benchmark_declares_both_its_matches_and_its_mismatches():
     assert LOCALIZED_HS_CCNU_BENCHMARK["mismatches_on"]
     assert LOCALIZED_HS_CCNU_BENCHMARK["n_dogs"] == 16
     assert LOCALIZED_HS_CCNU_BENCHMARK["relapse_free_fraction"] == pytest.approx(6 / 16)
+
+
+def test_corgi_benchmark_is_breed_matched_and_tells_a_materially_worse_story():
+    """The BMD-context benchmark is explicitly flagged as breed-UNRESOLVED. This one is the only
+    breed-matched comparator in the module, and its outcome must not be quietly similar to the BMD
+    one -- if it were, there would be no finding here at all."""
+    assert CORGI_PULMONARY_HS_BENCHMARK["breed"] == "Pembroke Welsh Corgi (all 19)"
+    assert CORGI_PULMONARY_HS_BENCHMARK["n_dogs"] == 19
+    assert CORGI_PULMONARY_HS_BENCHMARK["median_survival_days"] == 133
+    assert (CORGI_PULMONARY_HS_BENCHMARK["median_survival_days"]
+            < LOCALIZED_HS_CCNU_BENCHMARK["median_survival_days"] / 2)
+    assert "unresolved on breed" in LOCALIZED_HS_CCNU_BENCHMARK["caveat"].lower()
+    assert CORGI_PULMONARY_HS_BENCHMARK["mismatches_on"]
+
+
+def test_two_compartment_partition_reads_the_primary_compartments_day0_state():
+    """`run_monte_carlo_two_compartment` returns a differently-shaped outcome than `run_monte_carlo`
+    (primary/nodal trajectories instead of one array), so this needs its own adapter rather than
+    silently reusing `partition_by_preexisting_subclone`, which would crash on the missing
+    `.trajectories` attribute rather than mis-reading data -- but the adapter's *logic* must still
+    match: same split, same interpretation."""
+    from canine_dsp.mapk_resistance import TwoCompartmentOutcome
+
+    primary = np.array([[0.3, 0.0, 0.0, 0.0],
+                        [0.3, 0.0, 0.0, 0.0],
+                        [0.3, 1e-5, 0.0, 0.0]])
+    trajectories = np.zeros((3, 2, 4))
+    trajectories[:, 0, :] = primary
+    outcome = TwoCompartmentOutcome(
+        primary_trajectories=trajectories, nodal_trajectories=np.zeros_like(trajectories),
+        has_nodal_involvement=np.array([False, False, True]),
+        progressed=np.array([False, False, True]),
+        time_to_progression=np.array([np.nan, np.nan, 150.0]),
+        dominant_mechanism=["x"] * 3, dominant_compartment=["none", "none", "primary"])
+    report = partition_two_compartment_by_preexisting_subclone(outcome)
+    assert report["without_preexisting_subclone"]["durable_response_fraction"] == pytest.approx(1.0)
+    assert report["with_preexisting_subclone"]["durable_response_fraction"] == pytest.approx(0.0)
+    assert report["with_preexisting_subclone"]["n_trials"] == 1
+
+
+def test_single_patient_demo_refuses_to_run_the_bmd_arm_for_a_corgi():
+    """The regression this guards: findings 1-4 are BMD-context tumor-scenario code
+    (`combination_scenarios`, `ccnu_combination_scenarios`) reused unchanged. Silently accepting
+    breed='corgi' here would run the BMD tumor model and merely mislabel its output, which is worse
+    than refusing -- a wrong number with the right label looks validated."""
+    from pathlib import Path
+
+    from canine_dsp.single_patient_cli import single_patient_demo
+    with pytest.raises(ValueError, match="finding_5"):
+        single_patient_demo(Path("/tmp/should-not-be-created"), breed="corgi")
 
 
 def test_lomustine_is_cytotoxic_so_the_cytostatic_ceiling_does_not_bind():

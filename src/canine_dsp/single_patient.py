@@ -116,6 +116,13 @@ CANINE_HS_DRIVER_FREQUENCY = {
     "note": "PTPN11 and KRAS were counted as mutually exclusive in this cohort's reporting, so the "
            "union is taken as their sum. The complement is not 'no driver' -- it is 'no driver "
            "identified by this panel', which is a weaker and more honest statement.",
+    "breed_scope": "Bernese mountain dog and golden retriever ONLY. Zero Corgis have ever been "
+                  "sequenced for canine HS drivers. Applying 44/96 to a Corgi patient is not a "
+                  "cautious extrapolation, it is a category error this module must not make "
+                  "silently: `histiocytic_origin.py` exists specifically because Corgi PIHS/"
+                  "pulmonary HS is a clinically distinct presentation (see CORGI_PULMONARY_HS_"
+                  "BENCHMARK below) with its own untested candidate-driver panel, not a BMD tumor "
+                  "in a different breed's body. See `driver_conditioned_arms(breed=...)`.",
 }
 
 # The matched comparator this repo did not previously have. Unlike COMBI-d/v (rejected in
@@ -141,7 +148,40 @@ LOCALIZED_HS_CCNU_BENCHMARK = {
     "caveat": "n=16, single-arm, retrospective. Useful as a scale check on whether a model's "
              "durable-response fraction is plausible for debulked localized canine HS; not a "
              "calibration target, and explicitly not a target for this repo's drug-specific "
-             "parameters.",
+             "parameters. Breed composition was not reported -- HS in the referral-hospital "
+             "population this drew from skews toward BMD/flat-coated retriever/rottweiler, not "
+             "Corgi, so treat this as matched on species/disease/structure but UNRESOLVED on "
+             "breed, same as CANINE_HS_DRIVER_FREQUENCY.",
+}
+
+# The genuinely breed-matched comparator for a Corgi patient -- and it tells a materially
+# different, worse story than LOCALIZED_HS_CCNU_BENCHMARK above, which is why the two must never
+# be conflated. This is the same case series `pulmonary_corgi_scenarios` in mapk_scenarios.py
+# already models: unlike Skorupski's cohort, this one reports regional nodal involvement in many
+# cases, meaning debulking cannot be assumed to reach all disease (a structural mismatch, not just
+# a numeric one) and survival is roughly a quarter as long.
+CORGI_PULMONARY_HS_BENCHMARK = {
+    "citation": "Sakai et al. 2015, J Vet Med Sci 77(12):1667-1670, PMID 26155931 -- localized "
+               "pulmonary histiocytic sarcoma in Pembroke Welsh Corgis",
+    "n_dogs": 19,
+    "breed": "Pembroke Welsh Corgi (all 19)",
+    "median_survival_days": 133,
+    "nodal_involvement": "reported in many cases, no precise rate published",
+    "prognostic_factors_significant": "none reached statistical significance (including surgical "
+                                      "resection status) -- likely underpowered, not evidence "
+                                      "those factors don't matter",
+    "matches_on": ["species: dog", "breed: Corgi", "disease: histiocytic sarcoma",
+                  "anatomic presentation: primary lung"],
+    "mismatches_on": ["treatment: mixed/unspecified across the cohort, not a single systemic "
+                     "agent -- so this cannot isolate a drug effect the way the CCNU benchmark can",
+                     "structure: regional nodal involvement in many cases means the debulking-"
+                     "reaches-everything premise this repo's single-compartment scenarios lean on "
+                     "does not hold here -- see run_monte_carlo_two_compartment"],
+    "caveat": "n=19, retrospective, no molecular data (driver status unknown in every dog). This "
+             "is the ONLY benchmark in this repo that is breed-matched to Corgi HS, and its "
+             "133-day median survival -- versus 568 days in the BMD-context CCNU benchmark above "
+             "-- is the clearest available evidence that Corgi HS should not be assumed to behave "
+             "like BMD HS with the breed name swapped.",
 }
 
 
@@ -282,22 +322,68 @@ def spatial_detection_probability(subclone_cell_fraction: float, tumor_cells: fl
     }
 
 
-def driver_conditioned_arms(driver_frequency: dict = CANINE_HS_DRIVER_FREQUENCY) -> dict:
+#  Breeds Takada et al. 2019 actually sequenced -- the only ones with a real driver-frequency base
+# rate. Every other breed string (flat_coated_retriever's own real data is a GWAS germline locus,
+# a different thing entirely; corgi has no published HS driver sequencing at all; anything else is
+# simply unmeasured) gets the explicit "no data" branch below, generically -- not a Corgi special
+# case, since the flat-coated-retriever tumor-scenario preset makes exactly the same mistake
+# possible if this were hardcoded to only two named outcomes.
+_SEQUENCED_DRIVER_FREQUENCY_BREEDS = {"bmd", "golden_retriever"}
+
+
+def driver_conditioned_arms(breed: str = "bmd",
+                            driver_frequency: dict = CANINE_HS_DRIVER_FREQUENCY) -> dict:
     """The swing sequencing *does* resolve: is a MAPK-pathway inhibitor on-target for this patient?
 
-    The population model runs every trial as though the primary drug engages the driver. Real canine
-    HS does not work that way: a MAPK-activating lesion was identified in 44/96 BMD cases, so in the
-    cohort the model is implicitly averaging over, roughly half the dogs have no sequenced reason to
-    expect a MEK inhibitor to do anything.
+    `breed` matters here in a way it does not for the rest of this module, because the answer is not
+    "apply the same discount everywhere" -- it is a different epistemic situation depending on
+    whether this breed was in Takada et al. 2019's sequenced cohort:
 
-    This is reported as a *conditioning* rather than a correction factor, because the two arms are
-    qualitatively different questions rather than two values of one parameter: in the on-target arm
-    the resistance model applies as written; in the off-target arm the model's premise fails and the
-    right next step is a different primary drug, not a worse prognosis under the same one.
+      * breed in `_SEQUENCED_DRIVER_FREQUENCY_BREEDS` ("bmd", "golden_retriever"): a real measured
+        frequency exists, so sequencing converts a known base rate into a known fact for this dog.
+      * any other breed (Corgi, flat-coated retriever, or anything else): no canine HS driver
+        sequencing exists for it. There is no base rate to convert -- for Corgi specifically,
+        `histiocytic_origin.py`'s Tier A-D candidate panel (PTPN11/KRAS by analogy, BRAF/MAP2K1/
+        NRAS by analogy to human LCH, CSF1R/CSF1 by the tissue-resident-macrophage-lineage
+        hypothesis, CDKN2A/MTAP as a germline locus) is this repo's best current guess, not a
+        measured prior, and sequencing is a genuine discovery exercise rather than a confirmation
+        of a known split. This is returned generically for any unsequenced breed rather than
+        hardcoded to Corgi alone, precisely because flat-coated retriever -- a real tumor-scenario
+        preset elsewhere in this repo -- has a real germline locus but no driver-frequency
+        sequencing either, and silently applying BMD's 44/96 to it would repeat the same mistake.
     """
-    on_target = float(driver_frequency["mapk_activating_any_bmd"])
+    if breed not in _SEQUENCED_DRIVER_FREQUENCY_BREEDS:
+        return {
+            "breed": breed,
+            "source": f"no published canine HS driver sequencing exists for {breed!r}",
+            "probability_mapk_driver_identified": None,
+            "probability_no_mapk_driver_identified": None,
+            "detectability": "Unchanged in principle -- a driver lesion, if present, would still "
+                            "sit at ~25-50% VAF, orders of magnitude above every assay floor. What "
+                            "is missing is not detectability but a target list to check: unlike a "
+                            "sequenced breed, there is no prior cohort telling you which genes are "
+                            "likely hits.",
+            "on_target_arm": "N/A -- sequencing here is discovery, not confirmation of a known split",
+            "off_target_arm": "N/A",
+            "why_this_dominates": "For a sequenced breed, sequencing converts a known base rate "
+                                 "into a fact for this dog. For an unsequenced breed it does "
+                                 "something arguably more valuable and strictly riskier: it is the "
+                                 "only way to find out what the driver even is, including whether "
+                                 "it is a MAPK lesion at all.",
+            "do_not_borrow_bmd_frequency": f"Applying 44/96 (BMD) to {breed!r} is a category error, "
+                                          "not a conservative estimate, unless that breed's own "
+                                          "clinical presentation and natural history are shown to "
+                                          "match BMD's -- for Corgi specifically, they are shown "
+                                          "NOT to (see CORGI_PULMONARY_HS_BENCHMARK: 133-day median "
+                                          "survival vs. 568 days in the BMD-context benchmark).",
+        }
+    on_target = float(driver_frequency[breed]["PTPN11"] + driver_frequency[breed].get("KRAS", 0.0)) \
+        if breed == "golden_retriever" else float(driver_frequency["mapk_activating_any_bmd"])
+    cohort_n = 96 if breed == "bmd" else 13
     return {
+        "breed": breed,
         "source": driver_frequency["citation"],
+        "cohort_n": cohort_n,
         "probability_mapk_driver_identified": on_target,
         "probability_no_mapk_driver_identified": 1.0 - on_target,
         "detectability": "A driver lesion is clonal or near-clonal, so it sits at roughly 25-50% "
@@ -307,10 +393,12 @@ def driver_conditioned_arms(driver_frequency: dict = CANINE_HS_DRIVER_FREQUENCY)
         "off_target_arm": "no sequenced MAPK lesion -- the model's premise is unsupported for this "
                          "patient, and the actionable response is to choose a different primary "
                          "agent, not to run this model with a lower expected value",
-        "why_this_dominates": "Sequencing shifts this from a ~46/54 coin flip to a known fact, "
-                             "whereas the same sequencing shifts preexisting_prob by at most a "
-                             "fold or so (see posterior_preexisting_prob). The larger information "
-                             "gain is about drug choice, not about resistance.",
+        "why_this_dominates": "Sequencing shifts this from a known base rate to a known fact for "
+                             "this dog, whereas the same sequencing shifts preexisting_prob by at "
+                             "most a fold or so (see posterior_preexisting_prob). The larger "
+                             "information gain is about drug choice, not about resistance. This "
+                             f"base rate is specific to {breed} (n={cohort_n}) and must not be "
+                             "applied to any other breed.",
     }
 
 
@@ -349,6 +437,46 @@ def implied_preexisting_prob(observed_durable_fraction: float, durable_without_s
                  "model's other assumptions -- growth rates, kill ceilings, detection threshold, "
                  "horizon. It says what p would have to be for this model to reproduce that "
                  "observation, which is weaker than an independent measurement of p.",
+    }
+
+
+def partition_two_compartment_by_preexisting_subclone(outcome,
+                                                       resistant_indices: slice = slice(1, None)
+                                                       ) -> dict:
+    """`partition_by_preexisting_subclone`, adapted for `TwoCompartmentOutcome` (the Corgi pulmonary
+    scenario), which carries separate `primary_trajectories`/`nodal_trajectories` instead of one
+    `trajectories` array.
+
+    Reads the day-0 state from the primary compartment only. This is not a simplification: per
+    `run_monte_carlo_two_compartment`'s own modeling choice, a nodal deposit is seeded from the
+    *pre-debulking* primary's clonal composition, so a pre-existing resistant subclone is a primary-
+    tumor property that a nodal deposit inherits rather than one it could carry independently -- the
+    primary compartment's initial state is the complete answer to "did this dog already have one."
+    """
+    initial = np.asarray(outcome.primary_trajectories)[:, 0, :]
+    has_subclone = initial[:, resistant_indices].sum(axis=1) > 0
+    durable = ~np.asarray(outcome.progressed)
+
+    def _arm(mask):
+        n = int(mask.sum())
+        return {"n_trials": n,
+                "durable_response_fraction": float(durable[mask].mean()) if n else None,
+                "median_time_to_progression_days":
+                    float(np.nanmedian(np.asarray(outcome.time_to_progression)[mask]))
+                    if n and not np.all(np.isnan(np.asarray(outcome.time_to_progression)[mask]))
+                    else None}
+
+    with_subclone, without_subclone = _arm(has_subclone), _arm(~has_subclone)
+    spread = None
+    if with_subclone["durable_response_fraction"] is not None and \
+       without_subclone["durable_response_fraction"] is not None:
+        spread = (without_subclone["durable_response_fraction"]
+                  - with_subclone["durable_response_fraction"])
+    return {
+        "population_durable_response_fraction": float(durable.mean()),
+        "with_preexisting_subclone": with_subclone,
+        "without_preexisting_subclone": without_subclone,
+        "spread_attributable_to_preexisting_resistance": spread,
     }
 
 

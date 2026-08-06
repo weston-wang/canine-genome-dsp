@@ -1337,8 +1337,53 @@ against it — the mutations worth targeting are the clonal driver (which the ex
 PTPN11/KRAS construct already covers, and which is what makes an off-the-shelf design viable for a
 rare veterinary disease) rather than subclonal resistance mutations, which are exactly the ones that
 sit below every assay floor. What the driver split *does* change is patient selection: the vaccine
-and the whole MAPK premise apply to the ~46% with a sequenced MAPK lesion, and for the rest the
-actionable response is a different primary drug, not this regimen with worse odds.
+and the whole MAPK premise apply to the ~46% of **BMD** dogs with a sequenced MAPK lesion, and for
+the rest the actionable response is a different primary drug, not this regimen with worse odds. That
+"46%" figure is BMD-specific, which the next section exists to make impossible to miss.
+
+### Everything above is BMD. A Corgi is not "a BMD in a different breed's body"
+
+Everything in this N=1 section — the 44/96 driver frequency, the `localized_pihs_scenarios` tumor
+model, the Skorupski calibration benchmark — is BMD-context end to end. `single-patient-demo`
+originally applied it to "one sequenced dog" without saying so, which given this whole module's own
+prior, extensively-modeled premise (`histiocytic_origin.py`: Corgi PIHS/pulmonary HS as a clinically
+distinct, unsequenced presentation) is a real mismatch — the same species of error as treating
+canine-melanoma CDK4/6i data as informative about canine-HS potency, just one level up: treating
+one breed's HS as informative about a different breed's, without checking whether the clinical
+picture actually matches.
+
+It doesn't, on the one axis where real breed-matched data exists. `CORGI_PULMONARY_HS_BENCHMARK`
+(Sakai et al. 2015, 19 Pembroke Welsh Corgis) reports a **133-day median survival** — roughly a
+quarter of the BMD-context Skorupski benchmark's 568 days — and regional nodal involvement in many
+cases, meaning the single-compartment "debulking reaches everything" premise the BMD arm leans on
+does not hold for this presentation at all (this repo already built the right tool for that:
+`run_monte_carlo_two_compartment`, used in `mapk-pulmonary-two-compartment-demo` above). And on
+driver frequency, a Corgi isn't a worse coin flip than BMD's 46/54 — there is no coin to flip: zero
+Corgis have ever been sequenced for canine HS drivers, so `driver_conditioned_arms(breed="corgi")`
+returns `None`, not a number, and the honest state is "unknown, `histiocytic_origin.py`'s Tier A-D
+panel is a hypothesis, not a measurement."
+
+`single_patient_demo` now runs a real, separate fifth analysis for this rather than reusing the BMD
+numbers: `pulmonary_corgi_scenarios` + `run_monte_carlo_two_compartment`, swept over
+`NODAL_INVOLVEMENT_PROB_SWEEP`, checked against the Sakai benchmark instead of Skorupski. In testing
+(200 trials, `preexisting_prob=0.30`): median time to progression came out at 205–233 days across
+the nodal sweep — much closer to Sakai's 133-day median survival than the BMD arm's 568-day
+benchmark is, though "time to progression" and "survival" are not the same endpoint, so this is
+a directional consistency check, not a validation. The function also now refuses to run its BMD
+arm (findings 1–4) for `breed="corgi"` at all, with an error pointing at the Corgi-specific arm
+instead of silently producing a mislabeled number — and, closing a second mismatch caught building
+this fix, `driver_conditioned_arms` generalizes cleanly to *any* unsequenced breed, including
+flat-coated retriever, which has its own real GWAS germline locus but was never in Takada et al.'s
+driver-sequencing cohort either.
+
+The corrected, complete statement of what N=1 sequencing buys, by breed:
+
+| | BMD (or golden retriever) | Corgi |
+| --- | --- | --- |
+| Driver present? | Known base rate → fact (44/96, or 3/13) | Unknown — sequencing is discovery, not confirmation |
+| Pre-existing resistance? | Effectively unresolvable (finding 2) | Same — the detection-floor argument doesn't depend on breed |
+| Matched natural-history benchmark | Skorupski 2009, 568-day median survival | Sakai 2015, 133-day median survival |
+| Structural model | Single-compartment (debulking reaches all disease) | Two-compartment (regional nodal spread documented) |
 
 ## Where this leaves things
 
