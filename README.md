@@ -1187,6 +1187,159 @@ therefore cannot deliver durability on its own. The lineage-matched drug and the
 resistance-covering drug turn out to be different drugs, which is exactly the kind of conclusion
 that only shows up if the pathway topology is modeled rather than assumed away.
 
+### Was the melanoma potency data even the right objection? And treating one sequenced dog
+
+Two challenges to the achievability finding above, both of which changed the answer.
+
+**First: is "canine melanoma cells, not canine HS cells" actually a valid criticism of the IC50
+data?** Partly, but it names the wrong axis, and correcting it makes the conclusion *stronger*
+rather than weaker. CDK4/6-inhibitor sensitivity does not track tissue of origin; it tracks the
+molecular state of the cyclin D–CDK4/6–RB axis. The determinants are intact RB1 (loss is the
+dominant resistance mechanism), D-cyclin activating features, and CCND1/CDK4/6 amplification
+([ASCO Educational Book review](https://ascopubs.org/doi/10.1200/EDBK_281085);
+[Gong et al., *Cancer Cell* 2017](https://www.cell.com/cancer-cell/fulltext/S1535-6108(17)30509-3)).
+So the right question is not "melanoma vs. histiocytic sarcoma" but "does canine HS share the
+RB-pathway genotype of those melanoma lines" — which is unknown, because no canine HS line has been
+profiled for it. One inference I had been tempted to make is also wrong: BMD HS's CDKN2A/MTAP locus
+does *not* imply CDK4/6i sensitivity, since CDKN2A-mutant cancers without co-occurring D-cyclin
+lesions "rarely show high sensitivity" and instead show intermediate response.
+
+But none of this rescues the potency requirement, because it only touches constraint 2. Even if HS
+turned out to be maximally sensitive — IC50 exactly at the illustrative 100 nM — constraint 1 is
+untouched: a cytostatic drug still cannot kill faster than cells divide, and the worst clone still
+needs 0.063/day against a 0.058/day ceiling. **Accepting the objection moves the binding constraint
+from "the drug is too weak" to "the drug's mechanism forbids it", which is the harder of the two
+failures.** That reframing is what motivated looking for a different second drug entirely.
+
+**Second: had any of this been done as an N=1 problem, given that a real patient's tumor can be
+sequenced?** Partially — the variance decomposition above already found 99.8% of outcome variance is
+"which dog you are" and already named pretreatment subclone detection as the diagnostic that would
+matter. What it never did was check whether that diagnostic can work. It assumed it would.
+
+```bash
+canine-dsp single-patient-demo --breed bmd --out results/single-patient
+```
+
+`single_patient.py` closes that gap, and the answer is no — with a compensating discovery that the
+sequencing is worth doing anyway, for a different reason.
+
+| What sequencing is asked to resolve | Can it? | Effect on the model |
+| --- | --- | --- |
+| Is a MAPK driver present (is trametinib even on-target)? | **Yes, outright** | 44/96 BMD HS carry PTPN11 or KRAS (Takada et al. 2019, *Genes* 10(7):505). Driver lesions are clonal, ~25–50% VAF — orders of magnitude above any assay floor. |
+| Does a resistant subclone already exist? | **Effectively no** | The model's own prior puts it at 10⁻⁶–10⁻³ of tumor, i.e. ≤0.05% VAF. Every clinically orderable assay's floor sits *above* that entire range. |
+
+The second row is the sharper result, so it is worth being precise about. `posterior_preexisting_prob`
+does the Bayes update for a *negative* sequencing result, and because the size prior is log-uniform
+the detectable fraction is a ratio of log-widths, not linear widths — which is why intuition
+overestimates it badly:
+
+| Assay | VAF floor | Cell-fraction floor | Prior mass visible | `preexisting_prob` after a negative result |
+| --- | --- | --- | --- | --- |
+| standard targeted NGS | 2% | 4×10⁻² | 0% | 0.30 → **0.30** (no change) |
+| UMI panel, clinical operating point | 1% | 2×10⁻² | 0% | 0.30 → **0.30** (no change) |
+| UMI best published / ddPCR | 0.1% | 2×10⁻³ | 0% | 0.30 → **0.30** (no change) |
+| QBDA (research) | 0.01% | 2×10⁻⁴ | 23% | 0.30 → 0.25 |
+| duplex sequencing, best ever published | 0.0031% | 6.2×10⁻⁵ | 40% | 0.30 → 0.20 |
+
+**Every assay a clinician can actually order leaves the number exactly where it started.** A negative
+result is uninformative, not reassuring, and the best sensitivity ever published in a research
+setting buys a 1.5× shrinkage. Input DNA is *not* the limit — seeing a 10⁻⁶ subclone needs ~40 µg,
+which a resection yields. Two other things are: the assay error floor, and spatial sampling, which
+no sequencing depth fixes. `spatial_detection_probability` brackets it and the bracket is the
+finding: sampling 1% of a 10¹⁰-cell tumor detects a dispersed 10⁻⁶ subclone with near-certainty and
+a single focal one with probability ~0.01. Which regime holds is unmeasured, so a negative result
+cannot be interpreted even given a perfect assay.
+
+`partition_by_preexisting_subclone` then splits any existing Monte Carlo ensemble by its day-0 state,
+with no re-simulation, and the split is stark enough to undermine how the population numbers
+throughout this README should be read:
+
+| lomustine `max_kill` | no pre-existing subclone | pre-existing subclone | cohort average |
+| --- | --- | --- | --- |
+| 0 (trametinib alone) | 99.1% | 0.0% | 68.2% |
+| 0.05 | 99.1% | 0.0% | 68.6% |
+| 0.12 | 99.4% | 1.3% | 69.0% |
+| 0.20 | 100% | 13.5% | 73.2% |
+
+The cohort column is almost exactly `1 − preexisting_prob`. **At a realistic exposure duration the
+reported durable-response fraction is mostly a readout of that one unfitted parameter, and barely a
+readout of the drug at all** — a 4× potency range moves it five points. No patient is 68% durable;
+each is in one of the two outer columns.
+
+That near-degeneracy has one useful consequence: it makes a matched real-world cohort outcome an
+unusually direct estimator of `preexisting_prob`. `implied_preexisting_prob` inverts the mixture, and
+Skorupski et al. 2009 (already cited above for its 568-day median survival) supplies the admissible
+comparator — its 6/16 relapse-free fraction matches on all four axes that made the COMBI-d/v
+comparison inadmissible: species, disease, localized presentation, and treatment *structure* (local
+therapy then adjuvant systemic drug). Inverting against it implies **p ≈ 0.62, roughly double the
+0.30 this module centres on** — i.e. the model is optimistic on durable-response fraction by about
+2×, while its progression *timing* is in the right range (214-day median vs. the benchmark's 243-day
+median disease-free interval). This is deliberately **not** written back into
+`_PREEXISTING_PROB_CENTRAL`: the benchmark's systemic agent is a cytotoxic rather than a MEK
+inhibitor, it has no molecular stratification (so it mixes the two arms of the driver split above),
+n=16, and "relapse-free at follow-up" is not the model's "no progression in 730 days". The existing
+`[0.05, 0.15, 0.30, 0.50, 0.70]` sweep already spans it, which is the honest way to carry it.
+
+### A different second drug: lomustine, and the two candidates failing on opposite axes
+
+Given that constraint 1 is mechanistic, the fix has to be a drug class, not a dose. Lomustine (CCNU)
+is the obvious candidate and is better-evidenced than the CDK4/6 inhibitor on three independent
+counts, all real: it is a DNA-alkylating nitrosourea, so **genuinely cytotoxic** and not
+ceiling-bound; it has measured activity **in this exact disease and species** (46% ORR, 60–90 mg/m²,
+n=56 with measurable disease — [Skorupski et al. 2007](https://pubmed.ncbi.nlm.nih.gov/17338159/)),
+so there is no lineage-proxy problem at all; and it is **CNS-penetrant**, which addresses the
+~15%-of-plasma brain exposure that is the MEK inhibitor's worst structural weakness in the primary
+CNS presentation. A scalar `max_kill_2` is also the *correct* model here, unlike for CSF1R: DNA
+crosslinking acts downstream-independently, so there is no pathway-serial de-rating to apply.
+
+It works, in-model, and then it doesn't — because it trades the ceiling for a different hard limit.
+Lomustine's dose-limiting toxicity on repeated dosing is cumulative and, for the liver, irreversible
+(median 350 mg/m² cumulative and 4 doses in dogs that developed hepatotoxicosis). `cumulative_dose_limited_days(70, 21, 350)`
+turns that into 5 cycles / **105 days** of exposure, which populates the engine's
+`css_reference_2_duration_days` from real toxicity data rather than leaving it always-on. Running each
+potency both capped and counterfactually chronic isolates what the cap costs:
+
+| lomustine `max_kill` | worst clone's margin | capped at 105 d (real) | chronic (counterfactual) |
+| --- | --- | --- | --- |
+| 0.05 | +0.012 | 68.6% | 99.6% |
+| 0.08 | −0.015 | 68.6% | 100% |
+| 0.12 | −0.052 | 69.0% | 100% |
+| 0.20 | −0.126 | 73.2% | 100% |
+
+At ≥0.08 the drug genuinely reverses every resistant clone's growth margin — the thing the CDK4/6
+inhibitor cannot do at any dose. It changes almost nothing, because 625 of the 730 days are spent
+unsuppressed, and the margin snaps back from −0.015 to +0.058 the day dosing stops. In the
+pre-existing-subclone arm specifically, chronic dosing at 0.05 gives 98.7% and the real 105-day cap
+gives **0.0%**. This is the same pattern the HSA module found for eBAT — a time-limited agent's
+benefit erodes once exposure ends — now reproduced independently in HS.
+
+**Which gives the sharpest negative result of this whole pass.** Reversing these clones needs two
+things simultaneously: a kill rate at or above their growth rates, *and* that rate sustained long
+enough that the subclone cannot regrow. The two candidates each satisfy exactly one:
+
+- **CDK4/6 inhibitor** — dosable chronically (oral, no cumulative organ cap), and reaches ~100%
+  durable response in-model when dosed continuously. Cannot reach the kill rate: cytostatic agents
+  are capped at the clone's own growth rate.
+- **Lomustine** — reaches the kill rate (cytotoxic, ceiling does not apply). Cannot sustain it:
+  cumulative irreversible hepatotoxicity caps exposure at ~105 days.
+
+Neither is the answer, for non-overlapping reasons, which is a stronger statement than either
+analysis alone and names the target precisely: a ceiling-free partner *without* a cumulative-dose
+duration cap. Whether one exists for canine HS is not established here. The most concrete thing left
+to test is the trade along exactly that axis — metronomic lomustine has been reported tolerable in
+dogs for up to ~12 months ([Tripp et al. 2011](https://academic.oup.com/jvim/article/25/2/278/8451316)),
+i.e. lower kill rate for much longer duration, and this model does not yet evaluate it.
+
+On the vaccine question: nothing here argues for a *different* vaccine, and the driver-conditioning
+result argues for the same shared-hotspot design already modeled, applied more selectively. A fully
+personalized neoantigen vaccine is the intuitive N=1 answer, but the sequencing analysis above cuts
+against it — the mutations worth targeting are the clonal driver (which the existing shared-antigen
+PTPN11/KRAS construct already covers, and which is what makes an off-the-shelf design viable for a
+rare veterinary disease) rather than subclonal resistance mutations, which are exactly the ones that
+sit below every assay floor. What the driver split *does* change is patient selection: the vaccine
+and the whole MAPK premise apply to the ~46% with a sequenced MAPK lesion, and for the rest the
+actionable response is a different primary drug, not this regimen with worse odds.
+
 ## Where this leaves things
 
 `canine_dsp.mapk_resistance` (the generic Monte Carlo/branching-process engine) and
@@ -1750,5 +1903,13 @@ three ways: `mapk_resistance.py` (the generic Monte Carlo/branching-process engi
 functions that consume a scenario and produce CSV/plot/summary.json output); `dla_binding.py` is
 the real IEDB MHC-I epitope-binding client. `hsa_scenarios.py`/`hsa_cli.py` follow the same
 scenarios/demo split for canine hemangiosarcoma, reusing `mapk_resistance.py`'s engine directly
-rather than duplicating it. `tests/` contains deterministic unit tests. `data/` stores only
-provenance documentation in Git.
+rather than duplicating it. Two modules exist to check the resistance model against constraints it
+cannot see from inside itself: `pharmacology.py` converts real in vitro/PK observables into the
+engine's `max_kill_2`/`ic50_nM_2` parameters, so "is this potency achievable" becomes a question
+about named, individually-checkable inputs (cytostatic ceiling, Emax/Hill saturation,
+cumulative-dose duration caps) rather than an unexaminable constant; `single_patient.py` reframes the
+population Monte Carlo as an N=1 problem, quantifying what tumor sequencing can and cannot resolve
+(assay detection floors, spatial sampling, driver conditioning) and splitting an existing ensemble
+into the patient types its cohort average hides. Both pair with `*_cli.py` demo modules following the
+same split. `tests/` contains deterministic unit tests. `data/` stores only provenance documentation
+in Git.

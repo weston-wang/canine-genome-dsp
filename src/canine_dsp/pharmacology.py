@@ -79,6 +79,49 @@ CDK46_CANINE_POTENCY = {
              "measurement available for the class, not a measurement in the disease being modeled.",
 }
 
+CCNU_CANINE_HS = {
+    "citation": "Skorupski et al. 2007, J Vet Intern Med 21(1):121-126, PMID 17338159 -- phase II "
+               "CCNU (lomustine) in dogs with histiocytic sarcoma",
+    "dose_mg_per_m2_range": (60.0, 90.0),
+    "overall_response_rate": 0.46,
+    "n_dogs_measurable_disease": 56,
+    "median_survival_days_all": 106,
+    "median_survival_days_responders": 172,
+    "mechanism": "nitrosourea alkylating agent: DNA alkylation and interstrand crosslinking, which "
+                "kills cycling and non-cycling cells -- net cell loss, not arrest",
+    "mechanism_class": CYTOTOXIC,
+    "blood_brain_barrier": "highly lipophilic small nitrosourea; CNS-penetrant by design, which is "
+                          "the property that makes it relevant to primary CNS HS where the MEK "
+                          "inhibitor reaches only ~15% of plasma concentration",
+    "why_this_matters_here": "This is the one second-agent candidate with real efficacy data in the "
+                            "actual modeled disease and species. It is also cytotoxic, so the "
+                            "cytostatic ceiling that rules out a CDK4/6 inhibitor does not apply -- "
+                            "max_kill may legitimately exceed a clone's growth rate.",
+    "caveat": "No dose-response IC50 has been measured in any canine HS cell line, so translating "
+             "the 46% response rate into a per-day max_kill remains an assumption. What the real "
+             "data changes is which constraints bind, not that the kill rate became measured.",
+}
+
+# The constraint that replaces the cytostatic ceiling for this agent. Lomustine's dose-limiting
+# toxicity on repeated dosing is cumulative and, for the liver, irreversible -- so unlike an oral
+# kinase inhibitor it cannot be continued indefinitely, and its exposure window is finite by
+# construction rather than by choice.
+CCNU_DURATION_LIMIT = {
+    "citation": "canine lomustine toxicity series (retrospective, 2002-07) and canine hepatotoxicity "
+               "reports; metronomic tolerability from Tripp et al. 2011, J Vet Intern Med 25:278",
+    "cumulative_dose_cap_mg_per_m2": 350.0,
+    "median_doses_before_hepatotoxicosis": 4,
+    "typical_planned_cycles": (4, 6),
+    "cycle_interval_days_range": (21, 28),
+    "dose_limiting_toxicities": "delayed myelosuppression (neutrophil nadir 7-14 days, severe "
+                               "neutropenia in ~25% of dogs on a lomustine-containing protocol) and "
+                               "cumulative, dose-related, irreversible hepatotoxicity",
+    "note": "350 mg/m2 was the median *cumulative* dose in dogs that developed hepatotoxicosis, and "
+           "4 the median number of doses -- these are the observed toxicity threshold, not an "
+           "approved cap, so treating them as a hard stop is a conservative reading.",
+}
+
+
 PALBOCICLIB_DOG_PK = {
     "citation": "palbociclib nonclinical PK (rat/dog/monkey) as reported in the drug's development "
                "literature",
@@ -240,6 +283,34 @@ def achievability_report(growth_rates: np.ndarray, margins_without_second_drug: 
         "all_clones_reversed": all(row["reversed"] for row in rows),
         "any_blocked_by_mechanism": any(row["blocked_by_cytostatic_ceiling"] for row in rows),
     }
+
+
+def cumulative_dose_limited_days(dose_per_cycle_mg_per_m2: float, cycle_interval_days: float,
+                                 cumulative_cap_mg_per_m2: float) -> dict:
+    """How many days of exposure a cumulative-toxicity-capped cytotoxic can actually deliver.
+
+    A genuinely cytotoxic second agent escapes the cytostatic ceiling (`cytostatic_ceiling`) but
+    generally acquires a different hard limit in exchange: total lifetime dose. This converts that
+    cap into the quantity the resistance engine consumes -- `css_reference_2_duration_days` -- so the
+    trade is modeled rather than assumed away.
+
+    The returned `exposure_days` counts through the end of the last cycle's interval, since the drug
+    is still present and acting during the interval following its final administration. It is a
+    ceiling on treatment duration, not a prediction of tolerance: an individual patient may stop
+    earlier for myelosuppression, which this does not model.
+    """
+    for name, value in (("dose_per_cycle_mg_per_m2", dose_per_cycle_mg_per_m2),
+                        ("cycle_interval_days", cycle_interval_days),
+                        ("cumulative_cap_mg_per_m2", cumulative_cap_mg_per_m2)):
+        if value <= 0:
+            raise ValueError(f"{name} must be positive")
+    cycles = int(np.floor(cumulative_cap_mg_per_m2 / dose_per_cycle_mg_per_m2))
+    return {"dose_per_cycle_mg_per_m2": float(dose_per_cycle_mg_per_m2),
+            "cumulative_cap_mg_per_m2": float(cumulative_cap_mg_per_m2),
+            "cycles_permitted": cycles,
+            "exposure_days": int(cycles * cycle_interval_days),
+            "constraint_class": "cumulative-dose duration cap -- replaces the cytostatic ceiling "
+                               "for a cytotoxic agent rather than removing all limits"}
 
 
 def feasibility_frontier(margin: float, ic50_values_nM: np.ndarray,

@@ -397,6 +397,72 @@ def combination_scenarios(breed: str = "bmd", debulking_fraction: float = DEBULK
     return scenarios
 
 
+# Lomustine (CCNU) as the second agent ------------------------------------------------------
+# Built after the CDK4/6-inhibitor arm was shown to be pharmacologically unreachable: a purely
+# cytostatic drug cannot exceed a clone's own growth rate (pharmacology.cytostatic_ceiling), which
+# rules out max_kill_2 >= 0.05 for this model's clones on mechanism alone, at any dose. Lomustine is
+# the natural replacement and is a better-evidenced choice on three independent counts, all real:
+#   * it is a DNA-alkylating nitrosourea -- genuinely cytotoxic, so the ceiling does not bind;
+#   * it has measured single-agent activity in the actual disease and species (46% ORR in canine HS,
+#     pharmacology.CCNU_CANINE_HS) rather than in a proxy lineage;
+#   * it is CNS-penetrant, which addresses the ~15%-of-plasma brain exposure problem that is the
+#     worst structural weakness of the MEK inhibitor in the primary-CNS presentation.
+# A scalar (mechanism-agnostic) max_kill_2 is the *correct* modeling choice here, unlike for the
+# CSF1R inhibitor: DNA crosslinking acts downstream-independently, so it does not care which MAPK
+# node a resistant clone acquired, and there is no pathway-serial de-rating to apply.
+# What it buys in mechanism it gives back in duration -- see CCNU_EXPOSURE_DAYS.
+CCNU_DOSE_MG_PER_M2 = 70.0                # mid-range of the real 60-90 mg/m2 canine HS dosing
+CCNU_CYCLE_INTERVAL_DAYS = 21             # real q3wk schedule
+# Derived from the real cumulative-hepatotoxicity threshold via
+# pharmacology.cumulative_dose_limited_days(70, 21, 350) -> 5 cycles, 105 days. This is the whole
+# point of modeling lomustine rather than asserting a chronic cytotoxic: the exposure window is
+# finite for a documented physiological reason, so the engine's css_reference_2_duration_days is
+# populated from real toxicity data instead of being left at None (always-on).
+CCNU_EXPOSURE_DAYS = 105
+# Deliberately identical to the CDK4/6i arm's values so the two arms differ *only* in mechanism
+# class and exposure duration. No lomustine IC50 exists for any canine HS cell line, so matching
+# them is not a claim about lomustine's potency -- it holds the saturation term constant to isolate
+# the two things that are actually evidenced as different.
+CCNU_MATCHED_IC50_NM = CDK46_ILLUSTRATIVE_IC50_NM
+CCNU_MATCHED_CSS_NM = CDK46_ILLUSTRATIVE_CSS_NM
+# Swept above the cytostatic ceiling on purpose: 0.08 and 0.12 exceed every clone's growth rate and
+# are therefore meaningless for a cytostatic drug but legitimate for a cytotoxic one.
+CCNU_MAX_KILL_SWEEP = [0.0, 0.05, 0.08, 0.12, 0.20]
+
+
+def ccnu_combination_scenarios(breed: str = "bmd", debulking_fraction: float = DEBULKING_FRACTION,
+                               max_kill_2_values: list[float] = CCNU_MAX_KILL_SWEEP,
+                               location_penetration_multiplier: float = 1.0,
+                               exposure_days: int | None = CCNU_EXPOSURE_DAYS,
+                               ) -> dict[float, tuple[ResistanceModel, float, np.ndarray, float, dict]]:
+    """Trametinib (debulked CNS context) +/- lomustine, a real, cytotoxic, duration-capped partner.
+
+    Structurally identical to `combination_scenarios` except that the second drug's exposure stops
+    after `exposure_days` (default `CCNU_EXPOSURE_DAYS`, derived from the real cumulative-dose
+    toxicity threshold). Pass `exposure_days=None` to model a counterfactual chronic cytotoxic --
+    useful only to isolate how much of the outcome depends on the duration cap, since no such drug
+    exists in this class.
+
+    The returned provenance records `exposure_days` and the mechanism class so downstream reports
+    cannot silently reuse a cytostatic-ceiling interpretation on a cytotoxic arm.
+    """
+    arms = localized_pihs_scenarios(breed, debulking_fraction, location_penetration_multiplier)
+    model, css, seeding_rates, initial_burden, provenance = arms["debulked_trametinib"]
+    scenarios = {}
+    for max_kill_2 in max_kill_2_values:
+        if max_kill_2 > 0:
+            combo_model = replace(model, ic50_nM_2=CCNU_MATCHED_IC50_NM, max_kill_2=max_kill_2)
+        else:
+            combo_model = model
+        scenarios[max_kill_2] = (combo_model, css, seeding_rates, initial_burden,
+                                 {**provenance, "ccnu_max_kill": max_kill_2,
+                                  "second_drug": "lomustine (CCNU)",
+                                  "second_drug_mechanism_class": "cytotoxic",
+                                  "second_drug_exposure_days": exposure_days,
+                                  "cytostatic_ceiling_applies": False})
+    return scenarios
+
+
 # "Durable response" everywhere else in this module means only "no detected relapse within
 # whatever horizon_days that specific run used" -- typically 730 days (2 years). It is not a
 # claim of permanence, and testing at longer horizons shows it is not flat: the combination

@@ -36,9 +36,11 @@ from .mapk_cli import (
     vaccine_epitope_binding_demo,
     vaccine_followon_demo,
 )
+from .mapk_scenarios import DEBULKING_FRACTION
 from .mapk_scenarios import _PREEXISTING_PROB_CENTRAL as MAPK_PREEXISTING_PROB_CENTRAL
 from .pharmacology_cli import cdk46_achievability_demo
 from .signals import eiip, variant_density, windowed_gc
+from .single_patient_cli import single_patient_demo
 from .spectral import coherence, multitaper_psd, spectral_entropy, welch_psd
 from .vaccine_eval import run_gse102459, run_gse190001
 from .volterra_cli import run_volterra, synthetic_table
@@ -233,6 +235,17 @@ def main() -> None:
     cdk46_feas.add_argument("--target-max-kill", type=float, default=0.08)
     cdk46_feas.add_argument("--location-penetration-multiplier", type=float, default=1.0)
     cdk46_feas.add_argument("--out", type=Path, required=True)
+    single_patient = sub.add_parser("single-patient-demo",
+                                    help="N=1 reframing: what sequencing one dog's tumor resolves, "
+                                         "plus lomustine (real, cytotoxic, CNS-penetrant) as the "
+                                         "second agent instead of a CDK4/6 inhibitor")
+    single_patient.add_argument("--breed", choices=["bmd", "flat_coated_retriever"], default="bmd")
+    single_patient.add_argument("--debulking-fraction", type=float, default=DEBULKING_FRACTION)
+    single_patient.add_argument("--horizon-days", type=int, default=730)
+    single_patient.add_argument("--trials", type=int, default=500)
+    single_patient.add_argument("--preexisting-prob", type=float, default=0.30)
+    single_patient.add_argument("--seed", type=int, default=7)
+    single_patient.add_argument("--out", type=Path, required=True)
     corgi_driver = sub.add_parser("corgi-driver-hypothesis-demo",
                                   help="structural/DSP triage of candidate driver genes for "
                                        "Corgi primary CNS / pulmonary histiocytic sarcoma")
@@ -406,6 +419,9 @@ def main() -> None:
     elif args.command == "cdk46-achievability-demo":
         cdk46_achievability_demo(args.out, args.breed, target_max_kill=args.target_max_kill,
                                  location_penetration_multiplier=args.location_penetration_multiplier)
+    elif args.command == "single-patient-demo":
+        single_patient_demo(args.out, args.breed, args.debulking_fraction, args.horizon_days,
+                            args.trials, args.preexisting_prob, args.seed)
     elif args.command == "corgi-driver-hypothesis-demo":
         corgi_driver_hypothesis_demo(args.out, args.genes, args.bicoherence_nperseg,
                                      args.permutations, args.seed)
