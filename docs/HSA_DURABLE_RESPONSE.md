@@ -213,15 +213,81 @@ Every row requires potency **above** the bar. `tolerable_booster_interval` retur
 any potency at or below it. Route C is a consequence of having closed the gap, never a way of
 closing it — presenting it alongside A and B as a third option was a category error.
 
-### Where that leaves it
+### Where that leaves it — and what does work
 
-The gap is open. The best remaining lead is not a second kill term but **raising the vaccine's own
-height by removing immunosuppression** — metronomic cyclophosphamide's Treg depletion, or anti-PD-L1
-against the PD-L1⁺ macrophages that exclude T-cells from canine HSA tumours (PMID 35136176, §5).
-Neither has a measured effect on kill rate in this disease, so neither is quantified here, and
-neither should be reported as a closure.
+Those three failed because they all attacked the same side of one equation. The bar is
+`max_clone(growth − drug_kill)`, and every route above tried to add kill. Two things were never
+tried: correcting how much resistance the model grants, and reducing **growth** itself.
 
-*Tests: `test_hsa_gap_closure.py`*
+#### Component 1 — an inconsistency in the model, not a therapy
+
+`_SHARED_IC50_RATIOS` grants 35× resistance to `pi3k_akt_feedback_reactivation` and 50× to
+`target_site_mutation`. Both are **rapalog** resistance mechanisms — the module documents the second
+as "(FKBP12-mTOR binding site) mutation reducing **rapamycin** binding". But the potency anchor is
+VDC-597: a dual PI3K/mTOR inhibitor with kinase-assay IC50s of 19 nM and 14 nM, i.e.
+**ATP-competitive**, binding the kinase domain rather than FKBP12.
+
+The dual PI3K/mTOR class exists specifically to defeat both mechanisms. Rapamycin causes feedback
+AKT activation while the dual inhibitor PI-103 does not, and is more effective (Kharas et al. 2008,
+*J Clin Invest* 118(9):3038-50, PMID 18704194); the class was "developed with the idea of overcoming
+resistance to mTOR inhibition through preventing the activation of PI3K/Akt as a result of release
+negative feedback loops" (Gomez-Pinillos & Ferrari 2012, PMID 22520976).
+
+The module cannot have it both ways. If the drug is rapamycin, the mechanisms fit and the IC50
+anchor is the wrong drug. If it is VDC-597, the anchor fits and the two ratios are far too high.
+Resolving it in the direction the potency anchor implies takes **the bar from 0.0515 to 0.0385**.
+
+That is not enough on its own — durable response goes 0.492 → 0.640 — and the residual is an
+*efficacy* ceiling, not a potency one: `max_kill` for `target_site_mutation` is 0.015/day, so no
+further IC50 change moves it.
+
+#### Component 2 — reduce growth, not kill
+
+HSA is an endothelial tumour, and β-adrenergic blockade acts on proliferation rather than supplying
+a kill term. ADRB1 and ADRB2 are expressed in transformed endothelial cells and in angiosarcoma
+tumours (Pasquier et al. 2016, *EBioMedicine* 6:87-95, PMID 27211551).
+
+#### The stack
+
+10-year durable response at `preexisting_prob = 0.70`, vaccine held at the real 0.03/day:
+
+| | bar | clears 0.03? | 10-yr durable |
+|---|---|---|---|
+| vaccine only | 0.0515 | no | 0.492 |
+| + cross-resistance correction | 0.0385 | no | 0.640 |
+| 20% growth cut, no correction | 0.0411 | no | 0.536 |
+| **correction + 20% growth cut** | **0.0281** | **yes** | **1.000** |
+
+**No component works alone; together they do.** And the correction is what makes the therapeutic ask
+small: growth must fall by **16.3%** with it, versus **41.4%** without — a 2.5× reduction, bought by
+fixing a modelling inconsistency rather than by adding a drug.
+
+The stack is also insensitive to `preexisting_prob` (1.000 at 0.70, 0.50 and 0.30), and the vaccine
+remains load-bearing inside it — remove it and durability falls to 0.284.
+
+#### What is still unmeasured, and the experiment that would settle it
+
+Nobody has measured how much propranolol reduces canine HSA growth rate. 16.3% is what the stack
+*requires*, not what any study reports. The evidence around it is genuinely mixed, and the largest
+piece is negative:
+
+- **PRO-DOX** (Borgatti et al. 2025, PMID 40386412) — phase I, **20 dogs**, stage 1–2 splenic HSA:
+  propranolol + **doxorubicin** "did not appear to influence treatment outcomes." The biggest canine
+  test, in the exact disease.
+- But Pasquier's own in vitro work found propranolol synergizes strongly with **vinblastine** and
+  shows "only additivity or slight antagonism" with **doxorubicin**. PRO-DOX used the partner the
+  human data predicted would not work.
+- Terauchi et al. 2023 (PMID 37545711): anthracycline + propranolol, 5 dogs stage 3 HSA — clinical
+  benefit in 4/5, no serious adverse events. n=5, retrospective.
+- Moirano et al. 2023 (PMID 37800663): **vinblastine** + propranolol with radiotherapy, 7 dogs with
+  right atrial tumours — effusions resolved in all seven, median PFS 290 d, median OS 326 d.
+
+That the negative trial used doxorubicin and the positive ones used vinblastine is a hypothesis, not
+a demonstrated explanation. It is, however, a specific and pre-existing one: **propranolol +
+vinblastine metronomic in canine splenic HSA, with a progression-free readout**, is the experiment
+this analysis points at.
+
+*Tests: `test_hsa_gap_stack.py`*
 
 ---
 
@@ -407,17 +473,22 @@ requires. Boosters do not close that gap — they are required for a different r
 whatever height you have for the animal's life, and without them even a threshold-clearing vaccine
 falls back to roughly the no-vaccine outcome by ten years.
 
-**The gap does not close on the evidence available** (§3b). Lowering the bar with a second persistent
-agent works arithmetically but the candidate's own trial places it with the agents that fail.
-Combining two vaccines works on paper but fails under documented antigenic competition that cannot
-be boosted or adjuvanted around. Booster-interval tolerance is downstream of clearing the bar, not a
-way of clearing it.
+**No single fix closes the gap** (§3b): lowering the bar with a second kill term is unanchored,
+two vaccines fail under antigenic competition, and booster tolerance was never a route to closing it.
 
-**The best remaining lead is to raise the vaccine's own height by removing immunosuppression** —
-metronomic cyclophosphamide's Treg depletion, or anti-PD-L1 against the macrophages that exclude
-T-cells from these tumours. Both have real canine mechanistic evidence and neither has a measured
-effect on kill rate, so neither is a closure. The shortfall stands at ~1.7×, and it is the single
-thing this analysis cannot argue its way past.
+**A stack of three does.** Correcting a cross-resistance inconsistency in the model — the two
+high-resistance clones are rapalog mechanisms while the potency anchor is an ATP-competitive dual
+PI3K/mTOR inhibitor — takes the bar from 0.0515 to 0.0385 and costs nothing, because it is a
+modelling fix rather than an added therapy. Adding a ~16–20% reduction in tumour growth rate via
+β-adrenergic blockade takes it under 0.03, where the vaccine real trials already deliver reaches
+**1.000 at ten years**, insensitive to `preexisting_prob`. No component works alone; the correction
+is what makes the therapeutic ask small, cutting the required growth reduction from 41.4% to 16.3%.
+
+**What is not established** is the growth reduction itself. β-blockade has the target, a 100%
+response rate in human angiosarcoma with vinblastine, and a positive canine series with the same
+partner — but the largest canine trial paired it with doxorubicin and was negative, and no study
+reports a growth-rate reduction in canine HSA. The next experiment is propranolol + vinblastine
+metronomic with a progression-free readout.
 
 ### What would change the answer
 
