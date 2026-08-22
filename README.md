@@ -41,6 +41,10 @@ src/canine_dsp/
   # --- scientific / DSP / genomics models ---
   alphafold.py        AlphaFold structure integration for canine drug-target orthologs
   uniprot.py          UniProt sequence/accession resolution
+  sequence_conservation.py  human-vs-dog ortholog identity (ERK2 100% / PI3Kα 99.81% / P-gp 91%),
+                      computed from real UniProt sequences and reproducible (not asserted)
+  coverage_assessment.py    evidence grade for every escape closure — how much of "covers all
+                      escapes" is measured vs transferred vs assumed (the honest coverage verdict)
   dla_binding.py      canine MHC (DLA) peptide-binding prediction
   pharmacology.py     PK/PD pharmacology model
   mutational_supply.py  mutational-supply modelling

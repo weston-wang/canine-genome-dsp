@@ -32,10 +32,14 @@ Durability is therefore reached in **two moves**:
 
 **What is solid vs. what is hypothesis — the honest split that governs this whole report:**
 
-- The **escape-coverage half is solid and independently reproduced.** The induction
-  regimen closes every enumerated escape route at both occupied brain sites, and every
-  double and triple combination, with zero uncovered. The audit re-ran the code and
-  confirmed it.
+- The **escape-coverage half is reproducible, but that is a weaker claim than it sounds.**
+  The induction regimen closes every enumerated escape route at both occupied brain sites,
+  and every double and triple combination, with zero uncovered — and the audit re-ran the
+  code and confirmed the *arithmetic*. What it did **not** confirm is the inputs: graded by
+  evidence, only 1 of 12 escape closures rests on a measurement in canine HS, 2 are transfers
+  from the wrong disease, 2 are structural arguments, and 7 rest on assumed kill rates (see
+  "What 'closed' is actually worth" below). So the coverage is best read as a **structural /
+  hypothesis-level** result, not an empirical one.
 - The **ten-year half is a scientifically grounded hypothesis, not a result.** It rests
   on a maintenance pill whose durability *grade* varies by genotype, and on numbers that
   have never been measured in a dog. It reduces to a single inequality that fails at the
@@ -193,6 +197,33 @@ Checked across every assumption about how many dormant cells are awake at once, 
 messier ~16-route list used in the earliest framing, which the audit flagged as a stale
 taxonomy.)
 
+### What "closed" is actually worth — an honest evidence grade
+
+"Reproduced by the audit" means the *arithmetic* reproduces: every margin is
+`potency × access × duty − growth`, and the audit confirmed the code computes it consistently.
+It does **not** mean the inputs are measured. Almost every potency is a hand-set constant the
+code itself labels *assumed*, and the growth rate that sets the pass/fail bar (0.055/day) is an
+uncited placeholder — so "all escapes close" is true *inside the model* but is largely
+**definitional**, not empirical. `canine_dsp.coverage_assessment` grades each of the twelve
+escapes by what its closure actually rests on:
+
+| Evidence grade | Escapes | Meaning |
+| --- | --- | --- |
+| Measured in canine HS | **1** | NF-κB / parthenolide has real canine-HS activity data — and even its premise (that ERK activation predicts response) is contested by an unpropagated 11-line finding |
+| Transferred (wrong disease/species) | **2** | PI3K IC50s from canine *hemangiosarcoma*; hydroxychloroquine from canine *lymphoma* |
+| Structural / design argument | **2** | the persister schedule (duty→1.0) and making MGMT irrelevant by dropping the alkylator class — sound reasoning, but not measurements |
+| Assumed, never-measured kill rate | **7** | including the single load-bearing induction cytotoxic and the entire ten-year maintenance arm |
+
+So the headline should read: **the coverage claim is a structural / hypothesis-level result, not
+an evidence-backed one.** It is, however, falsifiable and cheap to start falsifying — the
+decisive experiments are enumerated in `coverage_assessment.decisive_experiments()`, cheapest
+first (an MTAP stain; a canine-HS kill rate for the microtubule agent; the 11-line ERK panel).
+Two of the target-side assumptions have since been *removed*: ERK2/MAPK1 (100%) and PI3Kα
+(99.81%, ATP pocket identical) human-to-dog identity are now computed from real UniProt sequences
+and reproducible in `canine_dsp.sequence_conservation`, so an inhibitor's *fit* to the canine
+target is no longer an assumption — only its potency, exposure, and the 91%-conserved P-gp efflux
+that gates delivery remain to be measured.
+
 ---
 
 ## The ten-year durability — the hypothesis half
@@ -226,9 +257,16 @@ An extinction state was added and it now returns a realistic 42% vs. the observe
 but only above the potency range the project itself considers plausible and with a
 favourable second free parameter, i.e. curve-fitting, labelled as such. Read the whole
 report as **hypothesis-generating.** The pharmacology is better sourced than that phrase
-suggests (the lead drug's potency is measured in canine HS cells; brain-penetration work
-uses a measured dog-specific scaling factor), but the growth rates are placeholders and the
-engine has one failed external check and zero passed ones.
+suggests — the lead drug's potency *is* measured in canine HS cells (cobimetinib IC50
+74–372 nM across three lines, PMID 39202410). But brain penetration is **not** dog-measured:
+those values are rodent/human brain:plasma ratios, and one figure the project previously
+leaned on (0.15) was trametinib's ratio wrongly applied to cobimetinib, whose real value is
+0.027 (catalogued in `core.evidence`). Canine CNS penetration remains unmeasured — consistent
+with P-glycoprotein, the efflux transporter that governs it, being only 91% conserved
+dog-to-human (the single target where conservation does *not* license transfer; the ERK2 and
+PI3Kα targets themselves are 100% / 99.81% identical — computed in `sequence_conservation`).
+The growth rates are placeholders and the engine has one failed external check and zero
+passed ones.
 
 ---
 
@@ -251,8 +289,14 @@ measuring a PRMT5 inhibitor's CNS penetration in a dog below ~0.37.
 
 For a tumour with no identified targetable antigen, the fallback is two small molecules —
 an **ERK1/2 inhibitor** (e.g. temuterkib) at full MTD **+ a PI3K/AKT inhibitor** (e.g.
-paxalisib) — which drive every clone negative (ERK activation was found in all twelve
-canine HS lines tested, not only the mutant ones). Two independent toxicity axes; escaping
+paxalisib). The MAPK rationale rests on **three** canine HS cell lines (BD/OD/DH82) carrying
+PTPN11/KRAS drivers that responded in vitro to MEK inhibition (cobimetinib, IC50 74–372 nM,
+PMID 39202410), together with MAPK-pathway alteration in ~43–64% of cases across published
+cohorts (PMID 31277422; PMID 39202410). *(A previous draft claimed ERK activation "in all
+twelve canine HS lines tested"; no twelve-line canine HS dataset exists — the corrected,
+code-cited figure is three lines. The "drives every clone negative" step is a design
+rationale for pairing two independent axes, not a measured pan-clonal result.)* Two
+independent toxicity axes; escaping
 ERK confers nothing against the parallel PI3K/AKT axis. In the **lung** this reaches 1.00
 at full dose (~0.99 realistic). In the **brain** it initially read 0.00 — but that came
 from applying **trametinib's** notoriously poor brain-to-plasma ratio (0.15) to two drugs
