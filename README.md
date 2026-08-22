@@ -107,6 +107,113 @@ doses, tumor state is not RECIST response, and inflammation is not an adverse-ev
 The workflow becomes evaluative only after its kernels and clinical mappings are fitted and locked
 using longitudinal combination-therapy data, then tested on untouched patients and external cohorts.
 
+The stochastic extension adds patient random effects, uncertain kernel gains, correlated immune
+process variation, birth/death/escape events, modality-specific observations, bootstrap particle
+filtering, and tail-risk-aware inverse control:
+
+```bash
+canine-dsp stochastic-immunotherapy-demo \
+  --draws 256 --particles 384 --maxiter 24 \
+  --out results/stochastic-immunotherapy-demo
+```
+
+It reports conditional probabilities of modeled response, escape dominance, and inflammation-bound
+crossing; terminal-burden uncertainty and CVaR; filtered state intervals; simulated assay data; and a
+six-panel clinical dashboard. See `docs/STOCHASTIC_IMMUNOTHERAPY_MODEL.md` for the statistical
+assumptions, identifiability limits, validation sequence, and clinical guardrails.
+
+### Locked treatment-policy comparison
+
+The policy benchmark adds reduced plasma/tumor PK, target engagement, protocol and exposure bounds,
+a first-order PK/PD virtual-population optimizer, a fixed-protocol proxy, and a QSP–Volterra
+candidate. Locked policies are evaluated on untouched PK, tumor, escape, and interaction shifts with
+prespecified benefit, safety, evolutionary-risk, feasibility, and replication gates.
+
+```bash
+canine-dsp immunotherapy-policy-benchmark \
+  --draws 96 --scenarios 12 --maxiter 18 \
+  --out results/immunotherapy-policy-benchmark
+```
+
+The output distinguishes `IN_SILICO_ADVANTAGE` from clinical superiority and fails closed when any
+gate is missed. The built-in comparator is a research proxy—not a disease-specific standard of care.
+See `docs/POLICY_SUPERIORITY_BENCHMARK.md` for the locked estimand, claim limits, and evidence ladder.
+
+For a target-trial-aligned logged longitudinal dataset with externally cross-fitted behavior-policy
+and value-model nuisance estimates, run:
+
+```bash
+canine-dsp evaluate-logged-policy --table logged_decisions.csv --cross-fitted \
+  --out results/logged-policy-evaluation
+```
+
+This triangulates importance-weighted and sequential doubly robust estimates and returns
+`NOT_EVALUABLE_*` when overlap, effective sample size, weights, cross-fitting, or estimator agreement
+is inadequate. Even a passing result is labeled a retrospective causal estimate, not clinical
+superiority.
+
+### Disease-specific melanoma benchmark
+
+The first disease-specific target is macroscopic resectable stage III melanoma treated with
+neoadjuvant ipilimumab plus nivolumab before week-six surgery. It was selected because two distinct
+checkpoint inputs, serial immune sampling, randomized dose/timing variation, an early pathology
+endpoint, and a phase-3 care benchmark all exist in the same biological setting.
+
+The model combines Hammerstein antibody exposure/occupancy, bilinear progenitor-exhausted-to-
+effector T-cell dynamics, a bounded low-rank second-order Volterra interaction, stochastic tumor
+birth/death and immune-escape events, and constrained risk-aware search. It is tested against
+published GSE272993 immune-wave directions, leave-one-arm-out OpACIN-neo response/toxicity, and the
+NADINA regimen and outcomes.
+
+```bash
+python scripts/fetch_public_data.py gse272993_metadata
+canine-dsp melanoma-neoadjuvant-benchmark \
+  --anchors data/clinical/melanoma_clinical_anchors.csv \
+  --draws 192 --candidates 96 \
+  --out results/melanoma-neoadjuvant-benchmark
+```
+
+Outputs include real-arm held-out predictions, method ablations, directional GSE checks, paired
+virtual-population draws, candidate and NADINA schedules, a clinical dashboard, and a plain-language
+interpretation. A candidate is always labeled a research hypothesis. Aggregate public data cannot
+show that its timing is clinically superior; that requires patient-level calibration followed by a
+prospective randomized comparison. See `docs/MELANOMA_DSP_BENCHMARK.md` and
+`docs/MELANOMA_DATA.md`.
+
+### Comparative osteosarcoma RNA-vaccine design
+
+The next disease program targets canine appendicular osteosarcoma after surgery, when occult
+pulmonary disease may remain. It combines a species-aware explicit-duration hidden semi-Markov
+model with bounded low-rank second-order Volterra terms in the state-transition logits. A separate
+robust inverse-design layer selects multivalent DLA/HLA cargo under clonality, presentation,
+subclone-coverage, normal-proteome safety, escape, and manufacturing constraints.
+
+Fetch the small real GSE76127 canine tumor/DFI cohort and run the complete benchmark:
+
+```bash
+python scripts/fetch_public_data.py gse76127
+canine-dsp osteosarcoma-rna-design \
+  --gse76127-matrix data/raw/gse76127/GSE76127_series_matrix.txt.gz \
+  --gse76127-supplements data/raw/gse76127/PMC4759767_SupplementaryFiles.zip \
+  --out results/osteosarcoma-rna-design
+```
+
+The default candidate-antigen panel is deliberately synthetic and exercises the constraints and
+visualizations. A real tumor-derived panel requires both a deidentified upstream candidate-feature
+CSV (`--candidates`) and a schema-v1 patient/cohort constraint manifest (`--design-spec`) containing
+the actual DLA and clone labels. The benchmark never substitutes its demo labels, and it still does
+not construct a manufacturing-ready nucleotide sequence or a patient treatment plan.
+
+Outputs include cargo and schedule rankings, exact fixed-prior state probabilities, schedule
+evidence flags, scenario-long escape stress tests with near-equivalence labels, state-conditioned
+Volterra memory plots, model ablations, a real held-out-dog static prognostic sensitivity analysis,
+separate dog/human clinical comparators, an identifiability audit, an atomically published
+checksum/size manifest, a prospective validation protocol, and a plain-language clinical
+interpretation. The clinical-superiority gate always fails closed because no completed randomized
+osteosarcoma RNA-vaccine dataset currently identifies the policy effect. See
+`docs/OSTEOSARCOMA_RNA_DESIGN.md` and
+`docs/OSTEOSARCOMA_DATA.md`.
+
 ## Real RNA data
 
 Fetch and prepare the small public canine tachypacing time course:
@@ -134,7 +241,8 @@ canine-dsp prepare-dog10k-aging \
 
 `data/sources.csv` registers open canine and human datasets, including Dog10K aging RNA, canine
 osteosarcoma PBMC scRNA-seq, human pancreatic mRNA-vaccine scRNA/TCR data, human vaccine plus
-pembrolizumab scRNA-seq, and a controlled-access longitudinal melanoma vaccine study.
+pembrolizumab scRNA-seq, longitudinal melanoma checkpoint scRNA/TCR/ADT, and a controlled-access
+longitudinal melanoma vaccine study.
 
 ### Real prime–boost Volterra evaluation
 
