@@ -36,10 +36,12 @@ Durability is therefore reached in **two moves**:
   The induction regimen closes every enumerated escape route at both occupied brain sites,
   and every double and triple combination, with zero uncovered — and the audit re-ran the
   code and confirmed the *arithmetic*. What it did **not** confirm is the inputs: graded by
-  evidence, only 1 of 12 escape closures rests on a measurement in canine HS, 2 are transfers
-  from the wrong disease, 2 are structural arguments, and 7 rest on assumed kill rates (see
-  "What 'closed' is actually worth" below). So the coverage is best read as a **structural /
-  hypothesis-level** result, not an empirical one.
+  evidence, 4 of 12 escape closures rest on a measurement in canine HS (the microtubule
+  induction class closing escapes 1–3, plus NF-κB), 2 are transfers from the wrong disease, 2 are
+  structural arguments, and 4 rest on assumed kill rates — still including the ten-year arm (see
+  "What 'closed' is actually worth" below). So the induction backbone is now measured-active, but
+  the coverage as a whole is still best read as a **structural / hypothesis-level** result, not a
+  fully empirical one.
 - The **ten-year half is a scientifically grounded hypothesis, not a result.** It rests
   on a maintenance pill whose durability *grade* varies by genotype, and on numbers that
   have never been measured in a dog. It reduces to a single inequality that fails at the
@@ -209,10 +211,10 @@ escapes by what its closure actually rests on:
 
 | Evidence grade | Escapes | Meaning |
 | --- | --- | --- |
-| Measured in canine HS | **1** | NF-κB / parthenolide has real canine-HS activity data — and even its premise (that ERK activation predicts response) is contested by an unpropagated 11-line finding |
+| Measured in canine HS | **4** | the **microtubule induction class** (vincristine/vinblastine/paclitaxel, IC50 1.77–58.4 ng/ml in 4 canine HS lines, PMID 25715778) closing escapes 1–3, plus NF-κB/parthenolide (whose premise — that ERK activation predicts response — is contested by an unpropagated 11-line finding) |
 | Transferred (wrong disease/species) | **2** | PI3K IC50s from canine *hemangiosarcoma*; hydroxychloroquine from canine *lymphoma* |
 | Structural / design argument | **2** | the persister schedule (duty→1.0) and making MGMT irrelevant by dropping the alkylator class — sound reasoning, but not measurements |
-| Assumed, never-measured kill rate | **7** | including the single load-bearing induction cytotoxic and the entire ten-year maintenance arm |
+| Assumed, never-measured kill rate | **4** | clodronate, the immune arm, ferroptosis, and the entire ten-year maintenance arm — the load-bearing induction *class* is now measured-active (above), leaving its per-day kill *rate* and these four as the gaps |
 
 So the headline should read: **the coverage claim is a structural / hypothesis-level result, not
 an evidence-backed one.** It is, however, falsifiable and cheap to start falsifying — the

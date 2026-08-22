@@ -13,17 +13,22 @@ def test_tally_sums_to_the_escape_count():
     assert sum(t.values()) == len(cov.COVERAGE) == 12
 
 
-def test_the_coverage_claim_is_not_mostly_evidence_backed():
-    """The honest headline: most escapes are NOT closed by a real measurement. If a future edit
-    quietly upgrades the grades, this test should fail and force a re-justification."""
+def test_coverage_is_still_not_fully_evidence_backed():
+    """The honest headline: the induction backbone (microtubule class, escapes 1-3) plus NF-kB
+    are now measured in canine HS, but a real share still is not -- and the ten-year arm remains
+    assumed. If a future edit claims full backing, this fails and forces re-justification."""
     backed = cov.evidence_backed()
-    assert len(backed) < len(cov.COVERAGE) / 2
-    # at most one line may claim canine-HS-measured backing (parthenolide), and its premise is
-    # flagged contested in its own record
-    canine = cov.measured_in_canine_hs()
-    assert len(canine) <= 1
-    if canine:
-        assert "contested" in canine[0].key_number_status.lower()
+    assert len(backed) < len(cov.COVERAGE)  # never all twelve
+    canine = {c.escape_number for c in cov.measured_in_canine_hs()}
+    # the microtubule-cytotoxic escapes (1-3) and NF-kB (7) are the canine-HS-measured ones
+    assert canine == {1, 2, 3, 7}
+    # escapes 1-3 must cite the canine-HS cytotoxicity paper, not merely assert
+    for c in cov.COVERAGE:
+        if c.escape_number in (1, 2, 3):
+            assert "25715778" in c.key_number_status
+    # the ten-year arm (escape 12) is still NOT evidence-backed
+    e12 = next(c for c in cov.COVERAGE if c.escape_number == 12)
+    assert not e12.backing.is_evidence_backed
 
 
 def test_the_ten_year_arm_is_not_evidence_backed():

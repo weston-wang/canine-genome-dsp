@@ -10,9 +10,10 @@
 
 A therapy *designed* to cover all sites, mechanisms, and escapes for this presentation exists and
 is specified below. Whether it *does* cover them is, today, a **structural / hypothesis-level**
-claim, not an evidence-backed result: of the twelve escape routes the model closes, **1** rests on
-a measurement in canine HS, **2** on transfers from another disease, **2** on mechanism/design
-arguments, and **7** on assumed, never-measured kill rates. This document states the design, grades
+claim, not a fully evidence-backed result: of the twelve escape routes the model closes, **4** rest
+on a measurement in canine HS (the microtubule induction class closing escapes 1–3, PMID 25715778,
+plus NF-κB), **2** on transfers from another disease, **2** on mechanism/design arguments, and **4**
+on assumed, never-measured kill rates (still including the ten-year arm). This document states the design, grades
 every line, and gives the prioritized experiments that would move each line from *assumed* to
 *measured*. Producing an evidence-backed "covers everything" without those experiments would
 require inventing the missing numbers, which this project does not do.
@@ -60,9 +61,9 @@ dosing + the immune arm (no durability number computed for that compartment, by 
 
 | # | Escape | Axis | Closing agent in the design | Evidence grade |
 | --- | --- | --- | --- | --- |
-| 1 | MAPK reactivation above the block | pathway | radiation / microtubule cytotoxic / PRMT5i | ASSUMED |
-| 2 | MEK target-site mutation | pathway | radiation / microtubule cytotoxic / PRMT5i | ASSUMED |
-| 3 | Activating ERK lesion | pathway | downstream / position-independent agents | ASSUMED |
+| 1 | MAPK reactivation above the block | pathway | radiation / microtubule cytotoxic / PRMT5i | MEASURED (canine HS, class) |
+| 2 | MEK target-site mutation | pathway | radiation / microtubule cytotoxic / PRMT5i | MEASURED (canine HS, class) |
+| 3 | Activating ERK lesion | pathway | downstream / microtubule cytotoxic | MEASURED (canine HS, class) |
 | 4 | RTK bypass into PI3K/AKT | pathway | paxalisib | MEASURED (other disease) |
 | 5 | CSF1R / lineage independence | lineage | liposomal clodronate | ASSUMED |
 | 6 | Antigen loss (MHC-I intact) | immune | radiation + cytotoxic + anti-PD-1 | ASSUMED |

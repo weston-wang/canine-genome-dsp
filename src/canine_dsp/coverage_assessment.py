@@ -73,27 +73,32 @@ class EscapeCoverage:
 COVERAGE: tuple[EscapeCoverage, ...] = (
     EscapeCoverage(
         1, "position-independent agents (radiation / microtubule cytotoxic / PRMT5i)",
-        Backing.ASSUMED,
-        "MEK-inhibitor response is measured in 3 canine HS lines (PMID 39202410), but this route "
-        "is closed by the cytotoxic, whose per-day kill rate is assumed, not measured.",
-        "Measure the microtubule agent's kill rate in canine HS cells.",
-        Provenance.ASSUMED,
+        Backing.MEASURED_CANINE_HS,
+        "Closed by the microtubule cytotoxic, and the microtubule CLASS is measured potently "
+        "cytotoxic in 4 canine HS lines (vincristine IC50 1.77-2.69, vinblastine 1.75-2.78, "
+        "paclitaxel 23.8-58.4 ng/ml; PMID 25715778). Gaps: the chosen induction agent "
+        "(lisavanbulin, colchicine-site) differs from the measured vinca/taxane agents, and an "
+        "IC50 is a concentration, not the per-day kill rate the margin uses.",
+        "Measure the specific induction agent's per-day kill rate in canine HS cells.",
+        Provenance.MEASURED,
     ),
     EscapeCoverage(
         2, "position-independent agents (radiation / microtubule cytotoxic / PRMT5i)",
-        Backing.ASSUMED,
-        "Closure does not depend on hitting MEK at all; it rests on the cytotoxic's assumed kill "
-        "rate. In the Monte Carlo this was the slowest-collapsing route.",
-        "Measure the microtubule agent's kill rate in canine HS cells.",
-        Provenance.ASSUMED,
+        Backing.MEASURED_CANINE_HS,
+        "Closure does not depend on hitting MEK; it rests on the microtubule cytotoxic, whose "
+        "class is measured potently active in canine HS (PMID 25715778). Same specific-agent and "
+        "kill-rate gaps as escape 1. In the Monte Carlo this was the slowest-collapsing route.",
+        "Measure the specific induction agent's per-day kill rate in canine HS cells.",
+        Provenance.MEASURED,
     ),
     EscapeCoverage(
-        3, "downstream / position-independent agents",
-        Backing.ASSUMED,
-        "A single activating ERK lesion is a deliberately pessimistic single-hit; closure again "
-        "rests on the assumed cytotoxic kill rate.",
-        "Measure the microtubule agent's kill rate in canine HS cells.",
-        Provenance.ASSUMED,
+        3, "downstream / position-independent agents (microtubule cytotoxic)",
+        Backing.MEASURED_CANINE_HS,
+        "A deliberately pessimistic single-hit; closed by the microtubule cytotoxic, whose class "
+        "is measured active in canine HS (PMID 25715778). Same specific-agent and kill-rate gaps "
+        "as escape 1.",
+        "Measure the specific induction agent's per-day kill rate in canine HS cells.",
+        Provenance.MEASURED,
     ),
     EscapeCoverage(
         4, "paxalisib (PI3K/AKT inhibitor)",
@@ -160,8 +165,9 @@ COVERAGE: tuple[EscapeCoverage, ...] = (
         11, "made irrelevant by dropping the alkylator class (use a microtubule agent)",
         Backing.STRUCTURAL,
         "A mitotic poison leaves no O6-methylguanine lesion for MGMT to repair, so MGMT cannot "
-        "apply -- a sound mechanism-level move. (The microtubule agent's own kill rate is still "
-        "assumed, which is captured under escapes 1-3.)",
+        "apply -- a sound mechanism-level move, and the substitute (microtubule) class is measured "
+        "potently active in canine HS (PMID 25715778); the specific-agent kill rate is the residual "
+        "gap, captured under escapes 1-3.",
         "Confirm the chosen agent is a non-alkylator in the canine formulation used.",
         Provenance.DERIVED,
     ),
@@ -339,14 +345,16 @@ def honest_coverage_statement() -> str:
     n = len(COVERAGE)
     return (
         f"All {n} escapes are reported closed by the model at both occupied CNS sites. Graded by "
-        f"evidence, that breaks down as: {t['MEASURED_CANINE_HS']} closure backed by activity "
-        f"measured in canine HS (and its premise is contested), {t['MEASURED_OTHER']} transferred "
-        f"from another disease/species, {t['STRUCTURAL']} resting on a mechanism/design argument "
-        f"with no kill number, and {t['ASSUMED']} resting on assumed, never-measured kill rates -- "
-        f"including the single load-bearing induction agent and the entire ten-year maintenance "
-        f"arm. 'Covers all sites, mechanisms and escapes' is therefore a STRUCTURAL / "
-        f"hypothesis-level claim, not an evidence-backed result. It is falsifiable and cheap to "
-        f"start falsifying: {decisive_experiments()[0]}"
+        f"evidence, that breaks down as: {t['MEASURED_CANINE_HS']} backed by activity measured in "
+        f"canine HS (the microtubule induction class, PMID 25715778, closing escapes 1-3, plus "
+        f"NF-kB/parthenolide whose premise is contested), {t['MEASURED_OTHER']} transferred from "
+        f"another disease/species, {t['STRUCTURAL']} resting on a mechanism/design argument with no "
+        f"kill number, and {t['ASSUMED']} resting on assumed, never-measured kill rates -- still "
+        f"including the entire ten-year maintenance arm. So the induction backbone is now "
+        f"measured-active in the disease, but 'covers all sites, mechanisms and escapes' remains a "
+        f"STRUCTURAL / hypothesis-level claim overall -- what stays unmeasured are per-day kill "
+        f"rates, canine CNS penetration, and the second-primary hinge. It is falsifiable and cheap "
+        f"to start falsifying: {decisive_experiments()[-1]}"
     )
 
 
