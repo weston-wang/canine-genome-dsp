@@ -218,6 +218,121 @@ def decisive_experiments() -> list[str]:
     return seen
 
 
+@dataclass(frozen=True)
+class MaintenanceTierCoverage:
+    """Evidence behind one genotype-matched maintenance arm (the ten-year / second-primary side).
+
+    The escape grades above concern closing the FIRST tumour, where the induction backbone
+    deliberately routes around reroutable targets. The maintenance tiers are graded separately
+    because their evidence is genuinely different -- and, for the two commonest cases, better:
+    the drug class has real measured response in canine HS, which the escape-closure view (which
+    treats MEK as reroutable and hands closure to the cytotoxic) never credits.
+    """
+
+    genotype: str
+    rough_share: str
+    anchor: str
+    backing: Backing
+    canine_hs_evidence: str
+    key_gap: str
+    citation: str
+    provenance: Provenance
+
+
+# Grades and citations are read from core.genotype_tiered_durability, pharmacology, mapk_resistance
+# and core.evidence -- all already in the repo. No external lookup.
+MAINTENANCE_TIERS: tuple[MaintenanceTierCoverage, ...] = (
+    MaintenanceTierCoverage(
+        "PTPN11/SHP2 or KRAS driver (MAPK)", "~59%",
+        "MEK inhibitor (mirdametinib, CNS-penetrant)",
+        Backing.MEASURED_CANINE_HS,
+        "Three canine HS lines (BD/OD/DH82) carrying these drivers responded in vitro to MEK "
+        "inhibition, cobimetinib IC50 74-372 nM, below achievable plasma Cmax (~1640 nM).",
+        "A MEK block is reroutable in an ESTABLISHED tumour (escapes 1-3); it works at EMERGENCE "
+        "of a new primary, so it leans on early detection. Mirdametinib's canine CNS penetration "
+        "is unmeasured.",
+        "PMID 39202410 (response); PMID 39258288 / 31277422 (frequency)",
+        Provenance.MEASURED,
+    ),
+    MaintenanceTierCoverage(
+        "none targetable / unknown", "residual",
+        "immune surveillance + cycled lomustine (CCNU)",
+        Backing.MEASURED_CANINE_HS,
+        "Lomustine has real canine-HS efficacy: phase II ORR 0.46 (n=56, PMID 17338159), and in "
+        "localized HS after debulking a 568-day median / 37.5% relapse-free (n=16, PMID 19453368) "
+        "-- the disease's only structurally-matched durability datapoint.",
+        "Modest ORR and not durable as monotherapy; the 37.5% comparator is the exact external "
+        "check the durability engine FAILED (predicted 0.0%). This is a floor, not a cure.",
+        "PMID 17338159; PMID 19453368",
+        Provenance.MEASURED,
+    ),
+    MaintenanceTierCoverage(
+        "MTAP deleted", "recurrent minority",
+        "PRMT5 inhibitor (MTA-cooperative; TNG908/TNG462)",
+        Backing.MEASURED_OTHER,
+        "The MTAP-deletion -> PRMT5-dependency synthetic lethality is validated in human "
+        "MTAP-deleted cancers (the basis of the TNG908/TNG462 phase I/II programs); the cell "
+        "cannot reroute around a homozygous deletion.",
+        "No canine-HS data at all: PRMT5i potency and canine CNS penetration are both unmeasured, "
+        "and the tumour must first be confirmed MTAP-deleted (one IHC stain -- the cheapest "
+        "falsifier in the project).",
+        "human MTAP-deleted cancers, phase I/II (repo: core.breed_wide_durability)",
+        Provenance.TRANSFERRED,
+    ),
+    MaintenanceTierCoverage(
+        "PTEN deleted", "minority",
+        "PI3K inhibitor (paxalisib)",
+        Backing.MEASURED_OTHER,
+        "PI3K-inhibitor IC50s measured in canine cells, and paxalisib is a confirmed non-substrate "
+        "of P-gp/BCRP with rodent brain penetration (Kp,uu ~0.31).",
+        "The canine PI3K IC50s are from HEMANGIOSARCOMA, not HS (a transfer catalogued in "
+        "core.evidence); PTEN-loss dependency has known resistance routes.",
+        "canine hemangiosarcoma PI3K IC50s (repo: core.evidence); paxalisib efflux status",
+        Provenance.TRANSFERRED,
+    ),
+    MaintenanceTierCoverage(
+        "CDKN2A deleted, RB1 intact", "minority",
+        "CDK4/6 inhibitor (abemaciclib)",
+        Backing.MEASURED_OTHER,
+        "Abemaciclib IC50 910-3090 nM across 5 canine melanoma lines (vs 5230 nM normal "
+        "fibroblasts) -- the closest real canine potency for the class.",
+        "Canine MELANOMA, not HS; and it is CYTOSTATIC (G1 arrest, weak apoptosis), so its kill "
+        "ceiling cannot exceed the clone's growth rate. Needs RB1 intact or it drops to the floor.",
+        "PMC12240792 (repo: pharmacology.CDK46_CANINE_POTENCY)",
+        Provenance.TRANSFERRED,
+    ),
+)
+
+
+def maintenance_tally() -> dict[str, int]:
+    """Count maintenance tiers by evidence grade."""
+    out: dict[str, int] = {b.name: 0 for b in Backing}
+    for m in MAINTENANCE_TIERS:
+        out[m.backing.name] += 1
+    return out
+
+
+def maintenance_measured_in_canine_hs() -> list[MaintenanceTierCoverage]:
+    """Maintenance tiers whose drug class has response measured in canine HS specifically."""
+    return [m for m in MAINTENANCE_TIERS if m.backing is Backing.MEASURED_CANINE_HS]
+
+
+def maintenance_statement() -> str:
+    """One paragraph: the maintenance side is better-evidenced than escape-closure, and why."""
+    canine = maintenance_measured_in_canine_hs()
+    shares = " + ".join(m.rough_share for m in canine)
+    return (
+        f"The genotype-matched maintenance arm is better evidenced than the escape-closure view "
+        f"suggests. Of {len(MAINTENANCE_TIERS)} tiers, {len(canine)} have drug-class response "
+        f"MEASURED in canine HS -- the MAPK-driver majority (MEK inhibition; cobimetinib IC50 "
+        f"74-372 nM, PMID 39202410) and the floor (lomustine; PMID 17338159/19453368), covering "
+        f"roughly {shares} of cases between them. The remaining tiers (MTAP/PRMT5i, PTEN/PI3Ki, "
+        f"CDKN2A/CDK4-6i) rest on transfers from human cancers or other canine diseases. So for "
+        f"the commonest genotype the maintenance DRUG CLASS is measured in the disease; what stays "
+        f"unmeasured is canine CNS penetration and whether early-emergence dosing holds for years."
+    )
+
+
 def honest_coverage_statement() -> str:
     """One paragraph: what the coverage claim is actually worth, by the numbers."""
     t = tally()
@@ -240,3 +355,8 @@ if __name__ == "__main__":
     print()
     for c in COVERAGE:
         print(f"  #{c.escape_number:>2} [{c.backing.name:<18}] {c.escape.name}")
+    print()
+    print(maintenance_statement())
+    print()
+    for m in MAINTENANCE_TIERS:
+        print(f"  [{m.backing.name:<18}] {m.rough_share:<20} {m.genotype} -> {m.anchor}")

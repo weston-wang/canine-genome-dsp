@@ -47,3 +47,37 @@ def test_honest_statement_names_the_structural_verdict():
     statement = cov.honest_coverage_statement()
     assert "hypothesis" in statement.lower() or "structural" in statement.lower()
     assert "12" in statement
+
+
+def test_every_maintenance_tier_is_graded_and_cited():
+    assert len(cov.MAINTENANCE_TIERS) == 5
+    for m in cov.MAINTENANCE_TIERS:
+        assert m.citation
+        assert m.canine_hs_evidence
+        assert m.key_gap  # every tier keeps its honest caveat
+
+
+def test_the_two_commonest_tiers_have_canine_hs_backing():
+    """The upgrade: MAPK-majority and floor tiers rest on measured canine-HS drug response, not
+    assumptions. If a future edit downgrades them, this fails and forces a re-check."""
+    canine = cov.maintenance_measured_in_canine_hs()
+    genotypes = " ".join(m.genotype for m in canine).lower()
+    assert "mapk" in genotypes  # the ~59% majority
+    assert len(canine) == 2
+    # the MAPK tier must cite the cobimetinib canine-HS response paper
+    mapk = next(m for m in cov.MAINTENANCE_TIERS if "MAPK" in m.genotype)
+    assert "39202410" in mapk.citation
+
+
+def test_mtap_tier_is_a_transfer_not_canine_measured():
+    """MTAP/PRMT5i has no canine-HS data; it must not be graded as canine-measured."""
+    mtap = next(m for m in cov.MAINTENANCE_TIERS if "MTAP" in m.genotype)
+    assert mtap.backing is cov.Backing.MEASURED_OTHER
+    assert "no canine-hs data" in mtap.key_gap.lower()
+
+
+def test_maintenance_tally_sums_and_statement_is_honest():
+    assert sum(cov.maintenance_tally().values()) == len(cov.MAINTENANCE_TIERS)
+    statement = cov.maintenance_statement()
+    assert "measured in canine hs" in statement.lower()
+    assert "unmeasured" in statement

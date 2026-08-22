@@ -36,13 +36,20 @@ non-substrate of P-gp/BCRP), liposomal clodronate (macrophage-lineage depletion)
 **Move 2 — Genotype-matched maintenance (indefinite).** A single targeted pill keyed to the
 tumour's driver, lethal only to cells carrying the lesion:
 
-| Genotype | Maintenance | Durability grade (design) |
-| --- | --- | --- |
-| MTAP deleted | PRMT5 inhibitor (MTA-cooperative; TNG908/TNG462) | strongest — genotype-locked |
-| PTEN deleted | PI3K inhibitor (paxalisib) | strong dependency |
-| CDKN2A deleted, RB1 intact | CDK4/6 inhibitor (abemaciclib) | strong dependency |
-| SHP2/KRAS driver (~59%) | MEK inhibitor (mirdametinib, CNS-penetrant) | medium — surveillance-dependent |
-| none targetable | immune surveillance + cycled chemotherapy | floor — monitored |
+| Genotype | Maintenance | Durability grade (design) | Evidence grade |
+| --- | --- | --- | --- |
+| SHP2/KRAS driver (~59%) | MEK inhibitor (mirdametinib, CNS-penetrant) | medium — surveillance-dependent | **measured in canine HS** (cobimetinib IC50 74–372 nM, 3 lines, PMID 39202410) |
+| none targetable (residual) | immune surveillance + cycled lomustine | floor — monitored | **measured in canine HS** (lomustine ORR 0.46, PMID 17338159; 568 d/37.5%, PMID 19453368) |
+| MTAP deleted | PRMT5 inhibitor (MTA-cooperative; TNG908/TNG462) | strongest — genotype-locked | transfer (human MTAP-deleted cancers; no canine-HS data) |
+| PTEN deleted | PI3K inhibitor (paxalisib) | strong dependency | transfer (canine hemangiosarcoma IC50s) |
+| CDKN2A deleted, RB1 intact | CDK4/6 inhibitor (abemaciclib) | strong dependency | transfer (canine melanoma IC50 910–3090 nM; cytostatic) |
+
+**The maintenance side is better-evidenced than the escape-closure side.** For the **~59% MAPK-driver
+majority** the maintenance *drug class* has direct measured in-vitro response in canine HS cells, and
+the floor tier rests on real canine-HS lomustine data. What remains unmeasured for these is canine CNS
+penetration of the specific CNS-penetrant analog and whether early-emergence dosing holds for years —
+not whether the drug hits the disease. The three deletion-anchored tiers rest on transfers from human
+cancers or other canine diseases (`canine_dsp.coverage_assessment.MAINTENANCE_TIERS`).
 
 **Delivery to the CNS.** Systemic at favourable access; for the parenchyma a resection-cavity
 drug-eluting implant / convection-enhanced delivery removes the penetration bottleneck by
