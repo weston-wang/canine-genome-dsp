@@ -232,6 +232,55 @@ from real UniProt sequences in `canine_dsp.sequence_conservation` (ERK2 100%, PI
 99.37%, β-tubulin 98.42%, …), so an inhibitor's *fit* to the canine target is established fact —
 leaving exposure and the 91%-conserved P-gp efflux that gates delivery as the measured unknowns.
 
+### Escape by escape — agent, class, potency, toxicity
+
+The full mapping behind "all twelve closed," drawn from `disease.ESCAPES`, `coverage_assessment`,
+`pkpd`, and `core.toxicity`. Note the structural fact it makes visible: **one position-independent
+cytotoxic (the microtubule agent) closes seven of the twelve** — a mitotic poison kills a dividing
+cell irrespective of pathway, antigen, or ferroptosis state — so most rows share a drug, and the
+grade is carried by that one agent's canine-HS cytotoxicity data (PMID 25715778).
+
+| # | Escape (axis) | Closing agent · class | Potency / evidence | Toxicity: axis · budget · in-dogs | Grade |
+| --- | --- | --- | --- | --- | --- |
+| 1 | MAPK reactivation (pathway) | microtubule cytotoxic · mitotic poison | class active in 4 canine HS lines (PMID 25715778); specific-agent kill rate unmeasured | normal-brain · 0.70 · no | measured (canine HS) |
+| 2 | MEK target-site mutation (pathway) | microtubule cytotoxic · mitotic poison | as #1 (closure does not depend on hitting MEK) | normal-brain · 0.70 · no | measured (canine HS) |
+| 3 | Activating ERK lesion (pathway) | microtubule cytotoxic · mitotic poison | as #1 | normal-brain · 0.70 · no | measured (canine HS) |
+| 4 | RTK bypass → PI3K/AKT (pathway) | paxalisib · PI3K/AKT inhibitor | PI3K IC50s from canine *hemangiosarcoma* (transfer); Kp,uu 0.31 rodent | metabolic (hyperglycaemia) · 0.60 · yes | transfer |
+| 5 | CSF1R / lineage independence (lineage) | liposomal clodronate · lineage depletion | 2/5 dog response; kill rate unmeasured in any species; **cannot cross intact BBB** | hepatic · 0.20 · no | measured (canine HS), delivery-limited in brain |
+| 6 | Antigen loss, MHC-I intact (immune) | microtubule cytotoxic (+ anti-PD-1 suppl.) · mitotic poison | position-independent (PMID 25715778); anti-PD-1 canine-HS efficacy unmeasured | normal-brain · 0.70 · no | measured (canine HS) |
+| 7 | NF-κB independence (pathway) | parthenolide / DMAPT · NF-κB inhibitor | real canine-HS activity (lines + primary cells); premise contested (PMID 40500939) | GI · 0.35 · no | measured (canine HS) |
+| 8 | Ferroptosis resistance (metabolic) | microtubule cytotoxic; **statin dropped** · mitotic poison | ferroptosis inducer counter-indicated; cytotoxic closes it (PMID 25715778) | normal-brain · 0.70 · no | measured (canine HS) |
+| 9 | Autophagy independence (metabolic) | hydroxychloroquine · autophagy inhibitor | canine *lymphoma* phase I (transfer); ~2e-5 margin cost — near-free to drop | marrow · 0.45 · yes | transfer |
+| 10 | Drug-tolerant persister (dormancy) | continuous / metronomic dosing · schedule | duty-cycle argument; no persister drug approved in any species | (workhorse) normal-brain · 0.70 · no | structural |
+| 11 | MGMT repair (DNA repair) | drop the alkylator class → mitotic poison · drug choice | mechanism: a mitotic poison leaves no O6-lesion to repair | n/a | structural |
+| 12 | Germline second primary (germline) | PRMT5 inhibitor · synthetic-lethal | model-derived (`pkpd`): closes at ~0.2% CNS access; potency human MTAP-null, target 99.37% conserved | marrow · 0.35 · no | model-derived (conditional on MTAP-deleted) |
+
+Broad support at both brain sites comes from **radiation** (position-/antigen-indifferent by
+physics; normal-brain 0.80 + seizure load 0.55) and, for the parenchyma, **local delivery** (CED /
+cavity implant), which removes penetration as a constraint by construction. The one computed
+toxicity collision: full-dose radiation and the CNS microtubule agent both load the normal-brain
+axis (0.80 + 0.70 = 1.50, oversubscribed), so in the brain they must be **sequenced** or local
+delivery substituted for whole-brain radiation.
+
+### Does the site change any of this?
+
+**The escape map does not change with site — delivery does.** Which escapes exist, and which agent
+class closes each, is the same in the lung, the brain parenchyma, and the CSF; the antigen axis was
+found inert (0.000 at every site). What the site decides is the single thing a kill margin hides —
+whether a systemically dosed drug reaches the cells:
+
+- **Lung / disseminated** — systemically reachable at full exposure; closes with oral/systemic drug
+  alone, no local delivery.
+- **Brain parenchyma** — behind an intact barrier; needs an intrinsically brain-penetrant agent or
+  the cavity implant. This is the site that forced the local-delivery work.
+- **Leptomeninges / CSF** — not reached systemically; addressed by intrathecal dosing + craniospinal
+  radiation + the immune arm (no durability number computed for this compartment).
+
+Two agents are genuinely site-limited: **liposomal clodronate** (escape 5) cannot cross into intact
+brain tissue, so there the lineage escape leans on the penetrant partners; and any small molecule's
+brain closure rides on the unmeasured canine CNS penetration (the P-gp axis). So the coverage claim
+is site-independent in its *biology* and site-dependent in its *pharmacokinetics*.
+
 ---
 
 ## The ten-year durability — the hypothesis half
