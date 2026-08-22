@@ -26,6 +26,10 @@ def test_csf_is_addressed_but_durability_unquantified():
     assert a["reached"] is True
     assert a["why_no_durability_number"]  # the specific reasons are enumerated
     assert "retracted" in " ".join(a["why_no_durability_number"]).lower()  # the 470x headline
+    # better-quantified: a computed cell-level concentration bar per drug, and it is low
+    q = a["quantified_threshold"]
+    assert q["tng908"]["cell_concentration_to_close_nM"] < 5
+    assert q["cobimetinib"]["cell_concentration_to_close_nM"] < 100
 
 
 def test_mapk_majority_is_never_locked():

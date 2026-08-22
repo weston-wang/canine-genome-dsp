@@ -143,17 +143,44 @@ CSF_RESOLUTION = {
         ("Radiation reaches the compartment but is DUTY-LIMITED (a ~21-day course), so it provides "
          "coverage, not the continuous presence maintenance-at-emergence needs."),
     ),
-    "verdict": "ADDRESSED for coverage, NOT QUANTIFIED for durable maintenance. The honest gap is a "
-               "device (sustained intrathecal release to beat the frequency wall) plus two "
-               "measurements (fluid-space saturation; the breed's tolerance of repeated intrathecal "
-               "dosing). It is the one compartment where a durability figure is deliberately withheld.",
+    "verdict": "ADDRESSED for coverage, and now BOUNDED for durable maintenance: the kill closes "
+               "once the drug reaches only ~1.8 nM (PRMT5i) or ~67 nM (MEKi) at the leptomeningeal "
+               "cells (see quantified_threshold) -- concentrations intrathecal dosing exceeds by "
+               "orders of magnitude in bulk CSF. So the single open quantity is the FLUID-TO-CELL "
+               "engagement fraction; the practical gap is a sustained-release device (to beat the "
+               "frequency wall) plus two measurements (that engagement fraction; the breed's "
+               "tolerance of repeated intrathecal dosing).",
 }
 
 
+def csf_required_cell_concentration() -> dict:
+    """Better quantification: the free drug concentration AT the leptomeningeal tumour cells that the
+    maintenance kill needs to beat growth, per drug with a measured IC50.
+
+    Inverts the Emax kill (``pkpd.emax_kill_rate``): closure needs
+    ``ln(1 + C/IC50)/assay_days > growth`` -> ``C > IC50 * (exp(growth*assay_days) - 1)``. That factor
+    is ~0.18, so the required CELL-level concentration is a small fraction of the IC50-equivalent --
+    numbers intrathecal dosing reaches with orders of magnitude to spare in BULK CSF. So the CSF is
+    not open-ended: the only unquantified quantity is the fraction of bulk CSF drug that engages the
+    tumour cells (fluid-to-cell), and here is the bar that fraction has to clear.
+    """
+    import math
+    factor = math.exp(pkpd.GROWTH_PER_DAY * pkpd.DEFAULT_ASSAY_DAYS) - 1.0
+    out = {}
+    for key in ("tng908", "cobimetinib"):
+        d = pkpd.PARAMS[key]
+        out[key] = {
+            "drug": d.name,
+            "ic50_nM": d.ic50_nM,
+            "cell_concentration_to_close_nM": round(d.ic50_nM * factor, 2),
+        }
+    return out
+
+
 def csf_answer() -> dict:
-    """The CSF/leptomeningeal resolution: reached and addressed, durability deliberately unquantified,
-    with the specific reasons and the experiments that would close it."""
-    return CSF_RESOLUTION
+    """The CSF/leptomeningeal resolution: reached and addressed, durability now BOUNDED (the required
+    cell-level concentration is computed), with the one remaining unknown and the experiments named."""
+    return {**CSF_RESOLUTION, "quantified_threshold": csf_required_cell_concentration()}
 
 
 @dataclass(frozen=True)

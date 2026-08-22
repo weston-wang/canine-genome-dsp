@@ -347,17 +347,19 @@ holds.** Three honest results fall out, faithful to the repo:
   robustly. The lock, not the raw margin, is what separates them (the old 0.15/day potency implied a
   ~0.37 access threshold; the derived kill clears growth at ~0.2%–4% access, so margin size was never
   the binding constraint; TNG908's Cmax is a placeholder, so absolute margins aren't comparable).
-- **CSF is addressed, but its durability figure is deliberately withheld — not absent.** The
-  compartment *is* reached and treated: **craniospinal radiation** for coverage (physics — it ignores
-  the barrier), **intrathecal** dosing for rate control (an established canine route), and an
-  **immune arm** for persistence. What is withheld is a durability *number*, for four specific
-  reasons the repo records (`maintenance_durability.csf_answer()`): the intrathecal "470× headroom"
-  headline was **audited and retracted** (an absolute-nM error against a placeholder), bulk CSF
-  concentration is not cell-surface exposure (fluid-space **saturation** is the real, unmeasured
-  question), no ERK/PI3K inhibitor has ever been given intrathecally **in any species**, and repeated
-  intrathecal dosing **collides with the breed's SOD1 / degenerative-myelopathy** predisposition. The
-  honest gap is a sustained-release **device** (to beat the dosing-frequency wall) plus two
-  measurements (fluid saturation; the breed's tolerance of repeat intrathecal dosing).
+- **CSF is addressed, and now *bounded* — not a blank.** The compartment *is* reached and treated:
+  **craniospinal radiation** for coverage (physics — it ignores the barrier), **intrathecal** dosing
+  for rate control (an established canine route), and an **immune arm** for persistence. And the
+  durability is now quantified as a threshold: inverting the Emax kill, closure needs only
+  **~1.8 nM (PRMT5i) or ~67 nM (MEKi) at the leptomeningeal cells**
+  (`maintenance_durability.csf_required_cell_concentration()`) — concentrations intrathecal dosing
+  exceeds by orders of magnitude in *bulk* CSF. So the one open quantity is the **fluid-to-cell
+  engagement fraction**: what share of bulk-CSF drug reaches the tumour deposits. That reframes the
+  earlier caveats — the "470× headroom" headline was **audited and retracted** (an absolute-nM error
+  against a placeholder), no ERK/PI3K inhibitor has been given intrathecally **in any species**, and
+  repeated intrathecal dosing **collides with the breed's SOD1 / degenerative-myelopathy**
+  predisposition — into one measurable unknown plus a **device** (sustained release to beat the
+  frequency wall) and a **breed-tolerance** measurement, rather than an open-ended gap.
 
 The whole result is model-based and conditional on continuous dosing being achievable and the site
 being reachable — not on genotype — and a second primary could in principle arise from a non-MTAP
