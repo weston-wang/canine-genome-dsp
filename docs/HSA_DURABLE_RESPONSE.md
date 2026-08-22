@@ -289,6 +289,60 @@ this analysis points at.
 
 *Tests: `test_hsa_gap_stack.py`*
 
+#### Is propranolol the only option? No — but the class has a poor record
+
+The stack asks for a ~16% growth reduction. It does not ask for propranolol specifically. Five
+growth-directed agents have canine splenic-HSA readouts, and every one of them was given **without a
+vaccine**:
+
+| agent | n | median OS | verdict |
+|---|---|---|---|
+| toceranib (VEGFR/PDGFR/KIT) — Gardner 2015, PMID 26062540 | 43 | 172 d | **negative** — "does not improve either disease free interval or overall survival" |
+| propranolol + doxorubicin — Borgatti 2025, PMID 40386412 | 20 | — | **negative** — "did not appear to influence treatment outcomes" |
+| thalidomide — Bray 2018, PMID 29210452 | 15 | 172 d | uncontrolled; identical median to the negative toceranib arm |
+| metronomic cyclophosphamide/etoposide/piroxicam — Lana 2007, PMID 17708397 | 9 | 178 d | suggestive, unrandomised (vs 133 d on doxorubicin) |
+| propranolol + vinblastine + RT — Moirano 2023, PMID 37800663 | 7 | 326 d | positive, small, **cardiac** site |
+
+So there is no shortage of candidates. The problem is that the class has largely failed in this
+disease — and where a partner drug is involved the split runs along the partner, not the agent: both
+clear negatives used **doxorubicin**, while the one clearly positive propranolol readout here and
+the human angiosarcoma result (Pasquier 2016, PMID 27211551) both used **vinblastine**. Lana's
+metronomic cocktail is the exception that fits neither side: no vinblastine, but also no randomised
+comparison.
+
+#### The back-test: the model predicts those failures
+
+The engine now takes a `growth_modifier` array, so an antiproliferative agent can be **scheduled** —
+ramped in from a start day, applied to chosen clones, optionally stopped — instead of being faked by
+permanently rewriting `model.growth`. A multiplier can never push net growth below zero, which is
+exactly right for this class: arrest is not death (the *cytostatic ceiling*).
+
+Running the configuration those five trials actually used — growth reduction, **no vaccine**:
+
+| growth suppression | 10-yr durable |
+|---|---|
+| 0% | 0.284 |
+| 16.3% | 0.336 |
+| 30% | 0.324 |
+| 50% | 0.524 |
+
+Slowing a clone that still has a positive margin delays relapse; it does not prevent it. The spread
+across the plausible range is inside Monte Carlo noise (±3 points at 250 trials), and only an
+implausible 50% cut moves the needle. **That is the real record**: three negative-or-flat trials at
+~172–178 days.
+
+Re-running the stack through the scheduled agent reproduces the earlier table (0.492 / 0.640 / 0.532
+/ 1.000), and adds one practically useful result: starting the agent on day 0, 60 or 180 all give
+1.000. It does not have to be given up front — it can follow the chemotherapy backbone.
+
+The back-test is a check on the *model*, not evidence for the stack. None of those trials included a
+vaccine or the corrected cross-resistance backbone; the stack's prediction is about a combination
+that has never been given to a dog, so the negative record neither confirms nor refutes it. What the
+back-test does establish is that the model does not naively reward antiproliferative agents — it
+predicted their failure before being asked to predict their success.
+
+*Tests: `test_hsa_antiproliferative.py`*
+
 ---
 
 ## 4. Escape routes

@@ -71,16 +71,33 @@ def drug_kill_rate(concentration, ic50_nM, hill: float, max_kill) -> np.ndarray:
 def simulate_resistance(model: ResistanceModel, concentration: np.ndarray, initial: np.ndarray,
                         injections: dict[int, np.ndarray] | None = None,
                         concentration_2: np.ndarray | None = None,
-                        additional_kill: np.ndarray | None = None) -> np.ndarray:
+                        additional_kill: np.ndarray | None = None,
+                        growth_modifier: np.ndarray | None = None) -> np.ndarray:
     """Simulate density-dependent multiclone tumor burden under a daily drug-concentration series.
     Net growth is logistic growth minus an Emax drug kill-rate term, so a clone whose kill rate
     exceeds its growth rate actually regresses (not just plateaus) -- required for "response, then
     progression from nadir" dynamics, rather than the drug only ever capping growth at zero.
+
+    `growth_modifier`, if given, is a `(days,)` or `(days, k)` array of multipliers applied to
+    `model.growth` before the density term. It expresses an ANTIPROLIFERATIVE agent, which is a
+    different thing from `additional_kill`: a multiplier of 0 arrests the population (net growth
+    zero, nothing dies), while a kill term of equal size makes it shrink. That distinction is the
+    cytostatic ceiling `pharmacology.cytostatic_ceiling` computes, and without this parameter the
+    engine could only express an antiproliferative agent by permanently rewriting `model.growth`,
+    which cannot start on a given day, wane, or apply to some clones and not others.
+
+    `None` (the default) leaves every existing caller byte-identical.
     """
     initial = np.asarray(initial, float)
     state = np.zeros((len(concentration) + 1, len(initial)))
     state[0] = initial
     has_second_drug = concentration_2 is not None and model.ic50_nM_2 is not None
+    if growth_modifier is not None:
+        growth_modifier = np.asarray(growth_modifier, dtype=float)
+        if np.any(growth_modifier < 0):
+            raise ValueError("growth_modifier must be nonnegative")
+        if growth_modifier.ndim == 1:
+            growth_modifier = growth_modifier[:, None]
     for t, c in enumerate(np.asarray(concentration, float)):
         current = state[t]
         density = current.sum() / model.carrying_capacity
@@ -89,7 +106,8 @@ def simulate_resistance(model: ResistanceModel, concentration: np.ndarray, initi
             kill = kill + drug_kill_rate(concentration_2[t], model.ic50_nM_2, model.hill_2, model.max_kill_2)
         if additional_kill is not None:
             kill = kill + additional_kill[t]
-        net = model.growth * (1 - density) - kill
+        growth = model.growth if growth_modifier is None else model.growth * growth_modifier[t]
+        net = growth * (1 - density) - kill
         grown = current * np.exp(np.clip(net, -30, 30))
         state[t + 1] = grown @ model.mutation
         if injections and (t + 1) in injections:
