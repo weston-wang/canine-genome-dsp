@@ -203,7 +203,7 @@ def antigen_convergence_demo(out: Path, breed: str = "bmd",
             "resistance mechanism does to the antigen.",
             "the immune-escape clone's seeding rate and 15% growth penalty are both illustrative, and "
             "they set how fast the long-horizon erosion runs",
-            "the whole chain still rests on Corgi HS carrying a PTPN11/KRAS hotspot at all, which "
+            "the whole chain still rests on localized HS carrying a PTPN11/KRAS hotspot at all, which "
             "remains unsequenced -- antigen convergence says resistance will not shed the antigen, "
             "not that the antigen is present",
             "vaccine and cytotoxic schedules are not co-optimized; VACCINE_START_DAY=90 was chosen "

@@ -18,8 +18,8 @@ from .hsa_cli import (
     hsa_vaccine_followon_demo,
 )
 from .antigen_convergence_cli import antigen_convergence_demo
-from .corgi_answer_cli import corgi_answer_demo
-from .histiocytic_cli import corgi_driver_hypothesis_demo
+from .endurance_answer_cli import endurance_answer_demo
+from .histiocytic_cli import driver_hypothesis_demo
 from .hsa_scenarios import HSA_EBAT_EXPOSURE_DURATION_DAYS
 from .hsa_scenarios import _PREEXISTING_PROB_CENTRAL as HSA_PREEXISTING_PROB_CENTRAL
 from .hybrid_cli import inverse_demo, prepare_dog10k_aging, prepare_gse9794
@@ -238,14 +238,14 @@ def main() -> None:
     cdk46_feas.add_argument("--target-max-kill", type=float, default=0.08)
     cdk46_feas.add_argument("--location-penetration-multiplier", type=float, default=1.0)
     cdk46_feas.add_argument("--out", type=Path, required=True)
-    corgi_answer = sub.add_parser("corgi-answer-demo",
+    endurance_answer = sub.add_parser("endurance-answer-demo",
                                   help="the culminating question: is a durable response achievable "
-                                       "for one Corgi, with everything this repo established")
-    corgi_answer.add_argument("--debulking-fraction", type=float, default=DEBULKING_FRACTION)
-    corgi_answer.add_argument("--ccnu-max-kill", type=float, default=0.08)
-    corgi_answer.add_argument("--trials", type=int, default=250)
-    corgi_answer.add_argument("--seed", type=int, default=7)
-    corgi_answer.add_argument("--out", type=Path, required=True)
+                                       "for one dog, with everything this repo established")
+    endurance_answer.add_argument("--debulking-fraction", type=float, default=DEBULKING_FRACTION)
+    endurance_answer.add_argument("--ccnu-max-kill", type=float, default=0.08)
+    endurance_answer.add_argument("--trials", type=int, default=250)
+    endurance_answer.add_argument("--seed", type=int, default=7)
+    endurance_answer.add_argument("--out", type=Path, required=True)
     antigen_conv = sub.add_parser("antigen-convergence-demo",
                                   help="re-runs the three-component regimen with the vaccine ON: "
                                        "every drug-resistance route keeps the driver antigen, so a "
@@ -279,14 +279,14 @@ def main() -> None:
     single_patient.add_argument("--preexisting-prob", type=float, default=0.30)
     single_patient.add_argument("--seed", type=int, default=7)
     single_patient.add_argument("--out", type=Path, required=True)
-    corgi_driver = sub.add_parser("corgi-driver-hypothesis-demo",
+    driver_hypothesis = sub.add_parser("driver-hypothesis-demo",
                                   help="structural/DSP triage of candidate driver genes for "
-                                       "Corgi primary CNS / pulmonary histiocytic sarcoma")
-    corgi_driver.add_argument("--genes", nargs="+", default=None)
-    corgi_driver.add_argument("--bicoherence-nperseg", type=int, default=64)
-    corgi_driver.add_argument("--permutations", type=int, default=10000)
-    corgi_driver.add_argument("--seed", type=int, default=7)
-    corgi_driver.add_argument("--out", type=Path, required=True)
+                                       "localized primary CNS / pulmonary histiocytic sarcoma")
+    driver_hypothesis.add_argument("--genes", nargs="+", default=None)
+    driver_hypothesis.add_argument("--bicoherence-nperseg", type=int, default=64)
+    driver_hypothesis.add_argument("--permutations", type=int, default=10000)
+    driver_hypothesis.add_argument("--seed", type=int, default=7)
+    driver_hypothesis.add_argument("--out", type=Path, required=True)
     mapk_structure = sub.add_parser("mapk-structure-compare",
                                     help="compare human vs. dog AlphaFold confidence at MAPK-gene hotspots")
     mapk_structure.add_argument("--gene", required=True)
@@ -371,7 +371,7 @@ def main() -> None:
                                        "published canine DLA-I alleles via the live IEDB API")
     mapk_epitope.add_argument("--out", type=Path, required=True)
     mapk_pulmonary = sub.add_parser("mapk-pulmonary-two-compartment-demo",
-                                    help="localized pulmonary Corgi HS: does undetected regional "
+                                    help="localized pulmonary HS: does undetected regional "
                                          "nodal disease erase the surgery benefit?")
     mapk_pulmonary.add_argument("--cdk46-max-kill", type=float, default=0.0)
     mapk_pulmonary.add_argument("--debulking-fraction", type=float, default=0.97)
@@ -452,8 +452,8 @@ def main() -> None:
     elif args.command == "cdk46-achievability-demo":
         cdk46_achievability_demo(args.out, args.breed, target_max_kill=args.target_max_kill,
                                  location_penetration_multiplier=args.location_penetration_multiplier)
-    elif args.command == "corgi-answer-demo":
-        corgi_answer_demo(args.out, args.debulking_fraction, args.ccnu_max_kill, args.trials,
+    elif args.command == "endurance-answer-demo":
+        endurance_answer_demo(args.out, args.debulking_fraction, args.ccnu_max_kill, args.trials,
                           args.seed)
     elif args.command == "antigen-convergence-demo":
         antigen_convergence_demo(args.out, args.breed, args.debulking_fraction, args.ccnu_max_kill,
@@ -464,8 +464,8 @@ def main() -> None:
     elif args.command == "single-patient-demo":
         single_patient_demo(args.out, args.breed, args.debulking_fraction, args.horizon_days,
                             args.trials, args.preexisting_prob, args.seed)
-    elif args.command == "corgi-driver-hypothesis-demo":
-        corgi_driver_hypothesis_demo(args.out, args.genes, args.bicoherence_nperseg,
+    elif args.command == "driver-hypothesis-demo":
+        driver_hypothesis_demo(args.out, args.genes, args.bicoherence_nperseg,
                                      args.permutations, args.seed)
     elif args.command == "mapk-structure-compare":
         compare_orthologs(args.gene, args.hotspots, args.out)

@@ -31,7 +31,7 @@ from canine_dsp.mapk_scenarios import (
     combination_scenarios,
     dog_preset,
     localized_pihs_scenarios,
-    pulmonary_corgi_scenarios,
+    localized_pulmonary_scenarios,
     vaccine_followon_scenarios,
 )
 from canine_dsp.mapk_resistance import (
@@ -412,14 +412,14 @@ def test_worst_case_is_never_better_than_best_case_for_one_dog():
     assert outcomes["best_case"] >= outcomes["worst_case"]
 
 
-def test_pulmonary_corgi_scenarios_use_full_systemic_exposure_not_brain_discounted():
+def test_localized_pulmonary_scenarios_use_full_systemic_exposure_not_brain_discounted():
     """Lung tissue has no blood-brain-barrier-type restriction; the pulmonary scenario should use
     dog_preset's full systemic css, not the 15% brain-penetration-discounted CNS value."""
     _, systemic_css, _, _ = dog_preset()
-    scenarios = pulmonary_corgi_scenarios(nodal_involvement_prob_values=[0.0])
+    scenarios = localized_pulmonary_scenarios(nodal_involvement_prob_values=[0.0])
     _, css, _, _, provenance = scenarios[0.0]
     assert css == systemic_css
-    assert provenance["site"] == "localized pulmonary (Corgi)"
+    assert provenance["site"] == "localized pulmonary"
 
 
 def test_pulmonary_two_compartment_demo_writes_expected_outputs(tmp_path):
@@ -448,7 +448,7 @@ def test_higher_nodal_involvement_probability_does_not_improve_durability():
     distinction genuinely hard to detect above ordinary Monte Carlo noise at moderate trial
     counts -- a real property of this model, not a reason to expect a large effect everywhere.
     """
-    scenarios = pulmonary_corgi_scenarios(cdk46_max_kill=0.05, nodal_involvement_prob_values=[0.0, 1.0])
+    scenarios = localized_pulmonary_scenarios(cdk46_max_kill=0.05, nodal_involvement_prob_values=[0.0, 1.0])
     durability = {}
     for nodal_prob, (model, css, seeding_rates, debulk, _) in scenarios.items():
         outcome = run_monte_carlo_two_compartment(

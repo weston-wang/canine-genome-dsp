@@ -313,7 +313,7 @@ pharmacology will match.
 
 Canine HS can present as a primary, localized CNS disease (PIHS). Kishimoto et al. 2020 (J Vet
 Med Sci 82(1):77-83, University of Tokyo, 9,270 dogs screened, 20 PIHS cases) found this is by far
-the most breed-concentrated tumor type in their cohort: Pembroke Welsh Corgi accounted for 10 of
+the most breed-concentrated tumor type in their cohort: one breed accounted for 10 of
 the 20 PIHS cases -- 50%, from a breed that was only 4.6% of the hospital population (odds ratio
 21.5, 95% CI 8.9-51.8, P<0.001) -- and, in the 16 cases with known location, PIHS occurred
 exclusively in the cerebrum (100%; temporal lobe most common at 25.0%, then frontal 18.8%), with
@@ -322,7 +322,7 @@ HS across multiple US institutions) corroborates the strong cerebral predilectio
 a real infratentorial (cerebellar/brainstem) minority -- so cerebellar primary CNS HS is not
 fictional, just rare wherever it has been counted, and apparently absent in Kishimoto's cohort
 specifically. Toyoda's data also shows primary and disseminated CNS HS are pathophysiologically
-distinct (CSF pleocytosis 170 vs. 4 cells/uL), with sharply different breed skew: Corgis and
+distinct (CSF pleocytosis 170 vs. 4 cells/uL), with sharply different breed skew: this presentations and
 Shetland Sheepdogs get almost exclusively the primary form, Rottweilers almost exclusively the
 disseminated form. Neither paper reports PTPN11/KRAS/BRAF mutation status for any CNS case --
 this concentration is anatomic and epidemiologic, not (yet) molecular. So
@@ -359,10 +359,10 @@ separate GWAS findings that different breeds carry different germline predisposi
 is a concrete, testable hypothesis, not because any study has connected them. It's a different
 kind of homogeneity claim than the anatomic one: breed argues for a shared germline background,
 which is not the same thing as a shared acquired driver mutation, and doesn't by itself make one
-CNS location more molecularly uniform than another. There's deliberately no `corgi` option here
-despite Corgi being the single most striking breed association in the PIHS literature above:
+CNS location more molecularly uniform than another. There's deliberately no `unsequenced_breed` option here
+despite this presentation being the single most striking breed association in the PIHS literature above:
 `bmd`/`flat_coated_retriever` each rest on a published germline GWAS locus this module extends;
-no such locus (germline or somatic) has been published for Corgi PIHS, so adding one would be
+no such locus (germline or somatic) has been published for localized PIHS, so adding one would be
 fabricating a number rather than extending a real one -- exactly the mistake this module is
 trying not to make. `summary.json` lists every extrapolation this scenario stacks on top of
 `mapk_resistance_demo`'s already-uncalibrated systemic model explicitly,
@@ -370,7 +370,7 @@ under `unverified_extrapolations`.
 
 ### Debulking plus adjuvant therapy for a localized, single-lineage tumor
 
-Corgi PIHS's anatomic/breed concentration is more than an epidemiological curiosity: it's the
+localized PIHS's anatomic/breed concentration is more than an epidemiological curiosity: it's the
 kind of profile (anatomically predictable, likely non-disseminating, arising from one dendritic
 cell population) that in other cancers has changed the prognosis ceiling when local therapy is
 combined with a targeted drug, rather than relying on either alone. PIHS arises from dendritic
@@ -379,7 +379,7 @@ the body-wide interstitial dendritic cells behind disseminated HS. In mice, that
 CNS-resident population has a documented dependency on FLT3-ligand signaling and the
 transcription factors BATF3, IRF8, and ID2 (Anandasabapathy et al. 2011, J Exp Med
 208:1695-1705) -- unverified in dogs, and offered here only as a candidate-gene hypothesis for
-what a Corgi germline variant might affect, distinct from BMD's generic CDKN2A/MTAP mechanism.
+what a this presentation germline variant might affect, distinct from BMD's generic CDKN2A/MTAP mechanism.
 Combining local and systemic therapy is not speculative for canine HS generally: Skorupski et al.
 2009 (Vet Comp Oncol) reported 568-day median survival across 16 dogs with localized HS on
 aggressive local therapy plus adjuvant CCNU, against 96-106 days for disseminated/unresectable
@@ -406,10 +406,10 @@ model, not just noise: debulking shrinks a pre-existing resistant subclone propo
 removes resistant and sensitive cells alike), which delays how long it takes that subclone to
 regrow to a detectable size, but does not change *whether* one was already present at the time of
 surgery. **Debulking's modeled benefit here is buying time, not preventing relapse** -- and
-whether real Corgi PIHS ever reaches a durable cure depends on a question this model cannot
+whether real localized PIHS ever reaches a durable cure depends on a question this model cannot
 answer: whether a resistant subclone is typically already present by the time these tumors are
 diagnosed and resected, which nobody has measured. Every extrapolation this scenario relies on
--- that Corgi PIHS is MAPK-driven at all, that it doesn't disseminate, the candidate-gene
+-- that localized PIHS is MAPK-driven at all, that it doesn't disseminate, the candidate-gene
 hypothesis, the debulking fraction, the survival benchmark's location match -- is listed in
 `summary.json` under `unverified_extrapolations`, alongside the full multidisciplinary
 `reasoning_chain` behind the scenario.
@@ -445,7 +445,7 @@ illustrative growth-rate parameters being clustered close together -- if the esc
 more widely separated fitness advantages, closing them off would look more gradual, not a cliff.
 
 This is offered as a demonstration of the mechanism's *shape*, not a probability estimate: no
-canine PK/safety data for any CDK4/6 inhibitor exists, and the scenario still assumes Corgi PIHS
+canine PK/safety data for any CDK4/6 inhibitor exists, and the scenario still assumes localized PIHS
 is MAPK-driven at all -- the load-bearing, unverified premise beneath every scenario in this
 module. The efficacy side is stronger than pure speculation, though: palbociclib has real,
 published in vitro growth-inhibitory activity against canine histiocytic disease cell lines
@@ -578,7 +578,7 @@ Shared/hotspot-mutation mRNA vaccines are a real, active human-oncology approach
 invented for this module: mRNA-5671 (Moderna/Merck) is a Phase 1 lipid-nanoparticle vaccine
 targeting four recurrent KRAS mutations (G12D, G13D, G12C, G12V) as monotherapy or with
 pembrolizumab, and a KRAS G12V-specific mRNA vaccine combined with pembrolizumab reported clinical
-benefit in advanced solid tumors (Cell Research 2024). Corgi PIHS's own PTPN11/KRAS hotspot
+benefit in advanced solid tumors (Cell Research 2024). localized PIHS's own PTPN11/KRAS hotspot
 mutations, *if confirmed present*, would be the same kind of small, recurrent, shareable target --
 what makes an "off-the-shelf" vaccine plausible at all, rather than a fully personalized one
 requiring per-patient sequencing and manufacture. No canine cancer vaccine trial of any kind exists
@@ -639,7 +639,7 @@ Read the vaccine's near-elimination of the long-horizon gap as a demonstration o
 the antigen-persistence argument (a vaccine should suppress an escape route that hasn't shed the
 antigen it targets), not as a probability estimate for an actual dog: `vaccine_start_day`,
 `vaccine_ramp_days`, `vaccine_max_kill`, and the immune-escape clone's seeding rate and fitness
-cost are all illustrative placeholders, and the premise that Corgi PIHS carries a shareable
+cost are all illustrative placeholders, and the premise that localized PIHS carries a shareable
 PTPN11/KRAS hotspot at all remains unconfirmed in dogs.
 
 ### Feasibility of curing one specific dog
@@ -737,13 +737,13 @@ sufficient for actual immunogenicity, no specific dog's real DLA genotype was ty
 alleles are literature stand-ins, not any dog's measured genotype), canine MHC class II (the CD4+
 axis) has no supporting method in IEDB at all for any DLA allele -- checked directly, not assumed
 -- so it is unchecked here rather than approximated with a human-allele substitute, and whether
-Corgi PIHS carries any of these three mutations at all remains unconfirmed.
+localized PIHS carries any of these three mutations at all remains unconfirmed.
 
-### Does the approach transfer to localized pulmonary Corgi HS?
+### Does the approach transfer to localized pulmonary HS?
 
-A real, independently-described Corgi-associated HS presentation exists distinct from PIHS:
+A real, independently-described localized HS presentation exists distinct from PIHS:
 localized pulmonary histiocytic sarcoma (Sakai et al. 2015, J Vet Med Sci 77(12):1667-1670, PMID
-26155931; 19 Pembroke Welsh Corgis, median survival 133 days). Two things are concretely
+26155931; 19 dogs of one breed, median survival 133 days). Two things are concretely
 different from the PIHS scenarios above, both checked directly rather than assumed:
 
 1. **Lung tissue has no blood-brain-barrier-type restriction** -- drug reaches it at full
@@ -790,7 +790,7 @@ This is offered as a demonstration that reusing a single-compartment model's num
 disease presentation with a different natural history can be actively misleading, not as a
 calibrated estimate for a real dog: `NODAL_SEED_FRACTION` and the involvement-probability sweep
 are both illustrative placeholders, no lymphadenectomy option is modeled, and -- as with every
-other scenario in this module -- whether Corgi pulmonary HS actually carries the same PTPN11/KRAS
+other scenario in this module -- whether localized pulmonary HS actually carries the same PTPN11/KRAS
 driver spectrum has never been directly confirmed.
 
 ### Is the simulation engine's own math actually right?
@@ -1001,17 +1001,17 @@ to the `max_kill_2=0.05` regime (100% → 99.7% → 92% → 81% at 1/2/5/10 year
 
 ### Reasoning toward the driver mutation instead of looking it up
 
-The load-bearing unverified premise of this whole module is that Corgi primary CNS / primary
+The load-bearing unverified premise of this whole module is that this presentation primary CNS / primary
 pulmonary HS carries a PTPN11 or KRAS hotspot at all. Searching confirmed that gap is real rather
-than an oversight: the paper that *defines* the Corgi pulmonary entity (19 Pembroke Welsh Corgis,
+than an oversight: the paper that *defines* the localized pulmonary entity (19 dogs of one breed,
 PMID 26155931) is purely histopathologic and predates the canine HS mutation literature entirely;
 the largest canine HS sequencing cohort found (129 HS + 26 HHS, PMC11353564) contains exactly one
-Welsh corgi, pooled into an undifferentiated "other breeds" bucket. **No canine HS study stratifies
+Welsh unsequenced_breed, pooled into an undifferentiated "other breeds" bucket. **No canine HS study stratifies
 mutations by anatomic site at all.** So the mutation can't be looked up — but it can be reasoned
 toward, which is what `histiocytic_origin.py` encodes.
 
 ```bash
-canine-dsp corgi-driver-hypothesis-demo --out results/corgi-drivers
+canine-dsp driver-hypothesis-demo --out results/unsequenced_breed-drivers
 ```
 
 **The inference chain.** Two clinical observations do the work. (1) The tumors are **Iba-1
@@ -1021,7 +1021,7 @@ splenic/hepatic pattern. Those two facts intersect at something specific: lung a
 precisely the two mammalian tissues whose macrophage compartments — alveolar macrophages and
 microglia — are seeded prenatally from yolk-sac erythro-myeloid progenitors, self-renew in situ,
 and are maintained largely independently of bone-marrow output in adults (Gomez Perdiguero et al.
-2015, *Nature*, PMID 25470051). That yields the **tissue-resident macrophage hypothesis**: Corgi HS
+2015, *Nature*, PMID 25470051). That yields the **tissue-resident macrophage hypothesis**: localized HS
 may be a neoplasm of a prenatally-seeded, locally self-renewing macrophage compartment, and it
 stays localized because its cell of origin *does not circulate* — not because it was caught early.
 This is the same cell-of-origin logic already established for human LCH, where MAPK activation in
@@ -1042,7 +1042,7 @@ module already models as a deliberately mechanism-agnostic second node: the BMD 
 GWAS narrows to a 75 kb window spanning MTAP through the last exon of CDKN2A (Shearin et al. 2012,
 PMID 22623710). CDKN2A encodes p16INK4a, the endogenous brake on CDK4/6 — loss of that brake is the
 canonical setting for CDK4/6-inhibitor sensitivity. That was not why CDK4/6i was chosen, so this is
-retrospective support rather than circularity; whether Corgis share the BMD locus is unknown.
+retrospective support rather than circularity; whether this presentations share the BMD locus is unknown.
 
 **Structural triage of the 9-gene panel** (all resolved; human + dog AlphaFold models, real):
 
@@ -1102,7 +1102,7 @@ The honest bottom line: this narrows *what to sequence first* and supplies a mec
 BBB-penetrant drug candidate nobody in this line of work had considered — but it does not identify
 the mutation, and the one novel analysis that might have gone further failed validation. The
 highest-value real-world action is unchanged and cannot be substituted for by modeling: **sequence a
-series of Corgi primary CNS and primary pulmonary HS tumors, stratified by anatomic site.**
+series of this presentation primary CNS and primary pulmonary HS tumors, stratified by anatomic site.**
 
 ### Testing the CSF1R hypothesis in the model — and watching it lose
 
@@ -1341,36 +1341,36 @@ and the whole MAPK premise apply to the ~46% of **BMD** dogs with a sequenced MA
 the rest the actionable response is a different primary drug, not this regimen with worse odds. That
 "46%" figure is BMD-specific, which the next section exists to make impossible to miss.
 
-### Everything above is BMD. A Corgi is not "a BMD in a different breed's body"
+### Everything above is BMD. A this presentation is not "a BMD in a different breed's body"
 
 Everything in this N=1 section — the 44/96 driver frequency, the `localized_pihs_scenarios` tumor
 model, the Skorupski calibration benchmark — is BMD-context end to end. `single-patient-demo`
 originally applied it to "one sequenced dog" without saying so, which given this whole module's own
-prior, extensively-modeled premise (`histiocytic_origin.py`: Corgi PIHS/pulmonary HS as a clinically
+prior, extensively-modeled premise (`histiocytic_origin.py`: localized PIHS/pulmonary HS as a clinically
 distinct, unsequenced presentation) is a real mismatch — the same species of error as treating
 canine-melanoma CDK4/6i data as informative about canine-HS potency, just one level up: treating
 one breed's HS as informative about a different breed's, without checking whether the clinical
 picture actually matches.
 
-It doesn't, on the one axis where real breed-matched data exists. `CORGI_PULMONARY_HS_BENCHMARK`
-(Sakai et al. 2015, 19 Pembroke Welsh Corgis) reports a **133-day median survival** — roughly a
+It doesn't, on the one axis where real breed-matched data exists. `LOCALIZED_PULMONARY_HS_BENCHMARK`
+(Sakai et al. 2015, 19 dogs of one breed) reports a **133-day median survival** — roughly a
 quarter of the BMD-context Skorupski benchmark's 568 days — and regional nodal involvement in many
 cases, meaning the single-compartment "debulking reaches everything" premise the BMD arm leans on
 does not hold for this presentation at all (this repo already built the right tool for that:
 `run_monte_carlo_two_compartment`, used in `mapk-pulmonary-two-compartment-demo` above). And on
-driver frequency, a Corgi isn't a worse coin flip than BMD's 46/54 — there is no coin to flip: zero
-Corgis have ever been sequenced for canine HS drivers, so `driver_conditioned_arms(breed="corgi")`
+driver frequency, a this presentation isn't a worse coin flip than BMD's 46/54 — there is no coin to flip: zero
+this presentations have ever been sequenced for canine HS drivers, so `driver_conditioned_arms(breed="unsequenced_breed")`
 returns `None`, not a number, and the honest state is "unknown, `histiocytic_origin.py`'s Tier A-D
 panel is a hypothesis, not a measurement."
 
 `single_patient_demo` now runs a real, separate fifth analysis for this rather than reusing the BMD
-numbers: `pulmonary_corgi_scenarios` + `run_monte_carlo_two_compartment`, swept over
+numbers: `localized_pulmonary_scenarios` + `run_monte_carlo_two_compartment`, swept over
 `NODAL_INVOLVEMENT_PROB_SWEEP`, checked against the Sakai benchmark instead of Skorupski. In testing
 (200 trials, `preexisting_prob=0.30`): median time to progression came out at 205–233 days across
 the nodal sweep — much closer to Sakai's 133-day median survival than the BMD arm's 568-day
 benchmark is, though "time to progression" and "survival" are not the same endpoint, so this is
 a directional consistency check, not a validation. The function also now refuses to run its BMD
-arm (findings 1–4) for `breed="corgi"` at all, with an error pointing at the Corgi-specific arm
+arm (findings 1–4) for `breed="unsequenced_breed"` at all, with an error pointing at the presentation-specific arm
 instead of silently producing a mislabeled number — and, closing a second mismatch caught building
 this fix, `driver_conditioned_arms` generalizes cleanly to *any* unsequenced breed, including
 flat-coated retriever, which has its own real GWAS germline locus but was never in Takada et al.'s
@@ -1378,7 +1378,7 @@ driver-sequencing cohort either.
 
 The corrected, complete statement of what N=1 sequencing buys, by breed:
 
-| | BMD (or golden retriever) | Corgi |
+| | BMD (or golden retriever) | this presentation |
 | --- | --- | --- |
 | Driver present? | Known base rate → fact (44/96, or 3/13) | Unknown — sequencing is discovery, not confirmation |
 | Pre-existing resistance? | Effectively unresolvable (finding 2) | Same — the detection-floor argument doesn't depend on breed |
@@ -1461,7 +1461,7 @@ the detection-floor analysis above showed no assay can measure.
 
 **One number must not travel with it.** `refuse_bmd_benchmark_transfer` records this explicitly: the
 Skorupski inversion implying `p ≈ 0.62` is BMD-context, breed-unstratified and mixed-treatment. If
-the low-burden argument holds for Corgi HS, carrying 0.62 over would be the same breed/stratification
+the low-burden argument holds for localized HS, carrying 0.62 over would be the same breed/stratification
 mismatch `driver_conditioned_arms` was rewritten to refuse — running in the *pessimistic* direction,
 which is exactly why it was easy to miss. A correction that makes a model look worse still has to be
 scoped correctly.
@@ -1618,33 +1618,33 @@ that line the result is robust to the model's least-measurable parameter in a wa
 All of which sits on top of two unfitted inputs — `vaccine_max_kill` is a swept knob (no canine cancer
 vaccine trial exists for this disease, so nothing here says 0.06 is reachable, which is exactly the
 question `pharmacology.py` had to ask about CDK4/6i and got a "no" for) and the antigen-loss rate — and
-on the oldest open premise in this repo: whether Corgi HS carries a PTPN11/KRAS hotspot at all.
+on the oldest open premise in this repo: whether localized HS carries a PTPN11/KRAS hotspot at all.
 
-## The answer: one Corgi, durable response
+## The answer: one this presentation, durable response
 
 ```bash
-canine-dsp corgi-answer-demo --out results/corgi-answer
+canine-dsp endurance-answer-demo --out results/unsequenced_breed-answer
 ```
 
 Everything above was BMD-context or generic. This assembles all of it for the actual target: the
-Corgi pulmonary presentation, in a single dog. Two code upgrades were needed first, both because the
-Corgi arm literally could not express the answer:
+localized pulmonary presentation, in a single dog. Two code upgrades were needed first, both because the
+localized pulmonary arm literally could not express the answer:
 
-- **`run_monte_carlo_two_compartment` had no vaccine support** — so the Corgi arm of
+- **`run_monte_carlo_two_compartment` had no vaccine support** — so the localized pulmonary arm of
   `single-patient-demo` was trametinib monotherapy, repeating the exact omission corrected for BMD
   one section earlier. It now takes the same time-gated ramping vaccine plus
   `css_reference_2_duration_days`, applied **identically to both compartments**, and seeds immune
   escape per compartment. Vaccine-off defaults are byte-identical to before (asserted in tests).
-- **`pulmonary_corgi_scenarios` is 4-clone**, which cannot carry an immune-escape clone at all.
-  `corgi_full_regimen_scenarios` is the 5-clone pulmonary equivalent of `vaccine_followon_scenarios`.
+- **`localized_pulmonary_scenarios` is 4-clone**, which cannot carry an immune-escape clone at all.
+  `pulmonary_full_regimen_scenarios` is the 5-clone pulmonary equivalent of `vaccine_followon_scenarios`.
 
 **Why the compartment structure matters here and doesn't break the answer:** Sakai et al. report
-regional nodal involvement in many Corgi cases, so "debulking reaches everything" is false. But
+regional nodal involvement in many localized pulmonary cases, so "debulking reaches everything" is false. But
 debulking is the *only* modality with a reach problem — the MEK inhibitor (full systemic exposure, no
 brain-barrier discount in the lung), lomustine, and the vaccine all reach the node. Surgery misses the
 compartment; the systemic mechanisms don't.
 
-**10-year durable response, Corgi pulmonary, two-compartment, trametinib + duration-capped lomustine
+**10-year durable response, localized pulmonary, two-compartment, trametinib + duration-capped lomustine
 + vaccine** (columns = nodal involvement probability):
 
 | vaccine `max_kill` | 0.0 | 0.2 | 0.4 | 0.6 |
@@ -1678,11 +1678,11 @@ What makes this a usable answer rather than a hedge is that the uncertainties pa
 
 | Measurable in this dog | Not measurable in this dog |
 | --- | --- |
-| **Driver hotspot status** — clonal, ~25–50% VAF, far above every assay floor. *Never done in any Corgi.* | **Pre-existing resistant subclone** — ≤0.05% VAF, below every clinical assay; plus spatial sampling as a second wall |
+| **Driver hotspot status** — clonal, ~25–50% VAF, far above every assay floor. *Never done in any this presentation.* | **Pre-existing resistant subclone** — ≤0.05% VAF, below every clinical assay; plus spatial sampling as a second wall |
 | **Nodal involvement** — staging/imaging at diagnosis | **Vaccine potency in this dog** — no canine vaccine trial exists for this disease |
 | **Burden and resectability** — imaging, surgical margins | **Antigen-loss rate** — unmeasured constant |
 
-The useful asymmetry: **the Corgi-specific risk (nodal disease) is resolvable for an individual
+The useful asymmetry: **the presentation-specific risk (nodal disease) is resolvable for an individual
 patient even though its cohort rate was never published, while the generic risk (subclonal resistance)
 is unresolvable at any sequencing depth.** That's the opposite of how the population model treats
 them — and above threshold, the unresolvable one stops mattering.
@@ -1697,7 +1697,7 @@ covering every drug-resistance route.
 **The single point of failure, stated plainly.** Two unmeasured quantities carry the whole result, and
 they are different in kind:
 
-- The **driver hotspot** is measurable and simply has not been measured in any Corgi. That is a
+- The **driver hotspot** is measurable and simply has not been measured in any this presentation. That is a
   tissue-and-funding problem, resolvable by sequencing one tumor, and it gates everything downstream.
 - **Vaccine potency** is not measurable in advance at all — and the analogous achievability question,
   asked of a CDK4/6 inhibitor by `pharmacology.py`, came back **no**. Nothing here establishes 0.06/day
@@ -1706,8 +1706,8 @@ they are different in kind:
 
 So the defensible statement is: **this is a well-posed strategy with one clearly identified point of
 failure and one clearly identified cheap first experiment — not a predicted outcome.** The first
-experiment is to sequence a Corgi HS specimen. Against a real benchmark of 133-day median survival
-(Sakai et al., 19 Corgis), the upside if both conditions hold is large; the probability that both hold
+experiment is to sequence a localized HS specimen. Against a real benchmark of 133-day median survival
+(Sakai et al., 19 this presentations), the upside if both conditions hold is large; the probability that both hold
 is unknown, and one of them has never been tested in any species for this antigen.
 
 ## Where this leaves things
@@ -1731,7 +1731,7 @@ human BRAF+MEK-inhibitor benchmark). Everything else -- every growth rate, resis
 shift, kill ceiling, seeding rate, CDK4/6i potency, and vaccine parameter -- remains an illustrative
 placeholder, swept across a range rather than asserted as a point estimate wherever the module
 itself is the reason to doubt a single value. The load-bearing, unconfirmed premise underneath
-every scenario is unchanged by any of this work: whether Corgi PIHS or Corgi pulmonary HS actually
+every scenario is unchanged by any of this work: whether localized PIHS or localized pulmonary HS actually
 carries a PTPN11/KRAS hotspot mutation at all. Nothing here can answer that; the actual canine
 trametinib trial is running but hasn't reported results, and no shortcut to canine HS tumor
 sequencing was found in a broad search for one. That is the single highest-leverage next step this
@@ -1757,7 +1757,7 @@ cohort (Rodrigues et al. 2025, Sci Rep, PMID 40368987, PMC12078565, the FidoCure
 platform) found trametinib conferred **no survival benefit** in NRAS-mutant HSA (241 vs. 259 days,
 p=0.7775, n=71 vs. 26), despite real in vitro MEK-dependence data existing for NRAS-mutant HSA cell
 lines. Building an optimistic hypothetical there would have contradicted a real result already in
-hand -- exactly the mistake the histiocytic-sarcoma module's own "don't fabricate a Corgi locus"
+hand -- exactly the mistake the histiocytic-sarcoma module's own "don't fabricate a this presentation locus"
 discipline exists to avoid.
 
 The PI3K/mTOR angle instead has three real anchors verified directly against source, not taken

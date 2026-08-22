@@ -114,7 +114,7 @@ ESCAPE_ROUTES = [
         "name": "Micrometastatic disease outside any modelled compartment",
         "status": "OPEN, NOT MODELLED -- and this is the asymmetry with HS",
         "detail": "The HS pipeline built `run_monte_carlo_two_compartment` for localized "
-                  "pulmonary Corgi HS specifically because regional nodal disease may already "
+                  "localized pulmonary HS specifically because regional nodal disease may already "
                   "have spread before surgery.",
     },
 ]
@@ -163,6 +163,6 @@ WHAT_WOULD_CHANGE_THE_ANSWER = [
     "surface-vimentin loss for eVim, which needs a fitness cost of its own, since vimentin is "
     "structural rather than a passenger antigen.",
     "Model the second compartment. Splenic HSA is disseminated at diagnosis more often than the "
-    "Corgi pulmonary presentation that already has a two-compartment model.",
+    "localized pulmonary presentation that already has a two-compartment model.",
     "Give the module a rupture/haemorrhage hazard once any real rate exists.",
 ]

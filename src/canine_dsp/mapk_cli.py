@@ -36,7 +36,7 @@ from .mapk_scenarios import (
     MECHANISM_AGNOSTIC_RATIONALE,
     NODAL_INVOLVEMENT_PROB_SWEEP,
     NODAL_SEED_FRACTION,
-    PULMONARY_CORGI_CASE_SERIES,
+    PULMONARY_HS_CASE_SERIES,
     SPECIES_PRESETS,
     TOXICITY_EXTRAPOLATION_NOTE,
     VACCINE_ANTIGEN_TARGETS,
@@ -51,7 +51,7 @@ from .mapk_scenarios import (
     canine_cns_hs_scenarios,
     combination_scenarios,
     localized_pihs_scenarios,
-    pulmonary_corgi_scenarios,
+    localized_pulmonary_scenarios,
     vaccine_antigen_peptides,
     vaccine_followon_scenarios,
 )
@@ -124,25 +124,25 @@ def mapk_cns_demo(out: Path, breed: str = "bmd", trials: int = 300, horizon_days
             "would be less honest than exposing location_penetration_multiplier for anyone who "
             "wants to test a hypothesis about one."
         ),
-        "corgi_pihs_context": (
+        "localized_pihs_context": (
             "Kishimoto et al. 2020 (J Vet Med Sci 82(1):77-83, University of Tokyo, 186 "
-            "intracranial tumors, 9,270 dogs screened) found Pembroke Welsh Corgi carries by "
+            "intracranial tumors, 9,270 dogs screened) found one breed carries by "
             "far the strongest breed association of any tumor type in the study: 16 of 422 "
-            "Corgis had a primary intracranial tumor, 10 of which were PIHS specifically -- 50% "
+            "dogs of that breed had a primary intracranial tumor, 10 of which were PIHS specifically -- 50% "
             "of all 20 PIHS cases in the cohort, odds ratio 21.5 (95% CI 8.9-51.8, P<0.001). "
             "Combined with the cerebrum-only, temporal/frontal-lobe-predominant localization "
             "above, this is a genuinely striking clinical concentration -- but it is anatomic "
             "and epidemiologic, not molecular: this paper is histopathology/epidemiology only "
             "and reports no PTPN11/KRAS/BRAF mutation data for these or any other CNS cases. "
-            "No canine study has sequenced Corgi PIHS specifically. A 'corgi' breed option is "
+            "No canine study has sequenced localized PIHS specifically. A 'unsequenced_breed' breed option is "
             "deliberately not offered here (unlike bmd/flat_coated_retriever): those two rest on "
-            "published germline GWAS loci this module extrapolates from; Corgi PIHS has no "
+            "published germline GWAS loci this module extrapolates from; localized PIHS has no "
             "published germline or somatic locus to extrapolate from at all, so adding one would "
             "be fabricating a number rather than extending a real one."
         ),
         "unverified_extrapolations": [
             ("canine primary CNS HS carries the same PTPN11/KRAS-dominated driver spectrum as "
-             "systemic HS -- no canine CNS-specific sequencing exists to confirm this, Corgi "
+             "systemic HS -- no canine CNS-specific sequencing exists to confirm this, this presentation "
              "PIHS included"),
             ("the breed-to-mechanism-weight link (bmd vs. flat_coated_retriever) is this "
              "module's own speculative extension of germline GWAS loci to acquired-resistance "
@@ -222,12 +222,12 @@ def localized_control_demo(out: Path, breed: str = "bmd", debulking_fraction: fl
         "dendritic_cell_origin_hypothesis": DENDRITIC_CELL_ORIGIN_NOTE,
         "localized_therapy_precedent": LOCALIZED_THERAPY_PRECEDENT,
         "reasoning_chain": [
-            ("Kishimoto et al. 2020: Corgi accounts for 50% of all PIHS cases (OR 21.5), and "
+            ("Kishimoto et al. 2020: one breed accounts for 50% of all PIHS cases (OR 21.5), and "
              "100% of location-known PIHS cases were cerebral -- an anatomic/breed concentration "
              "on the same order as BMD's known germline-driven systemic-HS association."),
             ("That magnitude of concentration in a closed breed population is the signature of "
              "an as-yet-unidentified, high-frequency germline variant (geneticist's reading); no "
-             "GWAS has been done for Corgi PIHS to confirm this."),
+             "GWAS has been done for localized PIHS to confirm this."),
             ("PIHS arises from a CNS-resident dendritic-cell population that is developmentally "
              "distinct from the interstitial DCs behind disseminated HS (cell biologist's "
              "reading); a lineage-restricted germline mechanism would unify the anatomic and "
@@ -238,11 +238,11 @@ def localized_control_demo(out: Path, breed: str = "bmd", debulking_fraction: fl
              "(computational/clinical-translation reading); this scenario substitutes trametinib."),
         ],
         "unverified_extrapolations": [
-            ("Corgi PIHS is less prone to dissemination than other breeds' HS -- plausible from "
+            ("localized PIHS is less prone to dissemination than other breeds' HS -- plausible from "
              "the primary-vs-disseminated breed skew literature, but not directly measured, "
              "and this model has no explicit dissemination/metastasis mechanic to test it with"),
             ("the FLT3/BATF3/IRF8/ID2 candidate-gene hypothesis is extrapolated from mouse "
-             "biology, never tested in dogs, and not linked to any Corgi-specific variant"),
+             "biology, never tested in dogs, and not linked to any presentation-specific variant"),
             ("debulking_fraction=0.97 is illustrative, not fit to a reported canine "
              "resection-completeness statistic"),
             ("the 568-day localized-HS survival benchmark is not confirmed to be CNS-specific; "
@@ -323,7 +323,7 @@ def combination_control_demo(out: Path, breed: str = "bmd", debulking_fraction: 
              "cdk46_ic50_nM and cdk46_css_nM are round illustrative placeholders, and "
              "cdk46_max_kill is swept rather than fixed for the same reason "
              "preexisting_prob is swept in mapk_resistance_demo"),
-            ("assumes Corgi PIHS carries a MAPK driver at all (the premise of every scenario in "
+            ("assumes localized PIHS carries a MAPK driver at all (the premise of every scenario in "
              "this module) AND that CDK4/6 dependence specifically (not just any downstream "
              "node) is the relevant shared mechanism -- neither is confirmed in dogs"),
             ("combined-drug toxicity is not modeled: real MEK+CDK4/6 combinations in human "
@@ -579,7 +579,7 @@ def vaccine_followon_demo(out: Path, breed: str = "bmd", debulking_fraction: flo
             ("no canine cancer vaccine trial of any kind exists for this disease; "
              "vaccine_start_day, vaccine_ramp_days, and vaccine_max_kill are all illustrative, "
              "not fit to measured data"),
-            ("assumes Corgi PIHS carries a PTPN11/KRAS hotspot mutation at all (the premise of "
+            ("assumes localized PIHS carries a PTPN11/KRAS hotspot mutation at all (the premise of "
              "every scenario in this module) that would be shareable/targetable across cases -- "
              "unconfirmed, no canine CNS-specific sequencing exists"),
             ("immune_escape_seeding_rate and immune_escape_growth_penalty are illustrative "
@@ -840,7 +840,7 @@ def vaccine_epitope_binding_demo(out: Path, lengths: list[int] = (9, 10, 11)) ->
             ("the CD4+/MHC class II axis is entirely unchecked here (no tool exists for canine "
              "class II alleles), despite real human precedent for CD4+-T-cell-mediated tumor "
              "regression against a KRAS-mutant peptide independent of MHC-I presentation"),
-            ("whether Corgi PIHS specifically carries any of these three mutations remains "
+            ("whether localized PIHS specifically carries any of these three mutations remains "
              "entirely unconfirmed, as flagged throughout this module"),
         ],
         "warning": (
@@ -860,14 +860,14 @@ def pulmonary_two_compartment_demo(out: Path, cdk46_max_kill: float = 0.0,
                                    trials: int = 300, horizon_days: int = 730,
                                    preexisting_prob: float = _PREEXISTING_PROB_CENTRAL,
                                    seed: int = 7) -> None:
-    """Sweeps `NODAL_INVOLVEMENT_PROB_SWEEP` for the localized pulmonary Corgi HS scenario, and
+    """Sweeps `NODAL_INVOLVEMENT_PROB_SWEEP` for the localized pulmonary HS scenario, and
     contrasts the result against what a single-compartment model (as used throughout this
     module's CNS/PIHS scenarios) would have naively predicted by implicitly assuming debulking
     reaches all disease -- i.e. `nodal_involvement_prob=0` -- showing concretely how much that
     assumption can overstate the benefit of surgery once undetected regional disease is plausible.
     """
     out.mkdir(parents=True, exist_ok=True)
-    scenarios = pulmonary_corgi_scenarios(cdk46_max_kill, debulking_fraction, NODAL_INVOLVEMENT_PROB_SWEEP)
+    scenarios = localized_pulmonary_scenarios(cdk46_max_kill, debulking_fraction, NODAL_INVOLVEMENT_PROB_SWEEP)
     css_2 = CDK46_ILLUSTRATIVE_CSS_NM if cdk46_max_kill > 0 else None
 
     rows, outcomes = [], {}
@@ -906,7 +906,7 @@ def pulmonary_two_compartment_demo(out: Path, cdk46_max_kill: float = 0.0,
         combined = outcome.primary_trajectories.sum(axis=2) + outcome.nodal_trajectories.sum(axis=2)
         axes[0].plot(days, np.median(combined, axis=0), label=f"P(nodal)={nodal_prob}")
     axes[0].set(xlabel="day", ylabel="median combined tumor burden",
-               title="pulmonary Corgi HS: primary + nodal")
+               title="localized pulmonary HS: primary + nodal")
     axes[0].legend(fontsize=7)
     axes[1].plot(table["nodal_involvement_prob"], table["probability_durable_response"],
                 marker="o", color="tab:blue")
@@ -925,7 +925,7 @@ def pulmonary_two_compartment_demo(out: Path, cdk46_max_kill: float = 0.0,
     summary = {
         "cdk46_max_kill_used": cdk46_max_kill, "debulking_fraction": debulking_fraction,
         "preexisting_prob_used": preexisting_prob, "nodal_seed_fraction": NODAL_SEED_FRACTION,
-        "sensitivity": rows, "case_series": PULMONARY_CORGI_CASE_SERIES,
+        "sensitivity": rows, "case_series": PULMONARY_HS_CASE_SERIES,
         "full_systemic_exposure_note": (
             "Uses dog_preset's full systemic trametinib exposure (Cmax ~1640 nM), not the "
             "15%-brain-penetration-discounted concentration used in the CNS/PIHS scenarios -- "
@@ -966,12 +966,12 @@ def pulmonary_two_compartment_demo(out: Path, cdk46_max_kill: float = 0.0,
             ("assumes lymphadenectomy is not performed alongside lobectomy -- if regional nodal "
              "dissection is standard practice for this presentation, the nodal compartment "
              "would also be partially debulked, which this scenario does not model"),
-            ("assumes Corgi pulmonary HS carries the same PTPN11/KRAS-dominated driver spectrum "
+            ("assumes localized pulmonary HS carries the same PTPN11/KRAS-dominated driver spectrum "
              "as systemic HS -- unconfirmed, no sequencing of this presentation has been "
              "published, the same caveat attached to every scenario in this module"),
-            ("reuses dog_preset's baseline mechanism-weight spectrum unchanged; no Corgi-"
+            ("reuses dog_preset's baseline mechanism-weight spectrum unchanged; no this presentation-"
              "specific germline locus exists to justify reweighting it, deliberately, for the "
-             "same reason canine_cns_hs_scenarios does not offer a 'corgi' breed option"),
+             "same reason canine_cns_hs_scenarios does not offer an unsequenced-breed option"),
         ],
         "warning": (
             "Demonstrates how much a single-compartment model (implicitly assuming surgery "

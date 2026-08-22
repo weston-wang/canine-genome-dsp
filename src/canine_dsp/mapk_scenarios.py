@@ -206,7 +206,7 @@ DENDRITIC_CELL_ORIGIN_NOTE = (
     "CNS-resident dendritic-cell population has a documented dependency on FLT3-ligand signaling "
     "and the transcription factors BATF3, IRF8, and ID2 for its development (Anandasabapathy et "
     "al. 2011, J Exp Med 208:1695-1705) -- not verified in dogs, and included here as this "
-    "module's own candidate-gene hypothesis for what a Corgi germline PIHS-risk variant might "
+    "module's own candidate-gene hypothesis for what a a germline PIHS-risk variant might "
     "affect, distinct from BMD's generic CDKN2A/MTAP tumor-suppressor mechanism."
 )
 
@@ -397,7 +397,7 @@ DURABILITY_HORIZON_SWEEP = [365, 730, 1825, 3650]  # 1, 2, 5, 10 years
 # mRNA cancer vaccine: mRNA-5671 (Moderna/Merck), a Phase 1 lipid-nanoparticle vaccine targeting
 # four frequent KRAS mutations (G12D, G13D, G12C, G12V) as monotherapy or with pembrolizumab, in
 # KRAS-mutant NSCLC/CRC/pancreatic cancer; and a KRAS G12V-specific mRNA vaccine + pembrolizumab
-# combination reporting clinical benefit in advanced solid tumors (Cell Research 2024). Corgi
+# combination reporting clinical benefit in advanced solid tumors (Cell Research 2024). this presentation
 # PIHS's own PTPN11/KRAS hotspot mutations, if confirmed present (unverified -- see
 # canine_cns_hs_scenarios), would be the same kind of small, recurrent, shareable target: this is
 # what makes a vaccine plausible without per-patient neoantigen sequencing/manufacture, unlike a
@@ -426,7 +426,7 @@ DENDRITIC_CELL_VACCINE_CAVEAT = (
 # --- CSF1R inhibitor: a pathway-SERIAL second drug, not a mechanism-agnostic one ---------------
 #
 # Motivated by `histiocytic_origin`'s tissue-resident-macrophage hypothesis, which nominates CSF1R
-# as a candidate driver/dependency for Corgi primary CNS and pulmonary HS specifically, and
+# as a candidate driver/dependency for localized primary CNS and pulmonary HS specifically, and
 # pexidartinib as a real, FDA-approved, BBB-penetrant agent against it. Adding it here is NOT a
 # straightforward swap for the CDK4/6 inhibitor, and the reason is the whole point:
 #
@@ -604,8 +604,8 @@ def vaccine_antigen_peptides(structure_cache: Path) -> dict[str, str]:
     return peptides
 
 
-# Localized pulmonary histiocytic sarcoma in Pembroke Welsh Corgis ------------------------------
-# A real, independently-described Corgi-associated HS presentation, distinct from PIHS above: a
+# Localized localized pulmonary histiocytic sarcoma ------------------------------
+# A real, independently-described localized HS presentation, distinct from PIHS above: a
 # case series of localized pulmonary HS (Sakai et al. 2015, J Vet Med Sci 77(12):1667-1670, PMID
 # 26155931). Two things are concretely different from the PIHS scenarios and worth modeling
 # rather than reusing those numbers unchanged: (1) lung tissue has no blood-brain-barrier-type
@@ -617,8 +617,8 @@ def vaccine_antigen_peptides(structure_cache: Path) -> dict[str, str]:
 # lymph node involvement in many cases, with median survival of only 133 days across all 19 dogs
 # -- meaning "debulk the primary, then treat systemically" cannot assume surgery reaches the
 # whole disease burden the way it was modeled for PIHS.
-PULMONARY_CORGI_CASE_SERIES = (
-    "Sakai et al. 2015, J Vet Med Sci 77(12):1667-1670 (PMID 26155931): 19 Pembroke Welsh Corgis "
+PULMONARY_HS_CASE_SERIES = (
+    "Sakai et al. 2015, J Vet Med Sci 77(12):1659-61 (PMID 26155931): 19 dogs of one breed "
     "with histiocytic sarcoma involving lung and/or regional lymph nodes; median survival 133 "
     "days across the cohort; no prognostic factor examined (including surgical resection status) "
     "reached statistical significance in that small series -- not a claim those factors don't "
@@ -639,15 +639,15 @@ NODAL_SEED_FRACTION = 0.1
 _PULMONARY_BASELINE_BURDEN = .3  # same illustrative pre-debulking baseline used elsewhere
 
 
-def pulmonary_corgi_scenarios(cdk46_max_kill: float = 0.0, debulking_fraction: float = DEBULKING_FRACTION,
+def localized_pulmonary_scenarios(cdk46_max_kill: float = 0.0, debulking_fraction: float = DEBULKING_FRACTION,
                               nodal_involvement_prob_values: list[float] = NODAL_INVOLVEMENT_PROB_SWEEP,
                               ) -> dict[float, tuple[ResistanceModel, float, np.ndarray, float, dict]]:
     """Trametinib (+/- CDK4/6i) at full systemic exposure (no CNS brain-penetration discount) for a
     resectable primary lung mass, swept over how likely regional nodal disease already is. Uses
-    `dog_preset`'s baseline mechanism-weight spectrum unchanged -- no Corgi-specific germline
+    `dog_preset`'s baseline mechanism-weight spectrum unchanged -- no presentation-specific germline
     locus exists to justify reweighting it, deliberately, for the same reason
-    `canine_cns_hs_scenarios` does not offer a "corgi" breed option: extending real GWAS loci from
-    bmd/flat_coated_retriever is a reasonable extrapolation; inventing a Corgi-specific one from
+    `canine_cns_hs_scenarios` does not offer an unsequenced-breed option: extending real GWAS loci from
+    bmd/flat_coated_retriever is a reasonable extrapolation; inventing a presentation-specific one from
     nothing would not be.
     """
     model, systemic_css, seeding_rates, base_provenance = dog_preset()
@@ -655,22 +655,22 @@ def pulmonary_corgi_scenarios(cdk46_max_kill: float = 0.0, debulking_fraction: f
         model = replace(model, ic50_nM_2=CDK46_ILLUSTRATIVE_IC50_NM, max_kill_2=cdk46_max_kill)
     scenarios = {}
     for nodal_involvement_prob in nodal_involvement_prob_values:
-        provenance = {**base_provenance, "site": "localized pulmonary (Corgi)",
+        provenance = {**base_provenance, "site": "localized pulmonary",
                      "cdk46_max_kill": cdk46_max_kill, "debulking_fraction": debulking_fraction,
                      "nodal_involvement_prob": nodal_involvement_prob,
                      "nodal_seed_fraction": NODAL_SEED_FRACTION,
-                     "case_series": PULMONARY_CORGI_CASE_SERIES}
+                     "case_series": PULMONARY_HS_CASE_SERIES}
         scenarios[nodal_involvement_prob] = (model, systemic_css, seeding_rates, debulking_fraction, provenance)
     return scenarios
 
 
-def corgi_full_regimen_scenarios(debulking_fraction: float = DEBULKING_FRACTION,
+def pulmonary_full_regimen_scenarios(debulking_fraction: float = DEBULKING_FRACTION,
                                  ccnu_max_kill: float = 0.0,
                                  nodal_involvement_prob_values: list[float] = NODAL_INVOLVEMENT_PROB_SWEEP,
                                  ) -> dict[float, tuple[ResistanceModel, float, np.ndarray, float, dict]]:
-    """The localized pulmonary Corgi scenario carried in a 5-clone (vaccine-capable) state vector.
-    Exists because `pulmonary_corgi_scenarios` is 4-clone and therefore cannot express a vaccine
-    at all -- which is how the Corgi arm of `single_patient_demo` came to be built as trametinib
+    """The localized pulmonary scenario carried in a 5-clone (vaccine-capable) state vector.
+    Exists because `localized_pulmonary_scenarios` is 4-clone and therefore cannot express a vaccine
+    at all -- which is how the localized pulmonary arm of `single_patient_demo` came to be built as trametinib
     monotherapy while the whole endurance case rests on the vaccine.
     """
     model, systemic_css, seeding_rates, base_provenance = dog_preset()
@@ -687,7 +687,7 @@ def corgi_full_regimen_scenarios(debulking_fraction: float = DEBULKING_FRACTION,
     scenarios = {}
     for nodal_involvement_prob in nodal_involvement_prob_values:
         scenarios[nodal_involvement_prob] = (model5, systemic_css, seeding_rates, debulking_fraction, {
-            **base_provenance, "site": "localized pulmonary (Corgi), 5-clone vaccine-capable",
+            **base_provenance, "site": "localized pulmonary, 5-clone vaccine-capable",
             "debulking_fraction": debulking_fraction,
             "nodal_involvement_prob": nodal_involvement_prob,
             "nodal_seed_fraction": NODAL_SEED_FRACTION,
@@ -697,7 +697,7 @@ def corgi_full_regimen_scenarios(debulking_fraction: float = DEBULKING_FRACTION,
             "vaccine_start_day": VACCINE_START_DAY, "vaccine_ramp_days": VACCINE_RAMP_DAYS,
             "immune_escape_seeding_rate": IMMUNE_ESCAPE_SEEDING_RATE,
             "immune_escape_growth_penalty": IMMUNE_ESCAPE_GROWTH_PENALTY,
-            "case_series": PULMONARY_CORGI_CASE_SERIES,
+            "case_series": PULMONARY_HS_CASE_SERIES,
         })
     return scenarios
 

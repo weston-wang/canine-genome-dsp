@@ -21,7 +21,7 @@ from .mapk_scenarios import (
     NODAL_SEED_FRACTION,
     ccnu_combination_scenarios,
     combination_scenarios,
-    pulmonary_corgi_scenarios,
+    localized_pulmonary_scenarios,
 )
 from .pharmacology import (
     CCNU_CANINE_HS,
@@ -31,7 +31,7 @@ from .pharmacology import (
 )
 from .single_patient import (
     CANINE_HS_DRIVER_FREQUENCY,
-    CORGI_PULMONARY_HS_BENCHMARK,
+    LOCALIZED_PULMONARY_HS_BENCHMARK,
     LOCALIZED_HS_CCNU_BENCHMARK,
     SEQUENCING_ASSAYS,
     driver_conditioned_arms,
@@ -57,20 +57,20 @@ def single_patient_demo(out: Path, breed: str = "bmd",
                         preexisting_prob: float = 0.30, seed: int = 7) -> None:
     """Re-asks this repo's central question as an N=1 question, and swaps in a cytotoxic partner.
     Five analyses, in order of how much they change the answer. `breed` (must be 'bmd' or
-    'golden_retriever') governs findings 1-4 only -- see finding 5 for why a Corgi patient is
+    'golden_retriever') governs findings 1-4 only -- see finding 5 for why an unsequenced-breed patient is
     handled as a separate scenario rather than a value of this parameter.
     """
     if breed not in ("bmd", "flat_coated_retriever"):
         raise ValueError(
             "is not one of this repo's tumor-scenario presets ('bmd', 'flat_coated_retriever' -- "
-            "see localized_pihs_scenarios/combination_scenarios). A Corgi patient is not covered by "
-            "this arm at all: see finding_5_corgi_is_a_different_disease_not_a_different_breed_name "
-            "in this demo's summary.json, and corgi-answer-demo for the Corgi regimen.")
+            "see localized_pihs_scenarios/combination_scenarios). An unsequenced-breed patient is not covered by "
+            "this arm at all: see finding_5_localized_pulmonary_is_a_different_disease_not_a_different_breed_name "
+            "in this demo's summary.json, and endurance-answer-demo for the localized pulmonary regimen.")
     out.mkdir(parents=True, exist_ok=True)
 
     # 1. Driver conditioning ------------------------------------------------------------------
     driver = driver_conditioned_arms(breed=breed)
-    driver_corgi = driver_conditioned_arms(breed="corgi")
+    driver_unsequenced = driver_conditioned_arms(breed="unsequenced_breed")
 
     # 2. What a negative sequencing result buys -----------------------------------------------
     assay_rows = []
@@ -192,34 +192,34 @@ def single_patient_demo(out: Path, breed: str = "bmd",
     right.legend(fontsize=8); right.grid(alpha=.3, axis="y")
     fig.tight_layout(); fig.savefig(out / "single_patient.png", dpi=160); plt.close(fig)
 
-    # 5. The actual Corgi case: a different scenario against a different, breed-matched benchmark --
-    # Everything above (findings 1-4) models BMD localized PIHS. Applying its numbers to a Corgi
+    # 5. The actual localized pulmonary case: a different scenario against a different, breed-matched benchmark --
+    # Everything above (findings 1-4) models BMD localized PIHS. Applying its numbers to an unsequenced breed
     # patient would repeat exactly the kind of breed/lineage mismatch the pharmacology-vs-melanoma
-    # objection already caught once this session -- so this runs the real Corgi-specific scenario
-    # (`pulmonary_corgi_scenarios`, the two-compartment nodal model) instead of reusing the BMD arm.
-    corgi_rows = []
+    # objection already caught once this session -- so this runs the real presentation-specific scenario
+    # (`localized_pulmonary_scenarios`, the two-compartment nodal model) instead of reusing the BMD arm.
+    pulmonary_rows = []
     for nodal_prob in NODAL_INVOLVEMENT_PROB_SWEEP:
-        model, corgi_css, corgi_rates, corgi_debulk, _ = pulmonary_corgi_scenarios(
+        model, pulmonary_css, pulmonary_rates, pulmonary_debulk, _ = localized_pulmonary_scenarios(
             cdk46_max_kill=0.0, debulking_fraction=debulking_fraction,
             nodal_involvement_prob_values=[nodal_prob])[nodal_prob]
-        corgi_outcome = run_monte_carlo_two_compartment(
-            model, corgi_css, horizon_days, corgi_rates, nodal_involvement_prob=nodal_prob,
-            nodal_seed_fraction=NODAL_SEED_FRACTION, debulking_fraction=corgi_debulk, trials=trials,
+        pulmonary_outcome = run_monte_carlo_two_compartment(
+            model, pulmonary_css, horizon_days, pulmonary_rates, nodal_involvement_prob=nodal_prob,
+            nodal_seed_fraction=NODAL_SEED_FRACTION, debulking_fraction=pulmonary_debulk, trials=trials,
             preexisting_prob=preexisting_prob, initial_burden=_PULMONARY_BASELINE_BURDEN, seed=seed)
-        corgi_partition = partition_two_compartment_by_preexisting_subclone(corgi_outcome)
-        corgi_rows.append({
+        pulmonary_partition = partition_two_compartment_by_preexisting_subclone(pulmonary_outcome)
+        pulmonary_rows.append({
             "nodal_involvement_prob": nodal_prob,
-            "probability_durable_response": float(1 - corgi_outcome.progressed.mean()),
+            "probability_durable_response": float(1 - pulmonary_outcome.progressed.mean()),
             "durable_without_preexisting_subclone":
-                corgi_partition["without_preexisting_subclone"]["durable_response_fraction"],
+                pulmonary_partition["without_preexisting_subclone"]["durable_response_fraction"],
             "durable_with_preexisting_subclone":
-                corgi_partition["with_preexisting_subclone"]["durable_response_fraction"],
+                pulmonary_partition["with_preexisting_subclone"]["durable_response_fraction"],
             "median_days_to_progression": (
-                float(np.nanmedian(corgi_outcome.time_to_progression))
-                if corgi_outcome.progressed.any() else None),
+                float(np.nanmedian(pulmonary_outcome.time_to_progression))
+                if pulmonary_outcome.progressed.any() else None),
         })
-    corgi_df = pd.DataFrame(corgi_rows)
-    corgi_df.to_csv(out / "corgi_pulmonary_arm.csv", index=False)
+    pulmonary_df = pd.DataFrame(pulmonary_rows)
+    pulmonary_df.to_csv(out / "localized_pulmonary_arm.csv", index=False)
 
     best_capped = capped.loc[capped["probability_durable_response"].idxmax()]
     # The matched benchmark is admissible on all four axes, so inverting the mixture against it is a
@@ -250,7 +250,7 @@ def single_patient_demo(out: Path, breed: str = "bmd",
                 "mapk_scenarios) but no Takada-et-al.-style driver-mutation cohort."
             ),
             "source": CANINE_HS_DRIVER_FREQUENCY,
-            "does_not_apply_to_corgi": "This finding is specific to the breed named in "
+            "does_not_apply_to_unsequenced_breeds": "This finding is specific to the breed named in "
                                        "'for_breed' above.",
         },
         "finding_2_sequencing_cannot_see_preexisting_resistance": {
@@ -319,38 +319,38 @@ def single_patient_demo(out: Path, breed: str = "bmd",
                                       "shortly after a real 4-6 cycle lomustine course (84-168 "
                                       "days) would have ended.",
         },
-        "finding_5_corgi_is_a_different_disease_not_a_different_breed_name": {
+        "finding_5_localized_pulmonary_is_a_different_disease_not_a_different_breed_name": {
             "why_this_section_exists": "Findings 1-4 model BMD localized PIHS end to end -- the "
                 "driver-frequency data (Takada 2019), the tumor scenario (`localized_pihs_"
                 "scenarios`), and the calibration benchmark (Skorupski 2009) are all BMD-context. "
-                "Corgi HS is a clinically distinct, separately-published presentation (Sakai et al. "
+                "Localized pulmonary HS is a clinically distinct, separately-published presentation (Sakai et al. "
                 "2015) with regional nodal involvement in many cases and a 133-day median survival "
                 "-- roughly a quarter of the BMD-context benchmark's 568 days. Reusing findings 1-4 "
-                "for a Corgi patient would be the same category of mistake this session already "
+                "for an unsequenced-breed patient would be the same category of mistake this session already "
                 "caught once (treating canine melanoma IC50 data as informative about canine HS "
                 "potency): a real, cited number applied across an unverified species/lineage-"
                 "equivalent boundary.",
-            "driver_conditioning_for_corgi": driver_corgi,
-            "scenario_used": "pulmonary_corgi_scenarios / run_monte_carlo_two_compartment -- the "
+            "driver_conditioning_unsequenced": driver_unsequenced,
+            "scenario_used": "localized_pulmonary_scenarios / run_monte_carlo_two_compartment -- the "
                              "two-compartment nodal model already built for this presentation, "
                              "not the single-compartment BMD PIHS model findings 1-4 use.",
-            "sweep": corgi_rows,
+            "sweep": pulmonary_rows,
             "cdk46_or_ccnu_not_added_here": "Deliberately not layered onto this arm: doing so would "
                 "imply the CDK4/6i-achievability and lomustine-duration findings (derived from BMD-"
                 "context growth rates and CDK46_CANINE_POTENCY, itself from canine melanoma lines) "
-                "transfer to the Corgi tumor model, which is exactly the unverified cross-lineage "
+                "transfer to the this presentation tumor model, which is exactly the unverified cross-lineage "
                 "step this finding exists to avoid taking silently.",
-            "matched_benchmark": CORGI_PULMONARY_HS_BENCHMARK,
+            "matched_benchmark": LOCALIZED_PULMONARY_HS_BENCHMARK,
             "why_no_calibration_inversion_here": "`implied_preexisting_prob` is not applied against "
                 "this benchmark the way it was against Skorupski for the BMD arm: Sakai's cohort "
                 "received mixed/unspecified treatment, not one systemic agent, so its outcome is "
                 "not attributable to a comparable regimen the way the CCNU-specific benchmark's is. "
                 "It is a scale check, not an estimator.",
-            "verdict": "The honest N=1 statement for a Corgi patient is not 'apply findings 1-4 with "
-                "a discount' -- it is that this repo's own best-evidenced Corgi-specific model "
+            "verdict": "The honest N=1 statement for an unsequenced-breed patient is not 'apply findings 1-4 with "
+                "a discount' -- it is that this repo's own best-evidenced presentation-specific model "
                 "predicts a materially different disease course, its driver is undetermined rather "
                 "than known-at-46%, and no drug-specific finding above (CDK4/6i ceiling, lomustine "
-                "duration cap) has been checked against Corgi-specific growth rates or potency data, "
+                "duration cap) has been checked against presentation-specific growth rates or potency data, "
                 "because none exist.",
         },
         "synthesis_the_two_candidates_fail_on_opposite_axes": {
@@ -383,9 +383,9 @@ def single_patient_demo(out: Path, breed: str = "bmd",
             "limit; treating it as a hard stop is conservative but arbitrary at the margin",
             "the pre-existing-fraction prior 10^U(-6,-3) is the resistance engine's own "
             "convention.",
-            "the Corgi arm's own scenario (pulmonary_corgi_scenarios) still reuses the BMD "
+            "the localized pulmonary arm's own scenario (localized_pulmonary_scenarios) still reuses the BMD "
             "growth-rate/resistance-mechanism spectrum unchanged, per that function's own "
-            "documented reasoning: no Corgi-specific germline locus or driver panel is "
+            "documented reasoning: no presentation-specific germline locus or driver panel is "
             "established enough to justify inventing a different one from nothing.",
         ],
         "warning": "This reframes an illustrative model as an individual-patient question. It does "

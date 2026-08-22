@@ -116,7 +116,7 @@ def scale_seeding_rate(seeding_rate_reference: float | np.ndarray, tmb_ratio: fl
 
 
 def refuse_bmd_benchmark_transfer(implied_bmd_preexisting_prob: float = 0.62) -> dict:
-    """Why the BMD benchmark inversion must not be carried onto a low-burden or Corgi arm.
+    """Why the BMD benchmark inversion must not be carried onto a low-burden or localized pulmonary arm.
     `single_patient.implied_preexisting_prob` inverted the Skorupski localized-HS CCNU benchmark
     and implied `p ~= 0.62` -- about double this module's 0.30 -- concluding the model is roughly
     twice too optimistic.
@@ -126,15 +126,15 @@ def refuse_bmd_benchmark_transfer(implied_bmd_preexisting_prob: float = 0.62) ->
         "valid_for": "the BMD-context, debulked, localized-HS-plus-adjuvant-systemic-drug scenario "
                     "the benchmark actually describes",
         "must_not_transfer_to": [
-            "any Corgi arm -- the benchmark's breed composition is unreported and skews to the "
+            "any localized pulmonary arm -- the benchmark's breed composition is unreported and skews to the "
             "referral HS population (BMD/flat-coated retriever/rottweiler), and the one breed-"
-            "matched Corgi benchmark (single_patient.CORGI_PULMONARY_HS_BENCHMARK) describes a "
+            "matched cohort benchmark (single_patient.LOCALIZED_PULMONARY_HS_BENCHMARK) describes a "
             "different natural history entirely",
             "any low-mutational-supply arm -- the benchmark cohort was not stratified by burden or "
             "by driver status, so it averages over exactly the variation this scaling isolates",
         ],
         "symmetry_note": "This is the same class of error as applying BMD's 44/96 driver "
-                         "frequency to a Corgi, which driver_conditioned_arms was rewritten to "
+                         "frequency to an unsequenced breed, which driver_conditioned_arms was rewritten to "
                          "refuse. It ran in the pessimistic direction here, which made it easier "
                          "to miss: a correction that makes a model look worse still has to be "
                          "scoped correctly.",

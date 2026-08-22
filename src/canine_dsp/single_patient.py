@@ -99,28 +99,28 @@ LOCALIZED_HS_CCNU_BENCHMARK = {
                      "MAPK-driven and non-MAPK-driven tumors"],
     "caveat": "n=16, single-arm, retrospective. Breed composition was not reported -- HS in the "
               "referral-hospital population this drew from skews toward BMD/flat-coated "
-              "retriever/rottweiler, not Corgi, so treat this as matched on "
+              "retriever/rottweiler, not this breed, so treat this as matched on "
               "species/disease/structure but UNRESOLVED on breed, same as "
               "CANINE_HS_DRIVER_FREQUENCY.",
 }
 
-# The genuinely breed-matched comparator for a Corgi patient -- and it tells a materially
+# The genuinely breed-matched comparator for an unsequenced-breed patient -- and it tells a materially
 # different, worse story than LOCALIZED_HS_CCNU_BENCHMARK above, which is why the two must never
-# be conflated. This is the same case series `pulmonary_corgi_scenarios` in mapk_scenarios.py
+# be conflated. This is the same case series `localized_pulmonary_scenarios` in mapk_scenarios.py
 # already models: unlike Skorupski's cohort, this one reports regional nodal involvement in many
 # cases, meaning debulking cannot be assumed to reach all disease (a structural mismatch, not just
 # a numeric one) and survival is roughly a quarter as long.
-CORGI_PULMONARY_HS_BENCHMARK = {
+LOCALIZED_PULMONARY_HS_BENCHMARK = {
     "citation": "Sakai et al. 2015, J Vet Med Sci 77(12):1667-1670, PMID 26155931 -- localized "
-               "pulmonary histiocytic sarcoma in Pembroke Welsh Corgis",
+               "localized pulmonary histiocytic sarcoma",
     "n_dogs": 19,
-    "breed": "Pembroke Welsh Corgi (all 19)",
+    "breed": "single breed (all 19)",
     "median_survival_days": 133,
     "nodal_involvement": "reported in many cases, no precise rate published",
     "prognostic_factors_significant": "none reached statistical significance (including surgical "
                                       "resection status) -- likely underpowered, not evidence "
                                       "those factors don't matter",
-    "matches_on": ["species: dog", "breed: Corgi", "disease: histiocytic sarcoma",
+    "matches_on": ["species: dog", "breed: this presentation", "disease: histiocytic sarcoma",
                   "anatomic presentation: primary lung"],
     "mismatches_on": ["treatment: mixed/unspecified across the cohort, not a single systemic "
                      "agent -- so this cannot isolate a drug effect the way the CCNU benchmark can",
@@ -241,8 +241,8 @@ def spatial_detection_probability(subclone_cell_fraction: float, tumor_cells: fl
 
 #  Breeds Takada et al. 2019 actually sequenced -- the only ones with a real driver-frequency base
 # rate. Every other breed string (flat_coated_retriever's own real data is a GWAS germline locus,
-# a different thing entirely; corgi has no published HS driver sequencing at all; anything else is
-# simply unmeasured) gets the explicit "no data" branch below, generically -- not a Corgi special
+# a different thing entirely; unsequenced breeds have no published HS driver sequencing at all; anything else is
+# simply unmeasured) gets the explicit "no data" branch below, generically -- not a this presentation special
 # case, since the flat-coated-retriever tumor-scenario preset makes exactly the same mistake
 # possible if this were hardcoded to only two named outcomes.
 _SEQUENCED_DRIVER_FREQUENCY_BREEDS = {"bmd", "golden_retriever"}
@@ -270,8 +270,8 @@ def driver_conditioned_arms(breed: str = "bmd",
             "do_not_borrow_bmd_frequency": f"Applying 44/96 (BMD) to {breed!r} is a category error, "
                                           "not a conservative estimate, unless that breed's own "
                                           "clinical presentation and natural history are shown to "
-                                          "match BMD's -- for Corgi specifically, they are shown "
-                                          "NOT to (see CORGI_PULMONARY_HS_BENCHMARK: 133-day median "
+                                          "match BMD's -- for this presentation specifically, they are shown "
+                                          "NOT to (see LOCALIZED_PULMONARY_HS_BENCHMARK: 133-day median "
                                           "survival vs. 568 days in the BMD-context benchmark).",
         }
     on_target = float(driver_frequency[breed]["PTPN11"] + driver_frequency[breed].get("KRAS", 0.0)) \
@@ -325,7 +325,7 @@ def implied_preexisting_prob(observed_durable_fraction: float, durable_without_s
 def partition_two_compartment_by_preexisting_subclone(outcome,
                                                        resistant_indices: slice = slice(1, None)
                                                        ) -> dict:
-    """`partition_by_preexisting_subclone`, adapted for `TwoCompartmentOutcome` (the Corgi pulmonary
+    """`partition_by_preexisting_subclone`, adapted for `TwoCompartmentOutcome` (the localized pulmonary
     scenario), which carries separate `primary_trajectories`/`nodal_trajectories` instead of one
     `trajectories` array. Reads the day-0 state from the primary compartment only.
     """

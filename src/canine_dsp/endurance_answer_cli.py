@@ -1,6 +1,6 @@
-"""The culminating question: is a durable response achievable for one Corgi with this disease?
+"""The culminating question: is a durable response achievable for one dog with this disease?
 Assembles every constraint this repo established into a single conditional answer, rather than
-another sweep. Deliberately built as its own demo because the Corgi arm of `single_patient_demo`
+another sweep. Deliberately built as its own demo because the localized pulmonary arm of `single_patient_demo`
 was trametinib monotherapy in a 4-clone model -- it could not express a vaccine at all, which is
 the component the entire endurance case turned out to rest on. See docs/HSA_DURABLE_RESPONSE.md.
 """
@@ -30,11 +30,11 @@ from .mapk_scenarios import (
     VACCINE_CLONE_NAMES,
     VACCINE_RAMP_DAYS,
     VACCINE_START_DAY,
-    corgi_full_regimen_scenarios,
+    pulmonary_full_regimen_scenarios,
 )
 from .pharmacology import CCNU_CANINE_HS
 from .single_patient import (
-    CORGI_PULMONARY_HS_BENCHMARK,
+    LOCALIZED_PULMONARY_HS_BENCHMARK,
     SEQUENCING_ASSAYS,
     driver_conditioned_arms,
     vaf_lod_to_cell_fraction,
@@ -42,7 +42,7 @@ from .single_patient import (
 
 # For ONE dog, the model's uncertain inputs split into two groups that could not be more different in
 # what they imply for a treatment decision. This partition is the core N=1 contribution here: it is
-# not "everything is uncertain", it is that the Corgi-specific structural risk happens to be
+# not "everything is uncertain", it is that the presentation-specific structural risk happens to be
 # measurable per patient while the generic one is not.
 MEASURABLE_IN_ONE_DOG = {
     "driver_mutation_status": {
@@ -50,20 +50,20 @@ MEASURABLE_IN_ONE_DOG = {
               "near-clonal (~25-50% VAF), orders of magnitude above every assay floor",
         "decides": "whether a MEK inhibitor is on-target at all AND whether a hotspot vaccine has an "
                   "antigen to target -- both halves of the regimen depend on the same answer",
-        "status_for_corgi": "NEVER MEASURED IN ANY CORGI. This is the gate, and it is open.",
+        "status_for_unsequenced_breed": "NEVER MEASURED IN ANY DOG OF THIS PRESENTATION. This is the gate, and it is open.",
     },
     "regional_nodal_involvement": {
         "how": "staging: thoracic imaging, node aspirate/biopsy at diagnosis",
         "decides": "whether debulking can reach all disease, i.e. which compartment structure applies",
-        "status_for_corgi": "unmeasured as a population RATE (Sakai et al. report 'many cases', no "
+        "status_for_unsequenced_breed": "unmeasured as a population RATE (Sakai et al. report 'many cases', no "
                            "percentage) but directly measurable in an individual patient -- so the "
-                           "Corgi-specific structural risk is resolvable for one dog even though the "
+                           "presentation-specific structural risk is resolvable for one dog even though the "
                            "cohort rate is not",
     },
     "tumor_burden_and_resectability": {
         "how": "imaging plus surgical/histopathological margin assessment",
         "decides": "the model's initial_burden and debulking_fraction",
-        "status_for_corgi": "routinely measurable",
+        "status_for_unsequenced_breed": "routinely measurable",
     },
 }
 
@@ -93,17 +93,17 @@ NOT_MEASURABLE_IN_ONE_DOG = {
 }
 
 
-def corgi_answer_demo(out: Path, debulking_fraction: float = DEBULKING_FRACTION,
+def endurance_answer_demo(out: Path, debulking_fraction: float = DEBULKING_FRACTION,
                       ccnu_max_kill: float = 0.08, trials: int = 250,
                       seed: int = 7) -> None:
-    """Runs the full three-component regimen in the Corgi two-compartment scenario and answers.
+    """Runs the full three-component regimen in the two-compartment scenario and answers.
     Sweeps nodal involvement x vaccine potency x `preexisting_prob` (0.30 central, 0.62 as implied
     by the matched BMD-context benchmark) x horizon, because the answer for one dog is a
     conditional statement, not a number: what is achievable given what can be measured, and what
     remains unresolvable regardless.
     """
     out.mkdir(parents=True, exist_ok=True)
-    reference = corgi_full_regimen_scenarios(debulking_fraction, ccnu_max_kill,
+    reference = pulmonary_full_regimen_scenarios(debulking_fraction, ccnu_max_kill,
                                             NODAL_INVOLVEMENT_PROB_SWEEP)
     any_model = next(iter(reference.values()))[0]
     threshold = vaccine_potency_threshold(np.asarray(any_model.growth), VACCINE_CLONE_NAMES)
@@ -145,10 +145,10 @@ def corgi_answer_demo(out: Path, debulking_fraction: float = DEBULKING_FRACTION,
                         "immune_escape_share": float(mechanisms.get("immune_escape", 0.0)),
                     })
     grid = pd.DataFrame(rows)
-    grid.to_csv(out / "corgi_regimen_grid.csv", index=False)
+    grid.to_csv(out / "pulmonary_regimen_grid.csv", index=False)
 
     ten_year = grid[grid["years"] == 10.0]
-    # Does the answer survive the worst measurable configuration a Corgi could present with?
+    # Does the answer survive the worst measurable configuration a this presentation could present with?
     worst = ten_year[(ten_year["nodal_involvement_prob"] == max(NODAL_INVOLVEMENT_PROB_SWEEP))
                      & (ten_year["preexisting_prob"] == 0.62)]
     worst_above = worst[worst["above_threshold"]]
@@ -174,7 +174,7 @@ def corgi_answer_demo(out: Path, debulking_fraction: float = DEBULKING_FRACTION,
                  label=f"threshold {threshold['threshold_vaccine_max_kill']:.3f}/day")
     left.set(xlabel="vaccine max_kill (per day)", ylabel="P(durable response) at 10 years",
              ylim=(-0.03, 1.03),
-             title="Corgi pulmonary, two-compartment, worst preexisting_prob (0.62)\n"
+             title="localized pulmonary, two-compartment, worst preexisting_prob (0.62)\n"
                    "nodal involvement barely matters above the threshold")
     left.legend(fontsize=8); left.grid(alpha=.3)
 
@@ -186,24 +186,24 @@ def corgi_answer_demo(out: Path, debulking_fraction: float = DEBULKING_FRACTION,
         if not above:
             arm = arm[arm["vaccine_max_kill"] == 0.0]
         right.plot(arm["years"], arm["probability_durable_response"], "o-", color=color, label=label)
-    right.axhline(CORGI_PULMONARY_HS_BENCHMARK["median_survival_days"] / 3650, color="tab:green",
+    right.axhline(LOCALIZED_PULMONARY_HS_BENCHMARK["median_survival_days"] / 3650, color="tab:green",
                   linestyle="-.",
                   label="Sakai 2015 median survival (133 d) as a fraction of 10 yr")
     right.set(xlabel="horizon (years)", ylabel="P(durable response)", ylim=(-0.03, 1.03),
               title="Endurance over time, nodal 0.4 / preexisting_prob 0.62")
     right.legend(fontsize=8); right.grid(alpha=.3)
-    fig.tight_layout(); fig.savefig(out / "corgi_answer.png", dpi=160); plt.close(fig)
+    fig.tight_layout(); fig.savefig(out / "endurance_answer.png", dpi=160); plt.close(fig)
 
     summary = {
-        "question": "If the goal is a durable response for the Corgi niche presentation, in ONE dog, "
+        "question": "If the goal is a durable response for the localized niche presentation, in ONE dog, "
                    "what is the answer?",
         "short_answer": (
             "/day of kill, THEN the model gives a durable response that is robust to everything "
             "else -- including the two things that cannot be measured in this dog (pre-existing "
-            "resistance) and the Corgi-specific structural risk (nodal disease surgery cannot "
+            "resistance) and the presentation-specific structural risk (nodal disease surgery cannot "
             "reach)."),
         "the_gate_is_sequencing": {
-            **driver_conditioned_arms(breed="corgi"),
+            **driver_conditioned_arms(breed="unsequenced_breed"),
             "why_it_is_a_gate_and_not_a_discount": "Both halves of the regimen depend on the "
                                                    "same answer.",
             "cost_of_being_wrong": "If sequenced and negative, the correct action is a different "
@@ -212,7 +212,7 @@ def corgi_answer_demo(out: Path, debulking_fraction: float = DEBULKING_FRACTION,
         "what_can_and_cannot_be_measured_in_one_dog": {
             "measurable": MEASURABLE_IN_ONE_DOG,
             "not_measurable": NOT_MEASURABLE_IN_ONE_DOG,
-            "the_useful_asymmetry": "Nodal involvement -- the risk specific to the Corgi "
+            "the_useful_asymmetry": "Nodal involvement -- the risk specific to the this presentation "
                                     "pulmonary presentation -- IS measurable in an individual "
                                     "patient by staging, even though its cohort rate was never "
                                     "published.",
@@ -233,7 +233,7 @@ def corgi_answer_demo(out: Path, debulking_fraction: float = DEBULKING_FRACTION,
             },
         },
         "does_nodal_disease_break_it": {
-            "why_this_is_the_corgi_specific_question": "Sakai et al. report regional nodal involvement "
+            "why_this_is_the_presentation_specific_question": "Sakai et al. report regional nodal involvement "
                 "in many cases, so the single-compartment 'debulking reaches everything' premise does "
                 "not hold. The nodal compartment is seeded from the PRE-debulking primary (carrying "
                 "any pre-existing resistant clone) and surgery cannot touch it.",
@@ -274,8 +274,8 @@ def corgi_answer_demo(out: Path, debulking_fraction: float = DEBULKING_FRACTION,
             "convergence_argument": CONVERGENCE_ARGUMENT,
         },
         "matched_benchmark": {
-            **CORGI_PULMONARY_HS_BENCHMARK,
-            "what_it_says_about_the_bar": "133-day median survival across 19 Corgis on "
+            **LOCALIZED_PULMONARY_HS_BENCHMARK,
+            "what_it_says_about_the_bar": "133-day median survival across 19 dogs on "
                                           "mixed/unspecified treatment.",
         },
         "the_honest_bottom_line": [
@@ -291,12 +291,12 @@ def corgi_answer_demo(out: Path, debulking_fraction: float = DEBULKING_FRACTION,
             "constant, and it is the one failure mode where raising vaccine potency does not help.",
         ],
         "unverified_extrapolations": [
-            "no Corgi HS tumor has ever been sequenced for driver mutations, so the PTPN11/KRAS "
+            "no tumor of this presentation has ever been sequenced for driver mutations, so the PTPN11/KRAS "
             "premise underlying both the drug and the vaccine antigen is unconfirmed for this breed",
-            "the Corgi scenario reuses the BMD growth-rate and resistance-mechanism spectrum "
-            "unchanged (pulmonary_corgi_scenarios' own documented reasoning: no Corgi-specific "
+            "the localized pulmonary scenario reuses the BMD growth-rate and resistance-mechanism spectrum "
+            "unchanged (localized_pulmonary_scenarios' own documented reasoning: no presentation-specific "
             "germline locus exists to justify a different one), so 'the threshold is 0.058/day' is "
-            "inherited, not Corgi-measured",
+            "inherited, not cohort-measured",
             "vaccine_max_kill has no measured anchor in any species for this antigen; the threshold "
             "is a target, and nothing here establishes it is reachable",
             "nodal_seed_fraction and the nodal-involvement sweep are illustrative -- Sakai et al. "

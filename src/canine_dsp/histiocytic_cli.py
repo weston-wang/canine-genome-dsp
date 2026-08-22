@@ -1,4 +1,4 @@
-"""Demo/report functions for the Corgi HS driver-hypothesis analysis in `histiocytic_origin`."""
+"""Demo/report functions for the localized HS driver-hypothesis analysis in `histiocytic_origin`."""
 
 import json
 import time
@@ -12,7 +12,7 @@ import pandas as pd
 from .alphafold import align_residue_numbers, download_structure, read_plddt_track
 from .histiocytic_origin import (
     CANDIDATE_DRIVERS,
-    CORGI_CLINICAL_FEATURES,
+    LOCALIZED_PULMONARY_CLINICAL_FEATURES,
     HUMAN_HISTIOCYTOSIS_DRIVERS,
     MTAP_CDKN2A_LOCUS,
     TISSUE_RESIDENT_MACROPHAGE_ONTOGENY,
@@ -74,10 +74,10 @@ def _retrying(call, attempts: int = 3, delay: float = 2.0):
     raise last  # type: ignore[misc]
 
 
-def corgi_driver_hypothesis_demo(out: Path, genes: list[str] | None = None,
+def driver_hypothesis_demo(out: Path, genes: list[str] | None = None,
                                  bicoherence_nperseg: int = 64, permutations: int = 10_000,
                                  seed: int = 7) -> None:
-    """Structural/DSP triage of the candidate driver panel for Corgi primary CNS / pulmonary HS. Per
+    """Structural/DSP triage of the candidate driver panel for localized primary CNS / pulmonary HS. Per
     candidate gene: resolve human and dog UniProt accessions, pull both AlphaFold models, measure
     whole-protein ortholog conservation, check whether each established human hotspot residue is
     actually conserved at the aligned dog position, and run three signal analyses on the
@@ -196,10 +196,10 @@ def corgi_driver_hypothesis_demo(out: Path, genes: list[str] | None = None,
             "hotspot."),
     }
     summary = {
-        "question": "Which driver genes should be sequenced first in Pembroke Welsh Corgi primary "
-                   "CNS or primary pulmonary histiocytic sarcoma, given that no Corgi-specific and "
+        "question": "Which driver genes should be sequenced first in localized primary "
+                   "CNS or primary pulmonary histiocytic sarcoma, given that no presentation-specific and "
                    "no anatomic-site-stratified canine HS mutation data exists?",
-        "clinical_features_reasoned_from": CORGI_CLINICAL_FEATURES,
+        "clinical_features_reasoned_from": LOCALIZED_PULMONARY_CLINICAL_FEATURES,
         "ontogeny_argument": TISSUE_RESIDENT_MACROPHAGE_ONTOGENY,
         "cross_species_landscape": HUMAN_HISTIOCYTOSIS_DRIVERS,
         "germline_susceptibility_locus": MTAP_CDKN2A_LOCUS,

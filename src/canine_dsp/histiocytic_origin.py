@@ -1,6 +1,6 @@
-"""Inferring a candidate driver landscape for Pembroke Welsh Corgi primary CNS / primary pulmonary
+"""Inferring a candidate driver landscape for localized primary CNS / primary pulmonary
 histiocytic sarcoma from clinical phenotype, cross-species genetics, and structural signal
-analysis. WHY THIS MODULE EXISTS ---------------------- `mapk_scenarios` models Corgi primary
+analysis. WHY THIS MODULE EXISTS ---------------------- `mapk_scenarios` models localized primary
 intracranial HS (PIHS) and localized pulmonary HS as PTPN11/KRAS-driven, and has always flagged
 that premise as its single largest unverified assumption. See docs/HS_MAPK_RESISTANCE.md.
 """
@@ -18,9 +18,9 @@ AA_HYDROPATHY = {
     "T": -0.7, "W": -0.9, "Y": -1.3, "V": 4.2,
 }
 
-CORGI_CLINICAL_FEATURES = {
-    "citation": "Nakamura K, et al. Localized pulmonary histiocytic sarcomas in Pembroke Welsh "
-               "Corgis. J Vet Med Sci / (see PMID 26155931), 19 dogs",
+LOCALIZED_PULMONARY_CLINICAL_FEATURES = {
+    "citation": "Kagawa et al. 2015, J Vet Med Sci 77(12):1659-61, PMID 26155931 -- 19 dogs of "
+               "one breed, localized pulmonary histiocytic sarcoma",
     "anatomic_pattern": "focal or multiple masses in lung, regional lymph nodes, or both -- "
                         "localized, not the disseminated splenic/hepatic pattern of BMD HS",
     "immunophenotype": ["HLA-DR positive (MHC class II -- professional antigen-presenting cell)",
@@ -44,7 +44,7 @@ TISSUE_RESIDENT_MACROPHAGE_ONTOGENY = {
               "independently of circulating monocyte input in adulthood (microglia and Langerhans "
               "cells only marginally replaced over a mouse lifetime; alveolar macrophages more so "
               "with age)",
-    "why_it_matters_here": "Corgi HS presents in exactly two sites -- lung and CNS -- whose "
+    "why_it_matters_here": "Localized HS presents in exactly two sites -- lung and CNS -- whose "
                            "macrophage compartments are prenatally seeded, locally "
                            "self-renewing, and bone-marrow-independent.",
 }

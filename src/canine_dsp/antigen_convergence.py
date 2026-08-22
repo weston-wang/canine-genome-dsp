@@ -49,7 +49,7 @@ CONVERGENCE_ARGUMENT = {
                                     "second agents -- the cytostatic ceiling and the "
                                     "cumulative-dose duration cap -- do not apply to an immune "
                                     "mechanism.",
-    "load_bearing_unverified_premise": "That Corgi HS carries a PTPN11/KRAS hotspot at all.",
+    "load_bearing_unverified_premise": "That localized HS carries a PTPN11/KRAS hotspot at all.",
 }
 
 

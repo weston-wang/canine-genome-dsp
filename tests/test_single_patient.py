@@ -5,7 +5,7 @@ from canine_dsp.mapk_resistance import MonteCarloOutcome
 from canine_dsp.pharmacology import CCNU_CANINE_HS, CYTOTOXIC, cumulative_dose_limited_days
 from canine_dsp.single_patient import (
     CANINE_HS_DRIVER_FREQUENCY,
-    CORGI_PULMONARY_HS_BENCHMARK,
+    LOCALIZED_PULMONARY_HS_BENCHMARK,
     LOCALIZED_HS_CCNU_BENCHMARK,
     SEQUENCING_ASSAYS,
     detectable_prior_mass,
@@ -114,18 +114,18 @@ def test_driver_conditioning_reports_the_real_cohort_split_not_a_certainty():
     assert bmd["PTPN11"] + bmd["KRAS"] == pytest.approx(44 / 96)
 
 
-def test_driver_conditioning_refuses_to_apply_bmd_frequency_to_a_corgi():
+def test_driver_conditioning_refuses_to_apply_bmd_frequency_to_an_unsequenced_breed():
     """The regression this test guards against is a real mistake this module made once: presenting
-    BMD driver frequency as though it were generically informative for 'one sequenced dog'. Corgi
+    BMD driver frequency as though it were generically informative for 'one sequenced dog'. this presentation
     HS is a separately-published, clinically distinct presentation with zero sequenced cases, so
-    breed='corgi' must return an explicit unknown rather than a borrowed number."""
-    corgi = driver_conditioned_arms(breed="corgi")
-    assert corgi["probability_mapk_driver_identified"] is None
-    assert "no published canine HS driver sequencing exists" in corgi["source"]
-    assert "category error" in corgi["do_not_borrow_bmd_frequency"]
+    breed='unsequenced_breed' must return an explicit unknown rather than a borrowed number."""
+    unsequenced_breed = driver_conditioned_arms(breed="unsequenced_breed")
+    assert unsequenced_breed["probability_mapk_driver_identified"] is None
+    assert "no published canine HS driver sequencing exists" in unsequenced_breed["source"]
+    assert "category error" in unsequenced_breed["do_not_borrow_bmd_frequency"]
     # flat-coated retriever is a real tumor-scenario preset elsewhere in this repo (its own GWAS
     # germline locus) but was never in Takada et al.'s sequenced cohort either -- this must return
-    # the same "no data" branch as corgi, generically, not raise or silently borrow BMD's number.
+    # the same "no data" branch as an unsequenced breed, generically, not raise or silently borrow BMD's number.
     flat_coated = driver_conditioned_arms(breed="flat_coated_retriever")
     assert flat_coated["probability_mapk_driver_identified"] is None
 
@@ -199,17 +199,17 @@ def test_the_matched_benchmark_declares_both_its_matches_and_its_mismatches():
     assert LOCALIZED_HS_CCNU_BENCHMARK["relapse_free_fraction"] == pytest.approx(6 / 16)
 
 
-def test_corgi_benchmark_is_breed_matched_and_tells_a_materially_worse_story():
+def test_benchmark_is_cohort_matched_and_tells_a_materially_worse_story():
     """The BMD-context benchmark is explicitly flagged as breed-UNRESOLVED. This one is the only
     breed-matched comparator in the module, and its outcome must not be quietly similar to the BMD
     one -- if it were, there would be no finding here at all."""
-    assert CORGI_PULMONARY_HS_BENCHMARK["breed"] == "Pembroke Welsh Corgi (all 19)"
-    assert CORGI_PULMONARY_HS_BENCHMARK["n_dogs"] == 19
-    assert CORGI_PULMONARY_HS_BENCHMARK["median_survival_days"] == 133
-    assert (CORGI_PULMONARY_HS_BENCHMARK["median_survival_days"]
+    assert LOCALIZED_PULMONARY_HS_BENCHMARK["breed"] == "single breed (all 19)"
+    assert LOCALIZED_PULMONARY_HS_BENCHMARK["n_dogs"] == 19
+    assert LOCALIZED_PULMONARY_HS_BENCHMARK["median_survival_days"] == 133
+    assert (LOCALIZED_PULMONARY_HS_BENCHMARK["median_survival_days"]
             < LOCALIZED_HS_CCNU_BENCHMARK["median_survival_days"] / 2)
     assert "unresolved on breed" in LOCALIZED_HS_CCNU_BENCHMARK["caveat"].lower()
-    assert CORGI_PULMONARY_HS_BENCHMARK["mismatches_on"]
+    assert LOCALIZED_PULMONARY_HS_BENCHMARK["mismatches_on"]
 
 
 def test_two_compartment_partition_reads_the_primary_compartments_day0_state():
@@ -237,16 +237,16 @@ def test_two_compartment_partition_reads_the_primary_compartments_day0_state():
     assert report["with_preexisting_subclone"]["n_trials"] == 1
 
 
-def test_single_patient_demo_refuses_to_run_the_bmd_arm_for_a_corgi():
+def test_single_patient_demo_refuses_to_run_the_bmd_arm_for_an_unsequenced_breed():
     """The regression this guards: findings 1-4 are BMD-context tumor-scenario code
     (`combination_scenarios`, `ccnu_combination_scenarios`) reused unchanged. Silently accepting
-    breed='corgi' here would run the BMD tumor model and merely mislabel its output, which is worse
+    breed='unsequenced_breed' here would run the BMD tumor model and merely mislabel its output, which is worse
     than refusing -- a wrong number with the right label looks validated."""
     from pathlib import Path
 
     from canine_dsp.single_patient_cli import single_patient_demo
     with pytest.raises(ValueError, match="finding_5"):
-        single_patient_demo(Path("/tmp/should-not-be-created"), breed="corgi")
+        single_patient_demo(Path("/tmp/should-not-be-created"), breed="unsequenced_breed")
 
 
 def test_lomustine_is_cytotoxic_so_the_cytostatic_ceiling_does_not_bind():

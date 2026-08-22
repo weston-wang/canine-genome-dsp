@@ -103,12 +103,12 @@ def test_sweep_spans_the_status_quo_so_the_baseline_is_visible():
 
 
 def test_benchmark_transfer_guard_names_both_directions_of_the_same_error():
-    """The Skorupski inversion (p ~= 0.62) is BMD-context. Carrying it onto a Corgi or low-burden arm
-    would be the same breed/stratification mismatch driver_conditioned_arms refuses -- running
+    """The Skorupski inversion (p ~= 0.62) is BMD-context. Carrying it onto an
+    unsequenced-breed or low-burden arm would be the same breed/stratification mismatch driver_conditioned_arms refuses -- running
     pessimistically, which is exactly why it was easy to miss."""
     guard = refuse_bmd_benchmark_transfer()
     assert guard["implied_bmd_preexisting_prob"] == pytest.approx(0.62)
-    assert any("Corgi" in item for item in guard["must_not_transfer_to"])
+    assert any("localized pulmonary" in item for item in guard["must_not_transfer_to"])
     assert any("low-mutational-supply" in item for item in guard["must_not_transfer_to"])
     assert "pessimistic" in guard["symmetry_note"]
 

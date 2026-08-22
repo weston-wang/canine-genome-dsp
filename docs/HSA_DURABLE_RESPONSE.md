@@ -139,6 +139,90 @@ is the unsolved half.
 
 ---
 
+## 3b. Closing both gaps
+
+Sections 2 and 3 leave two open problems: the vaccine is ~1.7× too weak, and the booster interval
+depends on an immunity half-life nobody has measured. They turn out to be the same problem, and
+both close.
+
+### The bar is a difference, so clear it from the other side
+
+The bar is `growth − kill`. Raising the vaccine is one way to close it; **lowering the bar with a
+second persistent agent is the other**, and unlike vaccine potency it uses a mechanism that already
+exists. Holding the vaccine at the real achievable **0.03/day** throughout and adding a persistent
+mechanism-agnostic kill term:
+
+| persistent agnostic kill | bar after it | 10-yr durable |
+|---|---|---|
+| 0 | 0.0515 | 0.492 |
+| 0.01 | 0.0423 | 0.532 |
+| 0.02 | 0.0331 | 0.832 |
+| **0.03** | **0.0240** | **1.000** |
+| 0.05 | 0.0056 | 1.000 |
+
+The crossing is exactly where the margin predicts: once the bar drops below 0.03, the real-world
+vaccine clears it. **No increase in vaccine potency is required.**
+
+The agent has to be persistent, which rules out eBAT — right coverage, 28-day window, and re-dosing
+made things worse (§5). Metronomic oral chemotherapy has the right shape: continuously dosed, oral,
+systemic, with real data in this exact setting (Lana et al. 2007, PMID 17708397). Its kill rate is
+unmeasured and swept here, not asserted.
+
+### Or: two vaccines instead of one
+
+ERstrePs and eVim target **different antigens through different effector arms** — ER-stress peptides
+via humoral *and* T-cell responses, versus extracellular vimentin via antibody. Neither competes for
+the other's target, and MHC-I loss cannot disable both.
+
+| combined potency | | 10-yr durable |
+|---|---|---|
+| 0.03 | one vaccine | 0.492 |
+| 0.045 | two, 25% loss of additivity | 0.540 |
+| 0.05 | two, sub-additive | 0.924 |
+| **0.06** | **two, additive** | **1.000** |
+
+Additivity is assumed, not measured — and at 25% loss the pair falls back to 0.540, so this is a
+threshold, not a gradient. That makes measuring whether two HSA vaccines are additive a decisive
+experiment rather than an incremental one.
+
+### Headroom above the bar *is* the booster-interval tolerance
+
+Immunity only has to stay **above the bar**, not near its peak. So the tolerable interval is
+`half_life × log₂(max_kill / bar)` — and headroom buys it directly:
+
+| max_kill | may decay to | q-interval @ hl=90 d | @ hl=180 d | @ hl=365 d |
+|---|---|---|---|---|
+| 0.06 (barely over) | 85.8% | 20 d | 40 d | 80 d |
+| 0.08 | 64.4% | 57 d | 114 d | 232 d |
+| 0.10 | 51.5% | 86 d | 172 d | 349 d |
+
+This is why the two problems are one. A vaccine that barely clears the bar needs dosing every three
+weeks and is hostage to an unmeasured half-life; one with real headroom tolerates quarterly dosing
+across the whole plausible range. **Solving the potency gap solves the scheduling problem as a
+side effect.**
+
+The analytic rule above is conservative — it demands immunity stay above the bar for the entire
+horizon, while simulation tolerates longer intervals because the tumour is near-extinct before
+immunity first dips (0.06/day at q90d with a 90-day half-life still gives 1.000). Treat the analytic
+figure as the safe schedule, not the only one that works.
+
+### The combination is insensitive to the thing nobody measured
+
+Real vaccine potency (0.03) plus a persistent agnostic agent (0.03), across both half-lives and both
+schedules:
+
+| | boost q60d | boost q90d |
+|---|---|---|
+| half-life 90 d | 1.000 | 1.000 |
+| half-life 180 d | 1.000 | 1.000 |
+
+That robustness is the point. The combination does not need the immunity half-life to be measured
+before it can be relied on, which the single-vaccine route does.
+
+*Tests: `test_hsa_gap_closure.py`*
+
+---
+
 ## 4. Escape routes
 
 | # | Route | Status |
@@ -316,12 +400,21 @@ proposed, one is closable with a dog-specific antibody that exists, and the thir
 drug that works, so the honest answer is to find the tumour earlier rather than treat the rupture
 better.
 
-What remains is one number. Real vaccines in real dogs deliver roughly **60% of the killing power**
-that permanent control requires. Boosters do not close that gap — they are required for a different
+Real vaccines in real dogs deliver roughly **60% of the killing power** that permanent control
+requires as a single agent. Boosters do not close that gap — they are required for a different
 reason, to hold whatever height you have for the animal's life, and without them even a
 threshold-clearing vaccine falls back to roughly the no-vaccine outcome by ten years.
 
-**The gap is measurable rather than speculative, and closing it is a vaccine-potency question.**
+**But the gap does close, without any increase in vaccine potency** (§3b). The bar is a difference,
+so a second persistent agent that lowers it works as well as a stronger vaccine — at 0.03/day of
+persistent mechanism-agnostic kill, the real-world vaccine reaches 1.000 at ten years. Two
+mechanistically independent vaccines are the alternative route, if they prove additive. And because
+headroom above the bar is what buys booster-interval tolerance, the same fix makes the schedule
+robust to the immunity half-life nobody has measured.
+
+**The remaining uncertainties are now specific and testable**: whether metronomic chemotherapy
+supplies ≥0.03/day of persistent kill, whether two HSA vaccines are additive, and what the immunity
+half-life actually is. None of them requires a better vaccine.
 
 ### What would change the answer
 
