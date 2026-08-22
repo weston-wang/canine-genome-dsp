@@ -1,48 +1,12 @@
-"""Canine MHC class I (DLA) peptide-binding prediction via the IEDB Analysis Resource API.
-
-Two tools were asked about: a canine epitope-*prediction* tool, and a DLA allele-*typing* tool.
-They are not the same kind of thing, and only the first exists in a form usable here.
-
-Epitope prediction: NetMHCpan's EL 4.1 training set explicitly includes dog (DLA) alongside
-mouse (H-2), cattle (BoLA), swine (SLA), equine (Eqca), and several primates -- confirmed live,
-not assumed, by querying IEDB's public REST API directly (`method=netmhcpan_el&species=dog`
-against https://tools-cluster-interface.iedb.org/tools_api/mhci/), which returns exactly three
-allele names: DLA-8803401, DLA-8850101, DLA-8850801 (IEDB's compact nomenclature for
-DLA-88*034:01, DLA-88*501:01, DLA-88*508:01). This module is a thin, real client for that live
-service -- not a reimplementation of NetMHCpan and not a synthetic stand-in.
-
-Consensus prediction: real neoantigen-vaccine pipelines (e.g. pVACtools) don't trust a single
-binding-prediction algorithm -- pVACtools runs an ensemble of up to 13 human-HLA methods and
-requires agreement. Checked live (not assumed) which of IEDB's several MHC-I methods support any
-canine DLA allele at all: only `netmhcpan_el` and `netmhcpan_ba` return a nonempty allele list for
-`species=dog`; `ann`, `smm`, `smmpmbec`, `pickpocket`, `consensus`, and `netmhccons` all return
-none. That narrows the achievable consensus here to two methods, not thirteen -- but EL (trained
-on mass-spectrometry-eluted ligand data) and BA (trained on quantitative binding-affinity data)
-are genuinely different training objectives within NetMHCpan, not the same method run twice, so
-comparing them is still a real, if narrower, version of the same idea. Also checked live whether
-canine MHC class II (DLA-DRB1/DQA1/DQB1) binding could be predicted the same way: no IEDB method
-supports any canine class II allele at all (every method's own allele listing was checked, none
-returned a DLA entry) -- so, unlike class I, there is currently no real tool to check the CD4+
-T-cell axis with, and this module does not attempt to fake one with a human-allele substitute.
-
-DLA allele *typing* (calling a specific dog's actual DLA genotype from its own sequencing reads,
-the way OptiType/HLA-HD/arcasHLA do for human HLA) update: a real, runnable, reusable tool for
-this was found after all -- KPR (Kmer-based Paired-end Read de novo assembler and genotyper; Hess
-et al. 2023, iScience 26(2), PMID 36798440; https://github.com/ZhaoS-Lab/KPR), built specifically
-because human-HLA-style typing software fails on dogs' far sparser known-allele databases. It
-genotypes DLA-I directly from an individual dog's paired-end RNA-seq reads (maps reads to DLA-I
-reference alleles, assembles the mapped reads de novo per-locus, then genotypes the assembled
-contig against the reference panel) and was validated on 152 real dogs from a published dataset,
-recovering 33 putative new alleles. It does not remove the other real gap, though: this project
-has no actual dog's RNA-seq reads to feed it, so a typing step still has no real input here --
-KPR is the right tool for whenever that changes, not something usable today. (No DRB1/class-II-
-specific equivalent was found; DLA-I is as far as real, off-the-shelf typing software currently
-reaches.) The curated IPD-MHC Canine database remains the reference panel typing works against
-(https://www.ebi.ac.uk/ipd/mhc/group/DLA/, 173 DLA-I + 297 DLA-II alleles as of the 2026 search
-that informed this module). What this module adds is the binding-prediction half only, using the
-three real, published, functionally characterized DLA-88 alleles
-below as population-representative stand-ins for "a dog's DLA-88 genotype" -- not a claim about
-any specific dog's actual, unmeasured genotype.
+"""Canine MHC class I (DLA) peptide-binding prediction via the IEDB Analysis Resource API. Two tools
+were asked about: a canine epitope-*prediction* tool, and a DLA allele-*typing* tool. They are not
+the same kind of thing, and only the first exists in a form usable here. Epitope prediction:
+NetMHCpan's EL 4.1 training set explicitly includes dog (DLA) alongside mouse (H-2), cattle
+(BoLA), swine (SLA), equine (Eqca), and several primates -- confirmed live, not assumed, by
+querying IEDB's public REST API directly (`method=netmhcpan_el&species=dog` against
+https://tools-cluster-interface.iedb.org/tools_api/mhci/), which returns exactly three allele
+names: DLA-8803401, DLA-8850101, DLA-8850801 (IEDB's compact nomenclature for DLA-88*034:01,
+DLA-88*501:01, DLA-88*508:01). See docs/HS_MAPK_RESISTANCE.md.
 """
 
 import io
@@ -94,12 +58,11 @@ def binding_class(percentile_rank: float) -> str:
 
 
 def parse_mhci_response(text: str) -> pd.DataFrame:
-    """Parse the IEDB `tools_api/mhci/` tab-separated response into a DataFrame.
-
-    The API returns plain-text errors (e.g. an invalid allele name) with the same HTTP 200
-    status as a real results table, so this checks the response structurally -- the first line
-    of a real result starts with `allele`, not on the HTTP status -- and raises rather than
-    silently returning an empty/garbage table.
+    """Parse the IEDB `tools_api/mhci/` tab-separated response into a DataFrame. The API returns
+    plain-text errors (e.g. an invalid allele name) with the same HTTP 200 status as a real
+    results table, so this checks the response structurally -- the first line of a real result
+    starts with `allele`, not on the HTTP status -- and raises rather than silently returning an
+    empty/garbage table.
     """
     first_line = text.strip().splitlines()[0] if text.strip() else ""
     if not first_line.startswith("allele"):
@@ -133,14 +96,10 @@ CONSENSUS_METHODS = ("netmhcpan_el", "netmhcpan_ba")
 
 def fetch_consensus_binding_predictions(sequence: str, alleles: list[str], lengths: list[int],
                                         methods: tuple[str, ...] = CONSENSUS_METHODS) -> pd.DataFrame:
-    """Query multiple independently-trained IEDB methods for the same peptide/allele set and
-    merge them into one table keyed by (allele, peptide), with per-method percentile-rank and
+    """Query multiple independently-trained IEDB methods for the same peptide/allele set and merge
+    them into one table keyed by (allele, peptide), with per-method percentile-rank and
     binding-class columns plus a `methods_agree` flag (True iff every queried method assigns the
     same binding_class to that peptide/allele pair).
-
-    A real, if narrower-than-pVACtools, consensus check -- see module docstring for why only two
-    methods are available for canine alleles at all, and why they're a genuine pair (different
-    training objectives), not the same predictor queried twice.
     """
     merged = None
     for method in methods:

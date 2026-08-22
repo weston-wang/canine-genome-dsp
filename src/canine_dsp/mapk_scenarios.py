@@ -1,15 +1,10 @@
 """Illustrative scenario presets for the generic MAPK-resistance engine in `mapk_resistance.py`.
-
 Everything in this module is "the exact scenarios we have traded" -- specific breed/drug/disease-
 site parameterizations, case-series citations, and illustrative placeholder constants -- kept
-deliberately separate from the reusable simulation engine (`mapk_resistance.py`: `ResistanceModel`,
-`run_monte_carlo*`, `decompose_patient_uncertainty`, etc.) and from the demo/report functions that
-consume a scenario and produce CSV/plot/summary.json output (`mapk_cli.py`).
-
-The split exists so that once real data lands for this disease (tumor sequencing, canine-specific
-drug PK, DLA genotyping, vaccine immunogenicity, relapse-timing/ctDNA kinetics), a new scenario
-module built from that data can reuse every demo function and every line of the engine unchanged --
-only the presets here need to be swapped or added to.
+deliberately separate from the reusable simulation engine (`mapk_resistance.py`:
+`ResistanceModel`, `run_monte_carlo*`, `decompose_patient_uncertainty`, etc.) and from the
+demo/report functions that consume a scenario and produce CSV/plot/summary.json output
+(`mapk_cli.py`). See docs/HS_MAPK_RESISTANCE.md.
 """
 
 from dataclasses import replace
@@ -111,18 +106,10 @@ MAPK_INHIBITOR_HUMAN_BENCHMARK = {
     "confidence_interval_days": [98, 124],
     "progressed_fraction": 27 / 36,
     "caveat": "A different species, mutation (BRAF, not PTPN11/KRAS), drug pair, and disease "
-             "stage than any scenario in this module -- provided for scale (does this module's "
-             "own median_time_to_progression_days land in a remotely plausible range once a "
-             "resistant clone is present, compared to a real MAPK-inhibitor-treated cohort), not "
-             "as a validation of this module's specific numbers. Weaker than that framing implies "
-             "on its own terms, too: this is a ctDNA-biomarker-monitoring report, not a full "
-             "efficacy trial writeup -- no objective response rate, no PFS measured from "
-             "treatment start, no overall survival, and no systematic toxicity data are given in "
-             "the source paper. The 111-day figure is time from when ctDNA monitoring began to "
-             "clinical progression, and monitoring 'began at variable timepoints relative to "
-             "treatment initiation' (the paper's own wording) -- some patients may already have "
-             "been on drug before entering ctDNA monitoring, so real time-from-treatment-start-"
-             "to-progression could run longer than 111 days for at least some of the cohort.",
+              "stage than any scenario in this module -- provided for scale (does this module's "
+              "own median_time_to_progression_days land in a remotely plausible range once a "
+              "resistant clone is present, compared to a real MAPK-inhibitor-treated cohort), "
+              "not as a validation of this module's specific numbers.",
 }
 
 # The comparator actually used to stress-test this module's own "durable response" combination-
@@ -143,23 +130,8 @@ COMBI_D_V_FIVE_YEAR_BENCHMARK = {
     "five_year_overall_survival_full_population": 0.34,
     "complete_response_fraction": 109 / 563,
     "five_year_overall_survival_complete_responders": 0.71,
-    "caveat": "Provided for scale only, not as a calibration target -- do not use this to justify "
-             "moving any constant above. Stacks four mismatches against this module's own "
-             "scenarios at once: different species (human vs. dog), different disease/cell "
-             "lineage (melanocyte-derived metastatic melanoma vs. histiocyte-derived HS), "
-             "different driver mutation/pathway node (BRAF V600E/K vs. this module's PTPN11/"
-             "KRAS), and a mechanistically different drug pairing (two real MAPK-pathway "
-             "inhibitors blocking the *same* pathway at sequential nodes here, vs. this module's "
-             "MAPK inhibitor + an illustrative, deliberately mechanism-agnostic second-node drug "
-             "hitting a *different* pathway). It is also a poor source specifically for "
-             "calibrating a pre-existing-resistant-clone-prevalence parameter: melanoma carries "
-             "an unusually high, UV-mutagenesis-driven tumor mutational burden, so whatever rate "
-             "of pre-existing resistant clones it implies says little about a UV-unrelated canine "
-             "sarcoma's clonal heterogeneity. Even the fairer of its two headline numbers (71% "
-             "5-year OS among the 19% of patients who achieved a complete response, versus the "
-             "full population's cruder 19% 5-year PFS / 34% 5-year OS) does not change this -- "
-             "the mismatch is in what disease and mutation produced the number, not in which "
-             "endpoint was picked.",
+    "caveat": "Provided for scale only, not as a calibration target -- do not use this to "
+              "justify moving any constant above.",
 }
 
 # Fraction of plasma drug concentration reached in brain tissue -- real, drug-specific PK
@@ -184,29 +156,21 @@ BRAIN_PENETRATION_FRACTION = {
 # provenance rather than presented as a finding.
 BREED_GERMLINE_LOCI = {
     "bmd": "CFA11 haplotype spanning MTAP/CDKN2A, present in 96% of affected Bernese Mountain "
-          "Dogs (GWAS) -- a cell-cycle/tumor-suppressor locus. CDKN2A/MTAP loss is a known "
-          "cooperating lesion with RAS/MAPK activation in several human cancers; if that holds "
-          "here, it is a plausible (unproven) mechanistic link to BMD HS's PTPN11/KRAS-dominated "
-          "acquired-driver spectrum.",
+           "Dogs (GWAS) -- a cell-cycle/tumor-suppressor locus.",
     "flat_coated_retriever": "Two distinct loci on CFA5 and CFA19 (GWAS); the CFA5 locus "
-          "implicates PIK3R6, a PI3K-pathway gene -- a different germline background entirely "
-          "from BMD's. Speculative extension used here: weight this breed's acquired-resistance "
-          "spectrum toward the PI3K/AKT-linked rtk_bypass mechanism rather than PTPN11-like "
-          "pathway_reactivation.",
+                             "implicates PIK3R6, a PI3K-pathway gene -- a different germline "
+                             "background entirely from BMD's.",
 }
 
 
 def canine_cns_hs_scenarios(breed: str = "bmd", location_penetration_multiplier: float = 1.0
                             ) -> dict[str, tuple[ResistanceModel, float, np.ndarray, dict]]:
-    """Primary CNS histiocytic sarcoma scenarios, one per reference drug's brain penetration.
-
-    This is doubly extrapolated relative to `dog_preset`: no canine CNS-specific mutation study
-    exists, so it still assumes the systemic PTPN11/KRAS-dominated spectrum applies intracranially
+    """Primary CNS histiocytic sarcoma scenarios, one per reference drug's brain penetration. This is
+    doubly extrapolated relative to `dog_preset`: no canine CNS-specific mutation study exists, so
+    it still assumes the systemic PTPN11/KRAS-dominated spectrum applies intracranially
     (unverified), and effective drug exposure is discounted by each drug's real brain-to-plasma
     ratio applied to the same cellular potency numbers (which are cobimetinib's, not trametinib's
-    -- see `dog_preset`). `location_penetration_multiplier` defaults to 1.0 (no assumed cerebrum
-    vs. cerebellum difference); override it only to explore a hypothesis, not because a real
-    number supports one direction over the other.
+    -- see `dog_preset`).
     """
     base_model, systemic_css, base_rates, base_provenance = dog_preset()
     if breed == "flat_coated_retriever":
@@ -235,18 +199,15 @@ def canine_cns_hs_scenarios(breed: str = "bmd", location_penetration_multiplier:
 DEBULKING_FRACTION = 0.97
 
 DENDRITIC_CELL_ORIGIN_NOTE = (
-    "Primary intracranial histiocytic sarcoma (PIHS) arises from dendritic cells resident in "
-    "the meninges and choroid plexus -- a population that is developmentally and anatomically "
-    "distinct from the body-wide interstitial dendritic cells that give rise to disseminated "
-    "HS (Kishimoto et al. 2020; Moore 2014, Vet Pathol 51:167-184). In mice, this specific "
-    "CNS-resident dendritic-cell population has a documented dependency on FLT3-ligand "
-    "signaling and the transcription factors BATF3, IRF8, and ID2 for its development "
-    "(Anandasabapathy et al. 2011, J Exp Med 208:1695-1705) -- not verified in dogs, and "
-    "included here as this module's own candidate-gene hypothesis for what a Corgi germline "
-    "PIHS-risk variant might affect, distinct from BMD's generic CDKN2A/MTAP tumor-suppressor "
-    "mechanism. If real, a lineage-restricted germline mechanism would explain both the "
-    "anatomic restriction to the cerebrum and the near-absence of dissemination with one "
-    "mechanism, rather than requiring two independent explanations."
+    "Primary intracranial histiocytic sarcoma (PIHS) arises from dendritic cells resident in the "
+    "meninges and choroid plexus -- a population that is developmentally and anatomically "
+    "distinct from the body-wide interstitial dendritic cells that give rise to disseminated HS "
+    "(Kishimoto et al. 2020; Moore 2014, Vet Pathol 51:167-184). In mice, this specific "
+    "CNS-resident dendritic-cell population has a documented dependency on FLT3-ligand signaling "
+    "and the transcription factors BATF3, IRF8, and ID2 for its development (Anandasabapathy et "
+    "al. 2011, J Exp Med 208:1695-1705) -- not verified in dogs, and included here as this "
+    "module's own candidate-gene hypothesis for what a Corgi germline PIHS-risk variant might "
+    "affect, distinct from BMD's generic CDKN2A/MTAP tumor-suppressor mechanism."
 )
 
 LOCALIZED_THERAPY_PRECEDENT = (
@@ -255,10 +216,7 @@ LOCALIZED_THERAPY_PRECEDENT = (
     "with localized HS treated with aggressive local therapy (surgery/radiation) plus adjuvant "
     "CCNU, versus 96-106 days for disseminated/unresectable disease on CCNU alone (Rassnick et "
     "al. 2010; Skorupski et al. 2007) -- though that cohort's CNS-specific fraction is not "
-    "confirmed, so this is a suggestive, not a location-matched, benchmark. A single CNS-specific "
-    "case report (frontal-lobe PIHS, surgical resection plus low-dose CCNU) survived "
-    "recurrence-free past one year. DEBULKING_FRACTION substitutes a MAPK inhibitor "
-    "(trametinib, the real canine trial drug) for CCNU as the adjuvant in this scenario."
+    "confirmed, so this is a suggestive, not a location-matched, benchmark."
 )
 
 
@@ -266,13 +224,10 @@ def localized_pihs_scenarios(breed: str = "bmd", debulking_fraction: float = DEB
                              location_penetration_multiplier: float = 1.0
                              ) -> dict[str, tuple[ResistanceModel, float, np.ndarray, float, dict]]:
     """Four-arm comparison: local debulking x adjuvant MAPK-inhibitor therapy for primary CNS HS.
-
     Debulking is modeled by lowering `initial_burden` alone (see
     `mapk_resistance.run_monte_carlo`), which also proportionally shrinks any pre-existing
     resistant subclone -- a resection removes resistant and sensitive cells alike, it doesn't
-    selectively spare resistant ones. This is a hypothesis-generating comparison, not a
-    validated prediction: see DENDRITIC_CELL_ORIGIN_NOTE and LOCALIZED_THERAPY_PRECEDENT for
-    what is and isn't established.
+    selectively spare resistant ones.
     """
     cns_scenarios = canine_cns_hs_scenarios(breed, location_penetration_multiplier)
     _, trametinib_css, seeding_rates, base_provenance = cns_scenarios["trametinib"]
@@ -307,35 +262,23 @@ MECHANISM_AGNOSTIC_RATIONALE = (
     "all still have to drive the cell cycle through cyclin D/CDK4/6/Rb/E2F to actually divide), "
     "so blocking that node should suppress growth regardless of which upstream route a clone "
     "used, unlike the MEK inhibitor itself, which each escape route was specifically built to "
-    "evade. This is a real, published rationale for MEK+CDK4/6 combination therapy in RAS/RAF-"
-    "mutant human cancers (adaptive resistance to MEK inhibitors commonly proceeds through "
-    "cyclin D1 upregulation and CDK4/6 dependence). Palbociclib specifically has real, published "
-    "in vitro efficacy against canine histiocytic disease cell lines -- localized HS, "
-    "disseminated HS, systemic histiocytosis, and Langerhans cell histiocytosis all showed "
-    "growth inhibition, with significant activity also demonstrated in a disseminated-HS mouse "
-    "xenograft model (Hirabayashi et al. 2022, Vet Comp Oncol 20(3):587-601) -- real evidence "
-    "this drug class works on this cell type, though no canine dosing/toxicity study "
-    "accompanied it and no specific IC50 was extracted from that paper for this module. See "
-    "TOXICITY_EXTRAPOLATION_NOTE and combination_toxicity_demo for what is and isn't known "
-    "about combined-regimen safety."
+    "evade. Palbociclib specifically has real, published in vitro efficacy against canine "
+    "histiocytic disease cell lines -- localized HS, disseminated HS, systemic histiocytosis, "
+    "and Langerhans cell histiocytosis all showed growth inhibition, with significant activity "
+    "also demonstrated in a disseminated-HS mouse xenograft model (Hirabayashi et al. 2022, Vet "
+    "Comp Oncol 20(3):587-601) -- real evidence this drug class works on this cell type, though "
+    "no canine dosing/toxicity study accompanied it and no specific IC50 was extracted from that "
+    "paper for this module."
 )
 
 
 DIVISION_OF_LABOR_NOTE = (
     "Combination and CDK4/6i monotherapy are not interchangeable at the same potency, and the "
-    "reason is visible directly in the model's own parameters. Trametinib's job is suppressing "
-    "the *bulk* tumor: the sensitive clone's net growth under trametinib alone is already "
-    "strongly negative (growth 0.06/day minus its 0.18/day kill = -0.12/day). The three "
-    "resistant clones trametinib can't touch have much smaller growth margins (0.02-0.043/day), "
-    "so a modest additional CDK4/6i kill-rate is enough to tip all of them negative too -- that "
-    "is the combination's job: mopping up what's already nearly suppressed. CDK4/6i "
-    "monotherapy has no help on the bulk tumor, so it must single-handedly beat the sensitive "
-    "clone's own growth rate (0.06/day) before it does anything -- a higher potency bar than "
-    "combination needs (roughly 0.06-0.08 vs. roughly 0.05 in testing). Practically: combination "
-    "reaches full suppression at a lower required CDK4/6i dose than monotherapy would, which "
-    "matters because CDK4/6 inhibitors carry their own dose-limiting toxicity (myelosuppression "
-    "in human use) -- the combination's advantage here is dose-sparing the less-characterized "
-    "drug, not a mechanistic requirement that both drugs be present."
+    "reason is visible directly in the model's own parameters. Practically: combination reaches "
+    "full suppression at a lower required CDK4/6i dose than monotherapy would, which matters "
+    "because CDK4/6 inhibitors carry their own dose-limiting toxicity (myelosuppression in human "
+    "use) -- the combination's advantage here is dose-sparing the less-characterized drug, not a "
+    "mechanistic requirement that both drugs be present."
 )
 
 # Real combination-trial dose-finding practice: even with non-overlapping toxicity organ
@@ -348,19 +291,7 @@ COMBINED_EXPOSURE_DERATING = [1.0, 0.8, 0.6, 0.4]
 
 TOXICITY_EXTRAPOLATION_NOTE = (
     "Trametinib's canine dose-limiting toxicities are vascular/hepatic (hypertension, "
-    "proteinuria, elevated ALP; Takada et al. 2024). CDK4/6 inhibitors' dose-limiting toxicity "
-    "in human use is neutropenia -- an on-target, mechanism-driven effect (CDK4/6 inhibition "
-    "halts proliferation of any rapidly dividing cell, including marrow progenitors), not an "
-    "idiosyncratic host reaction, so extrapolating this specific toxicity to dogs is reasonable "
-    "even without canine-specific confirmation: the same cell-cycle machinery is being blocked "
-    "regardless of species. These are different organ systems -- the standard rationale for why "
-    "combinations are often feasible near full dose -- but real combination Phase I/Ib trials "
-    "still typically de-escalate both agents below their single-agent MTDs when starting out, "
-    "reflecting patient-level cumulative burden beyond any one organ system. "
-    "COMBINED_EXPOSURE_DERATING applies that possibility to both css_reference and "
-    "css_reference_2 simultaneously (see combination_toxicity_demo), to test whether the "
-    "combination's benefit survives realistic dose reduction rather than silently assuming "
-    "full, unconstrained dosing of both drugs holds."
+    "proteinuria, elevated ALP; Takada et al. 2024)."
 )
 
 
@@ -370,16 +301,9 @@ def combination_scenarios(breed: str = "bmd", debulking_fraction: float = DEBULK
                           trametinib_active: bool = True,
                           ) -> dict[float, tuple[ResistanceModel, float, np.ndarray, float, dict]]:
     """Trametinib (debulked CNS context) +/- a swept-potency mechanism-agnostic CDK4/6 inhibitor.
-
     `trametinib_active=False` zeroes trametinib's reference concentration, isolating CDK4/6i as
     monotherapy -- see DIVISION_OF_LABOR_NOTE for why that needs meaningfully higher potency to
     reach the same endpoint as the combination.
-
-    max_kill_2=0.0 leaves ic50_nM_2/max_kill_2 unset (None) rather than setting a zero-effect
-    value, so that sweep point is an exact RNG-for-RNG match to the trametinib-only arm -- a
-    true null baseline, not just a mathematically-inert-but-differently-perturbed one (setting
-    ic50_nM_2 at all, even to a value with no pharmacological effect, still consumes an extra
-    random draw in perturb_resistance_model's per-trial jitter).
     """
     arms = localized_pihs_scenarios(breed, debulking_fraction, location_penetration_multiplier)
     model, css, seeding_rates, initial_burden, provenance = arms["debulked_trametinib"]
@@ -436,15 +360,9 @@ def ccnu_combination_scenarios(breed: str = "bmd", debulking_fraction: float = D
                                exposure_days: int | None = CCNU_EXPOSURE_DAYS,
                                ) -> dict[float, tuple[ResistanceModel, float, np.ndarray, float, dict]]:
     """Trametinib (debulked CNS context) +/- lomustine, a real, cytotoxic, duration-capped partner.
-
     Structurally identical to `combination_scenarios` except that the second drug's exposure stops
     after `exposure_days` (default `CCNU_EXPOSURE_DAYS`, derived from the real cumulative-dose
-    toxicity threshold). Pass `exposure_days=None` to model a counterfactual chronic cytotoxic --
-    useful only to isolate how much of the outcome depends on the duration cap, since no such drug
-    exists in this class.
-
-    The returned provenance records `exposure_days` and the mechanism class so downstream reports
-    cannot silently reuse a cytostatic-ceiling interpretation on a cytotoxic arm.
+    toxicity threshold).
     """
     arms = localized_pihs_scenarios(breed, debulking_fraction, location_penetration_multiplier)
     model, css, seeding_rates, initial_burden, provenance = arms["debulked_trametinib"]
@@ -487,38 +405,22 @@ DURABILITY_HORIZON_SWEEP = [365, 730, 1825, 3650]  # 1, 2, 5, 10 years
 VACCINE_PRECEDENT_NOTE = (
     "Shared/hotspot-mutation mRNA vaccines are a real, active human-oncology approach, not "
     "something this module invents: mRNA-5671 targets four recurrent KRAS mutations "
-    "(G12D/G13D/G12C/G12V) as monotherapy or with pembrolizumab (Phase 1, KRAS-mutant NSCLC/CRC/"
-    "pancreatic cancer); a KRAS G12V-specific mRNA vaccine plus pembrolizumab reported clinical "
-    "benefit in advanced solid tumors (Cell Research 2024). No canine cancer vaccine trial of "
-    "any kind was found for this disease -- everything below is this module's own extension of "
-    "that human precedent onto Corgi PIHS's own (unconfirmed) PTPN11/KRAS driver hypothesis."
+    "(G12D/G13D/G12C/G12V) as monotherapy or with pembrolizumab (Phase 1, KRAS-mutant "
+    "NSCLC/CRC/pancreatic cancer); a KRAS G12V-specific mRNA vaccine plus pembrolizumab reported "
+    "clinical benefit in advanced solid tumors (Cell Research 2024)."
 )
 
 ANTIGEN_PERSISTENCE_NOTE = (
-    "None of this module's three drug-resistance escape mechanisms requires losing the driver-"
-    "mutation antigen a vaccine would target: pathway_reactivation adds a secondary RAS/RAF hit "
-    "on top of the original mutation, rtk_bypass reactivates parallel signaling around it, and "
-    "target_site_mutation only changes the MEK-inhibitor binding site -- all three keep "
-    "expressing the original PTPN11/KRAS hotspot peptide. A vaccine targeting that hotspot should "
-    "therefore still recognize cells using any of those three routes; only a genuinely new, "
-    "separate antigen-loss/immune-evasion event (the immune_escape clone modeled here) would "
-    "evade it. This is why the model adds a 5th clone rather than assuming the existing three "
-    "drug-resistance mechanisms already confer vaccine resistance."
+    "None of this module's three drug-resistance escape mechanisms requires losing the "
+    "driver-mutation antigen a vaccine would target: pathway_reactivation adds a secondary "
+    "RAS/RAF hit on top of the original mutation, rtk_bypass reactivates parallel signaling "
+    "around it, and target_site_mutation only changes the MEK-inhibitor binding site -- all "
+    "three keep expressing the original PTPN11/KRAS hotspot peptide."
 )
 
 DENDRITIC_CELL_VACCINE_CAVEAT = (
     "PIHS is itself a tumor of dendritic cells -- the same lineage that antigen presentation "
-    "(and therefore vaccine efficacy) depends on. This is worth flagging as an open biological "
-    "question, not dismissing: however, it is the patient's normal, non-malignant dendritic "
-    "cells (and other professional antigen-presenting cells) that would actually process and "
-    "present the vaccine antigen to T cells, not the malignant clone itself, which only partially "
-    "-- not fully -- allays the concern, since it is not established whether malignant "
-    "transformation of this lineage locally impairs normal antigen presentation nearby (e.g. via "
-    "local immunosuppression). A human primary CNS HS case report noted PD-L1/PD-L2 expression "
-    "on tumor cells, consistent with a broader T-cell-exhaustion phenotype that could blunt "
-    "vaccine-induced killing independent of antigen loss -- not modeled explicitly here, and a "
-    "reason a checkpoint-inhibitor combination (as in the real KRAS G12V vaccine + pembrolizumab "
-    "trial above) might matter for this application specifically, not just as a generic add-on."
+    "(and therefore vaccine efficacy) depends on."
 )
 
 # --- CSF1R inhibitor: a pathway-SERIAL second drug, not a mechanism-agnostic one ---------------
@@ -574,13 +476,9 @@ def csf1r_combination_scenarios(breed: str = "bmd",
                                 ) -> dict[float, tuple[ResistanceModel, float, np.ndarray, float, dict]]:
     """MAPK inhibitor +/- a swept-potency CSF1R inhibitor modeled as PATHWAY-SERIAL, i.e. with its
     kill term de-rated to `downstream_escape_fraction` on every clone whose resistance lesion lies
-    downstream of the receptor.
-
-    Deliberately parallel in shape to `combination_scenarios` so the two second drugs can be
-    compared at matched assumed potency -- which is the only fair comparison, since neither drug's
-    max_kill is fitted. The difference between them in that comparison is then attributable to
-    pathway topology (serial vs. parallel node) rather than to one having been handed a more
-    flattering potency.
+    downstream of the receptor. Deliberately parallel in shape to `combination_scenarios` so the
+    two second drugs can be compared at matched assumed potency -- which is the only fair
+    comparison, since neither drug's max_kill is fitted.
     """
     arms = localized_pihs_scenarios(breed, debulking_fraction, location_penetration_multiplier)
     model, css, seeding_rates, initial_burden, provenance = arms["debulked_trametinib"]
@@ -637,13 +535,9 @@ def vaccine_followon_scenarios(breed: str = "bmd", debulking_fraction: float = D
                                ) -> dict[float, tuple[ResistanceModel, float, np.ndarray, float, dict]]:
     """Trametinib + CDK4/6i (fixed at `cdk46_max_kill`, the combination's near-full-suppression
     potency from `combination_control_demo`) plus a swept-potency mRNA vaccine layered on top.
-
     Builds a 5th clone (`immune_escape`) onto the 4-clone combination model, inheriting
     `pathway_reactivation`'s drug-susceptibility with `IMMUNE_ESCAPE_GROWTH_PENALTY` applied --
-    see the module-level notes above for why. `vaccine_max_kill=0.0` gives a drug-only baseline
-    with the 5th clone present but never seeded before `VACCINE_START_DAY` and never subject to
-    vaccine kill (the mask always excludes it) -- i.e. behaviorally identical to the 4-clone
-    combination model, just carried in a 5-wide state vector for a consistent comparison.
+    see the module-level notes above for why.
     """
     combo_scenarios = combination_scenarios(breed, debulking_fraction, [cdk46_max_kill],
                                             location_penetration_multiplier)
@@ -692,11 +586,9 @@ VACCINE_ANTIGEN_FLANK = 12  # 25-mer peptides, matching mRNA-5671's synthetic lo
 def vaccine_antigen_peptides(structure_cache: Path) -> dict[str, str]:
     """Fetches the real canine AlphaFold structures for PTPN11 and KRAS (via UniProt accession
     resolution) and builds the mutant 25-mer peptide for each `VACCINE_ANTIGEN_TARGETS` entry.
-
     Built fresh from the actual structure-derived sequence each call (with a hard wild-type-
     residue check in `extract_mutant_peptide`), not hardcoded, so it stays correct if either
-    database is ever revised. Requires network access; structures are cached under
-    `structure_cache` so repeated calls for the same gene reuse the download.
+    database is ever revised.
     """
     peptides = {}
     tracks = {}
@@ -750,10 +642,9 @@ _PULMONARY_BASELINE_BURDEN = .3  # same illustrative pre-debulking baseline used
 def pulmonary_corgi_scenarios(cdk46_max_kill: float = 0.0, debulking_fraction: float = DEBULKING_FRACTION,
                               nodal_involvement_prob_values: list[float] = NODAL_INVOLVEMENT_PROB_SWEEP,
                               ) -> dict[float, tuple[ResistanceModel, float, np.ndarray, float, dict]]:
-    """Trametinib (+/- CDK4/6i) at full systemic exposure (no CNS brain-penetration discount) for
-    a resectable primary lung mass, swept over how likely regional nodal disease already is.
-
-    Uses `dog_preset`'s baseline mechanism-weight spectrum unchanged -- no Corgi-specific germline
+    """Trametinib (+/- CDK4/6i) at full systemic exposure (no CNS brain-penetration discount) for a
+    resectable primary lung mass, swept over how likely regional nodal disease already is. Uses
+    `dog_preset`'s baseline mechanism-weight spectrum unchanged -- no Corgi-specific germline
     locus exists to justify reweighting it, deliberately, for the same reason
     `canine_cns_hs_scenarios` does not offer a "corgi" breed option: extending real GWAS loci from
     bmd/flat_coated_retriever is a reasonable extrapolation; inventing a Corgi-specific one from
@@ -778,22 +669,9 @@ def corgi_full_regimen_scenarios(debulking_fraction: float = DEBULKING_FRACTION,
                                  nodal_involvement_prob_values: list[float] = NODAL_INVOLVEMENT_PROB_SWEEP,
                                  ) -> dict[float, tuple[ResistanceModel, float, np.ndarray, float, dict]]:
     """The localized pulmonary Corgi scenario carried in a 5-clone (vaccine-capable) state vector.
-
-    Exists because `pulmonary_corgi_scenarios` is 4-clone and therefore cannot express a vaccine at
-    all -- which is how the Corgi arm of `single_patient_demo` came to be built as trametinib
-    monotherapy while the whole endurance case rests on the vaccine. This is the Corgi equivalent of
-    `vaccine_followon_scenarios`, built on the pulmonary (full systemic exposure, no brain-penetration
-    discount) preset rather than the CNS one, and intended for
-    `run_monte_carlo_two_compartment(vaccine_start_day=...)` so the nodal compartment surgery cannot
-    reach is still exposed to both the systemic drug and the systemic immune mechanism.
-
-    `ccnu_max_kill > 0` adds lomustine as the second drug (real activity in canine HS, cytotoxic, and
-    CNS/tissue-penetrant); pair it with `css_reference_2_duration_days=CCNU_EXPOSURE_DAYS` at the call
-    site so its real cumulative-dose cap is respected rather than modeling chronic dosing.
-
-    The 5th clone inherits `pathway_reactivation`'s drug susceptibility with
-    `IMMUNE_ESCAPE_GROWTH_PENALTY` applied, matching `vaccine_followon_scenarios` exactly -- the same
-    illustrative, labeled assumption, not a Corgi-specific measurement (none exists).
+    Exists because `pulmonary_corgi_scenarios` is 4-clone and therefore cannot express a vaccine
+    at all -- which is how the Corgi arm of `single_patient_demo` came to be built as trametinib
+    monotherapy while the whole endurance case rests on the vaccine.
     """
     model, systemic_css, seeding_rates, base_provenance = dog_preset()
     escape_growth = model.growth[1] * IMMUNE_ESCAPE_GROWTH_PENALTY
@@ -825,14 +703,9 @@ def corgi_full_regimen_scenarios(debulking_fraction: float = DEBULKING_FRACTION,
 
 
 def dog_preset() -> tuple[ResistanceModel, float, np.ndarray, dict]:
-    """Cobimetinib vs. canine PTPN11/KRAS-mutant HS; sensitive-clone IC50 and Cmax are real.
-
-    The drug actually in canine clinical development is trametinib, not cobimetinib -- see the
-    "clinical_development" provenance field. Cobimetinib is used here because it is the only MEK
-    inhibitor with a published cellular IC50 measured directly on canine HS lines; no published
-    trametinib-specific canine HS cellular potency number was found, and estimating one by
-    converting from cobimetinib would stack an unverified assumption on top of a proxy substance,
-    so this preset does not attempt that.
+    """Cobimetinib vs. canine PTPN11/KRAS-mutant HS; sensitive-clone IC50 and Cmax are real. The drug
+    actually in canine clinical development is trametinib, not cobimetinib -- see the
+    "clinical_development" provenance field.
     """
     cell_line_ic50_nM = {"BD": 74.0, "OD": 91.0, "DH82": 372.0}
     ic50_sensitive = float(np.mean(list(cell_line_ic50_nM.values())))

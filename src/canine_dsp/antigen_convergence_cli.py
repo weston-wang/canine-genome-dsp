@@ -36,23 +36,11 @@ def antigen_convergence_demo(out: Path, breed: str = "bmd",
                              debulking_fraction: float = DEBULKING_FRACTION,
                              ccnu_max_kill: float = 0.08, trials: int = 400,
                              preexisting_prob: float = 0.30, seed: int = 7) -> None:
-    """Corrects three analyses that ran with the vaccine switched off.
-
-    `single_patient_cli`, `pharmacology_cli` and `mutational_supply_cli` all use `run_monte_carlo`
-    rather than `run_monte_carlo_with_vaccine`, so their conclusions -- notably "the
-    with-pre-existing-subclone arm is 0.0% durable" and "neither agent is the answer" -- describe a
-    two-component regimen. The antigen-convergence argument says the vaccine is exactly what covers
-    that arm, because a pre-existing drug-resistant subclone still carries the driver antigen.
-
-    Four checks:
-
-      1. STRUCTURAL VERIFICATION -- confirm the engine's own vaccine kill mask matches the
-         convergence claim, instead of restating the claim.
-      2. THE HANDOFF -- whether immune pressure arrives before the cytotoxic duration cap forces a
-         stop, which decides whether "the cap is the binding constraint" survives.
-      3. THE SWEEP WITH THE VACCINE ON -- durable response and the N=1 partition, over vaccine
-         potency, with lomustine duration-capped at its real cumulative-dose limit.
-      4. LONG HORIZON -- does antigen-loss escape erode it, and how fast.
+    """Corrects three analyses that ran with the vaccine switched off. `single_patient_cli`,
+    `pharmacology_cli` and `mutational_supply_cli` all use `run_monte_carlo` rather than
+    `run_monte_carlo_with_vaccine`, so their conclusions -- notably "the
+    with-pre-existing-subclone arm is 0.0% durable" and "neither agent is the answer" -- describe
+    a two-component regimen.
     """
     out.mkdir(parents=True, exist_ok=True)
 
@@ -150,15 +138,9 @@ def antigen_convergence_demo(out: Path, breed: str = "bmd",
         "question": "The project derived that every drug-resistance route in this model keeps the "
                    "driver antigen, so a vaccine catches all of them. Was that factored into the "
                    "recent analyses -- and what does it change?",
-        "answer": "It was derived and implemented, and then NOT used: the three most recent analyses "
-                 "all called run_monte_carlo instead of run_monte_carlo_with_vaccine, i.e. ran with "
-                 "the vaccine at zero. Switching it on reverses their central negative conclusion. "
-                 f"The pre-existing-subclone arm goes from "
-                 f"{no_vaccine['durable_with_preexisting_subclone']:.3f} to "
-                 f"{mid_vaccine['durable_with_preexisting_subclone']:.3f} durable at vaccine "
-                 f"max_kill={endurance_potency}, and the cohort from "
-                 f"{no_vaccine['probability_durable_response']:.3f} to "
-                 f"{mid_vaccine['probability_durable_response']:.3f}.",
+        "answer": "It was derived and implemented, and then NOT used: the three most recent "
+                  "analyses all called run_monte_carlo instead of run_monte_carlo_with_vaccine, "
+                  "i.e. ran with the vaccine at zero.",
         "the_argument": CONVERGENCE_ARGUMENT,
         "antigen_retention_per_clone": ANTIGEN_RETENTION,
         "finding_1_structural_verification": {
@@ -169,11 +151,9 @@ def antigen_convergence_demo(out: Path, breed: str = "bmd",
         },
         "finding_2_the_handoff_undoes_the_duration_cap_finding": {
             **handoff,
-            "what_it_revises": "The lomustine analysis concluded the cumulative-dose duration cap was "
-                "'the binding constraint for HS', because benefit collapsed purely from stopping. "
-                "That is true only with nothing to hand off to. The vaccine begins ramping at day "
-                f"{VACCINE_START_DAY}, inside lomustine's {CCNU_EXPOSURE_DAYS}-day window, so the "
-                "cap stops being the binding constraint once a persistent mechanism is present.",
+            "what_it_revises": "The lomustine analysis concluded the cumulative-dose duration "
+                               "cap was 'the binding constraint for HS', because benefit "
+                               "collapsed purely from stopping.",
         },
         "finding_3_vaccine_potency_sweep": {
             "rows": sweep_rows,
@@ -186,31 +166,18 @@ def antigen_convergence_demo(out: Path, breed: str = "bmd",
                     mid_vaccine["durable_with_preexisting_subclone"]),
             },
             "why_the_subclone_arm_is_the_point": "A pre-existing drug-resistant subclone still "
-                "expresses the driver hotspot -- it acquired resistance without shedding the antigen. "
-                "So the one patient type the drug-only regimen cannot help is precisely the type "
-                "antigen convergence predicts a vaccine covers. Reporting that arm as flat 0% while "
-                "the vaccine was off was the substantive error.",
+                                                 "expresses the driver hotspot -- it acquired "
+                                                 "resistance without shedding the antigen.",
         },
         "finding_4_endurance_and_what_actually_leaks": {
             "rows": endurance_rows,
-            "reading": f"At vaccine max_kill={endurance_potency} durability is flat to 2 years and "
-                      "erodes slowly after (~97% at 10 years). The erosion mechanism was checked "
-                      "rather than assumed, and it is NOT antigen loss: every 10-year relapse is "
-                      "target_site_mutation, and the immune-escape clone never establishes in any "
-                      "trial.",
-            "why": f"Arithmetic, not immunology. target_site_mutation grows at 0.058/day and the "
-                  f"swept vaccine potency {endurance_potency} sits just below it, so once "
-                  f"lomustine's exposure ends at day {CCNU_EXPOSURE_DAYS} that one clone has a small "
-                  "positive net margin and a decade is long enough for a few trials to cross the "
-                  "detection threshold. Raising vaccine potency just past that growth rate (0.06) "
-                  "gives flat 100% durable response at 10 years with no relapses of any kind -- a "
-                  "threshold effect at the clone's growth rate, exactly the same arithmetic as the "
-                  "cytostatic ceiling, except an immune mechanism is permitted to cross it.",
-            "correction_recorded": "An earlier draft of this summary claimed the erosion was antigen "
-                                  "loss, which the relapse-mechanism breakdown does not support. The "
-                                  "convergence argument predicts antigen loss is the only route that "
-                                  "CAN evade the vaccine; it does not predict that route is the one "
-                                  "that actually fires at these parameters.",
+            "reading": "durability is flat to 2 years and erodes slowly after (~97% at 10 "
+                       "years).",
+            "why": "that one clone has a small positive net margin and a decade is long enough "
+                   "for a few trials to cross the detection threshold.",
+            "correction_recorded": "An earlier draft of this summary claimed the erosion was "
+                                   "antigen loss, which the relapse-mechanism breakdown does not "
+                                   "support.",
             "load_bearing_assumption": "The immune-escape clone never establishing is largely a "
                 f"consequence of its illustrative seeding rate ({IMMUNE_ESCAPE_SEEDING_RATE:.1e}, "
                 f"~200x below the drug-resistance total) plus its day-{VACCINE_START_DAY} start and "
@@ -220,11 +187,8 @@ def antigen_convergence_demo(out: Path, breed: str = "bmd",
         },
         "mechanism_constraint_matrix": mechanism_constraint_matrix(),
         "what_this_retracts": [
-            "'Neither agent is the answer... what this regimen would need is a ceiling-free partner "
-            "without a cumulative-dose duration cap. Whether such an agent exists for canine HS is "
-            "not established here.' -- a mechanism satisfying both was already implemented in this "
-            "repo. The two-drug analysis was correct about the two drugs and wrong to generalize "
-            "from them.",
+            "'Neither agent is the answer... what this regimen would need is a ceiling-free "
+            "partner without a cumulative-dose duration cap.",
             "'The with-preexisting-subclone arm is lost to lomustine's 105-day duration cap "
             "regardless of any mutation rate' -- it is not, once the vaccine is on.",
             "The mutational-supply decomposition's framing that the argument's leverage 'lands on the "
@@ -233,13 +197,10 @@ def antigen_convergence_demo(out: Path, breed: str = "bmd",
             "therapeutically, so being unable to measure it matters less than that analysis implied.",
         ],
         "unverified_extrapolations": [
-            "vaccine_max_kill remains a swept, unfitted knob -- no canine cancer vaccine trial exists "
-            "for this disease, so no potency here is measured. The sweep spans plausible values; it "
-            "does not bracket a measurement",
+            "vaccine_max_kill remains a swept, unfitted knob -- no canine cancer vaccine trial "
+            "exists for this disease, so no potency here is measured.",
             "the antigen-convergence argument is a mechanistic deduction about what each modeled "
-            "resistance mechanism does to the antigen. It is internally consistent and checkable "
-            "against the engine, but the mechanisms themselves are illustrative constructs, not "
-            "sequenced canine HS resistance clones",
+            "resistance mechanism does to the antigen.",
             "the immune-escape clone's seeding rate and 15% growth penalty are both illustrative, and "
             "they set how fast the long-horizon erosion runs",
             "the whole chain still rests on Corgi HS carrying a PTPN11/KRAS hotspot at all, which "
@@ -249,8 +210,6 @@ def antigen_convergence_demo(out: Path, breed: str = "bmd",
             "before lomustine entered the model, so the favourable handoff timing is a coincidence "
             "of two independently-set constants, not a designed schedule",
         ],
-        "warning": "This corrects an omission inside an illustrative model. It does not establish that "
-                  "any vaccine works in this disease, and the high durable-response figures are "
-                  "properties of a swept potency knob, not predictions.",
+        "warning": "This corrects an omission inside an illustrative model.",
     }
     (out / "summary.json").write_text(json.dumps(summary, indent=2, default=str) + "\n")

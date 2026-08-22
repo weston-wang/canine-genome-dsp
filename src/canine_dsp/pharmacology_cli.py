@@ -34,19 +34,8 @@ def cdk46_achievability_demo(out: Path, breed: str = "bmd",
                              location_penetration_multiplier: float = 1.0) -> None:
     """Answers the question the resistance model could not: is `max_kill_2 = target_max_kill`
     (default 0.08, the value that produces 100% durable response flat to ten years) reachable by a
-    real CDK4/6 inhibitor?
-
-    Runs two independent checks, and reports them separately because they fail for different
-    reasons and would need different things to fix:
-
-      1. The cytostatic ceiling -- purely arithmetic, needs no PK data. A cell-cycle-arresting drug
-         cannot kill faster than cells divide, so `max_kill <= growth_rate` per clone.
-      2. Real measured canine potency vs. the illustrative value, propagated through the Emax/Hill
-         occupancy term, which determines how much of a permissible `max_kill` is actually realized
-         at an achievable exposure -- and therefore how much `max_kill` would be *required*.
-
-    Also emits a feasibility frontier over (IC50 x exposure), so the answer is visible as a region
-    rather than a single verdict, and so a future real measurement can be located on it directly.
+    real CDK4/6 inhibitor? Runs two independent checks, and reports them separately because they
+    fail for different reasons and would need different things to fix: 1.
     """
     out.mkdir(parents=True, exist_ok=True)
     base = combination_scenarios(breed, debulking_fraction, [0.0],
@@ -183,8 +172,6 @@ def cdk46_achievability_demo(out: Path, breed: str = "bmd",
             "numeric ceiling is not",
         ],
         "dog_pk_context": PALBOCICLIB_DOG_PK,
-        "warning": "This evaluates whether a model parameter is pharmacologically reachable. It "
-                  "does not establish that any drug works in this disease, and a reachable "
-                  "parameter would still be an illustrative model, not a prediction.",
+        "warning": "This evaluates whether a model parameter is pharmacologically reachable.",
     }
     (out / "summary.json").write_text(json.dumps(summary, indent=2, default=str) + "\n")

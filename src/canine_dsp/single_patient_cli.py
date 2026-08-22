@@ -56,36 +56,16 @@ def single_patient_demo(out: Path, breed: str = "bmd",
                         horizon_days: int = 730, trials: int = 500,
                         preexisting_prob: float = 0.30, seed: int = 7) -> None:
     """Re-asks this repo's central question as an N=1 question, and swaps in a cytotoxic partner.
-
     Five analyses, in order of how much they change the answer. `breed` (must be 'bmd' or
     'golden_retriever') governs findings 1-4 only -- see finding 5 for why a Corgi patient is
     handled as a separate scenario rather than a value of this parameter.
-
-      1. DRIVER CONDITIONING -- the largest effect. Only ~46% of BMD histiocytic sarcomas carry an
-         identified MAPK-activating lesion, and the population model implicitly assumes 100%. A
-         driver mutation is clonal, so sequencing resolves this outright.
-      2. PRE-EXISTING RESISTANCE DETECTABILITY -- the analysis the model would most like to have, and
-         the one sequencing cannot deliver: the model's own subclone-size prior sits below every
-         clinically available assay floor, so a negative result is worth roughly nothing.
-      3. SPATIAL SAMPLING -- an independent limit that no sequencing depth addresses.
-      4. THE N=1 DECOMPOSITION -- splits the existing Monte Carlo ensemble into the two patient types
-         it averages over, then re-runs it with lomustine (real, cytotoxic, CNS-penetrant,
-         duration-capped) in place of the CDK4/6 inhibitor that the cytostatic ceiling ruled out,
-         and compares against a genuinely matched canine benchmark.
-      5. THE CORGI CASE -- findings 1-4 are BMD-context end to end (driver frequency, tumor
-         scenario, calibration benchmark). Reusing them for a Corgi patient would repeat the same
-         species/lineage-mismatch error this session already caught with canine-melanoma CDK4/6i
-         potency data standing in for canine-HS potency. This runs the actual Corgi pulmonary
-         two-compartment scenario against the actual Corgi-matched benchmark instead.
     """
     if breed not in ("bmd", "flat_coated_retriever"):
         raise ValueError(
-            f"breed={breed!r} is not one of this repo's tumor-scenario presets ('bmd', "
-            "'flat_coated_retriever' -- see localized_pihs_scenarios/combination_scenarios). A "
-            "Corgi patient is NOT covered by this arm at all: see finding_5_corgi_is_a_different_"
-            "disease_not_a_different_breed_name below, which runs the actual Corgi pulmonary "
-            "two-compartment scenario against the actual Corgi-matched benchmark instead of "
-            "reusing this arm's numbers.")
+            "is not one of this repo's tumor-scenario presets ('bmd', 'flat_coated_retriever' -- "
+            "see localized_pihs_scenarios/combination_scenarios). A Corgi patient is not covered by "
+            "this arm at all: see finding_5_corgi_is_a_different_disease_not_a_different_breed_name "
+            "in this demo's summary.json, and corgi-answer-demo for the Corgi regimen.")
     out.mkdir(parents=True, exist_ok=True)
 
     # 1. Driver conditioning ------------------------------------------------------------------
@@ -255,18 +235,7 @@ def single_patient_demo(out: Path, breed: str = "bmd",
         "question": "Does treating one sequenced dog, rather than a cohort, change the answer -- and "
                    "is there a better second drug than the CDK4/6 inhibitor the cytostatic ceiling "
                    "ruled out?",
-        "answer": "Yes to both, and the two findings point in opposite directions. Sequencing helps "
-                 "far more than expected for drug *selection* and essentially not at all for "
-                 "pre-existing-resistance detection. Lomustine is a strictly better-evidenced "
-                 "partner than a CDK4/6 inhibitor -- real activity in this exact disease and "
-                 "species, cytotoxic so the ceiling does not bind, CNS-penetrant -- but it trades "
-                 "the ceiling for a hard duration cap, and the model says the cap is what now "
-                 "limits durability. All of that (findings 1-4) is scoped to BMD, the breed every "
-                 "input here comes from. Finding 5 checks whether it transfers to a Corgi patient "
-                 "and finds it does not: Corgi HS is a separately-published, worse-prognosis, "
-                 "structurally different presentation (regional nodal spread, no measured driver "
-                 "frequency at all), modeled here with its own real scenario and benchmark rather "
-                 "than by discounting the BMD numbers.",
+        "answer": "Yes to both, and the two findings point in opposite directions.",
         "finding_1_driver_conditioning_dominates": {
             "for_breed": breed,
             **driver,
@@ -277,17 +246,12 @@ def single_patient_demo(out: Path, breed: str = "bmd",
                 "converts that from an unexamined premise into a measured fact, and it is the only "
                 "measurement here that changes the treatment plan rather than the error bars."
             ) if driver["probability_mapk_driver_identified"] is not None else (
-                f"No published canine HS driver-frequency sequencing exists for {breed!r} either "
-                "-- it has its own real GWAS germline locus (BREED_GERMLINE_LOCI in mapk_scenarios) "
-                "but no Takada-et-al.-style driver-mutation cohort. This tumor scenario still "
-                "silently assumes the BMD PTPN11/KRAS-dominated spectrum applies (see "
-                "localized_pihs_scenarios), same open premise as breed='bmd' but with even less "
-                "specific evidence behind it."
+                "either -- it has its own real GWAS germline locus (BREED_GERMLINE_LOCI in "
+                "mapk_scenarios) but no Takada-et-al.-style driver-mutation cohort."
             ),
             "source": CANINE_HS_DRIVER_FREQUENCY,
-            "does_not_apply_to_corgi": "This finding is specific to the breed named in 'for_breed' "
-                "above. See finding_5 for what driver conditioning looks like for a Corgi, which is "
-                "a separately-modeled scenario, not a discount on this one.",
+            "does_not_apply_to_corgi": "This finding is specific to the breed named in "
+                                       "'for_breed' above.",
         },
         "finding_2_sequencing_cannot_see_preexisting_resistance": {
             "principle": "The resistance engine draws the pre-existing resistant fraction from "
@@ -309,10 +273,9 @@ def single_patient_demo(out: Path, breed: str = "bmd",
                         "The two bounds bracket the truth and the spread is the point.",
             "tumor_cells_assumed": TUMOR_CELLS,
             "per_configuration": spatial_rows,
-            "verdict": "If a resistant subclone is dispersed, sampling 1% of the tumor detects it "
-                      "with near-certainty; if it is one focal expansion, detection probability is "
-                      "just the sampled fraction (~1%). Which regime holds is unmeasured, so the "
-                      "honest reading is that a negative result cannot be interpreted.",
+            "verdict": "If a resistant subclone is dispersed, sampling 1% of the tumor detects "
+                       "it with near-certainty; if it is one focal expansion, detection "
+                       "probability is just the sampled fraction (~1%).",
         },
         "finding_4_lomustine_trades_the_ceiling_for_a_duration_cap": {
             "why_lomustine": CCNU_CANINE_HS["why_this_matters_here"],
@@ -330,58 +293,31 @@ def single_patient_demo(out: Path, breed: str = "bmd",
                 "probability_durable_response": float(best_capped["probability_durable_response"]),
                 "exceeds_cytostatic_ceiling": bool(best_capped["exceeds_cytostatic_ceiling"]),
             },
-            "what_the_cap_costs": "Compare the duration-capped and chronic rows at matched potency: "
-                                 "the difference is entirely attributable to stopping at "
-                                 f"{CCNU_EXPOSURE_DAYS} days, which real cumulative hepatotoxicity "
-                                 "forces. This reproduces the pattern already found for eBAT in the "
-                                 "HSA module -- a time-limited agent's benefit erodes once exposure "
-                                 "ends -- and it is now the binding constraint for HS as well.",
+            "what_the_cap_costs": "days, which real cumulative hepatotoxicity forces.",
         },
         "n1_decomposition": {
             "cdk46_arm_at_max_kill_0.05": cdk_partition,
             "ccnu_arms_duration_capped": {str(k): v for k, v in ccnu_partitions.items()},
-            "why_this_matters": "A cohort fraction of, say, 0.6 does not mean a patient has a 60% "
-                               "chance in any useful sense if the ensemble is really two "
-                               "sub-populations with very different fates. The spread between the "
-                               "two arms is ignorance about an already-fixed tumor property, not "
-                               "irreducible risk -- which is exactly why it is worth asking whether "
-                               "sequencing can resolve it, and finding 2 is the answer: not really.",
+            "why_this_matters": "A cohort fraction of, say, 0.6 does not mean a patient has a "
+                                "60% chance in any useful sense if the ensemble is really two "
+                                "sub-populations with very different fates.",
         },
         "matched_benchmark": {
             **LOCALIZED_HS_CCNU_BENCHMARK,
-            "why_this_one_is_admissible": "This is the comparator this repo previously lacked. It "
-                "matches on species, disease, localized presentation, and treatment structure "
-                "(local therapy then adjuvant systemic drug) -- the four axes whose mismatch made "
-                "the COMBI-d/v melanoma comparison inadmissible. It is used as a scale check only.",
+            "why_this_one_is_admissible": "This is the comparator this repo previously lacked.",
             "implied_preexisting_prob": {
                 **implied,
                 "model_current_central_value": preexisting_prob,
-                "reading": "Because the two N=1 arms sit near 1.0 and near 0.0 at the real exposure "
-                          "duration, the cohort statistic is almost purely a readout of "
-                          "preexisting_prob. Inverting the mixture against the matched benchmark "
-                          f"implies p ~= {implied['implied_preexisting_prob']:.2f}, roughly double "
-                          f"the {preexisting_prob:.2f} this module currently centres on -- i.e. the "
-                          "model is optimistic by about a factor of two on durable-response "
-                          "fraction, while its progression *timing* (214-day median vs. the "
-                          "benchmark's 243-day median disease-free interval) is in the right range.",
-                "not_applied": "Deliberately NOT written back into _PREEXISTING_PROB_CENTRAL. The "
-                              "benchmark's systemic agent is a cytotoxic rather than a MEK "
-                              "inhibitor, it has no molecular stratification (so it mixes MAPK-"
-                              "driven and non-MAPK-driven tumors, per finding 1), n=16, and "
-                              "'relapse-free at study follow-up' is not identical to this model's "
-                              "'no progression within 730 days'. The existing sweep already spans "
-                              "the implied value, which is the honest way to carry it.",
+                "reading": "Because the two N=1 arms sit near 1.0 and near 0.0 at the real "
+                           "exposure duration, the cohort statistic is almost purely a readout "
+                           "of preexisting_prob.",
+                "not_applied": "Deliberately NOT written back into _PREEXISTING_PROB_CENTRAL.",
             },
-            "scale_check": f"Skorupski reports {LOCALIZED_HS_CCNU_BENCHMARK['relapse_free_fraction']:.0%} "
-                          f"relapse-free (6/16) and a 243-day median disease-free interval after "
-                          f"local therapy plus adjuvant CCNU. The model's duration-capped lomustine "
-                          f"arms should be read against that, not against the flat-100% figures the "
-                          f"unreachable CDK4/6i potencies produced.",
-            "suggestive_consistency": "The benchmark's 201-day median time to relapse falls shortly "
-                "after a real 4-6 cycle lomustine course (84-168 days) would have ended. That is "
-                "consistent with the duration-cap mechanism this model predicts, but it is one "
-                "retrospective series of 16 dogs and the timing could have several other causes -- "
-                "it is a coincidence worth noting, not evidence.",
+            "scale_check": "relapse-free (6/16) and a 243-day median disease-free interval after "
+                           "local therapy plus adjuvant CCNU.",
+            "suggestive_consistency": "The benchmark's 201-day median time to relapse falls "
+                                      "shortly after a real 4-6 cycle lomustine course (84-168 "
+                                      "days) would have ended.",
         },
         "finding_5_corgi_is_a_different_disease_not_a_different_breed_name": {
             "why_this_section_exists": "Findings 1-4 model BMD localized PIHS end to end -- the "
@@ -396,11 +332,8 @@ def single_patient_demo(out: Path, breed: str = "bmd",
                 "equivalent boundary.",
             "driver_conditioning_for_corgi": driver_corgi,
             "scenario_used": "pulmonary_corgi_scenarios / run_monte_carlo_two_compartment -- the "
-                "two-compartment nodal model already built for this presentation, not the single-"
-                "compartment BMD PIHS model findings 1-4 use. Trametinib monotherapy, full systemic "
-                "exposure (no CNS brain-penetration discount, since this is the pulmonary "
-                "presentation), swept over NODAL_INVOLVEMENT_PROB_SWEEP since no nodal rate was "
-                "published.",
+                             "two-compartment nodal model already built for this presentation, "
+                             "not the single-compartment BMD PIHS model findings 1-4 use.",
             "sweep": corgi_rows,
             "cdk46_or_ccnu_not_added_here": "Deliberately not layered onto this arm: doing so would "
                 "imply the CDK4/6i-achievability and lomustine-duration findings (derived from BMD-"
@@ -425,49 +358,35 @@ def single_patient_demo(out: Path, breed: str = "bmd",
                           "kill rate at or above their growth rates, AND that kill rate sustained "
                           "long enough for the suppressed subclone not to regrow within the horizon.",
             "cdk46_inhibitor": "Can be dosed chronically (oral, no cumulative organ cap), so it "
-                              "satisfies the duration requirement -- and indeed reaches ~100% "
-                              "durable response in-model when dosed continuously at max_kill 0.05. "
-                              "But it cannot reach that kill rate: cytostatic agents are capped at "
-                              "the clone's own growth rate, and real canine potency leaves it 3-15x "
-                              "short at the modeled exposure.",
-            "lomustine": "Can reach the kill rate -- it is cytotoxic, so the ceiling does not apply, "
-                        "and at max_kill >= 0.08 it drives every resistant clone's margin negative. "
-                        "But it cannot sustain it: cumulative irreversible hepatotoxicity caps "
-                        f"exposure at ~{CCNU_EXPOSURE_DAYS} days, and the model shows the benefit "
-                        "against pre-existing resistance collapses from ~99% to ~0% purely from "
-                        "stopping.",
-            "consequence": "Neither agent is the answer, for non-overlapping reasons, and this is a "
-                          "sharper negative result than either analysis alone. It also names the "
-                          "target precisely: what this regimen would need is a cytotoxic (or at "
-                          "least ceiling-free) partner without a cumulative-dose duration cap. "
-                          "Whether such an agent exists for canine HS is not established here, and "
-                          "the two obvious candidate classes both fail one of the two tests.",
-            "note_on_metronomic_dosing": "Metronomic lomustine has been reported tolerable in dogs "
-                                        "for up to ~12 months (Tripp et al. 2011), which would "
-                                        "partly relax the duration cap at a lower dose intensity -- "
-                                        "i.e. trading kill rate for duration along exactly the axis "
-                                        "that matters. This model does not evaluate that trade, and "
-                                        "it is the most concrete next thing to test.",
+                               "satisfies the duration requirement -- and indeed reaches ~100% "
+                               "durable response in-model when dosed continuously at max_kill "
+                               "0.05.",
+            "lomustine": "Can reach the kill rate -- it is cytotoxic, so the ceiling does not "
+                         "apply, and at max_kill >= 0.08 it drives every resistant clone's "
+                         "margin negative.",
+            "consequence": "Neither agent is the answer, for non-overlapping reasons, and this "
+                           "is a sharper negative result than either analysis alone.",
+            "note_on_metronomic_dosing": "Metronomic lomustine has been reported tolerable in "
+                                         "dogs for up to ~12 months (Tripp et al. 2011), which "
+                                         "would partly relax the duration cap at a lower dose "
+                                         "intensity -- i.e. trading kill rate for duration along "
+                                         "exactly the axis that matters.",
         },
         "unverified_extrapolations": [
             "lomustine's max_kill is still swept, not measured: no canine HS cell line has a "
             "published lomustine dose-response, so the 46% response rate has not been converted "
-            "into a per-day kill rate. What changed is which constraints bind, not that the potency "
-            "became known",
+            "into a per-day kill rate.",
             "lomustine's IC50 and exposure are deliberately set equal to the CDK4/6i arm's "
             "illustrative values so the two arms differ only in mechanism class and duration -- "
             "these are not lomustine PK",
             "the 350 mg/m2 cumulative cap is an observed hepatotoxicity threshold, not a regulatory "
             "limit; treating it as a hard stop is conservative but arbitrary at the margin",
-            "the pre-existing-fraction prior 10^U(-6,-3) is the resistance engine's own convention. "
-            "Findings 2 and 3 are statements about detectability *given that prior*; a different "
-            "prior would move them, and nothing here independently validates it",
-            "the Corgi arm's own scenario (pulmonary_corgi_scenarios) still reuses the BMD growth-"
-            "rate/resistance-mechanism spectrum unchanged, per that function's own documented "
-            "reasoning: no Corgi-specific germline locus or driver panel is established enough to "
-            "justify inventing a different one from nothing. Finding 5 answers 'does the disease "
-            "course differ', not 'does the underlying resistance biology differ' -- the latter "
-            "remains open",
+            "the pre-existing-fraction prior 10^U(-6,-3) is the resistance engine's own "
+            "convention.",
+            "the Corgi arm's own scenario (pulmonary_corgi_scenarios) still reuses the BMD "
+            "growth-rate/resistance-mechanism spectrum unchanged, per that function's own "
+            "documented reasoning: no Corgi-specific germline locus or driver panel is "
+            "established enough to justify inventing a different one from nothing.",
         ],
         "warning": "This reframes an illustrative model as an individual-patient question. It does "
                   "not establish that any regimen works in this disease, and no part of it is a "

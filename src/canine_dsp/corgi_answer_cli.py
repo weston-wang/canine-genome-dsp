@@ -1,9 +1,8 @@
 """The culminating question: is a durable response achievable for one Corgi with this disease?
-
-Assembles every constraint this repo established into a single conditional answer, rather than another
-sweep. Deliberately built as its own demo because the Corgi arm of `single_patient_demo` was
-trametinib monotherapy in a 4-clone model -- it could not express a vaccine at all, which is the
-component the entire endurance case turned out to rest on.
+Assembles every constraint this repo established into a single conditional answer, rather than
+another sweep. Deliberately built as its own demo because the Corgi arm of `single_patient_demo`
+was trametinib monotherapy in a 4-clone model -- it could not express a vaccine at all, which is
+the component the entire endurance case turned out to rest on. See docs/HSA_DURABLE_RESPONSE.md.
 """
 
 import json
@@ -98,11 +97,10 @@ def corgi_answer_demo(out: Path, debulking_fraction: float = DEBULKING_FRACTION,
                       ccnu_max_kill: float = 0.08, trials: int = 250,
                       seed: int = 7) -> None:
     """Runs the full three-component regimen in the Corgi two-compartment scenario and answers.
-
-    Sweeps nodal involvement x vaccine potency x `preexisting_prob` (0.30 central, 0.62 as implied by
-    the matched BMD-context benchmark) x horizon, because the answer for one dog is a conditional
-    statement, not a number: what is achievable given what can be measured, and what remains
-    unresolvable regardless.
+    Sweeps nodal involvement x vaccine potency x `preexisting_prob` (0.30 central, 0.62 as implied
+    by the matched BMD-context benchmark) x horizon, because the answer for one dog is a
+    conditional statement, not a number: what is achievable given what can be measured, and what
+    remains unresolvable regardless.
     """
     out.mkdir(parents=True, exist_ok=True)
     reference = corgi_full_regimen_scenarios(debulking_fraction, ccnu_max_kill,
@@ -200,34 +198,24 @@ def corgi_answer_demo(out: Path, debulking_fraction: float = DEBULKING_FRACTION,
         "question": "If the goal is a durable response for the Corgi niche presentation, in ONE dog, "
                    "what is the answer?",
         "short_answer": (
-            "Conditionally yes, and the condition is unusually clean: IF this dog's tumor is "
-            "sequenced and carries a targetable MAPK hotspot, AND a vaccine against that hotspot "
-            "reaches roughly "
-            f"{threshold['threshold_vaccine_max_kill']:.3f}/day of kill, THEN the model gives a "
-            "durable response that is robust to everything else -- including the two things that "
-            "cannot be measured in this dog (pre-existing resistance) and the Corgi-specific "
-            "structural risk (nodal disease surgery cannot reach). Below that potency the answer is "
-            "no, and no amount of drug optimization substitutes. Neither condition is currently "
-            "established for any Corgi."),
+            "/day of kill, THEN the model gives a durable response that is robust to everything "
+            "else -- including the two things that cannot be measured in this dog (pre-existing "
+            "resistance) and the Corgi-specific structural risk (nodal disease surgery cannot "
+            "reach)."),
         "the_gate_is_sequencing": {
             **driver_conditioned_arms(breed="corgi"),
-            "why_it_is_a_gate_and_not_a_discount": "Both halves of the regimen depend on the same "
-                "answer. Without a MAPK driver the MEK inhibitor is off-target AND the hotspot "
-                "vaccine has no antigen -- so antigen convergence, which is what makes the endurance "
-                "case work, has nothing to converge on. This is the one measurement that changes "
-                "whether to attempt the strategy at all rather than adjusting its odds.",
+            "why_it_is_a_gate_and_not_a_discount": "Both halves of the regimen depend on the "
+                                                   "same answer.",
             "cost_of_being_wrong": "If sequenced and negative, the correct action is a different "
                                   "primary agent, not this regimen at lower expected value.",
         },
         "what_can_and_cannot_be_measured_in_one_dog": {
             "measurable": MEASURABLE_IN_ONE_DOG,
             "not_measurable": NOT_MEASURABLE_IN_ONE_DOG,
-            "the_useful_asymmetry": "Nodal involvement -- the risk specific to the Corgi pulmonary "
-                "presentation -- IS measurable in an individual patient by staging, even though its "
-                "cohort rate was never published. Pre-existing subclonal resistance, the generic "
-                "risk, is not measurable at any depth. So for one dog the Corgi-specific uncertainty "
-                "is resolvable and the generic one is not, which is the opposite of how the "
-                "population model treats them.",
+            "the_useful_asymmetry": "Nodal involvement -- the risk specific to the Corgi "
+                                    "pulmonary presentation -- IS measurable in an individual "
+                                    "patient by staging, even though its cohort rate was never "
+                                    "published.",
             "clinical_assay_floors_for_reference": {
                 name: {"vaf_lod": a["vaf_lod"],
                        "cell_fraction_lod": vaf_lod_to_cell_fraction(a["vaf_lod"])}
@@ -249,11 +237,7 @@ def corgi_answer_demo(out: Path, debulking_fraction: float = DEBULKING_FRACTION,
                 "in many cases, so the single-compartment 'debulking reaches everything' premise does "
                 "not hold. The nodal compartment is seeded from the PRE-debulking primary (carrying "
                 "any pre-existing resistant clone) and surgery cannot touch it.",
-            "answer": "No, above threshold. The vaccine and both drugs are systemic, so the "
-                     "compartment surgery misses is still fully exposed -- debulking is the only "
-                     "modality with a reach problem here. Nodal involvement matters most in the "
-                     "regime where the rest of the regimen is nearly working, and essentially not at "
-                     "all once potency clears the threshold.",
+            "answer": "No, above threshold.",
             "worst_measurable_configuration_10yr": {
                 "nodal_involvement_prob": max(NODAL_INVOLVEMENT_PROB_SWEEP),
                 "preexisting_prob": 0.62,
@@ -291,25 +275,18 @@ def corgi_answer_demo(out: Path, debulking_fraction: float = DEBULKING_FRACTION,
         },
         "matched_benchmark": {
             **CORGI_PULMONARY_HS_BENCHMARK,
-            "what_it_says_about_the_bar": "133-day median survival across 19 Corgis on mixed/"
-                "unspecified treatment. That is the standard any of this would have to beat, and it "
-                "is low -- which cuts both ways: a large relative improvement is plausible from a "
-                "low base, and a 10-year durable-response figure is far outside anything this "
-                "disease has been observed to do.",
+            "what_it_says_about_the_bar": "133-day median survival across 19 Corgis on "
+                                          "mixed/unspecified treatment.",
         },
         "the_honest_bottom_line": [
             "The model does contain a durable-response regime for this presentation, and it is not "
             "fragile inside its own assumptions: above the vaccine potency threshold it holds at 10 "
             "years across every nodal-involvement rate and both preexisting_prob values tested.",
-            "The entire result hinges on two unmeasured quantities, and they are different in kind. "
-            "The driver hotspot is measurable and simply has not been measured in any Corgi -- that "
-            "is a funding/tissue problem, resolvable by sequencing one tumor. Vaccine potency is not "
-            "measurable in advance at all, and the analogous achievability question, asked of a "
-            "CDK4/6 inhibitor by pharmacology.py, came back NO.",
-            "So the defensible statement is: this is a well-posed strategy with a clearly identified "
-            "single point of failure and a clearly identified first experiment, not a predicted "
-            "outcome. The first experiment is cheap relative to the rest (sequence a Corgi HS "
-            "specimen) and it gates everything downstream.",
+            "The entire result hinges on two unmeasured quantities, and they are different in "
+            "kind.",
+            "So the defensible statement is: this is a well-posed strategy with a clearly "
+            "identified single point of failure and a clearly identified first experiment, not a "
+            "predicted outcome.",
             "Antigen loss remains outside the threshold by construction. Its rate is an unmeasured "
             "constant, and it is the one failure mode where raising vaccine potency does not help.",
         ],

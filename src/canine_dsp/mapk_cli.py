@@ -347,14 +347,13 @@ def combination_toxicity_demo(out: Path, breed: str = "bmd", debulking_fraction:
                               max_kill_2: float = 0.05, trials: int = 300, horizon_days: int = 730,
                               preexisting_prob: float = _PREEXISTING_PROB_CENTRAL,
                               location_penetration_multiplier: float = 1.0, seed: int = 7) -> None:
-    """Stress-tests the combination finding against realistic combined-dosing de-rating.
-
-    Fixes CDK4/6i potency at `max_kill_2` (default 0.05, the threshold that closed off all
-    escape routes at full illustrative dose in `combination_control_demo`) and sweeps
-    COMBINED_EXPOSURE_DERATING, applying it multiplicatively to *both* the trametinib and
-    CDK4/6i reference concentrations, to see whether the benefit survives the kind of dose
-    reduction real combination trials commonly require -- see TOXICITY_EXTRAPOLATION_NOTE --
-    rather than silently assuming full, unconstrained dosing of both drugs holds.
+    """Stress-tests the combination finding against realistic combined-dosing de-rating. Fixes
+    CDK4/6i potency at `max_kill_2` (default 0.05, the threshold that closed off all escape routes
+    at full illustrative dose in `combination_control_demo`) and sweeps
+    COMBINED_EXPOSURE_DERATING, applying it multiplicatively to *both* the trametinib and CDK4/6i
+    reference concentrations, to see whether the benefit survives the kind of dose reduction real
+    combination trials commonly require -- see TOXICITY_EXTRAPOLATION_NOTE -- rather than silently
+    assuming full, unconstrained dosing of both drugs holds.
     """
     out.mkdir(parents=True, exist_ok=True)
     scenarios = combination_scenarios(breed, debulking_fraction, [max_kill_2],
@@ -426,7 +425,6 @@ def durability_horizon_demo(out: Path, breed: str = "bmd", debulking_fraction: f
                             preexisting_prob: float = _PREEXISTING_PROB_CENTRAL,
                             location_penetration_multiplier: float = 1.0, seed: int = 7) -> None:
     """How long does "durable response" actually mean, for the best-performing combination arm?
-
     Sweeps DURABILITY_HORIZON_SWEEP at fixed full-dose combination therapy (max_kill_2, defaults
     to the threshold that closed off all escape routes at 2 years in combination_control_demo),
     reporting durable-response probability and which mechanism drives relapse at each horizon --
@@ -517,11 +515,11 @@ def vaccine_followon_demo(out: Path, breed: str = "bmd", debulking_fraction: flo
                           preexisting_prob: float = _PREEXISTING_PROB_CENTRAL,
                           location_penetration_multiplier: float = 1.0, seed: int = 7) -> None:
     """Does a follow-on mRNA vaccine close the long-horizon durability gap `durability_horizon_demo`
-    found (durable-response probability eroding out to 5-10 years, driven by pathway_reactivation)?
-
-    Defaults to a 5-year (1825-day) horizon specifically because that is where the gap this demo
-    is testing shows up; a 2-year run would not exercise the effect being investigated. Sweeps
-    VACCINE_MAX_KILL_SWEEP at fixed combination-drug potency (`cdk46_max_kill`).
+    found (durable-response probability eroding out to 5-10 years, driven by
+    pathway_reactivation)? Defaults to a 5-year (1825-day) horizon specifically because that is
+    where the gap this demo is testing shows up; a 2-year run would not exercise the effect being
+    investigated. Sweeps VACCINE_MAX_KILL_SWEEP at fixed combination-drug potency
+    (`cdk46_max_kill`).
     """
     out.mkdir(parents=True, exist_ok=True)
     scenarios = vaccine_followon_scenarios(breed, debulking_fraction, cdk46_max_kill,
@@ -624,19 +622,11 @@ def single_patient_feasibility_demo(out: Path, breed: str = "bmd",
                                     n_dogs: int = 40, repeats_per_dog: int = 60,
                                     preexisting_prob: float = _PREEXISTING_PROB_CENTRAL,
                                     location_penetration_multiplier: float = 1.0, seed: int = 7) -> None:
-    """Reframes the full-potency combination model (trametinib + CDK4/6i at `cdk46_max_kill`)
-    around a single dog rather than a population, with three analyses:
-
-    1. `decompose_patient_uncertainty`'s between-vs-within-dog variance split: how much of the
-       outcome is "which dog you are" (in principle knowable about a specific dog) versus pure
-       chance (not knowable about any dog, no matter how well characterized).
-    2. The value of knowing, for one dog, whether a resistant subclone already exists before
-       treatment (a real, if not yet clinically applied, diagnostic question -- deep/ctDNA
-       sequencing for a known hotspot at low variant-allele frequency), compared against the
-       population-average number reported elsewhere in this module.
-    3. A worst-/best-case bracket at the edges of this module's own assumed exposure- and
-       mutation-rate uncertainty (its 5th/95th percentiles), combined with subclone status --
-       the realistic range for one dog, as opposed to a single blended average.
+    """Reframes the full-potency combination model (trametinib + CDK4/6i at `cdk46_max_kill`) around
+    a single dog rather than a population, with three analyses: 1.
+    `decompose_patient_uncertainty`'s between-vs-within-dog variance split: how much of the
+    outcome is "which dog you are" (in principle knowable about a specific dog) versus pure chance
+    (not knowable about any dog, no matter how well characterized).
     """
     out.mkdir(parents=True, exist_ok=True)
     scenarios = combination_scenarios(breed, debulking_fraction, [cdk46_max_kill],
@@ -787,10 +777,6 @@ def vaccine_epitope_binding_demo(out: Path, lengths: list[int] = (9, 10, 11)) ->
     ranking, kept as the primary method for consistency with earlier phases of this module) window
     per (peptide, allele) pair, both methods' percentile rank/class for that window, and whether
     the two independently-trained methods agree.
-
-    Requires network access (UniProt, AlphaFold DB, and IEDB). See `dla_binding`'s module
-    docstring for what is and isn't a real, existing tool here -- including why a canine MHC
-    class II check was not attempted (no method supports any canine class II allele).
     """
     out.mkdir(parents=True, exist_ok=True)
     structure_cache = out / "structures"
@@ -1002,12 +988,10 @@ def pulmonary_two_compartment_demo(out: Path, cdk46_max_kill: float = 0.0,
 def mapk_resistance_demo(out: Path, species: str = "dog", trials: int = 300,
                          horizon_days: int = 730, seed: int = 7) -> None:
     """Run the Monte Carlo escape model across a `preexisting_prob` sweep, not one fixed value.
-
     `preexisting_prob` (whether a resistant subclone already exists at treatment start) is the
     single most influential parameter in this model and has no HS-specific source; reporting a
     durable-response probability at one asserted value would mostly reflect that choice, not a
-    result. The sweep is reported as a range; only the sweep value matching
-    `_PREEXISTING_PROB_CENTRAL` is used for the illustrative trajectory and mechanism plots.
+    result.
     """
     out.mkdir(parents=True, exist_ok=True)
     model, css_reference, seeding_rates, provenance = SPECIES_PRESETS[species]()

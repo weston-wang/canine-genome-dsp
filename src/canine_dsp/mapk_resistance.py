@@ -1,68 +1,11 @@
 """Monte Carlo clonal-escape model for MAPK-pathway inhibitor treatment of histiocytic sarcoma.
-
-Canine histiocytic sarcoma (HS) carries recurrent MAPK-pathway driver mutations, dominated by
-two PTPN11/SHP2 hotspots (E76K, G503V) that are mutually exclusive with each other and with
-KRAS Q61H; together these alter the MAPK pathway in roughly 43-64% of cases across published
-cohorts (Takada et al., "Activating Mutations in PTPN11 and KRAS in Canine Histiocytic
-Sarcomas," Genes 2019;10(7):505, PMID 31277422; "Canine Histiocytic and Hemophagocytic
-Histiocytic Sarcomas Display KRAS and Extensive PTPN11/SHP2 Mutations and Respond In Vitro to
-MEK Inhibition by Cobimetinib," Genes 2024;15(8):1050, PMID 39202410). Three canine HS cell
-lines (BD, OD, DH82) with these mutations were shown to respond in vitro to the MEK1/2 inhibitor
-cobimetinib at IC50 74-372 nM, well below the achievable canine plasma concentration
-(Cmax ~1640 nM at 5 mg/kg; PMID 39202410). No canine-specific resistance data has been
-published; this module is a hypothesis-generating exploration of plausible escape routes, not a
-fitted or validated predictive model.
-
-Human histiocytic sarcoma carries MAPK-pathway mutations spread across more genes (BRAF,
-MAP2K1, KRAS, NRAS, PTPN11, NF1, CBL) in about 57% of cases (Shanmugam et al., "Identification
-of diverse activating mutations of the RAS-MAPK pathway in histiocytic sarcoma," Mod Pathol.
-2019;32(6):830-843), and a MAP2K1-mutant case achieved a complete clinical response to the MEK
-inhibitor trametinib (Gounder et al., "Trametinib in Histiocytic Sarcoma with an Activating
-MAP2K1 (MEK1) Mutation," N Engl J Med. 2018;378(20):1945-1947, PMID 29768143) -- a complete
-response maintained for more than two years with no relapse reported, and independent case
-reports of KRAS- and BRAF-mutant HS on MEK/BRAF inhibitors describe similarly long remissions (31
-months; 3 years). No published human HS in vitro potency or PK numbers were found, so the human
-preset reuses the same illustrative pharmacodynamic shape as the dog preset with a broader, less
-concentrated resistance-mutation spectrum reflecting that documented genetic heterogeneity; its
-potency/exposure values are not calibrated to a specific dataset.
-
-Three synthetic escape mechanisms are modeled, chosen for general applicability to any MAPK
-inhibitor rather than HS-specific evidence: (1) pathway reactivation via a secondary upstream
-RAS/RAF alteration restoring ERK signaling around the drug; (2) RTK-mediated bypass, in which
-loss of ERK-dependent negative feedback reactivates receptor tyrosine kinases and parallel
-(e.g. PI3K/AKT) signaling; (3) on-target site mutation reducing inhibitor binding affinity, the
-resistance category seen generally across kinase inhibitors. See MEK1/2 inhibitor resistance
-reviews, e.g. PMID 26615130.
-
-Acquired resistance is scheduled as a Poisson process over the sensitive clone's cumulative
-cell-days of drug exposure (`poisson_mutation_injections`), not a constant daily transfer
-fraction: with a fixed nonzero daily rate and any resistant clone growing net-positive under
-drug, eventual outgrowth is mathematically guaranteed given enough follow-up time (a 100x rate
-reduction only delayed median escape by degrees in testing), which cannot reproduce a genuinely
-durable, multi-year response. A Poisson draw can come back exactly zero, so a resistant lineage
-can truly never arise in a given trial. The overall rate is loosely tuned so the dog preset's
-durable-response probability is in the same ballpark as the case reports above -- not a fit:
-those are a handful of case reports published specifically because the outcome was durable
-(survivorship/publication bias), so the true rate is almost certainly lower than "durable in all
-of them."
-
-`run_monte_carlo_with_vaccine` extends this to a follow-on shared/hotspot-mutation-targeted mRNA
-cancer vaccine, layered on top of MAPK-inhibitor (+/- CDK4/6-inhibitor) therapy. Shared-neoantigen
-mRNA vaccines targeting a small, recurrent set of driver mutations -- rather than a fully
-personalized, per-patient neoantigen set -- are a real, active approach in human oncology:
-mRNA-5671 (Moderna/Merck), a Phase 1 lipid-nanoparticle vaccine targeting four frequent KRAS
-mutations (G12D, G13D, G12C, G12V) as monotherapy or with pembrolizumab in KRAS-mutant NSCLC/CRC/
-pancreatic cancer; and a KRAS G12V-specific mRNA vaccine combined with pembrolizumab reporting
-clinical benefit in advanced solid tumors (Cell Research, 2024). Canine HS's own PTPN11/KRAS
-hotspot mutations, if confirmed present in a given case, are the same kind of small, recurrent,
-shareable target -- no canine-specific vaccine data exists, so this remains this module's own
-hypothesis-generating extension, not a validated finding.
-
-`run_monte_carlo_two_compartment` extends the single-compartment model to a resectable primary
-tumor plus possible regional (e.g. lymph node) disease that a local resection cannot reach --
-relevant wherever "debulk the primary, then treat systemically" is being modeled for a tumor type
-that isn't always strictly localized at diagnosis, unlike this module's single-compartment
-CNS/PIHS scenarios, which are built around clinical evidence of near-zero dissemination.
+Canine histiocytic sarcoma (HS) carries recurrent MAPK-pathway driver mutations, dominated by two
+PTPN11/SHP2 hotspots (E76K, G503V) that are mutually exclusive with each other and with KRAS Q61H;
+together these alter the MAPK pathway in roughly 43-64% of cases across published cohorts (Takada
+et al., "Activating Mutations in PTPN11 and KRAS in Canine Histiocytic Sarcomas," Genes
+2019;10(7):505, PMID 31277422; "Canine Histiocytic and Hemophagocytic Histiocytic Sarcomas Display
+KRAS and Extensive PTPN11/SHP2 Mutations and Respond In Vitro to MEK Inhibition by Cobimetinib,"
+Genes 2024;15(8):1050, PMID 39202410). See docs/HS_MAPK_RESISTANCE.md.
 """
 
 from dataclasses import dataclass, replace
@@ -130,17 +73,9 @@ def simulate_resistance(model: ResistanceModel, concentration: np.ndarray, initi
                         concentration_2: np.ndarray | None = None,
                         additional_kill: np.ndarray | None = None) -> np.ndarray:
     """Simulate density-dependent multiclone tumor burden under a daily drug-concentration series.
-
     Net growth is logistic growth minus an Emax drug kill-rate term, so a clone whose kill rate
-    exceeds its growth rate actually regresses (not just plateaus) -- required for "response,
-    then progression from nadir" dynamics, rather than the drug only ever capping growth at zero.
-    `injections` optionally adds a population vector at specific days (see
-    `poisson_mutation_injections`), on top of whatever `model.mutation` transfers that day.
-    `concentration_2`, if given alongside `model.ic50_nM_2`/`max_kill_2`, adds a second,
-    per-clone-identical kill-rate term -- see `ResistanceModel` for why it's uniform, not
-    per-clone, unlike the first drug. `additional_kill`, if given, is a precomputed `(days, k)`
-    per-clone kill-rate array added directly on top of both drug terms -- used for a time-gated
-    (not concentration-gated) mechanism like vaccine-induced immunity, see `ramping_kill_schedule`.
+    exceeds its growth rate actually regresses (not just plateaus) -- required for "response, then
+    progression from nadir" dynamics, rather than the drug only ever capping growth at zero.
     """
     initial = np.asarray(initial, float)
     state = np.zeros((len(concentration) + 1, len(initial)))
@@ -164,15 +99,12 @@ def simulate_resistance(model: ResistanceModel, concentration: np.ndarray, initi
 
 def ramping_kill_schedule(horizon_days: int, start_day: int, ramp_days: float, max_kill: float,
                           applicable_clones: np.ndarray) -> np.ndarray:
-    """Time-gated, saturating kill-rate schedule for a vaccine-type mechanism.
-
-    Zero before `start_day`; rises as `1 - exp(-elapsed / ramp_days)` toward `max_kill` after,
-    representing T-cell priming/expansion kinetics (a real ~1-3 week immunology timescale, not
-    vaccine- or antigen-specific measured data) -- deliberately time-dependent rather than the
+    """Time-gated, saturating kill-rate schedule for a vaccine-type mechanism. Zero before
+    `start_day`; rises as `1 - exp(-elapsed / ramp_days)` toward `max_kill` after, representing
+    T-cell priming/expansion kinetics (a real ~1-3 week immunology timescale, not vaccine- or
+    antigen-specific measured data) -- deliberately time-dependent rather than the
     concentration-dependent Emax shape used for the small-molecule drugs, since immune effector
-    buildup is not governed by a plasma concentration. Applied only to clones flagged 1 in
-    `applicable_clones` (a length-k 0/1 mask): an antigen-loss/immune-escape clone is excluded by
-    construction, since the entire premise of that clone is that the vaccine no longer sees it.
+    buildup is not governed by a plasma concentration.
     """
     days = np.arange(horizon_days)
     ramp = np.where(days >= start_day, 1 - np.exp(-(days - start_day) / ramp_days), 0.0)
@@ -221,19 +153,12 @@ def poisson_mutation_injections(rng: np.random.Generator, sensitive_trajectory: 
                                 clone_indices: range | list[int] | None = None,
                                 k: int | None = None) -> dict[int, np.ndarray]:
     """Schedule acquired-resistance establishment as a Poisson process over a source population's
-    cumulative cell-days (usually the sensitive clone's trajectory).
-
-    Expected establishment count for `seeding_rates[i]` is `seeding_rates[i] * sum(trajectory)`.
-    Unlike a constant per-day transfer fraction, a Poisson draw can come back exactly zero, so a
-    resistant lineage can genuinely never arise in a given trial -- a rate small enough to make
-    that likely is required to reproduce multi-year durable responses; a fixed nonzero daily
-    seeding rate cannot, since it guarantees eventual outgrowth given enough follow-up time.
-
-    `clone_indices` defaults to `1, 2, ..., len(seeding_rates)` (the original single-source-clone
-    convention: seeding_rates[i] seeds clone i+1); pass explicit indices to seed a different clone
-    (e.g. a 5th, immune-escape clone) from a different source trajectory without reindexing.
-    `k`, the resulting vector length, defaults to `len(seeding_rates) + 1` for the same reason and
-    must be passed explicitly whenever `clone_indices` targets a clone beyond that range.
+    cumulative cell-days (usually the sensitive clone's trajectory). Expected establishment count
+    for `seeding_rates[i]` is `seeding_rates[i] * sum(trajectory)`. Unlike a constant per-day
+    transfer fraction, a Poisson draw can come back exactly zero, so a resistant lineage can
+    genuinely never arise in a given trial -- a rate small enough to make that likely is required
+    to reproduce multi-year durable responses; a fixed nonzero daily seeding rate cannot, since it
+    guarantees eventual outgrowth given enough follow-up time.
     """
     total_cell_days = float(sensitive_trajectory.sum())
     injections: dict[int, np.ndarray] = {}
@@ -257,7 +182,6 @@ def sample_initial_state(rng: np.random.Generator, k: int, preexisting_prob: flo
                          initial_burden: float = .3) -> np.ndarray:
     """Most trials start drug-sensitive only; some seed one pre-existing resistant subclone,
     reflecting that a resistant population may or may not already exist before treatment.
-
     `mechanism_weights` (typically the same relative seeding rates used for acquired resistance)
     picks which mechanism is more likely to already be present; without it, all mechanisms are
     equally likely, which would ignore that some escape routes are mutationally more accessible
@@ -303,28 +227,9 @@ def run_monte_carlo(reference: ResistanceModel, css_reference: float, horizon_da
                    exposure_scale_2: float = .3, css_reference_2_duration_days: int | None = None,
                    seed: int = 7) -> MonteCarloOutcome:
     """Run a Monte Carlo ensemble over parameter, exposure, and acquired-mutation-timing uncertainty.
-
     Acquired resistance is scheduled with `poisson_mutation_injections` rather than a constant
     daily transfer out of `reference.mutation` (`reference` is simulated with mutation forced to
     identity), so a real fraction of trials can see no acquired resistance ever establish.
-
-    Progression requires burden to both regrow >=20% from nadir (RECIST-style) and clear an
-    absolute `detection_floor_fraction * carrying_capacity`: without a floor, a regrowth ratio
-    computed against a numerically negligible nadir (e.g. 1e-9) can trip the 20% rule while the
-    tumor is still clinically undetectable, which is not a real progression event.
-
-    `initial_burden` models the starting tumor fraction (of carrying capacity) at day 0; a
-    surgical/radiation debulking step ahead of drug therapy is modeled by simply lowering this
-    value, which also proportionally shrinks any pre-existing resistant subclone (see
-    `sample_initial_state`) -- a debulking step removes resistant and sensitive cells alike.
-
-    `css_reference_2`, if given (with `reference.ic50_nM_2`/`max_kill_2` set), simulates a second,
-    mechanism-agnostic drug alongside the first -- see `ResistanceModel`. `css_reference_2_duration_
-    days`, if given, zeroes the second drug's exposure after that many days instead of holding it
-    at `css_reference_2` for the entire horizon -- models a single, front-loaded treatment course
-    (e.g. a short course of an immunotoxin given as one cycle) rather than chronic, small-molecule-
-    style dosing sustained indefinitely. `None` (the default) preserves the original always-on
-    behavior for every existing caller.
     """
     rng = np.random.default_rng(seed)
     k = len(reference.growth)
@@ -368,18 +273,13 @@ def run_monte_carlo(reference: ResistanceModel, css_reference: float, horizon_da
 
 def clone_growth_margins(model: ResistanceModel, concentration: float,
                          concentration_2: float | None = None) -> np.ndarray:
-    """Deterministic per-clone net growth margin (growth minus drug kill) at a fixed, sustained
-    drug concentration, ignoring density-dependence (valid at low tumor burden, where the
-    logistic term is negligible) and mutation transfer.
-
-    A positive margin means that clone's fitness advantage is not reversed at this exposure: it
-    will eventually regrow given enough follow-up time from *any* nonzero foothold, however
-    small -- unlike a Monte Carlo trial's empirical progression outcome, which also depends on
-    whether/when that foothold is seeded at all and how much follow-up time remains to detect it.
-    For one specific, fully-characterized dog (measured IC50s, measured achieved drug levels),
-    this is directly computable with no simulation -- the single most concrete, checkable fact
-    available about whether a given escape route is actually closed for that dog, as opposed to
-    merely delayed or made statistically unlikely to be observed within a given follow-up window.
+    """Deterministic per-clone net growth margin (growth minus drug kill) at a fixed, sustained drug
+    concentration, ignoring density-dependence (valid at low tumor burden, where the logistic term
+    is negligible) and mutation transfer. A positive margin means that clone's fitness advantage
+    is not reversed at this exposure: it will eventually regrow given enough follow-up time from
+    *any* nonzero foothold, however small -- unlike a Monte Carlo trial's empirical progression
+    outcome, which also depends on whether/when that foothold is seeded at all and how much
+    follow-up time remains to detect it.
     """
     kill = drug_kill_rate(concentration, model.ic50_nM, model.hill, model.max_kill)
     if concentration_2 is not None and model.ic50_nM_2 is not None:
@@ -393,18 +293,10 @@ def run_monte_carlo_fixed_patient(model: ResistanceModel, css: float, horizon_da
                                   css_2: float | None = None, additional_kill: np.ndarray | None = None,
                                   clone_names: list[str] = CLONE_NAMES, seed: int = 7
                                   ) -> MonteCarloOutcome:
-    """Repeats only the stochastic mutation-establishment process for one *given* dog's fixed
-    model, drug exposure, and starting tumor state, instead of redrawing a new hypothetical dog
-    every trial the way `run_monte_carlo` does.
-
-    `run_monte_carlo` reports population variability: which dog you are. This function holds that
-    fixed at whatever the caller supplies -- ideally, for a real dog, a model/exposure/initial
-    state informed by actual biopsy, imaging, and drug-level data for that specific animal -- and
-    re-samples only the Poisson mutation-timing draw (see `poisson_mutation_injections`), isolating
-    the residual, irreducible uncertainty that remains even with perfect knowledge of that one
-    dog's biology: whether and when a resistant mutation actually establishes is inherently
-    stochastic, not just unmeasured. See `decompose_patient_uncertainty` for why this split
-    matters when the question is "can this one dog be cured," not "what fraction of dogs respond."
+    """Repeats only the stochastic mutation-establishment process for one *given* dog's fixed model,
+    drug exposure, and starting tumor state, instead of redrawing a new hypothetical dog every
+    trial the way `run_monte_carlo` does. `run_monte_carlo` reports population variability: which
+    dog you are.
     """
     k = len(model.growth)
     rng = np.random.default_rng(seed)
@@ -455,21 +347,10 @@ def decompose_patient_uncertainty(reference: ResistanceModel, css_reference: flo
                                   initial_burden: float = .3, css_reference_2: float | None = None,
                                   exposure_scale_2: float = .3, seed: int = 7) -> UncertaintyDecomposition:
     """Decomposes `run_monte_carlo`'s population variability into between-dog and within-dog parts.
-
     Draws `n_dogs` distinct hypothetical dogs from the same distributions `run_monte_carlo` uses
-    (perturbed model, drug exposure, starting tumor state, mutation-rate jitter), then for each one
-    runs `repeats_per_dog` fixed-patient trials (`run_monte_carlo_fixed_patient`) to estimate that
-    dog's own true durable-response probability.
-
-    For any single real dog, Var(outcome) = Var(p_dog) [between-dog: uncertainty about *which* dog
-    this is -- in principle resolvable by biopsy, deep/ctDNA sequencing, or serial imaging on that
-    specific dog] + E[p_dog * (1 - p_dog)] [within-dog: irreducible, since whether a resistant
-    mutation actually establishes is a Poisson draw, not a deterministic consequence of the dog's
-    true parameters]. `between_dog_variance` corrects the naive sample variance of the
-    `repeats_per_dog`-trial probability estimates for their own finite-sample noise (a standard
-    method-of-moments/ANOVA-style variance-components estimate, biased toward zero when
-    `repeats_per_dog` is small relative to `n_dogs` -- both should be reasonably large for the
-    split to be trustworthy, not just directionally suggestive).
+    (perturbed model, drug exposure, starting tumor state, mutation-rate jitter), then for each
+    one runs `repeats_per_dog` fixed-patient trials (`run_monte_carlo_fixed_patient`) to estimate
+    that dog's own true durable-response probability.
     """
     rng = np.random.default_rng(seed)
     k = len(reference.growth)
@@ -506,37 +387,10 @@ def run_monte_carlo_with_vaccine(reference: ResistanceModel, css_reference: floa
                                 css_reference_2_duration_days: int | None = None,
                                 seed: int = 7) -> MonteCarloOutcome:
     """Adds a time-gated vaccine kill term and a 5th, antigen-loss/immune-escape clone on top of
-    `run_monte_carlo`'s drug-resistance model.
-
-    `reference` must have one more clone than its drug-resistance-only counterpart -- the last
-    index is treated as the immune-escape clone and is excluded from the vaccine's kill term (see
-    `ramping_kill_schedule`), since the entire premise of that clone is that it is not recognized.
-
-    Two independent Poisson processes seed resistant lineages, reflecting that they are
-    mechanistically unrelated: (1) the original acquired-drug-resistance mechanisms
-    (`seeding_rates`, clones 1..len(seeding_rates)) are seeded from the sensitive clone's
-    cell-days exactly as in `run_monte_carlo`; (2) the immune-escape clone (last index) is seeded
-    from the "antigen-positive" population's cell-days -- the sum of every clone except itself --
-    restricted to days on or after `vaccine_start_day`. That restriction is a simplifying
-    assumption, not a claim that the underlying mutation only becomes physically possible once
-    the vaccine starts: an antigen-loss variant confers no survival advantage before immune
-    pressure exists, so it has no plausible route to establish and expand before that point,
-    making its pre-vaccine contribution negligible to omit rather than model.
-
-    None of the three original drug-resistance mechanisms requires losing the driver-mutation
-    antigen a vaccine would target -- they all add a resistance mechanism upstream or on-target,
-    without shedding the original hotspot mutation -- so a vaccine targeting that hotspot should
-    still recognize cells using any of those three routes; only a genuinely new antigen-loss
-    event (this 5th clone) evades it. The immune-escape clone's own growth/IC50/kill parameters
-    are set by the caller to inherit the pathway_reactivation clone's drug-susceptibility with an
-    added fitness cost (see `mapk_scenarios.vaccine_followon_scenarios`), reflecting the assumption
-    that an antigen-loss variant most plausibly arises from a cell lineage that already survived
-    MAPK-inhibitor-based selection -- an illustrative, labeled assumption, not a measured one.
-
-    `css_reference_2_duration_days`, if given, zeroes the second drug's exposure after that many
-    days instead of holding it at `css_reference_2` for the entire horizon -- see `run_monte_carlo`
-    for the rationale (a single front-loaded treatment cycle vs. chronic dosing). `None` (the
-    default) preserves the original always-on behavior for every existing caller.
+    `run_monte_carlo`'s drug-resistance model. `reference` must have one more clone than its
+    drug-resistance-only counterpart -- the last index is treated as the immune-escape clone and
+    is excluded from the vaccine's kill term (see `ramping_kill_schedule`), since the entire
+    premise of that clone is that it is not recognized.
     """
     rng = np.random.default_rng(seed)
     k = len(reference.growth)
@@ -634,39 +488,9 @@ def run_monte_carlo_two_compartment(reference: ResistanceModel, css_reference: f
                                     seed: int = 7) -> TwoCompartmentOutcome:
     """A two-compartment extension of `run_monte_carlo` for a resectable primary tumor that may
     already have seeded regional (e.g. lymph node) disease before surgery -- unlike
-    `run_monte_carlo`'s single-compartment model, which implicitly assumes debulking reaches
-    every tumor cell wherever it is.
-
-    Per trial: a single perturbed model, drug exposure, and primary-tumor initial state are drawn
-    exactly as in `run_monte_carlo`. With probability `nodal_involvement_prob`, a nodal deposit is
-    also seeded, at `nodal_seed_fraction` of the *pre-debulking* primary tumor's size and clonal
-    composition -- pre-debulking because metastatic spread is a biological event that already
-    happened before a later surgical decision, so a resistant subclone present in the primary at
-    the time of spread is carried into the node too, not independently re-sampled. `debulking_fraction`
-    then shrinks the primary only; the nodal compartment (if present) is left untouched, modeling a
-    lobectomy-type resection that cannot reach disease outside the resected organ. Both
-    compartments receive the identical drug-concentration series (no barrier distinguishes them,
-    unlike the CNS case) and each seeds its own acquired resistance independently via its own
-    Poisson process, since they are physically separate, independently-dividing cell populations
-    after the point of metastatic seeding. Progression is judged on the combined (primary + nodal)
-    burden, matching how relapse would actually be detected clinically.
-
-    `vaccine_start_day`, if given, adds the same time-gated ramping vaccine mechanism as
-    `run_monte_carlo_with_vaccine` (`reference` must then carry one extra clone, the last index,
-    treated as antigen-loss/immune-escape and excluded from the vaccine's kill term). The vaccine is
-    applied **identically to both compartments**, which is the mechanistically important asymmetry in
-    this scenario: `debulking_fraction` cannot reach the nodal compartment at all, but a systemic
-    immune mechanism can, so the compartment surgery misses is exactly where a persistent systemic
-    agent matters most. Immune escape is seeded per compartment from that compartment's own
-    antigen-positive cell-days, since the two are physically separate populations after metastatic
-    seeding -- the same reasoning already applied to drug-resistance seeding here.
-
-    `css_reference_2_duration_days` zeroes the second drug's exposure after that many days, matching
-    `run_monte_carlo` -- needed to model a cumulative-dose-capped cytotoxic (e.g. lomustine) rather
-    than chronic dosing.
-
-    All vaccine parameters default to off (`vaccine_start_day=None`, `vaccine_max_kill=0.0`), so every
-    existing caller keeps byte-identical behavior including RNG draw order.
+    `run_monte_carlo`'s single-compartment model, which implicitly assumes debulking reaches every
+    tumor cell wherever it is. Per trial: a single perturbed model, drug exposure, and
+    primary-tumor initial state are drawn exactly as in `run_monte_carlo`.
     """
     rng = np.random.default_rng(seed)
     k = len(reference.growth)

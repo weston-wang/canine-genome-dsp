@@ -1,94 +1,10 @@
 """Illustrative scenario presets for a PI3K/mTOR-pathway resistance model of canine hemangiosarcoma.
-
 Canine hemangiosarcoma (HSA) is genetically heterogeneous, not a single-hotspot disease the way
 histiocytic sarcoma (PTPN11/KRAS) is: real, published somatic-mutation cohorts find TP53
 loss-of-function in up to ~66% of cases, activating PIK3CA mutations (H1047R is the dominant
 hotspot residue) in ~30-46%, PTEN loss-of-function in 3-10%, and NRAS Q61 hotspot mutations
-(largely restricted to splenic HSA and mostly mutually exclusive with TP53) in ~7-24% (Megquier
-et al. 2019, Mol Cancer Res, whole-exome sequencing of 47 golden retriever HSA cases + RNA-seq of
-74 tumors, Broad/NHGRI Lindblad-Toh lab; Estabrooks et al. 2023, Vet Comp Oncol, PMID 37734854;
-Wong et al. 2017, PLOS ONE, PMID 29190660). This module deliberately does not attempt one model
-covering "HSA" generically -- it scopes to the PIK3CA/PTEN-driven, PI3K/mTOR-pathway subtype
-specifically, both because that is where the real anchors below exist and because a real,
-directly relevant negative result argues against building the most obvious alternative (an
-NRAS-driven, MEK-inhibitor scenario mirroring the histiocytic-sarcoma module): a large real-world
-cohort found trametinib conferred no survival benefit in NRAS-mutant HSA (241 vs. 259 days,
-p=0.7775, n=71 vs. 26 -- Rodrigues et al. 2025, Sci Rep, PMID 40368987, PMC12078565, the FidoCure
-precision-medicine platform's real-world-evidence study of 508 dogs with splenic HSA), despite
-real in vitro MEK-dependence data for NRAS-mutant HSA cell lines existing (Andrade et al., PMC3769440).
-Building an optimistic hypothetical scenario there would contradict a real result already in hand.
-
-The PI3K/mTOR angle, by contrast, has three real anchors this module can build on, each verified
-directly against its source rather than taken from a summary: a real in vitro cellular potency
-measurement (Pyuen et al. 2018, PLOS ONE 13(7):e0200634, PMID 30011343: the dual PI3K/mTOR
-inhibitor VDC-597 gave IC50 0.23, 0.69, and 0.71 uM on three canine HSA cell lines -- CIN-, SB-,
-and DEN-HSA respectively -- additive with doxorubicin); real canine PK/PD data for the clinically
-relevant drug in this class, rapamycin/sirolimus (Paoloni et al. 2010, PLOS ONE 5(6):e11013, PMID
-20543980: a comparative-oncology dose-escalation study in dogs *with cancer* (osteosarcoma, not
-HSA) found median trough concentrations exceeding 10 ng/mL at 0.06-0.08 mg/kg IM daily -- matching
-human transplant target levels -- with no MTD reached and confirmed target inhibition
-(>2-fold reduction in tumoral phospho-S6RP in 8/10 dogs)); and a real-world survival benchmark
-specifically in HSA (the same FidoCure study above): TP53-mutant dogs given rapamycin had a median
-survival of 193 vs. 118 days without it (p<0.0001), and PIK3CA-mutant dogs 179 vs. 119 days
-(p=0.005). VDC-597 itself has no published canine dosing; rapamycin is the real clinically-used
-drug with no published HSA-cell-line potency number of its own -- a more severe version of the
-proxy-drug mismatch `mapk_scenarios.dog_preset` documents for cobimetinib/trametinib. There, both
-numbers were the same drug's own measurements; here, naively pairing VDC-597's real IC50 with
-rapamycin's real trough would put achievable exposure ~50x *below* IC50, predicting the drug
-barely works -- directly contradicting the real survival benefit just cited. `dog_hsa_preset`
-resolves this by keeping the reference concentration illustrative rather than publishing that
-self-contradictory pairing; see its own docstring for the exact reasoning.
-
-Cancer-vaccine work in canine HSA turns out to be more extensive than a first pass found, and
-checking it directly (not trusting a search summary) corrected a real mistake in an earlier draft
-of this module, which had misattributed one trial's numbers to a different, unrelated vaccine
-under the wrong name. There are at least four real, distinct programs, none of which targets a
-specific driver-mutation neoantigen the way the histiocytic-sarcoma module's mRNA-vaccine
-hypothesis does -- a real, deliberate design choice by vaccine developers that independently
-confirms this module's own earlier scoping decision: HSA has no single shared hotspot to build a
-mutation-specific vaccine around the way HS's PTPN11/KRAS does, so real HSA vaccine programs
-target broader, genotype-agnostic tumor antigens instead.
-
-- **ERstrePs** (endoplasmic-reticulum-stress-related peptides released from Salmonella-infected
-  HSA cells): the strongest real result found. Marconato et al. 2023, Cancers (Basel) 15(17):4402,
-  PMID 37686485 -- Phase 2, single-arm, 28 vaccinated dogs (post-splenectomy, adjuvant to standard
-  chemotherapy) vs. 32 historical controls. Median overall survival 276 vs. 175 days (p=0.002);
-  1-year survival 35.7% vs. 6.3%.
-- **eVim** (extracellular vimentin, delivered via "iBoost" conjugate technology): a second, later,
-  independent real trial. Engbersen et al. 2025, Int J Mol Sci, PMID 41009669 -- Phase 2,
-  single-arm, 23 vaccinated dogs vs. 22 historical controls (Stage I+II). Median overall survival
-  235 vs. 136 days -- *not* statistically significant on its own; but 1-year survival 44% vs. 14%
-  (p=0.0344) and a restricted-mean-survival-time advantage of 81 days at one year (p=0.02) both
-  were. Read alongside ERstrePs, not in place of it: two different real vaccines, two different
-  significance profiles, on overlapping but not identical patient populations.
-- **Autologous whole-cell vaccine** (mechanically dissociated, chemically inactivated tumor cells
-  plus a small-intestine-submucosa-derived adjuvant): real but far weaker evidence. Lucroy et al.
-  2020, BMC Vet Res 16:447, PMID 33208160 -- a small (n=8), uncontrolled, Stage III (metastatic)
-  cohort; median survival 142 days against a historical 41-day surgery-alone reference, no
-  concurrent control arm.
-- **Xenogeneic VEGFR-2 DNA vaccine**: a real, informative negative signal, included for the same
-  reason the NRAS/trametinib negative result is included above -- not omitted because it's
-  inconvenient. Real immunogenicity/safety study in *healthy* dogs (not an HSA efficacy trial):
-  vaccination reliably raised anti-VEGFR-2 antibodies, but co-incubating vaccinated dogs' PBMCs
-  with a real canine HSA cell line showed *no increase* in cytotoxic response after the final
-  vaccination (Oncotarget, DOI 10.18632/oncotarget.7265, PMC4905448, 2016). Antibody response
-  did not translate to the specific cell-killing readout that would predict tumor efficacy.
-- **Calviri frameshift-peptide vaccine**: a real, currently enrolling therapeutic trial (adjuvant,
-  post-splenectomy, same design pattern as ERstrePs/eVim) across three US veterinary schools
-  (Wisconsin, Colorado State, UC Davis) as of late 2024, targeting "frame-shift peptides" --
-  neoantigens shared across patients and tumor types, arising from RNA processing errors rather
-  than point mutations. No results published yet -- the same "real trial running, no readout yet"
-  situation as the canine trametinib-for-histiocytic-sarcoma trial.
-
-`hsa_vaccine_followon_scenarios`/`hsa_cli.hsa_vaccine_followon_demo` layer a vaccine kill term on
-top of the PI3K/mTOR resistance model above, reusing `mapk_resistance.run_monte_carlo_with_vaccine`
-unchanged. The antigen-persistence argument is, if anything, more secure here than in the
-histiocytic-sarcoma module, precisely because real HSA vaccines don't target a driver mutation:
-none of this module's three modeled resistance mechanisms (all *drug*-resistance routes, evading
-rapamycin/VDC-597 specifically) has any documented reason to alter vimentin expression, ER-stress
-signaling, or whole-tumor antigen presentation, so a vaccine built around any of those real targets
-should keep recognizing cells using any of the three routes. Only genuine antigen/MHC-I loss --
-modeled, as in the histiocytic-sarcoma module, as a 5th clone -- would evade it.
+(largely restricted to splenic HSA and mostly mutually exclusive with TP53) in ~7-24% (Megquier et
+al. See docs/HSA_DURABLE_RESPONSE.md.
 """
 
 import numpy as np
@@ -161,10 +77,8 @@ HSA_RAPAMYCIN_BENCHMARK = {
                "does not build an NRAS/MEK-inhibitor HSA scenario alongside this one.",
     },
     "caveat": "Retrospective real-world evidence, not a controlled trial -- dogs were not "
-             "randomized to rapamycin, dosing was not standardized within this cohort, and "
-             "survival reflects whatever other concurrent treatments each dog received. Provided "
-             "for scale (does this module's own median_time_to_progression_days land in a "
-             "remotely plausible range), not as validation of this module's specific numbers.",
+              "randomized to rapamycin, dosing was not standardized within this cohort, and "
+              "survival reflects whatever other concurrent treatments each dog received.",
 }
 
 # Two real published studies bracketing standard-of-care survival without any targeted drug --
@@ -190,26 +104,12 @@ HSA_STANDARD_OF_CARE_BENCHMARK = {
 
 
 def dog_hsa_preset() -> tuple[ResistanceModel, float, np.ndarray, dict]:
-    """PI3K/mTOR-inhibitor vs. canine PIK3CA/PTEN-mutant HSA; sensitive-clone IC50 anchored to
-    real cell-line data (VDC-597); reference plasma concentration illustrative, not rapamycin's
-    real trough concentration.
-
-    A more severe version of the cellular-potency-vs-clinical-drug mismatch
+    """PI3K/mTOR-inhibitor vs. canine PIK3CA/PTEN-mutant HSA; sensitive-clone IC50 anchored to real
+    cell-line data (VDC-597); reference plasma concentration illustrative, not rapamycin's real
+    trough concentration. A more severe version of the cellular-potency-vs-clinical-drug mismatch
     `mapk_scenarios.dog_preset` documents for cobimetinib/trametinib: there, both numbers came
     from the same drug's own real measurements (cobimetinib IC50 and cobimetinib Css), so pairing
-    them was internally consistent. Here, no drug has both halves: VDC-597 has a real HSA-cell-line
-    IC50 but no published canine dosing; rapamycin has real canine PK/PD (>10 ng/mL trough, ~10.9
-    nM, at 0.06-0.08 mg/kg IM daily) and a real HSA survival benchmark, but no published
-    HSA-cell-line potency of its own. Naively pairing VDC-597's real IC50 (mean 543 nM) with
-    rapamycin's real ~10.9 nM trough would put achievable exposure roughly 50x *below* the
-    sensitive clone's IC50 -- predicting the drug barely works at all, which would directly
-    contradict the real, statistically significant FidoCure survival benefit this same module
-    cites for rapamycin. Rather than publish that self-contradictory pairing, `css_reference`
-    here is illustrative (5x the mean measured IC50, the same "assumed, not measured, margin"
-    convention `mapk_cli.CDK46_ILLUSTRATIVE_CSS_NM` uses), and rapamycin's real PK/PD and survival
-    numbers are kept as separate, real-world context -- used to sanity-check this scenario's
-    *output* durability numbers, the same role `MAPK_INHIBITOR_HUMAN_BENCHMARK` plays for
-    histiocytic sarcoma, not fed into the concentration-vs-IC50 kill-rate calculation itself.
+    them was internally consistent.
     """
     cell_line_ic50_nM = {"CIN": 230.0, "SB": 690.0, "DEN": 710.0}
     ic50_sensitive = float(np.mean(list(cell_line_ic50_nM.values())))
@@ -240,9 +140,7 @@ def dog_hsa_preset() -> tuple[ResistanceModel, float, np.ndarray, dict]:
             "VDC-597 (the cellular-potency anchor) has no published canine dosing; rapamycin "
             "(the real, clinically relevant drug, with real canine PK/PD and a real HSA "
             "real-world survival benchmark) has no published HSA-cell-line potency number of its "
-            "own. Both are PI3K/mTOR-pathway inhibitors but different molecules -- pairing their "
-            "real numbers directly would be self-contradictory (see docstring), so this preset "
-            "keeps css_reference illustrative instead."
+            "own."
         ),
     }
     return model, css_reference, seeding_rates, provenance
@@ -390,15 +288,11 @@ HSA_EBAT_EXPOSURE_DURATION_DAYS = 28
 # COMBINED_EXPOSURE_DERATING for comparability, not because the evidence differs in severity.
 HSA_COMBINED_EXPOSURE_DERATING = [1.0, 0.8, 0.6, 0.4]
 HSA_TOXICITY_EXTRAPOLATION_NOTE = (
-    "Real, same-organ-system (hepatic/GI) toxicity is documented for both the PI3K/mTOR inhibitor "
-    "class in dogs and for eBAT specifically (Borgatti et al. 2017) -- unlike histiocytic "
-    "sarcoma's trametinib+CDK4/6i pair, which hits two different organ systems, giving the "
-    "standard 'combinations are often feasible near full dose' rationale less room to apply here. "
-    "No canine dose-finding trial has actually combined a PI3K/mTOR inhibitor with eBAT, so no "
-    "real de-rating fraction is known; HSA_COMBINED_EXPOSURE_DERATING applies to css_reference "
-    "and css_reference_2 simultaneously (see hsa_combination_toxicity_demo) to test whether the "
-    "combination's benefit survives realistic dose reduction rather than assuming full, "
-    "unconstrained dosing of both drugs holds."
+    "Real, same-organ-system (hepatic/GI) toxicity is documented for both the PI3K/mTOR "
+    "inhibitor class in dogs and for eBAT specifically (Borgatti et al. 2017) -- unlike "
+    "histiocytic sarcoma's trametinib+CDK4/6i pair, which hits two different organ systems, "
+    "giving the standard 'combinations are often feasible near full dose' rationale less room to "
+    "apply here."
 )
 
 # Same sweep mapk_scenarios.DURABILITY_HORIZON_SWEEP uses: 1, 2, 5, and 10 years. No HSA demo
@@ -441,15 +335,10 @@ def hsa_vaccine_followon_scenarios(ebat_max_kill: float = 0.0, inhibitor_active:
                                    ) -> dict[float, tuple[ResistanceModel, float, np.ndarray, dict]]:
     """PI3K/mTOR inhibitor (+/- eBAT, fixed at `ebat_max_kill`) plus a swept-potency cancer vaccine
     layered on top, mirroring `mapk_scenarios.vaccine_followon_scenarios`'s structure exactly
-    (same 5th-clone antigen/MHC-I-loss mechanic, reusing `mapk_resistance.run_monte_carlo_with_vaccine`
-    unchanged) but built for a genotype-agnostic real vaccine antigen rather than a
-    driver-mutation-specific one -- see module docstring for why that makes the
-    antigen-persistence argument, if anything, more secure here. `ebat_max_kill=0.0` (the
-    default) gives an inhibitor-plus-vaccine-only baseline with no eBAT contribution.
-    `inhibitor_active=False` isolates vaccine (+/- eBAT) as monotherapy, no PI3K/mTOR inhibitor
-    at all -- none of the four real HSA vaccine trials this scenario is grounded in were actually
-    combined with a PI3K/mTOR inhibitor (see module docstring), so vaccine-without-inhibitor is,
-    if anything, closer to how these vaccines have actually been tested than vaccine-with-inhibitor is.
+    (same 5th-clone antigen/MHC-I-loss mechanic, reusing
+    `mapk_resistance.run_monte_carlo_with_vaccine` unchanged) but built for a genotype-agnostic
+    real vaccine antigen rather than a driver-mutation-specific one -- see module docstring for
+    why that makes the antigen-persistence argument, if anything, more secure here.
     """
     combo_scenarios = hsa_combination_scenarios(inhibitor_active, [ebat_max_kill])
     model, css, seeding_rates, provenance = combo_scenarios[ebat_max_kill]

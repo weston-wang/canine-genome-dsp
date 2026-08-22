@@ -99,12 +99,11 @@ def read_plddt_track(path: str | Path) -> pd.DataFrame:
 
 
 def align_residue_numbers(source_seq: str, target_seq: str) -> dict[int, tuple[int, bool]]:
-    """Global (Needleman-Wunsch) alignment mapping 1-based source residue numbers to target.
-
-    Returns {source_position: (target_position, identical)}; unaligned (gapped) source
-    positions are absent. Residue numbering is not guaranteed to match between orthologs
-    (indels shift it), so this is required before comparing a hotspot position across species
-    rather than assuming the same index applies to both structures.
+    """Global (Needleman-Wunsch) alignment mapping 1-based source residue numbers to target. Returns
+    {source_position: (target_position, identical)}; unaligned (gapped) source positions are
+    absent. Residue numbering is not guaranteed to match between orthologs (indels shift it), so
+    this is required before comparing a hotspot position across species rather than assuming the
+    same index applies to both structures.
     """
     match, mismatch, gap = 2, -1, -2
     n, m = len(source_seq), len(target_seq)
@@ -131,12 +130,11 @@ def align_residue_numbers(source_seq: str, target_seq: str) -> dict[int, tuple[i
 
 def whole_sequence_identity(source_seq: str, target_seq: str) -> dict:
     """Overall ortholog conservation, not a single hotspot: reuses `align_residue_numbers`'s
-    alignment but reports identity across the whole protein.
-
-    Useful for questions `align_residue_numbers`/a single-hotspot comparison can't answer --
-    e.g. whether a whole-protein antigen (an antibody target, not a point-mutation neoepitope)
-    or a receptor a human-designed ligand/toxin binds is conserved enough across species for a
-    human precedent to plausibly transfer, as opposed to whether one specific residue matches.
+    alignment but reports identity across the whole protein. Useful for questions
+    `align_residue_numbers`/a single-hotspot comparison can't answer -- e.g. whether a
+    whole-protein antigen (an antibody target, not a point-mutation neoepitope) or a receptor a
+    human-designed ligand/toxin binds is conserved enough across species for a human precedent to
+    plausibly transfer, as opposed to whether one specific residue matches.
     """
     mapping = align_residue_numbers(source_seq, target_seq)
     identical = sum(1 for _, is_identical in mapping.values() if is_identical)
@@ -153,13 +151,12 @@ def extract_mutant_peptide(track: pd.DataFrame, position: int, wt_residue: str, 
                            flank: int = 12) -> str:
     """Build a mutant peptide window (length `2*flank + 1`) centered on `position`, substituting
     `mut_residue` in for the wild-type residue -- for designing a synthetic long-peptide/mRNA
-    vaccine antigen around a specific point mutation.
-
-    Verifies the wild-type residue at `position` actually matches `wt_residue` before
-    substituting, rather than trusting the caller's numbering -- a real, structure-derived
-    sequence can silently disagree with a hand-transcribed literature position (isoform
-    differences, off-by-one errors, stale annotations), and this is the one check that catches
-    that class of mistake outright rather than producing a subtly wrong peptide.
+    vaccine antigen around a specific point mutation. Verifies the wild-type residue at `position`
+    actually matches `wt_residue` before substituting, rather than trusting the caller's numbering
+    -- a real, structure-derived sequence can silently disagree with a hand-transcribed literature
+    position (isoform differences, off-by-one errors, stale annotations), and this is the one
+    check that catches that class of mistake outright rather than producing a subtly wrong
+    peptide.
     """
     seq = track.set_index("residue_number")["residue_type"]
     observed = seq.get(position)
@@ -177,18 +174,12 @@ def extract_mutant_peptide(track: pd.DataFrame, position: int, wt_residue: str, 
 def contact_number_burial(track: pd.DataFrame, radius: float = 10.0) -> pd.DataFrame:
     """CA-CA contact-number burial estimate: for each residue, count how many other residues'
     alpha-carbons fall within `radius` angstroms. A densely surrounded residue (high count) is
-    packed into the protein core; a sparsely surrounded one (low count) has open space on at
-    least one side and is more likely solvent-exposed.
-
-    This is a coarse proxy for true solvent-accessible surface area (SASA), not a replacement for
-    it: a real Shrake-Rupley SASA calculation needs every atom's coordinates and van der Waals
-    radius, but `read_plddt_track` (this module's only structure parser) reads alpha-carbons
-    only -- the AlphaFold mmCIF files it's built for carry full atomic detail, but no side-chain
-    atoms are parsed out. Contact number from CA coordinates alone is a real, if coarse, burial
-    signal used for exactly this kind of ranking when full atomic detail isn't available, not
-    something invented for this module. `radius=10.0` is a standard order-of-magnitude choice for
-    CA-based contact counting, not fit to any specific protein -- treat exposure comparisons as
-    relative ranks within one structure, not as calibrated absolute solvent-accessibility numbers.
+    packed into the protein core; a sparsely surrounded one (low count) has open space on at least
+    one side and is more likely solvent-exposed. This is a coarse proxy for true
+    solvent-accessible surface area (SASA), not a replacement for it: a real Shrake-Rupley SASA
+    calculation needs every atom's coordinates and van der Waals radius, but `read_plddt_track`
+    (this module's only structure parser) reads alpha-carbons only -- the AlphaFold mmCIF files
+    it's built for carry full atomic detail, but no side-chain atoms are parsed out.
     """
     coords = track[["x", "y", "z"]].to_numpy()
     dist = np.sqrt(((coords[:, None, :] - coords[None, :, :]) ** 2).sum(-1))
@@ -200,16 +191,11 @@ def contact_number_burial(track: pd.DataFrame, radius: float = 10.0) -> pd.DataF
 
 def find_exposed_linear_epitopes(track_with_contact: pd.DataFrame, window: int = 9,
                                  top_n: int = 3) -> pd.DataFrame:
-    """Slide a `window`-residue frame across the sequence and rank windows by mean contact
-    number (ascending -- least-packed first) to surface candidate linear B-cell epitopes: a
-    contiguous, solvent-exposed surface loop is a plausible antibody target, unlike an isolated
-    exposed residue or a buried stretch no circulating antibody could reach regardless of how
-    immunogenic the raw sequence looks. Requires `contact_number_burial`'s output.
-
-    Returns the top `top_n` non-overlapping windows (each starting at least `window` residues
-    from the previous one, so results aren't near-duplicates of the same loop), ordered most-
-    exposed first. This ranks *within* one structure; it says nothing about immunogenicity,
-    antibody titer, or in vivo efficacy -- no structural tool can predict those.
+    """Slide a `window`-residue frame across the sequence and rank windows by mean contact number
+    (ascending -- least-packed first) to surface candidate linear B-cell epitopes: a contiguous,
+    solvent-exposed surface loop is a plausible antibody target, unlike an isolated exposed
+    residue or a buried stretch no circulating antibody could reach regardless of how immunogenic
+    the raw sequence looks.
     """
     track_with_contact = track_with_contact.sort_values("residue_number").reset_index(drop=True)
     n = len(track_with_contact)
@@ -246,12 +232,10 @@ def confidence_band(plddt: float) -> str:
 
 
 def map_variants(track: pd.DataFrame, variants: pd.DataFrame, flank: int = 5) -> pd.DataFrame:
-    """Join variant residue positions onto a pLDDT track and summarize local confidence.
-
-    `variants` must carry a `protein_position` column using the same 1-based UniProt residue
-    numbering as `track.residue_number` (the caller is responsible for that correspondence;
-    this does not perform genome-to-protein coordinate liftover). Positions absent from the
-    resolved structure are reported with a null confidence band.
+    """Join variant residue positions onto a pLDDT track and summarize local confidence. `variants`
+    must carry a `protein_position` column using the same 1-based UniProt residue numbering as
+    `track.residue_number` (the caller is responsible for that correspondence; this does not
+    perform genome-to-protein coordinate liftover).
     """
     positions = track.set_index("residue_number")["plddt"]
     rows = []

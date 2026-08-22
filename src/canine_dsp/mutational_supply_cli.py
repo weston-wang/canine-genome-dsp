@@ -32,20 +32,10 @@ def mutational_supply_demo(out: Path, breed: str = "bmd",
                            trials: int = 400, preexisting_prob: float = 0.30,
                            seed: int = 7) -> None:
     """Tests the mutational-supply argument in the engine instead of asserting it, and decomposes it.
-
-    The argument (see `mutational_supply`): a low-mutation-burden tumor supplies less raw material for
-    resistance, which in this engine's terms means a lower `seeding_rates` AND a lower
-    `preexisting_prob`, predicting better durability -- without claiming fewer distinct mechanisms.
-
-    Three things get checked, in increasing order of how much they change the reading:
-
-      1. THE SWEEP -- durable response across `TMB_RATIO_SWEEP`, since canine HS burden is unmeasured.
-      2. THE ANALYTIC SHORTCUT'S VALIDITY -- `scale_preexisting_prob` predicts durable response as
-         simply `1 - p`. That is only legitimate because the two N=1 arms are saturated near 1.0 and
-         0.0; it is checked against the Monte Carlo rather than assumed.
-      3. THE DECOMPOSITION, which is the actual finding -- scaling each of the two parameters
-         separately shows the benefit is almost entirely `preexisting_prob` and almost not at all the
-         acquired seeding rate. The argument is right for a narrower reason than it first appears.
+    The argument (see `mutational_supply`): a low-mutation-burden tumor supplies less raw material
+    for resistance, which in this engine's terms means a lower `seeding_rates` AND a lower
+    `preexisting_prob`, predicting better durability -- without claiming fewer distinct
+    mechanisms.
     """
     out.mkdir(parents=True, exist_ok=True)
     model, css, reference_rates, burden, _ = ccnu_combination_scenarios(
@@ -148,43 +138,31 @@ def mutational_supply_demo(out: Path, breed: str = "bmd",
                  "has never been measured for canine histiocytic sarcoma, so it is swept, not "
                  "asserted.",
         "hypothesis": MUTATIONAL_SUPPLY_HYPOTHESIS,
-        "what_was_already_in_the_repo": "mapk_scenarios._PREEXISTING_PROB_CENTRAL's comment already "
-            "used exactly this argument to REJECT recentering against the human melanoma trial "
-            "('melanoma has an unusually high, UV-mutagenesis-driven tumor mutational burden'). It "
-            "was never applied in the positive direction, and both HS and HSA still ship the "
-            "identical _SEEDING_RATE_TOTAL = 0.012 -- i.e. the model as written assumes HS is "
-            "exactly as mutable as a disease now measured to be high-burden.",
+        "what_was_already_in_the_repo": "mapk_scenarios._PREEXISTING_PROB_CENTRAL's comment "
+                                        "already used exactly this argument to REJECT "
+                                        "recentering against the human melanoma trial ('melanoma "
+                                        "has an unusually high, UV-mutagenesis-driven tumor "
+                                        "mutational burden').",
         "finding_1_sweep": sweep_rows,
         "finding_2_analytic_shortcut_is_valid_here": {
             "claim": "durable response ~= 1 - preexisting_prob",
             "max_absolute_error_vs_monte_carlo": float(sweep["analytic_error"].max()),
-            "why_it_works": "The two N=1 arms are saturated -- no-subclone sits near 0.997 durable "
-                           "and with-subclone near 0.000 -- so the cohort average is essentially "
-                           "the mixing weight. Verified against the Monte Carlo rather than assumed; "
-                           "it would NOT hold in a regime where the arms were closer together.",
+            "why_it_works": "The two N=1 arms are saturated -- no-subclone sits near 0.997 "
+                            "durable and with-subclone near 0.000 -- so the cohort average is "
+                            "essentially the mixing weight.",
         },
         "finding_3_decomposition_is_the_real_result": {
             "at_tmb_ratio": decomposition_ratio,
             "arms": decomposition_rows,
             "delta_from_acquired_seeding_rate_alone": seeding_only,
             "delta_from_preexisting_prob_alone": prob_only,
-            "verdict": f"Scaling the acquired seeding rate fourfold lower moves durable response by "
-                      f"{seeding_only:+.3f}; scaling preexisting_prob moves it by {prob_only:+.3f}. "
-                      "The derivation is correct but its leverage is narrower than its usual "
-                      "statement: what matters is whether a resistant clone is ALREADY present at "
-                      "treatment start, not the rate at which new ones arise during treatment.",
-            "why": "Two independent saturation effects. The no-subclone arm is already ~99.7% "
-                  "durable, so a lower acquired rate has almost nothing left to improve -- at these "
-                  "rates acquired resistance rarely establishes within the horizon anyway. And the "
-                  "with-subclone arm is lost to lomustine's 105-day duration cap regardless of any "
-                  "mutation rate.",
+            "verdict": ".",
+            "why": "Two independent saturation effects.",
             "uncomfortable_consequence": "The argument's leverage lands squarely on the one "
-                                        "parameter that single_patient's finding 2 showed no assay "
-                                        "can measure: every clinically available sequencing platform "
-                                        "sits above the entire pre-existing-subclone size prior. So "
-                                        "the most decision-relevant implication of a real HS burden "
-                                        "measurement would be about a quantity that still could not "
-                                        "be checked directly in a given patient.",
+                                         "parameter that single_patient's finding 2 showed no "
+                                         "assay can measure: every clinically available "
+                                         "sequencing platform sits above the entire "
+                                         "pre-existing-subclone size prior.",
         },
         "empirical_status": {
             "measured_canine_burden": CANINE_TMB_BY_TUMOR_TYPE,
@@ -193,15 +171,10 @@ def mutational_supply_demo(out: Path, breed: str = "bmd",
                 "measured high-burden (median >= 1 mutations/Mb). That empirically backs this repo's "
                 "existing rejection of the melanoma comparator in dogs rather than by analogy to "
                 "human UV biology.",
-            "what_this_revises": "The earlier HS-vs-HSA conclusion -- that their different modelled "
-                "outcomes trace to calibration rather than biology -- was right about mechanism "
-                "COUNTS and incomplete about RATES. HSA is measured high-burden, so a genuinely "
-                "higher seeding rate and preexisting_prob for HSA than HS may be biologically "
-                "justified rather than an arbitrary calibration difference.",
-            "what_remains_unmeasured": "Histiocytic sarcoma's own burden. HS is absent from the "
-                "pan-canine TMB cohort, and the single canine HS exome study (n=5) reports "
-                "Sanger-validated mutation counts but no mutations/Mb. Nothing here measures the "
-                "ratio the whole argument turns on.",
+            "what_this_revises": "The earlier HS-vs-HSA conclusion -- that their different "
+                                 "modelled outcomes trace to calibration rather than biology -- "
+                                 "was right about mechanism COUNTS and incomplete about RATES.",
+            "what_remains_unmeasured": "Histiocytic sarcoma's own burden.",
         },
         "benchmark_transfer_guard": refuse_bmd_benchmark_transfer(),
         "not_applied_to_the_shipped_constants": "Neither _SEEDING_RATE_TOTAL nor "

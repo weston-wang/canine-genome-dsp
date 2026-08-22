@@ -1,57 +1,9 @@
 """Bridging real, measurable pharmacology to the `max_kill_2` parameter the resistance model asserts.
-
-WHY THIS MODULE EXISTS
-----------------------
-`mapk_scenarios` reports that a second-drug potency of `max_kill_2 = 0.08` per day reverses every
-resistant clone's growth margin, producing 100% durable response flat to ten years -- and that
-`max_kill_2 = 0.05` does not. Asked whether 0.08 is *achievable*, the model could not answer,
-because `max_kill_2` entered it as a bare asserted number with no link to any quantity anyone can
-measure. That is the gap this module closes: it converts real in vitro and PK observables into
-`max_kill_2`/`ic50_nM_2`, so achievability becomes a question about named, individually-checkable
-inputs instead of an unexaminable constant.
-
-Two independent constraints fall out, and both say 0.08 is out of reach for this drug class.
-
-CONSTRAINT 1: THE CYTOSTATIC CEILING (needs no PK data at all)
---------------------------------------------------------------
-`max_kill` has units of per-day and only means anything relative to a clone's own growth rate. A
-drug that arrests the cell cycle can at most drive *net* growth to zero -- it cannot make a
-population shrink, because arrested cells are still there. So for a purely cytostatic agent:
-
-    max_kill <= growth_rate                    (equality = perfect arrest of every cell)
-
-Exceeding it requires genuine cytotoxicity: net cell loss. CDK4/6 inhibitors are the textbook
-cytostatic class -- they act by holding cells in G1, and the observed phenotype is arrest plus
-senescence, not death. This was checked in canine cells specifically rather than assumed from human
-pharmacology: in canine melanoma lines abemaciclib inhibited proliferation "primarily through G1
-phase arrest and senescence," with cleaved PARP (an apoptosis marker) showing "only weak signal
-intensity, suggesting that apoptosis may not be a major mechanism" (Frontiers Vet Sci 2025,
-PMC12240792). The same paper notes prior palbociclib work also acted "primarily through cytostatic
-growth inhibition."
-
-This module's own resistant clones grow at 0.050-0.058/day. So `max_kill_2 = 0.08` asks a
-cytostatic drug class to kill faster than the cells divide -- above the mechanistic ceiling for
-every clone, by 38-60%. No dose achieves that, because it is not a dosing question.
-
-CONSTRAINT 2: REAL CANINE POTENCY IS 9-31x WEAKER THAN ASSUMED
---------------------------------------------------------------
-Separately and independently: `CDK46_ILLUSTRATIVE_IC50_NM = 100.0` was always labeled illustrative.
-The real measured value in canine cells is 910-3090 nM (abemaciclib across five canine melanoma
-lines, same paper) -- 9 to 31 times less potent. And `CDK46_ILLUSTRATIVE_CSS_NM = 500.0` was set as
-a nominal 5x margin *over the assumed IC50*; against the real IC50 range, 500 nM sits at or below
-the IC50, so the drug would be operating well short of saturation. `saturation_fraction` below
-quantifies how much of even a permissible `max_kill` is actually realized at a given exposure --
-and `required_max_kill` shows that operating below saturation *raises* the max_kill you would need,
-compounding constraint 1 rather than offsetting it.
-
-WHAT IS REAL HERE VS. ASSUMED
------------------------------
-Real and cited: the canine abemaciclib IC50 range and its cytostatic mechanism; palbociclib's dog
-oral bioavailability range; the two molecular weights (standard reference values). Assumed, and
-exposed as parameters rather than baked in: canine clearance and dosing interval for any specific
-CDK4/6 inhibitor (no canine oncology dosing trial exists for one), unbound fraction in dog plasma
-(reported qualitatively as "moderate", never as a number), and brain penetration for this class.
-Nothing here is fitted to an outcome.
+WHY THIS MODULE EXISTS ---------------------- `mapk_scenarios` reports that a second-drug potency
+of `max_kill_2 = 0.08` per day reverses every resistant clone's growth margin, producing 100%
+durable response flat to ten years -- and that `max_kill_2 = 0.05` does not. Asked whether 0.08 is
+*achievable*, the model could not answer, because `max_kill_2` entered it as a bare asserted
+number with no link to any quantity anyone can measure. See docs/HS_MAPK_RESISTANCE.md.
 """
 
 from dataclasses import dataclass
@@ -75,8 +27,7 @@ CDK46_CANINE_POTENCY = {
                 "autophagic flux rather than cell death",
     "mechanism_class": CYTOSTATIC,
     "caveat": "Canine melanoma, not canine histiocytic sarcoma -- no CDK4/6 inhibitor has been "
-             "tested against any canine HS cell line. This is the closest real canine potency "
-             "measurement available for the class, not a measurement in the disease being modeled.",
+              "tested against any canine HS cell line.",
 }
 
 CCNU_CANINE_HS = {
@@ -93,13 +44,10 @@ CCNU_CANINE_HS = {
     "blood_brain_barrier": "highly lipophilic small nitrosourea; CNS-penetrant by design, which is "
                           "the property that makes it relevant to primary CNS HS where the MEK "
                           "inhibitor reaches only ~15% of plasma concentration",
-    "why_this_matters_here": "This is the one second-agent candidate with real efficacy data in the "
-                            "actual modeled disease and species. It is also cytotoxic, so the "
-                            "cytostatic ceiling that rules out a CDK4/6 inhibitor does not apply -- "
-                            "max_kill may legitimately exceed a clone's growth rate.",
-    "caveat": "No dose-response IC50 has been measured in any canine HS cell line, so translating "
-             "the 46% response rate into a per-day max_kill remains an assumption. What the real "
-             "data changes is which constraints bind, not that the kill rate became measured.",
+    "why_this_matters_here": "This is the one second-agent candidate with real efficacy data in "
+                             "the actual modeled disease and species.",
+    "caveat": "No dose-response IC50 has been measured in any canine HS cell line, so "
+              "translating the 46% response rate into a per-day max_kill remains an assumption.",
 }
 
 # The constraint that replaces the cytostatic ceiling for this agent. Lomustine's dose-limiting
@@ -130,21 +78,17 @@ PALBOCICLIB_DOG_PK = {
     "volume_of_distribution": "large",
     "plasma_protein_binding": "moderate in mouse, rat, dog and human plasma (never given as a "
                              "numeric unbound fraction)",
-    "caveat": "These come from tox/PK species work supporting the human program, not from a canine "
-             "oncology dosing study. No canine dose, schedule, or achieved steady-state "
-             "concentration for any CDK4/6 inhibitor was found.",
+    "caveat": "These come from tox/PK species work supporting the human program, not from a "
+              "canine oncology dosing study.",
 }
 
 
 @dataclass(frozen=True)
 class DrugPotency:
     """A second drug described in *measurable* terms rather than as an asserted kill rate.
-
     `emax_fraction_of_growth` is the maximal effect expressed as a multiple of the target clone's
     own growth rate -- the natural unit, because that is what decides whether the drug can only
-    slow a clone (<1), exactly halt it (==1), or shrink it (>1). Keeping Emax and IC50 separate
-    matters: they are different pharmacological quantities, and conflating them is what let a
-    single `max_kill_2` number stand in for both.
+    slow a clone (<1), exactly halt it (==1), or shrink it (>1).
     """
     name: str
     ic50_nM: float
@@ -197,15 +141,10 @@ def saturation_fraction(concentration_nM: float, ic50_nM: float, hill: float = 1
 def required_max_kill(margin_without_second_drug: float, concentration_nM: float,
                       ic50_nM: float, hill: float = 1.5) -> float:
     """`max_kill` a second drug needs so a clone's net growth margin reaches zero at this exposure.
-
-    Inverts the kill term: the drug must supply `margin` of kill, but only delivers
-    `max_kill * saturation_fraction`, so the requirement inflates by 1/saturation_fraction. Returns
-    `inf` when the exposure is effectively zero, and 0.0 when the clone is already suppressed
-    without any second drug.
-
-    The practical consequence: being below saturation does not merely waste potency, it *raises the
-    Emax you would need* -- so a weaker-than-assumed IC50 and a demanding max_kill compound rather
-    than trade off.
+    Inverts the kill term: the drug must supply `margin` of kill, but only delivers `max_kill *
+    saturation_fraction`, so the requirement inflates by 1/saturation_fraction. Returns `inf` when
+    the exposure is effectively zero, and 0.0 when the clone is already suppressed without any
+    second drug.
     """
     if margin_without_second_drug <= 0:
         return 0.0
@@ -216,15 +155,11 @@ def required_max_kill(margin_without_second_drug: float, concentration_nM: float
 def steady_state_css_nM(dose_mg_per_kg: float, dosing_interval_h: float,
                         clearance_L_per_h_per_kg: float, bioavailability: float,
                         molecular_weight: float, fraction_unbound: float = 1.0) -> dict:
-    """Average steady-state concentration for repeated oral dosing, total and unbound.
-
-        Css_avg (mg/L) = F * Dose / (CL * tau)          then  nM = (mg/L) * 1e6 / MW
-
-    `fraction_unbound` scales to the pharmacologically active free concentration -- the number that
-    should be compared against a cell-based IC50, since in vitro potency is measured in largely
-    protein-free medium while plasma is not. Defaults to 1.0 (i.e. *no* correction) so the
-    assumption is never applied silently; for the CDK4/6 class no numeric dog unbound fraction was
-    found, only a qualitative "moderate".
+    """Average steady-state concentration for repeated oral dosing, total and unbound. Css_avg (mg/L)
+    = F * Dose / (CL * tau) then nM = (mg/L) * 1e6 / MW `fraction_unbound` scales to the
+    pharmacologically active free concentration -- the number that should be compared against a
+    cell-based IC50, since in vitro potency is measured in largely protein-free medium while
+    plasma is not.
     """
     for name, value in (("dose_mg_per_kg", dose_mg_per_kg), ("dosing_interval_h", dosing_interval_h),
                         ("clearance_L_per_h_per_kg", clearance_L_per_h_per_kg),
@@ -242,13 +177,10 @@ def steady_state_css_nM(dose_mg_per_kg: float, dosing_interval_h: float,
 def achievability_report(growth_rates: np.ndarray, margins_without_second_drug: np.ndarray,
                          potency: DrugPotency, concentration_nM: float,
                          clone_names: list[str]) -> dict:
-    """Can this drug, at this exposure, reverse each clone -- and if not, what would it take?
-
-    Reports per clone: the cytostatic ceiling, the `max_kill` this drug can actually supply, the
+    """Can this drug, at this exposure, reverse each clone -- and if not, what would it take? Reports
+    per clone: the cytostatic ceiling, the `max_kill` this drug can actually supply, the
     `max_kill` required at this exposure, and whether the requirement clears both the drug's own
-    Emax and the mechanistic ceiling. Separating "not potent enough" from "above the ceiling for
-    this mechanism" is the point -- the first is a dosing/medicinal-chemistry problem, the second
-    cannot be fixed by either.
+    Emax and the mechanistic ceiling.
     """
     growth_rates = np.asarray(growth_rates, dtype=float)
     margins = np.asarray(margins_without_second_drug, dtype=float)
@@ -287,17 +219,11 @@ def achievability_report(growth_rates: np.ndarray, margins_without_second_drug: 
 
 def cumulative_dose_limited_days(dose_per_cycle_mg_per_m2: float, cycle_interval_days: float,
                                  cumulative_cap_mg_per_m2: float) -> dict:
-    """How many days of exposure a cumulative-toxicity-capped cytotoxic can actually deliver.
-
-    A genuinely cytotoxic second agent escapes the cytostatic ceiling (`cytostatic_ceiling`) but
+    """How many days of exposure a cumulative-toxicity-capped cytotoxic can actually deliver. A
+    genuinely cytotoxic second agent escapes the cytostatic ceiling (`cytostatic_ceiling`) but
     generally acquires a different hard limit in exchange: total lifetime dose. This converts that
-    cap into the quantity the resistance engine consumes -- `css_reference_2_duration_days` -- so the
-    trade is modeled rather than assumed away.
-
-    The returned `exposure_days` counts through the end of the last cycle's interval, since the drug
-    is still present and acting during the interval following its final administration. It is a
-    ceiling on treatment duration, not a prediction of tolerance: an individual patient may stop
-    earlier for myelosuppression, which this does not model.
+    cap into the quantity the resistance engine consumes -- `css_reference_2_duration_days` -- so
+    the trade is modeled rather than assumed away.
     """
     for name, value in (("dose_per_cycle_mg_per_m2", dose_per_cycle_mg_per_m2),
                         ("cycle_interval_days", cycle_interval_days),
@@ -316,11 +242,10 @@ def cumulative_dose_limited_days(dose_per_cycle_mg_per_m2: float, cycle_interval
 def feasibility_frontier(margin: float, ic50_values_nM: np.ndarray,
                          concentration_values_nM: np.ndarray, hill: float = 1.5) -> np.ndarray:
     """`max_kill` required to reverse a clone of the given margin, over an (IC50 x exposure) grid.
-
     Sweeps the two quantities a real experiment would measure, instead of asserting either. Read
-    against a mechanistic ceiling: grid cells whose requirement exceeds the clone's growth rate are
-    unreachable by a cytostatic agent at any dose, which is a qualitatively different kind of "no"
-    than a cell that merely needs a more potent molecule.
+    against a mechanistic ceiling: grid cells whose requirement exceeds the clone's growth rate
+    are unreachable by a cytostatic agent at any dose, which is a qualitatively different kind of
+    "no" than a cell that merely needs a more potent molecule.
     """
     ic50_values_nM = np.asarray(ic50_values_nM, dtype=float)
     concentration_values_nM = np.asarray(concentration_values_nM, dtype=float)

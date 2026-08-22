@@ -46,10 +46,6 @@ def hsa_resistance_demo(out: Path, trials: int = 300, horizon_days: int = 730, s
     discipline `mapk_cli.mapk_resistance_demo` uses for histiocytic sarcoma: whether a resistant
     subclone already exists at treatment start has no HSA-specific source either, so a single
     asserted value would mostly reflect that choice, not a finding.
-
-    See `hsa_scenarios` module docstring for why this models the PIK3CA/PTEN-driven subtype
-    specifically (not HSA generically), and for why the reference concentration is illustrative
-    rather than rapamycin's real trough concentration paired against a different drug's real IC50.
     """
     out.mkdir(parents=True, exist_ok=True)
     model, css_reference, seeding_rates, provenance = dog_hsa_preset()
@@ -110,19 +106,11 @@ def hsa_resistance_demo(out: Path, trials: int = 300, horizon_days: int = 730, s
         "hsa_rapamycin_real_world_benchmark": HSA_RAPAMYCIN_BENCHMARK,
         "hsa_standard_of_care_benchmark": HSA_STANDARD_OF_CARE_BENCHMARK,
         "human_benchmark_comparison": (
-            f"This scenario's own median_time_to_progression_days among progressors ranges "
-            f"{min(progressor_medians):.0f}-{max(progressor_medians):.0f} days across the "
-            f"preexisting_prob values swept, versus real median survival differences of "
-            "75-79 days (rapamycin vs. not, in the TP53- and PIK3CA-mutant FidoCure subgroups -- "
-            "see hsa_rapamycin_real_world_benchmark) and a real standard-of-care range of "
-            "48 days (surgery alone) to ~120-180 days (surgery+doxorubicin, see "
-            "hsa_standard_of_care_benchmark). These aren't directly comparable endpoints "
-            "(this module's median_time_to_progression_days is RECIST-style progression from "
-            "nadir in a synthetic model; the real benchmarks are overall survival, mix "
-            "unstandardized concurrent treatments, and are not restricted to any driver "
-            "subtype the same way this scenario is) -- read as scale, not agreement or "
-            "disagreement, the same caveat MAPK_INHIBITOR_HUMAN_BENCHMARK carries in the "
-            "histiocytic-sarcoma module."
+            "days across the preexisting_prob values swept, versus real median survival "
+            "differences of 75-79 days (rapamycin vs. not, in the TP53- and PIK3CA-mutant "
+            "FidoCure subgroups -- see hsa_rapamycin_real_world_benchmark) and a real "
+            "standard-of-care range of 48 days (surgery alone) to ~120-180 days "
+            "(surgery+doxorubicin, see hsa_standard_of_care_benchmark)."
             if progressor_medians else
             "No trial in this run had any progressor to compare against the real benchmarks."
         ),
@@ -147,11 +135,8 @@ def hsa_resistance_demo(out: Path, trials: int = 300, horizon_days: int = 730, s
         ],
         "warning": (
             "Synthetic Monte Carlo exploration of plausible escape dynamics for one molecularly "
-            "defined HSA subtype; only sensitive_clone_ic50_nM under provenance."
-            "calibrated_from_data is anchored to a published measurement. Not a validated "
-            "predictive or clinical model. The real rapamycin PK/PD and FidoCure survival "
-            "numbers are reported for scale, not fit into this scenario's own parameters -- see "
-            "human_benchmark_comparison."
+            "defined HSA subtype; only sensitive_clone_ic50_nM under "
+            "provenance.calibrated_from_data is anchored to a published measurement."
         ),
     }
     (out / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")
@@ -163,12 +148,6 @@ def hsa_combination_control_demo(out: Path, trials: int = 300, horizon_days: int
                                  seed: int = 7) -> None:
     """PI3K/mTOR inhibitor vs. eBAT vs. their combination, mirroring
     `mapk_cli.combination_control_demo`'s side-by-side monotherapy/combination comparison.
-
-    eBAT has no real multi-dose-level response curve (see `HSA_EBAT_TRIAL`), so its potency is
-    swept across an illustrative range the same way `mapk_scenarios.CDK46_MAX_KILL_SWEEP` sweeps
-    histiocytic sarcoma's own real-but-unquantified second agent. `ebat_exposure_duration_days`
-    (default `HSA_EBAT_EXPOSURE_DURATION_DAYS`) caps eBAT's kill pressure to a front-loaded window
-    rather than the whole horizon -- see `hsa_durability_horizon_demo` for the rationale.
     """
     out.mkdir(parents=True, exist_ok=True)
     regimens = [("combination", True), ("ebat_monotherapy", False)]
@@ -237,23 +216,10 @@ def hsa_vaccine_followon_demo(out: Path, ebat_max_kill: float = 0.0, inhibitor_a
                               preexisting_prob: float = _PREEXISTING_PROB_CENTRAL,
                               ebat_exposure_duration_days: int | None = HSA_EBAT_EXPOSURE_DURATION_DAYS,
                               seed: int = 7) -> None:
-    """Does layering a cancer vaccine on top of PI3K/mTOR-inhibitor (+/- eBAT) therapy close the
-    gap left by drug resistance alone, the same question `mapk_cli.vaccine_followon_demo` asks for
+    """Does layering a cancer vaccine on top of PI3K/mTOR-inhibitor (+/- eBAT) therapy close the gap
+    left by drug resistance alone, the same question `mapk_cli.vaccine_followon_demo` asks for
     histiocytic sarcoma? `ebat_max_kill=0.0` (the default) tests inhibitor+vaccine only, with no
     eBAT contribution -- pass a nonzero value to test the full three-way combination instead.
-    `inhibitor_active=False` tests vaccine (+/- eBAT) with no PI3K/mTOR inhibitor at all -- the
-    combination actually closest to how the four real HSA vaccine trials were tested (surgery
-    +/- doxorubicin-based chemo, never with a PI3K/mTOR inhibitor).
-
-    Real HSA vaccines don't target this scenario's driver mutation (PIK3CA/PTEN) at all -- see
-    `hsa_scenarios` module docstring for the real trials (ERstrePs, eVim, autologous whole-cell,
-    a real vaccine that failed on a key readout, and one still-enrolling trial) and why targeting
-    a genotype-agnostic antigen instead makes the antigen-persistence argument more secure here,
-    not less.
-
-    `ebat_exposure_duration_days` (default `HSA_EBAT_EXPOSURE_DURATION_DAYS`) caps eBAT's kill
-    pressure to a front-loaded window rather than the whole horizon -- see
-    `hsa_durability_horizon_demo` for the rationale.
     """
     out.mkdir(parents=True, exist_ok=True)
     scenarios = hsa_vaccine_followon_scenarios(ebat_max_kill, inhibitor_active, HSA_VACCINE_MAX_KILL_SWEEP)
@@ -341,19 +307,10 @@ def hsa_combination_search_demo(out: Path, trials: int = 300, horizon_days: int 
                                 preexisting_prob: float = _PREEXISTING_PROB_CENTRAL,
                                 ebat_exposure_duration_days: int | None = HSA_EBAT_EXPOSURE_DURATION_DAYS,
                                 seed: int = 7) -> None:
-    """Searches combination space directly rather than assuming which pairing wins: a full grid
-    over eBAT potency x vaccine potency, inhibitor always present as the base -- reports which
+    """Searches combination space directly rather than assuming which pairing wins: a full grid over
+    eBAT potency x vaccine potency, inhibitor always present as the base -- reports which
     combinations reach durable response and which don't, plus the eBAT-monotherapy (no inhibitor)
     comparison point, so "does the inhibitor matter at all" is also answered rather than assumed.
-
-    This exists because it's easy to build one combination, declare it good enough, and never
-    check whether a simpler alternative does just as well, or whether a piece assumed necessary
-    actually is -- exactly the check that found histiocytic sarcoma's drug+vaccine (no CDK4/6i)
-    alternative performed almost as well as the full three-drug combination there.
-
-    `ebat_exposure_duration_days` (default `HSA_EBAT_EXPOSURE_DURATION_DAYS`) caps eBAT's kill
-    pressure to a front-loaded window rather than the whole horizon -- see
-    `hsa_durability_horizon_demo` for the rationale.
     """
     out.mkdir(parents=True, exist_ok=True)
     rows = {}
@@ -416,15 +373,7 @@ def hsa_combination_search_demo(out: Path, trials: int = 300, horizon_days: int 
         "ebat_monotherapy_no_inhibitor": ebat_alone_durable,
         "minimal_combinations_reaching_threshold": minimal_combinations,
         "interpretation": (
-            f"At >= {durable_threshold:.0%} durable response ({horizon_days}-day horizon, "
-            f"inhibitor always present): {minimal_combinations_display}. Compare against "
-            "inhibitor+eBAT alone (vaccine_max_kill=0 rows above) and inhibitor+vaccine alone "
-            "(ebat_max_kill=0 rows) to see whether either single addition suffices, or whether "
-            "both are needed -- "
-            "read the grid, not just this summary line, since the minimal-combination search "
-            "only reports the *first* vaccine potency that clears the threshold per eBAT level, "
-            "not the full shape. ebat_monotherapy_no_inhibitor answers a different question: "
-            "does the PI3K/mTOR inhibitor matter at all, or could eBAT alone substitute for it."
+            "."
         ),
         "unverified_extrapolations": [
             ("this grid answers 'which combination closes this scenario's own modeled "
@@ -439,9 +388,7 @@ def hsa_combination_search_demo(out: Path, trials: int = 300, horizon_days: int 
         "warning": (
             "A search over this module's own parameter space, not a search over real treatment "
             "options -- it can only ever be as good as the illustrative growth/kill/seeding-rate "
-            "constants underneath it. Read 'combination X reaches 95% durable response here' as "
-            "'given everything else this module assumes, X closes the gap in this model,' not "
-            "as a treatment recommendation."
+            "constants underneath it."
         ),
     }
     (out / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")
@@ -450,15 +397,10 @@ def hsa_combination_search_demo(out: Path, trials: int = 300, horizon_days: int 
 def hsa_receptor_conservation_demo(out: Path,
                                    genes: list[str] = list(HSA_RECEPTOR_CONSERVATION_TARGETS)
                                    ) -> None:
-    """Checks whether the real drugs' molecular targets are conserved enough between human and
-    dog for a human precedent to plausibly transfer, using genomics/structure directly rather
-    than depending on clinical-trial outcome data (which the eBAT comparison found to be
-    confounded by a real, unmodeled mechanism). See `HSA_RECEPTOR_CONSERVATION_TARGETS` and the
-    `hsa_scenarios` module docstring for what each gene means and what was found.
-
-    Requires network access (UniProt, AlphaFold DB). Genes with no UniProt entry for either
-    species are reported as `"found": false` rather than raising -- a real data gap (confirmed
-    live, e.g. PLAUR has no curated dog entry at all) is a finding, not an error to hide.
+    """Checks whether the real drugs' molecular targets are conserved enough between human and dog
+    for a human precedent to plausibly transfer, using genomics/structure directly rather than
+    depending on clinical-trial outcome data (which the eBAT comparison found to be confounded by
+    a real, unmodeled mechanism).
     """
     out.mkdir(parents=True, exist_ok=True)
     rows = []
@@ -508,15 +450,6 @@ def hsa_vaccine_antigen_design_demo(out: Path, gene: str = "VIM", window: int = 
     circulating antibody, using the dog structure already fetched for `hsa_receptor_conservation_
     demo` (default gene VIM -- eVim's real antigen, the one HSA vaccine confirmed to work through
     an antibody, not a T-cell, mechanism).
-
-    This does not, and cannot, produce a `vaccine_max_kill` number: no structural tool predicts
-    immunogenicity, antibody titer, or in vivo efficacy from a folded structure alone. What it
-    can do is answer a narrower, checkable question -- is there a real, contiguous, solvent-
-    exposed loop on the actual dog protein to target at all, as opposed to only buried residues a
-    real antibody could never reach -- and whether that loop is conserved with the human ortholog
-    (relevant if a human vaccine's exact epitope is meant to transfer to dogs) or dog-specific.
-
-    Requires network access (UniProt, AlphaFold DB).
     """
     out.mkdir(parents=True, exist_ok=True)
     dog_accession = resolve_uniprot_accession(gene, DOG_TAXID)
@@ -570,9 +503,8 @@ def hsa_vaccine_antigen_design_demo(out: Path, gene: str = "VIM", window: int = 
             "vaccine_max_kill remains an illustrative, swept potency number regardless of which "
             "epitope a real vaccine construct targets",
         ],
-        "warning": "Structural plausibility for antibody accessibility, not a vaccine design tool "
-                  "and not an efficacy prediction. AlphaFold predicts structure from a known "
-                  "sequence; it does not generate or invent new antigen sequences.",
+        "warning": "Structural plausibility for antibody accessibility, not a vaccine design "
+                   "tool and not an efficacy prediction.",
     }
     (out / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")
 
@@ -585,14 +517,7 @@ def hsa_combination_toxicity_demo(out: Path, ebat_max_kill: float = 0.05, trials
     """Stress-tests the inhibitor+eBAT combination against realistic combined-dosing de-rating,
     mirroring `mapk_cli.combination_toxicity_demo` -- but grounded in real, documented, same-
     organ-system (hepatic/GI) toxicity for both drugs specifically, not an extrapolated
-    mechanism-class argument. See `HSA_TOXICITY_EXTRAPOLATION_NOTE`.
-
-    Fixes eBAT potency at `ebat_max_kill` (default 0.05, the threshold that reached durable
-    response in `hsa_combination_search_demo`) and sweeps `HSA_COMBINED_EXPOSURE_DERATING`,
-    applying it multiplicatively to both the inhibitor and eBAT reference concentrations.
-    `ebat_exposure_duration_days` (default `HSA_EBAT_EXPOSURE_DURATION_DAYS`) caps eBAT's kill
-    pressure to a front-loaded window rather than the whole horizon -- see
-    `hsa_durability_horizon_demo` for the rationale.
+    mechanism-class argument.
     """
     out.mkdir(parents=True, exist_ok=True)
     scenarios = hsa_combination_scenarios(True, [ebat_max_kill])
@@ -654,22 +579,11 @@ def hsa_durability_horizon_demo(out: Path, ebat_max_kill: float = 0.05, vaccine_
                                 preexisting_prob: float = _PREEXISTING_PROB_CENTRAL,
                                 ebat_exposure_duration_days: int | None = HSA_EBAT_EXPOSURE_DURATION_DAYS,
                                 seed: int = 7) -> None:
-    """How long does "durable response" actually mean for a given HSA combination, the same
-    question `mapk_cli.durability_horizon_demo` asks for histiocytic sarcoma? No HSA demo had
-    ever been run past the default 730-day horizon before this was added -- every "durable
-    response" figure quoted for HSA up to this point meant only "no relapse detected within 2
-    years," unverified at longer horizons.
-
-    Sweeps `HSA_DURABILITY_HORIZON_SWEEP` (1, 2, 5, 10 years) at a fixed `(ebat_max_kill,
-    vaccine_max_kill)` combination, reusing `hsa_vaccine_followon_scenarios` (vaccine_max_kill=0.0
-    still runs the 5-clone vaccine model with a harmless immune-escape clone, so eBAT-only and
-    vaccine-only regimens can both be tested through the same code path as the full combination).
-
-    `ebat_exposure_duration_days` (default `HSA_EBAT_EXPOSURE_DURATION_DAYS`) caps eBAT's kill
-    pressure to a front-loaded window instead of holding it constant for the whole horizon -- the
-    real trial gave eBAT as a single IV cycle, not chronic dosing. Pass `None` to recover the
-    original always-on assumption (e.g. to reproduce earlier results or explore a hypothetical
-    repeated-cycles regimen manually).
+    """How long does "durable response" actually mean for a given HSA combination, the same question
+    `mapk_cli.durability_horizon_demo` asks for histiocytic sarcoma? No HSA demo had ever been run
+    past the default 730-day horizon before this was added -- every "durable response" figure
+    quoted for HSA up to this point meant only "no relapse detected within 2 years," unverified at
+    longer horizons.
     """
     out.mkdir(parents=True, exist_ok=True)
     scenarios = hsa_vaccine_followon_scenarios(ebat_max_kill, inhibitor_active, [vaccine_max_kill])

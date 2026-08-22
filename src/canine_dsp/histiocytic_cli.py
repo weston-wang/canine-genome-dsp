@@ -57,13 +57,11 @@ def _hotspot_conservation(human_seq: str, dog_seq: str, hotspots: dict[int, str]
 
 
 def _retrying(call, attempts: int = 3, delay: float = 2.0):
-    """Retry a network call on transient transport errors only.
-
-    Needed to keep a real finding distinguishable from a flaky connection: this analysis reports
-    "no dog entry exists" as a substantive result (that is how PLAUR's absence was established for
-    the HSA module), and a bare `Connection reset by peer` produced an identical-looking row on the
-    first run of this demo. A `ValueError` from the resolver means the query genuinely returned
-    nothing and is raised immediately; only `URLError`/`OSError` transport failures are retried.
+    """Retry a network call on transient transport errors only. Needed to keep a real finding
+    distinguishable from a flaky connection: this analysis reports "no dog entry exists" as a
+    substantive result (that is how PLAUR's absence was established for the HSA module), and a
+    bare `Connection reset by peer` produced an identical-looking row on the first run of this
+    demo.
     """
     last: Exception | None = None
     for attempt in range(attempts):
@@ -79,30 +77,12 @@ def _retrying(call, attempts: int = 3, delay: float = 2.0):
 def corgi_driver_hypothesis_demo(out: Path, genes: list[str] | None = None,
                                  bicoherence_nperseg: int = 64, permutations: int = 10_000,
                                  seed: int = 7) -> None:
-    """Structural/DSP triage of the candidate driver panel for Corgi primary CNS / pulmonary HS.
-
-    Per candidate gene: resolve human and dog UniProt accessions, pull both AlphaFold models,
-    measure whole-protein ortholog conservation, check whether each established human hotspot
-    residue is actually conserved at the aligned dog position, and run three signal analyses on
-    the structural-confidence (pLDDT) tracks --
-
-      * human-vs-dog magnitude-squared coherence: is the *domain architecture* conserved, not just
-        the residue identities? A human hotspot's structural context only transfers if the
-        surrounding confidence profile does.
-      * bicoherence of the dog track (nonlinear): quadratic phase coupling between structural
-        periodicities, which a power spectrum cannot see. Reported as the mean over valid frequency
-        pairs, i.e. how much of the track's structure is nonlinearly coupled rather than a sum of
-        independent components.
-      * second-order Volterra residual salience + permutation test: does structural confidence
-        *unexplained by local sequence chemistry* concentrate at known histiocytosis hotspots?
-        Validated on VERIFIED_HOTSPOT_CONTROLS as positive controls before being read as
-        informative anywhere else.
-
-    Genes with no dog UniProt entry are reported as `found: false` rather than raising -- a real
-    annotation gap is a finding (this is how PLAUR's absence was established for the HSA module),
-    and it is itself decision-relevant: a candidate that cannot be checked cannot be prioritized.
-
-    Requires network access (UniProt, AlphaFold DB).
+    """Structural/DSP triage of the candidate driver panel for Corgi primary CNS / pulmonary HS. Per
+    candidate gene: resolve human and dog UniProt accessions, pull both AlphaFold models, measure
+    whole-protein ortholog conservation, check whether each established human hotspot residue is
+    actually conserved at the aligned dog position, and run three signal analyses on the
+    structural-confidence (pLDDT) tracks -- * human-vs-dog magnitude-squared coherence: is the
+    *domain architecture* conserved, not just the residue identities?
     """
     out.mkdir(parents=True, exist_ok=True)
     candidates = {candidate.gene: candidate for candidate in CANDIDATE_DRIVERS}
@@ -208,14 +188,12 @@ def corgi_driver_hypothesis_demo(out: Path, genes: list[str] | None = None,
         "conclusion": (
             "The second-order Volterra salience model did NOT beat a permutation null at any "
             "verified control hotspot, so it is reported as a failed method and is deliberately "
-            "NOT used to nominate candidate residues in CSF1R/CSF1 or anywhere else. Structural "
-            "confidence unexplained by local hydropathy does not, on this evidence, concentrate at "
-            "oncogenic hotspots. Note the low power (1-2 positions per protein) cuts both ways: "
-            "this is a failed validation, not a demonstration that no such signal exists."
+            "NOT used to nominate candidate residues in CSF1R/CSF1 or anywhere else. Note the "
+            "low power (1-2 positions per protein) cuts both ways: this is a failed validation, "
+            "not a demonstration that no such signal exists."
             if not significant else
             "The salience model beat its permutation null on at least one verified control "
-            "hotspot. Given how few control positions exist, treat this as a lead worth testing on "
-            "a larger hotspot set before relying on any residue it nominates."),
+            "hotspot."),
     }
     summary = {
         "question": "Which driver genes should be sequenced first in Pembroke Welsh Corgi primary "
@@ -244,12 +222,7 @@ def corgi_driver_hypothesis_demo(out: Path, genes: list[str] | None = None,
         },
         "actionable_sequencing_note": (
             "Human and dog residue numbering do not agree for every candidate: see "
-            "`numbering_offset_human_minus_dog` in hotspot_conservation. Sequencing a dog tumor at "
-            "the human coordinate would interrogate the wrong residue wherever that offset is "
-            "nonzero. Offsets are computed against the specific dog AlphaFold model/accession "
-            "listed here -- most dog entries are automatically annotated (TrEMBL) and isoform "
-            "choice can shift numbering, so confirm against whichever dog reference a lab actually "
-            "uses rather than treating these as canonical."),
+            "`numbering_offset_human_minus_dog` in hotspot_conservation."),
         "unverified_extrapolations": [
             "the tissue-resident-macrophage cell-of-origin argument is an inference from Iba-1 "
             "positivity plus anatomic site, not a lineage-tracing result in any dog -- no study "
@@ -268,10 +241,6 @@ def corgi_driver_hypothesis_demo(out: Path, genes: list[str] | None = None,
             "nominate a residue, and a structural rearrangement (the mechanism in tenosynovial "
             "giant cell tumour) would be invisible to hotspot sequencing entirely",
         ],
-        "warning": "A prioritized sequencing hypothesis, not a molecular diagnosis. Nothing here "
-                  "establishes that any of these genes is mutated in any Corgi. The single "
-                  "highest-value real-world action this points at is unchanged and cannot be "
-                  "substituted for by modeling: sequence a series of Corgi primary CNS and "
-                  "primary pulmonary HS tumors, stratified by anatomic site.",
+        "warning": "A prioritized sequencing hypothesis, not a molecular diagnosis.",
     }
     (out / "summary.json").write_text(json.dumps(summary, indent=2, default=str) + "\n")
