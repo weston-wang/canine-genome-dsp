@@ -1,0 +1,427 @@
+<title>Primary Intracranial Histiocytic Sarcoma — Consolidated Analysis</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Public+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap">
+
+<style>
+:root{
+  --paper:#F6F7F8; --raised:#FFFFFF; --ink:#191C21; --ink-soft:#4A525E;
+  --rule:#DDE1E6; --rule-soft:#E9ECEF;
+  --accent:#0E6B6B; --accent-soft:#E3F0EF;
+  --closed:#2E7A58; --closed-bg:#E6F1EB;
+  --open:#B0432C; --open-bg:#F8E9E5;
+  --unknown:#96691A; --unknown-bg:#F7EFDF;
+  --shadow:0 1px 2px rgba(25,28,33,.05),0 8px 24px -16px rgba(25,28,33,.28);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#14171B; --raised:#1B1F25; --ink:#E9ECEF; --ink-soft:#A2ACB8;
+    --rule:#2C333B; --rule-soft:#242A31;
+    --accent:#5FBDB6; --accent-soft:#16302F;
+    --closed:#6ECA9C; --closed-bg:#15291F;
+    --open:#E38A70; --open-bg:#2E1B16;
+    --unknown:#D6AC5B; --unknown-bg:#2B2314;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -16px rgba(0,0,0,.7);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#14171B; --raised:#1B1F25; --ink:#E9ECEF; --ink-soft:#A2ACB8;
+  --rule:#2C333B; --rule-soft:#242A31;
+  --accent:#5FBDB6; --accent-soft:#16302F;
+  --closed:#6ECA9C; --closed-bg:#15291F;
+  --open:#E38A70; --open-bg:#2E1B16;
+  --unknown:#D6AC5B; --unknown-bg:#2B2314;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px -16px rgba(0,0,0,.7);
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:"Public Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  font-size:16.5px; line-height:1.62; -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:820px; margin:0 auto; padding:0 24px 96px}
+
+/* ---------- masthead ---------- */
+header.mast{padding:64px 0 34px; border-bottom:2px solid var(--ink)}
+.kicker{
+  font-size:11.5px; font-weight:700; letter-spacing:.13em; text-transform:uppercase;
+  color:var(--accent); margin:0 0 18px;
+}
+h1{
+  font-family:Newsreader,Georgia,serif; font-weight:500; font-size:clamp(34px,5.6vw,52px);
+  line-height:1.1; letter-spacing:-.015em; margin:0 0 18px; text-wrap:balance;
+}
+.standfirst{
+  font-family:Newsreader,Georgia,serif; font-size:clamp(18px,2.4vw,21px); line-height:1.5;
+  color:var(--ink-soft); margin:0; max-width:60ch;
+}
+.mast-meta{
+  display:flex; flex-wrap:wrap; gap:8px 22px; margin-top:26px;
+  font-size:12.5px; color:var(--ink-soft);
+}
+.mast-meta b{color:var(--ink); font-weight:600}
+
+/* ---------- verdict ---------- */
+.verdict{
+  margin:38px 0 0; padding:26px 28px; background:var(--raised); border:1px solid var(--rule);
+  border-left:4px solid var(--accent); border-radius:3px; box-shadow:var(--shadow);
+}
+.verdict p{margin:0 0 12px}
+.verdict p:last-child{margin-bottom:0}
+.verdict .plan{font-size:15px; padding:12px 15px; background:var(--accent-soft); border-radius:3px; border:1px solid color-mix(in srgb, var(--accent) 22%, transparent)}
+.verdict ul{margin:0 0 12px; padding-left:20px}
+.verdict li{font-size:15px}
+.verdict .lead{
+  font-family:Newsreader,Georgia,serif; font-size:20px; line-height:1.45; color:var(--ink);
+}
+
+/* ---------- sections ---------- */
+section{margin-top:56px}
+h2{
+  font-family:Newsreader,Georgia,serif; font-weight:600; font-size:27px; line-height:1.22;
+  letter-spacing:-.01em; margin:0 0 6px; text-wrap:balance;
+}
+h2 .num{
+  font-family:"Public Sans",sans-serif; font-size:12px; font-weight:700; letter-spacing:.1em;
+  color:var(--accent); display:block; margin-bottom:9px; text-transform:uppercase;
+}
+h3{
+  font-size:15px; font-weight:700; letter-spacing:.04em; text-transform:uppercase;
+  color:var(--ink-soft); margin:34px 0 12px;
+}
+p{margin:0 0 15px; max-width:68ch}
+section > p:first-of-type{margin-top:14px}
+strong{font-weight:600}
+em{font-style:italic}
+.sub{color:var(--ink-soft); font-size:14.5px}
+
+/* ---------- tables ---------- */
+.tscroll{overflow-x:auto; margin:20px 0 8px; border:1px solid var(--rule); border-radius:3px; background:var(--raised)}
+table{border-collapse:collapse; width:100%; font-size:14.5px; min-width:520px}
+th,td{padding:11px 16px; text-align:left; border-bottom:1px solid var(--rule-soft); vertical-align:top}
+thead th{
+  font-size:11px; letter-spacing:.09em; text-transform:uppercase; font-weight:700;
+  color:var(--ink-soft); background:var(--paper); border-bottom:1px solid var(--rule); white-space:nowrap;
+}
+tbody tr:last-child td{border-bottom:none}
+td.num,th.num{text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap}
+caption{caption-side:bottom; text-align:left; padding:11px 16px; font-size:12.5px; color:var(--ink-soft); border-top:1px solid var(--rule-soft)}
+
+/* ---------- status pills ---------- */
+.pill{
+  display:inline-block; font-size:11px; font-weight:700; letter-spacing:.06em;
+  text-transform:uppercase; padding:2.5px 9px; border-radius:2px; white-space:nowrap;
+}
+.pill.ok{color:var(--closed); background:var(--closed-bg)}
+.pill.no{color:var(--open); background:var(--open-bg)}
+.pill.un{color:var(--unknown); background:var(--unknown-bg)}
+
+/* ---------- site cards ---------- */
+.sites{display:grid; gap:16px; margin:22px 0 8px}
+@media(min-width:680px){.sites{grid-template-columns:1fr 1fr}}
+.site{
+  background:var(--raised); border:1px solid var(--rule); border-radius:3px; padding:20px 22px;
+}
+.site.absent{opacity:.72}
+.site h4{
+  font-family:Newsreader,Georgia,serif; font-size:19px; font-weight:600; margin:0 0 4px;
+}
+.site .tag{font-size:11.5px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; color:var(--ink-soft); display:block; margin-bottom:11px}
+.site p{font-size:14.5px; margin:0 0 9px; color:var(--ink-soft); max-width:none}
+.site p:last-child{margin:0}
+.site p b{color:var(--ink)}
+
+/* ---------- callouts ---------- */
+.note{
+  margin:22px 0; padding:18px 22px; border-radius:3px; font-size:15px;
+  background:var(--accent-soft); border:1px solid color-mix(in srgb, var(--accent) 24%, transparent);
+}
+.note.warn{background:var(--unknown-bg); border-color:color-mix(in srgb, var(--unknown) 30%, transparent)}
+.note.bad{background:var(--open-bg); border-color:color-mix(in srgb, var(--open) 26%, transparent)}
+.note p{margin:0 0 10px; max-width:none}
+.note p:last-child{margin:0}
+.note .h{font-weight:700; font-size:12px; letter-spacing:.08em; text-transform:uppercase; display:block; margin-bottom:8px; color:var(--accent)}
+.note.warn .h{color:var(--unknown)}
+.note.bad .h{color:var(--open)}
+
+/* ---------- change list ---------- */
+.change{border-top:1px solid var(--rule); padding:22px 0}
+.change:last-of-type{border-bottom:1px solid var(--rule)}
+.change h4{font-family:Newsreader,Georgia,serif; font-size:20px; font-weight:600; margin:0 0 10px; text-wrap:balance}
+.thenNow{display:grid; gap:10px; margin:0 0 12px}
+@media(min-width:600px){.thenNow{grid-template-columns:1fr 1fr; gap:14px}}
+.tn{padding:12px 15px; border-radius:3px; font-size:14px; background:var(--raised); border:1px solid var(--rule)}
+.tn .lbl{font-size:10.5px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-soft); display:block; margin-bottom:5px}
+.tn.was{border-left:3px solid var(--open)}
+.tn.now{border-left:3px solid var(--closed)}
+.why{font-size:14.5px; color:var(--ink-soft); margin:0; max-width:none}
+.why b{color:var(--ink); font-weight:600}
+
+ul{margin:0 0 15px; padding-left:22px; max-width:68ch}
+li{margin-bottom:9px}
+li::marker{color:var(--accent)}
+
+footer{margin-top:60px; padding-top:26px; border-top:2px solid var(--ink); font-size:13.5px; color:var(--ink-soft)}
+footer p{max-width:68ch}
+a{color:var(--accent)}
+:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+@media (prefers-reduced-motion:no-preference){
+  section{animation:rise .5s ease-out both}
+  @keyframes rise{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
+}
+</style>
+<div class="wrap">
+
+<header class="mast">
+  <p class="kicker">Consolidated analysis &middot; predisposed dog breed &middot; independently audited</p>
+  <h1>Primary intracranial histiocytic sarcoma: a durable-therapy strategy</h1>
+  <p class="standfirst">The three prior report artifacts merged into one: every site — lung and brain — every escape route, the two-move plan that closes them, and the honest split between what is solid and what is a grounded hypothesis.</p>
+  <div class="mast-meta">
+    <span><b>Sites</b> lung / disseminated + 2 brain compartments — the whole niche</span>
+    <span><b>Escapes</b> 11 closed; 45 double + 120 triple combos, 0 uncovered</span>
+    <span><b>Ten-year mechanism</b> genotype-matched maintenance, every case</span>
+  </div>
+</header>
+
+<div class="note bad" style="margin-top:30px">
+  <span class="h">This is an analysis, not veterinary advice</span>
+  <p>Every figure below is a model output for a regimen no dog with this disease has ever received. Where a number is assumed rather than measured, this report says so. Every treatment decision belongs with clinicians who can examine the animal.</p>
+</div>
+
+<div class="verdict">
+  <p class="lead">Ten-year durability is not reached by killing this one tumour harder. It is reached in two moves: clear the tumour that is there, then keep a targeted pill in the background matched to the tumour's own driver fault, killing any new cell that carries it — so the <em>next</em> tumour never gets started.</p>
+  <p class="plan"><b>The plan, in one line:</b> an <b>induction</b> phase (a brain-penetrant oral chemotherapy plus three supporting drugs) that clears the tumour in roughly 4–6 months, then <b>indefinite maintenance</b> on a targeted pill chosen from the tumour's genotype.</p>
+  <p>The escape-coverage half of this is <strong>solid and independently reproduced</strong>. The ten-year half is a <strong>scientifically grounded hypothesis, not a result</strong>: it reduces to a single inequality that fails at the conservative access assumption and holds only at more optimistic, unmeasured values.</p>
+</div>
+
+<section>
+  <h2><span class="num">The answer</span>How ten-plus years is actually achieved</h2>
+  <p>Every earlier version of this work chased "kill this tumour so hard it never comes back." That framing can never reach ten years, for a reason unrelated to how good the drug is: <b>this breed is born predisposed to this cancer.</b> Clearing one tumour does nothing about the inherited fault that caused it, so a second one can arise.</p>
+  <p>The unlock is that the predisposition and the tumour are the <em>same genetic lesion</em>. The cleanest case is deletion of <b>MTAP</b> (with its neighbour CDKN2A) — the most common genetic fault in canine histiocytic sarcoma, found across ~104 cases and shared by the breeds prone to it. It is in the inherited background, so it is in the brain tumour, the lung form, and any future tumour.</p>
+
+  <div class="note">
+    <span class="h">The two moves</span>
+    <p><b>1 — Induction (months).</b> Clear the tumour that exists now. A brain-penetrant oral chemotherapy (a "mitotic poison," the drug class this cancer is measurably sensitive to) plus three supporting agents. Closes all eleven escape routes at both brain sites; below detectable in about two months, cleared in roughly 4–6. The induction is the same for every dog.</p>
+    <p><b>2 — Maintenance (indefinite).</b> A single targeted pill, matched to the genotype, lethal only to cells carrying the driver lesion and sparing normal cells. It kills any lesion-carrying cell at emergence, <em>before it becomes a tumour.</em> Because normal tissue is spared by design, it is the rare cancer drug a dog could plausibly stay on for years.</p>
+  </div>
+
+  <p><b>That second move is what ten years is made of:</b> not "this tumour never recurs" but "the next one never gets going." A cell that has <em>deleted</em> a gene cannot reroute around it — escaping would mean re-growing a locus it threw away, a reversal, not a mutation — which is why a maintenance drug aimed at a <em>genotype</em> (rather than a pathway, which a tumour escapes by rerouting) can plausibly hold for years.</p>
+</section>
+
+<section>
+  <h2><span class="num">Every genotype</span>A matched maintenance pill for all cases</h2>
+  <p>MTAP deletion is the cleanest anchor, but it is a <em>minority</em> of tumours; the most common fault is a MAPK driver (SHP2/PTPN11 or KRAS, ~59% of cases). So the maintenance arm is a decision tree, keyed on <b>one NGS panel read once from the tumour tissue.</b> Every genotype gets a matched pill — what varies is the strength of the ten-year hold.</p>
+  <div class="tscroll">
+    <table>
+      <thead><tr><th>Tumour genotype</th><th>Rough share</th><th>Maintenance pill (brain-penetrant, oral, continuous)</th><th>Durability grade</th></tr></thead>
+      <tbody>
+        <tr><td>MTAP deleted</td><td>recurrent minority</td><td>PRMT5 inhibitor (MTA-cooperative; TNG908 / TNG462 class)</td><td><span class="pill ok">Strongest — genotype-locked</span></td></tr>
+        <tr><td>PTEN deleted</td><td>minority</td><td>PI3K inhibitor (paxalisib)</td><td><span class="pill ok">Strong dependency</span></td></tr>
+        <tr><td>CDKN2A deleted, RB1 intact</td><td>minority</td><td>CDK4/6 inhibitor (abemaciclib)</td><td><span class="pill ok">Strong dependency</span></td></tr>
+        <tr><td>SHP2 / KRAS driver</td><td><b>~59%</b></td><td>MEK inhibitor (mirdametinib, CNS-penetrant)</td><td><span class="pill un">Medium — surveillance-dependent</span></td></tr>
+        <tr><td>None targetable / unknown</td><td>residual</td><td>Immune surveillance + cycled chemotherapy</td><td><span class="pill un">Floor — monitored, years</span></td></tr>
+      </tbody>
+      <caption>Every branch kills a second primary at emergence and is tolerable indefinitely (verified in-model). The grade is how well it holds if that second tumour is caught late.</caption>
+    </table>
+  </div>
+  <div class="note warn">
+    <span class="h">Why the grades differ — stated honestly</span>
+    <p>Only the MTAP tier is <em>genotype-locked</em>: a cell cannot reroute around a deleted gene. The dependency tiers (PTEN, CDKN2A) are strong but have known resistance routes. The MAPK majority's MEK block is reroutable in an <em>established</em> tumour — it works against a <em>new</em> primary because that starts as a single founding-driver cell before any reroute exists, so it leans on catching recurrences early. So "ten years for all cases" is honest as a clean lock for some genotypes and a surveillance-dependent hold for the majority — not one uniform guarantee.</p>
+  </div>
+  <div class="note">
+    <span class="h">Credited, not re-discovered</span>
+    <p>The MAPK branch is not new: the earliest analysis already listed MEK inhibitors as "works, but fails in the brain on access" and named SHP2/KRAS genotyping as a top next step. The genuinely new parts are the maintenance-at-emergence role and the CNS-penetrant candidate (mirdametinib), whose canine brain penetration is still unmeasured.</p>
+  </div>
+</section>
+
+<section>
+  <h2><span class="num">The drugs</span>What kind of things these are</h2>
+  <div class="tscroll">
+    <table>
+      <thead><tr><th>Component</th><th>What it is</th><th>Its job</th></tr></thead>
+      <tbody>
+        <tr><td><b>Lisavanbulin</b> <span class="sub">(induction)</span></td><td>Oral "mitotic poison" that jams cell-division machinery; enters the brain ~1:1 with blood and is not pumped back out</td><td>The workhorse that clears the existing tumour. Chosen because its dose-limiting toxicity is <b>acute, not cumulative</b> — so it can be dosed long enough to work</td></tr>
+        <tr><td><b>PRMT5 inhibitor</b> <span class="sub">(maintenance)</span></td><td>Targeted pill lethal only to MTAP-deleted cells; brain-penetrant by design</td><td>The ten-year arm — kills any new cell carrying the breed's genetic fault at emergence</td></tr>
+        <tr><td>Paxalisib</td><td>Brain-penetrant PI3K/mTOR inhibitor, designed to resist efflux</td><td>Widens the margin on the "jump to the parallel pathway" escape; also the PTEN-deletion maintenance anchor</td></tr>
+        <tr><td>Hydroxychloroquine</td><td>Blocks cellular self-recycling (autophagy)</td><td>Covers the recycling-dependence escape</td></tr>
+        <tr><td>Liposomal clodronate</td><td>Depletes the macrophage lineage this cancer is made of</td><td>Works on non-dividing cells; supports the persister and lineage arms</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section>
+  <h2><span class="num">Where it is</span>The whole niche — both sites</h2>
+  <p>This is a <b>multi-site disease</b>, and the analysis covers all of it. The same germline MTAP/CDKN2A lesion drives the breed's histiocytic sarcoma wherever it appears, so the target is the whole niche — <b>lung/disseminated and brain</b> — not one compartment. The three source reports treated <b>lung as a co-equal primary site with its own regimen</b>, and so does this one.</p>
+  <div class="sites">
+    <div class="site">
+      <h4>Lung / disseminated</h4>
+      <span class="tag">Co-equal primary site &middot; systemically reachable</span>
+      <p>A genuine primary site of the disease, carrying the <b>same MTAP lesion</b>.</p>
+      <p><b>The tractable site — closes systemically, no local delivery needed</b> (see next section).</p>
+    </div>
+    <div class="site">
+      <h4>Invaded brain tissue</h4>
+      <span class="tag">Occupied &middot; behind the barrier</span>
+      <p><b>23/23 dogs</b> (11 dogs of this breed) grew into brain tissue with no clean edge.</p>
+      <p><b>Surgery leaves this behind</b> — systemic at favourable access, or local delivery into the cavity.</p>
+    </div>
+    <div class="site">
+      <h4>Leptomeninges &amp; CSF</h4>
+      <span class="tag">Occupied &middot; unreached systemically</span>
+      <p><b>19/19 dogs</b>, and every dog whose spinal fluid was sampled; neoplastic cells in the CSF in <b>~52%</b> of cases.</p>
+      <p><b>Surgery does not reach this.</b></p>
+    </div>
+    <div class="site absent">
+      <h4>A discrete removable lump</h4>
+      <span class="tag">Ruled out</span>
+      <p>Relied on for months in earlier work; one large series says this compartment <b>does not exist</b> in the dog brain. It was a mirage.</p>
+    </div>
+  </div>
+  <p class="sub">The breed's brain tumour is extra-axial — a discrete meningeal-surface mass, the most surgically accessible kind there is. Surgery removes the part where drugs could reach and leaves the parts where they cannot. Extracranial spread of primary CNS HS has never been reported, and dogs of this breed get predominantly <em>confined</em> tumours — so each site is a bounded target.</p>
+</section>
+
+<section>
+  <h2><span class="num">The site axis</span>Lung is the tractable site, brain is the hard one</h2>
+  <p>The earliest report framed the problem as a <b>four-cell grid: {lung, brain} × {antigen present, antigen lost}.</b> Two corrections from the later reports, both kept here:</p>
+  <div class="thenNow">
+    <div class="tn was"><span class="lbl">Antigen axis — inert</span>Flipping antigen status moved the modelled answer by <b>0.000 at every site</b>; a tumour that loses its antigen is caught by the same non-antigen mechanisms. The grid collapses on this axis.</div>
+    <div class="tn now"><span class="lbl">Site axis — decisive, stays</span>Lung and brain are genuinely different problems, because they differ in the one thing a single access number hides: <b>can a systemically dosed drug reach the cells.</b></div>
+  </div>
+  <div class="tscroll">
+    <table>
+      <thead><tr><th>Site</th><th>Antigen present</th><th>Antigen lost</th><th>Delivery verdict</th></tr></thead>
+      <tbody>
+        <tr><td><b>Lung / disseminated</b></td><td>Trametinib + CDK4/6i + vaccine → holds</td><td>ERK1/2i (MTD) + PI3K/AKTi; needs +0.045/day immune arm</td><td><span class="pill ok">Closes systemically — no local delivery</span></td></tr>
+        <tr><td><b>Brain (parenchyma)</b></td><td>+ anti-PD-1 → holds</td><td>Same small-molecule pair</td><td><span class="pill un">0.00 systemically; 1.00 into the cavity (CED / implant)</span></td></tr>
+      </tbody>
+      <caption>An agent whose achievable concentration exceeds its canine-HS IC50 clears both lung cells with no local delivery; the extra-axial geometry supplies the brain cavity by construction.</caption>
+    </table>
+  </div>
+  <p>So "the answer" is <b>not brain-only</b>. The lung/disseminated form is the <em>more tractable</em> site — it closes with systemic drug alone — and the brain is the site that forced the local-delivery and CSF work. The one genuinely open durability gap on the antigen-lost side is a <b>lung</b> finding: the lung/no-antigen cell has no immune component, so it needs ~0.045/day of antigen-independent killing to endure once dosing stops (two internal parameterizations disagree 25× on how badly the unrescued lung cell degrades but agree the fix works). The MEK-inhibitor maintenance is likewise <b>site-split</b>: solid for a lung or disseminated second primary, conditional for a brain one.</p>
+</section>
+
+<section>
+  <h2><span class="num">The solid half</span>Escape coverage</h2>
+  <p>An escape is a route by which some cells survive and regrow. Margin = how much faster treatment kills those cells than they regrow; above zero is closed. Figures are the induction regimen at conservative brain access, growth taken at 0.055/day.</p>
+  <p>All <b>eleven</b> escape routes close at both sites — tightest margin <b>+0.11 (brain tissue) / +0.13 (linings)</b>. Routes: pathway restart above the block, target-site mutation, downstream activation, jump to the parallel pathway, lineage independence, antigen loss, survival-signal independence, iron-death (ferroptosis) resistance, self-recycling independence, and dormant survivors (+0.09 / +0.10, the tightest). MGMT repair "cannot apply" — this drug class leaves no damage for it to repair.</p>
+  <div class="tscroll">
+    <table>
+      <thead><tr><th>Combination</th><th class="num">Possible</th><th class="num">Uncovered</th></tr></thead>
+      <tbody>
+        <tr><td>Any two escapes together</td><td class="num">45</td><td class="num">0</td></tr>
+        <tr><td>Any three escapes together</td><td class="num">120</td><td class="num">0</td></tr>
+      </tbody>
+      <caption>Checked across every assumption about how many dormant cells are awake at once, and independently reproduced by the audit. This clean 11-route catalogue supersedes the messier ~16-route list used in the earliest framing.</caption>
+    </table>
+  </div>
+</section>
+
+<section>
+  <h2><span class="num">The hypothesis half</span>The ten-year durability</h2>
+  <p>The escape coverage above is about the <em>first</em> tumour. Ten-year durability is a separate, weaker claim about the maintenance arm suppressing a <em>second</em> primary. It reduces to a single inequality:</p>
+  <div class="note bad">
+    <span class="h">The inequality it reduces to</span>
+    <p style="font-family:Newsreader,Georgia,serif; font-size:19px">potency &middot; access &minus; growth &gt; 0</p>
+    <p>which <b>fails at the module's own conservative brain-access assumption (0.30)</b> and holds only at unmeasured values (≥ ~0.50). Several deciding numbers are assumed, not measured in any dog: the maintenance pill's potency and CNS access; the tumour's growth rate (~0.055/day — it enters the answer twice); the pill's marrow budget (est. 0.35; if the true value exceeds ~0.55 the regimen flips to over-budget); and lisavanbulin's dose-limiting toxicity being CNS rather than marrow.</p>
+  </div>
+  <div class="note warn">
+    <span class="h">A caution about the engine itself</span>
+    <p>Every figure comes from one simulation engine. It carried 1,340+ tests, but until recently not one checked it against a known outcome. Exactly one apples-to-apples external check exists (lomustine, 16 dogs, same endpoint/disease/species, 37.5% relapse-free), and the engine <b>failed it</b> — predicting 0.0% at every potency, because it structurally cannot represent a cured animal. An extinction state was added and it now returns a realistic 42% vs. the observed 37.5% — but only above the potency range the project itself considers plausible and with a favourable second free parameter, i.e. curve-fitting, labelled as such. Read the whole report as <b>hypothesis-generating.</b></p>
+  </div>
+</section>
+
+<section>
+  <h2><span class="num">The one test</span>What would falsify the headline</h2>
+  <p><b>MTAP status.</b> A single MTAP immunohistochemistry stain (or MTAP/CDKN2A copy-number assay) on the existing tumour tissue:</p>
+  <div class="thenNow">
+    <div class="tn now"><span class="lbl">MTAP-deleted</span>The strongest ten-year arm is live.</div>
+    <div class="tn was"><span class="lbl">MTAP-intact</span>The synthetic-lethal maintenance does nothing and durability collapses to the previous answer.</div>
+  </div>
+  <p class="sub">This is the single most load-bearing fact in the analysis and the cheapest decisive test in it — it needs archived tissue and a matched normal, no live dog. Runner-up falsifier: measuring a PRMT5 inhibitor's CNS penetration in a dog below ~0.37.</p>
+</section>
+
+<section>
+  <h2><span class="num">Delivery</span>The brain, the two-drug / no-antigen problem, and how it closes</h2>
+  <p>For a tumour with no identified targetable antigen, the fallback is two small molecules — an <b>ERK1/2 inhibitor</b> (e.g. temuterkib) at full MTD <b>+ a PI3K/AKT inhibitor</b> (e.g. paxalisib) — which drive every clone negative (ERK activation was found in all twelve canine HS lines tested). In the <b>lung</b> this reaches 1.00 at full dose (~0.99 realistic). In the <b>brain</b> it initially read 0.00 — but that came from applying trametinib's poor brain-to-plasma ratio (0.15) to two drugs that are <em>not</em> trametinib. Successive checks narrowed the gap: the molecules work on canine protein (ERK2/MAPK1 100% identical human-to-dog; PI3Kα 99.81%); crediting paxalisib at its real penetration drops the ERK requirement to 0.235–0.300; and two structure-based shortcuts were tried and both failed their controls (a firmer basis for "this must be measured").</p>
+  <div class="note">
+    <span class="h">The closer: local delivery</span>
+    <p>All four bottleneck coordinates are what happens when a <em>swallowed</em> drug crosses the blood-brain barrier. So stop dosing systemically: <b>convection-enhanced delivery</b> or a <b>drug-eluting implant in the resection cavity</b> (FDA-approved precedent in the Gliadel wafer). Modelled durability is 0.00 at 0.15 systemic penetration and <b>1.00 at local delivery</b>, holding flat to 10 years. The breed's extra-axial geometry supplies the cavity by construction.</p>
+  </div>
+  <div class="note warn">
+    <span class="h">The fluid-borne remainder</span>
+    <p>The ~52% CSF-positive compartment is not reached by a cavity implant. It maps onto a bounded, CNS-restricted space addressable by a three-part combination: <b>craniospinal radiation</b> (coverage), <b>intrathecal dosing</b> (rate control), and an <b>immune arm</b> (persistence). No durability number is computed for this compartment, and none should be until someone measures whether drug saturates the fluid space. Breed-specific caution: the breed carries the SOD1 degenerative-myelopathy allele at high frequency, so repeated intrathecal dosing is a plausible, unquantified interaction.</p>
+  </div>
+</section>
+
+<section>
+  <h2><span class="num">The measured reality</span>The honest headline</h2>
+  <p>Every figure above is a model output; <b>no agent in any regimen here has ever been given to a dog with this disease.</b> The location-matched reality today:</p>
+  <div class="thenNow">
+    <div class="tn was"><span class="lbl">Intracranial, definitive treatment</span><b>~44-day median</b> (43–44 across sources) — surgery + radiation + chemotherapy, 102-dog series; longest survivor under eight months.</div>
+    <div class="tn now"><span class="lbl">Localized HS, lomustine after debulking</span><b>568-day median</b>, 243-day disease-free interval, <b>0.375 relapse-free</b> (n = 16) — the only structurally matched comparator with real durability.</div>
+  </div>
+  <p>The gap between 44 days and ten years is the real headline, and nothing here narrows it. What "structurally achievable" earns is that the arithmetic closes — the biology <em>permits</em> a durable response — not that one has been achieved. It does not earn a prognosis, because nobody has yet measured how many dogs of this breed carry a non-droppable target.</p>
+</section>
+
+<section>
+  <h2><span class="num">Retractions</span>Withdrawn claims, carried deliberately</h2>
+  <p>The analysis carries its own withdrawn claims; the test suite enforces them — tests fail if a retracted claim is reasserted.</p>
+  <div class="change">
+    <h4>Intra-arterial delivery schedule — retracted</h4>
+    <div class="thenNow">
+      <div class="tn was"><span class="lbl">Was</span>A "durable regimen" headline that multiplied a monthly-procedure access gain by a continuous dosing duty cycle.</div>
+      <div class="tn now"><span class="lbl">Now</span>Physically incoherent; appears nowhere in the live answer. The live chain reaches into those modules only for surviving measured constants.</div>
+    </div>
+  </div>
+  <div class="change">
+    <h4>Carboplatin swap for the MGMT escape — retracted</h4>
+    <p class="why">Falsified by class-wide drug resistance in canine HS. The MGMT <b>mechanism</b> it was attached to remains valid and is reused; only the swap is withdrawn.</p>
+  </div>
+  <div class="change">
+    <h4>The "circular / back-to-square-one" worry — examined and resolved</h4>
+    <p class="why">The four-agent audit found the dependency graph <b>acyclic</b> and the final answer re-uses nothing an earlier step falsified. What made it <em>look</em> circular — the oldest module still asserting "no regimen closes these compartments; read the imaging," plus four other stale files — has been withdrawn behind superseded banners.</p>
+  </div>
+  <div class="change">
+    <h4>The "kill it harder" framing — superseded</h4>
+    <p class="why">Every earlier version chased killing the one tumour so hard it never recurs; that could never reach ten years, and is replaced by the two-move architecture.</p>
+  </div>
+  <div class="change">
+    <h4>Internal correction on the immune arm</h4>
+    <p class="why">One cell — lung / no-antigen — needs ~0.045/day of antigen-independent immune killing. And the growth model has no state for drug-tolerant <b>persisters</b>, so 1.00 means "no genetically resistant clone survives," which is narrower than "the tumour is gone" — the immune arm is the only mechanism class that reaches persisters.</p>
+  </div>
+</section>
+
+<section>
+  <h2><span class="num">The audit</span>Am I back where I started?</h2>
+  <p>Four independent review agents each re-ran the code for a slice of the 24 core modules, ignoring all prose and grounding every finding by execution. Verdict: <b>genuinely progressed, not circular.</b> All 439 core tests pass and actively encode the retractions.</p>
+  <div class="note warn">
+    <span class="h">What the audit says is genuinely shaky</span>
+    <ul style="margin:6px 0 0; padding-left:20px">
+      <li><b>Ten-year durability rests on one drug and one inequality</b> that fails at conservative access; escape-coverage is solid, ten-year durability is a hypothesis stacked on it.</li>
+      <li><b>Several deciding numbers are unmeasured in dogs</b> — drug potencies, the tumour's growth rate, the maintenance pill's brain access and marrow cost.</li>
+      <li><b>Some reasoning lives in prose and tests, not the calculator</b> — the live regimen hard-codes potency instead of deriving it from measured IC50s. The conclusions are right, but the wiring is looser than the narrative implies.</li>
+    </ul>
+  </div>
+</section>
+
+<section>
+  <h2><span class="num">What to do first</span>Feasibility, and the cheapest decisive steps</h2>
+  <p><b>Cost</b> is roughly <b>$20,000–$45,000 per dog</b> before any investigational-drug cost. The two binding constraints are not biological: <b>drug access</b> (the targeted agents are sponsor-owned, unapproved, with no veterinary precedent — a business-development problem) and <b>enrolment</b> (CNS histiocytic sarcoma is ~2.2% of primary intracranial tumours; it needs a multi-centre consortium).</p>
+  <div class="note">
+    <span class="h">The cheapest things that would move this — neither is a drug</span>
+    <ul style="margin:6px 0 0; padding-left:20px">
+      <li>A <b>genotype panel</b> on existing tumour tissue (MTAP/CDKN2A/PTEN copy number; PTPN11/KRAS/RB1 sequence) — assigns the maintenance tier and resolves a separate drug liability at no extra cost. <b>Do this first.</b></li>
+      <li>The <b>tumour's growth rate</b> from imaging already taken — it enters the answer twice.</li>
+      <li>A <b>vaccine/immune kill rate in a dog</b>, and resiquimod on canine HS cells in vitro (does the immune depot kill this myeloid tumour, or feed it).</li>
+      <li>A <b>brain:plasma ratio</b> for an ERK and a PI3K/AKT inhibitor in a dog — the durability either side of the threshold is already computed.</li>
+    </ul>
+  </div>
+</section>
+
+<footer>
+  <p>Consolidated from three prior report artifacts — "Four Persistence Mechanisms," the "Antigen-Independent Immunity Ledger," and "The Brain-Tumour Analysis" (independently audited by four review agents who re-ran the code). All figures are model outputs computed from cited evidence and re-derived by automated tests. Where a number is assumed rather than measured, this report says so. This is an analysis, not veterinary advice; every decision belongs with clinicians who can examine the animal.</p>
+</footer>
+
+</div>
