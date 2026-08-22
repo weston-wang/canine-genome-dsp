@@ -40,11 +40,17 @@ from .mapk_cli import (
 )
 from .mapk_scenarios import DEBULKING_FRACTION
 from .mapk_scenarios import _PREEXISTING_PROB_CENTRAL as MAPK_PREEXISTING_PROB_CENTRAL
+from .melanoma_benchmark import run_melanoma_benchmark
 from .mutational_supply_cli import mutational_supply_demo
+from .off_policy_cli import evaluate_logged_policy_file
+from .osteosarcoma_benchmark import run_osteosarcoma_benchmark
+from .osteosarcoma_data import prepare_gse76127
 from .pharmacology_cli import cdk46_achievability_demo
 from .signals import eiip, variant_density, windowed_gc
 from .single_patient_cli import single_patient_demo
 from .spectral import coherence, multitaper_psd, spectral_entropy, welch_psd
+from .stochastic_cli import stochastic_immunotherapy_demo
+from .superiority_cli import policy_superiority_benchmark
 from .vaccine_eval import run_gse102459, run_gse190001
 from .volterra_cli import run_volterra, synthetic_table
 from .wavelets import cwt_power
@@ -129,6 +135,75 @@ def main() -> None:
     immunotherapy.add_argument("--scenarios", type=int, default=12)
     immunotherapy.add_argument("--maxiter", type=int, default=60)
     immunotherapy.add_argument("--out", type=Path, default=Path("results/immunotherapy-demo"))
+    stochastic = sub.add_parser("stochastic-immunotherapy-demo",
+                                help="run stochastic state-space inverse benchmark")
+    stochastic.add_argument("--draws", type=int, default=256)
+    stochastic.add_argument("--particles", type=int, default=384)
+    stochastic.add_argument("--maxiter", type=int, default=24)
+    stochastic.add_argument("--seed", type=int, default=42)
+    stochastic.add_argument("--out", type=Path,
+                            default=Path("results/stochastic-immunotherapy-demo"))
+    benchmark = sub.add_parser("immunotherapy-policy-benchmark",
+                               help="compare locked PK/PD-QSP and Volterra policies")
+    benchmark.add_argument("--draws", type=int, default=96)
+    benchmark.add_argument("--scenarios", type=int, default=12)
+    benchmark.add_argument("--maxiter", type=int, default=18)
+    benchmark.add_argument("--seed", type=int, default=73)
+    benchmark.add_argument("--reference-schedule", type=Path)
+    benchmark.add_argument("--out", type=Path,
+                           default=Path("results/immunotherapy-policy-benchmark"))
+    logged = sub.add_parser("evaluate-logged-policy",
+                            help="run fail-closed longitudinal off-policy evaluation")
+    logged.add_argument("--table", type=Path, required=True)
+    logged.add_argument("--gamma", type=float, default=1.0)
+    logged.add_argument("--cross-fitted", action="store_true")
+    logged.add_argument("--out", type=Path, required=True)
+    melanoma = sub.add_parser(
+        "melanoma-neoadjuvant-benchmark",
+        help="benchmark a nonlinear stochastic DSP policy against OpACIN-neo and NADINA",
+    )
+    melanoma.add_argument("--anchors", type=Path,
+                          default=Path("data/clinical/melanoma_clinical_anchors.csv"))
+    melanoma.add_argument("--draws", type=int, default=192)
+    melanoma.add_argument("--candidates", type=int, default=96)
+    melanoma.add_argument("--seed", type=int, default=142)
+    melanoma.add_argument("--out", type=Path,
+                          default=Path("results/melanoma-neoadjuvant-benchmark"))
+    osteo_data = sub.add_parser(
+        "prepare-gse76127",
+        help="prepare the real 33-dog osteosarcoma tumor/DFI cohort",
+    )
+    osteo_data.add_argument("--matrix", type=Path, required=True)
+    osteo_data.add_argument("--supplements", type=Path, required=True)
+    osteo_data.add_argument("--components", type=int, default=5)
+    osteo_data.add_argument("--out", type=Path, required=True)
+    osteo = sub.add_parser(
+        "osteosarcoma-rna-design",
+        help="run the comparative Volterra-HSMM RNA-vaccine design benchmark",
+    )
+    osteo.add_argument("--anchors", type=Path,
+                       default=Path("data/clinical/osteosarcoma_clinical_anchors.csv"))
+    osteo.add_argument(
+        "--candidates", type=Path,
+        help="deidentified candidate-feature CSV; requires --design-spec",
+    )
+    osteo.add_argument(
+        "--design-spec", type=Path,
+        help="schema-v1 JSON with patient-specific DLA/clone constraints and scenarios",
+    )
+    osteo.add_argument(
+        "--gse76127-matrix", type=Path,
+        default=Path("data/raw/gse76127/GSE76127_series_matrix.txt.gz"),
+    )
+    osteo.add_argument(
+        "--gse76127-supplements", type=Path,
+        default=Path("data/raw/gse76127/PMC4759767_SupplementaryFiles.zip"),
+    )
+    osteo.add_argument("--skip-real-data", action="store_true")
+    osteo.add_argument("--draws", type=int, default=192)
+    osteo.add_argument("--seed", type=int, default=2608)
+    osteo.add_argument("--out", type=Path,
+                       default=Path("results/osteosarcoma-rna-design"))
     vaccine_eval = sub.add_parser("evaluate-gse190001", help="validate vaccine-response kernels")
     vaccine_eval.add_argument("--prime", type=Path, required=True)
     vaccine_eval.add_argument("--boost", type=Path, required=True)
@@ -405,6 +480,31 @@ def main() -> None:
         inverse_demo(args.out, args.scenarios, args.maxiter)
     elif args.command == "immunotherapy-demo":
         immunotherapy_demo(args.out, args.scenarios, args.maxiter)
+    elif args.command == "stochastic-immunotherapy-demo":
+        stochastic_immunotherapy_demo(args.out, args.draws, args.particles,
+                                      args.maxiter, args.seed)
+    elif args.command == "immunotherapy-policy-benchmark":
+        policy_superiority_benchmark(args.out, args.draws, args.scenarios,
+                                     args.maxiter, args.seed, args.reference_schedule)
+    elif args.command == "evaluate-logged-policy":
+        evaluate_logged_policy_file(args.table, args.out, args.gamma, args.cross_fitted)
+    elif args.command == "melanoma-neoadjuvant-benchmark":
+        run_melanoma_benchmark(args.out, args.anchors, args.draws, args.candidates, args.seed)
+    elif args.command == "prepare-gse76127":
+        prepare_gse76127(args.matrix, args.supplements, args.out, args.components)
+    elif args.command == "osteosarcoma-rna-design":
+        matrix = None if args.skip_real_data else args.gse76127_matrix
+        supplements = None if args.skip_real_data else args.gse76127_supplements
+        run_osteosarcoma_benchmark(
+            out=args.out,
+            anchors=args.anchors,
+            candidate_file=args.candidates,
+            design_spec_file=args.design_spec,
+            gse76127_matrix=matrix,
+            gse76127_supplements=supplements,
+            draws=args.draws,
+            seed=args.seed,
+        )
     elif args.command == "evaluate-gse190001":
         run_gse190001(args.prime, args.boost, args.soft, args.out)
     elif args.command == "evaluate-gse102459":
