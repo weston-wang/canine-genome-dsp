@@ -303,6 +303,32 @@ any dog:
 - and lisavanbulin's dose-limiting toxicity being CNS rather than marrow (which is what
   lets the two chemo-type drugs coexist).
 
+### Deriving it instead of asserting it — durability by genotype and site
+
+`canine_dsp.maintenance_durability` replaces the single hand-tuned inequality with a derived one.
+It takes the maintenance kill rate from `pkpd` (measured IC50 + exposure, not a hand-set 0.15),
+treats the founding cell of a second primary as a birth-death branching process — where a positive
+margin (`kill − growth > 0`) makes the lineage subcritical and extinction certain — and then applies
+the two conditions a raw margin hides: **genotype lock** (can the target be rerouted?) and **reach**
+(is the drug where the founding cell is?). The result is not one number but a grid, and it fails or
+abstains where it should:
+
+| Genotype (share) | Lung / local-delivery brain | Systemic-penetration brain | CSF |
+| --- | --- | --- | --- |
+| **MTAP deleted** (minority) | **Durable to 10y** — locked | **Durable to 10y** — locked | *No number* — not reached |
+| **MAPK driver** (~59%) | Surveillance-dependent | Surveillance-dependent | *No number* — not reached |
+| PTEN / CDKN2A / none | Needs data (no measured IC50+Cmax) | Needs data | *No number* — not reached |
+
+Two honest results fall straight out. **Only the MTAP tier reaches a locked decade** — not because
+its kill is bigger (absolute margins aren't comparable; TNG908's Cmax is a placeholder) but because a
+synthetic-lethal target on a homozygous deletion **cannot be rerouted**, while the MAPK majority's
+pathway target can. And the **CSF compartment returns no durability number at all**, matching the
+report's refusal to compute one. The reconciliation with the older module: its 0.15/day hand-set
+potency implied an access threshold near 0.37 (hence "fails at 0.30"); the derived kill clears growth
+at ~0.2% (MTAP) to ~4% (MAPK) access — so the raw margin was never the binding constraint. **The lock
+is.** Every "durable" verdict stays conditional on MTAP-deleted status (the falsifier) and on
+continuous dosing being achievable; it is a grounded model result, not an outcome shown in any dog.
+
 **A caution about the engine itself.** Every figure comes from one simulation engine. It
 carried 1,340+ tests, but until recently *not one* checked it against a known outcome —
 they verified internal consistency, which catches drift but not being wrong about the

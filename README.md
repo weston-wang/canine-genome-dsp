@@ -47,6 +47,9 @@ src/canine_dsp/
                       escapes" is measured vs transferred vs model-derived vs structural
   pkpd.py             Emax PK/PD model: DERIVES a per-day kill rate from a measured IC50 + achievable
                       exposure (returns a non-closing rate when the drug can't reach its IC50)
+  maintenance_durability.py  derives 10-year durability per genotype and per site from the pkpd kill
+                      rate + branching-process extinction + genotype-lock + reach — durable only for
+                      the MTAP lock, surveillance-dependent for the MAPK majority, no number for CSF
   dla_binding.py      canine MHC (DLA) peptide-binding prediction
   pharmacology.py     PK/PD pharmacology model
   mutational_supply.py  mutational-supply modelling
