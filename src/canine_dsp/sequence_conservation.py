@@ -114,12 +114,78 @@ CONSERVATION: dict[str, OrthologConservation] = {
         dog_length=1281,
         aligned_positions=1278,
         identical_positions=1164,
-        # 114 aligned differences -- too many to enumerate; the point is that this is the LEAST
-        # conserved of the three and it is the one that decides CNS penetration.
+        # 114 aligned differences -- too many to enumerate; the point is that this is a LOW-
+        # conservation target and it is the one that decides CNS penetration.
         differing_positions=(),
-        note="91.08% identical (1164/1278 aligned). The least-conserved of the three targets and "
-             "the only one that gates drug delivery -- so canine CNS penetration must be measured, "
-             "not inferred from human data.",
+        note="91.08% identical (1164/1278 aligned). A low-conservation target that gates drug "
+             "delivery -- so canine CNS penetration must be measured, not inferred from human data.",
+    ),
+    # --- the remaining drug targets in the regimen (maintenance + supporting arms) --------------
+    "MAP2K1": OrthologConservation(
+        gene="MAP2K1",
+        protein="MEK1 -- the MEK-inhibitor target (mirdametinib / cobimetinib; MAPK maintenance)",
+        human_accession="Q02750",
+        dog_accession="A0A8I3RYU6",
+        human_length=393,
+        dog_length=434,
+        aligned_positions=393,
+        identical_positions=391,
+        differing_positions=(),
+        note="99.49% identical (391/393 aligned, 2 differences). A MEK inhibitor designed for the "
+             "human target should bind the canine one -- the target-fit half of the MAPK-majority "
+             "maintenance arm, whose drug-class response is separately measured in canine HS.",
+    ),
+    "PRMT5": OrthologConservation(
+        gene="PRMT5",
+        protein="PRMT5 -- the synthetic-lethal target for MTAP-deleted cells (TNG908/TNG462)",
+        human_accession="O14744",
+        dog_accession="A0A8I3RQT2",
+        human_length=637,
+        dog_length=637,
+        aligned_positions=637,
+        identical_positions=633,
+        differing_positions=(),
+        note="99.37% identical (633/637 aligned, 4 differences). The MTAP-maintenance target is "
+             "near-identical in the dog, so the synthetic-lethal MECHANISM should transfer; the "
+             "canine-HS kill rate and CNS penetration remain unmeasured.",
+    ),
+    "CDK4": OrthologConservation(
+        gene="CDK4",
+        protein="CDK4 -- a CDK4/6-inhibitor target (abemaciclib; CDKN2A-deleted maintenance)",
+        human_accession="P11802",
+        dog_accession="A0A8I3NU36",
+        human_length=303,
+        dog_length=303,
+        aligned_positions=303,
+        identical_positions=294,
+        differing_positions=(),
+        note="97.03% identical (294/303 aligned, 9 differences).",
+    ),
+    "CDK6": OrthologConservation(
+        gene="CDK6",
+        protein="CDK6 -- a CDK4/6-inhibitor target (abemaciclib; CDKN2A-deleted maintenance)",
+        human_accession="Q00534",
+        dog_accession="A0A8I3RZY6",
+        human_length=326,
+        dog_length=326,
+        aligned_positions=326,
+        identical_positions=320,
+        differing_positions=(),
+        note="98.16% identical (320/326 aligned, 6 differences).",
+    ),
+    "CSF1R": OrthologConservation(
+        gene="CSF1R",
+        protein="CSF1R -- lineage-survival receptor / pexidartinib target",
+        human_accession="P07333",
+        dog_accession="A0A8I3MXT5",
+        human_length=972,
+        dog_length=1044,
+        aligned_positions=966,
+        identical_positions=824,
+        differing_positions=(),
+        note="85.30% identical (824/966 aligned) -- the lowest-conservation kinase target here "
+             "(matching the repo's independently noted 85.3%). A human-designed CSF1R inhibitor's "
+             "transfer to the dog is correspondingly less certain than for MEK/PRMT5/CDK4-6.",
     ),
 }
 

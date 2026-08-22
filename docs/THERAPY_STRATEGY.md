@@ -73,11 +73,14 @@ dosing + the immune arm (no durability number computed for that compartment, by 
 | 11 | MGMT repair | DNA repair | drop the alkylator class (use a mitotic poison) | STRUCTURAL |
 | 12 | Germline second primary | germline | PRMT5i maintenance (synthetic-lethal on MTAP) | ASSUMED (conditional) |
 
-**Target-side transfer is no longer an assumption.** The kinase targets are essentially identical
-dog-to-human — ERK2/MAPK1 **100.0%**, PI3Kα **99.81%** (ATP-binding domain 100%) — computed from
-real UniProt sequences in `canine_dsp.sequence_conservation`. Only P-gp/ABCB1, at **91.08%** (the
-efflux transporter that gates CNS delivery), remains a target where conservation does not license
-transfer, so canine penetration must be measured.
+**Target-side transfer is no longer an assumption.** Every drug target in the regimen is now
+computed from real UniProt sequences in `canine_dsp.sequence_conservation` (reproducible via
+`recompute()`): ERK2/MAPK1 **100.0%**, PI3Kα **99.81%** (ATP-binding domain 100%), MEK1/MAP2K1
+**99.49%**, PRMT5 **99.37%**, CDK6 **98.16%**, CDK4 **97.03%** — so a human-designed inhibitor's
+*fit* to the canine target is established fact for the MAPK, MTAP, and CDKN2A maintenance arms, not
+an assumption. Two targets are lower and flagged: CSF1R **85.30%** (the receptor-side lineage arm,
+which the analysis already deprioritizes) and P-gp/ABCB1 **91.08%** — the efflux transporter that
+gates CNS delivery, so canine *penetration* still must be measured even where target fit transfers.
 
 ## The validation protocol — how coverage becomes *backed*
 
