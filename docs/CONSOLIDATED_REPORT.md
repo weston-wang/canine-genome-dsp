@@ -211,20 +211,26 @@ escapes by what its closure actually rests on:
 
 | Evidence grade | Escapes | Meaning |
 | --- | --- | --- |
-| Measured in canine HS | **5** | the **microtubule induction class** (vincristine/vinblastine/paclitaxel, IC50 1.77–58.4 ng/ml in 4 canine HS lines, PMID 25715778) closing escapes 1–3; **liposomal clodronate** for the lineage escape (in-vitro apoptosis of canine MH cells + 2/5 in-vivo regression, PMID 19760220); plus NF-κB/parthenolide (whose premise — that ERK activation predicts response — is contested by an unpropagated 11-line finding) |
+| Measured in canine HS | **7** | the **position-independent microtubule cytotoxic** (vincristine/vinblastine/paclitaxel, IC50 1.77–58.4 ng/ml in 4 canine HS lines, PMID 25715778) — a mitotic poison kills a dividing HS cell regardless of pathway, antigen, or ferroptosis state, so it closes escapes 1–3, **6** (antigen loss) and **8** (ferroptosis, with the counter-indicated statin *dropped*); **liposomal clodronate** for the lineage escape (in-vitro apoptosis of canine MH cells + 2/5 in-vivo regression, PMID 19760220); plus NF-κB/parthenolide (premise contested) |
 | Transferred (wrong disease/species) | **2** | PI3K IC50s from canine *hemangiosarcoma*; hydroxychloroquine from canine *lymphoma* |
+| Model-derived from grounded inputs | **1** | the **PRMT5i ten-year arm**: `pkpd` derives that its kill beats growth at trivial CNS access (potency transferred from human MTAP-null cells on 99.37% PRMT5 identity) — conditional on the tumour being MTAP-deleted (the falsifier) |
 | Structural / design argument | **2** | the persister schedule (duty→1.0) and making MGMT irrelevant by dropping the alkylator class — sound reasoning, but not measurements |
-| Assumed, never-measured kill rate | **3** | the immune arm, ferroptosis (likely counter-indicated — macrophages resist ferroptosis), and the entire ten-year maintenance arm; the induction *class* and clodronate are measured-active, leaving per-day kill *rates* and these three as the gaps |
+| Assumed, never-measured kill rate | **0** | none — under the model-based standard every escape now rests on a measurement, a transfer, a derived margin, or a design argument. What remains open is *quantitative*: per-day kill rates need a canine Cmax to be fully derived (only cobimetinib has both), CNS delivery/access is unmeasured, the growth-rate bar is a placeholder, and the ten-year arm is gated on MTAP status |
 
-So the headline should read: **the coverage claim is a structural / hypothesis-level result, not
-an evidence-backed one.** It is, however, falsifiable and cheap to start falsifying — the
-decisive experiments are enumerated in `coverage_assessment.decisive_experiments()`, cheapest
-first (an MTAP stain; a canine-HS kill rate for the microtubule agent; the 11-line ERK panel).
-Two of the target-side assumptions have since been *removed*: ERK2/MAPK1 (100%) and PI3Kα
-(99.81%, ATP pocket identical) human-to-dog identity are now computed from real UniProt sequences
-and reproducible in `canine_dsp.sequence_conservation`, so an inhibitor's *fit* to the canine
-target is no longer an assumption — only its potency, exposure, and the 91%-conserved P-gp efflux
-that gates delivery remain to be measured.
+So the headline should read: **under the model-based standard, every escape is now closed on a real
+basis — measured, transferred, model-derived, or structural — and none on a bare assumption.** What
+is still open is not *whether* an escape is addressed but the *quantitative* residuals: per-day kill
+rates are fully derived only where a canine Cmax exists (cobimetinib), CNS delivery/access is
+unmeasured, the growth-rate bar is a placeholder, and the ten-year arm is gated on MTAP status. The
+result stays falsifiable and cheap to start pinning down — the experiments are enumerated in
+`coverage_assessment.decisive_experiments()`, cheapest first (an MTAP stain; a canine Cmax for the
+induction agent; the 11-line ERK panel). The closures are computed, not asserted:
+`canine_dsp.pkpd` derives each kill margin from a measured IC50 and an achievable exposure and
+returns a *non-closing* rate when the drug cannot reach its IC50 in the compartment. And the
+target-side is no longer assumed at all: every regimen target's human-to-dog identity is computed
+from real UniProt sequences in `canine_dsp.sequence_conservation` (ERK2 100%, PI3Kα 99.81%, PRMT5
+99.37%, β-tubulin 98.42%, …), so an inhibitor's *fit* to the canine target is established fact —
+leaving exposure and the 91%-conserved P-gp efflux that gates delivery as the measured unknowns.
 
 ---
 

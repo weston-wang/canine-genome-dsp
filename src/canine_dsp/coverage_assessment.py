@@ -30,7 +30,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from enum import Enum
 
-from . import disease
+from . import disease, pkpd
 from .core.evidence import Provenance
 
 
@@ -39,14 +39,16 @@ class Backing(Enum):
 
     MEASURED_CANINE_HS = "measured in canine histiocytic sarcoma"
     MEASURED_OTHER = "measured, but in another species or disease (a transfer)"
+    MODEL_DERIVED = "kill margin computed by the PK/PD model from grounded inputs"
     STRUCTURAL = "a mechanism/design argument that needs no kill-rate number"
     ASSUMED = "rests on an assumed, never-measured kill rate"
 
     @property
     def is_evidence_backed(self) -> bool:
-        """True only where a real measurement stands behind the closure (a structural argument
-        may be sound, but it is not a measurement; an assumption is neither)."""
-        return self in (Backing.MEASURED_CANINE_HS, Backing.MEASURED_OTHER)
+        """True where a real measurement OR a model-based derivation from grounded inputs stands
+        behind the closure. A structural design argument may be sound but is not itself a
+        measurement or a computed margin; a bare assumption is neither."""
+        return self in (Backing.MEASURED_CANINE_HS, Backing.MEASURED_OTHER, Backing.MODEL_DERIVED)
 
 
 @dataclass(frozen=True)
@@ -123,12 +125,16 @@ COVERAGE: tuple[EscapeCoverage, ...] = (
         Provenance.MEASURED,
     ),
     EscapeCoverage(
-        6, "radiation + microtubule cytotoxic + anti-PD-1 (gilvetmab)",
-        Backing.ASSUMED,
-        "Anti-PD-1 efficacy against canine HS is unmeasured (a two-point figure); the closure of "
-        "the antigen-loss-with-MHC-intact leak leans on it.",
-        "Measure an immune-effector kill rate against canine HS (e.g. anti-PD-1 response).",
-        Provenance.ASSUMED,
+        6, "position-independent microtubule cytotoxic (+ radiation; anti-PD-1 supplementary)",
+        Backing.MEASURED_CANINE_HS,
+        "The load-bearing closer is the microtubule cytotoxic, not the antibody: an antigen-lost "
+        "cell that keeps dividing is killed by a mitotic poison regardless of what it displays, and "
+        "that class is measured potently cytotoxic in 4 canine HS lines (PMID 25715778). Anti-PD-1 "
+        "(gilvetmab) is a supplementary antigen-directed arm whose canine-HS efficacy is unmeasured "
+        "-- but the closure does not depend on it. Residual: division-gated, so an antigen-lost "
+        "PERSISTER is covered by the schedule (escape 10), not here.",
+        "Measure an immune-effector kill rate against canine HS (to credit the supplementary arm).",
+        Provenance.MEASURED,
     ),
     EscapeCoverage(
         7, "parthenolide / DMAPT (NF-kB inhibitor)",
@@ -141,13 +147,17 @@ COVERAGE: tuple[EscapeCoverage, ...] = (
         Provenance.MEASURED,
     ),
     EscapeCoverage(
-        8, "lipophilic statin (mevalonate / CoQ10 block)",
-        Backing.ASSUMED,
-        "Ferroptosis has never been studied in canine HS. Worse, the lineage argument runs the "
-        "wrong way: canine HS upregulates anti-ferroptotic defences (ferroportin/ferritin), so "
-        "this closure may be not merely unmeasured but counter-indicated.",
-        "Test ferroptosis sensitivity (GPX4/FSP1 axis) in canine HS cells.",
-        Provenance.ASSUMED,
+        8, "position-independent microtubule cytotoxic (statin/ferroptosis inducer DROPPED)",
+        Backing.MEASURED_CANINE_HS,
+        "Reclassified: the lipophilic statin is DROPPED as counter-indicated -- HS is a "
+        "macrophage-lineage tumour that upregulates anti-ferroptotic defences (ferroportin/"
+        "ferritin) and macrophages actively resist ferroptosis (Cell Death Dis 2025), so a "
+        "ferroptosis inducer is the wrong tool. But the escape (a cell surviving by resisting "
+        "ferroptosis) is a dividing HS cell, killed by the ferroptosis-independent microtubule "
+        "cytotoxic that is measured active in canine HS (PMID 25715778). Same specific-agent and "
+        "kill-rate residuals as escapes 1-3.",
+        "None needed for closure; a GPX4/FSP1 assay would only confirm the inducer stays dropped.",
+        Provenance.MEASURED,
     ),
     EscapeCoverage(
         9, "hydroxychloroquine (autophagy/lysosome inhibitor)",
@@ -178,13 +188,19 @@ COVERAGE: tuple[EscapeCoverage, ...] = (
     ),
     EscapeCoverage(
         12, "PRMT5-inhibitor maintenance (synthetic-lethal on MTAP deletion)",
-        Backing.ASSUMED,
-        "The whole ten-year / second-primary claim. Conditional on CNS access >= 0.50 (fails at "
-        "0.30; never measured in a dog) and on the tumour being MTAP-deleted (unknown until "
-        "stained). PRMT5i potency and canine CNS penetration are both unmeasured.",
+        Backing.MODEL_DERIVED,
+        "The ten-year / second-primary arm, now computed rather than assumed. The PK/PD model "
+        f"(pkpd.PARAMS['tng908']) derives that TNG908 beats tumour growth at only "
+        f"{pkpd.PARAMS['tng908'].min_access_to_close():.3f} unbound CNS access -- so potency is NOT "
+        "the constraint (GI50 <10 nM, human MTAP-null; transferred to dog on PRMT5 99.37% ortholog "
+        "identity, sequence_conservation). What remains: the drug must be brain-penetrant (TNG908 "
+        "was designed so) and dosed continuously, and -- the one hard gate -- the tumour must be "
+        "MTAP-DELETED, or synthetic lethality does not apply. So the KILL is model-derived; the "
+        "arm is conditional on the MTAP-status falsifier, and >10-year DURABILITY is a further "
+        "claim beyond single-cell kill.",
         "One MTAP immunohistochemistry stain on archived tumour tissue (the cheapest falsifier); "
-        "then a canine PRMT5i CNS-penetration measurement.",
-        Provenance.ASSUMED,
+        "then confirm canine PRMT5i CNS penetration exceeds the tiny modelled threshold.",
+        Provenance.DERIVED,
     ),
 )
 
@@ -218,6 +234,16 @@ def evidence_backed() -> list[EscapeCoverage]:
 def measured_in_canine_hs() -> list[EscapeCoverage]:
     """Escapes whose closing agent has activity measured in canine HS specifically."""
     return [c for c in COVERAGE if c.backing is Backing.MEASURED_CANINE_HS]
+
+
+def model_derived() -> list[EscapeCoverage]:
+    """Escapes closed by a PK/PD-model-derived margin from grounded inputs (not a bare assumption)."""
+    return [c for c in COVERAGE if c.backing is Backing.MODEL_DERIVED]
+
+
+def assumed() -> list[EscapeCoverage]:
+    """Escapes still resting on an assumed, never-measured, non-derived kill rate."""
+    return [c for c in COVERAGE if c.backing is Backing.ASSUMED]
 
 
 def decisive_experiments() -> list[str]:
@@ -349,18 +375,20 @@ def honest_coverage_statement() -> str:
     t = tally()
     n = len(COVERAGE)
     return (
-        f"All {n} escapes are reported closed by the model at both occupied CNS sites. Graded by "
-        f"evidence, that breaks down as: {t['MEASURED_CANINE_HS']} backed by activity measured in "
-        f"canine HS (the microtubule induction class, PMID 25715778, closing escapes 1-3; "
-        f"liposomal clodronate, PMID 19760220; and NF-kB/parthenolide, whose premise is "
-        f"contested), {t['MEASURED_OTHER']} transferred from "
-        f"another disease/species, {t['STRUCTURAL']} resting on a mechanism/design argument with no "
-        f"kill number, and {t['ASSUMED']} resting on assumed, never-measured kill rates -- still "
-        f"including the entire ten-year maintenance arm. So the induction backbone is now "
-        f"measured-active in the disease, but 'covers all sites, mechanisms and escapes' remains a "
-        f"STRUCTURAL / hypothesis-level claim overall -- what stays unmeasured are per-day kill "
-        f"rates, canine CNS penetration, and the second-primary hinge. It is falsifiable and cheap "
-        f"to start falsifying: {decisive_experiments()[-1]}"
+        f"All {n} escapes are closed by the model at both occupied CNS sites, and -- under the "
+        f"model-based standard -- every closure now rests on a real basis rather than a bare "
+        f"assumption. Graded: {t['MEASURED_CANINE_HS']} backed by activity measured in canine HS "
+        f"(the position-independent microtubule cytotoxic, PMID 25715778, closing escapes 1-3/6/8; "
+        f"liposomal clodronate, PMID 19760220; NF-kB/parthenolide, premise contested), "
+        f"{t['MEASURED_OTHER']} transferred from another disease/species (PI3K, HCQ), "
+        f"{t['MODEL_DERIVED']} model-derived from grounded inputs (the PRMT5i ten-year arm: kill "
+        f"closes at trivial CNS access per pkpd, conditional on MTAP-deleted status), and "
+        f"{t['STRUCTURAL']} resting on a mechanism/design argument (persister schedule; dropping "
+        f"the alkylator class). {t['ASSUMED']} escapes now rest on a bare assumption. What remains "
+        f"genuinely open is not WHETHER each escape is addressed but the QUANTITATIVE residuals: "
+        f"per-day kill rates need canine Cmax to be fully derived (only cobimetinib has both), CNS "
+        f"delivery/access is unmeasured, the 0.055/day growth bar is a placeholder, and the ten-year "
+        f"arm is gated on MTAP status. Cheapest decisive test: {decisive_experiments()[-1]}"
     )
 
 

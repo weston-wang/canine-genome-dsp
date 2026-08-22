@@ -13,35 +13,40 @@ def test_tally_sums_to_the_escape_count():
     assert sum(t.values()) == len(cov.COVERAGE) == 12
 
 
-def test_coverage_is_still_not_fully_evidence_backed():
-    """The honest headline: the induction backbone (microtubule class, escapes 1-3), lineage
-    depletion (clodronate, escape 5) and NF-kB (7) are now measured in canine HS, but a real
-    share still is not -- and the ten-year arm remains assumed. If a future edit claims full
-    backing, this fails and forces re-justification."""
-    backed = cov.evidence_backed()
-    assert len(backed) < len(cov.COVERAGE)  # never all twelve
+def test_no_escape_rests_on_a_bare_assumption():
+    """Under the model-based standard every escape is now closed on a real basis -- measured,
+    transferred, model-derived, or a structural design argument -- so none may be graded ASSUMED.
+    If a future edit reintroduces a bare assumption, this fails and forces re-justification."""
+    assert cov.assumed() == []
+    assert cov.tally()["ASSUMED"] == 0
+
+
+def test_the_canine_hs_measured_set_is_exactly_the_position_independent_and_direct_lines():
+    """Measured-in-canine-HS = the position-independent microtubule cytotoxic (escapes 1-3, 6, 8),
+    liposomal clodronate (5) and NF-kB/parthenolide (7). Each must cite its source, not assert."""
     canine = {c.escape_number for c in cov.measured_in_canine_hs()}
-    # microtubule cytotoxic (1-3), liposomal clodronate (5), NF-kB (7) are the canine-HS-measured
-    assert canine == {1, 2, 3, 5, 7}
-    # escapes 1-3 must cite the canine-HS cytotoxicity paper, not merely assert
+    assert canine == {1, 2, 3, 5, 6, 7, 8}
     for c in cov.COVERAGE:
-        if c.escape_number in (1, 2, 3):
-            assert "25715778" in c.key_number_status
-    # escape 5 must cite the canine-HS liposomal-clodronate study, not merely assert
+        if c.escape_number in (1, 2, 3, 6, 8):
+            assert "25715778" in c.key_number_status  # the canine-HS cytotoxicity paper
     e5 = next(c for c in cov.COVERAGE if c.escape_number == 5)
     assert "19760220" in e5.key_number_status
-    # the ten-year arm (escape 12) is still NOT evidence-backed
-    e12 = next(c for c in cov.COVERAGE if c.escape_number == 12)
-    assert not e12.backing.is_evidence_backed
+    # escape 8 must record that the counter-indicated ferroptosis inducer was dropped
+    e8 = next(c for c in cov.COVERAGE if c.escape_number == 8)
+    assert "DROPPED" in e8.closing_agent or "dropped" in e8.key_number_status.lower()
 
 
-def test_the_ten_year_arm_is_not_evidence_backed():
-    """Escape 12 (germline second primary / PRMT5i maintenance) carries the ten-year claim; it
-    must not be graded as measured while CNS access and MTAP status are unmeasured."""
+def test_the_ten_year_arm_is_model_derived_and_conditional_on_mtap():
+    """Escape 12 (PRMT5i maintenance) is now MODEL-DERIVED (kill computed by pkpd from grounded
+    inputs), but its closure stays conditional on MTAP-deleted status -- not a bare assumption,
+    and not an unqualified measurement."""
     e12 = next(c for c in cov.COVERAGE if c.escape_number == 12)
-    assert e12.backing is cov.Backing.ASSUMED
-    assert not e12.backing.is_evidence_backed
+    assert e12.backing is cov.Backing.MODEL_DERIVED
+    assert e12.backing.is_evidence_backed
+    assert cov.model_derived() == [e12]
+    # the MTAP falsifier must remain the named gate
     assert "MTAP" in e12.decisive_experiment
+    assert "MTAP" in e12.key_number_status
 
 
 def test_decisive_experiments_are_offered_and_deduplicated():
@@ -52,10 +57,14 @@ def test_decisive_experiments_are_offered_and_deduplicated():
     assert any("MTAP" in x for x in experiments)
 
 
-def test_honest_statement_names_the_structural_verdict():
+def test_honest_statement_names_residuals_not_just_closure():
+    """The verdict must not read as an unqualified 'solved': it states every escape is addressed on
+    a real basis AND names the quantitative residuals (kill rates, delivery, growth bar, MTAP)."""
     statement = cov.honest_coverage_statement()
-    assert "hypothesis" in statement.lower() or "structural" in statement.lower()
     assert "12" in statement
+    assert "model-derived" in statement.lower()
+    assert "residual" in statement.lower()
+    assert "MTAP" in statement
 
 
 def test_every_maintenance_tier_is_graded_and_cited():

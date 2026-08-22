@@ -44,7 +44,9 @@ src/canine_dsp/
   sequence_conservation.py  human-vs-dog ortholog identity (ERK2 100% / PI3Kα 99.81% / P-gp 91%),
                       computed from real UniProt sequences and reproducible (not asserted)
   coverage_assessment.py    evidence grade for every escape closure — how much of "covers all
-                      escapes" is measured vs transferred vs assumed (the honest coverage verdict)
+                      escapes" is measured vs transferred vs model-derived vs structural
+  pkpd.py             Emax PK/PD model: DERIVES a per-day kill rate from a measured IC50 + achievable
+                      exposure (returns a non-closing rate when the drug can't reach its IC50)
   dla_binding.py      canine MHC (DLA) peptide-binding prediction
   pharmacology.py     PK/PD pharmacology model
   mutational_supply.py  mutational-supply modelling

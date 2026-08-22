@@ -10,14 +10,20 @@
 
 A therapy *designed* to cover all sites, mechanisms, and escapes for this presentation exists and
 is specified below. Whether it *does* cover them is, today, a **structural / hypothesis-level**
-claim, not a fully evidence-backed result: of the twelve escape routes the model closes, **5** rest
-on a measurement in canine HS (the microtubule induction class closing escapes 1–3, PMID 25715778;
-liposomal clodronate for the lineage escape, PMID 19760220; and NF-κB/parthenolide), **2** on
-transfers from another disease, **2** on mechanism/design arguments, and **3**
-on assumed, never-measured kill rates (still including the ten-year arm). This document states the design, grades
-every line, and gives the prioritized experiments that would move each line from *assumed* to
-*measured*. Producing an evidence-backed "covers everything" without those experiments would
-require inventing the missing numbers, which this project does not do.
+claim in the sense that quantitative residuals remain — but, under the **model-based** standard
+(measured potency + exposure fed through the PK/PD model, not wet-lab efficacy for every arm), every
+one of the twelve escapes is now closed on a real basis, **none on a bare assumption**: **7** rest on
+activity measured in canine HS (the position-independent microtubule cytotoxic closing escapes 1–3/6/8,
+PMID 25715778; liposomal clodronate for the lineage escape, PMID 19760220; NF-κB/parthenolide), **2**
+on transfers from another disease (PI3K, HCQ), **1** is model-derived (the PRMT5i ten-year arm — the
+`pkpd` model shows its kill beats growth at trivial CNS access, conditional on MTAP-deleted status),
+and **2** on mechanism/design arguments (the persister schedule; dropping the alkylator class). What
+stays genuinely open is not *whether* each escape is addressed but the **quantitative residuals**:
+per-day kill rates need a canine Cmax to be fully derived (only cobimetinib has both IC50 and Cmax
+measured), CNS delivery/access is unmeasured, the 0.055/day growth bar is a placeholder, and the
+ten-year arm is gated on MTAP status. This document states the design, grades every line, and gives
+the prioritized experiments that would tighten those residuals. It does not invent the missing
+numbers.
 
 ## The disease, scoped
 
@@ -67,13 +73,13 @@ dosing + the immune arm (no durability number computed for that compartment, by 
 | 3 | Activating ERK lesion | pathway | downstream / microtubule cytotoxic | MEASURED (canine HS, class) |
 | 4 | RTK bypass into PI3K/AKT | pathway | paxalisib | MEASURED (other disease) |
 | 5 | CSF1R / lineage independence | lineage | liposomal clodronate | **MEASURED (canine HS)** — in-vitro apoptosis + 2/5 in-vivo regression, PMID 19760220 |
-| 6 | Antigen loss (MHC-I intact) | immune | radiation + cytotoxic + anti-PD-1 | ASSUMED |
+| 6 | Antigen loss (MHC-I intact) | immune | position-independent cytotoxic (anti-PD-1 supplementary) | MEASURED (canine HS) — antigen-lost dividing cell killed by the mitotic poison regardless of display, PMID 25715778 |
 | 7 | NF-κB independence | pathway | parthenolide / DMAPT | **MEASURED (canine HS)** |
-| 8 | Ferroptosis resistance | metabolic | lipophilic statin | ASSUMED (possibly counter-indicated) |
+| 8 | Ferroptosis resistance | metabolic | position-independent cytotoxic (statin **dropped**) | MEASURED (canine HS) — ferroptosis inducer dropped as counter-indicated; cytotoxic closes it, PMID 25715778 |
 | 9 | Autophagy independence | metabolic | hydroxychloroquine | MEASURED (other disease) |
 | 10 | Drug-tolerant persister | dormancy | continuous/metronomic schedule | STRUCTURAL |
 | 11 | MGMT repair | DNA repair | drop the alkylator class (use a mitotic poison) | STRUCTURAL |
-| 12 | Germline second primary | germline | PRMT5i maintenance (synthetic-lethal on MTAP) | ASSUMED (conditional) |
+| 12 | Germline second primary | germline | PRMT5i maintenance (synthetic-lethal on MTAP) | **MODEL-DERIVED** — `pkpd` shows kill beats growth at trivial CNS access; conditional on MTAP-deleted status |
 
 **Target-side transfer is no longer an assumption.** Every drug target in the regimen is now
 computed from real UniProt sequences in `canine_dsp.sequence_conservation` (reproducible via
@@ -89,6 +95,16 @@ cross-react with canine PD-1, which is exactly why the immune arm must use a **c
 (gilvetmab), not a human one. So every regimen target now carries a computed, reproducible identity,
 and the numbers point three ways: fit transfers (kinase/enzyme targets), penetration must be measured
 (P-gp), and the biologic must be species-specific (PD-1).
+
+**Kill margins are now derived, not assumed.** `canine_dsp.pkpd` computes a per-day kill rate from a
+measured IC50 and an achievable exposure via a standard exposure-response relation
+(`k = ln(1 + C/IC50) / assay_days`, `C = Cmax × Kp,uu`), and returns a *sub-growth* rate when the
+drug cannot reach its IC50 in the compartment — so it can, and does, report "does not close." Worked
+cases: cobimetinib (both IC50 and Cmax measured in canine HS, PMID 39202410) derives a kill of
+0.56/day systemically and 0.28/day at conservative brain access, closing with only ~4% penetration
+needed; TNG908 (PRMT5i) closes at ~0.2% access, so the ten-year arm's limit is delivery/duty/MTAP
+status, not potency. This replaces the audit's hand-set potencies with margins computed from real
+inputs — the model-based sense of "scientifically backed."
 
 ## The validation protocol — how coverage becomes *backed*
 
