@@ -111,11 +111,16 @@ COVERAGE: tuple[EscapeCoverage, ...] = (
     ),
     EscapeCoverage(
         5, "liposomal clodronate (macrophage-lineage depletion)",
-        Backing.ASSUMED,
-        "Clodronate's kill rate against canine HS has never been measured in any species; the "
-        "only signal is a response in 2/5 HS dogs. A liposome also cannot cross an intact BBB.",
-        "Measure liposomal clodronate cytotoxicity against canine HS cells.",
-        Provenance.ASSUMED,
+        Backing.MEASURED_CANINE_HS,
+        "Liposomal clodronate is directly measured to kill canine malignant-histiocytosis cells: "
+        "they are 'very susceptible to LC-induced apoptotic cell death' in vitro (uptake-dependent; "
+        "other lineages resistant) AND 2/5 dogs with spontaneous MH had significant tumour "
+        "regression in vivo (Hafeman et al. 2010, Cancer Immunol Immunother 59(3):441-52, PMID "
+        "19760220). Gaps: an apoptosis/regression readout is not the per-day kill RATE the margin "
+        "uses, and a liposome cannot cross an intact BBB, so this covers blood-side/meningeal "
+        "macrophages, not the parenchymal compartment.",
+        "Convert the in-vitro apoptosis data to a per-day kill rate; test intra-cavity/CSF delivery.",
+        Provenance.MEASURED,
     ),
     EscapeCoverage(
         6, "radiation + microtubule cytotoxic + anti-PD-1 (gilvetmab)",
@@ -346,8 +351,9 @@ def honest_coverage_statement() -> str:
     return (
         f"All {n} escapes are reported closed by the model at both occupied CNS sites. Graded by "
         f"evidence, that breaks down as: {t['MEASURED_CANINE_HS']} backed by activity measured in "
-        f"canine HS (the microtubule induction class, PMID 25715778, closing escapes 1-3, plus "
-        f"NF-kB/parthenolide whose premise is contested), {t['MEASURED_OTHER']} transferred from "
+        f"canine HS (the microtubule induction class, PMID 25715778, closing escapes 1-3; "
+        f"liposomal clodronate, PMID 19760220; and NF-kB/parthenolide, whose premise is "
+        f"contested), {t['MEASURED_OTHER']} transferred from "
         f"another disease/species, {t['STRUCTURAL']} resting on a mechanism/design argument with no "
         f"kill number, and {t['ASSUMED']} resting on assumed, never-measured kill rates -- still "
         f"including the entire ten-year maintenance arm. So the induction backbone is now "

@@ -211,10 +211,10 @@ escapes by what its closure actually rests on:
 
 | Evidence grade | Escapes | Meaning |
 | --- | --- | --- |
-| Measured in canine HS | **4** | the **microtubule induction class** (vincristine/vinblastine/paclitaxel, IC50 1.77–58.4 ng/ml in 4 canine HS lines, PMID 25715778) closing escapes 1–3, plus NF-κB/parthenolide (whose premise — that ERK activation predicts response — is contested by an unpropagated 11-line finding) |
+| Measured in canine HS | **5** | the **microtubule induction class** (vincristine/vinblastine/paclitaxel, IC50 1.77–58.4 ng/ml in 4 canine HS lines, PMID 25715778) closing escapes 1–3; **liposomal clodronate** for the lineage escape (in-vitro apoptosis of canine MH cells + 2/5 in-vivo regression, PMID 19760220); plus NF-κB/parthenolide (whose premise — that ERK activation predicts response — is contested by an unpropagated 11-line finding) |
 | Transferred (wrong disease/species) | **2** | PI3K IC50s from canine *hemangiosarcoma*; hydroxychloroquine from canine *lymphoma* |
 | Structural / design argument | **2** | the persister schedule (duty→1.0) and making MGMT irrelevant by dropping the alkylator class — sound reasoning, but not measurements |
-| Assumed, never-measured kill rate | **4** | clodronate, the immune arm, ferroptosis, and the entire ten-year maintenance arm — the load-bearing induction *class* is now measured-active (above), leaving its per-day kill *rate* and these four as the gaps |
+| Assumed, never-measured kill rate | **3** | the immune arm, ferroptosis (likely counter-indicated — macrophages resist ferroptosis), and the entire ten-year maintenance arm; the induction *class* and clodronate are measured-active, leaving per-day kill *rates* and these three as the gaps |
 
 So the headline should read: **the coverage claim is a structural / hypothesis-level result, not
 an evidence-backed one.** It is, however, falsifiable and cheap to start falsifying — the
