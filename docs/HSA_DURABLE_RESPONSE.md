@@ -139,85 +139,87 @@ is the unsolved half.
 
 ---
 
-## 3b. Closing both gaps
+## 3b. Three attempts to close the gap, and why each fails
 
-Sections 2 and 3 leave two open problems: the vaccine is ~1.7× too weak, and the booster interval
-depends on an immunity half-life nobody has measured. They turn out to be the same problem, and
-both close.
+Sections 2 and 3 leave the vaccine ~1.7× too weak. Three routes were tried. **None of them closes
+the gap**, and this section records why, because an earlier draft of this document claimed two of
+them did.
 
-### The bar is a difference, so clear it from the other side
+### Route A — lower the bar instead of raising the vaccine
 
-The bar is `growth − kill`. Raising the vaccine is one way to close it; **lowering the bar with a
-second persistent agent is the other**, and unlike vaccine potency it uses a mechanism that already
-exists. Holding the vaccine at the real achievable **0.03/day** throughout and adding a persistent
-mechanism-agnostic kill term:
+The bar is `growth − kill`, so a second persistent mechanism-agnostic agent should clear it from the
+other side. The arithmetic works. Holding the vaccine at the real achievable 0.03/day:
 
 | persistent agnostic kill | bar after it | 10-yr durable |
 |---|---|---|
 | 0 | 0.0515 | 0.492 |
-| 0.01 | 0.0423 | 0.532 |
 | 0.02 | 0.0331 | 0.832 |
 | **0.03** | **0.0240** | **1.000** |
-| 0.05 | 0.0056 | 1.000 |
 
-The crossing is exactly where the margin predicts: once the bar drops below 0.03, the real-world
-vaccine clears it. **No increase in vaccine potency is required.**
+**The anchoring destroys it.** Metronomic oral chemotherapy was the candidate. Anchor it the way
+vaccine potency was anchored — find the rate reproducing the real trial's numbers — and no rate
+does. As an agnostic agent alone the model gives a median time-to-progression of 10 d at 0.02,
+20 d at 0.03, 41 d at 0.035, 72–81 d at 0.04–0.045, then never progresses at 0.05. It is a cliff,
+not a gradient: **the maximum reachable median is 81 days against a real disease-free interval of
+178 days** (Lana et al. 2007, PMID 17708397).
 
-The agent has to be persistent, which rules out eBAT — right coverage, 28-day window, and re-dosing
-made things worse (§5). Metronomic oral chemotherapy has the right shape: continuously dosed, oral,
-systemic, with real data in this exact setting (Lana et al. 2007, PMID 17708397). Its kill rate is
-unmeasured and swept here, not asserted.
+Worse, 178 days is almost exactly what the modelled **inhibitor-alone** arm gives (174 days) — the
+arm that moves the bar by 7% and does not clear it. So metronomic chemotherapy's own trial places it
+with the agents that fail, not the ones that succeed. Route A is not supported.
 
-### Or: two vaccines instead of one
+*What metronomic cyclophosphamide does have real canine evidence for is immunological, not
+cytotoxic*: it selectively depletes regulatory T cells and inhibits angiogenesis in dogs (Burton
+et al. 2011, PMID 21736624), and prolonged disease-free interval at P < 0.0001 in 30 dogs versus 55
+matched controls (Elmslie et al. 2008, PMID 18976288), at a cost of sterile cystitis in 40%. That
+mechanism acts on the **height of the vaccine already present**, not as an independent kill term —
+a different proposition, and an unquantified one.
 
-ERstrePs and eVim target **different antigens through different effector arms** — ER-stress peptides
-via humoral *and* T-cell responses, versus extracellular vimentin via antibody. Neither competes for
-the other's target, and MHC-I loss cannot disable both.
+### Route B — two vaccines instead of one
 
-| combined potency | | 10-yr durable |
-|---|---|---|
-| 0.03 | one vaccine | 0.492 |
-| 0.045 | two, 25% loss of additivity | 0.540 |
-| 0.05 | two, sub-additive | 0.924 |
-| **0.06** | **two, additive** | **1.000** |
+ERstrePs and eVim target different antigens through different effector arms, so on paper they add:
+0.03 + 0.03 = 0.06 clears the bar and gives 1.000 at ten years.
 
-Additivity is assumed, not measured — and at 25% loss the pair falls back to 0.540, so this is a
-threshold, not a gradient. That makes measuring whether two HSA vaccines are additive a decisive
-experiment rather than an incremental one.
+**Antigenic competition destroys it.** B cells compete for restricted T-cell help, suppressing the
+subordinate response 10-fold at 2× antigen excess and 100-fold at 10× — stable across a 6-log dose
+range, apparent within 10 days, and **resistant to boosting and adjuvants** (Woodruff et al. 2018,
+Cell Rep 25(2):321-327.e3, PMID 30304673). The source names immunodominance explicitly as an
+obstacle to polyvalent vaccination. eVim is an antibody vaccine — precisely the arm this suppresses.
 
-### Headroom above the bar *is* the booster-interval tolerance
+| scenario | combined | clears bar? | 10-yr durable |
+|---|---|---|---|
+| perfect additivity | 0.0600 | yes | 1.000 |
+| weaker arm suppressed 2× | 0.0450 | **no** | 0.540 |
+| weaker arm suppressed 10× *(Woodruff's weakest)* | 0.0330 | **no** | 0.500 |
+| weaker arm suppressed 100× | 0.0303 | **no** | 0.516 |
 
-Immunity only has to stay **above the bar**, not near its peak. So the tolerable interval is
-`half_life × log₂(max_kill / bar)` — and headroom buys it directly:
+The pair tolerates a **28%** loss in the weaker arm. The weakest suppression Woodruff reports is
+10-fold — a **90%** loss. Route B fails under any documented level of competition, and the
+competition cannot be dosed or adjuvanted around.
+
+This is an interference problem, not a safety one: both trials individually reported no
+vaccine-related toxicity (PMID 37686485, PMID 41009669).
+
+### Route C — booster-interval tolerance is not a route at all
+
+Immunity only has to stay above the bar, not near peak, so headroom buys interval tolerance:
 
 | max_kill | may decay to | q-interval @ hl=90 d | @ hl=180 d | @ hl=365 d |
 |---|---|---|---|---|
-| 0.06 (barely over) | 85.8% | 20 d | 40 d | 80 d |
+| 0.06 | 85.8% | 20 d | 40 d | 80 d |
 | 0.08 | 64.4% | 57 d | 114 d | 232 d |
 | 0.10 | 51.5% | 86 d | 172 d | 349 d |
 
-This is why the two problems are one. A vaccine that barely clears the bar needs dosing every three
-weeks and is hostage to an unmeasured half-life; one with real headroom tolerates quarterly dosing
-across the whole plausible range. **Solving the potency gap solves the scheduling problem as a
-side effect.**
+Every row requires potency **above** the bar. `tolerable_booster_interval` returns exactly 0.0 for
+any potency at or below it. Route C is a consequence of having closed the gap, never a way of
+closing it — presenting it alongside A and B as a third option was a category error.
 
-The analytic rule above is conservative — it demands immunity stay above the bar for the entire
-horizon, while simulation tolerates longer intervals because the tumour is near-extinct before
-immunity first dips (0.06/day at q90d with a 90-day half-life still gives 1.000). Treat the analytic
-figure as the safe schedule, not the only one that works.
+### Where that leaves it
 
-### The combination is insensitive to the thing nobody measured
-
-Real vaccine potency (0.03) plus a persistent agnostic agent (0.03), across both half-lives and both
-schedules:
-
-| | boost q60d | boost q90d |
-|---|---|---|
-| half-life 90 d | 1.000 | 1.000 |
-| half-life 180 d | 1.000 | 1.000 |
-
-That robustness is the point. The combination does not need the immunity half-life to be measured
-before it can be relied on, which the single-vaccine route does.
+The gap is open. The best remaining lead is not a second kill term but **raising the vaccine's own
+height by removing immunosuppression** — metronomic cyclophosphamide's Treg depletion, or anti-PD-L1
+against the PD-L1⁺ macrophages that exclude T-cells from canine HSA tumours (PMID 35136176, §5).
+Neither has a measured effect on kill rate in this disease, so neither is quantified here, and
+neither should be reported as a closure.
 
 *Tests: `test_hsa_gap_closure.py`*
 
@@ -401,20 +403,21 @@ drug that works, so the honest answer is to find the tumour earlier rather than 
 better.
 
 Real vaccines in real dogs deliver roughly **60% of the killing power** that permanent control
-requires as a single agent. Boosters do not close that gap — they are required for a different
-reason, to hold whatever height you have for the animal's life, and without them even a
-threshold-clearing vaccine falls back to roughly the no-vaccine outcome by ten years.
+requires. Boosters do not close that gap — they are required for a different reason, to hold
+whatever height you have for the animal's life, and without them even a threshold-clearing vaccine
+falls back to roughly the no-vaccine outcome by ten years.
 
-**But the gap does close, without any increase in vaccine potency** (§3b). The bar is a difference,
-so a second persistent agent that lowers it works as well as a stronger vaccine — at 0.03/day of
-persistent mechanism-agnostic kill, the real-world vaccine reaches 1.000 at ten years. Two
-mechanistically independent vaccines are the alternative route, if they prove additive. And because
-headroom above the bar is what buys booster-interval tolerance, the same fix makes the schedule
-robust to the immunity half-life nobody has measured.
+**The gap does not close on the evidence available** (§3b). Lowering the bar with a second persistent
+agent works arithmetically but the candidate's own trial places it with the agents that fail.
+Combining two vaccines works on paper but fails under documented antigenic competition that cannot
+be boosted or adjuvanted around. Booster-interval tolerance is downstream of clearing the bar, not a
+way of clearing it.
 
-**The remaining uncertainties are now specific and testable**: whether metronomic chemotherapy
-supplies ≥0.03/day of persistent kill, whether two HSA vaccines are additive, and what the immunity
-half-life actually is. None of them requires a better vaccine.
+**The best remaining lead is to raise the vaccine's own height by removing immunosuppression** —
+metronomic cyclophosphamide's Treg depletion, or anti-PD-L1 against the macrophages that exclude
+T-cells from these tumours. Both have real canine mechanistic evidence and neither has a measured
+effect on kill rate, so neither is a closure. The shortfall stands at ~1.7×, and it is the single
+thing this analysis cannot argue its way past.
 
 ### What would change the answer
 

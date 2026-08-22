@@ -1,135 +1,134 @@
 import numpy as np
 import pytest
-from dataclasses import replace
 
 from canine_dsp import hsa_scenarios as hs
 from canine_dsp.hsa_gap_closure import (
-    BOOSTER_INTERVAL_BY_HEADROOM, COMBINED_IS_HALF_LIFE_INSENSITIVE, DUAL_VACCINE,
-    DUAL_VACCINE_RATIONALE, DURABILITY_BAR_PER_DAY, LOWER_THE_BAR,
-    PERSISTENT_AGNOSTIC_CANDIDATE, REAL_TRIAL_IMPLIED_MAX_KILL, tolerable_booster_interval,
+    ANTIGENIC_COMPETITION, BOOSTER_INTERVAL_BY_HEADROOM, DUAL_VACCINE, DUAL_VACCINE_TOLERANCE,
+    DURABILITY_BAR_PER_DAY, GAP_STATUS, LOWER_THE_BAR, METRONOMIC_IMMUNE_MECHANISM,
+    REAL_TRIAL_IMPLIED_MAX_KILL, ROUTE_A_ANCHORING_FAILS, tolerable_booster_interval,
 )
 from canine_dsp.hsa_vaccine_maintenance import immunity_schedule, run_with_schedule
-from canine_dsp.mapk_resistance import drug_kill_rate
+from canine_dsp.mapk_resistance import drug_kill_rate, replace, run_monte_carlo
 
 H = 3650
 S, R = hs.HSA_VACCINE_START_DAY, hs.HSA_VACCINE_RAMP_DAYS
 APPLICABLE = np.array([1.0, 1.0, 1.0, 1.0, 0.0])
 
 
-def _durable(vmk, agnostic=0.0, half_life=None, interval=None, trials=250):
+def _durable(vmk, trials=250):
     m5, css, seeding, _ = hs.hsa_vaccine_followon_scenarios(vaccine_max_kill_values=[vmk])[vmk]
-    schedule = immunity_schedule(H, S, R, vmk, APPLICABLE, half_life_days=half_life,
-                                 booster_interval_days=interval)
-    if agnostic > 0:
-        kill = drug_kill_rate(hs.HSA_EBAT_ILLUSTRATIVE_CSS_NM, hs.HSA_EBAT_ILLUSTRATIVE_IC50_NM,
-                              1.5, agnostic)
-        schedule = schedule + np.full((H, 5), float(kill))
+    schedule = immunity_schedule(H, S, R, vmk, APPLICABLE)
     progressed = run_with_schedule(m5, css, H, seeding, schedule, S,
                                    hs.HSA_IMMUNE_ESCAPE_SEEDING_RATE, trials=trials,
                                    preexisting_prob=hs._PREEXISTING_PROB_CENTRAL, seed=7)
     return 1 - progressed.mean()
 
 
-def _agnostic_kill(agnostic):
-    return float(drug_kill_rate(hs.HSA_EBAT_ILLUSTRATIVE_CSS_NM,
-                                hs.HSA_EBAT_ILLUSTRATIVE_IC50_NM, 1.5, agnostic))
+def _agnostic_only_median_ttp(agnostic, trials=300):
+    """No inhibitor, agnostic agent alone -- the arm Route A's anchor has to match."""
+    model, _, seeding, _ = hs.dog_hsa_preset()
+    kwargs = {}
+    if agnostic > 0:
+        model = replace(model, ic50_nM_2=hs.HSA_EBAT_ILLUSTRATIVE_IC50_NM, max_kill_2=agnostic)
+        kwargs["css_reference_2"] = hs.HSA_EBAT_ILLUSTRATIVE_CSS_NM
+    out = run_monte_carlo(model, 0.0, 1095, seeding, trials=trials,
+                          preexisting_prob=hs._PREEXISTING_PROB_CENTRAL, seed=7, **kwargs)
+    ttp = out.time_to_progression[out.progressed]
+    return float(np.median(ttp)) if ttp.size else None
 
 
-# ---------- route A: lower the bar instead of raising the vaccine ----------
+# ---------- route A: the arithmetic works, the anchoring does not ----------
 
-def test_a_persistent_agnostic_agent_lowers_the_bar_by_its_own_kill_rate():
-    """The bar is a difference, so it can be cleared from either side."""
+def test_the_bar_does_move_by_the_agnostic_agents_kill_rate():
+    """Route A's arithmetic is sound -- which is why the anchoring test below matters."""
     for agnostic, recorded in LOWER_THE_BAR.items():
-        expected = DURABILITY_BAR_PER_DAY - _agnostic_kill(agnostic)
-        assert expected == pytest.approx(recorded["bar_after"], abs=0.002)
+        kill = float(drug_kill_rate(hs.HSA_EBAT_ILLUSTRATIVE_CSS_NM,
+                                    hs.HSA_EBAT_ILLUSTRATIVE_IC50_NM, 1.5, agnostic))
+        assert DURABILITY_BAR_PER_DAY - kill == pytest.approx(recorded["bar_after"], abs=0.002)
 
 
-@pytest.mark.parametrize("agnostic", [0.0, 0.03])
-def test_real_vaccine_potency_reaches_durability_once_the_bar_is_lowered(agnostic):
-    """Vaccine held at the real achievable 0.03/day throughout -- only the bar moves."""
-    recorded = LOWER_THE_BAR[agnostic]["ten_year_durable"]
-    assert _durable(REAL_TRIAL_IMPLIED_MAX_KILL, agnostic=agnostic) == pytest.approx(recorded,
-                                                                                     abs=0.07)
+@pytest.mark.parametrize("agnostic", [0.03, 0.045])
+def test_no_agnostic_rate_reproduces_the_real_metronomic_disease_free_interval(agnostic):
+    """178 days is unreachable: the arm jumps from tens of days to never progressing."""
+    median = _agnostic_only_median_ttp(agnostic)
+    recorded = ROUTE_A_ANCHORING_FAILS["agnostic_alone_median_ttp_days"][agnostic]
+    assert median == pytest.approx(recorded, abs=25)
+    assert median is None or median < 120, "well short of the 178-day anchor"
 
 
-def test_lowering_the_bar_is_monotone_and_crosses_at_the_point_the_margin_predicts():
-    values = [LOWER_THE_BAR[a]["ten_year_durable"] for a in sorted(LOWER_THE_BAR)]
-    assert values == sorted(values)
-    crossing = [a for a in sorted(LOWER_THE_BAR)
-                if LOWER_THE_BAR[a]["bar_after"] < REAL_TRIAL_IMPLIED_MAX_KILL]
-    assert crossing and min(crossing) == 0.03
-    assert LOWER_THE_BAR[min(crossing)]["ten_year_durable"] == pytest.approx(1.0, abs=0.02)
+def test_route_a_is_recorded_as_unsupported_with_its_own_counter_evidence():
+    assert ROUTE_A_ANCHORING_FAILS["max_reachable_median_ttp_days"] < 178
+    assert ROUTE_A_ANCHORING_FAILS["modelled_inhibitor_alone_median_ttp_days"] == pytest.approx(
+        178, abs=15), "the real metronomic result matches the arm that does NOT clear the bar"
+    assert "NOT SUPPORTED" in GAP_STATUS["route_A"]
 
 
-def test_the_persistent_agent_named_is_persistent_and_the_rejected_one_is_not():
-    assert "metronomic" in PERSISTENT_AGNOSTIC_CANDIDATE["therapy"]
-    assert "17708397" in PERSISTENT_AGNOSTIC_CANDIDATE["citation"]
-    assert "32187827" in PERSISTENT_AGNOSTIC_CANDIDATE["rejected_alternative"]
-    assert PERSISTENT_AGNOSTIC_CANDIDATE["limits"]
+def test_the_metronomic_mechanism_with_canine_evidence_is_immune_not_cytotoxic():
+    assert "21736624" in METRONOMIC_IMMUNE_MECHANISM["treg_depletion"]
+    assert "18976288" in METRONOMIC_IMMUNE_MECHANISM["clinical_signal"]
+    why = METRONOMIC_IMMUNE_MECHANISM["why_it_is_not_route_A"]
+    assert "rather than supplying an independent kill term" in why
+    assert "no per-day kill rate follows" in why
+    assert METRONOMIC_IMMUNE_MECHANISM["toxicity"]
 
 
-# ---------- route B: two independent vaccines ----------
+# ---------- route B: fails under documented competition ----------
 
-def test_two_additive_vaccines_clear_the_bar_and_a_lossy_pair_does_not():
-    assert DUAL_VACCINE[0.06]["ten_year_durable"] == pytest.approx(1.0, abs=0.02)
-    assert DUAL_VACCINE[0.045]["ten_year_durable"] < 0.6
-    assert 0.06 > DURABILITY_BAR_PER_DAY > 0.045
+def test_the_pair_tolerates_far_less_loss_than_competition_actually_imposes():
+    single = REAL_TRIAL_IMPLIED_MAX_KILL
+    combined_at_tolerance = single + single * (1 - DUAL_VACCINE_TOLERANCE)
+    assert combined_at_tolerance == pytest.approx(DURABILITY_BAR_PER_DAY, abs=0.001)
+
+    weakest_documented_loss = 1 - 1 / ANTIGENIC_COMPETITION["suppression_at_2x_excess"]
+    assert weakest_documented_loss == pytest.approx(0.90, abs=0.01)
+    assert weakest_documented_loss > DUAL_VACCINE_TOLERANCE, "documented loss exceeds tolerance"
 
 
-@pytest.mark.parametrize("combined", [0.045, 0.06])
-def test_dual_vaccine_figures_are_recomputed(combined):
+@pytest.mark.parametrize("combined", [0.033, 0.06])
+def test_dual_vaccine_outcomes_are_recomputed(combined):
     assert _durable(combined) == pytest.approx(DUAL_VACCINE[combined]["ten_year_durable"], abs=0.07)
 
 
-def test_the_two_vaccines_named_are_mechanistically_independent():
-    assert "37686485" in DUAL_VACCINE_RATIONALE["vaccine_a"]
-    assert "41009669" in DUAL_VACCINE_RATIONALE["vaccine_b"]
-    assert "assumed, not measured" in DUAL_VACCINE_RATIONALE["caveat"]
+def test_only_perfect_additivity_clears_the_bar():
+    clearing = [k for k in DUAL_VACCINE if k > DURABILITY_BAR_PER_DAY]
+    assert clearing == [0.06]
+    assert DUAL_VACCINE[0.06]["label"] == "perfect additivity"
+    for k in DUAL_VACCINE:
+        if k <= DURABILITY_BAR_PER_DAY:
+            assert DUAL_VACCINE[k]["ten_year_durable"] < 0.6
 
 
-# ---------- the link: headroom buys booster-interval tolerance ----------
+def test_competition_is_interference_not_toxicity_and_cannot_be_boosted_around():
+    assert ANTIGENIC_COMPETITION["resistant_to_boosting_and_adjuvants"] is True
+    assert "30304673" in ANTIGENIC_COMPETITION["citation"]
+    assert "not safety" in ANTIGENIC_COMPETITION["not_a_toxicity_problem"]
+    assert "NOT SUPPORTED" in GAP_STATUS["route_B"]
 
-def test_headroom_above_the_bar_sets_the_tolerable_interval():
+
+# ---------- route C: not a route ----------
+
+def test_booster_tolerance_is_zero_for_every_potency_that_does_not_clear_the_bar():
+    """Route C presupposes the gap is already closed; it cannot close it."""
+    for potency in (REAL_TRIAL_IMPLIED_MAX_KILL, 0.045, DURABILITY_BAR_PER_DAY):
+        assert tolerable_booster_interval(potency, DURABILITY_BAR_PER_DAY, 180) == 0.0
+    assert "NOT A ROUTE" in GAP_STATUS["route_C"]
+
+
+def test_headroom_sets_the_interval_only_once_the_bar_is_cleared():
     for max_kill, row in BOOSTER_INTERVAL_BY_HEADROOM.items():
+        assert max_kill > DURABILITY_BAR_PER_DAY
         assert DURABILITY_BAR_PER_DAY / max_kill == pytest.approx(row["may_decay_to"], abs=0.005)
         for half_life in (90, 180, 365):
-            computed = tolerable_booster_interval(max_kill, DURABILITY_BAR_PER_DAY, half_life)
-            assert computed == pytest.approx(row[half_life], abs=1.0)
-
-
-def test_more_headroom_means_a_longer_tolerable_interval():
-    intervals = [BOOSTER_INTERVAL_BY_HEADROOM[k][180] for k in sorted(BOOSTER_INTERVAL_BY_HEADROOM)]
-    assert intervals == sorted(intervals)
-    assert intervals[-1] > 4 * intervals[0]
-
-
-def test_a_vaccine_that_does_not_clear_the_bar_has_no_tolerable_interval():
-    assert tolerable_booster_interval(REAL_TRIAL_IMPLIED_MAX_KILL, DURABILITY_BAR_PER_DAY, 180) == 0.0
-    assert tolerable_booster_interval(DURABILITY_BAR_PER_DAY, DURABILITY_BAR_PER_DAY, 180) == 0.0
+            assert tolerable_booster_interval(max_kill, DURABILITY_BAR_PER_DAY,
+                                              half_life) == pytest.approx(row[half_life], abs=1.0)
     with pytest.raises(ValueError):
         tolerable_booster_interval(0.06, DURABILITY_BAR_PER_DAY, 0)
 
 
-def test_the_analytic_interval_is_conservative_against_simulation():
-    """The analytic rule demands immunity stay above the bar for the whole horizon; simulation
-    tolerates longer because the tumour is near-extinct before immunity first dips. Recorded so the
-    analytic figure is read as the safe schedule, not the only one that works."""
-    analytic = tolerable_booster_interval(0.06, DURABILITY_BAR_PER_DAY, 90)
-    assert analytic == pytest.approx(20.0, abs=1.0)
-    assert _durable(0.06, half_life=90, interval=90) == pytest.approx(1.0, abs=0.03)
+# ---------- the honest bottom line ----------
 
-
-# ---------- the combination is insensitive to the unmeasured half-life ----------
-
-@pytest.mark.parametrize("half_life,interval", [(90, 90), (180, 60)])
-def test_combination_holds_across_the_unmeasured_half_life(half_life, interval):
-    recorded = COMBINED_IS_HALF_LIFE_INSENSITIVE[(half_life, interval)]
-    got = _durable(REAL_TRIAL_IMPLIED_MAX_KILL, agnostic=0.03,
-                   half_life=half_life, interval=interval)
-    assert got == pytest.approx(recorded, abs=0.05)
-
-
-def test_the_combination_beats_either_component_alone():
-    combined = COMBINED_IS_HALF_LIFE_INSENSITIVE[(90, 90)]
-    vaccine_alone = LOWER_THE_BAR[0.0]["ten_year_durable"]
-    assert combined > vaccine_alone + 0.4
+def test_the_gap_is_recorded_as_still_open():
+    assert GAP_STATUS["open"] is True
+    assert all("NOT" in GAP_STATUS[k] for k in ("route_A", "route_B", "route_C"))
+    assert "should be reported as a closure" in GAP_STATUS["best_remaining_lead"]
+    assert "neither should" in GAP_STATUS["best_remaining_lead"]
