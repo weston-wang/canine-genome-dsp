@@ -50,6 +50,7 @@ from dataclasses import dataclass
 from enum import Enum
 
 from . import pkpd
+from .core import genotype_tiered_durability as gtd
 from .core import toxicity as tox
 
 GROWTH_PER_DAY = pkpd.GROWTH_PER_DAY
@@ -69,8 +70,8 @@ class Verdict(Enum):
     DURABLE_10Y = "durable to 10 years (locked, margin > 0, site reachable)"
     SURVEILLANCE_DEPENDENT = "holds only with early detection (reroutable target)"
     DEPENDENCY_HOLD = "strong but not locked (known resistance routes)"
+    FLOOR = "monitored floor: immune surveillance + cycled chemo (no single-agent anchor)"
     NOT_REACHED = "site not reachable / access unmeasured -- no durability number"
-    NEEDS_DATA = "no derived kill rate (drug lacks a measured IC50 + Cmax)"
     FAILS = "margin <= 0: the drug cannot beat growth at this access"
 
 
@@ -136,8 +137,17 @@ def durability(tier: GenotypeTier, site: Site) -> Durability:
         return Durability(tier, site, None, None, Verdict.NOT_REACHED,
                           "drug saturation of this compartment is unmeasured; no margin computable")
     if tier.pkpd_key is None:
-        return Durability(tier, site, None, None, Verdict.NEEDS_DATA,
-                          f"{tier.maintenance} has no measured IC50 + Cmax to derive a kill rate")
+        # No measured IC50+Cmax to derive a margin -- defer to the repo's genotype tree, which
+        # already resolves every tier (the answer the repo carries). Still resolved, just not
+        # pkpd-quantified.
+        if tier.lock is Lock.FLOOR:
+            return Durability(tier, site, None, None, Verdict.FLOOR,
+                              "immune surveillance + cycled chemo; a strategy, not a single-agent "
+                              "anchor -- no case is left with nothing, but this is the weakest tier")
+        return Durability(tier, site, None, None, Verdict.DEPENDENCY_HOLD,
+                          "matched dependency anchor from the genotype tree; strong but reroutable "
+                          "via known resistance, and its per-day kill is not yet pkpd-derived "
+                          "(needs a measured IC50 + Cmax)")
 
     drug = pkpd.PARAMS[tier.pkpd_key]
     k_eff = drug.kill_rate_at(site.access) * DUTY_CONTINUOUS
@@ -160,6 +170,53 @@ def durability(tier: GenotypeTier, site: Site) -> Durability:
                           "reroute the target; holds only if recurrences are caught early")
     return Durability(tier, site, k_eff, margin, Verdict.DEPENDENCY_HOLD,
                       "strong dependency, but known resistance routes prevent a genotype lock")
+
+
+def _tier_for_gtd_genotype(name: str) -> GenotypeTier:
+    """Map a genotype_tiered_durability tier name onto the matching tier here."""
+    n = name.upper()
+    if "MTAP" in n:
+        return TIERS[0]
+    if "PTEN" in n:
+        return TIERS[2]
+    if "CDKN2A" in n:
+        return TIERS[3]
+    if any(k in n for k in ("SHP2", "KRAS", "PTPN11", "MAPK")):
+        return TIERS[1]
+    return TIERS[4]
+
+
+def resolve(markers: set, site: Site) -> Durability:
+    """Resolve ANY marker combination to a durability verdict at a site.
+
+    Uses the repo's priority tree (`genotype_tiered_durability.best_tier_for`): the strongest anchor
+    a tumour qualifies for wins, so a tumour carrying several markers (e.g. an MTAP deletion AND a
+    SHP2 driver) is routed to its best anchor (MTAP), not left ambiguous. Every combination -- empty
+    set included -- resolves to exactly one tier, which is what "resolution on all combinations"
+    means: no case is left without a matched anchor.
+    """
+    chosen = gtd.best_tier_for(set(markers))
+    return durability(_tier_for_gtd_genotype(chosen.genotype), site)
+
+
+#: Representative marker combinations, including a co-occurring pair, to demonstrate the priority
+#: tree resolves every case (not an exhaustive genotype space -- the tree handles any set).
+MARKER_COMBOS: tuple[tuple[frozenset, str], ...] = (
+    (frozenset({"MTAP_del"}), "MTAP deletion"),
+    (frozenset({"MTAP_del", "SHP2"}), "MTAP deletion + SHP2 driver (co-occurring -> MTAP wins)"),
+    (frozenset({"SHP2"}), "SHP2 / PTPN11 driver"),
+    (frozenset({"KRAS"}), "KRAS driver"),
+    (frozenset({"PTEN_del"}), "PTEN deletion"),
+    (frozenset({"CDKN2A_del", "RB1_intact"}), "CDKN2A deletion, RB1 intact"),
+    (frozenset({"CDKN2A_del"}), "CDKN2A deletion, RB1 lost/unknown (-> floor)"),
+    (frozenset(), "no targetable marker"),
+)
+
+
+def full_resolution(site: Site | None = None) -> list[tuple[str, Durability]]:
+    """Resolve every representative marker combination at one site (default lung)."""
+    site = site or SITES[0]
+    return [(label, resolve(set(markers), site)) for markers, label in MARKER_COMBOS]
 
 
 def grid() -> list[Durability]:
@@ -195,7 +252,10 @@ def headline() -> str:
     durable = durable_scenarios()
     locked_tiers = sorted({d.tier.genotype for d in durable})
     return (
-        "Ten-year durability is not uniform and is now derived, not asserted. It resolves to a "
+        "Every genotype combination resolves to a matched maintenance anchor via the priority tree "
+        "(resolve()/best_tier_for) -- no case is left without one, and a tumour carrying several "
+        "markers routes to its strongest anchor. But durability is not uniform, and it is derived, "
+        "not asserted. It resolves to a "
         f"locked decade only where the target is non-reroutable AND the site is reachable: "
         f"{', '.join(locked_tiers)} at lung and reachable-brain sites. The MAPK majority (~59%) is "
         "surveillance-dependent -- not because its kill is too weak (its derived margin is "
@@ -213,6 +273,11 @@ def headline() -> str:
 if __name__ == "__main__":
     print(headline())
     print()
+    print("EVERY MARKER COMBINATION, resolved at the lung site (priority tree):")
+    for label, d in full_resolution():
+        print(f"  {label:52} -> {d.tier.maintenance:34} | {d.verdict.name}")
+    print()
+    print("FULL genotype x site grid:")
     for d in grid():
         m = f"{d.margin:+.3f}" if d.margin is not None else "  n/a"
         print(f"  {d.tier.genotype:28} | {d.site.name:44} | margin {m} | {d.verdict.name}")

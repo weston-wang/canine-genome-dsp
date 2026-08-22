@@ -313,21 +313,41 @@ the two conditions a raw margin hides: **genotype lock** (can the target be rero
 (is the drug where the founding cell is?). The result is not one number but a grid, and it fails or
 abstains where it should:
 
-| Genotype (share) | Lung / local-delivery brain | Systemic-penetration brain | CSF |
-| --- | --- | --- | --- |
-| **MTAP deleted** (minority) | **Durable to 10y** — locked | **Durable to 10y** — locked | *No number* — not reached |
-| **MAPK driver** (~59%) | Surveillance-dependent | Surveillance-dependent | *No number* — not reached |
-| PTEN / CDKN2A / none | Needs data (no measured IC50+Cmax) | Needs data | *No number* — not reached |
+**Every genotype combination resolves** — the repo's priority tree
+(`genotype_tiered_durability.best_tier_for`, mirrored by `maintenance_durability.resolve()`) maps any
+set of markers to the strongest anchor it qualifies for, so no case is left without a matched pill,
+and a tumour carrying several markers (e.g. an MTAP deletion *and* a SHP2 driver) routes to its best
+anchor (MTAP). What differs across combinations is the durability *grade*, not whether an answer
+exists:
 
-Two honest results fall straight out. **Only the MTAP tier reaches a locked decade** — not because
-its kill is bigger (absolute margins aren't comparable; TNG908's Cmax is a placeholder) but because a
-synthetic-lethal target on a homozygous deletion **cannot be rerouted**, while the MAPK majority's
-pathway target can. And the **CSF compartment returns no durability number at all**, matching the
-report's refusal to compute one. The reconciliation with the older module: its 0.15/day hand-set
-potency implied an access threshold near 0.37 (hence "fails at 0.30"); the derived kill clears growth
-at ~0.2% (MTAP) to ~4% (MAPK) access — so the raw margin was never the binding constraint. **The lock
-is.** Every "durable" verdict stays conditional on MTAP-deleted status (the falsifier) and on
-continuous dosing being achievable; it is a grounded model result, not an outcome shown in any dog.
+| Genotype (share) | Maintenance anchor | Lung / local-delivery brain | Systemic-penetration brain | CSF |
+| --- | --- | --- | --- | --- |
+| **MTAP deleted** (recurrent minority) | PRMT5i (synthetic-lethal) | **Durable 10y** — locked | **Durable 10y** — locked | *No number* — not reached |
+| **MAPK driver** (~59%) | MEKi (mirdametinib) | Surveillance-dependent | Surveillance-dependent | *No number* — not reached |
+| PTEN deleted (minority) | PI3Ki (paxalisib) | Dependency hold | Dependency hold | *No number* — not reached |
+| CDKN2A del, RB1 intact (minority) | CDK4/6i (abemaciclib) | Dependency hold | Dependency hold | *No number* — not reached |
+| None targetable / RB1 lost (residual) | immune + cycled chemo | Floor — monitored | Floor — monitored | *No number* — not reached |
+
+So the resolution across *all* combinations is: **a matched anchor for every case, with a graded
+hold — not a uniform ten-year lock.** Three honest results fall out, and they match what the repo
+already concluded and, in one place, explicitly retracted:
+
+- **A locked decade is the MTAP subset's prize, not everyone's.** `presentation.py` marks the earlier
+  "MTAP synthetic lethality applies to all cases" claim **RETRACTED**: the MAPK-driven majority is the
+  dominant genotype, and "recurrent is not universal." Only a synthetic-lethal target on a homozygous
+  deletion **cannot be rerouted**; the MAPK, PTEN and CDKN2A anchors are dependencies with known
+  resistance routes.
+- **The lock, not the raw margin, is decisive.** The old module's 0.15/day hand-set potency implied a
+  ~0.37 access threshold ("fails at 0.30"); the derived kill clears growth at ~0.2% (MTAP) to ~4%
+  (MAPK) access — so margin size was never the binding constraint (and TNG908's Cmax is a placeholder,
+  so absolute margins aren't comparable anyway).
+- **CSF gets no durability number at all** for any genotype — drug saturation of that compartment is
+  unmeasured, and the repo declines to compute one.
+
+Every "durable" verdict stays conditional on the tumour actually being MTAP-deleted (the falsifier)
+and on continuous dosing being achievable; and even a second primary *could* in principle arise from
+a non-MTAP secondary locus that maintenance would not see (`breed_wide_durability`). It is a grounded
+model result, not an outcome shown in any dog.
 
 **A caution about the engine itself.** Every figure comes from one simulation engine. It
 carried 1,340+ tests, but until recently *not one* checked it against a known outcome —

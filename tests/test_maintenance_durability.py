@@ -38,11 +38,34 @@ def test_csf_is_never_given_a_durability_number():
             assert d.margin is None
 
 
-def test_dependency_tiers_need_data():
-    """Tiers with no measured IC50 + Cmax cannot get a derived margin -- honest abstention."""
+def test_every_combination_resolves_to_an_anchor():
+    """Resolution on ALL combinations: every marker set -- empty, single, or co-occurring -- routes
+    to exactly one matched anchor with a real verdict. Nothing is left unresolved."""
+    for _label, d in md.full_resolution():
+        assert d.verdict in (md.Verdict.DURABLE_10Y, md.Verdict.SURVEILLANCE_DEPENDENT,
+                             md.Verdict.DEPENDENCY_HOLD, md.Verdict.FLOOR)
+        assert d.tier.maintenance  # a concrete matched pill/strategy
+
+
+def test_co_occurring_markers_route_to_the_strongest_anchor():
+    """A tumour with BOTH an MTAP deletion and a SHP2 driver is routed to the MTAP (locked) anchor,
+    not the MAPK one -- the priority tree picks the best anchor a tumour qualifies for."""
+    lung = md.SITES[0]
+    d = md.resolve({"MTAP_del", "SHP2"}, lung)
+    assert d.tier.genotype == "MTAP deleted"
+    assert d.verdict is md.Verdict.DURABLE_10Y
+
+
+def test_dependency_and_floor_tiers_still_resolve_without_pkpd():
+    """No measured IC50+Cmax -> still resolved (dependency/floor grade from the genotype tree),
+    never left as an unresolved gap."""
     for d in md.grid():
-        if d.tier.lock in (md.Lock.DEPENDENCY, md.Lock.FLOOR) and d.site.access is not None:
-            assert d.verdict is md.Verdict.NEEDS_DATA
+        if d.site.access is None:
+            continue
+        if d.tier.lock is md.Lock.DEPENDENCY:
+            assert d.verdict is md.Verdict.DEPENDENCY_HOLD
+        if d.tier.lock is md.Lock.FLOOR:
+            assert d.verdict is md.Verdict.FLOOR
 
 
 def test_only_mtap_reaches_a_locked_decade():
