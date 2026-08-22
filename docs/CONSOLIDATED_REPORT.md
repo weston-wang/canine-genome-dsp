@@ -325,11 +325,11 @@ lesion establishes — not whether it works:
 
 | Genotype (share) | Maintenance anchor | Lung / local-delivery brain | Systemic-penetration brain | CSF |
 | --- | --- | --- | --- | --- |
-| **MTAP deleted** (recurrent minority) | PRMT5i (synthetic-lethal) | **Durable 10y** — locked | **Durable 10y** — locked | *No number* — not reached |
-| **MAPK driver** (~59%) | MEKi (mirdametinib) | Surveillance-dependent | Surveillance-dependent | *No number* — not reached |
-| PTEN deleted (minority) | PI3Ki (paxalisib) | Dependency hold | Dependency hold | *No number* — not reached |
-| CDKN2A del, RB1 intact (minority) | CDK4/6i (abemaciclib) | Dependency hold | Dependency hold | *No number* — not reached |
-| None targetable / RB1 lost (residual) | immune + cycled chemo | Floor — monitored | Floor — monitored | *No number* — not reached |
+| **MTAP deleted** (recurrent minority) | PRMT5i (synthetic-lethal) | **Durable 10y** — locked | **Durable 10y** — locked | *Addressed (RT+intrathecal), no durability number* |
+| **MAPK driver** (~59%) | MEKi (mirdametinib) | Surveillance-dependent | Surveillance-dependent | *Addressed (RT+intrathecal), no durability number* |
+| PTEN deleted (minority) | PI3Ki (paxalisib) | Dependency hold | Dependency hold | *Addressed (RT+intrathecal), no durability number* |
+| CDKN2A del, RB1 intact (minority) | CDK4/6i (abemaciclib) | Dependency hold | Dependency hold | *Addressed (RT+intrathecal), no durability number* |
+| None targetable / RB1 lost (residual) | immune + cycled chemo | Floor — monitored | Floor — monitored | *Addressed (RT+intrathecal), no durability number* |
 
 So the resolution across *all* combinations is: **every case gets a matched anchor that suppresses a
 second primary at emergence — the ten-year mechanism is breed-wide — graded by how robustly it
@@ -347,8 +347,17 @@ holds.** Three honest results fall out, faithful to the repo:
   robustly. The lock, not the raw margin, is what separates them (the old 0.15/day potency implied a
   ~0.37 access threshold; the derived kill clears growth at ~0.2%–4% access, so margin size was never
   the binding constraint; TNG908's Cmax is a placeholder, so absolute margins aren't comparable).
-- **CSF is the one gap** — no durability number for any genotype, because drug saturation of that
-  compartment is unmeasured.
+- **CSF is addressed, but its durability figure is deliberately withheld — not absent.** The
+  compartment *is* reached and treated: **craniospinal radiation** for coverage (physics — it ignores
+  the barrier), **intrathecal** dosing for rate control (an established canine route), and an
+  **immune arm** for persistence. What is withheld is a durability *number*, for four specific
+  reasons the repo records (`maintenance_durability.csf_answer()`): the intrathecal "470× headroom"
+  headline was **audited and retracted** (an absolute-nM error against a placeholder), bulk CSF
+  concentration is not cell-surface exposure (fluid-space **saturation** is the real, unmeasured
+  question), no ERK/PI3K inhibitor has ever been given intrathecally **in any species**, and repeated
+  intrathecal dosing **collides with the breed's SOD1 / degenerative-myelopathy** predisposition. The
+  honest gap is a sustained-release **device** (to beat the dosing-frequency wall) plus two
+  measurements (fluid saturation; the breed's tolerance of repeat intrathecal dosing).
 
 The whole result is model-based and conditional on continuous dosing being achievable and the site
 being reachable — not on genotype — and a second primary could in principle arise from a non-MTAP

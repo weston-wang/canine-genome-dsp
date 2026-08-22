@@ -71,6 +71,8 @@ class Verdict(Enum):
     SURVEILLANCE_DEPENDENT = "holds only with early detection (reroutable target)"
     DEPENDENCY_HOLD = "strong but not locked (known resistance routes)"
     FLOOR = "monitored floor: immune surveillance + cycled chemo (no single-agent anchor)"
+    LOCAL_UNQUANTIFIED = ("reached by craniospinal radiation (barrier-free coverage) + intrathecal + "
+                          "immune arm, but durable maintenance is not quantified -- see csf_answer()")
     NOT_REACHED = "site not reachable / access unmeasured -- no durability number"
     FAILS = "margin <= 0: the drug cannot beat growth at this access"
 
@@ -88,7 +90,8 @@ class GenotypeTier:
 @dataclass(frozen=True)
 class Site:
     name: str
-    access: float | None       # unbound CNS access (Kp,uu); None = unknown / not computable
+    access: float | None       # unbound CNS access (Kp,uu); None = no systemic-drug margin here
+    local_route: str | None = None   # a barrier-free local route that still reaches the site
 
 
 # Continuous-maintenance tiers. Only MTAP and the MAPK majority have a grounded kill rate in pkpd;
@@ -110,8 +113,47 @@ SITES: tuple[Site, ...] = (
     Site("Lung / disseminated", 1.0),
     Site("Brain -- local delivery (cavity implant / CED)", 1.0),
     Site("Brain -- systemic penetration", 0.30),   # conservative; canine value unmeasured
-    Site("Leptomeninges / CSF", None),             # drug saturation unknown -> not computable
+    # CSF: no systemic-drug margin, but NOT unexplored -- craniospinal radiation reaches it by
+    # physics and intrathecal dosing places drug in the fluid. The durability number is withheld,
+    # not absent; see csf_answer() for the repo's full exploration and why.
+    Site("Leptomeninges / CSF", None,
+         local_route="craniospinal radiation (coverage) + intrathecal dosing + immune arm"),
 )
+
+
+# The CSF compartment, resolved from the repo's own exploration (disease.ROUTES intrathecal;
+# therapies 'Intrathecal / intraventricular dosing' and 'Radiation (focal / craniospinal)').
+CSF_RESOLUTION = {
+    "reached": True,
+    "how": "A three-part local approach: CRANIOSPINAL RADIATION for coverage (physics -- it ignores "
+           "the blood-brain barrier), INTRATHECAL dosing for rate control (drug placed straight into "
+           "the fluid, an established canine route), and an IMMUNE arm for persistence (the only part "
+           "that outlasts dosing; radiation enhances NK killing).",
+    "why_no_durability_number": (
+        ("The intrathecal '470x concentration headroom' headline was AUDITED and RETRACTED -- it was "
+         "an absolute-nM comparison against a placeholder drug concentration; only the scale-free "
+         "version was valid, and it is far smaller."),
+        ("Bulk CSF concentration is not cell exposure on the meningeal surfaces -- the binding "
+         "question is fluid-space SATURATION at the target, which is unmeasured."),
+        ("No ERK/PI3K inhibitor (nor the maintenance pills) has ever been given intrathecally in ANY "
+         "species -- the route is untested for these agents."),
+        ("Repeated intrathecal dosing collides with this breed's SOD1 / degenerative-myelopathy "
+         "predisposition (a spinal-cord hazard) and stacks on the marrow axis with craniospinal "
+         "radiation -- a breed-specific toxicity limit on dosing FREQUENCY."),
+        ("Radiation reaches the compartment but is DUTY-LIMITED (a ~21-day course), so it provides "
+         "coverage, not the continuous presence maintenance-at-emergence needs."),
+    ),
+    "verdict": "ADDRESSED for coverage, NOT QUANTIFIED for durable maintenance. The honest gap is a "
+               "device (sustained intrathecal release to beat the frequency wall) plus two "
+               "measurements (fluid-space saturation; the breed's tolerance of repeated intrathecal "
+               "dosing). It is the one compartment where a durability figure is deliberately withheld.",
+}
+
+
+def csf_answer() -> dict:
+    """The CSF/leptomeningeal resolution: reached and addressed, durability deliberately unquantified,
+    with the specific reasons and the experiments that would close it."""
+    return CSF_RESOLUTION
 
 
 @dataclass(frozen=True)
@@ -145,6 +187,7 @@ class Durability:
                                             "catching recurrences early",
             Verdict.DEPENDENCY_HOLD: "strong dependency with known resistance routes",
             Verdict.FLOOR: "immune/cytotoxic backstop; weakest",
+            Verdict.LOCAL_UNQUANTIFIED: "coverage by radiation; durable maintenance unquantified",
             Verdict.NOT_REACHED: "n/a -- site not reached",
             Verdict.FAILS: "n/a -- margin does not clear growth",
         }[self.verdict]
@@ -160,6 +203,10 @@ def _dosable_continuously(tox_key: str | None) -> bool:
 def durability(tier: GenotypeTier, site: Site) -> Durability:
     """Derive the durability verdict for one genotype at one site."""
     if site.access is None:
+        if site.local_route is not None:
+            return Durability(tier, site, None, None, Verdict.LOCAL_UNQUANTIFIED,
+                              f"reached by {site.local_route}; durable maintenance not quantified "
+                              "(see csf_answer())")
         return Durability(tier, site, None, None, Verdict.NOT_REACHED,
                           "drug saturation of this compartment is unmeasured; no margin computable")
     if tier.pkpd_key is None:
@@ -288,9 +335,11 @@ def headline() -> str:
         "emergence window; the MAPK majority, PTEN and CDKN2A tiers suppress the founding cell at "
         "emergence too but are reroute-vulnerable once a lesion establishes, so they lean on "
         "continuous dosing and catching recurrences early; the floor tier is the immune/cytotoxic "
-        "backstop. The one place with no answer is the CSF compartment (drug saturation unmeasured). "
-        "It is a grounded, model-based result -- conditional on continuous dosing being achievable "
-        "and on the site being reachable, not on genotype -- and not yet demonstrated in a dog."
+        "backstop. The CSF compartment is REACHED and addressed (craniospinal radiation for coverage "
+        "+ intrathecal + immune arm) but its durability figure is deliberately withheld, not absent "
+        "-- see csf_answer(). It is a grounded, model-based result -- conditional on continuous "
+        "dosing being achievable and on the site being reachable, not on genotype -- and not yet "
+        "demonstrated in a dog."
     )
 
 

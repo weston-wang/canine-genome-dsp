@@ -18,8 +18,14 @@ def test_mtap_is_durable_at_reachable_sites():
         assert _verdict("MTAP", site) is md.Verdict.DURABLE_10Y
 
 
-def test_mtap_has_no_number_in_csf():
-    assert _verdict("MTAP", "Leptomeninges / CSF") is md.Verdict.NOT_REACHED
+def test_csf_is_addressed_but_durability_unquantified():
+    """CSF is not 'unexplored' -- it is reached (craniospinal radiation + intrathecal + immune) but
+    its durability figure is deliberately withheld. The verdict must say so, not read as a blank."""
+    assert _verdict("MTAP", "Leptomeninges / CSF") is md.Verdict.LOCAL_UNQUANTIFIED
+    a = md.csf_answer()
+    assert a["reached"] is True
+    assert a["why_no_durability_number"]  # the specific reasons are enumerated
+    assert "retracted" in " ".join(a["why_no_durability_number"]).lower()  # the 470x headline
 
 
 def test_mapk_majority_is_never_locked():
@@ -27,15 +33,17 @@ def test_mapk_majority_is_never_locked():
     because a pathway target reroutes even though its derived margin is positive."""
     for d in md.grid():
         if d.tier.genotype.startswith("MAPK"):
-            assert d.verdict in (md.Verdict.SURVEILLANCE_DEPENDENT, md.Verdict.NOT_REACHED)
+            assert d.verdict in (md.Verdict.SURVEILLANCE_DEPENDENT, md.Verdict.LOCAL_UNQUANTIFIED)
             assert d.verdict is not md.Verdict.DURABLE_10Y
 
 
-def test_csf_is_never_given_a_durability_number():
+def test_csf_is_never_given_a_quantified_durability_number():
     for d in md.grid():
         if d.site.name.startswith("Leptomeninges"):
-            assert d.verdict is md.Verdict.NOT_REACHED
+            assert d.verdict is md.Verdict.LOCAL_UNQUANTIFIED
             assert d.margin is None
+            # addressed for coverage, but not a quantified continuous-maintenance hold
+            assert d.suppresses_second_primary_at_emergence is False
 
 
 def test_every_combination_resolves_to_an_anchor():
