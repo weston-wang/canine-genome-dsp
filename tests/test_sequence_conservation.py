@@ -53,24 +53,33 @@ def test_pgp_gates_delivery_and_is_far_below_the_kinase_targets():
     assert pgp.identity_fraction < CONSERVATION["PIK3CA"].identity_fraction
 
 
-def test_csf1r_is_the_single_lowest_conservation_target():
-    """CSF1R (pexidartinib target) is the least-conserved target in the set -- so a human CSF1R
-    inhibitor's transfer to the dog is the least certain, consistent with the repo deprioritizing
-    that receptor-side arm."""
+def test_pd1_is_the_lowest_and_warns_against_antibody_transfer():
+    """PD-1/PDCD1 is the least-conserved target overall -- an antibody target, not a pocket. Its
+    low identity is why the immune arm needs a caninized antibody, not a human one."""
+    pd1 = CONSERVATION["PDCD1"]
+    assert pd1.identity_percent == pytest.approx(67.72, abs=0.1)
+    assert all(pd1.identity_fraction <= rec.identity_fraction for rec in CONSERVATION.values())
+    assert "caninized" in pd1.note.lower()
+
+
+def test_csf1r_is_the_lowest_small_molecule_kinase_target():
+    """Among the small-molecule kinase targets, CSF1R is the least conserved -- so a human CSF1R
+    inhibitor's transfer is the least certain of those, consistent with deprioritizing that arm."""
+    kinase_targets = ("MAPK1", "PIK3CA", "MAP2K1", "PRMT5", "CDK4", "CDK6", "CSF1R")
     csf1r = CONSERVATION["CSF1R"]
     assert csf1r.identity_percent == pytest.approx(85.30, abs=0.05)
-    assert all(csf1r.identity_fraction <= rec.identity_fraction for rec in CONSERVATION.values())
+    assert all(csf1r.identity_fraction <= CONSERVATION[g].identity_fraction for g in kinase_targets)
 
 
 def test_transfer_set_covers_the_kinase_targets_but_not_the_low_ones():
-    # everything at/above 0.90 -- all targets except CSF1R (0.853)
+    # everything at/above 0.90 -- all targets except CSF1R (0.853) and PD-1 (0.677)
     supported = orthologs_supporting_transfer(threshold=0.90)
-    assert set(supported) == {"MAPK1", "PIK3CA", "ABCB1", "MAP2K1", "PRMT5", "CDK4", "CDK6"}
-    assert "CSF1R" not in supported
-    # raise the bar to 0.95: the near-identical kinase inhibitor targets remain; P-gp drops out
+    assert set(supported) == {"MAPK1", "PIK3CA", "ABCB1", "MAP2K1", "PRMT5", "CDK4", "CDK6", "TUBB"}
+    assert "CSF1R" not in supported and "PDCD1" not in supported
+    # raise the bar to 0.95: the near-identical inhibitor targets remain; P-gp drops out
     strict = set(orthologs_supporting_transfer(threshold=0.95))
-    assert strict == {"MAPK1", "PIK3CA", "MAP2K1", "PRMT5", "CDK4", "CDK6"}
-    assert "ABCB1" not in strict and "CSF1R" not in strict
+    assert strict == {"MAPK1", "PIK3CA", "MAP2K1", "PRMT5", "CDK4", "CDK6", "TUBB"}
+    assert "ABCB1" not in strict
 
 
 def test_the_maintenance_targets_are_high_conservation():

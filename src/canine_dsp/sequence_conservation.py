@@ -183,9 +183,39 @@ CONSERVATION: dict[str, OrthologConservation] = {
         aligned_positions=966,
         identical_positions=824,
         differing_positions=(),
-        note="85.30% identical (824/966 aligned) -- the lowest-conservation kinase target here "
+        note="85.30% identical (824/966 aligned) -- the lowest-conservation KINASE target here "
              "(matching the repo's independently noted 85.3%). A human-designed CSF1R inhibitor's "
              "transfer to the dog is correspondingly less certain than for MEK/PRMT5/CDK4-6.",
+    ),
+    "TUBB": OrthologConservation(
+        gene="TUBB",
+        protein="beta-tubulin -- the microtubule (mitotic-poison) induction agent's target",
+        human_accession="P07437",
+        dog_accession="A0A8I3MY05",
+        human_length=444,
+        dog_length=449,
+        aligned_positions=444,
+        identical_positions=437,
+        differing_positions=(),
+        note="98.42% identical (437/444 aligned). Backs the target-fit of the LOAD-BEARING "
+             "induction agent -- though its per-day kill rate in canine HS is still unmeasured "
+             "(that gap is what keeps escapes 1-3 graded ASSUMED, not target fit).",
+    ),
+    "PDCD1": OrthologConservation(
+        gene="PDCD1",
+        protein="PD-1 -- the immune-checkpoint target of the anti-PD-1 arm (gilvetmab)",
+        human_accession="Q15116",
+        dog_accession="A0A090BAM7",
+        human_length=288,
+        dog_length=288,
+        aligned_positions=285,
+        identical_positions=193,
+        differing_positions=(),
+        note="Only 67.72% identical (193/285 aligned) -- the LOWEST-conservation target in the "
+             "regimen, and an antibody target rather than a small-molecule pocket. A human "
+             "anti-PD-1 antibody would not reliably cross-react with canine PD-1, which is exactly "
+             "why the immune arm must use a CANINIZED antibody (gilvetmab), not a human one. Here "
+             "conservation actively WARNS against transfer, rather than licensing it.",
     ),
 }
 

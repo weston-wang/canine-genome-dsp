@@ -78,9 +78,15 @@ computed from real UniProt sequences in `canine_dsp.sequence_conservation` (repr
 `recompute()`): ERK2/MAPK1 **100.0%**, PI3Kα **99.81%** (ATP-binding domain 100%), MEK1/MAP2K1
 **99.49%**, PRMT5 **99.37%**, CDK6 **98.16%**, CDK4 **97.03%** — so a human-designed inhibitor's
 *fit* to the canine target is established fact for the MAPK, MTAP, and CDKN2A maintenance arms, not
-an assumption. Two targets are lower and flagged: CSF1R **85.30%** (the receptor-side lineage arm,
-which the analysis already deprioritizes) and P-gp/ABCB1 **91.08%** — the efflux transporter that
-gates CNS delivery, so canine *penetration* still must be measured even where target fit transfers.
+an assumption. The induction workhorse's target is likewise conserved — β-tubulin/TUBB **98.42%**. Three targets are
+lower and flagged: CSF1R **85.30%** (the receptor-side lineage arm, already deprioritized); P-gp/ABCB1
+**91.08%** — the efflux transporter that gates CNS delivery, so canine *penetration* must still be
+measured even where target fit transfers; and, most sharply, **PD-1/PDCD1 only 67.72%** — here
+conservation actively *warns against* transfer: a human anti-PD-1 antibody would not reliably
+cross-react with canine PD-1, which is exactly why the immune arm must use a **caninized** antibody
+(gilvetmab), not a human one. So every regimen target now carries a computed, reproducible identity,
+and the numbers point three ways: fit transfers (kinase/enzyme targets), penetration must be measured
+(P-gp), and the biologic must be species-specific (PD-1).
 
 ## The validation protocol — how coverage becomes *backed*
 
