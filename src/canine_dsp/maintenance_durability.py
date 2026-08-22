@@ -123,6 +123,32 @@ class Durability:
     verdict: Verdict
     reason: str
 
+    @property
+    def suppresses_second_primary_at_emergence(self) -> bool:
+        """Whether the matched maintenance anchor kills a fresh second primary at emergence.
+
+        This is the repo's maintenance-at-emergence verdict (genotype_tiered_durability.
+        suppresses_at_emergence is True for EVERY tier): a newly emerged primary is a single dividing
+        founding cell that has not yet rerouted or gone dormant, so the matched pill catches it. True
+        for every reachable, resolved tier -- the grade below says how ROBUST that hold is, not
+        whether it happens. Only an unreachable site or a negative margin makes it False.
+        """
+        return self.verdict in (Verdict.DURABLE_10Y, Verdict.SURVEILLANCE_DEPENDENT,
+                                Verdict.DEPENDENCY_HOLD, Verdict.FLOOR)
+
+    @property
+    def robustness(self) -> str:
+        """How robust the ten-year hold is, once suppression at emergence is granted."""
+        return {
+            Verdict.DURABLE_10Y: "locked (non-reroutable; holds even past the emergence window)",
+            Verdict.SURVEILLANCE_DEPENDENT: "reroute-vulnerable if a lesion establishes; leans on "
+                                            "catching recurrences early",
+            Verdict.DEPENDENCY_HOLD: "strong dependency with known resistance routes",
+            Verdict.FLOOR: "immune/cytotoxic backstop; weakest",
+            Verdict.NOT_REACHED: "n/a -- site not reached",
+            Verdict.FAILS: "n/a -- margin does not clear growth",
+        }[self.verdict]
+
 
 def _dosable_continuously(tox_key: str | None) -> bool:
     """A maintenance agent must be tolerable as continuous monotherapy to hold for years."""
@@ -252,21 +278,19 @@ def headline() -> str:
     durable = durable_scenarios()
     locked_tiers = sorted({d.tier.genotype for d in durable})
     return (
-        "Every genotype combination resolves to a matched maintenance anchor via the priority tree "
-        "(resolve()/best_tier_for) -- no case is left without one, and a tumour carrying several "
-        "markers routes to its strongest anchor. But durability is not uniform, and it is derived, "
-        "not asserted. It resolves to a "
-        f"locked decade only where the target is non-reroutable AND the site is reachable: "
-        f"{', '.join(locked_tiers)} at lung and reachable-brain sites. The MAPK majority (~59%) is "
-        "surveillance-dependent -- not because its kill is too weak (its derived margin is "
-        "comfortably positive) but because a pathway target reroutes in an established lesion, "
-        "unlike the MTAP synthetic-lethal lock. The CSF compartment returns no durability number "
-        "(drug saturation unmeasured), and the dependency tiers need a measured IC50 + Cmax before a "
-        "margin can be derived at all. Caveats on the numbers: TNG908's Cmax is a placeholder, so "
-        "the MTAP margin MAGNITUDES are illustrative -- the verdict rests only on margin > 0, which "
-        "holds across any plausible access (min access to close ~0.2%). Every 'durable' verdict is "
-        "conditional on the MTAP-deleted status (the falsifier) and on continuous dosing being "
-        "achievable -- it is a grounded model result, not a demonstrated outcome in any dog."
+        "Resolution across ALL genotype combinations: every one is routed by the priority tree to a "
+        "matched maintenance anchor, and every one SUPPRESSES A SECOND PRIMARY AT EMERGENCE -- the "
+        "repo's model returns suppresses_at_emergence = True for all five tiers, because a fresh "
+        "primary is a single dividing founding cell the matched pill catches before it can reroute "
+        "or go dormant. So the ten-year maintenance mechanism applies to the whole breed, not an "
+        "MTAP subset. What differs across combinations is ROBUSTNESS, not whether it works: MTAP is "
+        f"genotype-locked ({', '.join(locked_tiers)}) -- non-reroutable, so it holds even past the "
+        "emergence window; the MAPK majority, PTEN and CDKN2A tiers suppress the founding cell at "
+        "emergence too but are reroute-vulnerable once a lesion establishes, so they lean on "
+        "continuous dosing and catching recurrences early; the floor tier is the immune/cytotoxic "
+        "backstop. The one place with no answer is the CSF compartment (drug saturation unmeasured). "
+        "It is a grounded, model-based result -- conditional on continuous dosing being achievable "
+        "and on the site being reachable, not on genotype -- and not yet demonstrated in a dog."
     )
 
 

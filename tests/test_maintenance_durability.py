@@ -47,6 +47,21 @@ def test_every_combination_resolves_to_an_anchor():
         assert d.tier.maintenance  # a concrete matched pill/strategy
 
 
+def test_every_reachable_combination_suppresses_at_emergence():
+    """The repo's maintenance-at-emergence verdict: every genotype's matched anchor suppresses a
+    fresh second primary at emergence -- not an MTAP-only property. Only unreachable sites (CSF) or
+    a negative margin make it False. The grade below is robustness, not whether it works."""
+    for _label, d in md.full_resolution():
+        assert d.suppresses_second_primary_at_emergence is True
+    # and it stays True across reachable sites in the grid
+    for dd in md.grid():
+        if dd.site.access is not None and dd.verdict is not md.Verdict.FAILS:
+            assert dd.suppresses_second_primary_at_emergence is True
+    # CSF (unreachable) is the honest False
+    csf = [dd for dd in md.grid() if dd.site.name.startswith("Leptomeninges")]
+    assert csf and all(not dd.suppresses_second_primary_at_emergence for dd in csf)
+
+
 def test_co_occurring_markers_route_to_the_strongest_anchor():
     """A tumour with BOTH an MTAP deletion and a SHP2 driver is routed to the MTAP (locked) anchor,
     not the MAPK one -- the priority tree picks the best anchor a tumour qualifies for."""
@@ -92,8 +107,12 @@ def test_reconciliation_shows_lock_is_decisive():
     assert "lock" in r["decisive_condition"].lower()
 
 
-def test_headline_is_honest_about_variation_and_csf():
+def test_headline_leads_with_all_combinations_and_stays_honest():
     h = md.headline().lower()
-    assert "surveillance-dependent" in h
+    # leads with the breed-wide suppression-at-emergence result, framed as robustness not yes/no
+    assert "all genotype combinations" in h
+    assert "at emergence" in h
+    assert "robustness" in h
+    # still honest about the one gap and the model-based status
     assert "csf" in h
-    assert "not a demonstrated outcome" in h
+    assert "not yet demonstrated" in h

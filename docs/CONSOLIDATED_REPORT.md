@@ -313,12 +313,15 @@ the two conditions a raw margin hides: **genotype lock** (can the target be rero
 (is the drug where the founding cell is?). The result is not one number but a grid, and it fails or
 abstains where it should:
 
-**Every genotype combination resolves** — the repo's priority tree
-(`genotype_tiered_durability.best_tier_for`, mirrored by `maintenance_durability.resolve()`) maps any
-set of markers to the strongest anchor it qualifies for, so no case is left without a matched pill,
-and a tumour carrying several markers (e.g. an MTAP deletion *and* a SHP2 driver) routes to its best
-anchor (MTAP). What differs across combinations is the durability *grade*, not whether an answer
-exists:
+**Every genotype combination resolves, and every one suppresses a second primary at emergence.** The
+repo's priority tree (`genotype_tiered_durability.best_tier_for`, mirrored by
+`maintenance_durability.resolve()`) maps any set of markers to the strongest anchor it qualifies for
+— a tumour carrying several markers (e.g. MTAP deletion *and* a SHP2 driver) routes to its best
+anchor (MTAP) — and `suppresses_at_emergence` returns **True for all five tiers**: a fresh primary is
+a single dividing founding cell that has not yet rerouted or gone dormant, so the matched pill
+catches it. So the ten-year *mechanism* (maintenance-at-emergence) is **breed-wide, not an MTAP
+subset**. What differs across combinations is **robustness** — how well the hold survives once a
+lesion establishes — not whether it works:
 
 | Genotype (share) | Maintenance anchor | Lung / local-delivery brain | Systemic-penetration brain | CSF |
 | --- | --- | --- | --- | --- |
@@ -328,26 +331,29 @@ exists:
 | CDKN2A del, RB1 intact (minority) | CDK4/6i (abemaciclib) | Dependency hold | Dependency hold | *No number* — not reached |
 | None targetable / RB1 lost (residual) | immune + cycled chemo | Floor — monitored | Floor — monitored | *No number* — not reached |
 
-So the resolution across *all* combinations is: **a matched anchor for every case, with a graded
-hold — not a uniform ten-year lock.** Three honest results fall out, and they match what the repo
-already concluded and, in one place, explicitly retracted:
+So the resolution across *all* combinations is: **every case gets a matched anchor that suppresses a
+second primary at emergence — the ten-year mechanism is breed-wide — graded by how robustly it
+holds.** Three honest results fall out, faithful to the repo:
 
-- **A locked decade is the MTAP subset's prize, not everyone's.** `presentation.py` marks the earlier
-  "MTAP synthetic lethality applies to all cases" claim **RETRACTED**: the MAPK-driven majority is the
-  dominant genotype, and "recurrent is not universal." Only a synthetic-lethal target on a homozygous
-  deletion **cannot be rerouted**; the MAPK, PTEN and CDKN2A anchors are dependencies with known
-  resistance routes.
-- **The lock, not the raw margin, is decisive.** The old module's 0.15/day hand-set potency implied a
-  ~0.37 access threshold ("fails at 0.30"); the derived kill clears growth at ~0.2% (MTAP) to ~4%
-  (MAPK) access — so margin size was never the binding constraint (and TNG908's Cmax is a placeholder,
-  so absolute margins aren't comparable anyway).
-- **CSF gets no durability number at all** for any genotype — drug saturation of that compartment is
-  unmeasured, and the repo declines to compute one.
+- **Robustness is what the tiers encode, not whether it works.** All five suppress the founding cell
+  at emergence; MTAP is *locked* (a synthetic-lethal target on a homozygous deletion cannot be
+  rerouted, so it holds even after a lesion establishes), while the MAPK/PTEN/CDKN2A anchors are
+  dependencies that are reroute-vulnerable once a lesion is established, so they lean on continuous
+  dosing and catching recurrences early; the floor tier is the immune/cytotoxic backstop.
+- **The PRMT5i *lock* is MTAP-only — but that is not the same as "only MTAP is covered."**
+  `presentation.py` marks the claim "MTAP synthetic lethality applies to *all cases*" **RETRACTED**
+  ("recurrent is not universal"): you cannot give every dog the locked PRMT5i arm. Every *other*
+  genotype instead gets *its own* matched anchor, which also suppresses at emergence — just less
+  robustly. The lock, not the raw margin, is what separates them (the old 0.15/day potency implied a
+  ~0.37 access threshold; the derived kill clears growth at ~0.2%–4% access, so margin size was never
+  the binding constraint; TNG908's Cmax is a placeholder, so absolute margins aren't comparable).
+- **CSF is the one gap** — no durability number for any genotype, because drug saturation of that
+  compartment is unmeasured.
 
-Every "durable" verdict stays conditional on the tumour actually being MTAP-deleted (the falsifier)
-and on continuous dosing being achievable; and even a second primary *could* in principle arise from
-a non-MTAP secondary locus that maintenance would not see (`breed_wide_durability`). It is a grounded
-model result, not an outcome shown in any dog.
+The whole result is model-based and conditional on continuous dosing being achievable and the site
+being reachable — not on genotype — and a second primary could in principle arise from a non-MTAP
+secondary locus that maintenance would not see (`breed_wide_durability`). It is a grounded model
+result, not an outcome shown in any dog.
 
 **A caution about the engine itself.** Every figure comes from one simulation engine. It
 carried 1,340+ tests, but until recently *not one* checked it against a known outcome —
