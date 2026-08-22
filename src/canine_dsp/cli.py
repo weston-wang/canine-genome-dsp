@@ -38,6 +38,12 @@ from .mapk_cli import (
     vaccine_epitope_binding_demo,
     vaccine_followon_demo,
 )
+from .lymphoma_cli import (
+    lymphoma_durability_horizon_demo,
+    lymphoma_immunotherapy_demo,
+    lymphoma_resistance_demo,
+    lymphoma_sanctuary_demo,
+)
 from .mapk_scenarios import DEBULKING_FRACTION
 from .mapk_scenarios import _PREEXISTING_PROB_CENTRAL as MAPK_PREEXISTING_PROB_CENTRAL
 from .melanoma_benchmark import run_melanoma_benchmark
@@ -455,6 +461,43 @@ def main() -> None:
     mapk_pulmonary.add_argument("--preexisting-prob", type=float, default=MAPK_PREEXISTING_PROB_CENTRAL)
     mapk_pulmonary.add_argument("--seed", type=int, default=7)
     mapk_pulmonary.add_argument("--out", type=Path, required=True)
+    lym_res = sub.add_parser("lymphoma-resistance-demo",
+                             help="CHOP-only chemoresistance model for canine multicentric "
+                                  "lymphoma: the durability bar (set by P-glycoprotein efflux) and "
+                                  "durable-response sensitivity to pre-existing resistance")
+    lym_res.add_argument("--immunophenotype", choices=["B", "T"], default="B")
+    lym_res.add_argument("--trials", type=int, default=300)
+    lym_res.add_argument("--horizon-days", type=int, default=730)
+    lym_res.add_argument("--seed", type=int, default=7)
+    lym_res.add_argument("--out", type=Path, required=True)
+    lym_immuno = sub.add_parser("lymphoma-immunotherapy-demo",
+                                help="CHOP + a swept-potency CD20-directed immune effector for "
+                                     "canine lymphoma; where the durability threshold sits and "
+                                     "how CD20 antigen loss behaves")
+    lym_immuno.add_argument("--immunophenotype", choices=["B", "T"], default="B")
+    lym_immuno.add_argument("--rab-max-kill", type=float, default=0.0,
+                            help="optional mechanism-agnostic rabacfosadine second node")
+    lym_immuno.add_argument("--trials", type=int, default=300)
+    lym_immuno.add_argument("--horizon-days", type=int, default=730)
+    lym_immuno.add_argument("--seed", type=int, default=7)
+    lym_immuno.add_argument("--out", type=Path, required=True)
+    lym_sanct = sub.add_parser("lymphoma-sanctuary-demo",
+                               help="the CNS sanctuary: two-compartment model with swept drug "
+                                    "penetration, chemo-only vs. chemo + a systemic CD20 effector")
+    lym_sanct.add_argument("--immunotherapy-max-kill", type=float, default=0.09)
+    lym_sanct.add_argument("--trials", type=int, default=300)
+    lym_sanct.add_argument("--horizon-days", type=int, default=1825)
+    lym_sanct.add_argument("--nodal-involvement-prob", type=float, default=0.30)
+    lym_sanct.add_argument("--seed", type=int, default=7)
+    lym_sanct.add_argument("--out", type=Path, required=True)
+    lym_horizon = sub.add_parser("lymphoma-durability-horizon-demo",
+                                 help="how long is durable? CHOP + CD20 effector out to 1/2/5/10 "
+                                      "years, the horizon at which cure/10-year durability is tested")
+    lym_horizon.add_argument("--immunotherapy-max-kill", type=float, default=0.09)
+    lym_horizon.add_argument("--immunophenotype", choices=["B", "T"], default="B")
+    lym_horizon.add_argument("--trials", type=int, default=300)
+    lym_horizon.add_argument("--seed", type=int, default=7)
+    lym_horizon.add_argument("--out", type=Path, required=True)
     args = parser.parse_args()
     if args.command == "demo":
         rng = np.random.default_rng(42)
@@ -599,6 +642,18 @@ def main() -> None:
                                         args.location_penetration_multiplier, args.seed)
     elif args.command == "mapk-vaccine-epitope-binding-demo":
         vaccine_epitope_binding_demo(args.out)
+    elif args.command == "lymphoma-resistance-demo":
+        lymphoma_resistance_demo(args.out, args.immunophenotype, args.trials, args.horizon_days,
+                                 args.seed)
+    elif args.command == "lymphoma-immunotherapy-demo":
+        lymphoma_immunotherapy_demo(args.out, args.immunophenotype, args.rab_max_kill, args.trials,
+                                    args.horizon_days, args.seed)
+    elif args.command == "lymphoma-sanctuary-demo":
+        lymphoma_sanctuary_demo(args.out, args.immunotherapy_max_kill, args.trials,
+                                args.horizon_days, args.nodal_involvement_prob, args.seed)
+    elif args.command == "lymphoma-durability-horizon-demo":
+        lymphoma_durability_horizon_demo(args.out, args.immunotherapy_max_kill,
+                                         args.immunophenotype, args.trials, args.seed)
     else:
         pulmonary_two_compartment_demo(args.out, args.cdk46_max_kill, args.debulking_fraction,
                                        args.trials, args.horizon_days, args.preexisting_prob,

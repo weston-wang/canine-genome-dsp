@@ -480,6 +480,7 @@ def run_monte_carlo_two_compartment(reference: ResistanceModel, css_reference: f
                                     initial_burden: float = .3, css_reference_2: float | None = None,
                                     exposure_scale_2: float = .3,
                                     css_reference_2_duration_days: int | None = None,
+                                    sanctuary_penetration_multiplier: float = 1.0,
                                     vaccine_start_day: int | None = None,
                                     vaccine_ramp_days: float = 21.0, vaccine_max_kill: float = 0.0,
                                     immune_escape_seeding_rate: float = 0.0,
@@ -491,7 +492,21 @@ def run_monte_carlo_two_compartment(reference: ResistanceModel, css_reference: f
     `run_monte_carlo`'s single-compartment model, which implicitly assumes debulking reaches every
     tumor cell wherever it is. Per trial: a single perturbed model, drug exposure, and
     primary-tumor initial state are drawn exactly as in `run_monte_carlo`.
+
+    `sanctuary_penetration_multiplier` scales BOTH drug concentrations (`css` and any
+    `css_reference_2`) seen by the SECOND compartment only, leaving the first compartment at full
+    exposure. It defaults to 1.0, which reproduces the original behaviour exactly (both compartments
+    at systemic exposure). Values below 1.0 model a pharmacologic sanctuary: a site a small-molecule
+    or antibody drug reaches at reduced concentration -- the canonical case being the central nervous
+    system behind the blood-brain barrier. A time-gated immune effector (`vaccine_max_kill`) is NOT
+    discounted, because an adoptively transferred or vaccine-primed T-cell reaches a sanctuary under
+    its own trafficking, not by drug diffusion; that asymmetry -- drug excluded, cellular immunity
+    not -- is the whole point of representing the sanctuary separately rather than as a lower overall
+    exposure. The multiplier is unitless and does not itself assert a real penetration fraction for
+    any specific drug; those are supplied by the caller (see `lymphoma_scenarios`).
     """
+    if not 0.0 <= sanctuary_penetration_multiplier <= 1.0:
+        raise ValueError("sanctuary_penetration_multiplier must lie in [0, 1]")
     rng = np.random.default_rng(seed)
     k = len(reference.growth)
     identity_model = replace(reference, mutation=np.eye(k))
@@ -539,12 +554,25 @@ def run_monte_carlo_two_compartment(reference: ResistanceModel, css_reference: f
         has_nodal_involvement[trial] = has_nodal
         nodal_initial = pre_debulking_primary * nodal_seed_fraction if has_nodal else np.zeros(k)
 
+        # The first compartment (primary/systemic) sees full drug exposure; the second (regional or
+        # sanctuary) sees it scaled by sanctuary_penetration_multiplier. At the default 1.0 the two
+        # concentration series are identical and behaviour is unchanged.
+        compartment_concentrations = [(concentration, concentration_2)]
+        if sanctuary_penetration_multiplier == 1.0:
+            compartment_concentrations.append((concentration, concentration_2))
+        else:
+            sanctuary_c = concentration * sanctuary_penetration_multiplier
+            sanctuary_c2 = (concentration_2 * sanctuary_penetration_multiplier
+                            if concentration_2 is not None else None)
+            compartment_concentrations.append((sanctuary_c, sanctuary_c2))
+
         compartment_states = []
-        for initial in (primary_initial, nodal_initial):
+        for initial, (comp_c, comp_c2) in zip((primary_initial, nodal_initial),
+                                              compartment_concentrations):
             sensitive_only = np.zeros(k)
             sensitive_only[0] = initial[0]
-            sensitive_trajectory = simulate_resistance(model, concentration, sensitive_only,
-                                                        concentration_2=concentration_2)[:, 0]
+            sensitive_trajectory = simulate_resistance(model, comp_c, sensitive_only,
+                                                        concentration_2=comp_c2)[:, 0]
             jittered_rates = seeding_rates * rng.lognormal(0, seeding_rate_scale, len(seeding_rates))
             injections = poisson_mutation_injections(rng, sensitive_trajectory, jittered_rates,
                                                      seed_fraction,
@@ -552,9 +580,10 @@ def run_monte_carlo_two_compartment(reference: ResistanceModel, css_reference: f
             if vaccine_active:
                 # Provisional run to get this compartment's own antigen-positive cell-days, exactly
                 # as run_monte_carlo_with_vaccine does -- seeded per compartment because the two are
-                # separate populations after metastatic spread.
-                provisional = simulate_resistance(model, concentration, initial, injections,
-                                                  concentration_2, additional_kill=vaccine_kill)
+                # separate populations after metastatic spread. The vaccine/immune kill term is NOT
+                # penetration-discounted: cellular immunity traffics to the sanctuary on its own.
+                provisional = simulate_resistance(model, comp_c, initial, injections,
+                                                  comp_c2, additional_kill=vaccine_kill)
                 antigen_positive = provisional[:, :immune_escape_index].sum(axis=1)
                 antigen_positive = np.where(days_index >= vaccine_start_day, antigen_positive, 0.0)
                 jittered_escape_rate = immune_escape_seeding_rate * rng.lognormal(
@@ -563,7 +592,7 @@ def run_monte_carlo_two_compartment(reference: ResistanceModel, css_reference: f
                     rng, antigen_positive, np.array([jittered_escape_rate]),
                     immune_escape_seed_fraction, clone_indices=[immune_escape_index], k=k)
                 injections = merge_injections(injections, escape_injections)
-            state = simulate_resistance(model, concentration, initial, injections, concentration_2,
+            state = simulate_resistance(model, comp_c, initial, injections, comp_c2,
                                         additional_kill=vaccine_kill)
             compartment_states.append(state)
         primary_state, nodal_state = compartment_states
