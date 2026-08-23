@@ -265,6 +265,40 @@ fixing a modelling inconsistency rather than by adding a drug.
 The stack is also insensitive to `preexisting_prob` (1.000 at 0.70, 0.50 and 0.30), and the vaccine
 remains load-bearing inside it — remove it and durability falls to 0.284.
 
+#### Two things that 1.000 does not include
+
+**It assumed immunity never wanes.** The table above uses the engine's `half_life_days=None`
+default — the same assumption that was caught carrying the original headline number in §3. Re-run
+under real waning:
+
+| immunity half-life | no boosters | q180d | q60d (eVim's real schedule) |
+|---|---|---|---|
+| never wanes | 1.000 | 1.000 | 1.000 |
+| 365 d | 0.276 | 1.000 | 1.000 |
+| 180 d | 0.284 | 1.000 | 1.000 |
+| 90 d | 0.292 | 0.544 | 1.000 |
+
+The stack survives waning — but **only on a booster schedule**. Unboosted it falls to roughly the
+no-vaccine level at every half-life. q60d holds 1.000 even at a pessimistic 90-day half-life; q180d
+is adequate only if immunity genuinely lasts 180 days or more. Boosting is also maintenance rather
+than a tapering course — stopping q60d at 1, 2 and 5 years gives **0.244 / 0.388 / 0.668**. A
+ten-year claim requires ten years of dosing.
+
+**It is freedom from regrowth, not survival.** The engine does not model rupture; a dog that bleeds
+to death with a perfectly controlled tumour counts as a durable response by its definition. Carrying
+rupture as an independent competing hazard (`hsa_open_route_closure.joint_durability`) over ten
+years:
+
+| annual rupture hazard | unscreened | CANDiD 78.4% | CANDiD 90.9% |
+|---|---|---|---|
+| 2% | 0.817 | 0.958 | 0.982 |
+| 5% | 0.599 | 0.897 | 0.955 |
+| 10% | 0.349 | 0.804 | 0.913 |
+
+So the defensible ten-year figure is **~0.6–0.8 unscreened and ~0.9+ under surveillance**, not
+1.000. Screening is a third load-bearing component of the plan, not an optional extra — and the
+hazard values above are swept, not measured.
+
 #### What is still unmeasured, and the experiment that would settle it
 
 Nobody has measured how much propranolol reduces canine HSA growth rate. 16.3% is what the stack

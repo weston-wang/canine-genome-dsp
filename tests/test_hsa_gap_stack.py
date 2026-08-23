@@ -6,10 +6,14 @@ from canine_dsp import hsa_scenarios as hs
 from canine_dsp.hsa_gap_stack import (
     BETA_BLOCKADE_EVIDENCE, CROSS_RESISTANCE_INCONSISTENCY, DURABILITY_BAR_PER_DAY,
     GROWTH_REDUCTION_REQUIRED, REAL_TRIAL_IMPLIED_MAX_KILL, STACK,
-    STACK_IS_PREEXISTING_INSENSITIVE, STACK_STILL_NEEDS_THE_VACCINE, VERDICT,
+    STACK_IS_PREEXISTING_INSENSITIVE, STACK_STILL_NEEDS_THE_VACCINE,
+    STACK_STOPPING_BOOSTERS, STACK_UNDER_WANING_IMMUNITY, VERDICT,
     corrected_ic50, required_growth_reduction,
 )
-from canine_dsp.hsa_vaccine_maintenance import immunity_schedule, run_with_schedule
+from canine_dsp.hsa_open_route_closure import joint_durability, screened_rupture_hazard
+from canine_dsp.hsa_vaccine_maintenance import (
+    EVIM_MAINTENANCE_INTERVAL_DAYS, immunity_schedule, run_with_schedule,
+)
 from canine_dsp.mapk_resistance import clone_growth_margins
 
 H = 3650
@@ -37,9 +41,10 @@ def _bar(corrected=False, growth_cut=0.0):
 
 
 def _durable(corrected=False, growth_cut=0.0, vmk=REAL_TRIAL_IMPLIED_MAX_KILL,
-             preexisting=0.70, trials=250):
+             preexisting=0.70, trials=250, half_life=None, booster=None, n_boosters=None):
     m5, css, seeding = _build(corrected, growth_cut)
-    schedule = immunity_schedule(H, S, R, vmk, APPLICABLE)
+    schedule = immunity_schedule(H, S, R, vmk, APPLICABLE, half_life_days=half_life,
+                                 booster_interval_days=booster, n_boosters=n_boosters)
     progressed = run_with_schedule(m5, css, H, seeding, schedule, S,
                                    hs.HSA_IMMUNE_ESCAPE_SEEDING_RATE, trials=trials,
                                    preexisting_prob=preexisting, seed=7)
@@ -158,3 +163,52 @@ def test_the_verdict_names_what_is_still_unmeasured_and_the_next_experiment():
            "no study reports" in VERDICT["what_is_still_unmeasured"]
     assert "vinblastine" in VERDICT["next_experiment"]
     assert "2.5x" in VERDICT["why_the_correction_matters_most"]
+
+
+# ---------- what the headline 1.000 leaves out ----------
+
+def test_the_stack_collapses_without_boosters_at_every_half_life():
+    """The headline 1.000 used the engine's no-waning default. Waning is not the problem;
+    unboosted waning is."""
+    for half_life, row in STACK_UNDER_WANING_IMMUNITY.items():
+        if half_life is None:
+            assert row["no_boosters"] == pytest.approx(1.0, abs=0.02)
+            continue
+        assert row["no_boosters"] < 0.35, "falls to roughly the no-vaccine level"
+        assert row["q60d"] == pytest.approx(1.0, abs=0.02), "eVim's real schedule holds it"
+    assert STACK_UNDER_WANING_IMMUNITY[90]["q180d"] < 0.6, \
+        "q180d is not enough if immunity really lasts only 90 days"
+
+
+@pytest.mark.parametrize("half_life", [180, 90])
+def test_the_q60d_stack_reproduces_under_waning(half_life):
+    recorded = STACK_UNDER_WANING_IMMUNITY[half_life]["q60d"]
+    assert _durable(True, 0.20, half_life=half_life,
+                    booster=EVIM_MAINTENANCE_INTERVAL_DAYS) == pytest.approx(recorded, abs=0.06)
+
+
+def test_boosting_is_maintenance_not_a_tapering_course():
+    assert STACK_STOPPING_BOOSTERS[1] < STACK_STOPPING_BOOSTERS[2] < STACK_STOPPING_BOOSTERS[5]
+    assert STACK_STOPPING_BOOSTERS[5] < 0.75, "even five years of boosters does not buy ten"
+    assert STACK_STOPPING_BOOSTERS[10] == pytest.approx(1.0, abs=0.02)
+    n = int(2 * 365 / EVIM_MAINTENANCE_INTERVAL_DAYS)
+    assert _durable(True, 0.20, half_life=180, booster=EVIM_MAINTENANCE_INTERVAL_DAYS,
+                    n_boosters=n) == pytest.approx(STACK_STOPPING_BOOSTERS[2], abs=0.10)
+
+
+def test_tumour_control_is_not_survival_once_rupture_is_carried_as_a_competing_hazard():
+    """`joint_durability` is multiplicative: a controlled tumour does not stop a bleed."""
+    unscreened = joint_durability(1.0, 0.05, years=10)["joint_durability"]
+    assert unscreened == pytest.approx(0.599, abs=0.005), "1.000 control is not 1.000 survival"
+    low, high = 0.784, 0.909  # CANDiD sensitivity band for the aggressive-cancer group
+    for sensitivity, floor in ((low, 0.85), (high, 0.94)):
+        residual = screened_rupture_hazard(0.05, sensitivity)["residual_hazard"]
+        assert joint_durability(1.0, residual, years=10)["joint_durability"] > floor
+    caveat = VERDICT["the_stack_figure_is_freedom_from_regrowth_not_survival"]
+    assert "freedom from regrowth" in caveat
+    assert "Screening is a third load-bearing component" in caveat
+
+
+def test_the_verdict_says_boosters_are_required():
+    assert "q60d for the full ten years" in VERDICT["stack"]
+    assert "0.244/0.388/0.668" in VERDICT["boosters_are_required_not_optional"]

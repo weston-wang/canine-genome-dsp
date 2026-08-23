@@ -82,6 +82,21 @@ STACK_IS_PREEXISTING_INSENSITIVE = {0.70: 1.000, 0.50: 1.000, 0.30: 1.000}
 # Every component is load-bearing: removing the vaccine collapses the stack.
 STACK_STILL_NEEDS_THE_VACCINE = {0.0: 0.284, 0.01: 0.336, 0.02: 0.652, 0.03: 1.000}
 
+# The STACK figures above use the engine's no-waning default. Under real waning immunity the stack
+# survives, but ONLY on a booster schedule: with no boosters it collapses to the no-vaccine level
+# (~0.28) at every half-life. eVim's real q60d schedule holds 1.000 even at a pessimistic 90-day
+# half-life; q180d is adequate only if immunity actually lasts 180 d or more.
+STACK_UNDER_WANING_IMMUNITY = {
+    None: {"no_boosters": 1.000, "q180d": 1.000, "q60d": 1.000},
+    365:  {"no_boosters": 0.276, "q180d": 1.000, "q60d": 1.000},
+    180:  {"no_boosters": 0.284, "q180d": 1.000, "q60d": 1.000},
+    90:   {"no_boosters": 0.292, "q180d": 0.544, "q60d": 1.000},
+}
+
+# q60d boosters stopped after N years, half-life 180 d. Maintenance is not a tapering course: the
+# durability is only there while boosting continues, so a 10-year claim requires 10 years of dosing.
+STACK_STOPPING_BOOSTERS = {1: 0.244, 2: 0.388, 5: 0.668, 10: 1.000, None: 1.000}
+
 
 def corrected_ic50(sensitive_ic50: float, ratios: list[float] | None = None) -> np.ndarray:
     """Five-clone IC50 vector under the corrected ratios; the escape clone inherits clone 1."""
@@ -105,7 +120,17 @@ def required_growth_reduction(bar: float, target: float) -> float:
 VERDICT = {
     "closes": True,
     "stack": "cross-resistance correction + ~16-20% growth reduction + the vaccine real trials "
-             "already deliver (0.03/day)",
+             "already deliver (0.03/day), boosted q60d for the full ten years",
+    "the_stack_figure_is_freedom_from_regrowth_not_survival":
+        "The engine reports freedom from regrowth. Rupture/haemorrhage is an independent competing "
+        "hazard it does not model (hsa_open_route_closure.joint_durability), so a tumour-control "
+        "1.000 becomes about 0.60 at a 5%/yr hazard over ten years unscreened, and about 0.90-0.96 "
+        "under CANDiD-sensitivity surveillance. Screening is a third load-bearing component, not an "
+        "optional extra.",
+    "boosters_are_required_not_optional":
+        "STACK_UNDER_WANING_IMMUNITY: without boosters the stack falls to the no-vaccine level at "
+        "every half-life tested. STACK_STOPPING_BOOSTERS: stopping at 1/2/5 years gives "
+        "0.244/0.388/0.668. Ten-year durability requires ten years of q60d dosing.",
     "no_component_works_alone": "correction alone 0.640; 20% growth cut alone 0.536; vaccine alone "
                                 "0.492. Together 1.000.",
     "why_the_correction_matters_most": "it cuts the growth-reduction ask from 41.4% to 16.3%, a "
