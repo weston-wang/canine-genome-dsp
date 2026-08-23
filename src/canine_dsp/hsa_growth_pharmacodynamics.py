@@ -140,6 +140,53 @@ EXPOSURE_GAP = {
     "at_the_superseded_16_3pct": {"required_ng_per_ml": 1817.0, "fold_short": 97.0},
 }
 
+# ---------------------------------------------------------------------------------------------
+# Does the exposure criterion discriminate, or does it reject everything? Toceranib is the control.
+#
+# Unlike propranolol, toceranib demonstrably REACHES its target concentration in dogs, and the
+# authors say so explicitly. It was still negative in 43 dogs with splenic HSA (Gardner 2015).
+# The two negatives therefore mean different things, and only one of them is informative about
+# the biology.
+TOCERANIB_CLEARS_ITS_OWN_EXPOSURE_BAR = {
+    "citation": "Bernabe et al. 2013, BMC Vet Res 9:190, PMID 24079884, "
+                "doi 10.1186/1746-6148-9-190",
+    "dose_mg_per_kg_eod": (2.4, 2.9),
+    "plasma_ng_per_ml": (100.0, 120.0),
+    "target_inhibition_threshold_ng_per_ml": 40.0,
+    "quote": "well above the 40 ng/ml concentration associated with target inhibition",
+    "pharmacodynamic_confirmation": "plasma VEGF rose significantly over 30 days, indicating VEGFR2 "
+                                    "inhibition was achieved in the majority of dogs -- target "
+                                    "engagement measured, not assumed",
+    "fold_above_threshold": (2.5, 3.0),
+    "and_yet": "negative in 43 dogs with splenic HSA (Gardner et al. 2015, PMID 26062540): 'does "
+               "not improve either disease free interval or overall survival'",
+}
+
+# The criterion separates two kinds of negative trial.
+TWO_KINDS_OF_NEGATIVE_TRIAL = {
+    "propranolol": {
+        "cleared_its_exposure_bar": False,
+        "fold_versus_its_own_threshold": 1 / 347,
+        "what_the_negative_means": "uninformative about beta-blockade. The drug never reached a "
+                                   "concentration with a measured antiproliferative effect, so "
+                                   "PRO-DOX tested a dose, not a hypothesis.",
+    },
+    "toceranib": {
+        "cleared_its_exposure_bar": True,
+        "fold_versus_its_own_threshold": 2.75,
+        "what_the_negative_means": "informative. Target reached, target engagement confirmed by the "
+                                   "VEGF rise, and no durable benefit in 43 dogs. This is evidence "
+                                   "against VEGFR/PDGFR/KIT inhibition in canine splenic HSA rather "
+                                   "than against the trial design.",
+    },
+    "why_this_matters": "A screening criterion that rejected every candidate would be useless. It "
+                        "does not: toceranib passes the exposure test and fails on biology, "
+                        "propranolol fails the exposure test before biology is reached.",
+    "scope_limit": "toceranib's targets are VEGFR/PDGFR/KIT -- angiogenic and stromal rather than "
+                   "the tumour cell's own proliferation rate. Its failure indicts the "
+                   "anti-angiogenic route specifically, not growth reduction as a category.",
+}
+
 VERDICT = {
     "question": "Can beta-blockade deliver the ~29% growth reduction the stack requires, at a dose "
                 "a dog tolerates?",
@@ -163,6 +210,11 @@ VERDICT = {
                             "concentration. No such measurement exists; PRO-DOX collected the "
                             "pharmacokinetics and the tumour transcriptomes but did not report a "
                             "proliferation readout against exposure.",
+    "the_criterion_discriminates": "toceranib is the control that stops this being a criterion which "
+                               "rejects everything: it reaches 100-120 ng/mL against a 40 ng/mL "
+                               "target-inhibition threshold, confirms engagement via a rising "
+                               "plasma VEGF, and is still negative in 43 dogs. Propranolol fails "
+                               "before biology is reached; toceranib fails on biology.",
     "consequence_for_the_stack": "the 28.9% requirement stands, but propranolol is not shown to "
                                  "deliver it. The growth-reduction component needs an agent whose "
                                  "achievable exposure clears its own antiproliferative EC50, and "

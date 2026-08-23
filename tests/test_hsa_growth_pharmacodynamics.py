@@ -3,6 +3,7 @@ import pytest
 
 from canine_dsp.hsa_growth_pharmacodynamics import (
     ACHIEVABLE_SUPPRESSION_AT_CANINE_CMAX, EXPOSURE_GAP, IMPLIED_EC50_uM,
+    TOCERANIB_CLEARS_ITS_OWN_EXPOSURE_BAR, TWO_KINDS_OF_NEGATIVE_TRIAL,
     PROPRANOLOL_CANINE_EXPOSURE, PROPRANOLOL_CLINICAL_PROLIFERATION_SIGNAL,
     PROPRANOLOL_IN_VITRO_ANTIPROLIFERATIVE, PROPRANOLOL_IS_NOT_ONLY_ANTIPROLIFERATIVE,
     PROPRANOLOL_MW_G_PER_MOL, VERDICT, concentration_for_suppression, ec50_from_single_point,
@@ -136,3 +137,38 @@ def test_the_verdict_answers_no_and_says_what_would_change_it():
     assert "vinblastine would fail too" in VERDICT["what_it_explains"]
     assert "No such measurement exists" in VERDICT["what_would_change_it"]
     assert "requirement stands" in VERDICT["consequence_for_the_stack"]
+
+
+# ---------- does the criterion discriminate, or reject everything? ----------
+
+def test_toceranib_clears_its_own_exposure_bar_and_fails_anyway():
+    """The control. If every candidate failed the exposure test the test would be worthless."""
+    toc = TOCERANIB_CLEARS_ITS_OWN_EXPOSURE_BAR
+    low, high = toc["plasma_ng_per_ml"]
+    threshold = toc["target_inhibition_threshold_ng_per_ml"]
+    assert low > threshold, "reaches target concentration, unlike propranolol"
+    assert low / threshold == pytest.approx(toc["fold_above_threshold"][0], abs=0.05)
+    assert high / threshold == pytest.approx(toc["fold_above_threshold"][1], abs=0.05)
+    assert "24079884" in toc["citation"]
+    assert "VEGF rose significantly" in toc["pharmacodynamic_confirmation"]
+    assert "26062540" in toc["and_yet"], "and it was still negative in 43 dogs"
+
+
+def test_the_two_negative_trials_do_not_mean_the_same_thing():
+    both = TWO_KINDS_OF_NEGATIVE_TRIAL
+    assert both["propranolol"]["cleared_its_exposure_bar"] is False
+    assert both["toceranib"]["cleared_its_exposure_bar"] is True
+    assert both["propranolol"]["fold_versus_its_own_threshold"] < 0.01
+    assert both["toceranib"]["fold_versus_its_own_threshold"] > 2.0
+    assert "uninformative" in both["propranolol"]["what_the_negative_means"]
+    assert "informative" in both["toceranib"]["what_the_negative_means"]
+    assert "anti-angiogenic route specifically" in both["scope_limit"], \
+        "toceranib's failure does not indict growth reduction as a category"
+
+
+def test_propranolols_exposure_shortfall_matches_the_recorded_fold():
+    """The 1/347 in the comparison is the same number as the 25 uM / 0.072 uM gap."""
+    cmax = ng_per_ml_to_micromolar(PROPRANOLOL_CANINE_EXPOSURE["propranolol_cmax_ng_per_ml"])
+    threshold_uM = 25.0  # lowest concentration with a measured antiproliferative effect
+    recorded = TWO_KINDS_OF_NEGATIVE_TRIAL["propranolol"]["fold_versus_its_own_threshold"]
+    assert cmax / threshold_uM == pytest.approx(recorded, rel=0.02)
