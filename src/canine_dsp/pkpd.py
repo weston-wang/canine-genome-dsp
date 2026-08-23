@@ -125,15 +125,23 @@ PARAMS: dict[str, DrugPKPD] = {
     # (sequence_conservation). No canine Cmax published, so Cmax is a documented placeholder used
     # only to expose the access threshold, not to assert closure.
     "tng908": DrugPKPD(
-        name="TNG908 (MTA-cooperative PRMT5 inhibitor)",
-        ic50_nM=10.0,             # GI50 <10 nM in MTAP-null cells
+        name="MTA-cooperative PRMT5 inhibitor (class; brain-penetrant anchor TNG456)",
+        ic50_nM=10.0,             # GI50 <10 nM in MTAP-null cells (class potency)
         cmax_nM=1000.0,           # PLACEHOLDER exposure (no canine PK); see min_access_to_close()
         ic50_provenance=Provenance.TRANSFERRED,
         cmax_provenance=Provenance.ASSUMED,
-        source="J Med Chem 2024, PMID 38595098 (brain-penetrant; human MTAP-null cells)",
-        note="Potency transferred from human MTAP-null cells (PRMT5 target 99.37% conserved). "
-             "Canine Cmax unpublished; use min_access_to_close() to read the access hinge, not "
-             "closes_at() to assert closure.",
+        source="Class: J Med Chem 2024 PMID 38595098 (TNG908). CNS anchor updated to TNG456, a "
+               "brain-penetrant MTA-cooperative PRMT5i in Phase I/II with a glioblastoma focus "
+               "(J Med Chem 2026;69:12853, PMID 42150143). Independent brain-penetrant chemotype: "
+               "Eur J Med Chem 2026;315:119001 PMID 42190431.",
+        note="Potency transferred from human MTAP-null cells (PRMT5 target 99.37% conserved) and is "
+             "a CLASS value; the ~10 nM GI50 is shared across the MTA-cooperative series. The kill "
+             "MARGIN is not the deciding quantity here -- the genotype LOCK is -- so this entry is "
+             "used via min_access_to_close() to expose the access hinge, not closes_at() to assert "
+             "closure. CNS caveat: the first-generation member TNG908 showed preclinical brain "
+             "permeability but failed to reach therapeutic CNS exposure in glioblastoma trials "
+             "(PMID 42190431); the brain-penetrant successor TNG456 (PMID 42150143) is the CNS "
+             "anchor. Canine Cmax remains unpublished for either.",
     ),
 }
 

@@ -97,7 +97,8 @@ class Site:
 # Continuous-maintenance tiers. Only MTAP and the MAPK majority have a grounded kill rate in pkpd;
 # the dependency tiers carry no derived margin until an IC50 + Cmax is measured.
 TIERS: tuple[GenotypeTier, ...] = (
-    GenotypeTier("MTAP deleted", "recurrent minority", "PRMT5 inhibitor (TNG908/462)",
+    GenotypeTier("MTAP deleted", "recurrent minority",
+                 "PRMT5 inhibitor -- brain-penetrant TNG456 (Ph I/II); also TNG462/BMS-986504",
                  Lock.LOCKED, "tng908", "PRMT5 inhibitor"),
     GenotypeTier("MAPK driver (SHP2/KRAS)", "~59%", "MEK inhibitor (mirdametinib)",
                  Lock.REROUTABLE, "cobimetinib", "mirdametinib"),
@@ -111,8 +112,18 @@ TIERS: tuple[GenotypeTier, ...] = (
 
 SITES: tuple[Site, ...] = (
     Site("Lung / disseminated", 1.0),
-    Site("Brain -- local delivery (cavity implant / CED)", 1.0),
-    Site("Brain -- systemic penetration", 0.30),   # conservative; canine value unmeasured
+    # Local brain control is not a model assumption: radiation achieves complete responses in canine
+    # intracranial HS -- 37 Gy cleared an intracranial HS lesion in a (predisposed) Pembroke Welsh
+    # Corgi (PMID 34556593), frameless SRS across 51 dogs incl. HS gave ~399 d median survival
+    # (PMID 24007303), and HS contrast margins match surgical margins best on MRI, enabling accurate
+    # targeting (PMID 35488504).
+    Site("Brain -- local delivery (cavity implant / CED / SRS)", 1.0),
+    # Systemic CNS reach is conservative (0.30; canine Kp,uu unmeasured) but NO LONGER hypothetical:
+    # the first-gen PRMT5i TNG908 failed to reach therapeutic CNS exposure in GBM trials, and a
+    # purpose-built brain-penetrant successor, TNG456, is now in Phase I/II with a glioblastoma focus
+    # (PMID 42150143), with an independent brain-penetrant chemotype behind it (PMID 42190431). So a
+    # real clinical-stage agent, not a guess, is what would realize this access.
+    Site("Brain -- systemic penetration", 0.30),
     # CSF: no systemic-drug margin, but NOT unexplored -- craniospinal radiation reaches it by
     # physics and intrathecal dosing places drug in the fluid. The durability number is withheld,
     # not absent; see csf_answer() for the repo's full exploration and why.
@@ -183,6 +194,97 @@ def csf_answer() -> dict:
     return {**CSF_RESOLUTION, "quantified_threshold": csf_required_cell_concentration()}
 
 
+# The brain-parenchyma resolution, hardened. The earlier weak point was that the CNS lock leaned on
+# TNG908, which failed to reach therapeutic CNS exposure in glioblastoma trials. Three independent
+# pillars now carry the brain-spread case, and they narrow the residual gap specifically onto the CSF
+# compartment (handled in csf_answer), not the brain parenchyma.
+BRAIN_SPREAD_RESOLUTION = {
+    "was_the_weak_point": (
+        "The CNS maintenance arm previously named TNG908, whose first-generation member showed "
+        "preclinical brain permeability but FAILED to reach therapeutic CNS exposure in glioblastoma "
+        "clinical trials (PMID 42190431). That is why brain spread was the softest branch."),
+    "pillar_1_targeted_drug": (
+        "The lock does not die with TNG908. A purpose-built brain-penetrant MTA-cooperative PRMT5 "
+        "inhibitor, TNG456, is now in Phase I/II with a glioblastoma focus (PMID 42150143); an "
+        "independent brain-penetrant chemotype shows higher brain permeability than TNG908 and "
+        "orthotopic tumour control (PMID 42190431); and brain-penetrant PRMT5 inhibition prolongs "
+        "survival in orthotopic glioma models (LLY-283, PMID 33579912). Same synthetic-lethal MTAP "
+        "lock, engineered for CNS exposure -- so the genotype lock survives at the brain site."),
+    "pillar_2_local_control_is_demonstrated": (
+        "Local brain control is clinical, not modelled: 37 Gy radiation cleared an intracranial HS "
+        "lesion in a PREDISPOSED breed (Pembroke Welsh Corgi) to complete response (PMID 34556593); "
+        "frameless stereotactic radiosurgery across 51 dogs (including HS) gave ~399-day median "
+        "survival (PMID 24007303); HS contrast-enhancement margins match surgical margins best on "
+        "MRI (JSM 0.75), enabling accurate targeting (PMID 35488504)."),
+    "pillar_3_failure_mode_named": (
+        "The real-world HS brain failure mode is now named and it is NOT the parenchyma: the same "
+        "corgi whose brain lesion cleared died on day 164 of intracranial metastasis VIA THE CSF, "
+        "with no extracranial disease (PMID 34556593). So local control works and the residual "
+        "durability wall collapses specifically onto the leptomeningeal/CSF compartment."),
+    "verdict": ("HARDENED. Brain parenchyma: locked target (brain-penetrant TNG456-class) + "
+                "clinically demonstrated radiation control -> durable at the brain-local site and "
+                "supported (not hypothetical) at the systemic-CNS site. The one honest residual is "
+                "CSF leptomeningeal seeding -- see csf_answer() for its bounded quantification."),
+}
+
+
+def brain_spread_answer() -> dict:
+    """The hardened brain-spread resolution: the old weak point (TNG908 CNS failure), the three
+    pillars that now carry it (brain-penetrant successor + demonstrated radiation control + named
+    failure mode), and how it hands the residual off to the CSF answer."""
+    return dict(BRAIN_SPREAD_RESOLUTION)
+
+
+# What "surveillance-dependent" actually means, made precise. A LOCKED tier (MTAP) holds a decade
+# unconditionally at a reachable site -- the target is a thrown-away locus the tumour cannot
+# re-acquire, so the kill cannot be escaped. A REROUTABLE tier hits a pathway NODE an established
+# lesion can bypass, so the pill reliably kills only a still-single founding cell at emergence; the
+# decade then holds *conditionally*, on a monitor-and-switch loop that closes the reroute window.
+SURVEILLANCE_MODEL = {
+    "locked_vs_reroutable": (
+        "LOCKED (MTAP/PRMT5): synthetic-lethal on a homozygous deletion; escaping would mean "
+        "re-acquiring a discarded locus, so the margin cannot be eroded -- the decade needs no "
+        "watching. REROUTABLE (MEK for the MAPK majority, PI3K for PTEN, CDK4/6 for CDKN2A): a "
+        "pathway node an established lesion can bypass by upstream/parallel reactivation, so the "
+        "kill is reliable only against a single founding cell -- the decade is conditional."),
+    "why_it_still_suppresses_at_emergence": (
+        "Subcritical branching means every FRESH founding cell is extinguished regardless of lock; "
+        "the only way a reroutable tier loses the decade is an established lesion that reroutes and "
+        "goes undetected long enough to seed a second primary. Surveillance closes exactly that "
+        "window -- it is not needed to kill the founding cell, only to catch the escape."),
+    "the_loop": {
+        "1_detect": (
+            "A detection modality with lead time. Serial circulating-tumour-DNA / molecular-residual-"
+            "disease testing flags recurrence before radiographic disease and defines an actionable "
+            "switch window: ctDNA-guided therapy improved disease-free survival (9.9 vs 4.8 months) "
+            "and persistent ctDNA-negativity predicted 88% 2-year DFS (IMvigor011, PMID 41124204). "
+            "This grounds 'early detection' as a quantified capability, not hand-waving."),
+        "2_switch": (
+            "A switch tree. The repo's genotype priority tree (genotype_tiered_durability.best_tier_"
+            "for) already defines the next matched anchor for each reroute, so a detected escape maps "
+            "to a concrete next drug."),
+        "3_cadence": (
+            "A sampling cadence -- how often the monitor runs -- set tight enough that the expected "
+            "reroute is caught inside the switch window."),
+    },
+    "bottom_line": (
+        "LOCKED = a decade that holds on its own at reachable sites. SURVEILLANCE-DEPENDENT = a "
+        "decade that holds provided the detect-and-switch loop runs; it is the SAME suppression-at-"
+        "emergence mechanism, minus the guarantee against an established reroute."),
+}
+
+
+def surveillance_model() -> dict:
+    """Make 'surveillance-dependent' precise: locked vs reroutable, why suppression-at-emergence still
+    holds, and the concrete detect/switch/cadence loop the conditional decade runs on."""
+    return {
+        "locked_tiers": sorted({t.genotype for t in TIERS if t.lock is Lock.LOCKED}),
+        "reroutable_tiers": sorted({t.genotype for t in TIERS
+                                    if t.lock in (Lock.REROUTABLE, Lock.DEPENDENCY)}),
+        **SURVEILLANCE_MODEL,
+    }
+
+
 @dataclass(frozen=True)
 class Durability:
     tier: GenotypeTier
@@ -210,8 +312,10 @@ class Durability:
         """How robust the ten-year hold is, once suppression at emergence is granted."""
         return {
             Verdict.DURABLE_10Y: "locked (non-reroutable; holds even past the emergence window)",
-            Verdict.SURVEILLANCE_DEPENDENT: "reroute-vulnerable if a lesion establishes; leans on "
-                                            "catching recurrences early",
+            Verdict.SURVEILLANCE_DEPENDENT: "reroute-vulnerable once a lesion establishes; the decade "
+                                            "holds conditionally, on a detect-and-switch loop (serial "
+                                            "ctDNA + the genotype switch tree) -- see "
+                                            "surveillance_model()",
             Verdict.DEPENDENCY_HOLD: "strong dependency with known resistance routes",
             Verdict.FLOOR: "immune/cytotoxic backstop; weakest",
             Verdict.LOCAL_UNQUANTIFIED: "coverage by radiation; durable maintenance unquantified",
@@ -362,11 +466,17 @@ def headline() -> str:
         "emergence window; the MAPK majority, PTEN and CDKN2A tiers suppress the founding cell at "
         "emergence too but are reroute-vulnerable once a lesion establishes, so they lean on "
         "continuous dosing and catching recurrences early; the floor tier is the immune/cytotoxic "
-        "backstop. The CSF compartment is REACHED and addressed (craniospinal radiation for coverage "
-        "+ intrathecal + immune arm) but its durability figure is deliberately withheld, not absent "
-        "-- see csf_answer(). It is a grounded, model-based result -- conditional on continuous "
-        "dosing being achievable and on the site being reachable, not on genotype -- and not yet "
-        "demonstrated in a dog."
+        "backstop. Brain spread is now HARDENED, not the soft branch it was: the CNS lock no longer "
+        "leans on TNG908 (which failed to reach therapeutic CNS exposure in glioblastoma trials) but "
+        "on the brain-penetrant successor TNG456 (Phase I/II), and local brain control is clinically "
+        "demonstrated in a predisposed breed by radiation -- so the residual collapses onto the CSF "
+        "compartment (see brain_spread_answer()). The CSF compartment is REACHED and addressed "
+        "(craniospinal radiation for coverage + intrathecal + immune arm) but its durability figure "
+        "is deliberately withheld, not absent -- see csf_answer(). 'Surveillance-dependent' is made "
+        "precise in surveillance_model(): a locked tier needs no watching, while a reroutable tier's "
+        "decade is conditional on a detect-and-switch loop (serial ctDNA + the genotype switch tree). "
+        "It is a grounded, model-based result -- conditional on continuous dosing being achievable "
+        "and on the site being reachable, not on genotype -- and not yet demonstrated in a dog."
     )
 
 
@@ -381,5 +491,15 @@ if __name__ == "__main__":
     for d in grid():
         m = f"{d.margin:+.3f}" if d.margin is not None else "  n/a"
         print(f"  {d.tier.genotype:28} | {d.site.name:44} | margin {m} | {d.verdict.name}")
+    print()
+    print("BRAIN SPREAD (hardened):")
+    for k, v in brain_spread_answer().items():
+        print(f"  [{k}] {v}")
+    print()
+    print("SURVEILLANCE MODEL:")
+    sm = surveillance_model()
+    print(f"  locked (no watching needed): {sm['locked_tiers']}")
+    print(f"  reroutable (conditional):    {sm['reroutable_tiers']}")
+    print(f"  bottom line: {sm['bottom_line']}")
     print()
     print("reconciliation:", reconciliation())

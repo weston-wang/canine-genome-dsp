@@ -89,7 +89,7 @@ genotype gets a matched pill — what varies is the *strength* of the ten-year h
 
 | Tumour genotype | Rough share | Maintenance pill (all brain-penetrant, oral, continuous) | Durability grade |
 | --- | --- | --- | --- |
-| MTAP deleted | recurrent minority | PRMT5 inhibitor (MTA-cooperative; TNG908 / TNG462 class) | **Strongest** — non-reroutable, genotype-locked |
+| MTAP deleted | recurrent minority | PRMT5 inhibitor (MTA-cooperative; brain-penetrant **TNG456**, Phase I/II; also TNG462 / BMS-986504) | **Strongest** — non-reroutable, genotype-locked |
 | PTEN deleted | minority | PI3K inhibitor (paxalisib) | Strong dependency |
 | CDKN2A deleted, RB1 intact | minority | CDK4/6 inhibitor (abemaciclib) | Strong dependency |
 | SHP2 / KRAS driver | **~59%** | MEK inhibitor (mirdametinib, CNS-penetrant) | Medium — surveillance-dependent |
@@ -103,11 +103,71 @@ founding-driver cell before any reroute exists — so it leans on catching recur
 early. "Ten years for all cases" is therefore honest as a clean lock for some genotypes
 and a surveillance-dependent hold for the majority — not one uniform guarantee.
 
+**What "surveillance-dependent" actually means (made precise).** This is the difference
+between a decade that holds *on its own* and one that holds *provided a loop runs* — not a
+difference in whether the pill works. Encoded in `maintenance_durability.surveillance_model()`:
+
+- **Locked (MTAP → PRMT5i).** The target is a *thrown-away gene*; escaping would mean
+  re-acquiring a deleted locus, which a cell cannot do. The margin can't be eroded, so the
+  decade needs **no watching**.
+- **Reroutable (MAPK → MEK; PTEN → PI3K; CDKN2A → CDK4/6).** The target is a *pathway node*
+  an established lesion can bypass. The pill still reliably kills a **single founding cell**
+  at emergence (subcritical branching extinguishes every fresh cell), so the only way the
+  decade fails is an established lesion that reroutes **and goes undetected** long enough to
+  seed a second primary. Surveillance closes exactly that window.
+- **The loop has three concrete parts:** (1) *detect* — serial circulating-tumour-DNA /
+  molecular-residual-disease testing, which flags recurrence before it is visible on imaging
+  and defines an actionable switch window (ctDNA-guided therapy improved disease-free
+  survival 9.9 vs 4.8 months, and persistent ctDNA-negativity predicted 88% two-year DFS —
+  according to PubMed, IMvigor011, [DOI](https://doi.org/10.1056/NEJMoa2511885)); (2)
+  *switch* — the genotype priority tree already names the next matched anchor for each
+  reroute; (3) *cadence* — sample often enough to catch the escape inside that window.
+
+So "ten years for all cases" is honest as **a clean lock for MTAP, and a monitored decade
+(detect-and-switch) for the reroutable majority** — the same suppression-at-emergence
+mechanism, minus the guarantee against an established reroute.
+
+**Brain spread — the case is now hardened, not the soft branch it was.** The previous
+weak point was that the CNS maintenance arm leaned on **TNG908**, whose first-generation
+member showed preclinical brain permeability but *failed to reach therapeutic CNS exposure*
+in glioblastoma trials (according to PubMed, [DOI](https://doi.org/10.1016/j.ejmech.2026.119001)).
+Three independent pillars now carry brain spread, and together they narrow the residual gap
+specifically onto the CSF compartment — **not the brain parenchyma** (encoded in
+`maintenance_durability.brain_spread_answer()`):
+
+1. **A brain-penetrant successor keeps the genotype lock at the brain site.** **TNG456**, a
+   purpose-built brain-penetrant MTA-cooperative PRMT5 inhibitor, is now in **Phase I/II with
+   a glioblastoma focus** (according to PubMed, [DOI](https://doi.org/10.1021/acs.jmedchem.6c00035));
+   an independent brain-penetrant chemotype shows higher brain permeability than TNG908 with
+   orthotopic tumour control ([DOI](https://doi.org/10.1016/j.ejmech.2026.119001)); and
+   brain-penetrant PRMT5 inhibition prolongs survival in orthotopic glioma models (LLY-283,
+   [DOI](https://doi.org/10.1038/s41467-021-21204-5)). Same synthetic-lethal MTAP lock,
+   engineered for CNS exposure.
+2. **Local brain control is clinically demonstrated — in a predisposed breed.** 37 Gy
+   radiation drove an intracranial HS lesion to **complete response** in a Pembroke Welsh
+   Corgi (according to PubMed, [DOI](https://doi.org/10.1292/jvms.21-0206)); frameless
+   stereotactic radiosurgery across 51 dogs including HS gave ~399-day median survival
+   ([DOI](https://doi.org/10.1111/vco.12056)); HS contrast-enhancement margins match surgical
+   margins best on MRI (JSM 0.75), enabling accurate targeting
+   ([DOI](https://doi.org/10.1111/jvim.16431)).
+3. **The real-world failure mode is now named — and it is the CSF, not the parenchyma.** The
+   same corgi whose brain lesion cleared died on day 164 of intracranial metastasis **via the
+   CSF**, with no extracranial disease ([DOI](https://doi.org/10.1292/jvms.21-0206)). So local
+   control works and the residual durability wall collapses onto the leptomeningeal/CSF
+   compartment — which is exactly the one place the analysis already declines to put a
+   durability number (see the CSF row below and `csf_answer()`).
+
 **Credited, not re-discovered.** The MAPK branch is not new: the earliest analysis
 already listed MEK inhibitors as "works, but fails in the brain on access" and named
-SHP2/KRAS genotyping as a top next step. The genuinely new parts are the
-maintenance-at-emergence role and the CNS-penetrant candidate (mirdametinib), whose canine
-brain penetration is still unmeasured.
+SHP2/KRAS genotyping as a top next step; mirdametinib is now an FDA-approved MEK1/2
+inhibitor with documented CNS penetration (according to PubMed,
+[DOI](https://doi.org/10.1080/13543784.2025.2558656)), though its canine brain penetration
+in HS remains unmeasured. The genuinely new parts are the maintenance-at-emergence role, the
+brain-penetrant PRMT5i successor that repairs the CNS lock, and the ctDNA-grounded
+detect-and-switch loop that makes "surveillance-dependent" a concrete protocol.
+
+*Literature above retrieved via PubMed; DOIs linked inline. This is a computational
+analysis, not veterinary advice.*
 
 ---
 

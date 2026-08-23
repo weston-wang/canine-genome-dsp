@@ -104,6 +104,8 @@
 
   /* sections */
   section { margin: 3.4rem 0 0; }
+  p.src { font-size: .78rem; color: var(--ink-faint); margin: 1rem 0 0; line-height: 1.6; }
+  p.src a { color: var(--accent); }
   h2 {
     font-family: var(--serif); font-weight: 600;
     font-size: clamp(1.35rem, 3.4vw, 1.72rem);
@@ -315,7 +317,7 @@
 
     <div class="tree">
       <div class="row"><div class="gene">MTAP deletion <small>the clean case</small></div><div class="rx"><b>PRMT5 pill → catches new tumours + a locked hold.</b> Most robust: even a tumour that's missed and grows can't reroute around a thrown-away gene.</div></div>
-      <div class="row"><div class="gene">MAPK driver <small>~60%, the majority</small></div><div class="rx"><b>MEK pill → catches new tumours; reroute-vulnerable if missed.</b> Kills a new tumour at the starting line; leans on catching recurrences early.</div></div>
+      <div class="row"><div class="gene">MAPK driver <small>~60%, the majority</small></div><div class="rx"><b>MEK pill → catches new tumours; reroute-vulnerable if missed.</b> Kills a new tumour at the starting line. Because a <em>missed</em>, established tumour can find a detour around this pill, the decade here is "surveillance-dependent": run a <b>blood test for tumour DNA</b> on a schedule to catch a new tumour early, then <b>switch to the next matched pill</b>. Not watching = the one way this tier loses the decade.</div></div>
       <div class="row"><div class="gene">PTEN loss</div><div class="rx"><b>PI3K pill → catches new tumours; strong dependency.</b> Good hold, known escape routes if a lesion establishes.</div></div>
       <div class="row"><div class="gene">CDKN2A loss (RB1 intact)</div><div class="rx"><b>CDK4/6 pill → catches new tumours; dependency hold.</b> Holds growth; weaker than the MTAP lock.</div></div>
       <div class="row"><div class="gene">No target / RB1 lost</div><div class="rx"><b>Immune watch + cycled chemo → the backstop.</b> Weakest tier, but no case is stranded.</div></div>
@@ -362,8 +364,10 @@
       <div class="crow"><span class="mark">✓</span><span class="ctext"><b>All the places it lives — covered.</b> Brain tissue and the fluid around the brain and spine (the two spots it actually occupies), plus the lung/spread-out form. A neat "removable lump" was ruled out — it doesn't exist for this tumour.</span></div>
       <div class="crow"><span class="mark">✓</span><span class="ctext"><b>All 12 escape routes — closed.</b> Every way a cell tries to survive — restart the pathway, mutate the target, jump to a backup pathway, change identity, hide from the immune system, resist cell-death programs, go dormant, repair the damage, or seed a brand-new tumour — has an agent that shuts it.</span></div>
       <div class="crow"><span class="mark">✓</span><span class="ctext"><b>Backed, not just asserted.</b> Of those 12: <b>7</b> rest on drugs measured to kill these cells in the lab, <b>2</b> on close cousins of this cancer, <b>1</b> computed by the pharmacology model, <b>2</b> on solid design logic — and <b>0</b> on a bare guess.</span></div>
+      <div class="crow"><span class="mark">✓</span><span class="ctext"><b>Brain spread — the case just got stronger.</b> This used to be the soft spot, because the lifelong pill it relied on (TNG908) couldn't get high enough into the brain in human trials. Three things now shore it up: (1) a <b>purpose-built brain-penetrant successor, TNG456</b>, is already in human Phase I/II trials aimed at brain tumours — same lock, engineered to reach the brain; (2) <b>radiation already clears intracranial HS</b> — in a dog of a predisposed breed, 37 Gy drove a brain lesion to complete disappearance; and (3) that same case pins the real weak point to the <b>fluid (CSF) spread, not the brain tissue</b> — the dog's brain lesion cleared, but it later seeded through the spinal fluid. So brain <em>tissue</em> is well-covered; the honest residual is the CSF, handled below.</span></div>
       <div class="crow"><span class="mark warn">!</span><span class="ctext"><b>One honest asterisk — timing in the brain.</b> You can't give full-dose brain radiation and the CNS chemo at the same time; both tax the normal brain. They have to be <b>sequenced</b>, or the local wafer used instead of whole-brain radiation. (See the safety check below.)</span></div>
     </div>
+    <p class="src">Brain-spread evidence via PubMed: brain-penetrant PRMT5 successor TNG456 <a href="https://doi.org/10.1021/acs.jmedchem.6c00035">DOI</a>; TNG908 CNS-exposure shortfall + higher-penetrance chemotype <a href="https://doi.org/10.1016/j.ejmech.2026.119001">DOI</a>; radiation complete response &amp; CSF failure mode in a predisposed breed <a href="https://doi.org/10.1292/jvms.21-0206">DOI</a>; stereotactic radiosurgery survival <a href="https://doi.org/10.1111/vco.12056">DOI</a>. Analysis, not veterinary advice.</p>
   </section>
 
   <section>
@@ -389,7 +393,7 @@
       <div class="srow"><div class="drug">Cobimetinib · Mirdametinib (MEK) <small>maintenance, ~60% of dogs</small></div><span class="pill partial">Human-approved</span><p class="note2">Approved drugs — for <em>people</em>. Cobimetinib is the one actually tested on dog HS cells (in a dish). Mirdametinib is the brain-penetrant one. Neither is licensed for dogs.</p></div>
       <div class="srow"><div class="drug">Abemaciclib (CDK4/6) <small>maintenance, CDKN2A tier</small></div><span class="pill partial">Human-approved</span><p class="note2">Approved for people (breast cancer); crosses into the brain. No dog data; only works if the RB1 gene is intact.</p></div>
       <div class="srow"><div class="drug">Paxalisib (PI3K) <small>induction helper + PTEN tier</small></div><span class="pill bet">Investigational</span><p class="note2">In human trials, not approved anywhere. Brain-penetrant by design.</p></div>
-      <div class="srow"><div class="drug">PRMT5 inhibitors — TNG908 / TNG462 <small>the strongest lifelong arm</small></div><span class="pill bet">Investigational</span><p class="note2">In early human trials (including brain tumours). Not approved; <strong>zero dog data.</strong> This is the drug the ten-year hope rests on.</p></div>
+      <div class="srow"><div class="drug">PRMT5 inhibitors — brain-penetrant <b>TNG456</b>; also TNG462 / BMS-986504 <small>the strongest lifelong arm</small></div><span class="pill bet">Investigational</span><p class="note2">In early human trials (including brain tumours). Not approved; <strong>zero dog data.</strong> This is the drug the ten-year hope rests on. <strong>Brain update:</strong> the first-generation version (TNG908) couldn't get high enough into the brain in human trials — so the brain job now goes to its purpose-built successor <b>TNG456</b>, already in Phase I/II with a brain-tumour focus. Same lock, engineered to reach the brain.</p></div>
       <div class="srow"><div class="drug">Lisavanbulin <small>the induction chemo workhorse</small></div><span class="pill bet">Investigational</span><p class="note2">In human brain-tumour trials; not approved, not for dogs. Its acute (not cumulative) side-effect profile is why it's chosen.</p></div>
     </div>
     <p>So the shape of it: the <strong>fallback tier you can run today</strong>; the targeted pills either <strong>exist as human drugs</strong> (getting them for a dog means special access, not invention) or are <strong>still in trials</strong>. Bridging that is the single largest obstacle to actually treating a dog — the analysis is clear-eyed that it's a sourcing problem, not a science one.</p>
@@ -540,11 +544,11 @@
       </div>
 
       <div class="dcard">
-        <div class="dhead"><h3>PRMT5 inhibitor (TNG908/462)</h3><span class="pill partial">Model-derived</span></div>
+        <div class="dhead"><h3>PRMT5 inhibitor (brain-penetrant TNG456; also TNG462/BMS-986504)</h3><span class="pill partial">Model-derived</span></div>
         <p class="closes">Closes escape <b>12</b> — the lifelong arm against a brand-new tumour.</p>
         <dl>
-          <dt>Kind</dt><dd>A targeted <b>"synthetic-lethal"</b> pill: lethal only to cells missing the MTAP gene, sparing normal cells. Brain-penetrant by design.</dd>
-          <dt>Strength</dt><dd>Very potent — the model shows it beats the tumour at a <b>tiny</b> fraction of a dose. Strength borrowed from human MTAP-deleted cancers, on a target 99.4% identical in dogs.</dd>
+          <dt>Kind</dt><dd>A targeted <b>"synthetic-lethal"</b> pill: lethal only to cells missing the MTAP gene, sparing normal cells. The brain job goes to <b>TNG456</b>, a successor built to cross into the brain (the first version, TNG908, fell short on brain exposure in human trials).</dd>
+          <dt>Strength</dt><dd>Very potent — the model shows it beats the tumour at a <b>tiny</b> fraction of a dose. Strength borrowed from human MTAP-deleted cancers, on a target 99.4% identical in dogs. Brain reach is no longer hypothetical: a brain-penetrant member (TNG456) is in Phase I/II with a brain-tumour focus.</dd>
           <dt>Safety</dt><dd>Anaemia / low platelets, but set <b>low</b> because it spares normal tissue by design. ~35% budget; no dog data yet.</dd>
         </dl>
       </div>

@@ -13,7 +13,7 @@ def _verdict(genotype_prefix, site_name):
 
 def test_mtap_is_durable_at_reachable_sites():
     for site in ("Lung / disseminated",
-                 "Brain -- local delivery (cavity implant / CED)",
+                 "Brain -- local delivery (cavity implant / CED / SRS)",
                  "Brain -- systemic penetration"):
         assert _verdict("MTAP", site) is md.Verdict.DURABLE_10Y
 
@@ -128,3 +128,38 @@ def test_headline_leads_with_all_combinations_and_stays_honest():
     # still honest about the one gap and the model-based status
     assert "csf" in h
     assert "not yet demonstrated" in h
+    # the brain-spread case is now hardened, and surveillance is made precise
+    assert "hardened" in h
+    assert "tng456" in h
+
+
+def test_brain_spread_is_hardened_and_hands_residual_to_csf():
+    """The brain-spread answer names the old weak point (TNG908 CNS failure), replaces it with a
+    brain-penetrant successor, backs it with demonstrated radiation control, and narrows the residual
+    to the CSF compartment -- not the brain parenchyma."""
+    a = md.brain_spread_answer()
+    assert "tng908" in a["was_the_weak_point"].lower()
+    assert "failed" in a["was_the_weak_point"].lower()
+    # pillar 1: a brain-penetrant successor keeps the genotype lock at the brain site
+    assert "tng456" in a["pillar_1_targeted_drug"].lower()
+    # pillar 2: local control is clinically demonstrated (radiation), not modelled
+    assert any(w in a["pillar_2_local_control_is_demonstrated"].lower()
+               for w in ("radiation", "radiosurgery", "gy"))
+    # pillar 3: the failure mode is CSF seeding, handed off to csf_answer()
+    assert "csf" in a["pillar_3_failure_mode_named"].lower()
+    assert "hardened" in a["verdict"].lower()
+
+
+def test_surveillance_model_is_precise_about_locked_vs_conditional():
+    """'Surveillance-dependent' resolves to a concrete distinction: locked tiers need no watching;
+    reroutable tiers run a detect-and-switch loop. MTAP is the only locked tier."""
+    sm = md.surveillance_model()
+    assert sm["locked_tiers"] == ["MTAP deleted"]
+    assert "MAPK driver (SHP2/KRAS)" in sm["reroutable_tiers"]
+    assert "MTAP deleted" not in sm["reroutable_tiers"]
+    # the loop has all three named components, and detection is grounded in a real modality
+    loop = sm["the_loop"]
+    assert set(loop) == {"1_detect", "2_switch", "3_cadence"}
+    assert "ctdna" in loop["1_detect"].lower()
+    # locked needs no watching; reroutable is conditional -- stated in the bottom line
+    assert "holds on its own" in sm["bottom_line"].lower()
