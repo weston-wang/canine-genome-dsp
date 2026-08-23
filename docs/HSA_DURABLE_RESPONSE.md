@@ -416,9 +416,17 @@ across the plausible range is inside Monte Carlo noise (±3 points at 250 trials
 implausible 50% cut moves the needle. **That is the real record**: three negative-or-flat trials at
 ~172–178 days.
 
-Re-running the stack through the scheduled agent reproduces the earlier table (0.492 / 0.640 / 0.532
-/ 1.000), and adds one practically useful result: starting the agent on day 0, 60 or 180 all give
-1.000. It does not have to be given up front — it can follow the chemotherapy backbone.
+Re-running the stack through the scheduled agent reproduces the permanent-growth-rewrite figures to
+within Monte Carlo noise — 0.500 / 0.540 / 0.928 here against 0.500 / 0.544 / 0.936 there — which is
+the cross-check that scheduling a `growth_modifier` and rewriting `model.growth` mean the same thing.
+
+It adds one practically useful result: at the required 28.9%, starting the agent on day 0, 60 or 180
+gives **0.932 / 0.928 / 0.896**. It does not have to be given up front — it can follow the
+chemotherapy backbone, and a six-month delay costs about four points.
+
+And it confirms the exposure finding from the other direction: fed the suppression propranolol
+actually reaches in a dog (0.05–0.6%), the scheduled agent returns **0.500 on every anchor** — bit
+for bit the correction-only figure.
 
 The back-test is a check on the *model*, not evidence for the stack. None of those trials included a
 vaccine or the corrected cross-resistance backbone; the stack's prediction is about a combination

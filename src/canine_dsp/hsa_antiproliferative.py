@@ -60,7 +60,9 @@ HUMAN_ANGIOSARCOMA_ANCHOR = {
 }
 
 # Fraction by which growth must fall for the bar to drop under the real vaccine's 0.03/day.
-GROWTH_REDUCTION_REQUIRED = {"with_cross_resistance_correction": 0.163, "without": 0.414}
+# Tracks hsa_gap_stack.GROWTH_REDUCTION_REQUIRED. Rose from 16.3% when the cross-resistance
+# ratios were put on measured values (Rodrik-Outmezguine 2016) rather than an assumed flat set.
+GROWTH_REDUCTION_REQUIRED = {"with_cross_resistance_correction": 0.289, "without": 0.414}
 
 
 def antiproliferative_schedule(horizon_days: int, start_day: int, ramp_days: float,
@@ -96,14 +98,29 @@ BACKTEST_NO_VACCINE = {0.0: 0.284, 0.163: 0.336, 0.30: 0.324, 0.50: 0.524}
 # rather than by permanently rewriting model.growth.
 STACK_WITH_SCHEDULED_AGENT = {
     "vaccine_only": 0.492,
-    "vaccine_plus_correction": 0.640,
-    "vaccine_plus_20pct_no_correction": 0.532,
-    "vaccine_plus_correction_plus_16pct": 0.992,
-    "vaccine_plus_correction_plus_20pct": 1.000,
+    "vaccine_plus_correction": 0.500,
+    "vaccine_plus_29pct_no_correction": 0.540,
+    "vaccine_plus_correction_plus_16pct": 0.676,
+    "vaccine_plus_correction_plus_29pct": 0.928,
+    "vaccine_plus_correction_plus_35pct": 1.000,
 }
 
-# Starting the agent on day 0, 60 or 180 all give 1.000 -- it does not have to be given up front.
-STACK_TOLERATES_A_DELAYED_START = {0: 1.000, 60: 1.000, 180: 1.000}
+# The scheduled agent reproduces hsa_gap_stack's permanent-growth-rewrite figures to within Monte
+# Carlo noise (0.500/0.540/0.928 here against 0.500/0.544/0.936 there), which is the cross-check
+# that `growth_modifier` scheduling and a rewritten `model.growth` mean the same thing.
+SCHEDULED_AGENT_MATCHES_THE_GROWTH_REWRITE = {
+    "correction_only": (0.500, 0.500),
+    "cut_only": (0.540, 0.544),
+    "both": (0.928, 0.936),
+}
+
+# What the agent contributes at the exposure propranolol actually reaches in a dog
+# (hsa_growth_pharmacodynamics.ACHIEVABLE_SUPPRESSION_AT_CANINE_CMAX): nothing measurable.
+STACK_AT_REAL_PROPRANOLOL_EXPOSURE = {0.00582: 0.500, 0.00200: 0.500, 0.00051: 0.500}
+
+# At the required 28.9%, starting on day 0, 60 or 180 costs little -- the agent does not have to be
+# given up front and can follow the chemotherapy backbone. A six-month delay costs about 4 points.
+STACK_TOLERATES_A_DELAYED_START = {0: 0.932, 60: 0.928, 180: 0.896}
 
 BACKTEST_VERDICT = {
     "prediction": "Growth reduction without a vaccine buys almost nothing: 0.284 -> 0.336 at the "

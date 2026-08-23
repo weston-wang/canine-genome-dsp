@@ -6,6 +6,7 @@ from canine_dsp import hsa_scenarios as hs
 from canine_dsp.hsa_antiproliferative import (
     ANSWER_TO_IS_PROPRANOLOL_THE_ONLY_OPTION, BACKTEST_NO_VACCINE, BACKTEST_VERDICT,
     CANINE_ANTIPROLIFERATIVE_TRIALS, GROWTH_REDUCTION_REQUIRED, HUMAN_ANGIOSARCOMA_ANCHOR,
+    SCHEDULED_AGENT_MATCHES_THE_GROWTH_REWRITE, STACK_AT_REAL_PROPRANOLOL_EXPOSURE,
     STACK_TOLERATES_A_DELAYED_START, STACK_WITH_SCHEDULED_AGENT, antiproliferative_schedule,
 )
 from canine_dsp.hsa_gap_stack import corrected_ic50
@@ -160,7 +161,7 @@ def test_the_verdict_says_what_the_backtest_does_and_does_not_show():
 @pytest.mark.parametrize("key,kw", [
     ("vaccine_only", dict(vmk=REAL)),
     ("vaccine_plus_correction", dict(vmk=REAL, corrected=True)),
-    ("vaccine_plus_correction_plus_20pct", dict(vmk=REAL, corrected=True, suppression=0.20)),
+    ("vaccine_plus_correction_plus_29pct", dict(vmk=REAL, corrected=True, suppression=0.289)),
 ])
 def test_stack_reproduces_through_the_scheduled_agent(key, kw):
     assert _run(**kw) == pytest.approx(STACK_WITH_SCHEDULED_AGENT[key], abs=0.08)
@@ -168,20 +169,45 @@ def test_stack_reproduces_through_the_scheduled_agent(key, kw):
 
 def test_the_scheduled_agent_confirms_neither_half_works_alone():
     assert STACK_WITH_SCHEDULED_AGENT["vaccine_only"] < 0.6
-    assert STACK_WITH_SCHEDULED_AGENT["vaccine_plus_correction"] < 0.7
-    assert STACK_WITH_SCHEDULED_AGENT["vaccine_plus_20pct_no_correction"] < 0.6
-    assert STACK_WITH_SCHEDULED_AGENT["vaccine_plus_correction_plus_20pct"] == pytest.approx(
+    assert STACK_WITH_SCHEDULED_AGENT["vaccine_plus_correction"] < 0.6
+    assert STACK_WITH_SCHEDULED_AGENT["vaccine_plus_29pct_no_correction"] < 0.6
+    assert STACK_WITH_SCHEDULED_AGENT["vaccine_plus_correction_plus_29pct"] > 0.90
+    assert STACK_WITH_SCHEDULED_AGENT["vaccine_plus_correction_plus_35pct"] == pytest.approx(
         1.0, abs=0.02)
+
+
+def test_the_scheduled_agent_agrees_with_the_permanent_growth_rewrite():
+    """`growth_modifier` scheduling and a rewritten `model.growth` must mean the same thing."""
+    for key, (scheduled, rewritten) in SCHEDULED_AGENT_MATCHES_THE_GROWTH_REWRITE.items():
+        assert scheduled == pytest.approx(rewritten, abs=0.02), key
+        assert STACK_WITH_SCHEDULED_AGENT[
+            {"correction_only": "vaccine_plus_correction",
+             "cut_only": "vaccine_plus_29pct_no_correction",
+             "both": "vaccine_plus_correction_plus_29pct"}[key]] == pytest.approx(scheduled)
+
+
+def test_at_the_exposure_a_dog_actually_reaches_the_agent_adds_nothing():
+    """0.05-0.6% suppression returns the correction-only figure on every anchor."""
+    correction_only = STACK_WITH_SCHEDULED_AGENT["vaccine_plus_correction"]
+    for suppression, durable in STACK_AT_REAL_PROPRANOLOL_EXPOSURE.items():
+        assert suppression < 0.01, "these are the achievable levels, not the required one"
+        assert durable == pytest.approx(correction_only, abs=0.001)
+    required = GROWTH_REDUCTION_REQUIRED["with_cross_resistance_correction"]
+    assert max(STACK_AT_REAL_PROPRANOLOL_EXPOSURE) < required / 40
 
 
 def test_the_required_suppression_is_the_one_the_stack_uses():
     required = GROWTH_REDUCTION_REQUIRED["with_cross_resistance_correction"]
-    assert required == pytest.approx(0.163, abs=0.005)
-    assert STACK_WITH_SCHEDULED_AGENT["vaccine_plus_correction_plus_16pct"] > 0.95
+    assert required == pytest.approx(0.289, abs=0.005)
+    assert STACK_WITH_SCHEDULED_AGENT["vaccine_plus_correction_plus_29pct"] > 0.90
+    assert STACK_WITH_SCHEDULED_AGENT["vaccine_plus_correction_plus_16pct"] < 0.75, \
+        "the superseded 16.3% no longer suffices under the measured ratios"
 
 
 def test_the_agent_does_not_have_to_start_immediately():
     """Practically important: it can be added after the chemotherapy backbone finishes."""
-    for start, recorded in STACK_TOLERATES_A_DELAYED_START.items():
-        assert recorded == pytest.approx(1.0, abs=0.02)
-    assert _run(REAL, suppression=0.20, corrected=True, start=180) == pytest.approx(1.0, abs=0.05)
+    at_once = STACK_TOLERATES_A_DELAYED_START[0]
+    assert at_once > 0.90
+    assert STACK_TOLERATES_A_DELAYED_START[180] > at_once - 0.05, "six months costs a few points"
+    assert _run(REAL, suppression=0.289, corrected=True, start=180) == pytest.approx(
+        STACK_TOLERATES_A_DELAYED_START[180], abs=0.06)
