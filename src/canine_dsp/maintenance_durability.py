@@ -211,27 +211,42 @@ BRAIN_SPREAD_RESOLUTION = {
         "survival in orthotopic glioma models (LLY-283, PMID 33579912). Same synthetic-lethal MTAP "
         "lock, engineered for CNS exposure -- so the genotype lock survives at the brain site."),
     "pillar_2_local_control_is_demonstrated": (
-        "Local brain control is clinical, not modelled: 37 Gy radiation cleared an intracranial HS "
-        "lesion in a PREDISPOSED breed (Pembroke Welsh Corgi) to complete response (PMID 34556593); "
-        "frameless stereotactic radiosurgery across 51 dogs (including HS) gave ~399-day median "
-        "survival (PMID 24007303); HS contrast-enhancement margins match surgical margins best on "
-        "MRI (JSM 0.75), enabling accurate targeting (PMID 35488504)."),
+        "Local brain CONTROL is clinical, not modelled: 37 Gy radiation cleared an intracranial HS "
+        "lesion in a PREDISPOSED breed (Pembroke Welsh Corgi) to complete radiographic response "
+        "(PMID 34556593), and frameless stereotactic radiosurgery is established for canine "
+        "intracranial tumours incl. HS (PMID 24007303), with HS contrast margins matching surgical "
+        "margins on MRI (JSM 0.75) for accurate targeting (PMID 35488504). This pillar establishes "
+        "that the parenchymal lesion can be driven to CR -- it does NOT claim a duration."),
+    "pillar_2_does_not_claim_duration": (
+        "IMPORTANT: the survival figures in those reports (corgi 164 d; SRS series ~399 d median, "
+        "mostly meningiomas) are RADIATION-ALONE, largely PALLIATIVE-dose outcomes with NO "
+        "maintenance arm -- they are the natural history of local control without Move 2, not a "
+        "ceiling on local control and not a number this plan expects to beat with radiation. Any "
+        "longer duration this plan projects comes ENTIRELY from adding genotype-matched maintenance "
+        "(Move 2), which is model-based and unproven in dogs, plus addressing the CSF (the one "
+        "unquantified compartment) -- NOT from radiation doing more than it did in these cases."),
     "pillar_3_failure_mode_named": (
-        "The real-world HS brain failure mode is now named and it is NOT the parenchyma: the same "
-        "corgi whose brain lesion cleared died on day 164 of intracranial metastasis VIA THE CSF, "
-        "with no extracranial disease (PMID 34556593). So local control works and the residual "
-        "durability wall collapses specifically onto the leptomeningeal/CSF compartment."),
-    "verdict": ("HARDENED. Brain parenchyma: locked target (brain-penetrant TNG456-class) + "
-                "clinically demonstrated radiation control -> durable at the brain-local site and "
-                "supported (not hypothetical) at the systemic-CNS site. The one honest residual is "
-                "CSF leptomeningeal seeding -- see csf_answer() for its bounded quantification."),
+        "The real-world HS brain failure mode is named and it is NOT local regrowth: the corgi whose "
+        "brain lesion stayed in CR died on day 164 of intracranial metastasis VIA THE CSF, with no "
+        "extracranial disease (PMID 34556593). This cuts both ways -- it confirms local control held "
+        "and localises the residual to the leptomeningeal/CSF compartment, but that compartment is "
+        "exactly the one this analysis does not put a durability number on (see csf_answer), so the "
+        "case both supports the parenchymal claim AND marks the open gap."),
+    "verdict": ("STRENGTHENED, SCOPED HONESTLY. What is genuinely hardened: (a) the genotype LOCK "
+                "survives at the brain site via a brain-penetrant PRMT5i successor (TNG456-class) "
+                "rather than the failed TNG908, and (b) parenchymal local control to CR is clinically "
+                "demonstrated. What is NOT claimed: that radiation buys more time than the cited "
+                "series -- the durability beyond local control rests on the (unproven-in-dog) "
+                "maintenance arm. The residual gap is the CSF compartment (csf_answer), which is also "
+                "the documented cause of death in the one on-point case."),
 }
 
 
 def brain_spread_answer() -> dict:
-    """The hardened brain-spread resolution: the old weak point (TNG908 CNS failure), the three
-    pillars that now carry it (brain-penetrant successor + demonstrated radiation control + named
-    failure mode), and how it hands the residual off to the CSF answer."""
+    """The brain-spread resolution, scoped honestly: the old weak point (TNG908 CNS failure), the
+    brain-penetrant successor that repairs the genotype lock, the CLINICAL local-control result (CR is
+    achievable -- explicitly NOT a duration claim), and the named CSF failure mode that both supports
+    the parenchymal claim and marks the one open gap handed to csf_answer()."""
     return dict(BRAIN_SPREAD_RESOLUTION)
 
 
@@ -466,11 +481,13 @@ def headline() -> str:
         "emergence window; the MAPK majority, PTEN and CDKN2A tiers suppress the founding cell at "
         "emergence too but are reroute-vulnerable once a lesion establishes, so they lean on "
         "continuous dosing and catching recurrences early; the floor tier is the immune/cytotoxic "
-        "backstop. Brain spread is now HARDENED, not the soft branch it was: the CNS lock no longer "
-        "leans on TNG908 (which failed to reach therapeutic CNS exposure in glioblastoma trials) but "
-        "on the brain-penetrant successor TNG456 (Phase I/II), and local brain control is clinically "
-        "demonstrated in a predisposed breed by radiation -- so the residual collapses onto the CSF "
-        "compartment (see brain_spread_answer()). The CSF compartment is REACHED and addressed "
+        "backstop. Brain spread is STRENGTHENED and scoped honestly: the CNS lock no longer leans on "
+        "TNG908 (which failed to reach therapeutic CNS exposure in glioblastoma trials) but on the "
+        "brain-penetrant successor TNG456 (Phase I/II), and parenchymal local control to complete "
+        "response is clinically demonstrated in a predisposed breed by radiation -- though that is a "
+        "CONTROL result, not a duration claim (the cited radiation-alone survivals are natural "
+        "history without maintenance), so the residual collapses onto the CSF compartment (see "
+        "brain_spread_answer()). The CSF compartment is REACHED and addressed "
         "(craniospinal radiation for coverage + intrathecal + immune arm) but its durability figure "
         "is deliberately withheld, not absent -- see csf_answer(). 'Surveillance-dependent' is made "
         "precise in surveillance_model(): a locked tier needs no watching, while a reroutable tier's "

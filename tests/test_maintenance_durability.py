@@ -128,9 +128,10 @@ def test_headline_leads_with_all_combinations_and_stays_honest():
     # still honest about the one gap and the model-based status
     assert "csf" in h
     assert "not yet demonstrated" in h
-    # the brain-spread case is now hardened, and surveillance is made precise
-    assert "hardened" in h
+    # the brain-spread case is strengthened but scoped (control, not duration), surveillance precise
+    assert "strengthened" in h
     assert "tng456" in h
+    assert "not a duration claim" in h
 
 
 def test_brain_spread_is_hardened_and_hands_residual_to_csf():
@@ -145,9 +146,17 @@ def test_brain_spread_is_hardened_and_hands_residual_to_csf():
     # pillar 2: local control is clinically demonstrated (radiation), not modelled
     assert any(w in a["pillar_2_local_control_is_demonstrated"].lower()
                for w in ("radiation", "radiosurgery", "gy"))
+    # pillar 2 must NOT overclaim: it explicitly disclaims a duration/superiority claim
+    assert "does not claim" in a["pillar_2_local_control_is_demonstrated"].lower() \
+        or "not claim a duration" in a["pillar_2_local_control_is_demonstrated"].lower()
+    assert "maintenance" in a["pillar_2_does_not_claim_duration"].lower()
+    assert any(w in a["pillar_2_does_not_claim_duration"].lower()
+               for w in ("palliative", "radiation-alone", "natural history"))
     # pillar 3: the failure mode is CSF seeding, handed off to csf_answer()
     assert "csf" in a["pillar_3_failure_mode_named"].lower()
-    assert "hardened" in a["verdict"].lower()
+    # verdict is scoped, not an unqualified "hardened"
+    assert "strengthened" in a["verdict"].lower()
+    assert "not claimed" in a["verdict"].lower()
 
 
 def test_surveillance_model_is_precise_about_locked_vs_conditional():

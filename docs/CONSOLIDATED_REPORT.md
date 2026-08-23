@@ -127,12 +127,16 @@ So "ten years for all cases" is honest as **a clean lock for MTAP, and a monitor
 (detect-and-switch) for the reroutable majority** — the same suppression-at-emergence
 mechanism, minus the guarantee against an established reroute.
 
-**Brain spread — the case is now hardened, not the soft branch it was.** The previous
-weak point was that the CNS maintenance arm leaned on **TNG908**, whose first-generation
-member showed preclinical brain permeability but *failed to reach therapeutic CNS exposure*
-in glioblastoma trials (according to PubMed, [DOI](https://doi.org/10.1016/j.ejmech.2026.119001)).
-Three independent pillars now carry brain spread, and together they narrow the residual gap
-specifically onto the CSF compartment — **not the brain parenchyma** (encoded in
+**Brain spread — strengthened, and scoped honestly.** The previous weak point was that the
+CNS maintenance arm leaned on **TNG908**, whose first-generation member showed preclinical
+brain permeability but *failed to reach therapeutic CNS exposure* in glioblastoma trials
+(according to PubMed, [DOI](https://doi.org/10.1016/j.ejmech.2026.119001)). Two things are
+genuinely hardened — the genotype **lock** survives at the brain via a brain-penetrant PRMT5i
+successor, and parenchymal **local control** to complete response is clinically demonstrated —
+and the third pillar names the residual. What is **not** claimed is that we buy more *time*
+than the cited radiation series; the durability beyond local control rests on the
+(unproven-in-dog) maintenance arm. Together these narrow the open gap specifically onto the
+CSF compartment — **not the brain parenchyma** (encoded in
 `maintenance_durability.brain_spread_answer()`):
 
 1. **A brain-penetrant successor keeps the genotype lock at the brain site.** **TNG456**, a
@@ -143,19 +147,27 @@ specifically onto the CSF compartment — **not the brain parenchyma** (encoded 
    brain-penetrant PRMT5 inhibition prolongs survival in orthotopic glioma models (LLY-283,
    [DOI](https://doi.org/10.1038/s41467-021-21204-5)). Same synthetic-lethal MTAP lock,
    engineered for CNS exposure.
-2. **Local brain control is clinically demonstrated — in a predisposed breed.** 37 Gy
-   radiation drove an intracranial HS lesion to **complete response** in a Pembroke Welsh
-   Corgi (according to PubMed, [DOI](https://doi.org/10.1292/jvms.21-0206)); frameless
-   stereotactic radiosurgery across 51 dogs including HS gave ~399-day median survival
-   ([DOI](https://doi.org/10.1111/vco.12056)); HS contrast-enhancement margins match surgical
-   margins best on MRI (JSM 0.75), enabling accurate targeting
-   ([DOI](https://doi.org/10.1111/jvim.16431)).
-3. **The real-world failure mode is now named — and it is the CSF, not the parenchyma.** The
-   same corgi whose brain lesion cleared died on day 164 of intracranial metastasis **via the
-   CSF**, with no extracranial disease ([DOI](https://doi.org/10.1292/jvms.21-0206)). So local
-   control works and the residual durability wall collapses onto the leptomeningeal/CSF
-   compartment — which is exactly the one place the analysis already declines to put a
-   durability number (see the CSF row below and `csf_answer()`).
+2. **Local brain *control* is clinically demonstrated — in a predisposed breed.** 37 Gy
+   radiation drove an intracranial HS lesion to **complete radiographic response** in a
+   Pembroke Welsh Corgi (according to PubMed, [DOI](https://doi.org/10.1292/jvms.21-0206)),
+   and frameless stereotactic radiosurgery is established for canine intracranial tumours
+   including HS ([DOI](https://doi.org/10.1111/vco.12056)), with HS contrast margins matching
+   surgical margins on MRI (JSM 0.75) for accurate targeting
+   ([DOI](https://doi.org/10.1111/jvim.16431)). **This establishes that the parenchymal lesion
+   can be cleared — it is *not* a claim that we beat these studies' survival.** The survival
+   figures there (corgi 164 days; SRS series ~399-day median, mostly meningiomas) are
+   **radiation-alone, largely palliative-dose outcomes with no maintenance arm** — the natural
+   history of local control *without Move 2*. Any longer duration this plan projects comes
+   **entirely from adding genotype-matched maintenance** (unproven in dogs) plus addressing the
+   CSF, **not from radiation doing more than it did in these cases**.
+3. **The real-world failure mode is now named — and it is the CSF, not local regrowth.** The
+   same corgi whose brain lesion **stayed in complete response** died on day 164 of intracranial
+   metastasis **via the CSF**, with no extracranial disease
+   ([DOI](https://doi.org/10.1292/jvms.21-0206)). This cuts both ways: it confirms local control
+   held, and it localizes the residual to the leptomeningeal/CSF compartment — but that is
+   exactly the one place the analysis declines to put a durability number (see the CSF row below
+   and `csf_answer()`), so the case **both supports the parenchymal claim and marks the open
+   gap.**
 
 **Credited, not re-discovered.** The MAPK branch is not new: the earliest analysis
 already listed MEK inhibitors as "works, but fails in the brain on access" and named
