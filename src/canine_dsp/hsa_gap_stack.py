@@ -15,6 +15,55 @@ REAL_TRIAL_IMPLIED_MAX_KILL = 0.03
 # ATP-competitive, binding the kinase domain rather than FKBP12.
 #
 # The dual PI3K/mTOR class exists specifically to defeat both mechanisms.
+#
+# The corrected ratios below are MEASURED, not assumed. Rodrik-Outmezguine et al. 2016 built both
+# resistance classes in isogenic cells and cross-tested them, and the two mechanisms turn out to be
+# reciprocal rather than additive:
+#
+#   FRB / FKBP12-binding-site mutants (the model's `target_site_mutation`) are rapamycin-resistant
+#   but "maintained full sensitivity to AZD8055 and RapaLink-1" -- ATP-competitive inhibitors bind
+#   the kinase domain, so an FRB mutation is invisible to them. Ratio 1.0.
+#
+#   The mTOR kinase-domain mutation M2327I is the one that resists ATP-competitive drugs, needing
+#   "3 to 30 fold higher" AZD8055/MLN0128 -- and it "retained full sensitivity to rapamycin".
+#   Geometric mean of that measured range: 9.5.
+#
+# So correcting the model is not a matter of scaling 50x down to something small. It is that the
+# named mechanism confers NO resistance to the drug the potency anchor describes, while a different
+# mechanism -- absent from the model -- is the one that does.
+MEASURED_CROSS_RESISTANCE = {
+    "citation": "Rodrik-Outmezguine et al. 2016, Nature 534(7606):272-6, PMID 27279227, "
+                "doi 10.1038/nature17963",
+    "frb_mutants_vs_atp_competitive": {
+        "mutations": ("A2034V", "F2108L"),
+        "fold_resistance_to_rapamycin": "resistant -- S6K T389 and S6 phosphorylation unaffected at "
+                                        "100 nM rapalog",
+        "fold_resistance_to_atp_competitive": 1.0,
+        "quote": "maintained full sensitivity to AZD8055 and RapaLink-1 treatment",
+    },
+    "kinase_domain_mutant_vs_atp_competitive": {
+        "mutation": "M2327I",
+        "fold_resistance_range": (3.0, 30.0),
+        "quote": "3 to 30 fold higher concentrations of AZD8055 and MLN0128 required for inhibition",
+        "fold_resistance_to_rapamycin": 1.0,
+        "rapamycin_quote": "retained full sensitivity to rapamycin",
+    },
+    "the_pattern": "reciprocal, not additive -- FRB mutations spare ATP-competitive inhibitors and "
+                   "kinase-domain mutations spare rapalogs. A model cannot charge one drug for both.",
+    "mapk_bypass_left_alone": "the parallel-pathway clone keeps its 1.15x. A bypass around the "
+                              "pathway is not an IC50 shift on the drug's own target, and no "
+                              "measured fold-shift for it against a dual PI3K/mTOR inhibitor was "
+                              "found, so it is not changed here.",
+}
+
+_KINASE_DOMAIN_FOLD = float(np.sqrt(
+    MEASURED_CROSS_RESISTANCE["kinase_domain_mutant_vs_atp_competitive"]["fold_resistance_range"][0]
+    * MEASURED_CROSS_RESISTANCE["kinase_domain_mutant_vs_atp_competitive"]["fold_resistance_range"][1]
+))
+
+# [sensitive, kinase-domain-type route, MAPK bypass, FRB/FKBP12-site mutation]
+MEASURED_IC50_RATIOS = np.array([1.0, round(_KINASE_DOMAIN_FOLD, 1), 1.15, 1.0])
+
 CROSS_RESISTANCE_INCONSISTENCY = {
     "as_written": {"pi3k_akt_feedback_reactivation": 35.0, "target_site_mutation": 50.0},
     "mechanism_source": "hsa_scenarios documents both as rapalog resistance routes",
@@ -29,16 +78,23 @@ CROSS_RESISTANCE_INCONSISTENCY = {
     "two_readings": "If the modelled drug is rapamycin, the mechanisms fit and the IC50 anchor is "
                     "the wrong drug. If it is VDC-597, the anchor fits and the two ratios are too "
                     "high. The module cannot have both.",
-    "corrected_ratios": [1.0, 1.15, 1.15, 1.15],
+    "corrected_ratios": MEASURED_IC50_RATIOS.tolist(),
     "bar_as_written": 0.0515,
-    "bar_corrected": 0.0385,
-    "residual_is_set_by": "max_kill for target_site_mutation (0.015/day), an efficacy ceiling -- "
-                          "not potency, so no IC50 change moves it further",
+    "bar_corrected": 0.0445,
+    "residual_is_set_by": "the kinase-domain clone at its measured 9.5x -- this IS a potency limit, "
+                          "so a more potent drug would move it. Beneath it sits an efficacy floor "
+                          "at about 0.038/day set by max_kill for target_site_mutation (0.015/day), "
+                          "which no IC50 change can pass. An earlier revision claimed the residual "
+                          "was already at that floor; that was true only of the assumed flat ratios.",
+    "bar_at_the_efficacy_floor": 0.0382,
+    "superseded_guess": "an earlier revision used a flat [1.0, 1.15, 1.15, 1.15], which was an "
+                        "assumption rather than a measurement. The measured ratios above are less "
+                        "favourable: the kinase-domain route is 9.5x, not 1.15x.",
 }
 
 # ---------------------------------------------------------------------------------------------
 # Component 2 -- reduce GROWTH rather than add kill. HSA is an endothelial tumour.
-GROWTH_REDUCTION_REQUIRED = {"with_correction": 0.163, "without_correction": 0.414}
+GROWTH_REDUCTION_REQUIRED = {"with_correction": 0.289, "without_correction": 0.414}
 
 BETA_BLOCKADE_EVIDENCE = {
     "target_present": "ADRB1 and ADRB2 expressed in transformed endothelial cells and in "
@@ -133,9 +189,18 @@ VERDICT = {
         "0.244/0.388/0.668. Ten-year durability requires ten years of q60d dosing.",
     "no_component_works_alone": "correction alone 0.640; 20% growth cut alone 0.536; vaccine alone "
                                 "0.492. Together 1.000.",
-    "why_the_correction_matters_most": "it cuts the growth-reduction ask from 41.4% to 16.3%, a "
-                                       "2.5x reduction, and costs nothing because it is a modelling "
-                                       "fix rather than an added therapy",
+    "why_the_correction_matters_most": "it cuts the growth-reduction ask from 41.4% to 28.9%, a "
+                                       "1.43x reduction, and costs nothing because it is a modelling "
+                                       "fix rather than an added therapy. An earlier revision "
+                                       "claimed 16.3% and a 2.5x reduction; that rested on an "
+                                       "assumed flat ratio set, and the measured ratios "
+                                       "(MEASURED_CROSS_RESISTANCE) are less generous.",
+    "the_growth_component_is_not_delivered_by_propranolol":
+        "hsa_growth_pharmacodynamics puts real numbers on both sides. Propranolol reduces "
+        "vascular-tumour proliferation at 25 uM and above (Stiles 2013); PRO-DOX measured a mean "
+        "Cmax of 18.7 ng/mL = 0.072 uM in dogs (Borgatti 2025). That is ~350x short, implying "
+        "0.05-0.6% growth suppression against the 28.9% required. The requirement stands; the "
+        "candidate does not meet it.",
     "what_is_still_unmeasured": "the growth reduction itself. Beta-blockade has the target, a human "
                                 "angiosarcoma response signal, and a canine series with the right "
                                 "partner -- but the one large canine trial paired it with "

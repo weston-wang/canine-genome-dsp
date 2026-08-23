@@ -75,14 +75,18 @@ def test_correcting_the_ratios_lowers_the_bar_but_does_not_close_the_gap():
     assert corrected > REAL_TRIAL_IMPLIED_MAX_KILL, "still short on its own"
 
 
-def test_the_residual_bar_is_an_efficacy_ceiling_not_a_potency_one():
-    """Dropping the ratios further cannot help: max_kill for target_site_mutation binds."""
-    aggressive = _bar(corrected=True)
+def test_the_residual_bar_is_potency_limited_above_a_hard_efficacy_floor():
+    """Under the MEASURED ratios the kinase-domain clone binds at 9.5x, so potency still has room --
+    but only down to the max_kill floor, which no IC50 change can pass."""
+    measured = _bar(corrected=True)
     m5, css, _ = _build(corrected=True)
-    even_lower = replace(m5, ic50_nM=corrected_ic50(m5.ic50_nM[0], [1.0, 1.0, 1.0, 1.0]))
-    assert float(clone_growth_margins(even_lower, css)[:4].max()) == pytest.approx(aggressive,
-                                                                                   abs=0.004)
-    assert "efficacy ceiling" in CROSS_RESISTANCE_INCONSISTENCY["residual_is_set_by"]
+    no_resistance = replace(m5, ic50_nM=corrected_ic50(m5.ic50_nM[0], [1.0, 1.0, 1.0, 1.0]))
+    floor = float(clone_growth_margins(no_resistance, css)[:4].max())
+    assert floor < measured - 0.004, "potency is still doing work at the measured ratios"
+    assert floor == pytest.approx(CROSS_RESISTANCE_INCONSISTENCY["bar_at_the_efficacy_floor"],
+                                  abs=0.004)
+    assert floor > REAL_TRIAL_IMPLIED_MAX_KILL, "even a perfect drug leaves the vaccine short"
+    assert "efficacy floor" in CROSS_RESISTANCE_INCONSISTENCY["residual_is_set_by"]
 
 
 def test_corrected_ic50_shape_and_validation():
@@ -95,13 +99,14 @@ def test_corrected_ic50_shape_and_validation():
 
 # ---------- component 2: growth reduction ----------
 
-def test_the_correction_cuts_the_growth_reduction_ask_by_about_two_and_a_half_times():
+def test_the_correction_cuts_the_growth_reduction_ask_but_by_less_than_first_claimed():
     with_it = GROWTH_REDUCTION_REQUIRED["with_correction"]
     without = GROWTH_REDUCTION_REQUIRED["without_correction"]
     assert _bar(corrected=True, growth_cut=with_it + 0.01) < REAL_TRIAL_IMPLIED_MAX_KILL
     assert _bar(corrected=True, growth_cut=with_it - 0.02) > REAL_TRIAL_IMPLIED_MAX_KILL
     assert _bar(growth_cut=without + 0.01) < REAL_TRIAL_IMPLIED_MAX_KILL
-    assert without / with_it == pytest.approx(2.5, abs=0.3)
+    assert without / with_it == pytest.approx(1.43, abs=0.1), "measured ratios, not the flat guess"
+    assert with_it > 0.25, "the ask is still large -- see hsa_growth_pharmacodynamics" 
 
 
 def test_required_growth_reduction_helper_matches_its_own_definition():
@@ -162,7 +167,7 @@ def test_the_verdict_names_what_is_still_unmeasured_and_the_next_experiment():
     assert "unmeasured" in VERDICT["what_is_still_unmeasured"] or \
            "no study reports" in VERDICT["what_is_still_unmeasured"]
     assert "vinblastine" in VERDICT["next_experiment"]
-    assert "2.5x" in VERDICT["why_the_correction_matters_most"]
+    assert "1.43x" in VERDICT["why_the_correction_matters_most"]
 
 
 # ---------- what the headline 1.000 leaves out ----------
