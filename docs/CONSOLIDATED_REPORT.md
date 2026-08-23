@@ -390,6 +390,55 @@ passed ones.
 
 ---
 
+## Two tiers of regimen — the optimal one, and an obtainable-today backup
+
+The plan splits into two tiers that pursue the **same objective** (cover all sites, all mechanisms,
+all escapes, durable for 10+ years) but differ in drug access and in the *strength* of the hold.
+
+**Tier A — optimal (needs investigational access).** The regimen as specified: lisavanbulin
+induction, paxalisib, and — carrying the *locked* decade — the MTA-cooperative **PRMT5 inhibitor**.
+Three agents are investigational (no veterinary path), so Tier A requires sponsor compassionate-use.
+It is the only tier that delivers the **genotype-locked** decade (MTAP).
+
+**Tier B — obtainable today (approved off-label + veterinary standard-of-care).** Every component is
+sourceable now for one dog, via extra-label use of human-approved drugs plus established veterinary
+practice. It covers the same sites and escapes and gives every genotype a matched maintenance, at a
+**surveillance-dependent** grade rather than a lock:
+
+| Role | Tier B (obtainable) agent | Access | Evidence |
+| --- | --- | --- | --- |
+| Induction cytotoxic | vinca alkaloid / taxane (body); surgery + carmustine wafer + RT (brain) | vet-standard / approved | canine-HS microtubule sensitivity measured (PMID 25715778) |
+| MAPK maintenance (~59%) | trametinib / cobimetinib (MEK) | human-approved, off-label | MEK/MAPK inhibitors surveyed as promising for HS ([DOI](https://doi.org/10.1111/vco.12988)) |
+| CDKN2A maint. (RB1 intact) | palbociclib (CDK4/6) | human-approved, off-label | **best-evidenced:** growth inhibition in *all* canine HS lines + disseminated xenograft, CDKN2A down / Rb preserved ([DOI](https://doi.org/10.1111/vco.12812)) |
+| PTEN maintenance | everolimus / alpelisib (PI3K/mTOR) | approved, off-label | PI3K pathway active in HS lines ([DOI](https://doi.org/10.1111/vco.12812)) |
+| Floor | lomustine cycled + monitoring | vet-standard | Skorupski CCNU data (repo) |
+| **MTAP locked decade** | **no obtainable equivalent** | — | closest: genotype-directed antimetabolite (pemetrexed / thiopurine) ± methionine restriction — non-reroutable target but not continuously dosable → surveillance-grade, not locked |
+
+**What makes Tier B's decade hold: switch-on-reroute + molecular monitoring.** Tier B's maintenance
+targets are reroutable, so its decade is *managed*, not guaranteed: dose continuously, catch each new
+primary early, and **switch the matched inhibitor when a clone reroutes** (the escape catalogue names
+the successor drug for each route). The enabler that makes this robust is **ctDNA / liquid-biopsy
+monitoring** — catching a rerouted clone molecularly before it is a mass, so the switch happens while
+the lesion is still small. That is obtainable in principle (canine-HS ctDNA is unvalidated) and is
+the single biggest upgrade to Tier B.
+
+**An honest inversion worth stating.** Tier B's targeted agents are the ones the field is *already*
+pursuing for HS — MEK, PTPN11, CDK4/6 and PD-1 inhibitors are explicitly surveyed as the promising
+mutation-targeted options ([DOI](https://doi.org/10.1111/vco.12988)), and the CDK4/6 tier has real
+in-vitro + xenograft canine-HS data ([DOI](https://doi.org/10.1111/vco.12812)). The MTAP→PRMT5i
+*lock*, by contrast, is stronger in mechanism but **absent from the canine-HS literature** and never
+given to a dog. So for the non-MTAP majority, Tier B is not a consolation prize — it is the
+**better-evidenced** option today; Tier A's unique contribution is the *guarantee* for MTAP tumours.
+
+*Sources retrieved via PubMed: Hirabayashi & Tani 2022, Vet Comp Oncol
+([DOI](https://doi.org/10.1111/vco.12812)); Erich & Teske 2024, Vet Comp Oncol
+([DOI](https://doi.org/10.1111/vco.12988)); Hédan & Breen 2011, BMC Cancer
+([DOI](https://doi.org/10.1186/1471-2407-11-201)); Hédan 2021, PLoS Genet
+([DOI](https://doi.org/10.1371/journal.pgen.1009395)). Approval statuses are as of an early-2026
+knowledge cutoff, not a live check.*
+
+---
+
 ## The one test that would falsify the headline
 
 **MTAP status.** A single MTAP immunohistochemistry stain (or MTAP/CDKN2A copy-number
