@@ -1,6 +1,6 @@
 """Is the growth reduction the stack requires reachable at a tolerated dose?
 
-`hsa_gap_stack` asks for a ~16% reduction in tumour growth rate and names beta-blockade as the
+`hsa_gap_stack` asks for a ~29% reduction in tumour growth rate and names beta-blockade as the
 candidate. That is a requirement, not a measurement. This module turns it into a pharmacodynamic
 question with real numbers on both sides: measured in vitro potency, and the plasma exposure a real
 canine trial actually achieved.
@@ -127,24 +127,27 @@ ACHIEVABLE_SUPPRESSION_AT_CANINE_CMAX = {
     "most_sensitive_line": 0.00582,
 }
 
-# Plasma concentration the stack's 16.3% would require, against what PRO-DOX measured.
+# Plasma concentration the stack's requirement would need, against what PRO-DOX measured.
+# `required_suppression` tracks hsa_gap_stack.GROWTH_REDUCTION_REQUIRED["with_correction"], which
+# rose from 16.3% to 28.9% when the cross-resistance ratios were put on measured values.
 EXPOSURE_GAP = {
-    "required_suppression": 0.163,
+    "required_suppression": 0.289,
     "achieved_cmax_ng_per_ml": 18.7,
-    "required_cmax_ng_per_ml_midpoint_anchor": 1817.0,
-    "fold_short": 97.0,
-    "using_most_sensitive_line": {"required_ng_per_ml": 622.0, "fold_short": 33.0},
-    "using_least_sensitive_line": {"required_ng_per_ml": 7155.0, "fold_short": 383.0},
+    "required_cmax_ng_per_ml_midpoint_anchor": 3792.0,
+    "fold_short": 203.0,
+    "using_most_sensitive_line": {"required_ng_per_ml": 1298.0, "fold_short": 69.0},
+    "using_least_sensitive_line": {"required_ng_per_ml": 14934.0, "fold_short": 799.0},
+    "at_the_superseded_16_3pct": {"required_ng_per_ml": 1817.0, "fold_short": 97.0},
 }
 
 VERDICT = {
-    "question": "Can beta-blockade deliver the ~16% growth reduction the stack requires, at a dose "
+    "question": "Can beta-blockade deliver the ~29% growth reduction the stack requires, at a dose "
                 "a dog tolerates?",
     "answer": "No, on the in vitro anchor. Propranolol reduces vascular-tumour proliferation at "
               "25 uM and above; PRO-DOX achieved a mean Cmax of 18.7 ng/mL, which is 0.072 uM. "
               "That is roughly 350x below the lowest concentration with a measured "
               "antiproliferative effect, and the implied growth suppression is 0.05-0.6% against "
-              "the 16.3% required. Reaching 16.3% would need about 97x the plasma concentration "
+              "the 28.9% required. Reaching 28.9% would need about 203x the plasma concentration "
               "the trial achieved.",
     "the_contradicting_datum": "Chow et al. 2015 measured a 34% fall in proliferative index in a "
                                "human angiosarcoma after one week of 40 mg twice daily -- an "
@@ -160,7 +163,7 @@ VERDICT = {
                             "concentration. No such measurement exists; PRO-DOX collected the "
                             "pharmacokinetics and the tumour transcriptomes but did not report a "
                             "proliferation readout against exposure.",
-    "consequence_for_the_stack": "the 16.3% requirement stands, but propranolol is not shown to "
+    "consequence_for_the_stack": "the 28.9% requirement stands, but propranolol is not shown to "
                                  "deliver it. The growth-reduction component needs an agent whose "
                                  "achievable exposure clears its own antiproliferative EC50, and "
                                  "that is now a quantitative screening criterion rather than a "

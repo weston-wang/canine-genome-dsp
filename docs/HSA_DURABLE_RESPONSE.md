@@ -221,6 +221,11 @@ tried: correcting how much resistance the model grants, and reducing **growth** 
 
 #### Component 1 — an inconsistency in the model, not a therapy
 
+> **Revised on measured data.** An earlier version of this section corrected the ratios to a flat
+> `[1.0, 1.15, 1.15, 1.15]`, which was an assumption. The measured values are below and every
+> consequence is less favourable: the bar falls to 0.0445 rather than 0.0385, the required growth
+> reduction is 28.9% rather than 16.3%, and the correction is worth 1.43× rather than 2.5×.
+
 `_SHARED_IC50_RATIOS` grants 35× resistance to `pi3k_akt_feedback_reactivation` and 50× to
 `target_site_mutation`. Both are **rapalog** resistance mechanisms — the module documents the second
 as "(FKBP12-mTOR binding site) mutation reducing **rapamycin** binding". But the potency anchor is
@@ -235,17 +240,60 @@ negative feedback loops" (Gomez-Pinillos & Ferrari 2012, PMID 22520976).
 
 The module cannot have it both ways. If the drug is rapamycin, the mechanisms fit and the IC50
 anchor is the wrong drug. If it is VDC-597, the anchor fits and the two ratios are far too high.
-Resolving it in the direction the potency anchor implies takes **the bar from 0.0515 to 0.0385**.
+**The measured fold-shifts.** Rodrik-Outmezguine et al. 2016 (*Nature* 534(7606):272-6, PMID
+27279227) built both resistance classes in isogenic cells and cross-tested them. They are
+**reciprocal, not additive**:
 
-That is not enough on its own — durable response goes 0.492 → 0.640 — and the residual is an
-*efficacy* ceiling, not a potency one: `max_kill` for `target_site_mutation` is 0.015/day, so no
-further IC50 change moves it.
+| mechanism | vs rapamycin | vs ATP-competitive (AZD8055 / MLN0128) |
+|---|---|---|
+| FRB / FKBP12-site mutation (A2034V, F2108L) | resistant — S6K T389 unaffected at 100 nM rapalog | **"maintained full sensitivity to AZD8055 and RapaLink-1"** → 1.0× |
+| kinase-domain M2327I | **"retained full sensitivity to rapamycin"** | **"3 to 30 fold higher"** → 9.5× (geometric mean) |
 
-#### Component 2 — reduce growth, not kill
+So the correction is not a matter of scaling 50× down to something small. The model's
+`target_site_mutation` — explicitly a FKBP12-binding-site mutation — confers **no resistance at all**
+to the drug its potency anchor describes, while the mechanism that *does* resist ATP-competitive
+inhibitors is absent from the model entirely.
+
+Measured ratios `[1.0, 9.5, 1.15, 1.0]` take **the bar from 0.0515 to 0.0445**. Durable response
+goes 0.492 → **0.500** — under one point. The residual is now a *potency* limit (the kinase-domain
+clone at 9.5×), sitting above a hard efficacy floor at about **0.038/day** set by `max_kill` for
+`target_site_mutation`, which no IC50 change can pass. Even a perfect drug leaves the vaccine short.
+
+#### Component 2 — reduce growth, not kill — and the exposure that decides it
 
 HSA is an endothelial tumour, and β-adrenergic blockade acts on proliferation rather than supplying
 a kill term. ADRB1 and ADRB2 are expressed in transformed endothelial cells and in angiosarcoma
 tumours (Pasquier et al. 2016, *EBioMedicine* 6:87-95, PMID 27211551).
+
+**But "reduce growth by 29%" is a requirement, not a drug.** `hsa_growth_pharmacodynamics` puts real
+numbers on both sides of it — a Hill/Emax curve whose EC50 is inverted from measured dose-response,
+evaluated at measured canine exposure:
+
+| quantity | value | source |
+|---|---|---|
+| propranolol antiproliferative threshold | **25 µM** (15–67% reduction across lines) | Stiles et al. 2013, PLOS ONE 8(3):e60021, PMID 23555867 |
+| achieved in dogs at 1.3 mg/kg three times daily | **18.7 ng/mL = 0.072 µM** | PRO-DOX, Borgatti et al. 2025, PMID 40386412 |
+| **gap** | **~350×** | |
+| implied growth suppression | **0.05–0.6%** | Emax fit |
+| required | **28.9%** | this model |
+| plasma level that would be needed | **~3,792 ng/mL — 203× what the trial achieved** | |
+
+Run through the stack, propranolol at its real exposure returns **0.500 on every anchor** — bit for
+bit the correction-only figure. It contributes nothing measurable.
+
+This is also a better explanation of PRO-DOX than the partner-drug hypothesis in §"Is propranolol the
+only option": the drug never reached an active concentration. Unlike the partner hypothesis, it
+predicts propranolol **with vinblastine** would fail too.
+
+**Two contrary data, recorded rather than resolved.** Chow et al. 2015 (*JAMA Dermatol*
+151(11):1226-9, PMID 26375166) measured a **34% fall in proliferative index** in a human angiosarcoma
+after one week of propranolol 40 mg twice daily — an exposure no higher than the dogs received. That
+disagrees with the in vitro anchor by two orders of magnitude; it is n=1, and Ki-67 is not net growth
+rate, but it is not dismissible. And Saha et al. 2021 (*Front Oncol* 10:614288, PMID 33598432) found
+that in **canine HSA cells** propranolol's action is **β-AR-independent** — the receptor-inactive
+R-(+) enantiomer performs identically — operating by lysosomal drug sequestration. That is
+**chemosensitisation**: a multiplier on a partner drug's kill term, not the growth modifier this
+component asks for.
 
 #### The stack
 
@@ -254,15 +302,18 @@ tumours (Pasquier et al. 2016, *EBioMedicine* 6:87-95, PMID 27211551).
 | | bar | clears 0.03? | 10-yr durable |
 |---|---|---|---|
 | vaccine only | 0.0515 | no | 0.492 |
-| + cross-resistance correction | 0.0385 | no | 0.640 |
-| 20% growth cut, no correction | 0.0411 | no | 0.536 |
-| **correction + 20% growth cut** | **0.0281** | **yes** | **1.000** |
+| + measured cross-resistance correction | 0.0445 | no | 0.500 |
+| + correction + 16.3% growth cut | 0.0363 | no | 0.688 |
+| **+ correction + 28.9% cut (the requirement)** | **0.0298** | **yes** | **0.936** |
+| + correction + 35% cut | 0.0270 | yes | 1.000 |
+| 28.9% cut, no correction | 0.0347 | no | 0.544 |
 
-**No component works alone; together they do.** And the correction is what makes the therapeutic ask
-small: growth must fall by **16.3%** with it, versus **41.4%** without — a 2.5× reduction, bought by
-fixing a modelling inconsistency rather than by adding a drug.
+**No component works alone, and the correction is nearly worthless by itself** (0.492 → 0.500). What
+the pair has is a strong interaction: cut alone 0.544, correction alone 0.500, both together 0.936.
+The correction still lowers the therapeutic ask — growth must fall by **28.9%** with it versus
+**41.4%** without — but that is a 1.43× reduction, not the 2.5× an earlier revision claimed.
 
-The stack is also insensitive to `preexisting_prob` (1.000 at 0.70, 0.50 and 0.30), and the vaccine
+The stack is also insensitive to `preexisting_prob` (0.936 at 0.70, 0.50 and 0.30), and the vaccine
 remains load-bearing inside it — remove it and durability falls to 0.284.
 
 #### Two things that 1.000 does not include

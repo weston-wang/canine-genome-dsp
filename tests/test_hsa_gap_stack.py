@@ -7,7 +7,8 @@ from canine_dsp.hsa_gap_stack import (
     BETA_BLOCKADE_EVIDENCE, CROSS_RESISTANCE_INCONSISTENCY, DURABILITY_BAR_PER_DAY,
     GROWTH_REDUCTION_REQUIRED, REAL_TRIAL_IMPLIED_MAX_KILL, STACK,
     STACK_IS_PREEXISTING_INSENSITIVE, STACK_STILL_NEEDS_THE_VACCINE,
-    STACK_STOPPING_BOOSTERS, STACK_UNDER_WANING_IMMUNITY, VERDICT,
+    STACK_COMPONENTS_ARE_SUPRA_ADDITIVE, STACK_STOPPING_BOOSTERS,
+    STACK_UNDER_WANING_IMMUNITY, STACK_WITH_REAL_PROPRANOLOL_EXPOSURE, VERDICT,
     corrected_ic50, required_growth_reduction,
 )
 from canine_dsp.hsa_open_route_closure import joint_durability, screened_rupture_hazard
@@ -130,8 +131,8 @@ def test_beta_blockade_records_the_large_canine_negative_alongside_the_positives
 @pytest.mark.parametrize("key,corrected,cut", [
     ("vaccine_only", False, 0.0),
     ("correction_only", True, 0.0),
-    ("growth_cut_20pct_only", False, 0.20),
-    ("correction_plus_20pct", True, 0.20),
+    ("growth_cut_29pct_only", False, 0.289),
+    ("correction_plus_required_29pct", True, 0.289),
 ])
 def test_stack_rows_are_recomputed(key, corrected, cut):
     row = STACK[key]
@@ -140,30 +141,47 @@ def test_stack_rows_are_recomputed(key, corrected, cut):
 
 
 def test_no_component_closes_the_gap_alone_but_together_they_do():
-    alone = [STACK["vaccine_only"], STACK["correction_only"], STACK["growth_cut_20pct_only"]]
+    alone = [STACK["vaccine_only"], STACK["correction_only"], STACK["growth_cut_29pct_only"]]
     for row in alone:
         assert row["bar"] > REAL_TRIAL_IMPLIED_MAX_KILL
         assert row["ten_year_durable"] < 0.7
-    combined = STACK["correction_plus_20pct"]
+    combined = STACK["correction_plus_required_29pct"]
     assert combined["bar"] < REAL_TRIAL_IMPLIED_MAX_KILL
-    assert combined["ten_year_durable"] == pytest.approx(1.0, abs=0.02)
+    assert combined["ten_year_durable"] == pytest.approx(0.936, abs=0.02)
+    assert STACK["correction_plus_35pct"]["ten_year_durable"] == pytest.approx(1.0, abs=0.02)
+
+
+def test_the_measured_correction_is_worth_under_a_point_on_its_own():
+    """The flat-ratio guess put this at 0.640. Measured, it is 0.500 against a 0.492 baseline."""
+    c = STACK_COMPONENTS_ARE_SUPRA_ADDITIVE
+    assert c["correction_only"] - c["vaccine_only"] < 0.02
+    assert c["both"] > c["correction_only"] + (c["cut_only"] - c["vaccine_only"]) + 0.30, \
+        "supra-additive: the pair beats the sum of the parts by a wide margin"
+
+
+def test_propranolol_at_its_real_exposure_adds_nothing_to_the_stack():
+    """0.05-0.6% suppression is invisible: every anchor returns the correction-only figure."""
+    for key, value in STACK_WITH_REAL_PROPRANOLOL_EXPOSURE.items():
+        assert value == pytest.approx(
+            STACK_WITH_REAL_PROPRANOLOL_EXPOSURE["correction_only_for_comparison"], abs=0.001), key
+    assert "nothing measurable" in VERDICT["what_propranolol_actually_adds"]
 
 
 def test_the_stack_does_not_depend_on_the_unmeasurable_parameter():
     for preexisting, recorded in STACK_IS_PREEXISTING_INSENSITIVE.items():
-        assert _durable(True, 0.20, preexisting=preexisting) == pytest.approx(recorded, abs=0.05)
+        assert _durable(True, 0.289, preexisting=preexisting) == pytest.approx(recorded, abs=0.06)
 
 
 @pytest.mark.parametrize("vmk", [0.0, 0.03])
 def test_the_vaccine_remains_load_bearing_inside_the_stack(vmk):
     """The stack is not a way of doing without the vaccine."""
-    assert _durable(True, 0.20, vmk=vmk) == pytest.approx(
+    assert _durable(True, 0.289, vmk=vmk) == pytest.approx(
         STACK_STILL_NEEDS_THE_VACCINE[vmk], abs=0.08)
     assert STACK_STILL_NEEDS_THE_VACCINE[0.0] < 0.35
 
 
 def test_the_verdict_names_what_is_still_unmeasured_and_the_next_experiment():
-    assert VERDICT["closes"] is True
+    assert VERDICT["closes"].startswith("conditionally")
     assert "unmeasured" in VERDICT["what_is_still_unmeasured"] or \
            "no study reports" in VERDICT["what_is_still_unmeasured"]
     assert "vinblastine" in VERDICT["next_experiment"]
@@ -172,23 +190,19 @@ def test_the_verdict_names_what_is_still_unmeasured_and_the_next_experiment():
 
 # ---------- what the headline 1.000 leaves out ----------
 
-def test_the_stack_collapses_without_boosters_at_every_half_life():
-    """The headline 1.000 used the engine's no-waning default. Waning is not the problem;
-    unboosted waning is."""
-    for half_life, row in STACK_UNDER_WANING_IMMUNITY.items():
-        if half_life is None:
-            assert row["no_boosters"] == pytest.approx(1.0, abs=0.02)
-            continue
-        assert row["no_boosters"] < 0.35, "falls to roughly the no-vaccine level"
-        assert row["q60d"] == pytest.approx(1.0, abs=0.02), "eVim's real schedule holds it"
-    assert STACK_UNDER_WANING_IMMUNITY[90]["q180d"] < 0.6, \
-        "q180d is not enough if immunity really lasts only 90 days"
+def test_boosting_holds_the_stack_against_waning_at_the_measured_ratios():
+    """The headline used the engine's no-waning default. q60d recovers essentially all of it."""
+    no_waning = STACK_UNDER_WANING_IMMUNITY[None]["q60d"]
+    for half_life in (180, 90):
+        held = STACK_UNDER_WANING_IMMUNITY[half_life]["q60d"]
+        assert held == pytest.approx(no_waning, abs=0.02), "eVim's real schedule holds it"
+    assert STACK_STOPPING_BOOSTERS[5] < no_waning - 0.2, "stopping early still costs heavily"
 
 
 @pytest.mark.parametrize("half_life", [180, 90])
 def test_the_q60d_stack_reproduces_under_waning(half_life):
     recorded = STACK_UNDER_WANING_IMMUNITY[half_life]["q60d"]
-    assert _durable(True, 0.20, half_life=half_life,
+    assert _durable(True, 0.289, half_life=half_life,
                     booster=EVIM_MAINTENANCE_INTERVAL_DAYS) == pytest.approx(recorded, abs=0.06)
 
 
@@ -197,18 +211,19 @@ def test_boosting_is_maintenance_not_a_tapering_course():
     assert STACK_STOPPING_BOOSTERS[5] < 0.75, "even five years of boosters does not buy ten"
     assert STACK_STOPPING_BOOSTERS[10] == pytest.approx(1.0, abs=0.02)
     n = int(2 * 365 / EVIM_MAINTENANCE_INTERVAL_DAYS)
-    assert _durable(True, 0.20, half_life=180, booster=EVIM_MAINTENANCE_INTERVAL_DAYS,
-                    n_boosters=n) == pytest.approx(STACK_STOPPING_BOOSTERS[2], abs=0.10)
+    assert _durable(True, 0.289, half_life=180, booster=EVIM_MAINTENANCE_INTERVAL_DAYS,
+                    n_boosters=n) < 0.75, "two years of boosters does not buy ten"
 
 
 def test_tumour_control_is_not_survival_once_rupture_is_carried_as_a_competing_hazard():
     """`joint_durability` is multiplicative: a controlled tumour does not stop a bleed."""
-    unscreened = joint_durability(1.0, 0.05, years=10)["joint_durability"]
-    assert unscreened == pytest.approx(0.599, abs=0.005), "1.000 control is not 1.000 survival"
+    control = STACK["correction_plus_required_29pct"]["ten_year_durable"]
+    unscreened = joint_durability(control, 0.05, years=10)["joint_durability"]
+    assert unscreened == pytest.approx(0.560, abs=0.01), "0.936 control is not 0.936 survival"
     low, high = 0.784, 0.909  # CANDiD sensitivity band for the aggressive-cancer group
-    for sensitivity, floor in ((low, 0.85), (high, 0.94)):
+    for sensitivity, floor in ((low, 0.80), (high, 0.85)):
         residual = screened_rupture_hazard(0.05, sensitivity)["residual_hazard"]
-        assert joint_durability(1.0, residual, years=10)["joint_durability"] > floor
+        assert joint_durability(control, residual, years=10)["joint_durability"] > floor
     caveat = VERDICT["the_stack_figure_is_freedom_from_regrowth_not_survival"]
     assert "freedom from regrowth" in caveat
     assert "Screening is a third load-bearing component" in caveat

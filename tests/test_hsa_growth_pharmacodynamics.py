@@ -85,7 +85,7 @@ def test_the_achievable_concentration_is_hundreds_of_fold_below_the_active_one()
         assert recorded < 0.01, "under one percent on every anchor"
 
 
-def test_the_stack_requirement_needs_about_a_hundredfold_higher_plasma_level():
+def test_the_stack_requirement_needs_a_two_hundredfold_higher_plasma_level():
     required = GROWTH_REDUCTION_REQUIRED["with_correction"]
     conc = concentration_for_suppression(EXPOSURE_GAP["required_suppression"],
                                          IMPLIED_EC50_uM["midpoint"])
@@ -93,9 +93,11 @@ def test_the_stack_requirement_needs_about_a_hundredfold_higher_plasma_level():
     assert ng == pytest.approx(EXPOSURE_GAP["required_cmax_ng_per_ml_midpoint_anchor"], rel=0.01)
     assert ng / EXPOSURE_GAP["achieved_cmax_ng_per_ml"] == pytest.approx(
         EXPOSURE_GAP["fold_short"], rel=0.02)
-    # And the real requirement is larger still than the 16.3% this gap was computed at.
-    assert required > EXPOSURE_GAP["required_suppression"]
-    assert concentration_for_suppression(required, IMPLIED_EC50_uM["midpoint"]) > conc
+    assert required == pytest.approx(EXPOSURE_GAP["required_suppression"], abs=0.001), \
+        "the gap is computed at the stack's current requirement, not a stale one"
+    assert EXPOSURE_GAP["at_the_superseded_16_3pct"]["fold_short"] < EXPOSURE_GAP["fold_short"]
+    stale = EXPOSURE_GAP["at_the_superseded_16_3pct"]["required_ng_per_ml"]
+    assert ng > stale, "the measured correction raised the ask, so the gap widened"
 
 
 def test_even_the_most_favourable_anchor_leaves_a_large_gap():
@@ -103,7 +105,7 @@ def test_even_the_most_favourable_anchor_leaves_a_large_gap():
     worst = EXPOSURE_GAP["using_least_sensitive_line"]
     assert best["fold_short"] > 30
     assert worst["fold_short"] > best["fold_short"]
-    assert best["required_ng_per_ml"] > 30 * EXPOSURE_GAP["achieved_cmax_ng_per_ml"]
+    assert best["required_ng_per_ml"] > 60 * EXPOSURE_GAP["achieved_cmax_ng_per_ml"]
 
 
 # ---------- what the module refuses to resolve ----------
@@ -129,7 +131,7 @@ def test_the_canine_evidence_says_the_mechanism_may_not_even_be_antiproliferativ
 def test_the_verdict_answers_no_and_says_what_would_change_it():
     assert VERDICT["answer"].startswith("No")
     assert "0.072 uM" in VERDICT["answer"]
-    assert "97x" in VERDICT["answer"]
+    assert "203x" in VERDICT["answer"]
     assert "never reached an active concentration" in VERDICT["what_it_explains"]
     assert "vinblastine would fail too" in VERDICT["what_it_explains"]
     assert "No such measurement exists" in VERDICT["what_would_change_it"]

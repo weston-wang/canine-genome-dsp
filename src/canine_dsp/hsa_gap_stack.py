@@ -125,28 +125,43 @@ BETA_BLOCKADE_EVIDENCE = {
 # 10-year durable response at preexisting_prob 0.70, vaccine held at the real 0.03/day.
 STACK = {
     "vaccine_only": {"bar": 0.0515, "ten_year_durable": 0.492},
-    "correction_only": {"bar": 0.0385, "ten_year_durable": 0.640},
-    "growth_cut_20pct_only": {"bar": 0.0411, "ten_year_durable": 0.536},
-    "correction_plus_10pct": {"bar": 0.0333, "ten_year_durable": 0.840},
-    "correction_plus_20pct": {"bar": 0.0281, "ten_year_durable": 1.000},
-    "correction_plus_30pct": {"bar": 0.0229, "ten_year_durable": 1.000},
+    "correction_only": {"bar": 0.0445, "ten_year_durable": 0.500},
+    "correction_plus_16pct": {"bar": 0.0363, "ten_year_durable": 0.688},
+    "correction_plus_required_29pct": {"bar": 0.0298, "ten_year_durable": 0.936},
+    "correction_plus_35pct": {"bar": 0.0270, "ten_year_durable": 1.000},
+    "growth_cut_29pct_only": {"bar": 0.0347, "ten_year_durable": 0.544},
+}
+
+# What propranolol actually contributes at the exposure PRO-DOX measured. The suppression it can
+# deliver (0.05-0.6%, hsa_growth_pharmacodynamics) is small enough to be invisible: every anchor
+# returns the correction-only figure to three decimal places.
+STACK_WITH_REAL_PROPRANOLOL_EXPOSURE = {
+    "most_sensitive_line_anchor": 0.500,
+    "midpoint_anchor": 0.500,
+    "least_sensitive_line_anchor": 0.500,
+    "correction_only_for_comparison": 0.500,
+}
+
+# The growth cut is what carries the stack, and the correction only pays off in combination:
+# 28.9% alone gives 0.544, the correction alone 0.500, the two together 0.936.
+STACK_COMPONENTS_ARE_SUPRA_ADDITIVE = {
+    "correction_only": 0.500, "cut_only": 0.544, "both": 0.936, "vaccine_only": 0.492,
 }
 
 # The stack at 20% growth reduction, across preexisting_prob -- the parameter no assay can measure.
-STACK_IS_PREEXISTING_INSENSITIVE = {0.70: 1.000, 0.50: 1.000, 0.30: 1.000}
+STACK_IS_PREEXISTING_INSENSITIVE = {0.70: 0.936, 0.50: 0.936, 0.30: 0.936}
 
 # Every component is load-bearing: removing the vaccine collapses the stack.
-STACK_STILL_NEEDS_THE_VACCINE = {0.0: 0.284, 0.01: 0.336, 0.02: 0.652, 0.03: 1.000}
+STACK_STILL_NEEDS_THE_VACCINE = {0.0: 0.284, 0.03: 0.936}
 
 # The STACK figures above use the engine's no-waning default. Under real waning immunity the stack
 # survives, but ONLY on a booster schedule: with no boosters it collapses to the no-vaccine level
 # (~0.28) at every half-life. eVim's real q60d schedule holds 1.000 even at a pessimistic 90-day
 # half-life; q180d is adequate only if immunity actually lasts 180 d or more.
 STACK_UNDER_WANING_IMMUNITY = {
-    None: {"no_boosters": 1.000, "q180d": 1.000, "q60d": 1.000},
-    365:  {"no_boosters": 0.276, "q180d": 1.000, "q60d": 1.000},
-    180:  {"no_boosters": 0.284, "q180d": 1.000, "q60d": 1.000},
-    90:   {"no_boosters": 0.292, "q180d": 0.544, "q60d": 1.000},
+    None: {"q60d": 0.936},
+    180:  {"q60d": 0.932},
+    90:   {"q60d": 0.932},
 }
 
 # q60d boosters stopped after N years, half-life 180 d. Maintenance is not a tapering course: the
@@ -174,9 +189,11 @@ def required_growth_reduction(bar: float, target: float) -> float:
 
 
 VERDICT = {
-    "closes": True,
-    "stack": "cross-resistance correction + ~16-20% growth reduction + the vaccine real trials "
-             "already deliver (0.03/day), boosted q60d for the full ten years",
+    "closes": "conditionally -- 0.936 at the required 28.9% growth cut, 1.000 at 35%, but no "
+              "agent is shown to deliver either at a tolerated dose",
+    "stack": "measured cross-resistance correction + a 29-35% growth reduction + the vaccine real "
+             "trials already deliver (0.03/day), boosted q60d for the full ten years, plus "
+             "surveillance for rupture",
     "the_stack_figure_is_freedom_from_regrowth_not_survival":
         "The engine reports freedom from regrowth. Rupture/haemorrhage is an independent competing "
         "hazard it does not model (hsa_open_route_closure.joint_durability), so a tumour-control "
@@ -186,9 +203,14 @@ VERDICT = {
     "boosters_are_required_not_optional":
         "STACK_UNDER_WANING_IMMUNITY: without boosters the stack falls to the no-vaccine level at "
         "every half-life tested. STACK_STOPPING_BOOSTERS: stopping at 1/2/5 years gives "
-        "0.244/0.388/0.668. Ten-year durability requires ten years of q60d dosing.",
-    "no_component_works_alone": "correction alone 0.640; 20% growth cut alone 0.536; vaccine alone "
-                                "0.492. Together 1.000.",
+        "0.244/0.388/0.668. Ten-year durability requires ten years of q60d dosing. At the measured ratios q60d holds 0.932 at both a 180- and a 90-day half-life.",
+    "no_component_works_alone": "vaccine alone 0.492; measured correction alone 0.500; the required "
+                                "28.9% growth cut alone 0.544. Together 0.936, and 1.000 only at a "
+                                "35% cut. The components are supra-additive but the correction is "
+                                "worth under a point on its own.",
+    "what_propranolol_actually_adds": "nothing measurable. At PRO-DOX's exposure it delivers "
+                                      "0.05-0.6% growth suppression, and the stack returns 0.500 on "
+                                      "every anchor -- identical to the correction alone.",
     "why_the_correction_matters_most": "it cuts the growth-reduction ask from 41.4% to 28.9%, a "
                                        "1.43x reduction, and costs nothing because it is a modelling "
                                        "fix rather than an added therapy. An earlier revision "
