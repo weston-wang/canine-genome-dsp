@@ -285,6 +285,28 @@ This is also a better explanation of PRO-DOX than the partner-drug hypothesis in
 only option": the drug never reached an active concentration. Unlike the partner hypothesis, it
 predicts propranolol **with vinblastine** would fail too.
 
+**Does this criterion reject everything?** A screening rule that disqualified every candidate would
+be worthless, so it needs a control. Toceranib is it. Bernabe et al. 2013 (*BMC Vet Res* 9:190,
+PMID 24079884) measured 2.4–2.9 mg/kg every other day reaching **100–120 ng/mL**, which the authors
+call *"well above the 40 ng/ml concentration associated with target inhibition"* — and confirmed
+engagement pharmacodynamically, with plasma VEGF rising significantly over 30 days. It was still
+negative in 43 dogs.
+
+So the two negative trials mean opposite things:
+
+| | reached its own threshold? | what the negative means |
+|---|---|---|
+| propranolol | no — **0.003×** | **uninformative** — PRO-DOX tested a dose, not a hypothesis |
+| toceranib | yes — **2.75×**, engagement confirmed | **informative** — target hit, no benefit in 43 dogs |
+
+The criterion discriminates: one agent fails before biology is reached, the other fails on biology.
+
+*Scope limit.* Toceranib's targets are VEGFR/PDGFR/KIT — angiogenic and stromal rather than the
+tumour cell's own proliferation rate. Its failure indicts the **anti-angiogenic route**, not growth
+reduction as a category. The 28.9% requirement is not refuted; what is established is that neither
+agent with canine HSA exposure data can meet it — one for want of exposure, one for want of effect
+at adequate exposure.
+
 **Two contrary data, recorded rather than resolved.** Chow et al. 2015 (*JAMA Dermatol*
 151(11):1226-9, PMID 26375166) measured a **34% fall in proliferative index** in a human angiosarcoma
 after one week of propranolol 40 mg twice daily — an exposure no higher than the dogs received. That
