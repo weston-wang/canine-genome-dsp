@@ -115,11 +115,13 @@ difference in whether the pill works. Encoded in `maintenance_durability.surveil
   at emergence (subcritical branching extinguishes every fresh cell), so the only way the
   decade fails is an established lesion that reroutes **and goes undetected** long enough to
   seed a second primary. Surveillance closes exactly that window.
-- **The loop has three concrete parts:** (1) *detect* — serial circulating-tumour-DNA /
-  molecular-residual-disease testing, which flags recurrence before it is visible on imaging
-  and defines an actionable switch window (ctDNA-guided therapy improved disease-free
-  survival 9.9 vs 4.8 months, and persistent ctDNA-negativity predicted 88% two-year DFS —
-  according to PubMed, IMvigor011, [DOI](https://doi.org/10.1056/NEJMoa2511885)); (2)
+- **The loop has three concrete parts:** (1) *detect* — and for this disease the modality
+  already exists: a plasma **PTPN11 ctDNA assay detects ctDNA in ~91% of canine HS and is
+  98.8% specific** ([Sci Rep 2021](https://doi.org/10.1038/s41598-020-80332-y)), on a
+  commercial canine platform (OncoK9/CANDiD), with tumour-informed MRD assays maturing
+  (single-test sensitivity ~43–77%, raised by serial testing); the *switch benefit* is
+  transferred from human MRD-guided therapy (+DFS 9.9 vs 4.8 mo; 88% two-year DFS on
+  persistent negativity — IMvigor011, [DOI](https://doi.org/10.1056/NEJMoa2511885)); (2)
   *switch* — the genotype priority tree already names the next matched anchor for each
   reroute; (3) *cadence* — sample often enough to catch the escape inside that window.
 

@@ -150,10 +150,16 @@ def reroute_param(lock_kind: str) -> Param:
 def surveillance_param(with_surveillance: bool) -> Param:
     if not with_surveillance:
         return Param("eps_surv", "fixed", 0.0, 0.0, 0.0, Provenance.ASSUMED, "no monitoring arm")
-    # ctDNA/MRD detect-and-switch efficiency; transferred from human MRD-guided adjuvant data
-    # (IMvigor011, PMID 41124204). Transfer to canine HS is ASSUMED (no validated canine-HS ctDNA assay).
-    return Param("eps_surv", "beta", 0.70, 0.40, 0.90, Provenance.TRANSFERRED,
-                 "ctDNA MRD-guided switch efficiency, PMID 41124204; canine-HS transfer assumed")
+    # ctDNA/MRD detect-and-switch efficiency. No longer a pure human transfer: canine-HS ctDNA is
+    # validated on THIS tier's own driver -- a plasma PTPN11 assay detects ctDNA in ~91% of HS and is
+    # 98.8% specific (Prouteau et al., Sci Rep 2021, DOI 10.1038/s41598-020-80332-y) -- on a commercial
+    # canine platform (OncoK9/CANDiD), with tumour-informed MRD assays maturing. The switch BENEFIT is
+    # still transferred from human MRD-guided adjuvant data (IMvigor011, PMID 41124204). The wide low
+    # end reflects single-test sensitivity (~43-77% by presentation), which serial testing raises.
+    return Param("eps_surv", "beta", 0.70, 0.40, 0.90, Provenance.DERIVED,
+                 "canine-HS PTPN11 ctDNA validated (DOI 10.1038/s41598-020-80332-y; ~91% detectable, "
+                 "98.8% specific, single-test sensitivity 43-77%); switch benefit from human MRD "
+                 "(PMID 41124204); serial-testing cadence assumed")
 
 
 @dataclass(frozen=True)

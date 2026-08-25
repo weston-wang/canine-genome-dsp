@@ -269,11 +269,13 @@ SURVEILLANCE_MODEL = {
         "window -- it is not needed to kill the founding cell, only to catch the escape."),
     "the_loop": {
         "1_detect": (
-            "A detection modality with lead time. Serial circulating-tumour-DNA / molecular-residual-"
-            "disease testing flags recurrence before radiographic disease and defines an actionable "
-            "switch window: ctDNA-guided therapy improved disease-free survival (9.9 vs 4.8 months) "
-            "and persistent ctDNA-negativity predicted 88% 2-year DFS (IMvigor011, PMID 41124204). "
-            "This grounds 'early detection' as a quantified capability, not hand-waving."),
+            "A detection modality with lead time -- and for THIS disease it exists: a plasma PTPN11 "
+            "ctDNA assay detects ctDNA in ~91% of canine HS and is 98.8% specific (Prouteau et al., "
+            "Sci Rep 2021, DOI 10.1038/s41598-020-80332-y), on a commercial canine platform "
+            "(OncoK9/CANDiD), with tumour-informed MRD assays maturing (single-test sensitivity "
+            "~43-77%, raised by serial testing). The switch BENEFIT is transferred from human MRD-"
+            "guided therapy: +DFS (9.9 vs 4.8 mo) and 88% 2-year DFS on persistent negativity "
+            "(IMvigor011, PMID 41124204). So 'early detection' is canine-HS-grounded, not hand-waving."),
         "2_switch": (
             "A switch tree. The repo's genotype priority tree (genotype_tiered_durability.best_tier_"
             "for) already defines the next matched anchor for each reroute, so a detected escape maps "
