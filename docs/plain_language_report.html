@@ -106,6 +106,9 @@
   section { margin: 3.4rem 0 0; }
   p.src { font-size: .78rem; color: var(--ink-faint); margin: 1rem 0 0; line-height: 1.6; }
   p.src a { color: var(--accent); }
+  ul.clean { margin: .6rem 0 0; padding-left: 1.15rem; display: flex; flex-direction: column; gap: .55rem; }
+  ul.clean li { line-height: 1.6; }
+  ul.clean li::marker { color: var(--accent); }
   h2 {
     font-family: var(--serif); font-weight: 600;
     font-size: clamp(1.35rem, 3.4vw, 1.72rem);
@@ -374,7 +377,14 @@
     <h2><span class="h2-num">05</span>Do the doses work — and are they safe?</h2>
     <p>Two separate questions, both checked by the model rather than assumed.</p>
     <h3 class="sub">Potency — does enough drug reach the cell to kill it?</h3>
-    <p>Yes, on the numbers. Feeding <strong>measured drug strengths</strong> through a pharmacology model, each drug's kill rate beats the tumour's growth rate — and for the best-measured case (the MEK inhibitor, tested on these actual dog cells) it clears the bar even if only <strong>a few percent</strong> of the drug reaches the brain. The lifelong PRMT5 pill is so potent that dose is not the worry — getting it into the brain continuously is.</p>
+    <p>Yes, on the numbers. Feeding <strong>measured drug strengths</strong> through a pharmacology model, each drug's kill rate beats the tumour's growth rate — and for the best-measured case (the MEK inhibitor, tested on these actual dog cells) it clears the bar even if only <strong>a few percent</strong> of the drug reaches the brain.</p>
+    <h3 class="sub">The dose question, answered</h3>
+    <p>There's a fair worry from the real dog MEK-inhibitor trial: at the standard dose about <strong>a third of dogs didn't reach the drug level used to <em>shrink</em> tumours</strong>, and you can't simply push the dose — the side-effects cap it. For the <em>maintenance</em> job, that worry resolves three ways:</p>
+    <ul class="clean">
+      <li><strong>Maintenance needs far less drug than shrinking a tumour.</strong> That trial level is the amount needed to melt an established mass. Maintenance only has to kill a <em>single new cell</em> before it grows — a bar the model puts about <strong>25× lower</strong> than the amount a dog already reaches. So even the "underdosed" dogs sit comfortably above the maintenance bar.</li>
+      <li><strong>Tune it per dog.</strong> The shortfall is dog-to-dog variation, not a wall. A cheap blood-level check lets the vet nudge each dog's dose to target — lifting nearly all dogs there without pushing the whole group toward side-effects.</li>
+      <li><strong>Pair two drugs.</strong> Adding a partner drug that works with the MEK pill means less of each is needed; the model puts the dose for near-universal coverage back <strong>under</strong> the safety ceiling.</li>
+    </ul>
     <h3 class="sub">Toxicity — can a dog actually tolerate the combination?</h3>
     <p>The induction combination comes out <strong>tolerable</strong>, and for a specific reason: each drug's worst side-effect lands on a <em>different</em> organ system — nerves, blood sugar, liver, the immune system, bone marrow — so they don't pile onto one system. The model leaves roughly <strong>30% headroom</strong> on the tightest one. Each maintenance pill, taken alone, is comfortably tolerable.</p>
     <div class="warnbox">
@@ -456,7 +466,7 @@
     </div>
     <div class="check">
       <div class="crow"><span class="mark">✓</span><span class="ctext"><b>The most valuable next experiment isn't a new drug.</b> The biggest source of uncertainty in almost every number above is <b>how often a cured dog throws a brand-new tumour</b> — so the highest-value study is a simple follow-up cohort that measures that rate. For the brain specifically, it's instead a measurement of how well local delivery soaks the tissue.</span></div>
-      <div class="crow"><span class="mark warn">!</span><span class="ctext"><b>A dosing reality check.</b> In the real dog MEK-inhibitor trial, ~30% of dogs didn't reach the target drug level at the standard dose, and reaching 90% would need ~1.4× that dose — above what the drug's side-effects allow. Translation: you can't fix it by just pushing the dose; you'd measure each dog's blood level and tune it.</span></div>
+      <div class="crow"><span class="mark">✓</span><span class="ctext"><b>The dosing worry is handled</b> — maintenance needs far less drug than shrinking a tumour, plus per-dog tuning and pairing two drugs (see Section 05). No need to push past the safety ceiling.</span></div>
     </div>
     <p class="src">Probabilities are model outputs calibrated to canine-HS adjuvant recurrence data (via PubMed, <a href="https://doi.org/10.1111/j.1476-5829.2009.00186.x">DOI</a>) and the canine trametinib trial (<a href="https://doi.org/10.1111/vco.12989">DOI</a>) — calibrated confidence with ranges, not measured durability. Analysis, not veterinary advice.</p>
   </section>

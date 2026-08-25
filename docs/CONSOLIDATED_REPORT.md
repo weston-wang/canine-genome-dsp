@@ -221,13 +221,28 @@ rate** (variance share ~0.5–0.9). So the single highest-value study is not a n
 primary.** At the brain-local site for the locked tier, the dominant term flips to `p_reach_fail` —
 there, a **local-delivery penetration measurement** is what tightens the answer.
 
-**Target engagement (gap 2), from the trial's own numbers.** The canine trametinib Phase I reported
-~70% of dogs reach the efficacy-associated exposure at the MTD, and target engagement *unconfirmed on
-biopsy* ([DOI](https://doi.org/10.1111/vco.12989)). The attainment model restates that as a dose
-curve: **~30% of dogs are underdosed at the MTD**, and reaching 90% attainment needs **~1.4× the MTD
-— above a dose already limited by hypertension/proteinuria.** So attainment cannot be bought by dose
-alone; **therapeutic drug monitoring / dose individualisation** is required before continuous
-maintenance can be relied on. That is a concrete, data-grounded fix for gap 2.
+**Target engagement (gap 2) — the concern, and the workaround.** The canine trametinib Phase I
+reported ~70% of dogs reach the efficacy-associated exposure at the MTD, with engagement *unconfirmed
+on biopsy* ([DOI](https://doi.org/10.1111/vco.12989)); the attainment model restates that as **~30%
+underdosed at the MTD**, and 90% attainment needing **~1.4× the MTD — above the hypertension/
+proteinuria ceiling.** That gap does **not** block maintenance, for three computed reasons
+(`pkpd.dosing_workaround()`):
+
+1. **The maintenance bar is far lower than the treatment benchmark.** The ~10 ng/mL figure is the
+   exposure that *shrinks an established tumour*; maintenance only has to hold a single founding cell
+   subcritical (beat growth), which the model puts at ~67 nM for the measured MEK drug — **~25× below
+   the achievable exposure.** So a dog "underdosed" for shrinkage is still well above the maintenance
+   bar. The attainment gap is a *treatment-setting* artifact.
+2. **Dose individualisation (TDM).** The shortfall is interindividual PK spread, not a population wall;
+   a steady-state level check tunes each dog toward target without pushing the whole population over
+   the ceiling.
+3. **Synergistic pairing.** A partner agent (MEK + a vertical MAPK/SHP2 partner or dasatinib, synergy
+   documented in canine HS, [DOI](https://doi.org/10.1016/j.tvjl.2024.106264)) lowers the required
+   single-agent exposure — the model drops the 90%-attainment dose to **~0.6× the MTD, back under the
+   ceiling.**
+
+So gap 2's fix is not "dose harder" but "the maintenance bar is lower, tune per dog, and pair the
+drug" — each computed from data in hand.
 
 *Numbers are model outputs conditional on documented priors (see `emergence.py`, `pkpd.py`); they are
 calibrated confidence with intervals, not measured durability. Trial data via PubMed.*

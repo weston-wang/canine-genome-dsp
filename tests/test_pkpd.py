@@ -85,3 +85,24 @@ def test_dose_for_90pct_attainment_is_above_the_mtd():
     flags that dose alone may not close the gap (monitoring/individualisation needed)."""
     d = pkpd.dose_for_attainment(0.90)
     assert d["dose_multiple_of_mtd"] > 1.0
+
+
+def test_maintenance_bar_is_far_below_achievable_exposure():
+    """The workaround's core: the maintenance kill bar is well under achievable exposure, so the
+    treatment-benchmark attainment gap does not bind the maintenance use."""
+    hr = pkpd.maintenance_headroom("cobimetinib")
+    assert hr["headroom_x"] > 5          # many-fold headroom
+    assert hr["maintenance_target_nM"] < hr["achievable_cmax_nM"]
+    assert hr["provenance"] == "derived from measured parameters"
+
+
+def test_synergistic_partner_pulls_the_90pct_dose_under_the_mtd():
+    c = pkpd.combination_dose_reduction(3.0)
+    assert c["dose_multiple_for_90pct_with_partner"] < 1.0   # below the MTD, ceiling no longer binding
+    assert c["dose_multiple_for_90pct_with_partner"] < c["dose_multiple_for_90pct_alone"]
+
+
+def test_dosing_workaround_reports_all_three_levers():
+    w = pkpd.dosing_workaround()
+    assert set(w) >= {"lever_1_maintenance_bar_is_lower", "lever_2_individualise_dose_TDM",
+                      "lever_3_synergistic_combination", "bottom_line"}
