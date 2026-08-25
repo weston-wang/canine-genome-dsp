@@ -141,9 +141,9 @@ is the unsolved half.
 
 ## 3b. Three attempts to close the gap, and why each fails
 
-Sections 2 and 3 leave the vaccine ~1.7× too weak. Three routes were tried. **None of them closes
-the gap**, and this section records why, because an earlier draft of this document claimed two of
-them did.
+Sections 2 and 3 leave the vaccine ~1.7× too weak. Three routes look like they close it. Checked
+against what the evidence supports, **none of them does**, and this section records why — each is
+the kind of route that survives arithmetic but not scrutiny.
 
 ### Route A — lower the bar instead of raising the vaccine
 
@@ -219,12 +219,7 @@ Those three failed because they all attacked the same side of one equation. The 
 `max_clone(growth − drug_kill)`, and every route above tried to add kill. Two things were never
 tried: correcting how much resistance the model grants, and reducing **growth** itself.
 
-#### Component 1 — an inconsistency in the model, not a therapy
-
-> **Revised on measured data.** An earlier version of this section corrected the ratios to a flat
-> `[1.0, 1.15, 1.15, 1.15]`, which was an assumption. The measured values are below and every
-> consequence is less favourable: the bar falls to 0.0445 rather than 0.0385, the required growth
-> reduction is 28.9% rather than 16.3%, and the correction is worth 1.43× rather than 2.5×.
+#### Component 1 — match the resistance to the drug, which costs nothing
 
 `_SHARED_IC50_RATIOS` grants 35× resistance to `pi3k_akt_feedback_reactivation` and 50× to
 `target_site_mutation`. Both are **rapalog** resistance mechanisms — the module documents the second
@@ -333,7 +328,7 @@ component asks for.
 **No component works alone, and the correction is nearly worthless by itself** (0.492 → 0.500). What
 the pair has is a strong interaction: cut alone 0.544, correction alone 0.500, both together 0.936.
 The correction still lowers the therapeutic ask — growth must fall by **28.9%** with it versus
-**41.4%** without — but that is a 1.43× reduction, not the 2.5× an earlier revision claimed.
+**41.4%** without, a 1.43× reduction.
 
 The stack is also insensitive to `preexisting_prob` (0.936 at 0.70, 0.50 and 0.30), and the vaccine
 remains load-bearing inside it — remove it and durability falls to 0.284.
@@ -597,10 +592,10 @@ collapses before it can supply the mutation, so the route starves rather than be
 
 ## 5. Closing the open routes
 
-### A closure this project proposed, which real data refutes
+### The obvious closure for route 4, which real data refutes
 
-An earlier draft proposed closing route 4 with "eBAT, minus its 28-day cap." **That experiment was
-run.** SRCBST-2 (Borgatti et al. 2020, *Vet Comp Oncol* 18(4):664-674, PMID 32187827) gave eBAT as
+The natural way to close route 4 is "eBAT, minus its 28-day cap" — give more of it, for longer.
+**That experiment was run.** SRCBST-2 (Borgatti et al. 2020, *Vet Comp Oncol* 18(4):664-674, PMID 32187827) gave eBAT as
 three cycles instead of one, at a reduced interval from doxorubicin, in 25 dogs: greater toxicity
 (six acute hypotension, two hospitalised), **reduced** efficacy, and no significant survival benefit
 against contemporary standard of care — versus the same team's single-cycle trial, which did show
