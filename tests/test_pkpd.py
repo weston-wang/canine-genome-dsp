@@ -63,3 +63,25 @@ def test_derived_closures_reports_provenance():
     out = pkpd.derived_closures()
     assert out["cobimetinib"]["ic50_provenance"] == "measured"
     assert out["tng908"]["ic50_provenance"] == "transferred from another population"
+
+
+def test_target_attainment_matches_the_trial_at_the_mtd():
+    """Gap 2: the model is calibrated to the trametinib trial -- ~70% reach the efficacy exposure at
+    the MTD, so ~30% are underdosed."""
+    r = pkpd.target_attainment(pkpd.TRAMETINIB_MTD_MG_M2)
+    assert abs(r["p_attain_target"] - 0.70) < 0.02
+    assert abs(r["fraction_underdosed"] - 0.30) < 0.02
+    assert r["provenance"] == "measured"
+
+
+def test_attainment_rises_with_dose():
+    lo = pkpd.target_attainment(pkpd.TRAMETINIB_MTD_MG_M2)["p_attain_target"]
+    hi = pkpd.target_attainment(2 * pkpd.TRAMETINIB_MTD_MG_M2)["p_attain_target"]
+    assert hi > lo
+
+
+def test_dose_for_90pct_attainment_is_above_the_mtd():
+    """Reaching 90% attainment requires dosing above the MTD -- which is dose-limited -- so the model
+    flags that dose alone may not close the gap (monitoring/individualisation needed)."""
+    d = pkpd.dose_for_attainment(0.90)
+    assert d["dose_multiple_of_mtd"] > 1.0

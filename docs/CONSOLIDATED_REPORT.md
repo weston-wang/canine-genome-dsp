@@ -183,6 +183,57 @@ analysis, not veterinary advice.*
 
 ---
 
+## Probabilistic durability — P(10-year) with confidence intervals, and the highest-value experiment
+
+The categorical grid above says which tiers are *more* robust. This section puts a **number and an
+interval** on it, and — the point — names the one measurement that would most tighten each number.
+Two model upgrades (`emergence.py`, and the target-attainment model in `pkpd.py`) do this; both are
+Monte-Carlo/analytic over inputs that each carry stated provenance. **These raise and quantify
+confidence; they do not prove a decade — only the experiments they point to do that.**
+
+**The model.** Over a 10-year horizon a predisposed dog throws would-be second primaries at an
+expected rate `Λ`, calibrated so that *without* maintenance, exp(−Λ) reproduces the observed adjuvant
+recurrence-free fraction (anchored to the canine-HS CCNU cohort — ~1.5-year median, [DOI](https://doi.org/10.1111/j.1476-5829.2009.00186.x)).
+Each founding cell escapes with `p_esc = 1 − (1 − p_reach_fail)(1 − p_reroute·(1 − ε_surv))`, and
+`P(no second primary) = exp(−Λ·p_esc)`. The three escape terms map exactly onto the six gaps:
+`p_reach_fail` = drug-presence/penetration (gaps 5–6), `p_reroute` = pathway bypass vs. the genotype
+lock (gaps 3–4), `ε_surv` = detect-and-switch (gap 3); `Λ` = emergence (gap 1).
+
+**Result (lung site, 90% CI):**
+
+| Genotype tier | P(10-year durable), no surveillance | with detect-and-switch |
+| --- | --- | --- |
+| **MTAP (locked)** | **0.90 [0.76, 0.97]** | ~unchanged (a lock needs no watching) |
+| MAPK majority (reroutable) | 0.56 [0.25, 0.80] | **0.81 [0.55, 0.93]** |
+| PTEN / CDKN2A (dependency) | 0.60 [0.29, 0.83] | higher |
+| No target (floor) | 0.38 [0.12, 0.65] | modest |
+
+Two honest reads fall straight out: the **lock buys a high, tight probability**; the **reroutable
+majority is a wide, lower probability that the surveillance loop measurably lifts** (+0.25 absolute at
+the lung). And at the **CSF compartment every tier collapses to ~0.3** (MTAP 0.33 [0.10, 0.60]) —
+because `p_reach_fail` dominates there. The model reproduces "the CSF is the residual gap" from first
+principles, and shows the lock does not rescue a site the drug cannot reach.
+
+**Value of information (which experiment to run first).** Propagating each input's uncertainty, the
+dominant contributor to the spread in almost every scenario is **Λ — the second-primary emergence
+rate** (variance share ~0.5–0.9). So the single highest-value study is not a new drug: it is an
+**adjuvant/observational cohort that measures how often and when a cured predisposed dog throws a new
+primary.** At the brain-local site for the locked tier, the dominant term flips to `p_reach_fail` —
+there, a **local-delivery penetration measurement** is what tightens the answer.
+
+**Target engagement (gap 2), from the trial's own numbers.** The canine trametinib Phase I reported
+~70% of dogs reach the efficacy-associated exposure at the MTD, and target engagement *unconfirmed on
+biopsy* ([DOI](https://doi.org/10.1111/vco.12989)). The attainment model restates that as a dose
+curve: **~30% of dogs are underdosed at the MTD**, and reaching 90% attainment needs **~1.4× the MTD
+— above a dose already limited by hypertension/proteinuria.** So attainment cannot be bought by dose
+alone; **therapeutic drug monitoring / dose individualisation** is required before continuous
+maintenance can be relied on. That is a concrete, data-grounded fix for gap 2.
+
+*Numbers are model outputs conditional on documented priors (see `emergence.py`, `pkpd.py`); they are
+calibrated confidence with intervals, not measured durability. Trial data via PubMed.*
+
+---
+
 ## The drugs — what kind of things these are
 
 | Component | What it is | Its job |

@@ -164,8 +164,114 @@ def derived_closures(kp_uu_brain: float = 0.30) -> dict[str, dict]:
     return out
 
 
+# ---- Target-attainment model (Gap 2: is the maintenance drug even engaging its target?) ----------
+#
+# The canine trametinib Phase I (Takada/Vail 2024, PMID 38889903) reported that at the MTD
+# (0.5 mg/m2/day) approximately 70% of dogs reached an average steady-state concentration of ~10 ng/mL
+# -- the exposure associated with clinical efficacy in humans -- AND that target engagement was NOT
+# observed in the Day-0/Day-7 tumour biopsies. So "the drug engages the target" is an open quantity
+# even in the treatment setting. This model turns the trial's own numbers into a dose -> attainment
+# curve: it does not invent binding constants, it restates the reported attainment as a lognormal
+# steady-state distribution and extends it across dose, so we can read the fraction of dogs UNDERDOSED
+# for the efficacy-benchmark exposure and the dose needed to reach a chosen attainment. Attainment of
+# the exposure benchmark is necessary but not sufficient for engagement (which needs a PD biopsy) --
+# this bounds the necessary condition from data in hand.
+
+TRAMETINIB_MTD_MG_M2 = 0.5              # recommended Phase II dose, PMID 38889903
+TRAMETINIB_TARGET_NG_ML = 10.0          # efficacy-associated steady-state (human benchmark)
+TRAMETINIB_ATTAIN_AT_MTD = 0.70         # ~70% of dogs reached the target at the MTD
+TRAMETINIB_CSS_CV = 0.55                # population steady-state variability (saturable elimination)
+TRAMETINIB_DOSE_EXPONENT = 1.3          # median Css ~ dose^p; p>1 = saturable (supra-linear) exposure
+
+
+def _phi(z: float) -> float:
+    """Standard-normal CDF via erf (no scipy dependency)."""
+    return 0.5 * (1.0 + math.erf(z / math.sqrt(2.0)))
+
+
+def _phi_inv(q: float) -> float:
+    """Standard-normal quantile (Acklam's rational approximation; ample precision here)."""
+    if not 0.0 < q < 1.0:
+        raise ValueError("q must be in (0,1)")
+    a = [-3.969683028665376e+01, 2.209460984245205e+02, -2.759285104469687e+02,
+         1.383577518672690e+02, -3.066479806614716e+01, 2.506628277459239e+00]
+    b = [-5.447609879822406e+01, 1.615858368580409e+02, -1.556989798598866e+02,
+         6.680131188771972e+01, -1.328068155288572e+01]
+    c = [-7.784894002430293e-03, -3.223964580411365e-01, -2.400758277161838e+00,
+         -2.549732539343734e+00, 4.374664141464968e+00, 2.938163982698783e+00]
+    d = [7.784695709041462e-03, 3.224671290700398e-01, 2.445134137142996e+00,
+         3.754408661907416e+00]
+    plow, phigh = 0.02425, 1 - 0.02425
+    if q < plow:
+        r = math.sqrt(-2 * math.log(q))
+        return (((((c[0]*r+c[1])*r+c[2])*r+c[3])*r+c[4])*r+c[5]) / ((((d[0]*r+d[1])*r+d[2])*r+d[3])*r+1)
+    if q > phigh:
+        r = math.sqrt(-2 * math.log(1 - q))
+        return -(((((c[0]*r+c[1])*r+c[2])*r+c[3])*r+c[4])*r+c[5]) / ((((d[0]*r+d[1])*r+d[2])*r+d[3])*r+1)
+    r = q - 0.5
+    t = r * r
+    return (((((a[0]*t+a[1])*t+a[2])*t+a[3])*t+a[4])*t+a[5])*r / (((((b[0]*t+b[1])*t+b[2])*t+b[3])*t+b[4])*t+1)
+
+
+def _css_logmu_at(dose_mg_m2: float, sigma: float = TRAMETINIB_CSS_CV,
+                  exponent: float = TRAMETINIB_DOSE_EXPONENT) -> float:
+    """Log-median steady-state at a dose, calibrated so attainment at the MTD = TRAMETINIB_ATTAIN_AT_MTD."""
+    # At MTD: P(Css >= T) = attain  ->  (mu_MTD - lnT)/sigma = Phi^{-1}(attain)
+    mu_mtd = math.log(TRAMETINIB_TARGET_NG_ML) + sigma * _phi_inv(TRAMETINIB_ATTAIN_AT_MTD)
+    return mu_mtd + exponent * math.log(dose_mg_m2 / TRAMETINIB_MTD_MG_M2)
+
+
+def target_attainment(dose_mg_m2: float = TRAMETINIB_MTD_MG_M2,
+                      sigma: float = TRAMETINIB_CSS_CV) -> dict:
+    """Fraction of dogs reaching the efficacy-benchmark steady-state at a given trametinib dose.
+
+    Restates and extends the trial's reported attainment (calibrated to 70% at the MTD). Returns the
+    attainment probability and the underdosed fraction -- the population-PK gap that must be closed
+    (by dose, or by therapeutic drug monitoring) before continuous maintenance can be relied on."""
+    mu = _css_logmu_at(dose_mg_m2, sigma)
+    p_attain = _phi((mu - math.log(TRAMETINIB_TARGET_NG_ML)) / sigma)
+    return {
+        "dose_mg_m2": dose_mg_m2,
+        "target_ng_ml": TRAMETINIB_TARGET_NG_ML,
+        "p_attain_target": round(p_attain, 3),
+        "fraction_underdosed": round(1.0 - p_attain, 3),
+        "provenance": Provenance.MEASURED.value,
+        "source": "canine trametinib Phase I, PMID 38889903 (MTD 0.5 mg/m2/day; ~70% reach ~10 ng/mL; "
+                  "target engagement not confirmed on biopsy)",
+    }
+
+
+def dose_for_attainment(target_fraction: float = 0.90,
+                        sigma: float = TRAMETINIB_CSS_CV,
+                        exponent: float = TRAMETINIB_DOSE_EXPONENT) -> dict:
+    """Trametinib dose (as a multiple of the MTD) needed so `target_fraction` of dogs reach the
+    efficacy-benchmark exposure. Reads off how far above the MTD an adequately-dosing regimen sits --
+    and therefore whether dose alone can close the attainment gap or monitoring is required."""
+    # Solve mu(dose) - lnT = sigma * Phi^{-1}(target_fraction)
+    needed_mu = math.log(TRAMETINIB_TARGET_NG_ML) + sigma * _phi_inv(target_fraction)
+    mu_mtd = math.log(TRAMETINIB_TARGET_NG_ML) + sigma * _phi_inv(TRAMETINIB_ATTAIN_AT_MTD)
+    dose_multiple = math.exp((needed_mu - mu_mtd) / exponent)
+    return {
+        "target_fraction": target_fraction,
+        "dose_multiple_of_mtd": round(dose_multiple, 2),
+        "dose_mg_m2": round(dose_multiple * TRAMETINIB_MTD_MG_M2, 3),
+        "note": "if the dose multiple exceeds the tolerable window (the MTD is dose-limited by "
+                "hypertension/proteinuria), attainment cannot be reached by dose alone -- therapeutic "
+                "drug monitoring / dose individualisation is required. See core.toxicity for the ceiling.",
+        "source": "extends canine trametinib Phase I population PK, PMID 38889903",
+    }
+
+
 if __name__ == "__main__":
     for key, r in derived_closures().items():
         print(f"{key}: systemic k={r['systemic_kill_per_day']:.3f}/day closes={r['systemic_closes']}; "
               f"brain@0.30 k={r['brain_kill_per_day']:.3f}/day closes={r['brain_closes']}; "
               f"min access to close={r['min_access_to_close']:.3f}")
+    print()
+    print("Target attainment (trametinib, Gap 2):")
+    for mult in (1.0, 1.5, 2.0):
+        r = target_attainment(mult * TRAMETINIB_MTD_MG_M2)
+        print(f"  dose {r['dose_mg_m2']:.2f} mg/m2 ({mult:.1f}x MTD): "
+              f"P(reach {r['target_ng_ml']:.0f} ng/mL)={r['p_attain_target']:.2f}, "
+              f"underdosed={r['fraction_underdosed']:.2f}")
+    print("  dose for 90% attainment:", dose_for_attainment(0.90))
