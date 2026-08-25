@@ -548,6 +548,90 @@ criterion. It is a well-supported hypothesis, not a demonstrated closure.
 
 *Tests: `test_hsa_parallel_pathway.py`*
 
+
+---
+
+## 3d. The items left open, and what closes each
+
+Four things were flagged as unresolved when the two-node combination was proposed. Three close on
+evidence or arithmetic already in hand; the fourth narrows.
+
+### The kinase-domain mutation is covered — that gap was a counting error
+
+`VERDICT` listed `kinase_domain_mutation` as not covered while listing
+`pi3k_akt_feedback_reactivation` as covered. **In the model those are the same clone** — index 1,
+carrying the 9.5× fold-shift measured for M2327I. A lesion in mTOR's own kinase domain confers no
+protection against MEK inhibition, because that is a different node on a different pathway; Wei et
+al. 2020 (PMID 32943547) report the pair suppressing *reciprocal* crosstalk in vivo. Verified against
+the engine: clone 1 sets the bar at 0.0445 without the second drug and falls to 0.0300 with it.
+
+### "The therapy that made things worse" tested something else
+
+SRCBST-2 (Borgatti et al. 2020, PMID 32187827) did produce more toxicity and less benefit. But it
+changed **three things at once**: three cycles instead of one, a *reduced* interval before
+doxorubicin, and eligibility widened to stage 3 from a minimal-residual-disease setting. The authors'
+own conclusion attributes the harm to schedule — *"starting 1 week prior to doxorubicin … compared
+with a single cycle given between surgery and a delayed start of chemotherapy."*
+
+The requirement is a persistent kill term that antigen loss does not affect. That trial varied
+schedule, chemotherapy interval and disease stage simultaneously and never tested persistence. The
+negative result stands as a fact about that regimen; it is not evidence against the requirement.
+
+### A supplier for route 4 that turns the escape into the target
+
+Antigen loss is the escape where the tumour stops displaying what the vaccine trained against. NK
+cells are the one effector class for which that is an *attractant*: MHC class I restrains them, so a
+cell that hides from T cells removes the signal holding NK cells back — "missing self" (Malmberg et
+al. 2017, PMID 28699110).
+
+**Does the mechanism exist in dogs?** Canine Ly49 had been reported mutated and nonfunctional, which
+would rule this out entirely. Gingrich et al. 2023 (*ImmunoHorizons* 7(11):760-770, PMID 37971282)
+find Ly49/KLRA1 expressed in resting and activated canine NK cells, almost exclusively in the NK
+cluster, with modelled structure closely similar to the murine system and favourable docking to
+MHC-I. That resolves the doubt **in favour of the mechanism existing** — but it is predicted binding
+and expression, not a functional demonstration that canine NK cells preferentially kill MHC-I-low
+targets.
+
+Canine NK cells are manufacturable and have been given to dogs: 19-fold expansion to 259 × 10⁶ cells
+by day 14, and a first-in-dog trial of 10 dogs with osteosarcoma where **5 of 10 were metastasis-free
+at six months** and one lived 17.9 months (Canter et al. 2017, PMID 29254507; Judge et al. 2020,
+PMID 32084139). And the eBAT redosing failure does not transfer: eBAT is a foreign bacterial toxin
+construct whose repeat-dose problems were hypotension and immunogenicity, and autologous NK cells are
+the dog's own cells.
+
+*Not yet given for hemangiosarcoma, and delivery in every canine trial so far was intra-tumoral —
+splenectomised minimal residual disease has no target to inject.*
+
+### Target engagement was assayed a week before steady state
+
+Takada et al. 2024 looked for trametinib target engagement on **days 0 and 7**. The same paper
+reports steady state at **approximately 14 days**, and trametinib accumulates 3–4× on daily dosing.
+The assay ran before the exposure existed. That removes the finding as evidence *against* engagement;
+it does not supply evidence *for* it.
+
+### The exposure claim no longer depends on the drug substitution
+
+Two anchors, reached independently: Andersen's canine combination IC50 of **11 nM** (measured with
+PD0325901), and the **10 ng/mL** trametinib concentration Takada identify as clinically effective,
+which ~70% of dogs reach at the tolerated dose. **10 ng/mL is 16.2 nM** — the same number from canine
+tumour pharmacology and from the drug's own clinical threshold.
+
+### The rupture hazard is now grounded
+
+Ruffoni et al. 2025 (*JAVMA* 263(8):985-990, PMID 40334697) prospectively enrolled **345 dogs** with
+haemoperitoneum from a ruptured splenic tumour: 56.2% hemangiosarcoma, 35.7% benign, 8.1% other
+malignant. Rupture is not a rare complication to sweep over — it is how the majority of these tumours
+present. The *post-remission* annual hazard remains unmeasured, but the screening conclusion is
+insensitive to it: surveillance removes the detected fraction of whatever the hazard is.
+
+### What genuinely remains
+
+Two gaps, both missing measurements rather than contradictions: **nobody has shown trametinib
+engaging its target inside a canine tumour**, and **nobody has given NK cells systemically for
+hemangiosarcoma**. Neither is refuted; both are simply untested.
+
+*Tests: `test_hsa_open_item_closures.py`*
+
 ---
 
 ## 4. Escape routes
