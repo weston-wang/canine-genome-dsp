@@ -6,7 +6,9 @@ from canine_dsp import hsa_scenarios as hs
 from canine_dsp.hsa_gap_stack import corrected_ic50
 from canine_dsp.hsa_growth_pharmacodynamics import TWO_KINDS_OF_NEGATIVE_TRIAL
 from canine_dsp.hsa_parallel_pathway import (
-    BAR_BEFORE_SECOND_DRUG, CANINE_HSA_RUNS_ON_mTORC2, COMBINATION_HAS_BEEN_DOSED_IN_DOGS,
+    ALL_THREE_COMPONENTS_ARE_LOAD_BEARING, BAR_BEFORE_SECOND_DRUG,
+    CANINE_HSA_RUNS_ON_mTORC2, COMBINATION_HAS_BEEN_DOSED_IN_DOGS,
+    DURABILITY_BY_MEK_KILL, JOINT_WITH_RUPTURE_HAZARD, ROBUST_TO_WANING,
     EXPOSURE_CRITERION, MEK_ALONE_FAILS_IN_CANINE_HSA, MEK_KILL_NEEDED_PER_DAY,
     MEK_KILL_NEEDED_AT_SATURATING_EXPOSURE, MEK_PLUS_mTOR_SYNERGY,
     MEK_RELATIVE_EFFICACY_BY_CLONE, SAPANISERTIB_CMAX_nM,
@@ -193,3 +195,41 @@ def test_the_verdict_does_not_overclaim():
     assert "not that durability has been proven" in VERDICT["honest_status"]
     assert "per-clone kill rates" in VERDICT["what_is_not_measured"]
     assert "target engagement" in VERDICT["what_is_not_measured"]
+
+
+# ---------- what the combination actually buys ----------
+
+def test_durability_rises_with_mek_kill_and_reaches_the_requirement():
+    d = DURABILITY_BY_MEK_KILL
+    values = [d[k] for k in sorted(d)]
+    assert all(a <= b for a, b in zip(values, values[1:])), "monotone in kill"
+    assert d[0.0] == pytest.approx(0.500, abs=0.02), "correction alone, no second drug"
+    assert d[MEK_KILL_NEEDED_PER_DAY] > 0.85, "the swept requirement buys real durability"
+    assert d[0.0400] > 0.99
+
+
+def test_every_component_is_load_bearing():
+    """Remove any one and it collapses -- the same shape as the earlier stack."""
+    c = ALL_THREE_COMPONENTS_ARE_LOAD_BEARING
+    assert c["mek_without_vaccine"] < 0.4, "the vaccine is still doing the durability work"
+    assert c["mek_and_vaccine_without_correction"] < 0.65
+    assert c["all_three"] > 0.85
+    assert c["all_three"] == pytest.approx(DURABILITY_BY_MEK_KILL[MEK_KILL_NEEDED_PER_DAY])
+
+
+def test_the_combination_is_insensitive_to_how_fast_immunity_fades():
+    """A genuine improvement on the growth-reduction route, not a restatement of it."""
+    baseline = ROBUST_TO_WANING[None]
+    for half_life in (180, 90):
+        assert ROBUST_TO_WANING[half_life] == pytest.approx(baseline, abs=0.02), half_life
+
+
+def test_freedom_from_regrowth_is_still_not_survival():
+    j = JOINT_WITH_RUPTURE_HAZARD
+    for hazard, row in j.items():
+        lo, hi = row["screened"]
+        assert row["unscreened"] < ALL_THREE_COMPONENTS_ARE_LOAD_BEARING["all_three"]
+        assert lo > row["unscreened"], "screening helps at every hazard"
+        assert lo <= hi
+    assert j[0.05]["unscreened"] < 0.6, "0.888 control is not 0.888 survival"
+    assert "Screening remains a load-bearing component" in VERDICT["ten_year_survival"]

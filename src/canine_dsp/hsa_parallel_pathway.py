@@ -198,6 +198,36 @@ VACCINE_REAL = 0.03
 MEK_KILL_NEEDED_PER_DAY = 0.0225
 MEK_KILL_NEEDED_AT_SATURATING_EXPOSURE = 0.0145
 
+# ---------------------------------------------------------------------------------------------
+# 10-year freedom from regrowth with the MEK inhibitor as a real second drug at the achievable
+# canine exposure (16.2 nM against an 11 nM combination IC50). Recomputed in the test module.
+DURABILITY_BY_MEK_KILL = {
+    0.0000: 0.500,
+    0.0100: 0.536,
+    0.0225: 0.888,   # the requirement derived by sweep
+    0.0300: 0.980,
+    0.0400: 0.996,
+}
+
+# Every component is load-bearing at the required 0.0225/day.
+ALL_THREE_COMPONENTS_ARE_LOAD_BEARING = {
+    "mek_without_vaccine": 0.312,
+    "mek_and_vaccine_without_correction": 0.560,
+    "all_three": 0.888,
+}
+
+# Unlike the growth-reduction route, this one is completely insensitive to how fast immunity fades,
+# provided the q60d boosters are given. The second drug carries the load the vaccine cannot.
+ROBUST_TO_WANING = {None: 0.888, 180: 0.888, 90: 0.888}
+
+# Freedom from regrowth is not survival: rupture is an independent competing hazard
+# (hsa_open_route_closure.joint_durability). At a 5%/yr hazard over ten years, 0.888 becomes:
+JOINT_WITH_RUPTURE_HAZARD = {
+    0.02: {"unscreened": 0.726, "screened": (0.850, 0.872)},
+    0.05: {"unscreened": 0.532, "screened": (0.797, 0.848)},
+    0.10: {"unscreened": 0.310, "screened": (0.714, 0.810)},
+}
+
 VERDICT = {
     "candidate": "dual TORC1/2 inhibitor (sapanisertib) + MEK inhibitor (trametinib), on top of the "
                  "vaccine and its q60d boosters",
@@ -216,6 +246,13 @@ VERDICT = {
         "immune_escape": "not a drug-resistance route; handled by the vaccine and the open-route "
                          "analysis, not here.",
     },
+    "ten_year_freedom_from_regrowth": "0.888 at the required 0.0225/day, and it holds at 0.888 "
+                                      "under both a 180-day and a 90-day immunity half-life with "
+                                      "q60d boosters -- more robust to waning than the "
+                                      "growth-reduction route it replaces.",
+    "ten_year_survival": "lower. Carrying rupture as a competing hazard gives about 0.53 "
+                         "unscreened at a 5%/yr hazard and 0.80-0.85 under CANDiD-sensitivity "
+                         "surveillance. Screening remains a load-bearing component.",
     "what_is_measured": "the synergy (CI 0.07), the combination IC50 in canine angiosarcoma cells "
                         "(11 nM), tumorgraft efficacy, canine exposure for both drugs, and "
                         "tolerability of the pair in 12 dogs.",

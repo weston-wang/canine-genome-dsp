@@ -458,6 +458,101 @@ predicted their failure before being asked to predict their success.
 
 *Tests: `test_hsa_antiproliferative.py`*
 
+
+---
+
+## 3c. The combination that clears the exposure criterion
+
+§3b's growth-reduction route asks for something no agent is shown to deliver. This section records
+a different route that passes both halves of the test — and is the first candidate in this analysis
+to do so.
+
+### Why the drug class was wrong, mechanistically
+
+Murai et al. 2012 (*BMC Vet Res* 8:128, PMID 22839755; *J Comp Pathol* 147(4):430-40, PMID 22789858)
+found canine HSA runs on **mTORC2/Akt/4E-BP1, regulated independently of mTORC1**. In 37 canine
+haemangiosarcomas ~80% expressed p-Akt Ser473 and p-4E-BP1, but **only 35% expressed p-mTORC1**.
+
+Rapamycin inhibits mTORC1. It does not touch the pathway this disease actually runs on. That
+predicts a rapalog underperforms here — and Andersen et al. 2015 state flatly that *"angiosarcomas
+are insensitive to mTOR inhibition."* This is the mechanistic reason the FidoCure rapamycin signal
+is real but small, and the reason an ATP-competitive dual TORC1/2 inhibitor is the right class
+rather than a modelling convenience.
+
+### The measured synergy, in canine angiosarcoma
+
+Andersen et al. 2015 (*Int J Oncol* 47(1):71-80, PMID 25955301), in the canine AS isolate VCT261e:
+
+| | IC50 |
+|---|---|
+| MEK inhibitor alone | 150 ± 30 nM |
+| rapamycin alone | >50 nM (insensitive) |
+| **combined, 4:1** | **11 ± 6 nM** — 13.6× shift, **CI = 0.07** |
+
+In canine AS tumorgrafts: vehicle reached 1000 mm³ by day 21; the combination showed virtually no
+growth by week 3, with no weight loss over 38 days. Adachi et al. 2016 (PMID 27408334) independently
+found MAPK inhibitors alone do **not** affect canine HSA viability — the same result from the other
+side. Neither node is a monotherapy target; each becomes one once the parallel pathway is blocked.
+
+### It clears the exposure criterion
+
+Takada et al. 2024 (*Vet Comp Oncol* 22(3):410-421, PMID 38889903) ran phase I trametinib in 18
+dogs: MTD 0.5 mg/m²/day, with ~70% reaching 10 ng/mL = **16.2 nM**.
+
+| | requirement | achieved | verdict |
+|---|---|---|---|
+| as monotherapy | 150 nM | 16.2 nM | **9.2× short** |
+| **in combination** | **11 nM** | **16.2 nM** | **1.48× margin — passes** |
+
+That asymmetry *is* the finding, and it independently explains Adachi's null result. And Wei et al.
+2022 (*Front Vet Sci* 9:1056408, PMID 36590793) already gave sapanisertib with trametinib to 12
+dogs — tolerated, without dose-limiting toxicity. This is not a proposed combination.
+
+### What it buys
+
+Modelled through the engine's existing per-clone second-drug support, with no existing ceiling
+adjusted. The bar clears 0.03/day if MEK contributes **0.0225/day** at achievable exposure
+(0.0145/day at saturation) — inside the range the model already grants the primary drug against
+resistant clones.
+
+| MEK kill/day | 10-yr freedom from regrowth |
+|---|---|
+| 0 | 0.500 |
+| 0.0100 | 0.536 |
+| **0.0225** *(the requirement)* | **0.888** |
+| 0.0300 | 0.980 |
+
+Every component is load-bearing: drop the vaccine and it falls to **0.312**; drop the
+cross-resistance correction and it falls to **0.560**.
+
+**And unlike the growth-reduction route, it is insensitive to waning** — 0.888 at a 180-day *and* a
+90-day immunity half-life under q60d boosters. The second drug carries load the vaccine cannot.
+
+Freedom from regrowth is still not survival. At a 5%/yr rupture hazard over ten years, 0.888 becomes
+**0.532 unscreened** and **0.797–0.848 under CANDiD-sensitivity surveillance**.
+
+### Mechanism by mechanism
+
+| mechanism | answer |
+|---|---|
+| PI3K/AKT feedback reactivation *(sets the bar)* | dual TORC1/2 blocks the arm the feedback uses — the class's design purpose |
+| MAPK crosstalk bypass | MEK inhibition acts directly on the node |
+| target-site (FRB/FKBP12) mutation | invisible to ATP-competitive inhibitors (measured) |
+| **kinase-domain mutation** | **not covered.** 3–30× against ATP-competitive drugs. Bivalent third-generation inhibitors (RapaLink-1) exist for it, with no canine data at all. |
+
+### What is not established
+
+Andersen measured PD0325901; Takada dosed trametinib. Both inhibit MEK1/2 and trametinib is
+generally more potent, so carrying the requirement across is directionally conservative but not
+rigorous. Per-clone kill rates for either drug against these specific mechanisms have never been
+measured. And Takada **looked for target engagement in canine tumours on days 0 and 7 and did not
+find it** — weaker evidence than toceranib, where a rising plasma VEGF confirmed engagement.
+
+This is the strongest candidate the analysis has produced and the first to clear the exposure
+criterion. It is a well-supported hypothesis, not a demonstrated closure.
+
+*Tests: `test_hsa_parallel_pathway.py`*
+
 ---
 
 ## 4. Escape routes
