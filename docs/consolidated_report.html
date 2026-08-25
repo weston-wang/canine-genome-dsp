@@ -218,7 +218,7 @@ a{color:var(--accent)}
     <table>
       <thead><tr><th>Tumour genotype</th><th>Rough share</th><th>Maintenance pill (brain-penetrant, oral, continuous)</th><th>Durability grade</th></tr></thead>
       <tbody>
-        <tr><td>MTAP deleted</td><td>recurrent minority</td><td>PRMT5 inhibitor (MTA-cooperative; TNG908 / TNG462 class)</td><td><span class="pill ok">Strongest — genotype-locked</span></td></tr>
+        <tr><td>MTAP deleted</td><td>recurrent minority</td><td>PRMT5 inhibitor (MTA-cooperative; brain-penetrant <b>TNG456</b>, Ph I/II; also TNG462 / BMS-986504)</td><td><span class="pill ok">Strongest — genotype-locked</span></td></tr>
         <tr><td>PTEN deleted</td><td>minority</td><td>PI3K inhibitor (paxalisib)</td><td><span class="pill ok">Strong dependency</span></td></tr>
         <tr><td>CDKN2A deleted, RB1 intact</td><td>minority</td><td>CDK4/6 inhibitor (abemaciclib)</td><td><span class="pill ok">Strong dependency</span></td></tr>
         <tr><td>SHP2 / KRAS driver</td><td><b>~59%</b></td><td>MEK inhibitor (mirdametinib, CNS-penetrant)</td><td><span class="pill un">Medium — surveillance-dependent</span></td></tr>
@@ -335,6 +335,36 @@ a{color:var(--accent)}
   <div class="note warn">
     <span class="h">A caution about the engine itself</span>
     <p>Every figure comes from one simulation engine. It carried 1,340+ tests, but until recently not one checked it against a known outcome. Exactly one apples-to-apples external check exists (lomustine, 16 dogs, same endpoint/disease/species, 37.5% relapse-free), and the engine <b>failed it</b> — predicting 0.0% at every potency, because it structurally cannot represent a cured animal. An extinction state was added and it now returns a realistic 42% vs. the observed 37.5% — but only above the potency range the project itself considers plausible and with a favourable second free parameter, i.e. curve-fitting, labelled as such. Read the whole report as <b>hypothesis-generating.</b></p>
+  </div>
+</section>
+
+<section>
+  <h2><span class="num">Quantified</span>Probabilistic durability, brain spread, surveillance, and the dosing fix</h2>
+  <p>The categorical grades above say which tiers are more robust; the durability engine (<code>emergence.py</code>) puts a number and a 90% interval on each, calibrated so that <em>without</em> maintenance <code>exp(&minus;&Lambda;)</code> reproduces the canine-HS adjuvant CCNU recurrence baseline (PMID 19453368). These are calibrated model confidence, <b>not</b> measured durability.</p>
+  <div class="tscroll">
+    <table>
+      <thead><tr><th>Genotype tier</th><th>P(10-year), no surveillance</th><th>with detect-and-switch</th></tr></thead>
+      <tbody>
+        <tr><td>MTAP (locked)</td><td><span class="pill ok">0.90 [0.76–0.97]</span></td><td>~unchanged (a lock needs no watching)</td></tr>
+        <tr><td>MAPK majority (reroutable)</td><td><span class="pill un">0.56 [0.25–0.80]</span></td><td><span class="pill ok">0.81 [0.55–0.93]</span></td></tr>
+        <tr><td>PTEN / CDKN2A (dependency)</td><td><span class="pill un">0.60 [0.29–0.83]</span></td><td>higher</td></tr>
+        <tr><td>No target (floor)</td><td><span class="pill no">0.38 [0.12–0.65]</span></td><td>modest</td></tr>
+        <tr><td>Any tier at CSF</td><td><span class="pill no">~0.33</span></td><td>reach-limited</td></tr>
+      </tbody>
+      <caption>Value of information: the dominant uncertainty in almost every cell is &Lambda; — the second-primary emergence rate — so the highest-value experiment is an adjuvant recurrence cohort, not a new drug. At the brain-local site it flips to a local-delivery penetration measurement.</caption>
+    </table>
+  </div>
+  <div class="note">
+    <span class="h">Brain spread — strengthened, scoped honestly</span>
+    <p>The CNS lock no longer leans on TNG908 (which missed therapeutic CNS exposure in glioblastoma trials, PMID 42190431) but on the brain-penetrant successor <b>TNG456</b> (Ph I/II, PMID 42150143); and parenchymal local control to complete response is clinically demonstrated in a predisposed breed by radiation (PMID 34556593). What is <em>not</em> claimed is more <em>time</em> than those radiation-alone series — durability beyond local control rests on the (unproven-in-dog) maintenance arm. The documented failure mode is CSF seeding, which is exactly the residual gap above.</p>
+  </div>
+  <div class="note">
+    <span class="h">"Surveillance-dependent" made precise</span>
+    <p>A locked tier (MTAP) needs no watching — the target is a deleted gene that cannot be re-acquired. A reroutable tier's decade is conditional on a detect-and-switch loop: serial ctDNA / molecular-residual-disease monitoring (grounded in PMID 41124204) plus the genotype switch tree. Same suppression-at-emergence mechanism, minus the guarantee against an established reroute.</p>
+  </div>
+  <div class="note warn">
+    <span class="h">The dosing gap — and why it does not block maintenance</span>
+    <p>The canine trametinib Phase I left ~30% of dogs below the tumour-shrinking exposure at the MTD, and 90% attainment would need ~1.4× the MTD, above the hypertension/proteinuria ceiling (PMID 38889903). Three computed levers resolve it for maintenance (<code>pkpd.dosing_workaround()</code>): (1) the maintenance bar — holding a single founding cell subcritical — is ~25× below achievable exposure, so the shrink-a-tumour attainment gap does not bind; (2) per-dog dose individualisation (TDM) closes the interindividual spread; (3) a synergistic partner (PMID 39505062) pulls the 90%-attainment dose to ~0.6× the MTD, back under the ceiling. The fix is not "dose harder."</p>
   </div>
 </section>
 
