@@ -126,7 +126,7 @@ efficacy trial, so it is swept here, and the real durability anchor is the trans
 
 | # | Route | Status |
 |---|---|---|
-| 1 | `mdr1_pgp_efflux` | CLOSED by immunotherapy construction — and it sets the bar |
+| 1 | `mdr1_pgp_efflux` | CLOSED two ways (effector construction + real drug-side reversal) — and it sets the bar |
 | 2 | `abcg2_bcrp_efflux` | CLOSED by construction |
 | 3 | `tp53_apoptosis_evasion` | CLOSED by construction — with a real caveat |
 | 4 | `cd20_antigen_loss` | Real; unclosable by single-antigen immunotherapy; **closable by a tandem construct** |
@@ -315,7 +315,109 @@ disease — and its cost, the ~7–13% treatment-related mortality, is route 7.
 
 ---
 
-## 7. The answer
+## 7. Is 2-year disease-free a sound inference for 10-year?
+
+The real cure fraction is defined at **≥2 years**, but the target is a **decade**. So the load-bearing
+question: does surviving disease-free to 2 years imply surviving disease-free to 10? The model
+answers it by looking at *when* relapses happen — `conditional_durability` on a 10-year run, 400
+trials. Read "P(10y | 2y)" as: of the dogs disease-free at 2 years, what fraction are still
+disease-free at 10.
+
+| Regime | disease-free @2y | @10y | **P(10y \| 2y)** | late relapses (2–10y) | late mechanism |
+|---|---|---|---|---|---|
+| chemo only | 0.180 | 0.180 | **1.000** | 0 | — (all by day 114) |
+| sub-threshold effector (0.06) | 0.215 | 0.215 | **1.000** | 0 | — (all by day 263) |
+| **at the bar (0.09)** | 0.995 | 0.968 | **0.972** | 11 / 398 | **10 P-gp, 1 antigen-loss** |
+| at the bar + tandem | 0.990 | 0.963 | 0.972 | 11 / 396 | 11 P-gp (antigen loss closed) |
+| above the bar (0.12) | 1.000 | 1.000 | **1.000** | 0 | — |
+
+**The answer is mechanism-dependent, and the dependence is the finding:**
+
+- **Below the bar** (chemo alone, or a weak/transient effector), relapse is entirely *front-loaded* —
+  essentially every dog that will relapse has done so within 9 months. So 2-year disease-free
+  implies 10-year disease-free with probability ~1.000. The inference is **safe but trivial**,
+  because almost every dog has already relapsed by 2 years.
+- **Exactly at the bar**, a small late tail appears: **~3%** of dogs disease-free at 2 years relapse
+  between years 2 and 10, spread across the whole decade (median late-relapse day 1663, 90th
+  percentile 3213). So 2-year disease-free **over-estimates** 10-year by ~3 points. Crucially, that
+  tail is **rare late-emerging drug resistance (P-glycoprotein), not antigen loss** — 10 of 11 late
+  relapses — so a tandem CAR does *not* shrink it (it removes only the 1 antigen-loss case).
+- **Above the bar with margin** (0.12), there is **no** late relapse at all: 2-year disease-free
+  equals 10-year disease-free exactly. **Potency margin, not antigen insurance, is what makes 2
+  years a safe proxy for the decade.**
+
+Practical reading: for a dog on a genuinely bar-clearing regimen, 2-year disease-free is a strong
+(~97%) lower bound on 10-year durability, and MRD monitoring is exactly the tool to catch the rare
+late drug-resistant relapse in that tail. Because dogs live ~10–13 years, 10-year durability is
+effectively lifetime cure.
+
+**The honest limit.** This is the *model's* late hazard, from its exponential-growth + rare-Poisson-
+seeding structure. Real 2-to-10-year attrition is also bounded by things the model omits — competing
+non-lymphoma mortality over a decade in an older dog, second primary cancers, and therapy-related
+myeloid neoplasia after total body irradiation. Those cut the *other* way: they make real 10-year
+survival harder than the tumour dynamics alone imply. The tumour-relapse inference is sound at the
+bar; the whole-animal inference must also clear those competing risks.
+
+*Tests: `test_lymphoma_inference_and_toxicity.py` (`conditional_durability` + the regime cases)*
+
+---
+
+## 8. Toxicity, considered alongside potency
+
+Potency without toxicity is not a plan, and the two trade off *differently* for each agent — which
+is the whole reason the winning combination is a combination.
+
+| Agent | real toxicity | its potency role | de-ratable for toxicity? |
+|---|---|---|---|
+| CHOP | myelosuppression, GI; doxorubicin cardiotoxicity ceiling (PMID 26225611 context) | response depth; *partly* load-bearing in the combo | yes alone; **not for free** in the combo |
+| Rabacfosadine | GI/derm; **fatal delayed pulmonary fibrosis** in a few dogs (PMID 28370378, 32346934) | optional 2nd cytotoxic | yes; fibrosis caps total exposure |
+| CD20 CAR-T | cytokine release, neurotoxicity, B-cell aplasia; **well tolerated first-in-dog** (PMID 27401141) | **the durability carrier; fully load-bearing** | **no — and doesn't need to be** |
+| TBI + transplant | 7–13% treatment-related mortality (PMID 38695516, 22882500, 24467413) | one-time consolidation | reduced-intensity conditioning lowers it |
+
+Three quantified findings (10-year durable response; `lymphoma_toxicity`):
+
+1. **Chemo de-rating is durability-neutral when chemo is alone** — it was never carrying durability:
+   1.0 → 0.180, 0.6 → 0.173, 0.4 → 0.173. Lowering CHOP for toxicity costs response depth, not the
+   10-year figure.
+2. **But inside the curative combination, chemo's cytoreduction depth is partly load-bearing** —
+   de-rating CHOP now costs durability: 1.0 → 0.970, 0.6 → 0.850, 0.4 → 0.737. A shallower induction
+   leaves more burden and more late resistant-clone seeding for the effector to overcome. This is a
+   real potency/toxicity tension: you want deep induction, and CHOP's own myelosuppression caps how
+   deep you can safely go.
+3. **The durability carrier's potency is a cliff, not a gradient** — 0.12 → 1.000, 0.09 → 0.970,
+   0.06 → 0.240 — so it cannot be dose-de-rated the way a toxic small molecule can. The saving grace
+   is that its principal toxicity (cytokine release) is managed *pharmacologically* — anti-IL-6,
+   corticosteroids — **without lowering the CAR's kill**. Its efficacy and its toxicity are
+   decoupled, unlike a small molecule where cutting dose cuts both. First-in-dog CD20 CAR-T was well
+   tolerated (Panjwani et al. 2016, *Mol Ther* 24(9):1602-14, PMID 27401141), and — tellingly — its
+   *transient* RNA CAR gave only a transient response, which is the height-vs-persistence threshold
+   observed in a real dog.
+
+So the consolidation's toxicity (route 7) is the one place toxicity subtracts straight from the
+cure, and the realistic optimisation is: induction as deep as tolerated, effector kept above the bar
+with its toxicity managed pharmacologically, consolidation intensity reduced as far as durability
+allows — not any one of them traded away.
+
+*Tests: `test_lymphoma_inference_and_toxicity.py` (de-rating cases + the toxicity ledger)*
+
+---
+
+## 9. The completeness ledger
+
+`ESCAPE_ROUTE_COMPLETENESS` records, for every modelled mechanism and escape, the evidence class
+that closes it and whether potency and toxicity were considered. Every route is closed by real data,
+a rigorous model, or both. Two honest exceptions are flagged, not hidden: **apoptosis evasion**
+(route 3) is only *partly* covered by immune killing (perforin lysis is apoptosis-independent;
+granzyme/death-receptor pathways can be blunted by the same evasion), and the **2-to-10-year late
+drug-resistant tail** is reduced by potency margin and caught by MRD rather than eliminated outright.
+Neither is closed by assumption. Route 1 (P-gp efflux) is now closed **two ways** — the
+efflux-indifferent effector, *and* real drug-side reversal (PSC833 in vitro; a TGF-β inhibitor that
+cut P-gp and restored doxorubicin in a canine DLBCL line, Hsu et al. 2021, *PLOS ONE* 16(5):e0250013,
+PMID 33961622) — though reversal raises normal-tissue exposure, so it is not free.
+
+---
+
+## 10. The answer
 
 A lasting remission runs through **immunotherapy**, not chemotherapy. CHOP makes the tumour shrink —
 completely, in ~90%+ of dogs — and does essentially nothing to stop it returning, because the clone
@@ -339,6 +441,15 @@ And durability is not hypothetical here: transplant plus adoptive T cells alread
 dogs in a real cohort. The open work is raising that fraction — a stronger, potency-measured immune
 effector; a tandem construct to insure against antigen loss; lower-toxicity conditioning — not
 proving it is possible.
+
+On the two questions the goal put sharply: **every mechanism and escape is closed by real data, a
+rigorous model, or both**, with potency *and* toxicity considered for each (§8, §9) — the only two
+that are managed rather than eliminated, apoptosis evasion and the late drug-resistant tail, are
+flagged as such, not assumed away. And **2-year disease-free is a sound inference for 10-year only
+when the regimen clears the bar with margin** (§7): below the bar relapse is front-loaded so 2 years
+trivially predicts 10, at the bar a ~3% late drug-resistant tail means 2 years slightly over-states
+10, and above the bar the two are identical. Potency margin — not antigen insurance — is what earns
+the inference, and MRD monitoring is what guards the tail.
 
 **T-cell lymphoma is harder on both counts.** Its faster growth raises the bar, so the same effector
 potency that cures B-cell (0.09) leaves T-cell at 0.38 and only 0.12 reaches durable response — and
