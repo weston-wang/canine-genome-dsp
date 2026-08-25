@@ -632,6 +632,92 @@ hemangiosarcoma**. Neither is refuted; both are simply untested.
 
 *Tests: `test_hsa_open_item_closures.py`*
 
+
+---
+
+## 3e. Both gaps close — and the search found a constraint that matters more
+
+§3d left two items as missing measurements. Both have been done. Finding them also surfaced a phase 2
+result that changes *when* the immune components should be given.
+
+### Trametinib engages its target in canine tumour tissue
+
+Takada et al. 2018 (*Mol Cancer Ther* 17(11):2439-2450, PMID 30135215) — the **same first author** as
+the 2024 canine phase I whose day-7 biopsy found nothing — tested trametinib against canine
+histiocytic sarcoma cells in an intrasplenic orthotopic xenograft:
+
+- *"Target engagement was validated as activity of ERK, downstream of MEK, was significantly
+  downregulated in neoplasms of treated mice."*
+- *"trametinib was found in plasma **and neoplastic tissues** within projected therapeutic levels"* —
+  exposure confirmed at the tumour, not merely in blood
+- apoptosis by caspase 3/7; significantly longer survival
+- the canine lines carry **PTPN11 E76K** and **KRAS Q61H**, both reported in human histiocytic
+  sarcoma — the MAPK node is genuinely driving
+
+This replaces "never demonstrated" with "demonstrated in the wrong tumour type."
+
+### NK cells have been given intravenously to dogs
+
+Razmara et al. 2024 (*J Immunother Cancer* 12(4):e007963, PMID 38631708) expanded NK cells from
+**unmanipulated PBMCs** rather than CD5-depleted cells, lifting the yield ceiling, and ran two
+first-in-dog trials:
+
+| | route | n | schedule | outcome |
+|---|---|---|---|---|
+| autologous | **IV**, 7.5×10⁶ cells/kg | 9 (4 melanoma, 5 OSA) | days 0 and 7, inhaled IL-15 50 µg BID × 14 d | no treatment-related SAEs; 1 PR, 1 SD |
+| **allogeneic** | **IV**, 7.5×10⁶ cells/kg | 5 (oral melanoma) | single infusion, rhIL-15 3 µg/kg SC | no serious AEs; median survival 145 d, one dog 445 d |
+
+No lymphodepletion in either. **The allogeneic arm matters most**: an off-the-shelf product removes
+per-dog manufacture from the critical path.
+
+### The constraint this uncovered
+
+Rebhun et al. 2025 (*Front Immunol* 16:1672790, PMID 41209004, NCI-COTC030) ran a multicentre phase 2
+of inhaled rhIL-15 given **after amputation and before chemotherapy** in canine osteosarcoma, powered
+to cut metastatic failure from 40% to 20%.
+
+**Disease-free and overall survival were statistically inferior to historical controls. The trial was
+halted for futility.** And they measured why:
+
+- PBMC cytotoxicity fell significantly after surgery **and** after chemotherapy — **−18.2 ± 16.1%**
+  across therapy (P<0.001)
+- IL-6 rose at both points and tracked the falls
+- **dogs whose cytotoxicity rose lived significantly longer** (P=0.004, r=0.62)
+
+*"These data have important implications on novel immunotherapy strategies involving multimodality
+approaches including surgery and chemotherapy."*
+
+### Two independent failures with the same shape
+
+| | agent | setting | result |
+|---|---|---|---|
+| Borgatti 2020 (PMID 32187827) | eBAT | redosed at a *reduced* interval from doxorubicin | more toxicity, less benefit |
+| Rebhun 2025 (PMID 41209004) | inhaled IL-15 | between amputation and chemotherapy | inferior survival, halted |
+
+Different agents, different groups, different diseases — both placed an immune therapy **inside the
+peri-surgical and peri-chemotherapy window**. Neither failed because the mechanism was wrong. Both
+failed where host effector function is measurably at its lowest.
+
+**Splenectomy followed by doxorubicin is exactly that window**, and exactly where an HSA regimen would
+be tempted to add its immune components.
+
+### The design consequence, and why it is affordable
+
+Schedule the vaccine, boosters and any NK component to **avoid** the peri-operative and
+active-chemotherapy window, and gate dosing on recovered PBMC cytotoxicity — a biomarker that
+predicts outcome rather than merely describing it.
+
+The engine already says this is nearly free: starting the second drug on day 0, 60 or 180 gives
+**0.932 / 0.928 / 0.896**. Delay costs a few points. Being early, on this evidence, costs more.
+
+### What is genuinely left
+
+Every component has now been given to a dog, and the delivery questions are settled. **No trial has
+given any of it for hemangiosarcoma** — the demonstrations sit in histiocytic sarcoma, melanoma and
+osteosarcoma. Species and route are answered; the disease is not.
+
+*Tests: `test_hsa_immune_timing.py`*
+
 ---
 
 ## 4. Escape routes
