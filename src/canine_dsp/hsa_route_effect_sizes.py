@@ -257,3 +257,112 @@ VERDICT = {
                    "transfer fractions say how wrong the extrapolation can afford to be; they do "
                    "not say it is right.",
 }
+
+
+# =============================================================================================
+# CLOSING THE LOOP: from a transfer fraction to a durability number.
+#
+# The transfer fractions above say whether a route can meet the requirement. They do not say what
+# happens if it only partly does. That question the engine can answer, because the height grid is
+# a ramp: every increment maps to a durability. Merging the coarse, fine and tail sweeps gives one
+# curve, and each route's measured effect can be walked along it.
+#
+# All rows: same engine, same seed, same 250 trials, same corrected IC50 and waning-immunity
+# schedule. Keyed by increment over the measured 0.030/day.
+# =============================================================================================
+
+DURABILITY_BY_INCREMENT = {
+    #  increment: (stop drug at year 1, stop at year 2)
+    0.0000: (0.464, 0.460),
+    0.0030: (0.488, 0.516),
+    0.0060: (0.592, 0.652),
+    0.0075: (0.652, 0.696),
+    0.0090: (0.684, 0.736),
+    0.0105: (0.732, 0.864),
+    0.0120: (0.872, 0.960),
+    0.0135: (0.968, 0.992),
+    0.0150: (0.992, 1.000),
+    0.0200: (1.000, 1.000),
+    0.0250: (1.000, 1.000),
+}
+
+# The figure any alternative has to beat: the measured vaccine with the drug given forever.
+REFERENCE_DRUG_FOREVER = 0.888
+
+
+def durability_at_increment(increment: float, stop_year: int = 1) -> float:
+    """Ten-year durability for a given gain in vaccine kill, interpolated along the grid.
+
+    Linear interpolation between Monte Carlo points, clamped at both ends. The grid is dense
+    enough through the steep stretch that interpolation is a fair reading of it, but the returned
+    value is an interpolation of simulated points, not a simulated point.
+    """
+    if stop_year not in (1, 2):
+        raise ValueError("the grid covers withdrawal at year 1 or year 2")
+    if increment < 0:
+        raise ValueError("increment must be nonnegative")
+    column = 0 if stop_year == 1 else 1
+    points = sorted(DURABILITY_BY_INCREMENT)
+    if increment <= points[0]:
+        return float(DURABILITY_BY_INCREMENT[points[0]][column])
+    if increment >= points[-1]:
+        return float(DURABILITY_BY_INCREMENT[points[-1]][column])
+    for low, high in zip(points, points[1:]):
+        if low <= increment <= high:
+            span = high - low
+            weight = 0.0 if span == 0 else (increment - low) / span
+            a = DURABILITY_BY_INCREMENT[low][column]
+            b = DURABILITY_BY_INCREMENT[high][column]
+            return float(a + weight * (b - a))
+    raise AssertionError("increment fell outside the grid despite the bounds checks")
+
+
+_ROUTE_EFFECTS = {
+    "route_1_checkpoint": ROUTE_1_CHECKPOINT["implied_rate_per_day"],
+    "route_2_losartan": ROUTE_2_LOSARTAN["implied_rate_per_day"],
+    "route_3_redosing": ROUTE_3_REDOSING["implied_rate_per_day"],
+}
+
+
+def durability_at_transfer(route: str, transfer: float, stop_year: int = 1,
+                           conservative: bool = True) -> float:
+    """Durability if `transfer` of a route's measured effect survives the species/tumour jump.
+
+    `conservative` walks the LOW end of the route's effect range, which is the honest default for
+    an extrapolation; pass False for the optimistic end.
+    """
+    if route not in _ROUTE_EFFECTS:
+        raise ValueError(f"unknown route {route!r}; expected one of {sorted(_ROUTE_EFFECTS)}")
+    if not 0.0 <= transfer <= 1.0:
+        raise ValueError("transfer is a fraction of the measured effect, between 0 and 1")
+    rates = _ROUTE_EFFECTS[route].values()
+    effect = min(rates) if conservative else max(rates)
+    return durability_at_increment(effect * transfer, stop_year)
+
+
+# What each route buys at a range of transfer efficiencies, walking the conservative end of its
+# measured effect and withdrawing the second drug after one year.
+DURABILITY_BY_TRANSFER = {
+    route: {t: round(durability_at_transfer(route, t), 3) for t in (0.10, 0.25, 0.50, 0.75, 1.00)}
+    for route in _ROUTE_EFFECTS
+}
+
+WHAT_THE_MODEL_SAYS_ABOUT_PARTIAL_TRANSFER = {
+    "route_2_at_a_quarter": "losartan's conservative effect, discounted to a quarter, still lands "
+                            "above the drug-forever reference. Three-quarters of the effect can be "
+                            "lost in the species jump and the plan is still better off.",
+    "route_1_at_a_half": "the checkpoint route needs roughly half its conservative effect to reach "
+                         "the reference -- which is the same answer the transfer fractions gave, "
+                         "now expressed as a durability rather than a ratio.",
+    "route_3_at_full": "re-dosing, even at full transfer of its optimistic effect, does not reach "
+                       "the reference. The engine and the arithmetic agree.",
+    "why_this_is_worth_having": "the transfer fractions answer a yes/no question. This answers the "
+                                "question a trial designer actually has: if the effect is half what "
+                                "was measured, what does the dog get? On a ramp that has an answer, "
+                                "and it is not zero.",
+    "the_interpolation_caveat": "values between grid points are linear interpolations of simulated "
+                                "points, not simulations. The grid is dense through the steep "
+                                "stretch (0.0075 to 0.0150 in steps of 0.0015), so the reading is "
+                                "fair, but it should not be quoted to three decimals as though it "
+                                "were a run.",
+}

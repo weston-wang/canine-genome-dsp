@@ -152,3 +152,81 @@ def test_the_verdict_refuses_to_let_a_ratio_read_as_evidence():
     assert "arithmetic, not evidence" in eff.VERDICT["what_is_not"]
     assert "they do not say it is right" in eff.VERDICT["what_is_not"]
     assert eff.VERDICT["the_required_increment"] == pytest.approx(eff.REQUIRED_INCREMENT)
+
+
+# ---------------------------------------------------------------------------------------------
+# From a transfer fraction to a durability number.
+
+def test_durability_grid_is_monotone_in_the_increment():
+    increments = sorted(eff.DURABILITY_BY_INCREMENT)
+    for column in (0, 1):
+        values = [eff.DURABILITY_BY_INCREMENT[i][column] for i in increments]
+        assert values == sorted(values), f"non-monotone column {column}: {values}"
+
+
+def test_durability_interpolation_reproduces_the_grid_points():
+    for increment, (at_y1, at_y2) in eff.DURABILITY_BY_INCREMENT.items():
+        assert eff.durability_at_increment(increment, 1) == pytest.approx(at_y1)
+        assert eff.durability_at_increment(increment, 2) == pytest.approx(at_y2)
+
+
+def test_durability_interpolation_lands_between_its_neighbours():
+    below = eff.durability_at_increment(0.0120, 1)
+    above = eff.durability_at_increment(0.0135, 1)
+    middle = eff.durability_at_increment(0.01275, 1)
+    assert below < middle < above
+
+
+def test_durability_interpolation_clamps_outside_the_grid():
+    top = max(eff.DURABILITY_BY_INCREMENT)
+    assert eff.durability_at_increment(top * 10, 1) == pytest.approx(
+        eff.DURABILITY_BY_INCREMENT[top][0])
+    assert eff.durability_at_increment(0.0, 1) == pytest.approx(
+        eff.DURABILITY_BY_INCREMENT[0.0][0])
+
+
+def test_durability_helpers_reject_bad_arguments():
+    with pytest.raises(ValueError):
+        eff.durability_at_increment(0.01, stop_year=3)
+    with pytest.raises(ValueError):
+        eff.durability_at_increment(-0.01)
+    with pytest.raises(ValueError):
+        eff.durability_at_transfer("route_9", 0.5)
+    for bad in (-0.1, 1.1):
+        with pytest.raises(ValueError):
+            eff.durability_at_transfer("route_2_losartan", bad)
+
+
+def test_the_conservative_default_is_actually_conservative():
+    for route in eff.DURABILITY_BY_TRANSFER:
+        cautious = eff.durability_at_transfer(route, 0.5, conservative=True)
+        hopeful = eff.durability_at_transfer(route, 0.5, conservative=False)
+        assert cautious <= hopeful, route
+
+
+def test_losartan_beats_the_drug_forever_reference_at_a_quarter_transfer():
+    """Three-quarters of the measured effect can be lost and the dog is still better off."""
+    assert (eff.durability_at_transfer("route_2_losartan", 0.25)
+            > eff.REFERENCE_DRUG_FOREVER)
+
+
+def test_the_checkpoint_route_needs_about_half_its_conservative_effect():
+    assert eff.durability_at_transfer("route_1_checkpoint", 0.25) < eff.REFERENCE_DRUG_FOREVER
+    assert eff.durability_at_transfer("route_1_checkpoint", 0.50) > eff.REFERENCE_DRUG_FOREVER
+
+
+def test_redosing_never_reaches_the_reference_at_any_transfer():
+    for optimism in (True, False):
+        assert (eff.durability_at_transfer("route_3_redosing", 1.0, conservative=not optimism)
+                < eff.REFERENCE_DRUG_FOREVER)
+
+
+def test_the_engine_and_the_arithmetic_agree_about_route_3():
+    """Two independent statements of the same conclusion, checked against each other."""
+    assert min(eff.TRANSFER_REQUIRED["route_3_redosing"]["transfer_needed"]) > 1.0
+    assert eff.durability_at_transfer("route_3_redosing", 1.0) < eff.REFERENCE_DRUG_FOREVER
+
+
+def test_the_interpolation_caveat_is_recorded():
+    note = eff.WHAT_THE_MODEL_SAYS_ABOUT_PARTIAL_TRANSFER["the_interpolation_caveat"]
+    assert "not simulations" in note
