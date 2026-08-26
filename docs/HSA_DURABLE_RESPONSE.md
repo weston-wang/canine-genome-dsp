@@ -971,6 +971,61 @@ unmeasured 1.5× of potency. The second is the better bet, because it can be mea
 model that exists, before any dog is committed to it — and because falling short degrades back to the
 previous plan rather than to nothing.
 
+### The 1.5× shouldn't rest on one unmeasured mechanism
+
+Resting the revised plan on a single number nobody has measured is a single point of failure. Looking
+for a second route to the same target turned up something better than a backup — **the only agent in
+this entire analysis that clears both criteria**, with its target validated in hemangiosarcoma itself
+rather than borrowed from another tumour.
+
+**The suppressive compartment isn't just present in HSA — it is more prominent here than anywhere
+else in canine oncology.** Counting CD18⁺ monocytes inside metastases across common canine tumours,
+HSA metastases had *significantly more than any other tumour type*. HSA cells were the **highest
+producers of CCL2** of any line tested, and drove canine monocyte migration in a CCL2-dependent way.
+The authors' own conclusion: *"therapies designed to block monocyte recruitment may be an effective
+adjuvant strategy for suppressing HSA metastasis in dogs."* (Regan 2017, PMID 27779362)
+
+That proposal is eight years old and has never been run in this disease.
+
+**The agent that blocks that axis has been dose-found in dogs.** Losartan blocks CCL2–CCR2 monocyte
+recruitment. In 28 dogs with lung-metastatic osteosarcoma (Regan 2022, PMID 34580111):
+
+- PK/PD across three dose cohorts found a **ten-fold higher dose than the antihypertensive dose** was
+  needed to block monocyte migration — and that dose was given and well tolerated.
+- Clinical benefit rate **50%**, in a tumour the authors chose precisely because checkpoint
+  inhibitors had shown limited benefit there.
+
+That first bullet is the exposure criterion answered better than anywhere else in this analysis — not
+by comparing a plasma level to a dish IC50, but by escalating in dogs until a pharmacodynamic
+endpoint actually moved. It also shows the criterion has teeth: the standard dose would have missed
+by 10×, and a trial run at it would have produced a dose failure misread as an idea failure — exactly
+what happened to propranolol.
+
+| | losartan |
+|---|---|
+| **exposure criterion** | cleared by dose-escalation to a measured PD endpoint in dogs |
+| **duration criterion** | cleared trivially — an ARB given continuously in dogs for hypertension, proteinuria and CKD; indefinite dosing is the normal use |
+| **target validation in HSA** | stronger than for any other component — the axis was characterised *in* canine HSA and found more prominent than in any other canine tumour |
+
+**Two independent levers on one compartment.** Anti-PD-1 disarms the macrophages that arrive;
+losartan stops them arriving. Neither has to deliver the whole 1.5× for the combination to reach it,
+and the fallback is graded rather than binary — at 1.25× the second drug can still be withdrawn at
+year five (0.920) or continued indefinitely (1.000), which already beats the measured height dosed
+forever (0.888).
+
+*What this does not establish:* the 50% benefit is osteosarcoma, not HSA. It was losartan **with
+toceranib** — the agent this analysis already rejected for HSA on biology — so losartan's own share
+isn't separable. A 2026 case report (PMID 41772701) shows metastases resolving on losartan +
+toceranib + carboplatin and then progressing once the carboplatin ended despite continued losartan,
+which fits a microenvironment lever that potentiates rather than controls — but it is one dog. And
+none of this measures how much recruitment blockade raises *vaccine* kill. It moves the 1.5× from
+resting on one unmeasured mechanism to resting on two, both with canine dosing data. It does not
+measure it.
+
+**The experiment this points at** is four arms in one model: vaccine, vaccine + anti-PD-1, vaccine +
+high-dose losartan, and all three — in ISOS-1, read out as a growth-rate difference rather than
+survival.
+
 ### A third timing constraint
 
 Corticosteroid pre-treatment significantly alters canine PBMC composition — *primarily the monocytic
@@ -1198,16 +1253,24 @@ never has to hold the tumour alone — and in this disease a substantial part of
 is microenvironmental, from PD-L1⁺ M2 macrophages that measurably exclude T cells, with a caninized
 anti-PD-1 already dosed in 51 dogs on a booster-like schedule.
 
-**What is not established** is that 1.5×. Nobody has measured what checkpoint blockade adds to
-vaccine height in this tumour. That is the single number the plan now stands or falls on — and unlike
-a decade of safety data, it can be measured in months in a syngeneic model that now exists.
+**And there are two independent ways to raise it, not one.** Anti-PD-1 disarms the suppressive
+macrophages; losartan blocks the CCL2–CCR2 axis that recruits them. HSA is the **highest CCL2
+producer** and the most monocyte-rich metastasiser of any canine tumour examined, and losartan is the
+only agent in this analysis to clear **both** criteria — its exposure settled by dose-escalation to a
+measured pharmacodynamic endpoint in 28 dogs, its duration by being an ARB dogs already take
+indefinitely.
+
+**What is not established** is that 1.5×. Nobody has measured what either lever adds to vaccine
+height in this tumour. That is the single number the plan now stands or falls on — and unlike a
+decade of safety data, it can be measured in months in a syngeneic model that now exists.
 
 ### What would change the answer
 
-1. **Measure what checkpoint blockade adds to vaccine height** — the number the plan now turns on
-   (§3g). Vaccine ± anti-PD-1 in the ISOS-1 syngeneic model, read out as a growth-rate difference.
-   Anything at or above 1.5× converts a decade of dual kinase inhibition into a one-year induction;
-   anything below it falls back to the continuous-dosing plan rather than to nothing.
+1. **Measure what the microenvironment levers add to vaccine height** — the number the plan now
+   turns on (§3g). Four arms in ISOS-1: vaccine, vaccine + anti-PD-1, vaccine + high-dose losartan,
+   all three; read out as a growth-rate difference, not survival. Anything at or above 1.5× converts
+   a decade of dual kinase inhibition into a one-year induction; anything below it falls back to the
+   continuous-dosing plan rather than to nothing.
 2. **Measure a vaccine's kill rate directly** instead of inferring it from survival. Serial imaging or
    ctDNA on a vaccinated cohort gives the progression-free readout the engine consumes natively, and
    removes the endpoint mismatch that makes the 1.7× shortfall a floor rather than a number.

@@ -236,3 +236,66 @@ def test_the_verdict_answers_the_question_that_was_asked():
     assert alt.VERDICT["the_question"].startswith("given the toxicity")
     assert "not an alternative drug" in alt.VERDICT["the_answer"]
     assert alt.VERDICT["what_remains_open"]
+
+
+# ---------------------------------------------------------------------------------------------
+# The second lever: monocyte-recruitment blockade.
+
+def test_the_recruitment_axis_is_characterised_in_hemangiosarcoma_itself():
+    entry = alt.HSA_IS_THE_MOST_MONOCYTE_RECRUITING_CANINE_TUMOUR
+    assert "27779362" in entry["citation"]
+    assert "SIGNIFICANTLY GREATER" in entry["the_comparison"]
+    assert "CCL2-DEPENDENT" in entry["the_chemokine"]
+    assert "adjuvant strategy" in entry["authors_conclusion"]
+
+
+def test_losartan_exposure_was_settled_by_dose_escalation_not_by_a_ratio():
+    entry = alt.LOSARTAN_HAS_BEEN_DOSE_FOUND_IN_DOGS
+    assert "34580111" in entry["citation"]
+    assert "TEN-FOLD HIGHER" in entry["the_exposure_result"]
+    assert "pharmacodynamic endpoint" in entry["why_that_sentence_matters_so_much"]
+
+
+def test_losartan_is_the_first_agent_to_clear_both_criteria():
+    """Every earlier candidate cleared one criterion and failed the other."""
+    entry = alt.LOSARTAN_CLEARS_BOTH_CRITERIA
+    assert entry["exposure"] and entry["duration"]
+    assert "first agent" in entry["the_significance"]
+    # The swaps in step 2 are the contrast: each clears duration and then falls over on something
+    # else, so none of them clears both.
+    swaps = {k: v for k, v in alt.WHY_THE_OBVIOUS_SWAPS_DO_NOT_WORK.items() if k != "the_pattern"}
+    for name, swap in swaps.items():
+        head, _, tail = swap["verdict"].partition(",")
+        assert "clears the duration criterion" in head, name
+        assert tail.strip(), f"{name} should record what it fails on"
+
+
+def test_the_losartan_limits_are_recorded_at_the_same_volume_as_the_claim():
+    limits = alt.WHAT_LOSARTAN_DOES_NOT_ESTABLISH
+    assert "osteosarcoma" in limits["no_hemangiosarcoma_trial"]
+    assert "toceranib" in limits["the_partner_drug_does_not_transfer"]
+    assert "single dog" in limits["a_case_report_shows_the_ceiling"]
+    assert "does not measure it" in limits["the_number_is_still_unmeasured"]
+
+
+def test_the_two_levers_act_at_different_points_on_one_pathway():
+    entry = alt.TWO_LEVERS_ON_ONE_COMPARTMENT
+    assert "anti-PD-1" in entry["lever_1_effector"]
+    assert "CCL2-CCR2" in entry["lever_2_recruitment"]
+    assert "Neither has to" in entry["why_independence_matters"]
+
+
+def test_partial_delivery_of_the_requirement_still_buys_something():
+    """The fallback claim, checked against the grid rather than taken on trust."""
+    quarter_taller = alt.VACCINE_HEIGHT_VS_DRUG_STOP[(0.0375, 5)]
+    measured_never_stopped = alt.VACCINE_HEIGHT_VS_DRUG_STOP[(alt.MEASURED_VACCINE_HEIGHT, None)]
+    assert quarter_taller > measured_never_stopped, (
+        "1.25x with a five-year stop should beat the measured height dosed forever")
+    assert "partial reduction in drug-years" in alt.TWO_LEVERS_ON_ONE_COMPARTMENT[
+        "the_fallback_is_graded_not_binary"]
+
+
+def test_the_pointed_experiment_names_four_arms_and_a_growth_rate_readout():
+    experiment = alt.TWO_LEVERS_ON_ONE_COMPARTMENT["the_experiment_this_points_at"]
+    assert "ISOS-1" in experiment
+    assert "growth-rate" in experiment

@@ -492,3 +492,118 @@ VERDICT = {
                          "window after surgery, after chemotherapy, and away from "
                          "corticosteroids.",
 }
+
+
+# =============================================================================================
+# A SECOND, INDEPENDENT LEVER ON THE SAME COMPARTMENT.
+#
+# Resting the revised plan on one unmeasured number -- what checkpoint blockade adds to vaccine
+# height -- is a single point of failure. Searching for a second route to the same target found
+# something better than a backup: the only agent in this entire analysis that clears BOTH the
+# exposure criterion and the duration criterion, with the target validated in hemangiosarcoma
+# itself rather than borrowed from another tumour.
+# =============================================================================================
+
+# Step 1. The suppressive compartment is not merely present in HSA -- it is more prominent here
+# than in any other canine tumour examined, and the tumour recruits it through a named chemokine.
+HSA_IS_THE_MOST_MONOCYTE_RECRUITING_CANINE_TUMOUR = {
+    "citation": "Regan et al. 2017, Vet Comp Oncol 15(4):1309-1322, PMID 27779362, "
+                "doi 10.1111/vco.12272",
+    "the_comparison": "CD18+ monocytes were quantified inside metastases across common canine "
+                      "tumours. HSA metastases had SIGNIFICANTLY GREATER numbers than metastases "
+                      "from any other tumour type.",
+    "the_chemokine": "HSA cells were the highest producers of CCL2 among the lines tested, and "
+                     "stimulated canine monocyte migration in a CCL2-DEPENDENT manner",
+    "authors_conclusion": "'therapies designed to block monocyte recruitment may be an effective "
+                          "adjuvant strategy for suppressing HSA metastasis in dogs'",
+    "why_this_is_the_missing_link": "Gulay 2022 showed the macrophages inside canine HSA are "
+                                    "M2-polarised, PD-L1+, and associated with fewer T cells. This "
+                                    "shows where they come from and what pulls them in. Together "
+                                    "they give a recruitment axis and an effector axis for the "
+                                    "same compartment -- two independent places to intervene.",
+    "the_proposal_is_eight_years_old_and_untested": "the authors named the strategy in 2017. No "
+                                                    "trial has run it in hemangiosarcoma.",
+}
+
+# Step 2. The agent that blocks that axis has been dose-found in dogs against a PHARMACODYNAMIC
+# endpoint -- which is the exposure criterion, satisfied by measurement rather than by inference.
+LOSARTAN_HAS_BEEN_DOSE_FOUND_IN_DOGS = {
+    "citation": "Regan et al. 2022, Clin Cancer Res 28(4):662-676, PMID 34580111, "
+                "doi 10.1158/1078-0432.CCR-21-2105",
+    "mechanism": "losartan blocks CCL2-CCR2 monocyte recruitment; human and canine osteosarcoma "
+                 "cells secrete CCL2 and elicit monocyte migration, which losartan inhibits",
+    "the_exposure_result": "PK/PD in three dose cohorts found that a TEN-FOLD HIGHER dose than the "
+                           "typical antihypertensive dose was required to block monocyte "
+                           "migration. That dose was given and was well tolerated.",
+    "why_that_sentence_matters_so_much": "this is the exposure criterion answered the way nothing "
+                                         "else in this analysis has answered it -- not by comparing "
+                                         "a plasma level to a dish IC50, but by escalating in dogs "
+                                         "until the pharmacodynamic endpoint actually moved. It "
+                                         "also shows the criterion has teeth: the standard dose "
+                                         "would have failed by 10x, and a trial run at it would "
+                                         "have been a dose failure misread as an idea failure.",
+    "efficacy": "28 dogs with lung-metastatic osteosarcoma given high-dose losartan with "
+                "toceranib: clinical benefit rate 50%",
+    "the_setting_that_makes_50_percent_notable": "the authors chose osteosarcoma because it is a "
+                                                 "tumour where checkpoint inhibitors have shown "
+                                                 "limited benefit. The macrophage axis produced "
+                                                 "activity where the T-cell axis had not.",
+}
+
+LOSARTAN_CLEARS_BOTH_CRITERIA = {
+    "exposure": "cleared by direct dose-escalation to a measured pharmacodynamic endpoint in dogs "
+                "(Regan 2022), not by a plasma-to-IC50 ratio",
+    "duration": "cleared trivially -- losartan is an angiotensin receptor blocker with a long "
+                "established record of continuous administration in dogs for hypertension, "
+                "proteinuria and chronic kidney disease. Indefinite dosing is the normal use, not "
+                "an extrapolation from a 17-day study.",
+    "target_validation_in_this_disease": "stronger than for any other component of the plan. The "
+                                         "checkpoint agent has no hemangiosarcoma data at all; the "
+                                         "recruitment axis was characterised IN canine "
+                                         "hemangiosarcoma and found more prominent there than in "
+                                         "any other canine tumour.",
+    "the_significance": "this is the first agent in the analysis to clear both criteria. Every "
+                        "previous candidate cleared one and failed the other.",
+}
+
+# The limits, stated at the same volume as the claim.
+WHAT_LOSARTAN_DOES_NOT_ESTABLISH = {
+    "no_hemangiosarcoma_trial": "the 50% clinical benefit rate is osteosarcoma. The HSA evidence is "
+                                "target validation, not outcome.",
+    "the_partner_drug_does_not_transfer": "the canine benefit was losartan WITH toceranib, and "
+                                          "toceranib is the agent this analysis already rejected "
+                                          "for hemangiosarcoma on biology. How much of the 50% "
+                                          "belonged to losartan is not separable from that trial.",
+    "a_case_report_shows_the_ceiling": "Kwak et al. 2026 (PMID 41772701) describes pulmonary "
+                                       "metastases resolving on losartan + toceranib + carboplatin, "
+                                       "then progressing once the carboplatin cycles ended despite "
+                                       "continued losartan and toceranib. Consistent with a "
+                                       "microenvironment lever that potentiates rather than "
+                                       "controls -- which is exactly the role proposed here, but it "
+                                       "is a single dog.",
+    "the_number_is_still_unmeasured": "nothing here measures how much monocyte-recruitment blockade "
+                                      "raises VACCINE kill. It moves the 1.5x from resting on one "
+                                      "unmeasured mechanism to resting on two independent ones, "
+                                      "both with canine dosing data. It does not measure it.",
+}
+
+TWO_LEVERS_ON_ONE_COMPARTMENT = {
+    "lever_1_effector": "anti-PD-1 blockade releases the brake the recruited macrophages apply to "
+                        "T cells (Gulay 2022 for the mechanism in HSA; Chon 2026 for the canine "
+                        "agent and schedule)",
+    "lever_2_recruitment": "losartan blocks the CCL2-CCR2 axis that brings those macrophages in "
+                           "(Regan 2017 for the axis in HSA; Regan 2022 for the canine dose)",
+    "why_independence_matters": "they act at different points on the same pathway -- one stops the "
+                                "cells arriving, the other disarms the ones that do. Neither has to "
+                                "deliver the whole 1.5x for the combination to reach it, and a "
+                                "failure of one is not a failure of the plan.",
+    "the_fallback_is_graded_not_binary": "the height grid has no cliff below 1.25x either: at 1.25x "
+                                         "the second drug can still be withdrawn at year five "
+                                         "(0.920) or continued indefinitely (1.000). Partial "
+                                         "delivery buys a partial reduction in drug-years rather "
+                                         "than nothing.",
+    "the_experiment_this_points_at": "vaccine, vaccine + anti-PD-1, vaccine + high-dose losartan, "
+                                     "and all three, in the ISOS-1 syngeneic model, read out as a "
+                                     "growth-rate difference rather than survival. Four arms, one "
+                                     "model, and the number the whole revised plan turns on.",
+}
