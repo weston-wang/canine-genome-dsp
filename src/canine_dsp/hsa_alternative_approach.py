@@ -737,4 +737,11 @@ THREE_ROUTES_TO_THE_REQUIREMENT = {
                          "now rests on three independent ones, two with canine dosing data and one "
                          "requiring no new agent at all. None of them is measured against vaccine "
                          "kill in this tumour, and that remains the experiment to run.",
+    "but_they_are_not_interchangeable": "`hsa_route_effect_sizes` converts each route's published "
+                                        "result into a per-day rate and finds they are worth very "
+                                        "different amounts. Routes 1 and 2 clear the requirement "
+                                        "needing only 23-45% and 7-22% of their measured effect to "
+                                        "survive the species transfer. Route 3 needs 118-235% -- it "
+                                        "cannot carry the plan alone even if its effect transferred "
+                                        "in full. Listing the three as equals overstated the third.",
 }

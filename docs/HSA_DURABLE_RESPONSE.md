@@ -1097,6 +1097,57 @@ recruitment (losartan), re-dose the non-responders (recurrent immunisation). Two
 data; the third needs no new agent. **None of them has been measured against vaccine kill in this
 tumour**, and that remains the experiment to run.
 
+### What the three routes are actually worth
+
+Up to here the three routes were citations, not numbers. Each one's published result converts to a
+per-day rate by the same method already used for the MEK anchor (§3f) — take a measured change in
+burden or time-to-event and back out the rate implied by it. **The target is an increment of
+0.012/day** (0.030 → 0.042).
+
+| route | source | measured result | implied rate |
+|---|---|---|---|
+| **1. release the brake** | Maekawa 2021, PMID 33580183 | anti-PD-L1 in 29 dogs with pulmonary metastatic melanoma: median OS **143 vs 54 days** | 0.027–0.053/day |
+| **2. stop the recruitment** | Regan 2019, PMID 30971441 | losartan cut pulmonary metastatic burden **64%** (CT26, d19) and **90%** (4T1, d14) | 0.054–0.164/day |
+| **3. re-dose non-responders** | Mason 2025, PMID 39955616 | elite survivors DFI >490 d vs short-term 150–235 d | 0.005–0.010/day |
+
+Every one of these is cross-species, cross-tumour, or both, so the absolute rates cannot be carried
+across. What *can* be carried across is the ratio — **what fraction of the measured effect has to
+survive the transfer** for 0.012/day to be met:
+
+| route | transfer needed |
+|---|---|
+| 1. anti-PD-L1 | **23–45%** |
+| 2. losartan | **7–22%** |
+| 3. re-dosing | **118–235%** |
+
+**This separates three things I had been treating as equals.** Routes 1 and 2 clear the requirement
+while losing more than half — in losartan's case nearly nine tenths — of their measured effect.
+Route 3 **cannot meet the requirement alone even if its effect transferred in full**: the gap between
+the two immunological strata is smaller than the increment the plan needs. It is still free to add,
+and on a ramp every increment counts, so it belongs in the regimen. It cannot carry it.
+
+Route 1 is the shortest extrapolation — a canine antibody, in dogs, in metastatic disease. Route 2
+has the largest effect and the widest tolerance for discount, but the longest extrapolation (mouse
+models of two non-canine tumours). Its mechanism is unusually well pinned down: the effect survives
+in AT1R-knockout mice and adds nothing on top of CCR2 knockout, so CCR2 is *necessary* — direct
+cytotoxic and anti-angiogenic explanations were excluded rather than assumed away.
+
+**And routes 1 and 2 are not independent.** In 27 dogs on the same anti-PD-L1 antibody, **lower
+baseline MCP-1 — which is CCL2, the chemokine losartan blocks — predicted prolonged survival**
+(Maekawa 2022, PMID 35665759). In dogs, the CCL2 axis is a measured *resistance mechanism* for
+checkpoint blockade. That is a reason to expect the two to combine rather than merely add — but
+coupling cuts both ways: two levers on one pathway may overlap rather than sum, so the conservative
+reading is that either alone suffices at plausible transfer and the combination buys insurance, not
+arithmetic. (The same paper hands over a fourth lever: PGE2 predicted resistance, and meloxicam plus
+the antibody enhanced Th1 cytokine production. Meloxicam is already given to dogs indefinitely.)
+
+*What this does not establish:* converting a burden reduction into a rate is arithmetic, not evidence
+that the rate carries across species and tumour. No measurement exists of any of these levers acting
+on **vaccine** kill, in hemangiosarcoma, in a dog. The transfer fractions say how wrong the
+extrapolation can afford to be. They do not say it is right.
+
+*Tests: `test_hsa_route_effect_sizes.py`*
+
 ### A third timing constraint
 
 Corticosteroid pre-treatment significantly alters canine PBMC composition — *primarily the monocytic

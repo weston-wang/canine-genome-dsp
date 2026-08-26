@@ -398,3 +398,11 @@ def test_the_minimum_requirement_beats_the_reference_and_the_step_below_does_not
 def test_the_requirement_is_recorded_as_smaller_than_the_round_number_first_quoted():
     assert "overstated the" in alt.MINIMUM_REQUIREMENT["the_ask_is_smaller_than_1_5x"]
     assert alt.MINIMUM_REQUIREMENT["for_a_one_year_induction"]["height_multiple"] < 1.5
+
+
+def test_the_three_routes_are_flagged_as_unequal_where_they_are_first_listed():
+    """The effect-size work found route 3 cannot carry the plan; the listing must not imply it can."""
+    entry = alt.THREE_ROUTES_TO_THE_REQUIREMENT
+    note = entry["but_they_are_not_interchangeable"]
+    assert "cannot carry the plan alone" in note
+    assert "overstated the third" in note
