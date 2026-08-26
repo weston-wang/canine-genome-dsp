@@ -348,3 +348,53 @@ def test_the_requirement_now_rests_on_three_independent_routes():
     assert "platforms" in entry["what_is_ruled_out"]
     assert "None of them is measured" in entry["why_three_matters"], (
         "the module must not let three mechanisms read as a measurement")
+
+
+# ---------------------------------------------------------------------------------------------
+# The fine grid, which corrects the coarse grid's reading.
+
+def test_the_fine_grid_is_monotone_in_height():
+    heights = sorted({h for h, _ in alt.FINE_GRID_ACROSS_THE_RISE})
+    for stop in (1, 2):
+        column = [alt.FINE_GRID_ACROSS_THE_RISE[(h, stop)] for h in heights]
+        assert column == sorted(column), f"non-monotone at stop={stop}: {column}"
+
+
+def test_the_fine_grid_agrees_with_the_coarse_grid_where_they_overlap():
+    for height in (0.0375, 0.0450):
+        for stop in (1, 2):
+            assert alt.FINE_GRID_ACROSS_THE_RISE[(height, stop)] == pytest.approx(
+                alt.VACCINE_HEIGHT_VS_DRUG_STOP[(height, stop)])
+
+
+def test_the_rise_is_continuous_with_no_single_dominating_jump():
+    """A cliff would show one step carrying most of the rise. A ramp does not."""
+    heights = sorted({h for h, _ in alt.FINE_GRID_ACROSS_THE_RISE})
+    column = [alt.FINE_GRID_ACROSS_THE_RISE[(h, 1)] for h in heights]
+    steps = [b - a for a, b in zip(column, column[1:])]
+    total = column[-1] - column[0]
+    assert max(steps) < 0.5 * total, f"one step carries most of the rise: {steps}"
+    assert all(step >= 0 for step in steps)
+    assert "no discontinuity" in alt.IT_IS_A_RAMP_NOT_A_CLIFF["the_correction"]
+
+
+def test_partial_delivery_is_proportionally_useful():
+    assert "proportionally" in alt.IT_IS_A_RAMP_NOT_A_CLIFF["why_this_is_better_news"]
+
+
+def test_the_minimum_requirement_beats_the_reference_and_the_step_below_does_not():
+    """The requirement is the smallest ask that does not lose ground, not a round number."""
+    reference = alt.MINIMUM_REQUIREMENT["the_reference"]
+    assert reference == pytest.approx(alt.CONTINUOUS_FULL_DOSE)
+    for key in ("for_a_two_year_induction", "for_a_one_year_induction"):
+        entry = alt.MINIMUM_REQUIREMENT[key]
+        assert entry["durability"] > reference, key
+        assert entry["height"] == pytest.approx(entry["height_multiple"] * alt.MEASURED_VACCINE_HEIGHT)
+    # And each is genuinely minimal: one step down falls short of the reference.
+    assert alt.FINE_GRID_ACROSS_THE_RISE[(0.0405, 2)] < reference
+    assert alt.FINE_GRID_ACROSS_THE_RISE[(0.0420, 1)] < reference
+
+
+def test_the_requirement_is_recorded_as_smaller_than_the_round_number_first_quoted():
+    assert "overstated the" in alt.MINIMUM_REQUIREMENT["the_ask_is_smaller_than_1_5x"]
+    assert alt.MINIMUM_REQUIREMENT["for_a_one_year_induction"]["height_multiple"] < 1.5

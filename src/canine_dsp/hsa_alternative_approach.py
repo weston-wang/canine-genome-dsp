@@ -282,10 +282,55 @@ THE_EXCHANGE_RATE = {
                                       "vaccine finishes what a decade of drug plus the measured "
                                       "vaccine could not.",
     "why_the_curve_is_so_steep": "between 0.0375 and 0.045 the year-one stop moves 0.652 -> 0.992. "
-                                 "That is a threshold, not a slope, and it sits inside the range a "
-                                 "1.25-1.5x improvement covers. The practical consequence is that "
-                                 "a modest gain in vaccine potency is worth far more than any "
-                                 "further work on the drug schedule.",
+                                 "That whole rise sits inside the range a 1.25-1.5x improvement "
+                                 "covers, which is why a modest gain in vaccine potency is worth "
+                                 "far more than any further work on the drug schedule. See "
+                                 "FINE_GRID_ACROSS_THE_RISE for its actual shape.",
+}
+
+# The coarse grid's 0.652 -> 0.992 jump was read as a threshold. On a fine grid it is not one.
+# Same engine, same seed, same 250 trials; only the height changes.
+FINE_GRID_ACROSS_THE_RISE = {
+    (0.0375, 1): 0.652, (0.0375, 2): 0.696,
+    (0.0390, 1): 0.684, (0.0390, 2): 0.736,
+    (0.0405, 1): 0.732, (0.0405, 2): 0.864,
+    (0.0420, 1): 0.872, (0.0420, 2): 0.960,
+    (0.0435, 1): 0.968, (0.0435, 2): 0.992,
+    (0.0450, 1): 0.992, (0.0450, 2): 1.000,
+}
+
+IT_IS_A_RAMP_NOT_A_CLIFF = {
+    "the_correction": "resolved at 0.05x intervals the rise is steep but continuous -- 0.652, 0.684, "
+                      "0.732, 0.872, 0.968, 0.992 at a one-year stop. There is no discontinuity and "
+                      "no all-or-nothing point.",
+    "why_this_is_better_news": "a threshold would mean falling short of the target buys nothing. A "
+                               "ramp means every increment of vaccine potency is worth something, "
+                               "so partial delivery from any of the three routes is proportionally "
+                               "useful rather than wasted.",
+    "the_steepest_stretch": "1.35x -> 1.45x, where the one-year stop moves 0.732 -> 0.968. That is "
+                            "where the return on further potency is highest.",
+}
+
+# The requirement, stated as the smallest ask that does not lose ground rather than as a round
+# number. The reference to beat is 0.888: the measured vaccine with the drug given forever.
+MINIMUM_REQUIREMENT = {
+    "the_reference": CONTINUOUS_FULL_DOSE,
+    "for_a_two_year_induction": {
+        "height_multiple": 1.40, "height": 0.0420, "durability": 0.960,
+        "just_below": "1.35x gives 0.864, which is short of 0.888",
+    },
+    "for_a_one_year_induction": {
+        "height_multiple": 1.45, "height": 0.0435, "durability": 0.968,
+        "just_below": "1.40x gives 0.872, which is short of 0.888",
+    },
+    "the_ask_is_smaller_than_1_5x": "the round number quoted from the coarse grid overstated the "
+                "requirement. About 1.4x buys a two-year induction and about 1.45x buys a one-year "
+                "induction, both while IMPROVING on the reference rather than trading against it.",
+    "the_exchange_is_smooth": "potency and induction length trade against each other continuously. "
+                              "A shortfall in vaccine height can be paid for with a longer "
+                              "induction, and vice versa -- there is no point at which the plan "
+                              "stops working, only a point at which it stops being better than "
+                              "dosing the drug forever.",
 }
 
 # An honest note on the mechanism behind the 1.000s, because a perfect number invites suspicion.

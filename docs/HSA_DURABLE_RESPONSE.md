@@ -924,9 +924,36 @@ Two details make this more than arithmetic:
 - **The threshold sits below the bar.** 0.045 < 0.0515. The vaccine never has to hold the tumour
   alone. It only has to be tall enough that one year of drug plus a taller vaccine finishes what a
   decade of drug plus the measured vaccine could not.
-- **The curve is a cliff, not a slope.** Between 0.0375 and 0.045 the year-one stop moves from 0.652
-  to 0.992 — and that cliff sits inside the range a 1.25–1.5× improvement covers. A modest gain in
-  vaccine potency is worth far more than any further work on the drug schedule.
+- **The whole rise sits inside a 1.25–1.5× improvement.** Between 0.0375 and 0.045 the year-one stop
+  moves from 0.652 to 0.992. A modest gain in vaccine potency is worth far more than any further work
+  on the drug schedule.
+
+### How much is actually needed — resolved
+
+The coarse grid's jump looked like a threshold. At 0.05× intervals it is a **steep but continuous
+ramp**:
+
+| vaccine kill/day | multiple | stop y1 | stop y2 |
+|---|---|---|---|
+| 0.0375 | 1.25× | 0.652 | 0.696 |
+| 0.0390 | 1.30× | 0.684 | 0.736 |
+| 0.0405 | 1.35× | 0.732 | 0.864 |
+| **0.0420** | **1.40×** | 0.872 | **0.960** |
+| **0.0435** | **1.45×** | **0.968** | 0.992 |
+| 0.0450 | 1.50× | 0.992 | 1.000 |
+
+Two things follow, and both are better news than a cliff.
+
+**The requirement is smaller than 1.5×.** Against the reference to beat — 0.888, the measured vaccine
+with the drug given forever — about **1.40× buys a two-year induction** (0.960) and about **1.45×
+buys a one-year induction** (0.968). Each is minimal: the step below falls short (1.35×/y2 = 0.864;
+1.40×/y1 = 0.872). The round 1.5× quoted from the coarse grid overstated the ask.
+
+**Partial delivery is proportionally useful.** A threshold would mean falling short buys nothing. A
+ramp means every increment counts, so a partial contribution from any of the three routes is worth
+having. Potency and induction length trade smoothly against each other: a shortfall in vaccine height
+can be paid for with a longer induction. There is no point at which the plan stops working — only a
+point at which it stops being better than dosing the drug forever.
 
 *Why the 1.000s aren't a trick:* the vaccine doesn't touch the antigen-loss clone at all. But escape
 seeding is proportional to the **antigen-positive** burden, since that is the population the escape
