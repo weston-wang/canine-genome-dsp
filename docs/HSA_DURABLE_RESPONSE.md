@@ -718,6 +718,117 @@ osteosarcoma. Species and route are answered; the disease is not.
 
 *Tests: `test_hsa_immune_timing.py`*
 
+
+---
+
+## 3f. How thin is the margin, really?
+
+The exposure margin was reported as "1.48×, clears." That used point estimates. Carried through the
+reported **11 ± 6 nM**:
+
+| | margin |
+|---|---|
+| at IC50 − 1 SD (5 nM) | 3.25× |
+| at the point estimate (11 nM) | 1.48× |
+| **at IC50 + 1 SD (17 nM)** | **0.96×** |
+
+Only ~70% of dogs reach even the point-estimate exposure. "Clears with 1.5× to spare" overstated
+what the data support.
+
+### But reading 0.96× as "fails" is also wrong
+
+Effect is an Emax curve, not a switch. Sitting *at* the IC50 gives half-maximal effect, not none.
+Run through the engine rather than argued from the ratio:
+
+| combination IC50 | 10-yr durable |
+|---|---|
+| 5 nM (−1 SD) | 0.996 |
+| 11 nM (point) | 0.888 |
+| **17 nM (+1 SD)** | **0.748** |
+| 34 nM (2× worst) | 0.528 |
+
+Across the full reported uncertainty durability spans **0.748–0.996**, and even at twice the
+worst-case IC50 it is 0.528 — still above the 0.500 the correction alone gives. **The plan degrades
+gracefully rather than failing at a threshold.**
+
+### The steep axis is the kill rate, not the IC50
+
+| MEK kill/day | 10-yr durable |
+|---|---|
+| 0 | 0.500 |
+| 0.011 | 0.576 |
+| **0.0225** *(required)* | **0.888** |
+| 0.034 | 0.996 |
+
+Halving the kill rate loses most of the benefit. Durability is more sensitive to *how well the second
+drug works* than to *how precisely we know its IC50* — which is why the in vivo derivation below
+matters more than the concentration ratio.
+
+### The weakest joint, replaced with a measurement
+
+The 0.0225/day requirement was defended by analogy to ranges the model already grants other clones.
+It doesn't have to be. Andersen's canine angiosarcoma tumorgrafts started at **50–100 mm³**, vehicle
+reached **1000 mm³ by day 21**, and the combination held it flat. That implies **0.110–0.143/day of
+net growth removed** — a **4.9–6.3× margin** over what the model needs, from a growth curve in the
+right species and tumour.
+
+*Limits kept visible:* that is the combination's *total* effect, so attributing all of it to the
+second drug double-counts what the model already gives the first; and a subcutaneous mouse tumorgraft
+grows far faster than residual disease in a dog. What transfers is that the requirement sits well
+inside the measured envelope rather than at its edge.
+
+### Protein binding hits one anchor, not the other
+
+The objection is real: 16.25 nM is *total* plasma trametinib, and the drug is extensively bound.
+
+- **The in vitro anchor is vulnerable.** Andersen's IC50 was measured in DMEM with 10% FBS — roughly
+  a tenth of plasma protein — so the equivalent total *plasma* concentration is **higher**, not
+  lower. The correction runs against the plan and nobody has quantified it.
+- **The clinical anchor is not.** 10 ng/mL is the concentration Takada et al. associate with
+  *clinical efficacy in humans* — derived from outcomes in real plasma. Protein binding is already
+  inside that number; correcting it would double-count.
+
+Resting the case on the clinical anchor removes the objection entirely, at the cost of the
+canine-tumour specificity the in vitro number provided. That is the right trade.
+
+### The second drug cannot be stopped
+
+The obvious answer to chronic toxicity — dose for a few years, then stop once the resistant clones
+should be gone — does not work:
+
+| stop the second drug at | 10-yr durable |
+|---|---|
+| 1 year | 0.464 |
+| 2 years | 0.460 |
+| 3 years | 0.488 |
+| 5 years | 0.576 |
+| **never** | **0.888** |
+
+Stopping at one, two or three years lands **below the 0.500 the correction alone delivers**. The
+clones are suppressed, not eliminated, and they resume. This closes the escape hatch and makes
+cumulative toxicity over a decade the sharpest remaining objection.
+
+### Which makes the published schedule load-bearing
+
+Wei et al. 2020 (PMID 32943547) found *"a staggered sapanisertib dose, coupled with daily
+trametinib, was optimal … **while minimizing hematologic and renal side effects**."* Those are
+exactly trametinib's canine dose-limiting toxicities — hypertension, proteinuria, elevated ALP. The
+regimen should specify staggered sapanisertib with daily trametinib rather than both daily.
+
+*One correction to the record:* the claim that the combination reduces sapanisertib exposure is the
+**canine** finding (Wei 2022). In **mice**, the same group found sapanisertib PK unchanged and
+**trametinib AUC increased**. The trametinib direction cushions the thin side of the margin, since
+16.25 nM came from monotherapy dosing.
+
+### Where this leaves the defence
+
+| | |
+|---|---|
+| **stronger** | kill requirement from a measured growth curve; protein-binding objection answered by demoting the vulnerable anchor; IC50 uncertainty costs 0.888 → 0.748, not collapse |
+| **still weak** | second drug cannot be stopped, so a decade of cumulative toxicity; in dogs the pairing weakens the sapanisertib arm the mechanism depends on; tolerability is 17 days in *healthy* beagles; no data for the full stack |
+
+*Tests: `test_hsa_margin_analysis.py`*
+
 ---
 
 ## 4. Escape routes

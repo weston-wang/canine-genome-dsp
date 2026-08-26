@@ -3,7 +3,9 @@ import pytest
 
 from canine_dsp.hsa_margin_analysis import (
     COMBINATION_IC50_SD_nM, COMBINATION_IC50_nM, IN_VIVO_DERIVED_EFFECT_SIZE,
+    DURABILITY_ACROSS_THE_IC50_UNCERTAINTY, DURABILITY_ACROSS_THE_KILL_RATE,
     MARGIN_ACROSS_THE_REPORTED_UNCERTAINTY, STAGGERED_DOSING_IS_THE_PUBLISHED_OPTIMUM,
+    STOPPING_THE_SECOND_DRUG,
     THE_INTERACTION_EVIDENCE_IS_SPLIT, THE_TWO_ANCHORS_ARE_NOT_EQUALLY_VULNERABLE,
     TRAMETINIB_ACHIEVED_nM, VERDICT, implied_exponential_rate, margin,
 )
@@ -85,3 +87,43 @@ def test_the_verdict_separates_what_improved_from_what_is_still_weak():
     assert len(VERDICT["what_remains_genuinely_weak"]) >= 4
     assert any("sapanisertib exposure" in w for w in VERDICT["what_remains_genuinely_weak"])
     assert "includes failure" in VERDICT["the_honest_summary"]
+
+
+# ---------- what the uncertainty actually costs, run through the engine ----------
+
+def test_a_margin_below_one_degrades_rather_than_collapsing():
+    """Reading 0.96x as 'fails' is too binary: effect is an Emax curve, not a switch."""
+    d = DURABILITY_ACROSS_THE_IC50_UNCERTAINTY
+    assert d[5.0] > d[11.0] > d[17.0] > d[34.0], "monotone in the IC50"
+    assert d[17.0] > 0.70, "the case the bare margin calls a failure is still 0.748"
+    assert d[34.0] > 0.50, "even twice the worst case beats the correction alone"
+    assert "degrades gracefully" in d["reading"]
+    assert "too binary" in MARGIN_ACROSS_THE_REPORTED_UNCERTAINTY[
+        "and_a_margin_below_one_is_not_a_cliff"]
+
+
+def test_the_kill_rate_is_the_steep_axis_not_the_ic50():
+    k = DURABILITY_ACROSS_THE_KILL_RATE
+    ic = DURABILITY_ACROSS_THE_IC50_UNCERTAINTY
+    halved = k[0.011]
+    assert halved < 0.65, "halving the kill rate loses most of the benefit"
+    kill_swing = k[0.0225] - k[0.011]
+    ic50_swing = ic[11.0] - ic[17.0]
+    assert kill_swing > ic50_swing, "durability is more sensitive to kill rate than to the IC50"
+
+
+def test_the_second_drug_cannot_be_stopped():
+    """The obvious answer to chronic toxicity does not work."""
+    s = STOPPING_THE_SECOND_DRUG
+    for years in (1, 2, 3):
+        assert s[years] < 0.50, f"stopping at {years} yr lands below the correction alone"
+    assert s[5] < 0.65
+    assert s[None] > 0.85
+    assert "no escape hatch" in s["reading"]
+    assert "load-bearing" in s["why_it_matters"], "the staggered schedule becomes essential"
+
+
+def test_the_verdict_records_that_stopping_is_not_an_option():
+    weak = VERDICT["what_remains_genuinely_weak"]
+    assert any("CANNOT be stopped" in w for w in weak)
+    assert any("0.748 rather than collapse" in w for w in weak)

@@ -38,6 +38,48 @@ MARGIN_ACROSS_THE_REPORTED_UNCERTAINTY = {
     "what_this_is_not": "this does not say the combination fails. It says a single-number margin was "
                         "the wrong way to report it, and 'clears with 1.5x to spare' overstated what "
                         "the data support.",
+    "and_a_margin_below_one_is_not_a_cliff": "reading 0.96x as 'fails' is itself too binary. Effect "
+                                             "is an Emax curve, not a switch: sitting AT the IC50 "
+                                             "gives half-maximal effect rather than none. Run "
+                                             "through the engine, the +1 SD case gives 0.748 "
+                                             "durability -- worse than 0.888, not collapse. See "
+                                             "DURABILITY_ACROSS_THE_IC50_UNCERTAINTY.",
+}
+
+# What the IC50 uncertainty actually costs, run through the engine rather than argued from the
+# ratio. This is the number that matters, and it is far less brittle than the bare margin suggests.
+DURABILITY_ACROSS_THE_IC50_UNCERTAINTY = {
+    5.0:  0.996,   # IC50 - 1 SD
+    11.0: 0.888,   # point estimate
+    17.0: 0.748,   # IC50 + 1 SD -- the case where the bare margin reads "fails"
+    34.0: 0.528,   # twice the worst case
+    "reading": "across the full reported uncertainty durability spans 0.748-0.996. Even at twice "
+               "the worst-case IC50 it is 0.528, still above the 0.500 the correction alone gives. "
+               "The plan degrades gracefully rather than failing at a threshold.",
+}
+
+# Sensitivity to the swept kill rate itself. Steeper, and the real fragility.
+DURABILITY_ACROSS_THE_KILL_RATE = {
+    0.0: 0.500, 0.011: 0.576, 0.0225: 0.888, 0.034: 0.996, 0.045: 1.000,
+    "reading": "this is the steep axis. Halving the kill rate to 0.011/day loses most of the "
+               "benefit (0.576). The plan needs the second drug to be roughly as effective as "
+               "required, not merely present -- which is why the in vivo growth-curve derivation "
+               "matters more than the IC50 ratio.",
+}
+
+# Can the second drug be stopped once the resistant clones should be gone? No.
+STOPPING_THE_SECOND_DRUG = {
+    1: 0.464, 2: 0.460, 3: 0.488, 5: 0.576, None: 0.888,
+    "reading": "there is no escape hatch. Stopping at one, two or three years lands BELOW the 0.500 "
+               "that the cross-resistance correction alone delivers -- the clones are suppressed, "
+               "not eliminated, and they resume when the drug stops. Five years still only reaches "
+               "0.576.",
+    "why_it_matters": "this closes off the obvious answer to the chronic-toxicity objection. The "
+                      "second drug has to run for the full ten years, exactly like the boosters, "
+                      "which makes cumulative renal and marrow toxicity the sharpest remaining "
+                      "weakness rather than a manageable one -- and makes the staggered schedule "
+                      "(STAGGERED_DOSING_IS_THE_PUBLISHED_OPTIMUM) load-bearing rather than a "
+                      "refinement.",
 }
 
 # ---------------------------------------------------------------------------------------------
@@ -168,7 +210,10 @@ VERDICT = {
         "staggered dosing is the published optimum and minimises the exact toxicities at issue",
     ),
     "what_remains_genuinely_weak": (
-        "the margin is still inside measurement noise on the pessimistic side",
+        "the margin is still inside measurement noise on the pessimistic side, though the engine "
+        "shows that costs 0.888 -> 0.748 rather than collapse",
+        "the second drug CANNOT be stopped -- 1, 2 and 3 year stops all land below 0.500 -- so "
+        "cumulative toxicity over a decade is the sharpest remaining objection",
         "in dogs specifically, the combination REDUCES sapanisertib exposure -- weakening the arm "
         "the mechanism argument depends on",
         "tolerability data are 17 days in healthy laboratory beagles, against a regimen intended to "
