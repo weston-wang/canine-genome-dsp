@@ -831,6 +831,162 @@ regimen should specify staggered sapanisertib with daily trametinib rather than 
 
 ---
 
+## 3g. Given the toxicity, is a different approach needed?
+
+Yes — but not a different drug. A different place to put the persistent work.
+
+### First: can the same drug simply be given less?
+
+Three ways of cutting cumulative exposure, all run through the same engine, same seed, same 250
+trials. Continuous full dose is **0.888**.
+
+| approach | cumulative dose | 10-yr durable |
+|---|---|---|
+| duty cycling, 3 periods × 75% on | 75% | 0.740–0.760 |
+| duty cycling, 3 periods × 50% on | 50% | 0.576 |
+| continuous at 75% of dose | 75% | **0.784** |
+| continuous at 50% of dose | 50% | **0.668** |
+| full dose 2 yr, then half | 60% | 0.696 |
+| full dose 2 yr, then stop | 20% | 0.460 |
+
+**Nothing rescues it.** Durability tracks cumulative exposure, and every schedule that gives less
+gives less protection.
+
+One result is worth keeping. At matched cumulative dose, **giving less drug continuously beats
+giving full doses intermittently** — 0.784 vs 0.740–0.760 at three-quarter dose, 0.668 vs 0.576 at
+half. The period doesn't matter; only the fraction of time the drug is *absent* does. This is the
+opposite of the usual clinical instinct, which is drug holidays. It is also not the adaptive-therapy
+result: the engine has competition between clones built in, and the resistant ones still regrow
+during the gaps faster than competition suppresses them.
+
+### Second: what does the pair actually fail?
+
+Not potency. It cleared the exposure criterion — that is why it replaced propranolol. It fails a
+second criterion that was never written down, because nothing before it needed a time axis:
+
+> **The duration criterion.** An agent meant to be given continuously over a horizon qualifies only
+> if its tolerability has been demonstrated over a comparable horizon.
+
+| | |
+|---|---|
+| documented tolerability | **17 days**, in healthy laboratory beagles |
+| required | **3650 days**, in tumour-bearing dogs |
+| shortfall | **215×** |
+
+Propranolol was thrown out of this analysis for being ~200× short on *exposure*. This pair is ~200×
+short on *duration*. Applying the first standard and not the second would be special pleading.
+
+This does not say the pair is unsafe over ten years. It says it is **unknown** over ten years — and
+the toxicities actually recorded were proteinuria, reduced reticulocytes and acute-phase
+inflammation, which are renal and marrow signals. Those are exactly the organs where seventeen days
+of "mild change" carries no information about a decade.
+
+### Third: no available agent clears both criteria
+
+The natural fix is to swap in a better-tolerated drug. Three candidates have genuine chronic-dosing
+records in dogs, and each fails differently:
+
+| candidate | duration | why it still fails |
+|---|---|---|
+| metronomic chemotherapy | passes | **negative in this disease** — 65 vs 255 days against anthracycline in dogs with hepatic metastases (Valenti 2026, n=66, P=0.02) |
+| a rapalog alone | passes | targets mTORC1; canine HSA runs on mTORC2, and the measured cross-resistance is reciprocal, not additive |
+| toceranib | passes | already screened — clears exposure, fails on biology |
+
+Everything with a decade-scale safety record fails on effect in this tumour, and the one thing with
+measured effect in canine angiosarcoma has seventeen days of safety data. **The two criteria are in
+tension and nothing available clears both.**
+
+### So the persistent work moves off the drug
+
+The vaccine is already given on a schedule tolerable for a decade — boosters every sixty days. The
+question the model can answer is how much taller it has to be before the drug becomes stoppable.
+
+**Ten-year durability, by vaccine height and when the second drug is withdrawn:**
+
+| vaccine kill/day | stop y1 | stop y2 | stop y3 | stop y5 | never stop |
+|---|---|---|---|---|---|
+| **0.030** *(measured)* | 0.464 | 0.460 | 0.488 | 0.576 | 0.888 |
+| 0.0375 *(1.25×)* | 0.652 | 0.696 | 0.740 | 0.920 | 1.000 |
+| **0.045** *(1.5×)* | **0.992** | **1.000** | 1.000 | 1.000 | 1.000 |
+| 0.0515 *(= the bar)* | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 |
+
+| drug exposure | | |
+|---|---|---|
+| stop at year 1 | 365 drug-days | 10% of the decade |
+| never stop | 3650 drug-days | 100% |
+
+**A vaccine half again as tall turns the second drug from a life sentence into a one-year
+induction** — 90% less drug exposure, and durability *rises* from 0.888 to 0.992. Both axes improve;
+it is not a trade at all.
+
+Two details make this more than arithmetic:
+
+- **The threshold sits below the bar.** 0.045 < 0.0515. The vaccine never has to hold the tumour
+  alone. It only has to be tall enough that one year of drug plus a taller vaccine finishes what a
+  decade of drug plus the measured vaccine could not.
+- **The curve is a cliff, not a slope.** Between 0.0375 and 0.045 the year-one stop moves from 0.652
+  to 0.992 — and that cliff sits inside the range a 1.25–1.5× improvement covers. A modest gain in
+  vaccine potency is worth far more than any further work on the drug schedule.
+
+*Why the 1.000s aren't a trick:* the vaccine doesn't touch the antigen-loss clone at all. But escape
+seeding is proportional to the **antigen-positive** burden, since that is the population the escape
+variant arises from. A taller vaccine crushes that population faster, so there is less of it to throw
+off a variant. The suppression is indirect and real. (1.000 over 250 trials bounds escape below
+roughly 1%; it does not mean impossible.)
+
+### Is a 1.5× taller vaccine a real target?
+
+The vaccine's ceiling was treated as a fixed property of the product. In this disease a substantial
+part of it is a property of the **microenvironment** — which is a different problem, with an existing
+intervention.
+
+- **The suppression is measured, in this tumour.** Canine HSA is full of CD204⁺ M2 macrophages
+  expressing PD-L1, and *"canine HSA with macrophages expressing PD-L1 had a smaller number of
+  T-cells in tumour tissues than tumours with PD-L1 negative macrophages."* Tumour-conditioned medium
+  induces that polarisation in naive macrophages — the tumour creates the suppression. (Gulay 2022,
+  PMID 35136176)
+- **The intervention exists, in dogs.** Gilvetmab, a caninized anti-PD-1, in 51 client-owned dogs:
+  6 mg/kg q28d or 10 mg/kg q14d, ORR 20% melanoma / 46% mast cell tumour, serious adverse events in
+  5.9%. (Chon 2026, PMID 42247661)
+- **The schedule doesn't reintroduce the problem.** A q14–28d antibody is in the same tolerability
+  class as a q60d booster, not the same class as daily dual kinase inhibition.
+- **A testbed now exists.** ISOS-1 is a syngeneic model matching canine HSA — every immune question
+  here was previously stuck with xenografts, which have no host immune system to suppress.
+
+### What it costs
+
+| | |
+|---|---|
+| **removed** | ~3285 of 3650 drug-days, and with them a decade of renal and marrow toxicity that had no supporting data past day 17 |
+| **added** | a checkpoint antibody with a 5.9% serious-adverse-event rate — one instance of which was **tumour haemorrhage** |
+| **added uncertainty** | nobody has measured what checkpoint blockade adds to vaccine height. The 1.5× is a requirement derived from the model, not an effect size taken from data |
+
+The haemorrhage signal deserves to be named rather than reasoned away. Splenic rupture is the
+competing hazard that dominates early mortality here, and the tumour is made of endothelium. It is
+mitigated — the checkpoint component is proposed post-splenectomy, and the published event was in
+dogs with tumours in place — but it is **open**, with no hemangiosarcoma data.
+
+**The honest comparison:** the previous plan needed an unmeasured decade of safety. This one needs an
+unmeasured 1.5× of potency. The second is the better bet, because it can be measured in months, in a
+model that exists, before any dog is committed to it — and because falling short degrades back to the
+previous plan rather than to nothing.
+
+### A third timing constraint
+
+Corticosteroid pre-treatment significantly alters canine PBMC composition — *primarily the monocytic
+compartment* — and blunts the interferon-γ response to both anti-PD-L1 and anti-PD-1 blockade
+(Zimmermann 2025, PMID 40342421). Steroids are routine around splenectomy and haemoabdomen, and the
+compartment they suppress is exactly where HSA's PD-L1 suppression lives.
+
+That makes three independent findings pointing the same way: surgery and chemotherapy suppress
+effector function (§3e), dosing immune agents inside that window went backwards twice (§3e), and now
+steroids blunt the specific axis this swap depends on. **The immune components belong after the
+surgical and chemotherapy backbone, gated on recovered effector function — not inside it.**
+
+*Tests: `test_hsa_alternative_approach.py`*
+
+---
+
 ## 4. Escape routes
 
 | # | Route | Status |
@@ -1015,33 +1171,53 @@ falls back to roughly the no-vaccine outcome by ten years.
 
 **No single fix closes the gap** (§3b): lowering the bar with a second kill term is unanchored,
 two vaccines fail under antigenic competition, and booster tolerance was never a route to closing it.
+Growth suppression by β-blockade was tried and abandoned — achievable propranolol exposure is ~200×
+short of what the required suppression needs (§3b).
 
-**A stack of three does.** Correcting a cross-resistance inconsistency in the model — the two
-high-resistance clones are rapalog mechanisms while the potency anchor is an ATP-competitive dual
-PI3K/mTOR inhibitor — takes the bar from 0.0515 to 0.0385 and costs nothing, because it is a
-modelling fix rather than an added therapy. Adding a ~16–20% reduction in tumour growth rate via
-β-adrenergic blockade takes it under 0.03, where the vaccine real trials already deliver reaches
-**1.000 at ten years**, insensitive to `preexisting_prob`. No component works alone; the correction
-is what makes the therapeutic ask small, cutting the required growth reduction from 41.4% to 16.3%.
+**A parallel-pathway combination does close it** (§3c). A MEK inhibitor added to the dual TORC1/2
+agent is the first candidate to clear the exposure criterion: at the tolerated canine dose
+trametinib reaches ~16 nM against an ~11 nM combination requirement, where MEK inhibition alone
+would need ~150 nM. Combined with the cross-resistance correction and the vaccine, ten-year
+durability reaches **0.888** — and all three components are load-bearing (0.312 for the drug alone,
+0.560 without the correction).
 
-**What is not established** is the growth reduction itself. β-blockade has the target, a 100%
-response rate in human angiosarcoma with vinblastine, and a positive canine series with the same
-partner — but the largest canine trial paired it with doxorubicin and was negative, and no study
-reports a growth-rate reduction in canine HSA. The next experiment is propranolol + vinblastine
-metronomic with a progression-free readout.
+**That answer degrades gracefully rather than collapsing** (§3f). Across the full reported IC50
+uncertainty durability spans 0.748–0.996, and the kill requirement of 0.0225/day sits 4.9–6.3× inside
+what a canine angiosarcoma tumorgraft growth curve actually measured.
+
+**Its real weakness is time, not potency** (§3g). The second drug cannot be stopped — withdrawing it
+at one, two or three years lands *below* what the correction alone delivers. That makes a decade of
+continuous dual kinase inhibition mandatory, against 17 days of tolerability data in healthy beagles:
+a 215× shortfall on duration, the same magnitude and the same shape as the exposure shortfall that
+disqualified propranolol. No schedule rescues it, and no available agent clears both criteria.
+
+**So the persistent work moves off the drug and onto the vaccine.** A vaccine 1.5× taller than what
+real trials deliver (0.030 → 0.045/day) turns the second drug into a **one-year induction**: 90% less
+drug exposure, and durability *rises* to 0.992. The threshold sits below the bar, so the vaccine
+never has to hold the tumour alone — and in this disease a substantial part of the vaccine's ceiling
+is microenvironmental, from PD-L1⁺ M2 macrophages that measurably exclude T cells, with a caninized
+anti-PD-1 already dosed in 51 dogs on a booster-like schedule.
+
+**What is not established** is that 1.5×. Nobody has measured what checkpoint blockade adds to
+vaccine height in this tumour. That is the single number the plan now stands or falls on — and unlike
+a decade of safety data, it can be measured in months in a syngeneic model that now exists.
 
 ### What would change the answer
 
-1. **Measure a vaccine's kill rate directly** instead of inferring it from survival. Serial imaging or
+1. **Measure what checkpoint blockade adds to vaccine height** — the number the plan now turns on
+   (§3g). Vaccine ± anti-PD-1 in the ISOS-1 syngeneic model, read out as a growth-rate difference.
+   Anything at or above 1.5× converts a decade of dual kinase inhibition into a one-year induction;
+   anything below it falls back to the continuous-dosing plan rather than to nothing.
+2. **Measure a vaccine's kill rate directly** instead of inferring it from survival. Serial imaging or
    ctDNA on a vaccinated cohort gives the progression-free readout the engine consumes natively, and
    removes the endpoint mismatch that makes the 1.7× shortfall a floor rather than a number.
-2. **Measure the immunity half-life.** The booster interval follows from it, and §3 shows the answer
+3. **Measure the immunity half-life.** The booster interval follows from it, and §3 shows the answer
    flips between 0.268 and 1.000 depending on whether it is 90 days or 365.
-3. **Re-run every HSA time-course at real rapamycin exposure.** The bar barely moves, so the
+4. **Re-run every HSA time-course at real rapamycin exposure.** The bar barely moves, so the
    conclusions should survive — but "should survive" is a prediction, and the HS pipeline's equivalent
    prediction was wrong.
-4. **Model the right escape route for the right vaccine** — surface-vimentin loss for eVim, not MHC-I
+5. **Model the right escape route for the right vaccine** — surface-vimentin loss for eVim, not MHC-I
    loss, and with a fitness cost of its own.
-5. **Adopt the two-compartment model** the engine already provides.
-6. **Add a rupture hazard** once any real rate exists. Until then these are figures for cancer
+6. **Adopt the two-compartment model** the engine already provides.
+7. **Add a rupture hazard** once any real rate exists. Until then these are figures for cancer
    regrowth, not for dogs dying of hemangiosarcoma.
