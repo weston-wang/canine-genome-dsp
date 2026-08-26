@@ -607,3 +607,89 @@ TWO_LEVERS_ON_ONE_COMPARTMENT = {
                                      "growth-rate difference rather than survival. Four arms, one "
                                      "model, and the number the whole revised plan turns on.",
 }
+
+
+# =============================================================================================
+# A THIRD ROUTE TO THE SAME NUMBER -- AND A QUALIFICATION TO ONE OF THIS ANALYSIS'S OWN CLAIMS.
+#
+# The naive way to get 1.5x is to pick a better vaccine platform. Checking whether any canine
+# platform delivers materially more than the HSA vaccines did found the opposite -- and, in the
+# same trial, something that cuts against a claim this analysis has leaned on throughout.
+# =============================================================================================
+
+PICKING_A_BETTER_PLATFORM_DOES_NOT_WORK = {
+    "the_candidate": "ADXS31-164, a recombinant Listeria expressing chimeric HER2, the canine "
+                     "cancer vaccine with the most striking reported effect of any platform",
+    "the_phase_1_signal": "Mason et al. 2016, Clin Cancer Res 22(17):4380-4390, PMID 26994144 -- a "
+                          "small phase I in canine appendicular osteosarcoma reporting a large "
+                          "survival advantage",
+    "the_confirmatory_trial": "Mason et al. 2025, Mol Ther 33(4):1674-1686, PMID 39955616 -- 118 "
+                              "dogs, one-arm multicentre, standard of care followed by the vaccine",
+    "the_result": "'Significant differences in median disease-free interval (DFI) or median overall "
+                  "survival only were not observed.' The phase I signal did not replicate at scale.",
+    "what_this_settles": "there is no shelf to reach for. The most promising canine vaccine "
+                         "platform, taken to 118 dogs, did not beat standard of care -- so the "
+                         "1.5x cannot be obtained by swapping products.",
+    "why_this_strengthens_the_microenvironment_route": "if vaccine height were mainly a property of "
+                                                       "the platform, a better platform would show "
+                                                       "it. This is evidence that the ceiling is "
+                                                       "substantially imposed from outside the "
+                                                       "vaccine -- which is what the PD-L1 "
+                                                       "macrophage and CCL2 recruitment findings "
+                                                       "say directly.",
+}
+
+# The qualification. This analysis has said repeatedly that boosters buy persistence, not height.
+# The 118-dog trial reports something that does not fit that cleanly.
+REPEAT_IMMUNISATION_RAISED_RESPONSE_MAGNITUDE_IN_LOW_RESPONDERS = {
+    "citation": "Mason et al. 2025, Mol Ther 33(4):1674-1686, PMID 39955616",
+    "the_split": "elite survivors (DFI >490 days) showed transient pyrexia and rises in serum IL-6 "
+                 "and TNF-alpha after the FIRST immunisation; short-term survivors (DFI 150-235 "
+                 "days) did not. PBMC transcriptomics showed robust cytotoxic activity in elite but "
+                 "not short-term survivors.",
+    "the_finding_that_qualifies_the_claim": "'repeat immunizations in short-term survivors led to "
+                                            "improved and COMPARABLE pyrexic and cytokine responses "
+                                            "to elite survivors.' Re-dosing raised the MAGNITUDE of "
+                                            "the response in poor responders up to the level of "
+                                            "good ones.",
+    "what_this_analysis_had_been_saying": "that a booster restores the same insufficient height, so "
+                                          "you cannot re-dose your way over a threshold you are "
+                                          "under. That remains true for a dog whose response is "
+                                          "already at its ceiling -- and the trial is consistent "
+                                          "with it at the population level, since DFI and OS did "
+                                          "not move.",
+    "where_it_needs_qualifying": "for dogs starting BELOW their own ceiling, repeat dosing raised "
+                                 "response magnitude rather than merely maintaining it. The clean "
+                                 "separation between height and persistence is a property of the "
+                                 "model, not of the data. In the data the first few doses do both.",
+    "why_it_is_a_lever_and_not_just_a_correction": "the take-rate lever is already the largest in "
+                                                   "this analysis after vaccine height itself. This "
+                                                   "says take-rate is improvable by re-dosing, at "
+                                                   "no new agent and no new toxicity, and the "
+                                                   "authors say so: the result 'supports a future "
+                                                   "trial design of recurrent immunizations to "
+                                                   "improve outcomes of otherwise short-term "
+                                                   "survivors.'",
+    "the_readout_converges_with_the_timing_work": "the correlate that separated elite from "
+                                                  "short-term survivors was PBMC cytotoxic activity "
+                                                  "-- the same assay Rebhun 2025 found predicts "
+                                                  "outcome and that this analysis already adopted "
+                                                  "as the gate for WHEN to dose immune components. "
+                                                  "One assay now serves both decisions: when to "
+                                                  "start, and whether to re-dose.",
+}
+
+THREE_ROUTES_TO_THE_REQUIREMENT = {
+    "route_1": "release the brake -- anti-PD-1, against the PD-L1+ macrophages measured in canine "
+               "HSA (Gulay 2022; Chon 2026)",
+    "route_2": "stop the recruitment -- high-dose losartan against the CCL2-CCR2 axis, with HSA the "
+               "highest CCL2 producer of any canine tumour tested (Regan 2017; Regan 2022)",
+    "route_3": "re-dose the non-responders -- recurrent immunisation raised response magnitude in "
+               "poor responders to match good ones, with a measured correlate (Mason 2025)",
+    "what_is_ruled_out": "swapping vaccine platforms. The strongest canine platform failed to "
+                         "replicate in 118 dogs.",
+    "why_three_matters": "the 1.5x was a single unmeasured number resting on a single mechanism. It "
+                         "now rests on three independent ones, two with canine dosing data and one "
+                         "requiring no new agent at all. None of them is measured against vaccine "
+                         "kill in this tumour, and that remains the experiment to run.",
+}

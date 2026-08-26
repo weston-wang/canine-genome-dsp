@@ -1026,6 +1026,50 @@ measure it.
 high-dose losartan, and all three — in ISOS-1, read out as a growth-rate difference rather than
 survival.
 
+### You cannot get there by picking a better vaccine
+
+The obvious third route is to swap platforms. It is closed, and closing it is informative.
+
+ADXS31-164 — a recombinant *Listeria* expressing HER2 — is the canine cancer vaccine with the most
+striking reported effect of any platform, from a small phase I in osteosarcoma (Mason 2016, PMID
+26994144). The confirmatory trial ran **118 dogs** across many centres: *"Significant differences in
+median disease-free interval (DFI) or median overall survival only were not observed."* (Mason 2025,
+PMID 39955616)
+
+**There is no shelf to reach for.** And that failure argues *for* the microenvironment route: if
+vaccine height were mainly a property of the platform, the strongest platform would have shown it.
+
+### One of this analysis's own claims needs qualifying
+
+Throughout, this document has said **boosters buy persistence, not height** — you cannot re-dose your
+way over a threshold you are under. The same 118-dog trial complicates that.
+
+Elite survivors (DFI >490 days) showed transient pyrexia and IL-6/TNF-α rises after the *first*
+immunisation; short-term survivors (DFI 150–235 days) did not, and their PBMC transcriptomes lacked
+the cytotoxic signature. But: *"repeat immunizations in short-term survivors led to improved and
+**comparable** pyrexic and cytokine responses to elite survivors."*
+
+Re-dosing raised the **magnitude** of the response in poor responders up to the level of good ones.
+
+- **What survives.** At the population level the claim holds — DFI and OS did not move. For a dog
+  already at its own ceiling, a booster restores the same height.
+- **What needs qualifying.** For dogs starting *below* their ceiling, the first several doses raise
+  height as well as maintaining it. The clean split between height and persistence is a property of
+  the model, not of the data.
+- **Why it is a lever, not just a correction.** Take-rate is already the largest lever in this
+  analysis after height itself (§7). This says take-rate is improvable by re-dosing — no new agent,
+  no new toxicity — and the authors say so explicitly: the result *"supports a future trial design of
+  recurrent immunizations to improve outcomes of otherwise short-term survivors."*
+- **And the readout converges.** The correlate separating elite from short-term survivors was **PBMC
+  cytotoxic activity** — the same assay Rebhun 2025 found predicts outcome, already adopted here as
+  the gate for *when* to dose. One assay now serves two decisions: when to start, and whether to
+  re-dose.
+
+**So the 1.5× rests on three independent routes**, not one: release the brake (anti-PD-1), stop the
+recruitment (losartan), re-dose the non-responders (recurrent immunisation). Two have canine dosing
+data; the third needs no new agent. **None of them has been measured against vaccine kill in this
+tumour**, and that remains the experiment to run.
+
 ### A third timing constraint
 
 Corticosteroid pre-treatment significantly alters canine PBMC composition — *primarily the monocytic
@@ -1222,7 +1266,10 @@ better.
 Real vaccines in real dogs deliver roughly **60% of the killing power** that permanent control
 requires. Boosters do not close that gap — they are required for a different reason, to hold
 whatever height you have for the animal's life, and without them even a threshold-clearing vaccine
-falls back to roughly the no-vaccine outcome by ten years.
+falls back to roughly the no-vaccine outcome by ten years. *With one qualification the data force*
+(§3g): in a 118-dog trial, repeat immunisation raised response **magnitude** in poor responders up to
+the level of good ones. The height/persistence split is clean in the model; in the data the first few
+doses do both, for dogs starting below their own ceiling.
 
 **No single fix closes the gap** (§3b): lowering the bar with a second kill term is unanchored,
 two vaccines fail under antigenic competition, and booster tolerance was never a route to closing it.
@@ -1253,16 +1300,18 @@ never has to hold the tumour alone — and in this disease a substantial part of
 is microenvironmental, from PD-L1⁺ M2 macrophages that measurably exclude T cells, with a caninized
 anti-PD-1 already dosed in 51 dogs on a booster-like schedule.
 
-**And there are two independent ways to raise it, not one.** Anti-PD-1 disarms the suppressive
-macrophages; losartan blocks the CCL2–CCR2 axis that recruits them. HSA is the **highest CCL2
-producer** and the most monocyte-rich metastasiser of any canine tumour examined, and losartan is the
-only agent in this analysis to clear **both** criteria — its exposure settled by dose-escalation to a
-measured pharmacodynamic endpoint in 28 dogs, its duration by being an ARB dogs already take
-indefinitely.
+**And there are three independent ways to raise it, not one.** Anti-PD-1 disarms the suppressive
+macrophages; losartan blocks the CCL2–CCR2 axis that recruits them; and recurrent immunisation raises
+response magnitude in poor responders. HSA is the **highest CCL2 producer** and the most
+monocyte-rich metastasiser of any canine tumour examined, and losartan is the only agent in this
+analysis to clear **both** criteria — its exposure settled by dose-escalation to a measured
+pharmacodynamic endpoint in 28 dogs, its duration by being an ARB dogs already take indefinitely.
+What is *ruled out* is swapping vaccine platforms: the strongest canine platform failed to replicate
+in 118 dogs.
 
-**What is not established** is that 1.5×. Nobody has measured what either lever adds to vaccine
-height in this tumour. That is the single number the plan now stands or falls on — and unlike a
-decade of safety data, it can be measured in months in a syngeneic model that now exists.
+**What is not established** is that 1.5×. Nobody has measured what any of the three levers adds to
+vaccine height in this tumour. That is the single number the plan now stands or falls on — and unlike
+a decade of safety data, it can be measured in months in a syngeneic model that now exists.
 
 ### What would change the answer
 

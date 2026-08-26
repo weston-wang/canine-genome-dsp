@@ -299,3 +299,52 @@ def test_the_pointed_experiment_names_four_arms_and_a_growth_rate_readout():
     experiment = alt.TWO_LEVERS_ON_ONE_COMPARTMENT["the_experiment_this_points_at"]
     assert "ISOS-1" in experiment
     assert "growth-rate" in experiment
+
+
+# ---------------------------------------------------------------------------------------------
+# The third route, and the qualification it forces.
+
+def test_swapping_vaccine_platforms_is_ruled_out_by_the_larger_trial():
+    entry = alt.PICKING_A_BETTER_PLATFORM_DOES_NOT_WORK
+    assert "26994144" in entry["the_phase_1_signal"]
+    assert "39955616" in entry["the_confirmatory_trial"]
+    assert "118 dogs" in entry["the_confirmatory_trial"]
+    assert "did not replicate" in entry["the_result"]
+    assert "no shelf to reach for" in entry["what_this_settles"]
+
+
+def test_the_platform_failure_is_read_as_evidence_for_the_microenvironment_route():
+    reasoning = alt.PICKING_A_BETTER_PLATFORM_DOES_NOT_WORK[
+        "why_this_strengthens_the_microenvironment_route"]
+    assert "imposed from outside the vaccine" in reasoning
+
+
+def test_the_booster_claim_is_qualified_rather_than_quietly_kept():
+    """This analysis leaned on 'boosters buy persistence, not height'. The 118-dog trial complicates
+    that for dogs starting below their own ceiling, and the module has to say so."""
+    entry = alt.REPEAT_IMMUNISATION_RAISED_RESPONSE_MAGNITUDE_IN_LOW_RESPONDERS
+    assert "COMPARABLE" in entry["the_finding_that_qualifies_the_claim"]
+    assert entry["what_this_analysis_had_been_saying"]
+    assert "property of the" in entry["where_it_needs_qualifying"]
+
+
+def test_the_qualification_keeps_what_remains_true():
+    """The population-level claim survives -- DFI and OS did not move."""
+    entry = alt.REPEAT_IMMUNISATION_RAISED_RESPONSE_MAGNITUDE_IN_LOW_RESPONDERS
+    assert "did not move" in entry["what_this_analysis_had_been_saying"]
+    assert "remains true" in entry["what_this_analysis_had_been_saying"]
+
+
+def test_one_assay_now_serves_both_timing_and_redosing_decisions():
+    entry = alt.REPEAT_IMMUNISATION_RAISED_RESPONSE_MAGNITUDE_IN_LOW_RESPONDERS
+    assert "PBMC cytotoxic" in entry["the_readout_converges_with_the_timing_work"]
+    assert "Rebhun 2025" in entry["the_readout_converges_with_the_timing_work"]
+
+
+def test_the_requirement_now_rests_on_three_independent_routes():
+    entry = alt.THREE_ROUTES_TO_THE_REQUIREMENT
+    routes = [entry[k] for k in ("route_1", "route_2", "route_3")]
+    assert len(set(routes)) == 3
+    assert "platforms" in entry["what_is_ruled_out"]
+    assert "None of them is measured" in entry["why_three_matters"], (
+        "the module must not let three mechanisms read as a measurement")
