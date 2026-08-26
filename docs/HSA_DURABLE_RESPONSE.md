@@ -1387,9 +1387,21 @@ pharmacodynamic endpoint in 28 dogs, its duration by being an ARB dogs already t
 What is *ruled out* is swapping vaccine platforms: the strongest canine platform failed to replicate
 in 118 dogs.
 
-**What is not established** is that 1.5×. Nobody has measured what any of the three levers adds to
-vaccine height in this tumour. That is the single number the plan now stands or falls on — and unlike
-a decade of safety data, it can be measured in months in a syngeneic model that now exists.
+**The three are not equal, and converting them to rates settles it** (§3g). Against the 0.888 that
+the measured vaccine gives with the drug taken forever: losartan can lose three quarters of its
+measured effect crossing species and still beat it; anti-PD-L1 needs about half of its effect to
+carry over; re-dosing cannot reach it at any transfer, because the gap between the two immunological
+strata is smaller than the increment the plan needs. Re-dosing belongs in the regimen — it is free —
+but it cannot carry it.
+
+**What is not established** is the increment itself. Nobody has measured what any of the three levers
+adds to vaccine height in this tumour. That is the single number the plan now stands or falls on —
+and unlike a decade of safety data, it can be measured in months in a syngeneic model that now
+exists.
+
+**Which leaves bleeding as the binding constraint on survival**, not the cancer. Every escape route
+now has an answer on paper; the one that does not is answered by a screening test rather than a drug,
+and it is the difference between roughly 0.53 and 0.85 at ten years.
 
 ### What would change the answer
 
