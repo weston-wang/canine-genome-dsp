@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MTAP-PRMT5 in canine histiocytic sarcoma</title>
+<style>
+  @page { size: letter; margin: 22mm 20mm 20mm; }
+  :root{ --ink:#111; --soft:#444; --rule:#bbb; --accent:#0b5c57; }
+  *{box-sizing:border-box}
+  html{ -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  body{
+    margin:0; color:var(--ink); background:#fff;
+    font-family:Georgia,"Times New Roman",serif; font-size:11pt; line-height:1.5;
+  }
+  .page{ max-width:720px; margin:0 auto; padding:34px 26px 60px; }
+  @media print{ .page{ max-width:none; padding:0; } }
+
+  .tag{ font-family:-apple-system,"Segoe UI",Helvetica,Arial,sans-serif; font-size:8.5pt; font-weight:700; letter-spacing:.12em; text-transform:uppercase; color:var(--accent); margin:0 0 10px; }
+  h1{ font-size:18.5pt; line-height:1.22; margin:0 0 10px; font-weight:600; letter-spacing:-.01em; }
+  .byline{ font-size:10pt; color:var(--soft); margin:0 0 3px; }
+  .byline b{ color:var(--ink); font-weight:600; }
+  .dateline{ font-family:-apple-system,"Segoe UI",Helvetica,Arial,sans-serif; font-size:9pt; color:var(--soft); margin:0 0 18px; }
+
+  .abstract{ border:1px solid var(--rule); border-radius:4px; padding:14px 18px; margin:0 0 22px; background:#fafafa; }
+  .abstract .h{ font-family:-apple-system,"Segoe UI",Helvetica,Arial,sans-serif; font-size:8.5pt; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--soft); margin:0 0 6px; }
+  .abstract p{ margin:0; font-size:10.5pt; }
+
+  h2{ font-family:-apple-system,"Segoe UI",Helvetica,Arial,sans-serif; font-size:11.5pt; font-weight:700; margin:22px 0 7px; color:var(--ink); }
+  h2 .n{ color:var(--accent); margin-right:8px; }
+  p{ margin:0 0 11px; }
+  ul,ol{ margin:0 0 11px; padding-left:20px; }
+  li{ margin:0 0 6px; }
+  strong{ font-weight:600; } em{ font-style:italic; }
+  a{ color:var(--accent); }
+  .small{ font-size:9.5pt; color:var(--soft); }
+
+  .exp{ margin:0 0 10px; padding-left:30px; position:relative; }
+  .exp .r{ position:absolute; left:0; top:0; font-family:-apple-system,"Segoe UI",Helvetica,Arial,sans-serif; font-weight:700; color:var(--accent); }
+  .exp b{ font-weight:600; }
+
+  hr{ border:none; border-top:1px solid var(--rule); margin:22px 0; }
+
+  .refs{ font-size:9pt; line-height:1.42; }
+  .refs ol{ padding-left:20px; }
+  .refs li{ margin:0 0 5px; }
+  .refs a{ word-break:break-all; }
+
+  .foot{ margin-top:20px; font-size:8.5pt; color:var(--soft); font-family:-apple-system,"Segoe UI",Helvetica,Arial,sans-serif; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <p class="tag">Hypothesis note · comparative oncology · preprint</p>
+  <h1>MTAP loss and PRMT5 synthetic lethality as an untested, non-reroutable maintenance target in canine histiocytic sarcoma</h1>
+  <p class="byline"><b>[Author name]</b>, Independent Researcher</p>
+  <p class="dateline">Version 1 · 2026 · Correspondence &amp; materials: see Data and code availability</p>
+
+  <div class="abstract">
+    <p class="h">Abstract</p>
+    <p>Canine histiocytic sarcoma (HS) is an aggressive malignancy with a strong breed predisposition (notably the Bernese Mountain Dog) mapping to the CDKN2A/MTAP germline locus, and with somatic MAPK-pathway drivers — chiefly PTPN11/SHP2 — in roughly 60% of tumours. Current translational effort centres on MEK inhibition, now in a canine Phase I, and on ctDNA monitoring of the PTPN11 driver. These pathway targets are reroutable, so durable control depends on surveillance and drug-switching. I note a specific, testable gap: despite MTAP being co-located with the CDKN2A predisposition locus and homozygous MTAP deletion conferring PRMT5 synthetic-lethal dependency in ~10–15% of human cancers, I found no published evaluation of MTAP status or PRMT5-inhibitor sensitivity in canine HS. If an MTAP-null subset exists, MTA-cooperative PRMT5 inhibitors — several clinical-stage, including brain-penetrant congeners — would offer the only <em>non-reroutable</em> (genotype-locked) maintenance option in this disease, complementing the reroutable MEK majority. I outline the hypothesis, a genotype-tiered maintenance-at-emergence (prevention) framing, and a small set of cheap, decisive experiments led by MTAP immunostaining of archived tissue. This is a computational, model-assisted synthesis intended to orient research; it contains no new experimental data.</p>
+  </div>
+
+  <h2><span class="n">1</span>Background</h2>
+  <p>Histiocytic sarcoma is over-represented in specific dog breeds, and genome-wide work localizes the inherited risk to the CDKN2A/MTAP region [2]. Somatic activation of the MAPK pathway — most commonly a PTPN11/SHP2 gain-of-function mutation, also KRAS — is present in ~60% of tumours [2,4], motivating MEK inhibition, which has advanced to a canine Phase I dose-finding study (trametinib) [1] alongside in-vitro combination work [3] and molecular-subtype mapping [4,5]. Plasma detection of the PTPN11 driver provides a species- and disease-matched ctDNA assay for monitoring [6]. In parallel, human histiocytic disorders are increasingly treated by genotype-matched kinase inhibitors with switch-on-resistance strategies [7]. The unifying limitation of the pathway targets is that an established lesion can reroute around them; durability therefore leans on early detection and drug-switching rather than on an irreversible dependency.</p>
+
+  <h2><span class="n">2</span>The gap</h2>
+  <p>MTAP sits immediately adjacent to CDKN2A; the two are frequently co-deleted as neighbours in human cancers, and homozygous MTAP loss sensitizes tumour cells to inhibition of PRMT5 (via MTA accumulation) — a validated synthetic lethality now pursued with multiple clinical-stage MTA-cooperative PRMT5 inhibitors, including brain-penetrant members [9,10,11]. Given that the canine HS predisposition locus <em>is</em> the CDKN2A/MTAP region, somatic MTAP loss in a subset of canine HS tumours is biologically plausible. Yet a targeted search of PubMed and preprint servers returned no study evaluating MTAP status or PRMT5 dependency in canine HS. To my knowledge this dependency has not been tested in this disease.</p>
+
+  <h2><span class="n">3</span>Hypothesis</h2>
+  <p><strong>Primary.</strong> A definable subset of canine HS tumours carries homozygous MTAP loss and would be sensitive to MTA-cooperative PRMT5 inhibition.</p>
+  <p><strong>Corollary (why it matters).</strong> Because the target is a <em>deleted gene</em> rather than a pathway node, this dependency is non-reroutable: it would provide the only genotype-locked maintenance option in canine HS — durable at reachable sites without reliance on surveillance — complementing the reroutable MEK arm that covers the MAPK-driver majority. Brain-penetrant PRMT5 inhibitors [9,10] would extend the option to CNS-involved disease, where radiation achieves local control but leptomeningeal/CSF relapse is the documented failure mode [12].</p>
+
+  <h2><span class="n">4</span>Supporting rationale</h2>
+  <p>The PRMT5 target is highly conserved dog-to-human (ortholog identity ~99%), so potency and MTA-cooperativity established in human MTAP-null cells are a reasonable transfer to test. The class is clinical-stage and includes a brain-penetrant successor (TNG456) after a first-generation member (TNG908) fell short on CNS exposure [9,10], and MTA-cooperative PRMT5 inhibition drives regressions in MTAP-null sarcoma models including MPNST [11].</p>
+  <p>To size the opportunity I built a genotype- and site-resolved durability model (branching-process suppression of a second primary under continuous maintenance), calibrated so that, without maintenance, it reproduces the recurrence-free fraction observed with adjuvant lomustine in localized canine HS [8]. <strong>These are illustrative model estimates on documented but assumed priors, not measured outcomes.</strong> With that caveat, the model returns a high, tight ten-year suppression probability for a locked MTAP tier and a lower, wider, surveillance-dependent probability for the reroutable MAPK majority — the qualitative asymmetry that motivates seeking a locked target at all. The full model and its limitations are in the linked repository.</p>
+
+  <h2><span class="n">5</span>Prioritized experiments</h2>
+  <div class="exp"><span class="r">1</span><b>MTAP status in canine HS.</b> MTAP immunohistochemistry (and CDKN2A/MTAP copy-number) on archived HS tissue — no live animal required. Establishes whether an MTAP-null subset exists and its frequency. Cheapest and most decisive step.</div>
+  <div class="exp"><span class="r">2</span><b>PRMT5-inhibitor sensitivity.</b> If MTAP-null lines or samples are identified, test an MTA-cooperative PRMT5 inhibitor (e.g. TNG462/TNG456-class; BMS-986504) for the predicted synthetic-lethal response.</div>
+  <div class="exp"><span class="r">3</span><b>Second-primary emergence rate.</b> Recurrence-free interval in cured localized HS, stratified by genotype. In the durability model this is the dominant uncertainty, so it most tightens any maintenance projection.</div>
+  <div class="exp"><span class="r">4</span><b>Adjuvant maintenance concept.</b> Post-local-control, genotype-matched continuous maintenance with a recurrence-free-interval endpoint versus historical adjuvant lomustine [8], using plasma-PTPN11 ctDNA [6] for reroutable tiers.</div>
+
+  <h2><span class="n">6</span>A prevention-oriented framing</h2>
+  <p>The shift the note advocates is from treating established disease to <em>maintenance-at-emergence</em>: continuous, genotype-matched suppression of a second primary in the predisposed host, keyed to one tumour-tissue genotype read. Only the MTAP/PRMT5 tier would be genotype-locked; the MEK, PI3K and CDK4/6 tiers suppress a fresh founding cell but remain surveillance-dependent, which is where the validated PTPN11 ctDNA assay and a defined drug-switch tree apply. A maintenance dose is far below the exposure needed to shrink established tumours, which may relax the dosing constraints seen in the treatment setting.</p>
+
+  <h2><span class="n">7</span>Limitations</h2>
+  <p>This is a synthesis and prioritization, not new experimental data. The durability probabilities rest on documented but assumed priors and a single-institution cell-line evidence base; no maintenance-at-emergence claim is demonstrated in a dog; MTAP frequency in canine HS, canine CNS penetration, chronic tolerability, and canine PRMT5-inhibitor sensitivity are unmeasured. The literature search underlying the "no prior evaluation" claim may be incomplete. The analysis was produced computationally with AI assistance; the author takes responsibility for its content. The single load-bearing, low-cost action is the MTAP stain (Experiment 1), which either opens this direction or rules it out.</p>
+
+  <h2><span class="n">8</span>Data and code availability</h2>
+  <p class="small">The full model, escape/coverage ledger, probabilistic durability engine, and the analyses summarized here are openly available: <strong>github.com/weston-wang/canine-genome-dsp</strong>. This note is deposited with a permanent identifier (see the record's DOI). No datasets of animal subjects were generated.</p>
+
+  <hr>
+  <div class="refs">
+    <p style="font-family:-apple-system,'Segoe UI',Helvetica,Arial,sans-serif; font-size:8.5pt; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--soft); margin:0 0 8px;">References</p>
+    <ol>
+      <li>Takada M, Vail DM, et al. Population pharmacokinetics, pharmacodynamics and safety of trametinib in dogs with cancer: a Phase I trial. <em>Vet Comp Oncol</em> 2024. doi:<a href="https://doi.org/10.1111/vco.12989">10.1111/vco.12989</a></li>
+      <li>Thaiwong T, et al. Gain-of-function mutation in PTPN11 in histiocytic sarcomas of Bernese Mountain Dogs. <em>Vet Comp Oncol</em> 2017. doi:<a href="https://doi.org/10.1111/vco.12357">10.1111/vco.12357</a></li>
+      <li>Sakuma H, et al. Antitumor effects of inhibitors of ERK and Akt pathways in canine HS cell lines. <em>Vet J</em> 2024. doi:<a href="https://doi.org/10.1016/j.tvjl.2024.106264">10.1016/j.tvjl.2024.106264</a></li>
+      <li>Engleberg AI, Ostrander EA, Yuzbasiyan-Gurkan V, et al. Transcriptome analysis of canine HS reveals multiple therapeutic targets. <em>Cancers</em> 2025. doi:<a href="https://doi.org/10.3390/cancers17060954">10.3390/cancers17060954</a></li>
+      <li>Sakuma H, et al. Molecular classification of canine HS by gene expression. <em>Vet Comp Oncol</em> 2025. doi:<a href="https://doi.org/10.1111/vco.13071">10.1111/vco.13071</a></li>
+      <li>Prouteau A, et al. Circulating tumour DNA is detectable in canine histiocytic sarcoma (plasma PTPN11). <em>Sci Rep</em> 2021. doi:<a href="https://doi.org/10.1038/s41598-020-80332-y">10.1038/s41598-020-80332-y</a></li>
+      <li>Smith KER, et al. Personalized medicine in histiocytic disorders: novel targets without MAPK alterations. <em>JCO Precis Oncol</em> 2024. doi:<a href="https://doi.org/10.1200/PO-24-00471">10.1200/PO-24-00471</a></li>
+      <li>Skorupski KA, et al. Long-term survival in dogs with localized HS treated with CCNU as adjuvant to local therapy. <em>Vet Comp Oncol</em> 2009. doi:<a href="https://doi.org/10.1111/j.1476-5829.2009.00186.x">10.1111/j.1476-5829.2009.00186.x</a></li>
+      <li>Cottrell KM, et al. Discovery of TNG456, a brain-penetrant MTA-cooperative PRMT5 inhibitor. <em>J Med Chem</em> 2026. doi:<a href="https://doi.org/10.1021/acs.jmedchem.6c00035">10.1021/acs.jmedchem.6c00035</a></li>
+      <li>Li B, et al. Brain-penetrant MTA-cooperative PRMT5 synthetic-lethal inhibitor for glioblastoma. <em>Eur J Med Chem</em> 2026. doi:<a href="https://doi.org/10.1016/j.ejmech.2026.119001">10.1016/j.ejmech.2026.119001</a></li>
+      <li>MRTX1719 / BMS-986504 in MTAP-null tumours including MPNST. <em>Clin Cancer Res</em> 2025. doi:<a href="https://doi.org/10.1158/1078-0432.CCR-24-3610">10.1158/1078-0432.CCR-24-3610</a></li>
+      <li>Takahashi T, et al. Intracranial HS: complete response to 37 Gy, CSF metastasis (Pembroke Welsh Corgi). <em>J Vet Med Sci</em> 2021. doi:<a href="https://doi.org/10.1292/jvms.21-0206">10.1292/jvms.21-0206</a></li>
+    </ol>
+  </div>
+
+  <p class="foot">Computational analysis intended to orient research. Not veterinary advice or a treatment protocol. Prepared with AI assistance; the author is responsible for the content.</p>
+
+</div>
+</body>
+</html>
