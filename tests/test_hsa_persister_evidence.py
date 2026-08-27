@@ -340,3 +340,182 @@ def test_the_duration_shortfall_uses_the_same_horizon_as_the_original_criterion(
     w = pe.WHAT_HAS_CLOSED_ON_THE_PARALLEL_ARM[
         "THE_THERAPEUTIC_WINDOW_ARGUMENT_THAT_ANSWERS_HANGAUERS_SECOND_PROBLEM"]
     assert str(w["the_horizon_days"]) in repr(aa.THE_DURATION_CRITERION)
+
+
+# ---------------------------------------------------------------------------------------------
+# The finite course: the closed form, the exchange rate, and the assumption carrying all of it.
+# ---------------------------------------------------------------------------------------------
+
+def test_required_rate_falls_as_the_course_lengthens():
+    rates = [pe.required_rate_for_course(d) for d in (152, 335, 700, 3620)]
+    assert rates == sorted(rates, reverse=True)
+
+
+def test_required_rate_tends_to_the_holding_rate_for_an_endless_course():
+    assert pe.required_rate_for_course(10_000_000) == pytest.approx(
+        pe.BLIND_SPOT_NET_GROWTH_PER_DAY, abs=1e-4)
+    # And can never fall below it: holding the compartment still is the floor on the ask.
+    for d in (10, 152, 3620):
+        assert pe.required_rate_for_course(d) > pe.BLIND_SPOT_NET_GROWTH_PER_DAY
+
+
+def test_required_rate_is_the_holding_rate_plus_the_work_over_the_time():
+    d = 335
+    expected = pe.BLIND_SPOT_NET_GROWTH_PER_DAY + math.log(pe.blind_spot_initial_cells()) / d
+    assert pe.required_rate_for_course(d) == pytest.approx(expected)
+
+
+def test_required_rate_rejects_a_nonpositive_course():
+    with pytest.raises(ValueError):
+        pe.required_rate_for_course(0)
+
+
+def test_the_blind_spot_size_matters_only_logarithmically():
+    """The claim in the sensitivity section: a ten-fold size error is small next to the ask."""
+    base = pe.required_rate_for_course(335)
+    tenfold = pe.required_rate_for_course(335, fraction=pe.BLIND_SPOT_INITIAL_FRACTION * 10)
+    assert tenfold - base == pytest.approx(math.log(10) / 335, abs=1e-6)
+    assert tenfold - base < 0.01
+    assert (tenfold - base) / base < 0.10
+
+
+def test_the_closed_form_predicts_every_simulated_threshold():
+    """Each schedule's predicted rate must sit inside the interval the simulation brackets.
+
+    Three outcomes, not two. The closed form predicts a single deterministic threshold, but the
+    growth offset varies between Monte Carlo trials, so a rate sitting on the threshold returns an
+    intermediate durability rather than 0 or 1. An intermediate value is therefore evidence that the
+    true threshold is AT that rate -- it must bracket the prediction, not fall on one side of it.
+    Treating it as a failure (the first version of this test) wrongly failed the continuous
+    schedule, whose 0.040 -> 0.117 is the clearest boundary point in the table.
+    """
+    table = pe.FINITE_COURSE_RESCUE
+    rates = sorted(table)
+    tol = 2e-3
+    for name in pe.PERSISTER_COURSE_AGENT_DAYS:
+        predicted = pe.required_rate_for_course(pe.PERSISTER_COURSE_AGENT_DAYS[name])
+        succeeded = [r for r in rates if table[r][name] >= 0.99]
+        failed = [r for r in rates if table[r][name] <= 0.01]
+        boundary = [r for r in rates if 0.01 < table[r][name] < 0.99]
+        if succeeded:
+            assert min(succeeded) >= predicted - tol, f"{name}: cleared below the predicted threshold"
+        if failed:
+            assert max(failed) <= predicted + tol, f"{name}: failed above the predicted threshold"
+        for r in boundary:
+            # A partial result means the prediction should be sitting essentially on this rate.
+            assert abs(r - predicted) < 0.01, f"{name}: partial result far from the prediction"
+
+
+def test_the_boundary_case_is_the_one_the_module_calls_out():
+    """The continuous schedule is the only partial entry, and the module says so explicitly."""
+    partials = [(r, n) for r, row in pe.FINITE_COURSE_RESCUE.items()
+                for n, v in row.items() if 0.01 < v < 0.99]
+    assert partials == [(0.040, "continuous")]
+    assert "0.117" in pe.THE_CLOSED_FORM_PREDICTS_THE_SIMULATION["the_check"]["continuous"]
+
+
+def test_the_two_short_schedules_fail_at_every_rate_tested():
+    for rate, row in pe.FINITE_COURSE_RESCUE.items():
+        assert row["six_months"] == 0.0
+        assert row["pulsed_14_28_during_drug_year"] == 0.0
+
+
+def test_durability_is_monotone_in_rate_for_every_schedule():
+    rates = sorted(pe.FINITE_COURSE_RESCUE)
+    for name in pe.PERSISTER_COURSE_AGENT_DAYS:
+        col = [pe.FINITE_COURSE_RESCUE[r][name] for r in rates]
+        assert col == sorted(col), name
+
+
+def test_a_longer_course_is_never_worse_at_a_fixed_rate():
+    order = ["six_months", "pulsed_14_28_during_drug_year", "drug_year", "two_years", "continuous"]
+    # six_months (152d) and the pulsed schedule (167d) are close enough to tie; the rest must rise.
+    for rate, row in pe.FINITE_COURSE_RESCUE.items():
+        vals = [row[n] for n in order]
+        assert vals == sorted(vals), rate
+
+
+def test_agent_days_are_ordered_the_way_the_schedules_claim():
+    d = pe.PERSISTER_COURSE_AGENT_DAYS
+    assert d["continuous"] > d["two_years"] > d["drug_year"] > d["pulsed_14_28_during_drug_year"]
+    assert d["pulsed_14_28_during_drug_year"] > d["six_months"]
+    # The pulsed schedule really is about half the drug year's exposure.
+    assert d["pulsed_14_28_during_drug_year"] / d["drug_year"] == pytest.approx(0.5, abs=0.02)
+
+
+def test_the_exchange_rate_claim_matches_the_computed_rates():
+    one_year = pe.REQUIRED_RATE_BY_COURSE["drug_year"]
+    forever = pe.REQUIRED_RATE_BY_COURSE["continuous"]
+    # "roughly a doubling"
+    assert 1.8 < one_year["required_rate_per_day"] / forever["required_rate_per_day"] < 2.6
+    # "a three-day kill rising from about 14% to about 26%" -- both still modest.
+    assert 0.09 < forever["as_a_three_day_kill"] < 0.16
+    assert 0.20 < one_year["as_a_three_day_kill"] < 0.30
+
+
+def test_the_shortfall_improvement_the_exchange_rate_claims():
+    one_year_days = pe.PERSISTER_COURSE_AGENT_DAYS["drug_year"]
+    icfsp1_days = pe.WHAT_HAS_CLOSED_ON_THE_PARALLEL_ARM[
+        "THE_THERAPEUTIC_WINDOW_ARGUMENT_THAT_ANSWERS_HANGAUERS_SECOND_PROBLEM"][
+        "the_documented_tolerability_days"]
+    assert one_year_days / icfsp1_days == pytest.approx(24.0, abs=0.5)
+    assert "261x to 24x" in pe.THE_EXCHANGE_RATE_BETWEEN_DURATION_AND_POTENCY["what_it_buys"]
+
+
+def test_the_pulsing_failure_is_reported_against_the_authors_own_convenience():
+    d = pe.THE_EXCHANGE_RATE_BETWEEN_DURATION_AND_POTENCY
+    assert "does NOT license a duty cycle" in d["where_it_stops_buying"]
+    assert "result against my own convenience" in d["the_honest_reading_of_the_pulsing_failure"]
+
+
+def test_the_control_shows_the_floor_carries_the_entire_finite_result():
+    ctl = pe.FINITE_COURSE_WITHOUT_THE_EXTINCTION_FLOOR
+    assert ctl["continuous"] == 1.0
+    for name in ("two_years", "drug_year", "pulsed_14_28_during_drug_year"):
+        assert ctl[name] == 0.0
+    # ...while the floored table has two of those succeeding at the same rate.
+    assert pe.FINITE_COURSE_RESCUE[0.100]["two_years"] == 1.0
+    assert pe.FINITE_COURSE_RESCUE[0.100]["drug_year"] == 1.0
+
+
+def test_the_dependence_on_the_floor_is_stated_as_load_bearing_not_marginal():
+    d = pe.EVERYTHING_IN_SECTION_7_DEPENDS_ON_THE_FLOOR
+    assert "not a caveat at the" in d["so_the_result_is_entirely_a_consequence_of_the_assumption"]
+    w = d["where_the_choice_could_still_be_wrong"]
+    assert "has NOT run one" in w["stochasticity_at_low_numbers"]
+    assert "two-log window" in w["how_close_the_calls_are"]
+    assert "sanctuary" in w["sanctuary_sites"]
+
+
+def test_the_open_items_outnumber_the_closures_and_include_the_cheap_alternative():
+    items = pe.WHAT_IS_STILL_NOT_CLOSED
+    assert len(items) >= 8
+    joined = " ".join(items.values())
+    assert "genetic knockout" in joined
+    assert "PARENTAL" in joined
+    assert "sensitivity analysis" in joined
+    assert "stain" in joined
+
+
+def test_the_verdict_refuses_to_call_it_closed():
+    v = pe.VERDICT
+    assert v["the_status"].startswith("CLOSED CONDITIONAL ON A NAMED EXPERIMENT")
+    assert "weaker one than 'closed'" in v["the_status"]
+    assert "no drug has been shown to do it" in v["what_did_not_change"].lower()
+    assert "'Nearly solvable' is not closed" in v["what_this_module_refuses_to_say"]
+
+
+def test_the_verdict_names_the_experiment_concretely_enough_to_run():
+    v = pe.VERDICT["the_status"]
+    for line in pe.CANINE_HEMANGIOSARCOMA_IS_IN_THE_FERROPTOSIS_PANEL["the_hemangiosarcoma_lines"]:
+        assert line in v
+    assert "rate_from_burden_reduction" in v
+    assert "required_rate_for_course(335)" in v
+    # And the number it quotes must be the one the function returns.
+    assert pe.required_rate_for_course(335) == pytest.approx(0.090, abs=5e-4)
+
+
+def test_the_cheap_step_still_comes_first():
+    assert "stain first" in pe.VERDICT["the_order_to_do_it_in"].replace("\n", " ") or \
+        "stain" in pe.VERDICT["the_order_to_do_it_in"]
+    assert "unnecessary" in pe.VERDICT["the_order_to_do_it_in"]
