@@ -1,0 +1,378 @@
+"""The measured effect size behind the persister-directed kill, and the schedule it actually needs.
+
+`hsa_orthogonal_kill` proposed exploiting the GPX4 dependency that drug-tolerant persister cells
+acquire, found it rescues route 8's overlap case at about 0.045/day, and then said plainly that
+there was "no anchor at all for the rate a ferroptosis inducer achieves against persisters in vivo".
+That was the honest position at the time. It was also the position that made the route "closable
+rather than closed", which is not the same thing as closed.
+
+This module goes and gets the anchor. It does three things the earlier module did not:
+
+  1. It restates the requirement in the units the persister experiments actually report. The
+     requirement is a per-day rate; Hangauer's assays are three-day viability readouts. Converting
+     between them is one line of arithmetic, and it changes the impression of the ask completely.
+
+  2. It records that the disease-specific and species-specific test HAS been run. Three canine
+     hemangiosarcoma lines sit inside the canine ferroptosis panel. That was missed the first time
+     because the tumour type appears only in a supplementary table.
+
+  3. It applies the duration criterion to the ferroptosis agent itself -- the criterion that
+     disqualified the MEK/mTOR pair -- and tests whether the schedule the literature indicates is
+     the ten-year one the earlier model assumed. It is not.
+
+What it does NOT do is claim the route is finished. The section that matters most here is
+`WHAT_IS_STILL_NOT_CLOSED`, and it is longer than the section that says what closed.
+
+See docs/HSA_DURABLE_RESPONSE.md.
+"""
+from __future__ import annotations
+
+import math
+
+from .hsa_route_effect_sizes import rate_from_burden_reduction
+
+# The rate `hsa_orthogonal_kill.RESCUE_BY_PERSISTER_KILL` located the threshold at: 0.035/day gives
+# 0.000, 0.040/day gives 0.107, 0.050/day gives 1.000. The conservative reading is 0.045/day.
+REQUIRED_PERSISTER_RATE_PER_DAY = 0.045
+
+# The threshold's optimistic end, where durability first becomes non-zero.
+FIRST_NONZERO_PERSISTER_RATE_PER_DAY = 0.040
+
+# Hangauer read viability by CellTiter-Glo "after three days of small-molecule treatment".
+PERSISTER_ASSAY_DAYS = 3.0
+
+
+def viability_after(rate_per_day: float, days: float = PERSISTER_ASSAY_DAYS) -> float:
+    """Fraction surviving after `days` of a sustained net kill of `rate_per_day`.
+
+    The inverse of `rate_from_burden_reduction`. Present so the requirement can be quoted in the
+    units a bench assay reports rather than only in the units the model consumes.
+    """
+    if rate_per_day < 0:
+        raise ValueError("rate_per_day must be non-negative")
+    if days <= 0:
+        raise ValueError("days must be positive")
+    return float(math.exp(-rate_per_day * days))
+
+
+def transfer_required_from_viability(viability: float, days: float = PERSISTER_ASSAY_DAYS,
+                                     required: float = REQUIRED_PERSISTER_RATE_PER_DAY) -> float:
+    """Fraction of a measured in vitro kill that must survive transfer to clear the requirement.
+
+    Same discipline as `hsa_route_effect_sizes.transfer_required`: convert the measured effect to a
+    per-day rate, then divide the requirement by it. A value above 1.0 means the measured effect is
+    not large enough even if all of it transferred.
+    """
+    return float(required / rate_from_burden_reduction(viability, days))
+
+
+# =============================================================================================
+# 1. THE REQUIREMENT, RESTATED IN THE UNITS THE EXPERIMENTS REPORT.
+#
+# This is the single most useful thing in this module, and it is arithmetic rather than a
+# discovery. `hsa_orthogonal_kill` framed 0.045/day as "about seven eighths of the bar" and
+# "roughly twice what the MEK inhibitor is asked for", which reads as a large ask. Both statements
+# are true. But a sustained 0.045/day is, over the three days a persister viability assay runs,
+# a 12.6% kill. Bench assays of this mechanism do not report 12.6%. They report near-elimination.
+# =============================================================================================
+
+THE_REQUIREMENT_IN_ASSAY_UNITS = {
+    "required_per_day": REQUIRED_PERSISTER_RATE_PER_DAY,
+    "three_day_viability_that_corresponds_to": viability_after(REQUIRED_PERSISTER_RATE_PER_DAY),
+    "as_a_three_day_kill": 1.0 - viability_after(REQUIRED_PERSISTER_RATE_PER_DAY),
+    "at_the_optimistic_end_of_the_threshold": {
+        "required_per_day": FIRST_NONZERO_PERSISTER_RATE_PER_DAY,
+        "as_a_three_day_kill": 1.0 - viability_after(FIRST_NONZERO_PERSISTER_RATE_PER_DAY),
+    },
+    "the_reading": "the model is asking for a 12.6% kill of the tolerant compartment over three "
+                   "days -- SUSTAINED. It is not asking for a deep kill. It is asking for a shallow "
+                   "one that never stops.",
+    "why_the_earlier_framing_misled": "'seven eighths of the bar' compares the rate to the rate of "
+                                      "the entire regimen, which makes it sound like the agent must "
+                                      "do almost everything the regimen does. In per-day terms that "
+                                      "is arithmetically right. In bench terms it is a weak effect, "
+                                      "and the earlier module never converted it, so it never "
+                                      "noticed. The conversion is the correction.",
+    "what_this_does_not_do": "it does not lower the requirement. 0.045/day is still 0.045/day, and "
+                             "the step function around it is still a step. What changes is which "
+                             "experiments count as evidence for or against it, and how demanding "
+                             "they look.",
+    "where_the_difficulty_moves_to": "if the potency ask is small and the duration ask is ten years, "
+                                     "then the binding constraint is duration, not potency. That is "
+                                     "exactly the failure mode the duration criterion was invented "
+                                     "for, and it is tested below rather than assumed away.",
+}
+
+# =============================================================================================
+# 2. THE MEASURED EFFECT, AND WHY THIS ONE IS NOT THE COMPARISON THAT WAS RETRACTED.
+# =============================================================================================
+
+HANGAUER_ASSAY_PROTOCOL = {
+    "citation": "Hangauer et al. 2017, Nature 551(7679):247-250, PMID 29088702, "
+                "doi 10.1038/nature24297",
+    "readout": "'Cell viability was assessed using CellTiter Glo (Promega) after THREE DAYS of "
+               "small-molecule treatment'",
+    "concentration": "1 uM RSL3",
+    "persister_derivation": "two weeks of 2 uM lapatinib (BT474); persisters were also derived from "
+                            "A375 melanoma/vemurafenib, PC9 lung/erlotinib and Kuramochi "
+                            "ovarian/carboplatin-paclitaxel",
+    "the_selectivity_statement": "GPX4 inhibitors RSL3 and ML210 were 'among the compounds most "
+                                 "SELECTIVELY LETHAL to persister cells, with minimal effect on "
+                                 "parental cells or nontransformed MCF10A cells'",
+    "the_specificity_control": "'GPX4 inhibitors are NOT synergistic with lapatinib treatment of "
+                               "parental BT474 cells, demonstrating that GPX4 dependence is specific "
+                               "to the persister cell state'",
+    "why_the_protocol_matters_here": "three days is the same three days the requirement converts to. "
+                                     "The model's ask and the published readout are in the same "
+                                     "units without any rescaling, which is rare in this analysis.",
+    "the_number_that_is_missing": "the paper's per-line viability values are in figures rather than "
+                                  "in text, and were not retrievable. So this module does NOT assert "
+                                  "a specific measured viability. It computes the transfer required "
+                                  "ACROSS a range of assumed potencies instead, and the reader can "
+                                  "see which assumptions the conclusion survives.",
+}
+
+THE_IN_VIVO_RESULT_AT_THE_MODELS_OWN_ENDPOINT = {
+    "the_experiment": "A375 melanoma xenografts, GPX4 knockout versus wild type, were shrunk with "
+                      "dabrafenib plus trametinib while ferrostatin-1 masked any effect of GPX4 "
+                      "deletion during the initial response. 'Once tumours had been reduced to their "
+                      "minimal volume, ferrostatin-1 was withdrawn, unmasking the GPX4 KO effect in "
+                      "these RESIDUAL tumours.'",
+    "the_result": "'Upon further dosing of mice with dabrafenib and trametinib, without "
+                  "ferrostatin-1, the GPX4 WT tumours RELAPSED and the GPX4 KO tumours DID NOT.'",
+    "the_control": "'parental A375 GPX4 KO and WT cells both formed tumours without ferrostatin-1 "
+                   "equally well' -- so the effect is on the residual population specifically, not a "
+                   "general growth defect of the knockout.",
+    "why_this_is_the_right_endpoint": "relapse-versus-no-relapse under continued targeted therapy is "
+                                      "precisely what the Monte Carlo measures. Almost every other "
+                                      "anchor in this analysis had to be converted from response "
+                                      "rate or median survival. This one does not.",
+    "why_this_is_not_the_category_error_that_was_retracted": "`hsa_orthogonal_kill` withdrew a "
+                                                             "comparison that cited Andersen's "
+                                                             "0.110-0.143/day as evidence a 0.045/day "
+                                                             "ask was reachable. That was wrong "
+                                                             "because Andersen measured drug-SENSITIVE "
+                                                             "bulk tumour, killed by the very drugs "
+                                                             "the resistant cell resists. This "
+                                                             "experiment is the opposite: the "
+                                                             "measurement is made on the RESIDUAL "
+                                                             "population that survived the targeted "
+                                                             "therapy, while that therapy continues. "
+                                                             "It is the resistant compartment, "
+                                                             "measured as the resistant compartment.",
+    "the_limitation_that_must_be_stated_first": "the in vivo arm is a GENETIC knockout, not a drug. "
+                                                "Hangauer says why in terms: 'Because neither RSL3 "
+                                                "nor ML210 are systemically bioavailable, we instead "
+                                                "adopted a recently developed genetic strategy.' This "
+                                                "result proves the TARGET is right in vivo. It does "
+                                                "not prove any molecule can hit it in vivo.",
+    "the_second_limitation": "knockout is complete and permanent target removal. A drug gives partial "
+                             "and intermittent inhibition. The knockout result is therefore an upper "
+                             "bound on what pharmacology could achieve, not an estimate of it.",
+}
+
+# =============================================================================================
+# 3. THE GAP HANGAUER NAMED, AND WHAT HAS AND HAS NOT CLOSED SINCE.
+# =============================================================================================
+
+THE_BIOAVAILABILITY_GAP_AS_ORIGINALLY_STATED = {
+    "the_authors_own_words": "'While existing GPX4 inhibitors, including RSL3 and ML210, are valuable "
+                             "tool compounds in cell culture settings, their poor pharmacokinetic "
+                             "properties preclude their systemic use in vivo... the development of a "
+                             "potent bioavailable GPX4 inhibitor is an URGENT PRIORITY.'",
+    "the_safety_question_they_also_raised": "'Because GPX4 genetic deletion is LETHAL IN ADULT MICE, "
+                                            "further study will be needed to determine whether a "
+                                            "suitable therapeutic window exists for treatment with "
+                                            "GPX4 inhibitors.'",
+    "why_both_are_recorded": "the first is a medicinal-chemistry problem and the second is a "
+                             "toxicology problem. They are independent, and closing the first does "
+                             "not touch the second. An earlier draft of this work would have quoted "
+                             "the first and quietly dropped the second.",
+    "the_year": 2017,
+}
+
+WHAT_HAS_CLOSED_ON_THE_GPX4_ARM = {
+    "citation": "Liu et al. 2023, Redox Biology 63:102677, PMID 36989572, "
+                "doi 10.1016/j.redox.2023.102677",
+    "the_agent": "Tubastatin A, an HDAC6 inhibitor identified by large-scale screening",
+    "the_finding": "'Tubastatin A DIRECTLY BONDED to GPX4 and inhibited GPX4 enzymatic activity... "
+                   "which is INDEPENDENT of its inhibition of HDAC6'",
+    "the_bioavailability_claim": "'Tubastatin A has EXCELLENT BIOAVAILABILITY, as demonstrated by its "
+                                 "ability to significantly promote radiotherapy-induced lipid "
+                                 "peroxidation and tumour suppression in a mouse xenograft model'",
+    "why_it_matters_here": "this is a direct answer to the compound Hangauer said did not exist: a "
+                           "systemically dosable small molecule that binds GPX4 and inhibits it, with "
+                           "in vivo activity. The urgent priority named in 2017 is no longer entirely "
+                           "unmet.",
+    "the_tension_with_this_analysis": "HDAC inhibition was tried in canine hemangiosarcoma and "
+                                      "failed -- see `hsa_orthogonal_kill."
+                                      "HDAC_INHIBITION_WAS_TRIED_IN_CANINE_HSA_AND_FAILED`. That "
+                                      "failure is not automatically inherited here, because the GPX4 "
+                                      "binding is explicitly stated to be independent of HDAC6 "
+                                      "inhibition and the failed trial used a different agent on a "
+                                      "different rationale. But it is not automatically escaped "
+                                      "either, and this module does not pretend otherwise.",
+    "what_could_not_be_verified": "the dose, schedule, and magnitude of tumour suppression are behind "
+                                  "a publisher paywall that returned HTTP 403. Only the abstract's "
+                                  "claims are recorded above. No effect size from this paper is used "
+                                  "in any calculation in this module.",
+    "the_honest_weight": "existence evidence, not effect-size evidence. It moves 'no bioavailable "
+                         "GPX4 inhibitor exists' to 'one has been reported'. It does not supply a "
+                         "number.",
+}
+
+WHAT_HAS_CLOSED_ON_THE_PARALLEL_ARM = {
+    "citation": "Nature 2026, 'Targeting FSP1 triggers ferroptosis in lung cancer', PMID 41193800, "
+                "doi 10.1038/s41586-025-09710-8",
+    "the_biology": "GPX4 and FSP1 are the two arms of the same lipid-peroxidation defence. Tumour-"
+                   "specific loss of EITHER 'increased lipid peroxidation and robust suppression of "
+                   "tumorigenesis'.",
+    "the_finding_that_changes_the_picture": "'FSP1 was required for ferroptosis protection IN VIVO, "
+                                            "BUT NOT IN VITRO, underscoring a heightened need to "
+                                            "buffer lipid peroxidation under physiological "
+                                            "conditions.'",
+    "why_that_matters": "it says in vitro assays UNDERSTATE how much a tumour depends on this defence "
+                        "in a living animal. Every transfer estimate in this module is computed from "
+                        "in vitro potency, so this cuts in the conservative direction.",
+    "the_drug": "icFSP1, 'the first inhibitor of human FSP1 with IN VIVO STABILITY AND EFFICACY'",
+    "the_dosing_that_was_actually_used": "'mice were dosed with 50 mg kg-1 icFSP1 or vehicle (45% "
+                                         "PEG300 in sterile PBS) by INTRAPERITONEAL injection TWICE "
+                                         "DAILY'",
+    "the_result": "'FSP1 inhibition as a monotherapy improved overall survival of mice bearing lung "
+                  "tumours, almost to the same extent as genetic Fsp1 deletion', and 'icFSP1 "
+                  "treatment significantly decreased PDX tumour growth'",
+    "the_on_target_control": "icFSP1 extended survival in tumours expressing wild-type human FSP1 but "
+                             "NOT in tumours expressing the icFSP1-resistant FSP1(Q319K) mutant -- so "
+                             "the benefit is inhibitor activity on the tumour cells, not an off-target "
+                             "or microenvironmental effect.",
+    "the_rescue_control": "liproxstatin-1 co-treatment abrogated the tumour suppression, confirming "
+                          "the mechanism is lipid peroxidation.",
+    "the_caveat_the_authors_state": "most FSP1 inhibitors 'are effective only in vitro against human "
+                                    "FSP1 in the context of GPX4 loss or inhibition', and icFSP1's "
+                                    "prior in vivo efficacy was 'solely in tumours with concomitant "
+                                    "GPX4 loss'. This paper's contribution is showing monotherapy "
+                                    "benefit where the tumour is already ferroptosis-primed.",
+    "the_inference_that_is_tempting_and_is_not_made_here": "a persister is a cell in a state of "
+                                                           "heightened GPX4 dependence, so it is "
+                                                           "tempting to say it is exactly the "
+                                                           "'GPX4-compromised' context where FSP1 "
+                                                           "inhibitors work. That is a plausible "
+                                                           "chain and it is UNTESTED. No experiment "
+                                                           "in either paper puts an FSP1 inhibitor on "
+                                                           "a drug-tolerant persister. It is written "
+                                                           "down as a hypothesis, not counted as "
+                                                           "evidence.",
+    "the_delivery_problem_it_does_not_solve": "twice-daily intraperitoneal injection is a mouse "
+                                              "route. It is not a ten-year canine route. This clears "
+                                              "the exposure criterion in a rodent and says nothing "
+                                              "about the duration criterion in a dog.",
+}
+
+# =============================================================================================
+# 4. THE DISEASE-SPECIFIC ANCHOR THAT WAS THERE ALL ALONG.
+#
+# `hsa_orthogonal_kill` cited Chatterji for the general claim that canine cells are
+# ferroptosis-competent, and treated the disease-specific question as open. A PubMed search for
+# "hemangiosarcoma ferroptosis" returns ZERO results, which is what made it look open. The tumour
+# type is in the panel; it is just recorded in a supplementary table that the indexed text does
+# not cover.
+# =============================================================================================
+
+CANINE_HEMANGIOSARCOMA_IS_IN_THE_FERROPTOSIS_PANEL = {
+    "citation": "Chatterji et al. 2024, bioRxiv 2024.04.28.591561, PMID 38746359, "
+                "doi 10.1101/2024.04.28.591561",
+    "the_panel": "31 canine cancer cell lines from the Flint Animal Cancer Center panel, profiled "
+                 "against 14 compounds covering GPX4 modulators (RSL3, ML210, JKE-1674, FIN56), a "
+                 "cystine transport inhibitor (IKE), glutathione biosynthesis inhibitors (L-BSO, "
+                 "KOJ-1) and pro-oxidants (FINO2, jacaric acid)",
+    "the_hemangiosarcoma_lines": ("Cindy-HSA", "Den-HSA", "SB"),
+    "line_provenance": {
+        "Den-HSA": "Golden Retriever, male castrate; VEGFR2, aVB3 integrin and fVIII-ra positive",
+        "SB": "German Shepherd, male; TP53, PIK3CA and EP300 mutant",
+        "Cindy-HSA": "female; further detail not collected",
+    },
+    "why_the_provenance_matters": "Den-HSA is from the breed this analysis is about, and SB carries "
+                                  "a PIK3CA mutation -- the lesion the primary regimen targets. These "
+                                  "are not distant proxies.",
+    "the_lineage_result": "'Epithelial cancers (carcinomas) were enriched in the "
+                          "ferroptosis-INSENSITIVE cluster, while SARCOMAS, undifferentiated "
+                          "melanomas and hematological malignancies were ENRICHED FOR SENSITIVITY to "
+                          "ferroptosis.' Separately: 'Rank ordering cell lines by sensitivity "
+                          "indicates selectivity for killing NON-EPITHELIAL cells for ML210 but not "
+                          "doxorubicin.'",
+    "why_that_lands_on_this_disease": "hemangiosarcoma is a sarcoma of endothelial origin -- "
+                                      "non-epithelial, mesenchymal. It sits in the class the panel "
+                                      "found enriched for sensitivity, and the selectivity is "
+                                      "specific to the GPX4 inhibitor rather than to cytotoxicity in "
+                                      "general, since doxorubicin showed no such lineage pattern.",
+    "the_mesenchymal_link_to_the_persister_state": "Hangauer's persisters occupy a 'high-mesenchymal "
+                                                   "therapy-resistant state'. The lineage the canine "
+                                                   "panel found most ferroptosis-sensitive is the "
+                                                   "lineage the persister state resembles. In this "
+                                                   "tumour the two arguments point the same way "
+                                                   "instead of having to be bridged.",
+    "the_conservation_claim": "'characteristic patterns of ferroptotic response across tumor types "
+                              "seen in the human setting' are recapitulated, specifically including "
+                              "'heightened sensitivity of mesenchymal tumor types'.",
+    "what_this_does_not_establish": "per-line AUC values for the three hemangiosarcoma lines are in "
+                                    "figure heatmaps and supplementary tables that could not be "
+                                    "extracted, so it is NOT established that these three lines fell "
+                                    "in the sensitive cluster. The class-level result is what is "
+                                    "recorded. A line-level claim would be an inference dressed as a "
+                                    "measurement.",
+    "the_status_caveat": "still a preprint, not peer-reviewed at the time of writing. Recorded here "
+                         "again rather than once, because this module leans on it harder than "
+                         "`hsa_orthogonal_kill` did.",
+    "and_the_wrong_test": "these are PARENTAL lines, not persisters derived from them. The Hangauer "
+                          "claim is about the drug-tolerant state. Nobody has derived persisters from "
+                          "Cindy-HSA, Den-HSA or SB and tested them. That is the missing experiment, "
+                          "and it is now a specific one with named reagents rather than a wish.",
+}
+
+# =============================================================================================
+# 5. TRANSFER REQUIRED, ACROSS THE RANGE OF POTENCIES THE ASSAY MIGHT HAVE SHOWN.
+#
+# Since the published per-line viability could not be read off, the requirement is computed against
+# a spread of assumptions. The point is not to pick one; it is to show that the conclusion is the
+# same across all of them, including the pessimistic end.
+# =============================================================================================
+
+_ASSUMED_THREE_DAY_VIABILITIES = (0.75, 0.50, 0.30, 0.20, 0.10)
+
+TRANSFER_REQUIRED_BY_ASSUMED_POTENCY = {
+    v: {
+        "implied_rate_per_day": rate_from_burden_reduction(v, PERSISTER_ASSAY_DAYS),
+        "transfer_required_for_0_045": transfer_required_from_viability(v),
+        "transfer_required_for_0_040": transfer_required_from_viability(
+            v, required=FIRST_NONZERO_PERSISTER_RATE_PER_DAY),
+    }
+    for v in _ASSUMED_THREE_DAY_VIABILITIES
+}
+
+HOW_THE_TRANSFER_ASK_COMPARES = {
+    "the_range": "even at the most pessimistic assumption tested -- a three-day assay killing only a "
+                 "quarter of persisters -- the transfer required is about 47%. At a 50% three-day "
+                 "kill it is about 19%, and at the near-elimination the paper's language implies it "
+                 "is under 10%.",
+    "the_comparison": "the three vaccine-height routes needed 7-45% of their measured effect to "
+                      "transfer, and routes 1 and 2 were judged plausible on that basis. The "
+                      "persister route sits in the same band under any assumption except the very "
+                      "weakest.",
+    "what_this_overturns": "`hsa_orthogonal_kill.IT_WORKS_BUT_IT_IS_A_KNIFE_EDGE` says this route "
+                           "'has no measured effect size at all in this compartment, and would need "
+                           "essentially all of whatever it has'. The second half of that is WRONG and "
+                           "is withdrawn. It needs a minority of what the assay shows, because the "
+                           "requirement in assay units is small.",
+    "what_it_does_not_overturn": "the first half stands in weakened form. There is still no measured "
+                                 "in vivo per-day rate for a ferroptosis DRUG against persisters; "
+                                 "there is an in vivo relapse-prevention result for target removal, "
+                                 "and in vitro potency for tool compounds. The transfer figures above "
+                                 "are computed from assumed in vitro numbers, and are therefore a "
+                                 "sensitivity analysis rather than a measurement.",
+    "the_direction_of_the_remaining_uncertainty": "in vitro-to-in vivo transfer for this mechanism is "
+                                                  "argued by the FSP1 result to be BETTER than in "
+                                                  "vitro suggests, since the lipid-peroxidation "
+                                                  "defence matters more under physiological "
+                                                  "conditions. That is one paper in one tumour type "
+                                                  "and it is not treated as settled.",
+}
