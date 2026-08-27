@@ -1,10 +1,21 @@
 # Deposit & posting kit — MTAP/PRMT5 canine HS hypothesis note
 
-Goal: maximum reach, minimal interfacing. The plan is a **permanent citable deposit**
-(Zenodo) plus an **optional preprint** that pushes the note into researchers' keyword
-alert feeds. You upload once and you are done; nothing obliges you to respond to anyone.
+Goal: maximum reach, minimal interfacing. You upload once and you are done; nothing
+obliges you to respond to anyone. The uploadable file is **`hypothesis_note.pdf`**.
 
-The uploadable file is **`hypothesis_note.pdf`** (in this folder).
+**Recommended plan (updated):**
+- **Primary — Preprints.org** (Route A): accepts an honest hypothesis note *as-is*, gives
+  a permanent DOI, is indexed by Google Scholar/Crossref → better field reach than Zenodo,
+  near-certain acceptance. This is the best fit for your goals.
+- **Permanence anchor — Zenodo** (Route B): guaranteed, permanent, zero screening. Do this
+  too, or instead, if you just want the record to exist forever. (Note: this field does not
+  browse Zenodo, so its reach is search-only.)
+- **Skip bioRxiv for now** (Route C): its policy is that all articles must contain data and
+  that commentaries/hypothesis pieces are *not* accepted — so it would very likely reject
+  this note as written. Details in Route C.
+
+Post to **one** preprint server (duplicate preprints are discouraged). Preprints.org for
+reach, plus Zenodo if you want a second permanent copy, is the sweet spot.
 
 ---
 
@@ -38,44 +49,59 @@ researcher searches — the terms above appear in the first two sentences on pur
 
 ---
 
-## Route A — Zenodo (do this one; guaranteed, permanent, zero screening)
+## Route A — Preprints.org (recommended primary)
+
+Free, run by MDPI, gives a permanent DOI, indexed by Google Scholar and Crossref, and it
+**accepts hypothesis/perspective pieces** — so the note goes as-is, no reframing. Light
+editorial screening (scope / plagiarism / not-offensive), usually cleared in a few days.
+
+1. Go to **preprints.org** → **Submit** → create an account (or log in).
+2. Upload **`hypothesis_note.pdf`** as the manuscript. (PDF is accepted; if it asks for a
+   source file, the PDF is fine for a preprint.)
+3. Fields to paste:
+   - **Title / Abstract / Keywords** — from the metadata block above.
+   - **Author**: Wes Wang. **Affiliation**: put **Unaffiliated** (the field is required).
+     **Email**: your dedicated address.
+   - **Subject category**: *Medicine & Pharmacology → Oncology* (or *Biology & Life
+     Sciences*); note it concerns veterinary / comparative oncology.
+   - **License**: CC BY 4.0.
+   - **Conflicts / funding**: none. **AI disclosure**: state that the analysis was prepared
+     with AI assistance and you take responsibility (already in the note's Limitations).
+4. Submit. After the short screen it posts with a DOI and is picked up by Scholar.
+
+**Fallback if Preprints.org stalls: Research Square.** Same idea — free standalone preprint,
+DOI, indexed. Go to **researchsquare.com**, "Post a preprint," same fields as above.
+
+---
+
+## Route B — Zenodo (permanence anchor; do in addition, or if you skip preprints)
 
 1. Go to **zenodo.org**, sign in (GitHub or ORCID login works).
 2. **New upload** → drag in `hypothesis_note.pdf`.
 3. Fill the fields from the metadata block above. Resource type = *Preprint*. License = *CC-BY-4.0*.
 4. (Optional) Under **Related identifiers**, add the repo URL
    `https://github.com/weston-wang/canine-genome-dsp` as *"is supplemented by"*.
-5. **Publish.** You get a permanent DOI immediately. It is indexed by Google Scholar within days.
+5. **Publish.** Permanent DOI immediately; indexed by Google Scholar within days.
 
-That is the whole deposit. Findable forever, citable, no inbox.
+Guaranteed and permanent, but search-only reach — this field does not browse Zenodo.
 
-### Optional one-liner: mint the DOI straight from the repo instead
-Zenodo has a GitHub integration (Account → GitHub → flip the repo **on**, then cut a
-release). That gives the *code* its own DOI automatically. Use this in addition to the
-PDF deposit if you want the software itself citable.
+### Optional: mint a DOI straight from the repo
+Zenodo → Account → GitHub → flip the repo **on**, then cut a release; Zenodo auto-creates a
+record for the *code*. Use in addition if you want the software itself citable.
 
 ---
 
-## Route B — a preprint, for the alert-driven reach (optional, higher reach)
+## Route C — bioRxiv (not recommended for this note)
 
-A preprint is the same kind of permanent DOI deposit, but it is indexed where
-researchers browse and it triggers their standing keyword alerts ("histiocytic
-sarcoma", "MTAP") — targeted reach to the right people with no outreach from you.
-
-Recommended order, because of screening risk on a no-new-data, AI-assisted note:
-
-1. **Preprints.org** or **Research Square** — permissive of independent authors and
-   hypothesis pieces, give a DOI and indexing, light screening. Most likely to accept
-   as-is. Upload the same PDF + metadata.
-2. **bioRxiv** (biorxiv.org) — highest reach and best alerting, but it screens
-   submissions and can decline a purely computational hypothesis note with no data.
-   Worth trying first *only if* you don't mind a possible "not accepted" reply
-   (that itself is the only back-and-forth, and it's ignorable). List affiliation as
-   *Independent Researcher*; disclose AI assistance in the methods/acknowledgements
-   (already stated in the note).
-
-Post to **one** preprint server, not several (duplicate preprints are discouraged).
-Zenodo + one preprint is the sweet spot.
+bioRxiv has the best field reach, **but** its stated policy is that *all article types must
+contain data* and that *narrative reviews, commentaries, and opinion/hypothesis pieces are
+not acceptable article types* (biorxiv.org/submit-a-manuscript). This note is a hypothesis
+piece with no new data, so it would very likely be screened out (~80%). The only way onto
+bioRxiv would be to **restructure it as a computational modeling *research article***
+(Methods = the model; Results = the durability outputs) — which means presenting the
+illustrative probabilities as headline results, the overstatement we deliberately avoided.
+Not worth it here. If you ever generate real MTAP-frequency or PRMT5-sensitivity data,
+*that* paper belongs on bioRxiv.
 
 ---
 
