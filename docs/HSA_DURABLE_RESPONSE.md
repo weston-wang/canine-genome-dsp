@@ -1164,6 +1164,97 @@ surgical and chemotherapy backbone, gated on recovered effector function — not
 
 ---
 
+## 3h. The antigen gap — route 8
+
+Every route above assumes the vaccine's target is on the cells. The model has always represented
+antigen **loss** — a variant arises by mutation and stops displaying the target (route 4). It never
+represented antigen **inadequacy**: the target not being there on day zero.
+
+Easy to conflate, because both end with cells the vaccine cannot see. The arithmetic is completely
+different. A loss variant starts at zero and must be seeded at 1e-8/day against a shrinking
+population. An inadequacy fraction starts at whatever fraction it is and never had to arise.
+
+And it is load-bearing: **all three routes to raising vaccine height assume the antigen works.** If
+the target is wrong, checkpoint blockade, losartan and re-dosing are worth nothing, and the model
+would not notice.
+
+**Calviri's VACCS makes it concrete.** 800+ dogs, randomized, placebo-controlled, 31 defined
+RNA-error-derived neoantigens drawn from eight canine cancers **including hemangiosarcoma**. Reported
+outcome: mast cell and adrenal tumours reduced, **hemangiosarcoma not**. Johnston: *"We now know why
+— we just didn't put the right components in."* (Provenance caveat: that comes from a CEO interview
+in a consumer outlet; the primary efficacy analysis is still unpublished two years after the trial
+closed. Directionally informative, not established.)
+
+### Three modes, and only one is a height problem
+
+| mode | what it is | fixable by more height? |
+|---|---|---|
+| **uniform** | every cell dimmer | **yes** — reduces exactly to a height change |
+| **heterogeneous** | some cells never display it | **no** |
+| **inter-patient** | fits some dogs, not others | no — change the antigen, not the adjuvant |
+
+### The engine inverted my expectation
+
+At the plan's operating point (height 0.042, second drug stopped at year 1):
+
+| coverage | uniform (dimmer) | heterogeneous (blind spot) |
+|---|---|---|
+| 100% | 0.864 | 0.864 |
+| 95% | 0.708 | 0.864 |
+| 90% | 0.648 | 0.864 |
+| 80% | 0.496 | 0.864 |
+| 60% | 0.500 | 0.860 |
+| **40%** | **0.276** | **0.848** |
+
+I expected the blind spot to be far worse. **It's the reverse** — the blind spot barely moves while
+uniform dimming collapses.
+
+**Why:** the antigen-null cells are drug-*sensitive*, and the first drug runs continuously for all
+ten years. It holds them whatever the vaccine can see. Uniform dimming instead weakens the vaccine
+on the drug-*resistant* clones — and covering those is the vaccine's entire job in this plan.
+
+**So antigen coverage isn't the decisive variable. Whether the antigen covers the drug-resistant
+cells is.**
+
+*The caveat that matters:* this follows from a modelling choice — that the antigen-null fraction
+inherits the sensitive clone's drug response. That choice is doing the work, and the case it excludes
+is the dangerous one: a blind spot that overlaps drug resistance, covered by nothing.
+
+### That redirects the experiment
+
+**Wrong experiment:** quantitative IHC for antigen coverage across bulk tumour. **Right experiment:**
+coverage measured *in the drug-resistant fraction* — cells surviving PI3K/mTOR inhibition. One stain
+on treated versus untreated cells, in models that already exist (Andersen's tumorgrafts, ISOS-1).
+
+### Closing it — four legs, none of which needs to know the antigen
+
+1. **The drug absorbs it.** A drug-sensitive blind spot costs nothing down to 40% coverage, because
+   the first drug never stops. *Conditional on no overlap with resistance.*
+2. **Polyvalent tumour-derived vaccines can't have a coverage gap** — their antigens come from the
+   tumour. Both positive HSA vaccine results are of this type. Cost: per-dog manufacture, which is
+   exactly what Calviri calls *"impractical… and prohibitively expensive for use in dogs."*
+3. **Epitope spreading repairs coverage.** NEO-PV-01 in 38 NSCLC patients: *"Epitope spread to
+   **non-vaccinating** neoantigens, including responses to KRAS G12C and G12V"* (PMID 36027916). A
+   defined-antigen vaccine ending up covering antigens it never contained.
+4. **You can force the spreading without knowing the antigen.** RNA lipid particle aggregates,
+   given systemically with **tumour-unspecific** RNA, activate RIG-I in stromal cells — and *"in
+   client-owned canines with terminal gliomas, RNA-LPAs improved survivorship and reprogrammed the
+   TME, which became 'hot' within days of a single infusion"* (PMID 38697107). The companion study
+   shows this is what enables epitope spreading (PMID 40681861). **This attacks route 8 and routes
+   1–2 with one agent.**
+
+**NK cells do *not* close this**, despite being antigen-agnostic and already in the regimen.
+Missing-self recognition needs MHC-I downregulation, so it covers route 4's antigen loss — not a
+target that was never displayed on cells with intact presentation. Listing it here would repeat the
+exact conflation this section exists to undo.
+
+*Nothing in the four legs has been tested in canine hemangiosarcoma. Route 8 is closable on paper and
+on mechanism, in the same sense and with the same caveats as every other route here.*
+
+*Tests: `test_hsa_antigen_adequacy.py`*
+
+---
+
 ## 4. Escape routes
 
 | # | Route | Status |
@@ -1175,7 +1266,7 @@ surgical and chemotherapy backbone, gated on recovered effector function — not
 | 5 | splenic rupture / haemorrhage | **OPEN** → partially closed (§5) |
 | 6 | vaccine failure without antigen loss | **OPEN** → closable (§5) |
 | 7 | disease outside the resected compartment | **OPEN** → already closed (§5) |
-| 8 | **antigen inadequacy on day zero** | **OPEN** — added §3h; distinct from route 4 and not closable by height |
+| 8 | antigen inadequacy on day zero | **CLOSED conditionally** (§3h) — absorbed by the continuous first drug unless the blind spot overlaps drug resistance |
 
 Routes 1–3 are closed **by construction, not by potency**: none of these resistance lesions requires
 shedding the antigen a real HSA vaccine targets, so the vaccine still sees those cells. Route 3 sets
