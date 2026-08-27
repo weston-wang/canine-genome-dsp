@@ -1399,6 +1399,15 @@ the 75%.**
 **Verdict on the persister route alone: closable, not closed.** The mechanism is right, the species and disease evidence exists,
 an orally dosed agent exists — and the required rate has never been measured for any of them.
 
+> **Superseded in part by §3i.** Two of the pessimistic statements in this subsection are too strong.
+> "No anchor for the rate" overstates the vacuum — Hangauer's in vivo arm measures relapse versus no
+> relapse on *residual* tumour under continued targeted therapy, which is this model's own endpoint on
+> the right compartment. And the persister route does not need "essentially all" of its measured
+> effect: the requirement converts to a 12.6% three-day kill, so 6–47% transfer suffices. §3i also
+> replaces the "0.050/day forever" column above with a **one-year course at 0.090/day**, which changes
+> the toxicity comparison between the two routes. What survives unchanged: the in vivo arm is a genetic
+> knockout, not a drug.
+
 **And do the cheap step first:** stain canine HSA for the vaccine antigen before and after PI3K/mTOR
 inhibition. If coverage is retained on drug-tolerant cells, none of this is needed and route 8 stays
 benign. That one stain is the difference between a cheap answer and an expensive programme.
@@ -1586,6 +1595,109 @@ nobody has yet dosed for longer.
 
 Which makes one question decisive: **does this agent actually have to run for ten years?**
 
+### It does not — and the answer has a closed form
+
+Hangauer's own conclusion points away from permanent dosing: persisters are *generated* by the
+targeted therapy, 24h of RSL3 pre-treatment reduces the pool that survives it, persisters retain full
+sensitivity for at least two weeks after washout, and "pre- or post-treatment with GPX4 inhibitors,
+rather than co-treatment, may be adequate to deplete the pool of persister cells."
+
+**One modelling decision does all the work here, so it goes before the result.** `simulate_resistance`
+tracks a continuous fraction of carrying capacity with no lower bound — a clone driven to 10⁻³⁰ of
+carrying capacity, which is 10⁻²⁰ of a single cell, regrows when the pressure stops. For a permanent
+kill that is harmless. For a finite course it is decisive, and it is a numerical artifact. So the
+finite schedules were run **with** an extinction floor that zeroes any clone below one cell (10⁻¹⁰ of
+carrying capacity, from `TUMOR_CELLS = 1e10`) at the end of the course — and **without** it, as a
+control.
+
+| applied kill/day | continuous (3620 d) | two years (700 d) | drug year (335 d) | 14/14 pulsed in yr 1 (167 d) | six months (152 d) |
+|---|---|---|---|---|---|
+| 0.040 | 0.117 | 0.000 | 0.000 | 0.000 | 0.000 |
+| 0.050 | **1.000** | 0.000 | 0.000 | 0.000 | 0.000 |
+| 0.075 | 1.000 | **1.000** | 0.000 | 0.000 | 0.000 |
+| 0.100 | 1.000 | 1.000 | **1.000** | 0.000 | 0.000 |
+
+**A one-year course closes it at 0.100/day.** The agent does not have to run for ten years.
+
+### Why — the requirement is a fixed amount of work, not a rate
+
+Instrumenting the clone trajectories gives the mechanism exactly. The blind spot starts at 0.015 of
+carrying capacity — **1.5 × 10⁸ cells** — and the course has to drive it below **one cell** before it
+stops. That is ~19 natural logs of net decline, and the agent has to out-run the compartment's own
+growth to deliver them. Measuring that growth offset at three separate applied rates gave 0.0333,
+0.0335, 0.0335 — so:
+
+> **applied rate ≥ 0.0334 + ln(N₀) / course_days**
+
+This predicts every simulated threshold: continuous 0.039 (observed boundary at 0.040 → 0.117), two
+years 0.060 (0.050 fails, 0.075 works), drug year 0.090 (0.075 fails, 0.100 works), pulsed 0.146 and
+six months 0.157 (both fail at every rate tested). **Its two constants come from clone trajectories,
+not from durability values — it is a prediction, not a fit.**
+
+It also shows the result is robust to the quantity it is least sure of: the requirement depends on the
+blind spot's size only through ln(N₀), so a ten-fold error moves the one-year requirement by
+ln(10)/335 = 0.007/day against a 0.090 ask.
+
+### The exchange rate, and what it buys
+
+| course | agent-days | required rate | as a 3-day kill | shortfall vs icFSP1's 14 documented days |
+|---|---|---|---|---|
+| continuous | 3620 | 0.039/day | 11% | 259× |
+| two years | 700 | 0.060/day | 17% | 50× |
+| **one year** | **335** | **0.090/day** | **24%** | **24×** |
+| six months | 152 | 0.157/day | 38% | *fails at every rate tested* |
+
+Cutting ten years to one costs **roughly a doubling of the rate — a three-day kill going from 14% to
+26%.** Both are modest against a mechanism whose tool compounds are "among the compounds most
+selectively lethal to persister cells." And it drops the duration shortfall from **261× to 24×**: the
+difference between a category problem and an ordinary drug-development one.
+
+**Pulsing does not work, and that is a result against my own convenience.** 14-on/14-off through the
+drug year halves the agent-days and returns 0.000 — so the two-week retained-sensitivity window in
+Hangauer's washout experiment does *not* license a duty cycle. The course has to be continuous while
+it runs. It just does not have to run forever.
+
+### The control, which shows this all rests on one assumption
+
+Without the extinction floor, at the same 0.100/day: continuous 1.000, two years **0.000**, drug year
+**0.000**, pulsed **0.000**. **The difference between "a one-year course closes route 8" and "only
+permanent dosing closes it" is exactly the floor.** That is not a caveat at the margin.
+
+The floor is the right choice — a clone below one cell is gone, and the alternative is a numerical
+artifact — but three things could still make it wrong:
+
+- **Stochasticity.** The model is deterministic near extinction and treats one cell as a hard
+  boundary. At 0.075/day a one-year course leaves ~140 cells and returns 0.000; at 0.100/day it
+  reaches ~0.03 of a cell and returns 1.000. **The decision is made in a two-log window — precisely
+  where a deterministic model is least trustworthy.** A birth-death formulation would replace the step
+  with an extinction probability. I have not run one.
+- **Sanctuary sites.** The compartment is modelled as well-mixed and uniformly exposed. Any site the
+  agent does not reach breaks the extinction argument outright.
+- The reassuring one: **logarithmic sensitivity to N₀**, as above.
+
+### Verdict on route 8's dangerous case
+
+**CLOSED CONDITIONAL ON A NAMED EXPERIMENT** — stronger than "closable," weaker than "closed."
+
+What changed: the requirement is a 12.6% three-day kill needing 6–47% transfer, not "essentially
+everything it has"; the in vivo endpoint match exists and is on residual disease; the disease and
+species anchors exist with named cell lines; and the ten-year dosing assumption that made the duration
+criterion fatal is not what the biology indicates.
+
+What did not: **no drug has been shown to do it.** Every closure above is a target-level or
+class-level result plus a modelling argument, and the finite-course argument depends on a
+deterministic extinction floor. Eight items remain open in
+`hsa_persister_evidence.WHAT_IS_STILL_NOT_CLOSED`.
+
+**The named experiment, with reagents that already exist:** derive persisters from Cindy-HSA, Den-HSA
+and SB under PI3K/mTOR inhibition; measure their three-day viability under a GPX4 or FSP1 inhibitor;
+convert with `rate_from_burden_reduction`; compare against `required_rate_for_course(335)` = **0.090/day.**
+
+**But do the antigen-retention stain first.** It costs one experiment and can make all of the above
+unnecessary.
+
+*Tests: `test_hsa_persister_evidence.py`*
+
 ---
 
 ## 4. Escape routes
@@ -1599,7 +1711,7 @@ Which makes one question decisive: **does this agent actually have to run for te
 | 5 | splenic rupture / haemorrhage | **OPEN** → partially closed (§5) |
 | 6 | vaccine failure without antigen loss | **OPEN** → closable (§5) |
 | 7 | disease outside the resected compartment | **OPEN** → already closed (§5) |
-| 8 | antigen inadequacy on day zero | **CLOSED at a cost** (§3h) — harmless if drug-sensitive; if it overlaps resistance, needs 75% restored antigen presentation **plus the second drug continued indefinitely** (0.873) |
+| 8 | antigen inadequacy on day zero | **CLOSED conditional on a named experiment** (§3h, §3i) — harmless if drug-sensitive. If it overlaps resistance: either 75% restored antigen presentation plus the second drug continued indefinitely (0.873), or a **one-year** persister-directed ferroptosis course at 0.090/day (1.000). The second needs a 24% three-day kill and 6–47% transfer — but rests on a deterministic extinction floor, and no drug has been shown to do it |
 
 Routes 1–3 are closed **by construction, not by potency**: none of these resistance lesions requires
 shedding the antigen a real HSA vaccine targets, so the vaccine still sees those cells. Route 3 sets
@@ -1824,6 +1936,31 @@ adds to vaccine height in this tumour. That is the single number the plan now st
 and unlike a decade of safety data, it can be measured in months in a syngeneic model that now
 exists.
 
+**The one route with no answer now has two, and the harder one has a measured basis** (§3h, §3i). A
+blind spot that is both invisible to the vaccine and drug-resistant returned 0.000, and continuous
+dosing did not rescue it. Either restore presentation (75% restored, drug continued indefinitely →
+0.873) or kill the cell through what it had to become to survive: drug-tolerant persisters acquire a
+GPX4 dependency, and removing it prevented relapse in *residual* tumour under continued targeted
+therapy — this model's own endpoint on the right compartment.
+
+Converting that requirement into the units the assays report is what changed the picture. A sustained
+0.045/day is a **12.6% kill over three days** — the window Hangauer's assays actually run — so 6–47%
+transfer suffices, the same band as the vaccine-height routes. And the agent does **not** need a
+decade: the course has to do a fixed amount of work, driving the blind spot from 1.5 × 10⁸ cells below
+one, which gives a closed form (`applied ≥ 0.0334 + ln N₀ / days`) that predicts every simulated
+threshold. **A one-year course at 0.090/day reaches 1.000**, cutting the duration shortfall from 261×
+to 24×. The disease-specific anchor exists too — three canine hemangiosarcoma lines sit in the canine
+ferroptosis panel, one from a Golden Retriever and one PIK3CA-mutant, in the sarcoma class that
+clustered ferroptosis-*sensitive*.
+
+**What that does not amount to is a closed route.** The in vivo arm is a genetic knockout, not a drug;
+the field's own 2026 verdict on GPX4 inhibitors is "high toxicity, poor selectivity and low-to-limited
+bioavailability"; no persister has ever been derived from those three canine lines; and the entire
+finite-course result rests on a deterministic extinction floor whose decisive calls happen in a
+two-log window. It is **closed conditional on a named experiment** — derive persisters from Cindy-HSA,
+Den-HSA and SB, measure a three-day viability, compare against 0.090/day — and the antigen-retention
+stain still comes first, because it can make all of it unnecessary.
+
 **Which leaves bleeding as the binding constraint on survival**, not the cancer. Every escape route
 now has an answer on paper; the one that does not is answered by a screening test rather than a drug,
 and it is the difference between roughly 0.53 and 0.85 at ten years.
@@ -1848,3 +1985,13 @@ and it is the difference between roughly 0.53 and 0.85 at ten years.
 6. **Adopt the two-compartment model** the engine already provides.
 7. **Add a rupture hazard** once any real rate exists. Until then these are figures for cancer
    regrowth, not for dogs dying of hemangiosarcoma.
+8. **Stain canine HSA for the vaccine antigen before and after PI3K/mTOR inhibition** (§3h). One
+   experiment, and if coverage is retained on drug-tolerant cells it makes §3i unnecessary entirely.
+9. **Derive persisters from Cindy-HSA, Den-HSA and SB and measure their three-day viability under a
+   GPX4 or FSP1 inhibitor** (§3i). The reagents exist and the comparison is a single number:
+   `required_rate_for_course(335)` = 0.090/day. Every ferroptosis result in this analysis is on
+   *parental* lines, which is the wrong cell.
+10. **Re-run the finite schedules stochastically.** The one-year result depends on a deterministic
+    extinction floor; a birth–death formulation would replace the step with an extinction probability
+    and give a real number for the 0.075/day case instead of a 0.000 that means "about a hundred cells
+    left."
