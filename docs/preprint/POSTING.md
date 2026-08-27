@@ -3,21 +3,24 @@
 Goal: maximum reach, minimal interfacing. You upload once and you are done; nothing
 obliges you to respond to anyone. The uploadable file is **`hypothesis_note.pdf`**.
 
-**Recommended plan:**
-- **Primary — OSF Preprints** (Route A): run by the *Center for Open Science* (nonprofit,
-  clean reputation, no publisher baggage, minimal email spam). Accepts an honest hypothesis
-  note *as-is*, gives a permanent DOI, indexed by Google Scholar → better field reach than
-  Zenodo, near-certain acceptance. Best fit for your goals.
-- **Fallback — Research Square**: legitimate, established (powers Springer Nature's "In
-  Review"), free to post, DOI, Scholar-indexed. Commercial but not controversial. Use if
-  OSF stalls.
+**Recommended plan (updated Aug 2025):**
+- **~~OSF Preprints~~ — no longer usable.** OSF **suspended its generalist preprint server
+  on 8/25/2025**; only discipline-specific community servers (psychology/social science/
+  education) remain, none fitting canine oncology. Skip OSF.
+- **Primary — Research Square** (Route A): multidisciplinary, free, permanent DOI,
+  Scholar-indexed, no "must-contain-data" rule → accepts the honest note as-is. Legitimate
+  (powers Springer Nature's "In Review"); commercial but not controversial. Confirmed open.
+  Tip: upload a **.docx** if you have one — Research Square renders Word files as full-text
+  HTML, which is more discoverable than a PDF-only record.
 - **Permanence anchor — Zenodo** (Route B): guaranteed, permanent, zero screening. Do this
-  too, or instead, if you just want the record to exist forever. (This field does not browse
-  Zenodo, so its reach is search-only.)
+  too, or instead, if you just want the record to exist forever. (Search-only reach.)
+- **Also fine — Preprints.org** (MDPI): works and is biomedical-appropriate, but expect
+  heavy journal-solicitation email and a mixed publisher reputation. Use only if you prefer
+  it to Research Square.
 - **Skip bioRxiv** (Route C): its policy requires data and excludes commentary/hypothesis
-  pieces, so it would very likely reject this note as written. Details in Route C.
+  pieces, so it would very likely reject this note as written.
 
-Post to **one** preprint server (duplicate preprints are discouraged). OSF Preprints for
+Post to **one** preprint server (duplicate preprints are discouraged). Research Square for
 reach, plus Zenodo if you want a second permanent copy, is the sweet spot.
 
 ---
@@ -52,35 +55,29 @@ researcher searches — the terms above appear in the first two sentences on pur
 
 ---
 
-## Route A — OSF Preprints (recommended primary)
+## Route A — Research Square (recommended primary)
 
-Run by the **Center for Open Science** (nonprofit). Free, permanent DOI, indexed by Google
-Scholar, accepts hypothesis/theoretical pieces (no "must contain data" rule), light
-moderation for scope/appropriateness. Clean reputation, minimal solicitation email.
+Multidisciplinary, free, permanent DOI, Google Scholar-indexed, no "must-contain-data" rule.
+Screening is light (complete author info, declaration statements, health-risk check).
 
-1. Go to **osf.io** → create a free account (or log in). Confirm your email.
-2. Top menu → **Create new** → **Preprint**. Choose the provider **OSF Preprints** (the
-   general one), not a branded community.
-3. **Upload** `hypothesis_note.pdf` as the preprint file.
-4. Fields to paste:
+1. Go to **researchsquare.com/submit** → create an account (or log in). Confirm email.
+2. **Upload** the manuscript. **Prefer a `.docx`** if available — Research Square renders
+   Word files as **full-text HTML** (more discoverable); `hypothesis_note.pdf` also works.
+3. Fields to enter:
    - **Title / Abstract / Keywords** — from the metadata block above.
-   - **Authors**: Wes Wang. (Affiliation optional on OSF — leave blank, or "Unaffiliated".)
-     Add your dedicated email as contact.
-   - **Subjects** (OSF taxonomy): *Medicine and Health Sciences → Oncology* (and/or
-     *Life Sciences*). It concerns veterinary / comparative oncology.
-   - **License**: CC BY 4.0.
-   - **Conflicts / funding**: none. AI assistance is already disclosed in the note's
-     Limitations; no extra field needed.
-5. **Submit.** After a brief moderation it posts with a DOI and is picked up by Scholar.
+   - **Article type**: pick the closest available to a hypothesis/perspective. If there is no
+     "Hypothesis" option, choose **Research Article** (their screen is about completeness and
+     health-risk, not requiring data).
+   - **Area of study / subject**: **Oncology** (and/or Biology / Veterinary Medicine).
+   - **Authors**: Wes Wang. Affiliation: **Unaffiliated** if required; dedicated email.
+   - **Declarations**: **Competing interests** = none; **Funding** = none; **Data
+     availability** = no new data (optionally link `github.com/weston-wang/canine-genome-dsp`).
+     AI assistance is already disclosed in the note's Limitations.
+   - **License**: CC BY 4.0 if offered.
+4. **Submit.** After the short screen it posts with a DOI (`10.21203/rs...`) and is indexed.
 
-### Fallback if OSF stalls — Research Square
-Legitimate and established (it powers Springer Nature's "In Review"); free to post, DOI,
-Scholar-indexed; commercial but not controversial. Go to **researchsquare.com** →
-**Post a preprint**, upload the same PDF, paste the same metadata.
-
-(Preprints.org — run by the publisher MDPI — is another option but comes with heavy
-journal-solicitation email and a mixed publisher reputation; OSF and Research Square are
-cleaner, so it's not the recommendation.)
+(Alternative: **Preprints.org** — run by MDPI — is biomedical-appropriate and works the same
+way, but expect heavy journal-solicitation email and a mixed publisher reputation.)
 
 ---
 
