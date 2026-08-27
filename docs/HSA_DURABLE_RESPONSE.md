@@ -1420,6 +1420,174 @@ emphasis would understate it: the condition is not a caveat, it is the entire re
 
 ---
 
+## 3i. Getting the measured effect size the persister route was missing
+
+§3h ended with "closable, not closed," and the reason was specific: no anchor for the rate. That was
+the honest position, but it was not a finished one — "nearly solvable" is not the same as closed. So
+this section goes and gets the anchor.
+
+### The correction is arithmetic, and it is the important one
+
+I framed 0.045/day as "about seven eighths of the bar" and "roughly twice what the MEK inhibitor is
+asked for." Both are true in per-day units, and together they made the ask sound enormous.
+
+I never converted it into the units the experiments actually report. Hangauer's persister assays read
+viability by CellTiter-Glo **after three days** of treatment. A sustained 0.045/day over three days is:
+
+| rate | 3-day viability | 3-day kill |
+|---|---|---|
+| 0.040/day | 0.887 | **11.3%** |
+| 0.045/day | 0.874 | **12.6%** |
+
+**The model is asking for a 12.6% kill over three days — sustained.** It is not asking for a deep
+kill. It is asking for a shallow one that never stops. Bench assays of this mechanism do not report
+12.6%; they report near-elimination, with RSL3 and ML210 "among the compounds most selectively lethal
+to persister cells."
+
+So the transfer efficiency required, across the whole range of potencies the assay might have shown:
+
+| assumed 3-day viability | implied rate | transfer needed for 0.045/day |
+|---|---|---|
+| 0.75 (a weak 25% kill) | 0.096/day | **47%** |
+| 0.50 | 0.231/day | **19%** |
+| 0.30 | 0.401/day | **11%** |
+| 0.20 | 0.536/day | **8%** |
+| 0.10 | 0.768/day | **6%** |
+
+The three vaccine-height routes needed 7–45% of their measured effect to transfer, and routes 1 and 2
+were judged plausible on that basis. **The persister route sits in the same band under every
+assumption except the very weakest.** My earlier claim that it "would need essentially all of whatever
+it has" is wrong and is withdrawn.
+
+What this does *not* do is lower the requirement. 0.045/day is still 0.045/day and the step function
+around it is still a step. What changes is which experiments count as evidence, and how demanding they
+look — and where the real difficulty sits.
+
+### The in vivo result is at this model's own endpoint, on the right cells
+
+This is the distinction that matters, because I got it wrong once already. The comparison I retracted
+cited Andersen's 0.110–0.143/day as evidence a 0.045/day ask was reachable — a category error, because
+that was measured on drug-**sensitive** bulk tumour, by the very drugs the resistant cell resists.
+
+Hangauer's in vivo arm is the opposite. A375 xenografts were shrunk with dabrafenib + trametinib while
+ferrostatin-1 masked the GPX4 effect. Once tumours reached minimum volume, ferrostatin-1 was withdrawn
+— unmasking GPX4 loss **in the residual tumours**. Then:
+
+> "Upon further dosing of mice with dabrafenib and trametinib, without ferrostatin-1, the GPX4 WT
+> tumours **relapsed** and the GPX4 KO tumours **did not**."
+
+Relapse versus no relapse under continued targeted therapy is exactly what the Monte Carlo measures,
+and it is measured on the residual population, as the residual population. Almost every other anchor
+in this analysis had to be converted from response rate or median survival. This one does not.
+
+**Stated first, because it is the load-bearing limitation:** the in vivo arm is a *genetic knockout,
+not a drug.* Hangauer says why in terms — "because neither RSL3 nor ML210 are systemically
+bioavailable, we instead adopted a recently developed genetic strategy." This proves the target is
+right in vivo. It does not prove any molecule can hit it in vivo. And knockout is complete, permanent
+target removal, so it is an upper bound on what pharmacology could achieve, not an estimate of it.
+
+### The disease-specific anchor was there all along
+
+I treated the disease-specific question as open, and a PubMed search for "hemangiosarcoma ferroptosis"
+returns **zero results**, which is what made it look open.
+
+The canine ferroptosis panel contains **three canine hemangiosarcoma cell lines** — Cindy-HSA, Den-HSA
+and SB. The tumour type appears only in a supplementary table, which is why the indexed search misses
+it. Den-HSA is from a **Golden Retriever**; SB is **PIK3CA-mutant** — the lesion the primary regimen
+targets. These are not distant proxies.
+
+And the lineage result points the right way:
+
+> "Epithelial cancers (carcinomas) were enriched in the ferroptosis-**insensitive** cluster, while
+> **sarcomas**, undifferentiated melanomas and hematological malignancies were **enriched for
+> sensitivity** to ferroptosis."
+
+with the selectivity specific to the GPX4 inhibitor rather than to cytotoxicity in general: "rank
+ordering cell lines by sensitivity indicates selectivity for killing non-epithelial cells for ML210
+but not doxorubicin." Hemangiosarcoma is a sarcoma of endothelial origin. Separately, Hangauer's
+persisters occupy a "high-mesenchymal therapy-resistant state" — so in this tumour the lineage argument
+and the persister argument point the same way instead of having to be bridged.
+
+**What this does not establish:** per-line values for those three lines are in figure heatmaps that
+could not be extracted, so it is *not* established that they fell in the sensitive cluster. And they
+are **parental lines, not persisters derived from them.** Nobody has derived persisters from Cindy-HSA,
+Den-HSA or SB and tested them. That is the missing experiment — now a specific one with named
+reagents rather than a wish.
+
+### The bioavailability gap: partly closed, and the field disagrees with my optimism
+
+Hangauer named two blockers in 2017, and they are independent:
+
+1. **Chemistry** — "the development of a potent bioavailable GPX4 inhibitor is an urgent priority."
+2. **Toxicology** — "because GPX4 genetic deletion is **lethal in adult mice**, further study will be
+   needed to determine whether a suitable therapeutic window exists."
+
+On (1), Tubastatin A binds GPX4 directly, inhibits it independently of its HDAC6 activity, and has
+"excellent bioavailability... in a mouse xenograft model." I initially wrote that this means the urgent
+priority is "no longer entirely unmet." **A 2026 Nature paper contradicts that**, stating as background
+"the high toxicity, poor selectivity and low-to-limited bioavailability of GPX4 inhibitors in vivo."
+That is three years later and does not treat the problem as solved. Both statements are recorded;
+picking the convenient one is how an analysis talks itself into a conclusion. I take the pessimistic
+reading as the operating assumption for the GPX4 arm. (I also could not verify Tubastatin A's dose or
+effect size — the publisher returned HTTP 403 — so **no number from that paper is used in any
+calculation here.**)
+
+On (2), the answer comes from the **parallel arm**. GPX4 and FSP1 are the two arms of the same
+lipid-peroxidation defence, and:
+
+> "Given that germline *Gpx4* KO mice are **not viable**, whereas *Fsp1* KO mice are **viable with no
+> notable physiological defects**, the therapeutic window for targeting FSP1 with fewer toxic side
+> effects is expected to be **much greater** than for GPX4."
+
+icFSP1 is "the first inhibitor of human FSP1 with in vivo stability and efficacy" — 50 mg/kg IP twice
+daily, improving survival as a **monotherapy**, with an on-target control (no benefit against the
+icFSP1-resistant FSP1(Q319K) mutant) and a mechanism control (liproxstatin-1 abrogates it). One further
+finding cuts in the conservative direction for every transfer estimate above: **FSP1 was required for
+ferroptosis protection "in vivo, but not in vitro"** — in vitro assays *understate* how much a tumour
+depends on this defence in a living animal.
+
+**The inference I am not making:** a persister is a cell in a state of heightened GPX4 dependence, so it
+is tempting to say it is exactly the GPX4-compromised context where FSP1 inhibitors work. That chain is
+plausible and **untested** — no experiment in either paper puts an FSP1 inhibitor on a drug-tolerant
+persister. It is written down as a hypothesis, not counted as evidence.
+
+### Applying the duration criterion to the mechanism I am arguing for
+
+The duration criterion was invented to disqualify the MEK/mTOR pair: 17 days of documented tolerability
+against a 3650-day horizon, a 215× shortfall. A criterion only ever applied to options already rejected
+is not a criterion. So:
+
+**The cheap version of the answer dies here.** Sulfasalazine is the ferroptosis-adjacent agent with
+decades of chronic human dosing and established veterinary use — it depletes cysteine, hence
+glutathione, hence GPX4's substrate. In dogs it causes **permanent bilateral keratoconjunctivitis
+sicca**, with "no breed, age or sex incidence... unlike in keratoconjunctivitis sicca cases due to other
+causes" — so it cannot be dodged by patient selection. In the 12-month canine study of its active
+metabolite, the condition "was first diagnosed at **study week 22** and subsequently progressed both in
+incidence and severity." Week 22 is ~154 days, early inside a 3650-day horizon, and it gets worse.
+
+A second, independent dog-specific chronic toxicity sits in the same class: susalimod produced bile duct
+hyperplasia **in dogs only**, from a bile/plasma ratio of **3400 in the dog against 50 in the rat**.
+Rodent safety data for this class does not transfer to dogs, and this analysis is about dogs.
+
+That rules out one shortcut into the axis, not the axis — GPX4 and FSP1 inhibitors are not sulfonamides
+and do not inherit the lacrimal or biliary liabilities by construction.
+
+**And icFSP1 does not clear the criterion either.** Its longest reported exposure is two weeks:
+
+| | documented tolerability | horizon | shortfall |
+|---|---|---|---|
+| MEK/mTOR pair (disqualified) | 17 days | 3650 days | 215× |
+| icFSP1 | 14 days | 3650 days | **261×** |
+
+On the criterion as written, the agent I am arguing for is in *worse* shape than the one I rejected.
+Saying so is the price of having the criterion. What differs is the direction of travel: the pair's
+shortfall was against a dose-limiting toxicity that had **already appeared**, while this is an agent
+nobody has yet dosed for longer.
+
+Which makes one question decisive: **does this agent actually have to run for ten years?**
+
+---
+
 ## 4. Escape routes
 
 | # | Route | Status |
