@@ -237,6 +237,25 @@ IT_WORKS_BUT_IT_IS_A_KNIFE_EDGE = {
                           "exists -- and the rate required has never been measured for any of them. "
                           "Claiming this as solved would repeat the mistake this whole module was "
                           "written to catch.",
+    "SUPERSEDED_IN_PART_SEE_hsa_persister_evidence": "two of the pessimistic statements above are "
+                                                     "too strong and are corrected there. (1) 'would "
+                                                     "need essentially all of whatever it has' is "
+                                                     "WRONG: 0.045/day sustained is a 12.6% kill over "
+                                                     "the three days a persister viability assay "
+                                                     "runs, so the transfer required is 5-47%, in the "
+                                                     "same band as the vaccine-height routes. (2) "
+                                                     "'nothing to compare it to' overstates the "
+                                                     "vacuum: Hangauer's in vivo arm measured relapse "
+                                                     "versus no relapse on RESIDUAL tumour under "
+                                                     "continued targeted therapy, which is this "
+                                                     "model's own endpoint on the right compartment. "
+                                                     "What remains true is that the in vivo arm is a "
+                                                     "genetic knockout rather than a drug, and that "
+                                                     "no per-day rate has been measured for any "
+                                                     "ferroptosis DRUG against persisters. The "
+                                                     "verdict moves from 'closable' toward 'closed "
+                                                     "conditional on a named experiment', not to "
+                                                     "'closed'.",
 }
 
 THE_EXPERIMENT_THIS_POINTS_AT = {

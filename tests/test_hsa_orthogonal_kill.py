@@ -375,3 +375,21 @@ def test_the_persister_route_keeps_the_one_year_induction():
     assert persister > restoration
     assert ok.RESTORED_REACH_TIMES_DRUG_SCHEDULE[0.75]["stop_at_year_1"] == 0.0, (
         "restoration cannot hold with the drug withdrawn")
+
+
+def test_the_knife_edge_verdict_points_at_its_own_partial_supersession():
+    """The pessimistic framing here was measured against later and found too strong in two places.
+
+    This test exists so the correction cannot be dropped while the superseded sentences remain.
+    """
+    d = ok.IT_WORKS_BUT_IT_IS_A_KNIFE_EDGE
+    note = d["SUPERSEDED_IN_PART_SEE_hsa_persister_evidence"]
+    # Both superseded sentences must still be quoted in the correction, and must still be present
+    # in the entries they came from, so a reader of either lands on the other.
+    assert "essentially all of whatever it has" in note
+    assert "essentially all of whatever it has" in d["how_this_compares_to_the_other_routes"]
+    assert "nothing to compare it to" in note
+    assert "nothing to compare it to" in d["the_position_this_leaves"]
+    # And it must not overclaim in the other direction.
+    assert "not to \"closed\"" in note.replace("'", '"')
+    assert "genetic knockout rather than a drug" in note
