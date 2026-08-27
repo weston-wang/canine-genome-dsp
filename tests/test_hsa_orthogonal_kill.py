@@ -126,3 +126,67 @@ def test_this_module_does_not_contradict_the_adequacy_module():
     from canine_dsp import hsa_antigen_adequacy as ag
     assert "MISSING-SELF" in ag.THE_NK_COMPONENT_ONLY_PARTLY_TRANSFERS["why_it_does_not_fully_work"]
     assert "missing-self" in ok.NK_CELLS_ARE_PARTLY_REHABILITATED["the_honest_correction"]
+
+
+# ---------------------------------------------------------------------------------------------
+# Does it actually rescue the zero?
+
+def test_the_baseline_is_the_unrescued_zero():
+    assert ok.RESCUE_BY_PERSISTER_KILL[0.000] == 0.0
+
+
+def test_persister_kill_does_rescue_the_case_nothing_else_touched():
+    assert ok.RESCUE_BY_PERSISTER_KILL[0.050] == pytest.approx(1.0)
+    assert "does rescue" in ok.IT_WORKS_BUT_IT_IS_A_KNIFE_EDGE["the_good_news"]
+
+
+def test_the_rescue_is_a_step_not_a_ramp():
+    """Below threshold the rescue is worth exactly nothing -- unlike the vaccine-height curve."""
+    below = [v for k, v in ok.RESCUE_BY_PERSISTER_KILL.items() if k <= 0.035]
+    assert all(v == 0.0 for v in below), "everything at or below 0.035/day should be a flat zero"
+    assert ok.RESCUE_BY_PERSISTER_KILL[0.040] > 0.0
+    assert "It is a step" in ok.IT_WORKS_BUT_IT_IS_A_KNIFE_EDGE["the_bad_news"]
+
+
+def test_the_grid_is_monotone():
+    rates = sorted(ok.RESCUE_BY_PERSISTER_KILL)
+    values = [ok.RESCUE_BY_PERSISTER_KILL[r] for r in rates]
+    assert values == sorted(values)
+
+
+def test_the_size_of_the_ask_is_computed_not_asserted():
+    ask = ok.IT_WORKS_BUT_IT_IS_A_KNIFE_EDGE["how_big_the_ask_is"]
+    assert ask["as_a_multiple_of_the_mek_requirement"] == pytest.approx(
+        ask["required_per_day"] / 0.0225)
+    assert ask["as_a_fraction_of_the_bar"] == pytest.approx(ask["required_per_day"] / 0.0515)
+    assert ask["as_a_multiple_of_the_mek_requirement"] > 1.5, "this is a large ask, not a small one"
+
+
+def test_the_ask_sits_inside_a_measured_in_vivo_envelope():
+    """0.045/day is big, but rates of that magnitude have been measured in this tumour type."""
+    mitigation = ok.IT_WORKS_BUT_IT_IS_A_KNIFE_EDGE["what_makes_it_less_implausible_than_it_sounds"]
+    assert "0.110-0.143/day" in mitigation
+    assert ok.IT_WORKS_BUT_IT_IS_A_KNIFE_EDGE["how_big_the_ask_is"]["required_per_day"] < 0.110
+
+
+def test_it_is_compared_honestly_against_the_easier_routes():
+    comparison = ok.IT_WORKS_BUT_IT_IS_A_KNIFE_EDGE["how_this_compares_to_the_other_routes"]
+    assert "7-45%" in comparison
+    assert "least comfortable answer" in comparison
+    assert "only answer to this case" in comparison
+
+
+def test_the_verdict_says_closable_not_closed():
+    verdict = ok.IT_WORKS_BUT_IT_IS_A_KNIFE_EDGE["the_honest_verdict"]
+    assert "closable rather than closed" in verdict
+    assert "never been measured" in verdict
+    assert "Claiming this as solved" in verdict
+
+
+def test_the_experiment_puts_the_cheap_step_first():
+    exp = ok.THE_EXPERIMENT_THIS_POINTS_AT
+    assert "before and after PI3K/mTOR inhibition" in exp["step_1"]
+    assert "none of this is needed" in exp["step_1"]
+    assert "drug-tolerant fraction specifically" in exp["step_2"]
+    assert "0.045/day" in exp["step_3"]
+    assert "cheap answer and an" in exp["why_this_ordering_matters"]

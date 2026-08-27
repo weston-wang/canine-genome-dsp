@@ -160,3 +160,82 @@ NK_CELLS_ARE_PARTLY_REHABILITATED = {
                             "the NK component already in the regimen covers part of route 8 for "
                             "free.",
 }
+
+
+# =============================================================================================
+# DOES IT ACTUALLY RESCUE THE ZERO? YES -- BUT THE ASK IS THE LARGEST IN THIS ANALYSIS.
+#
+# Persister-directed kill applied to the drug-tolerant clones only (the three resistance
+# mechanisms, the antigen-loss escape clone, and the antigen-null resistant compartment), against a
+# blind spot that is both invisible to the vaccine and drug-resistant at 95% coverage. The sensitive
+# clones are untouched, which is what makes it persister-directed rather than a third cytotoxic.
+# Seven clones, 150 trials, second drug withdrawn at year one.
+# =============================================================================================
+
+RESCUE_BY_PERSISTER_KILL = {
+    #  kill/day on tolerant clones: 10-year durability at 95% antigen coverage
+    0.000: 0.000,
+    0.025: 0.000,
+    0.030: 0.000,
+    0.035: 0.000,
+    0.040: 0.107,
+    0.050: 1.000,
+}
+
+IT_WORKS_BUT_IT_IS_A_KNIFE_EDGE = {
+    "the_good_news": "the mechanism does rescue the case nothing else touched. At 0.050/day on the "
+                     "tolerant compartment, ten-year durability goes from 0.000 to 1.000 against a "
+                     "blind spot that is both antigen-null and drug-resistant.",
+    "the_bad_news": "the threshold is between 0.035 and 0.050/day, and below it the rescue is worth "
+                    "exactly nothing -- 0.035/day still gives 0.000. This is not a ramp like the "
+                    "vaccine-height curve. It is a step.",
+    "why_it_is_a_step_here_and_a_ramp_there": "the antigen-null resistant clone is covered by "
+                                              "nothing else, so its net growth is either positive "
+                                              "or negative and there is no partial credit. Below "
+                                              "the threshold it grows for ten years; above it, it "
+                                              "is eliminated.",
+    "how_big_the_ask_is": {
+        "required_per_day": 0.045,
+        "as_a_multiple_of_the_mek_requirement": 0.045 / 0.0225,
+        "as_a_fraction_of_the_bar": 0.045 / 0.0515,
+        "reading": "roughly twice what the MEK inhibitor is asked for, and about seven eighths of "
+                   "the bar itself. The persister agent would have to deliver, on its own and "
+                   "against one compartment, nearly what the entire regimen delivers against the "
+                   "whole tumour.",
+    },
+    "what_makes_it_less_implausible_than_it_sounds": "the kill is aimed at a small compartment "
+                                                     "rather than the bulk tumour, ferroptosis is a "
+                                                     "complete death mechanism rather than a "
+                                                     "cytostatic one, and the in vivo envelope "
+                                                     "measured for the MEK/mTOR combination in "
+                                                     "canine angiosarcoma was 0.110-0.143/day -- so "
+                                                     "rates of this magnitude are achievable in "
+                                                     "this tumour type, if not yet by this agent.",
+    "how_this_compares_to_the_other_routes": "the three vaccine-height routes needed only 7-45% of "
+                                             "their measured effect to transfer. This one has no "
+                                             "measured effect size at all in this compartment, and "
+                                             "would need essentially all of whatever it has. It is "
+                                             "the least comfortable answer in the analysis, and it "
+                                             "is the only answer to this case.",
+    "the_honest_verdict": "route 8's dangerous case is closable rather than closed. The mechanism is "
+                          "right, the species and disease evidence exists, an orally dosed agent "
+                          "exists -- and the rate required has never been measured for any of them. "
+                          "Claiming this as solved would repeat the mistake this whole module was "
+                          "written to catch.",
+}
+
+THE_EXPERIMENT_THIS_POINTS_AT = {
+    "step_1": "stain canine hemangiosarcoma for the vaccine antigen before and after PI3K/mTOR "
+              "inhibition. If coverage is retained on the drug-tolerant cells, none of this is "
+              "needed and route 8 stays in its benign form.",
+    "step_2": "if coverage is lost there, measure ferroptosis sensitivity of the drug-tolerant "
+              "fraction specifically -- not the bulk line -- since the Hangauer claim is about the "
+              "persister state, not the parental population.",
+    "step_3": "convert that sensitivity into a per-day rate by the same method used for every other "
+              "anchor in this analysis, and compare it against 0.045/day.",
+    "why_this_ordering_matters": "step 1 is one stain and can make steps 2 and 3 unnecessary. Doing "
+                                 "it first is the difference between a cheap answer and an "
+                                 "expensive programme.",
+    "the_models_already_exist": "Andersen's canine angiosarcoma tumorgrafts, the ISOS-1 syngeneic "
+                                "line, and the canine ferroptosis panel Chatterji validated.",
+}

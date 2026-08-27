@@ -1277,6 +1277,66 @@ Missing-self recognition needs MHC-I downregulation, so it covers route 4's anti
 target that was never displayed on cells with intact presentation. Listing it here would repeat the
 exact conflation this section exists to undo.
 
+### The answer for a cell the vaccine can't see
+
+Legs 2–4 all try to make the vaccine *see* the cell. That's no answer if it can't. What's needed is a
+kill orthogonal to **both** axes — no antigen, no kinase pathway. That gate rules out the obvious
+moves by construction: another kinase inhibitor fails the second, and a CAR or second-antigen vaccine
+fails the first by relocating the coverage question to a different molecule.
+
+One mechanism passes, and its logic is the point: **resistance isn't free.** A cell survives targeted
+therapy by entering a drug-tolerant persister state, and that state carries its own dependency. You
+don't need to see the cell — you exploit what it had to become in order to survive.
+
+- **Persisters acquire a GPX4 dependency** across a wide range of cancers and drugs; removing it
+  causes selective ferroptotic death and ***prevents tumour relapse in mice*** — the endpoint this
+  analysis measures (Hangauer 2017, PMID 29088702).
+- **Canine cells are ferroptosis-competent** *"in a manner indistinguishable from human cancer
+  cells"* — built by a co-author of the above with Thamm at CSU (PMID 38746359, preprint).
+- **Parthenolide was tested in canine hemangiosarcoma** — cell lines *and* primary cells, GSH
+  depletion, ROS, NF-κB inhibition, *"standard-of-care therapeutics broadly synergize"*, extended
+  survival in a disseminated model (PMID 38135509).
+- **DMAPT is the oral form** — ~70% bioavailable, in vivo bioactivity in **spontaneous canine
+  leukemias**, selective for stem/progenitor cells (PMID 17804695).
+
+**Does it rescue the zero? Yes — but the ask is the largest in this analysis.**
+
+| persister kill/day | 10-yr durable at 95% coverage |
+|---|---|
+| 0 | 0.000 |
+| 0.030 | 0.000 |
+| 0.035 | 0.000 |
+| 0.040 | 0.107 |
+| **0.050** | **1.000** |
+
+**This is a step, not a ramp.** Below ~0.04/day the rescue is worth exactly nothing, because the
+antigen-null resistant clone is covered by nothing else — its net growth is either positive or
+negative, and there's no partial credit. The required ~0.045/day is **2× what the MEK inhibitor is
+asked for and 87% of the bar itself**: the persister agent would have to deliver, against one
+compartment, nearly what the whole regimen delivers against the tumour.
+
+*What makes it less implausible than it sounds:* the kill targets a small compartment rather than
+bulk disease, ferroptosis is a complete death mechanism rather than cytostatic, and the in vivo
+envelope measured for MEK/mTOR in canine angiosarcoma was 0.110–0.143/day — so rates of this
+magnitude are achievable in this tumour, if not yet by this agent.
+
+*How it compares:* the three vaccine-height routes needed only **7–45%** of their measured effect to
+transfer. This one has **no measured effect size in this compartment at all** and would need
+essentially all of whatever it has. It is the least comfortable answer in the analysis, and the only
+answer to this case.
+
+**Verdict: closable, not closed.** The mechanism is right, the species and disease evidence exists,
+an orally dosed agent exists — and the required rate has never been measured for any of them.
+
+**And do the cheap step first:** stain canine HSA for the vaccine antigen before and after PI3K/mTOR
+inhibition. If coverage is retained on drug-tolerant cells, none of this is needed and route 8 stays
+benign. That one stain is the difference between a cheap answer and an expensive programme.
+
+**NK cells are partly rehabilitated.** Refusing them earlier was right about missing-self and wrong
+to treat missing-self as all of NK recognition — NKG2D responds to stress-induced MIC-A/MIC-B, which
+are independent of both the antigen and MHC-I, exist in dogs, and are plausibly induced by sustained
+therapeutic stress. They carry their own escape: tumours shed soluble MIC to decoy NKG2D.
+
 **Legs 2–4 are therefore not backups — they are the only candidate answers**, because they are the
 only things that can put an antigen on a cell whose antigen was never there. None has been tested
 against a resistant subpopulation specifically.
