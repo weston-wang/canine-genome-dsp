@@ -260,3 +260,47 @@ def test_the_half_that_still_stands_is_kept():
     t = d["what_it_does_not_overturn"]
     assert "no measured in vivo per-day rate" in t
     assert "sensitivity analysis rather than a measurement" in t
+
+
+# ---------------------------------------------------------------------------------------------
+# The duration criterion applied to this agent. These tests exist because a criterion that is only
+# ever applied to rejected options is not a criterion.
+# ---------------------------------------------------------------------------------------------
+
+def test_the_chronic_shortcut_is_disqualified_on_canine_evidence():
+    d = pe.THE_CHRONIC_ENTRY_POINT_AND_WHY_IT_FAILS_IN_DOGS
+    assert "PERMANENT" in d["the_canine_finding"]["the_result"]
+    assert "cannot be dodged by patient selection" in d["the_canine_finding"]["no_susceptible_subgroup"]
+
+
+def test_the_toxicity_timescale_is_inside_the_modelled_horizon():
+    d = pe.THE_CHRONIC_ENTRY_POINT_AND_WHY_IT_FAILS_IN_DOGS["the_timescale_that_makes_it_a_duration_problem"]
+    assert "STUDY WEEK 22" in d["the_result"]
+    assert "PROGRESSED" in d["the_result"]
+    # Week 22 is ~154 days, far inside the 3650-day horizon this analysis models.
+    assert 22 * 7 < 3650
+    assert "3650" in d["why_this_is_the_decisive_number"]
+
+
+def test_the_species_specific_signal_records_the_mechanism_not_just_the_finding():
+    d = pe.THE_CHRONIC_ENTRY_POINT_AND_WHY_IT_FAILS_IN_DOGS["the_second_dog_specific_signal_in_the_same_class"]
+    assert "ONLY IN DOGS" in d["the_result"]
+    assert "3400" in d["the_mechanism_of_the_species_difference"]
+    assert "does not transfer to dogs" in d["why_it_is_recorded"]
+
+
+def test_the_ruling_out_is_scoped_to_the_shortcut_not_the_mechanism():
+    d = pe.THE_CHRONIC_ENTRY_POINT_AND_WHY_IT_FAILS_IN_DOGS
+    assert "sulfasalazine" in d["what_this_rules_out"]
+    assert "rules out one shortcut into the axis, not the axis" in d["what_it_does_not_rule_out"]
+
+
+def test_the_criterion_is_applied_to_the_favoured_mechanism_not_only_the_rejected_one():
+    """The whole point of recording this: the duration criterion must cut both ways."""
+    d = pe.THE_CHRONIC_ENTRY_POINT_AND_WHY_IT_FAILS_IN_DOGS
+    sym = d["the_uncomfortable_symmetry"]
+    assert "same failure mode" in sym
+    assert "second drug" in sym
+    # And the criterion it is being borrowed from must still exist and still be about the horizon.
+    from canine_dsp import hsa_alternative_approach as aa
+    assert aa.THE_DURATION_CRITERION

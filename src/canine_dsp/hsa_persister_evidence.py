@@ -376,3 +376,75 @@ HOW_THE_TRANSFER_ASK_COMPARES = {
                                                   "conditions. That is one paper in one tumour type "
                                                   "and it is not treated as settled.",
 }
+
+
+# =============================================================================================
+# 6. THE DURATION CRITERION, APPLIED TO THIS AGENT.
+#
+# `hsa_alternative_approach` invented the duration criterion to disqualify the MEK/mTOR pair:
+# seventeen days of documented tolerability against a 3650-day horizon, a shortfall of 215x. The
+# criterion is worth nothing if it is only applied to agents the analysis has already decided
+# against. So it is applied here, to the mechanism this analysis is arguing FOR.
+#
+# The result is not comfortable. The one entry into this axis with a genuine chronic-dosing record
+# in dogs has a dog-specific toxicity that emerges on exactly the timescale that matters.
+# =============================================================================================
+
+THE_CHRONIC_ENTRY_POINT_AND_WHY_IT_FAILS_IN_DOGS = {
+    "the_tempting_shortcut": "the system xc- inhibitors -- sulfasalazine above all -- are the "
+                             "ferroptosis-adjacent agents that already have decades of chronic human "
+                             "dosing and established veterinary use. They deplete cysteine, hence "
+                             "glutathione, hence GPX4's substrate. If any agent on this axis could "
+                             "clear a ten-year duration criterion off the shelf, it would be this "
+                             "one.",
+    "the_canine_finding": {
+        "citation": "Sansom, Barnett & Neumann 1985, Veterinary Record, PMID 2860750",
+        "the_result": "thirteen dogs given sulphasalazine for colitis developed iatrogenic BILATERAL "
+                      "keratoconjunctivitis sicca. 'The lacrimotoxic effect of sulphasalazine was "
+                      "PERMANENT except in one case', and the authors recommend regular tear-secretion "
+                      "monitoring for dogs on the drug.",
+        "no_susceptible_subgroup": "'No breed, age or sex incidence was noted in this series, unlike "
+                                   "in keratoconjunctivitis sicca cases due to other causes' -- so it "
+                                   "cannot be dodged by patient selection.",
+    },
+    "the_timescale_that_makes_it_a_duration_problem": {
+        "citation": "Barnett & Joseph 1988, Human Toxicology, PMID 3679245",
+        "the_study": "a TWELVE-MONTH oral toxicity study of 5-aminosalicylic acid, sulfasalazine's "
+                     "active metabolite, in dogs",
+        "the_result": "'The condition was first diagnosed at STUDY WEEK 22 and subsequently PROGRESSED "
+                      "both in incidence and severity', correlating with reduced Schirmer tear test "
+                      "values. Treated females were more affected than males.",
+        "why_this_is_the_decisive_number": "week 22 is about 154 days. A short course would never see "
+                                           "it. The horizon this analysis models is 3650 days. The "
+                                           "toxicity does not merely appear within the horizon -- it "
+                                           "appears early in it and gets worse.",
+    },
+    "the_second_dog_specific_signal_in_the_same_class": {
+        "citation": "Ekman et al. 1999, Pharmacology & Toxicology, PMID 10522751",
+        "the_agent": "susalimod, a sulfasalazine analogue",
+        "the_result": "'Dose-related bile duct hyperplasia appeared ONLY IN DOGS at doses >=75 "
+                      "mg/kg/day, while in rats and monkeys it did not appear at doses up to 1500 and "
+                      "2000 mg/kg/day respectively', after LONG-TERM administration",
+        "the_mechanism_of_the_species_difference": "biliary concentration. The bile/plasma ratio was "
+                                                   "3400 in the dog against 300 in the monkey and 50 "
+                                                   "in the rat -- a roughly seventy-fold "
+                                                   "concentration difference from rat to dog.",
+        "why_it_is_recorded": "it is a second, independent, dog-specific chronic toxicity in this "
+                              "chemical class, arising from canine biliary physiology rather than "
+                              "from the pharmacology. Rodent safety data for this class does not "
+                              "transfer to dogs, and this analysis is about dogs.",
+    },
+    "what_this_rules_out": "the cheap version of the answer. 'Use sulfasalazine, it is already given "
+                           "to dogs long-term' does not survive contact with the canine literature. "
+                           "Any plan that reaches for an off-the-shelf chronic system xc- inhibitor "
+                           "for a ten-year horizon in a dog is wrong, and would have been caught by "
+                           "the duration criterion if anyone had applied it.",
+    "what_it_does_not_rule_out": "the mechanism. GPX4 and FSP1 inhibitors are not sulfonamides and do "
+                                 "not share the lacrimal or biliary liabilities by construction. It "
+                                 "rules out one shortcut into the axis, not the axis.",
+    "the_uncomfortable_symmetry": "this is the same failure mode, in the same units, as the one that "
+                                  "disqualified the second drug: a mechanism that works, an agent "
+                                  "that exists, and a tolerability record that stops far short of the "
+                                  "horizon. Recording it here rather than only there is the point of "
+                                  "having the criterion at all.",
+}
