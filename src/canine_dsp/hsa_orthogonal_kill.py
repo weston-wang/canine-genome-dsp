@@ -366,3 +366,42 @@ TYPE_I_INTERFERON_IS_THE_CONVERGENCE_POINT = {
                                "effect this route depends on. The mechanism is right and the "
                                "specific link is inferred.",
 }
+
+
+# =============================================================================================
+# AND THE RE-EXPRESSION ROUTE, RUN. IT IS NOT ENOUGH ON ITS OWN.
+#
+# Vaccine applicability on the antigen-null resistant clone raised from 0 to a fraction, at the
+# plan's operating point with the second drug withdrawn at year one. 150 trials, seven clones.
+# =============================================================================================
+
+DURABILITY_BY_RESTORED_REACH = {
+    #  fraction of vaccine reach restored: (phi=0.95, phi=0.90, phi=0.80)
+    0.00: (0.000, 0.000, 0.000),
+    0.25: (0.000, 0.000, 0.000),
+    0.50: (0.000, 0.000, 0.000),
+    0.75: (0.000, 0.000, 0.000),
+    1.00: (0.273, 0.293, 0.253),
+}
+
+RESTORATION_ALONE_DOES_NOT_CLOSE_IT = {
+    "the_result": "even at FULL restoration of the vaccine's reach, durability reaches only "
+                  "0.253-0.293. Against 0.840 with no blind spot and the 0.888 reference, that is "
+                  "not a closure. Below full restoration it is a flat zero.",
+    "why": "restoring the antigen moves the cell from 'covered by nothing' to 'covered by the "
+           "vaccine only'. It is still DRUG-RESISTANT, and the vaccine wanes between two-monthly "
+           "boosters, so its time-averaged kill is well below the 0.042/day peak. A drug-resistant "
+           "clone starting at five percent of the tumour outruns that.",
+    "what_it_does_change": "it converts an unsolvable case into a nearly-solvable one. Zero to 0.27 "
+                           "is not a fix, but it is the difference between a cell nothing touches "
+                           "and a cell that is merely short of cover.",
+    "the_correction_this_forces": "the re-expression route was written up before this was run, and "
+                                  "presented as the better answer because it needed no new killing. "
+                                  "That was premature. It needs no new killing and it does not "
+                                  "work alone.",
+    "what_it_implies_about_the_regimen": "if a blind spot exists, the second drug cannot be "
+                                         "withdrawn -- restoring visibility gives the vaccine a "
+                                         "target but not enough margin without the drug's "
+                                         "0.0225/day on top. That reconnects this route to the "
+                                         "toxicity finding rather than escaping it.",
+}

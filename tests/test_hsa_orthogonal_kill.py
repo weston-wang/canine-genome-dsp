@@ -284,3 +284,37 @@ def test_the_inferred_step_is_named_as_inferred():
     gap = ok.TYPE_I_INTERFERON_IS_THE_CONVERGENCE_POINT["what_is_not_established"]
     assert "neither canine study measured MHC-I" in gap
     assert "the specific link is inferred" in gap
+
+
+# ---------------------------------------------------------------------------------------------
+# The re-expression route, measured.
+
+def test_restoration_below_full_is_worth_nothing():
+    for reach, row in ok.DURABILITY_BY_RESTORED_REACH.items():
+        if reach < 1.0:
+            assert all(v == 0.0 for v in row), f"reach {reach}"
+
+
+def test_even_full_restoration_falls_short_of_the_reference():
+    at_full = ok.DURABILITY_BY_RESTORED_REACH[1.00]
+    assert all(0.2 < v < 0.35 for v in at_full)
+    assert max(at_full) < 0.840, "full restoration must not be presented as a closure"
+
+
+def test_the_module_says_restoration_alone_does_not_close_it():
+    entry = ok.RESTORATION_ALONE_DOES_NOT_CLOSE_IT
+    assert "not a closure" in entry["the_result"]
+    assert "DRUG-RESISTANT" in entry["why"]
+    assert "wanes between" in entry["why"]
+
+
+def test_the_premature_writeup_is_owned():
+    """The route was written up before it was run. That has to be recorded, not smoothed over."""
+    correction = ok.RESTORATION_ALONE_DOES_NOT_CLOSE_IT["the_correction_this_forces"]
+    assert "premature" in correction
+    assert "does not work alone" in correction
+
+
+def test_it_reconnects_to_the_toxicity_finding_rather_than_escaping_it():
+    implication = ok.RESTORATION_ALONE_DOES_NOT_CLOSE_IT["what_it_implies_about_the_regimen"]
+    assert "second drug cannot be withdrawn" in implication
