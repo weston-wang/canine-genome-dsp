@@ -204,6 +204,19 @@ WHAT_HAS_CLOSED_ON_THE_GPX4_ARM = {
                            "systemically dosable small molecule that binds GPX4 and inhibits it, with "
                            "in vivo activity. The urgent priority named in 2017 is no longer entirely "
                            "unmet.",
+    "THE_FIELD_DOES_NOT_AGREE_THAT_THIS_IS_SETTLED": "the sentence above is the optimistic reading "
+                                                     "and it is contradicted by a 2026 Nature paper "
+                                                     "on the parallel arm, which states as background "
+                                                     "'the HIGH TOXICITY, POOR SELECTIVITY and "
+                                                     "LOW-TO-LIMITED BIOAVAILABILITY of GPX4 "
+                                                     "inhibitors in vivo'. That is three years after "
+                                                     "Tubastatin A and it does not treat the problem "
+                                                     "as solved. Both statements are recorded because "
+                                                     "picking the convenient one is how an analysis "
+                                                     "talks itself into a conclusion. The weight of "
+                                                     "the field is on the pessimistic side, and this "
+                                                     "module takes the pessimistic side as the "
+                                                     "operating assumption for the GPX4 arm.",
     "the_tension_with_this_analysis": "HDAC inhibition was tried in canine hemangiosarcoma and "
                                       "failed -- see `hsa_orthogonal_kill."
                                       "HDAC_INHIBITION_WAS_TRIED_IN_CANINE_HSA_AND_FAILED`. That "
@@ -266,6 +279,40 @@ WHAT_HAS_CLOSED_ON_THE_PARALLEL_ARM = {
                                               "route. It is not a ten-year canine route. This clears "
                                               "the exposure criterion in a rodent and says nothing "
                                               "about the duration criterion in a dog.",
+    "THE_THERAPEUTIC_WINDOW_ARGUMENT_THAT_ANSWERS_HANGAUERS_SECOND_PROBLEM": {
+        "the_statement": "'Given that germline Gpx4 KO mice are NOT VIABLE, whereas Fsp1 KO mice are "
+                         "VIABLE WITH NO NOTABLE PHYSIOLOGICAL DEFECTS, the therapeutic window for "
+                         "targeting FSP1 with fewer toxic side effects is expected to be MUCH GREATER "
+                         "than for GPX4.'",
+        "why_this_is_the_important_sentence_in_this_module": "Hangauer named two blockers in 2017: no "
+                                                             "bioavailable inhibitor, and no known "
+                                                             "therapeutic window because GPX4 "
+                                                             "deletion is lethal in adult mice. The "
+                                                             "second is the one the duration "
+                                                             "criterion cares about, because an agent "
+                                                             "with no therapeutic window cannot be "
+                                                             "given for ten years at any dose. On the "
+                                                             "FSP1 arm that blocker is absent by "
+                                                             "genetics rather than by hope.",
+        "what_it_does_and_does_not_establish": "it establishes that removing FSP1 is survivable in a "
+                                               "healthy animal, which is the precondition for chronic "
+                                               "dosing. It does NOT establish chronic tolerability of "
+                                               "icFSP1 specifically, in any species, at any duration. "
+                                               "The longest icFSP1 exposure reported is two weeks.",
+        "the_documented_tolerability_days": 14,
+        "the_horizon_days": 3650,
+        "the_shortfall_multiple": 3650 / 14,
+        "how_that_compares_to_the_disqualified_pair": "the MEK/mTOR pair was disqualified at a 215x "
+                                                      "duration shortfall. icFSP1's is 261x. On the "
+                                                      "criterion as written, this agent is in worse "
+                                                      "shape than the one the analysis rejected, and "
+                                                      "saying so is the price of having the "
+                                                      "criterion. What differs is the direction of "
+                                                      "travel: the MEK/mTOR shortfall was against a "
+                                                      "DOSE-LIMITING TOXICITY that had already "
+                                                      "appeared, while this one is simply an agent "
+                                                      "nobody has yet dosed for longer.",
+    },
 }
 
 # =============================================================================================

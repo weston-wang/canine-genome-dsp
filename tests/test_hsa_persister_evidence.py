@@ -304,3 +304,39 @@ def test_the_criterion_is_applied_to_the_favoured_mechanism_not_only_the_rejecte
     # And the criterion it is being borrowed from must still exist and still be about the horizon.
     from canine_dsp import hsa_alternative_approach as aa
     assert aa.THE_DURATION_CRITERION
+
+
+def test_the_field_level_contradiction_of_the_optimistic_gpx4_reading_is_kept():
+    d = pe.WHAT_HAS_CLOSED_ON_THE_GPX4_ARM
+    c = d["THE_FIELD_DOES_NOT_AGREE_THAT_THIS_IS_SETTLED"]
+    assert "HIGH TOXICITY" in c and "LOW-TO-LIMITED BIOAVAILABILITY" in c
+    assert "pessimistic side as the operating assumption" in c
+    # The optimistic sentence it contradicts must still be present, not quietly deleted.
+    assert "no longer entirely" in d["why_it_matters_here"]
+
+
+def test_the_fsp1_therapeutic_window_argument_is_genetic_not_pharmacological():
+    w = pe.WHAT_HAS_CLOSED_ON_THE_PARALLEL_ARM[
+        "THE_THERAPEUTIC_WINDOW_ARGUMENT_THAT_ANSWERS_HANGAUERS_SECOND_PROBLEM"]
+    assert "NOT VIABLE" in w["the_statement"]
+    assert "VIABLE WITH NO NOTABLE PHYSIOLOGICAL DEFECTS" in w["the_statement"]
+    assert "does NOT establish chronic tolerability" in w["what_it_does_and_does_not_establish"]
+
+
+def test_the_duration_shortfall_is_computed_and_is_worse_than_the_rejected_pair():
+    w = pe.WHAT_HAS_CLOSED_ON_THE_PARALLEL_ARM[
+        "THE_THERAPEUTIC_WINDOW_ARGUMENT_THAT_ANSWERS_HANGAUERS_SECOND_PROBLEM"]
+    assert w["the_documented_tolerability_days"] == 14
+    assert w["the_horizon_days"] == 3650
+    assert w["the_shortfall_multiple"] == pytest.approx(3650 / 14)
+    # The analysis must not flatter its own preferred mechanism.
+    assert w["the_shortfall_multiple"] > 215
+    assert "worse shape than the one the analysis rejected" in \
+        w["how_that_compares_to_the_disqualified_pair"]
+
+
+def test_the_duration_shortfall_uses_the_same_horizon_as_the_original_criterion():
+    from canine_dsp import hsa_alternative_approach as aa
+    w = pe.WHAT_HAS_CLOSED_ON_THE_PARALLEL_ARM[
+        "THE_THERAPEUTIC_WINDOW_ARGUMENT_THAT_ANSWERS_HANGAUERS_SECOND_PROBLEM"]
+    assert str(w["the_horizon_days"]) in repr(aa.THE_DURATION_CRITERION)
