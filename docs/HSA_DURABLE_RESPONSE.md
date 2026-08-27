@@ -1367,10 +1367,30 @@ reopens it for the subgroup with a blind spot.
 **Which makes the one stain a treatment-assignment decision.** Antigen survives on drug-tolerant
 cells → one-year induction. It doesn't → indefinite dosing plus an interferon-axis agent.
 
-*Why this beats the persister route:* 0.045/day of novel killing has no measured anchor anywhere.
-Restoring three-quarters of antigen presentation is a transcriptional effect with an established
-mechanism and two independent systemic canine demonstrations of the upstream trigger. The persister
-route stays as the fallback if antigen loss turns out to be deletional rather than epigenetic.
+### Two routes, and neither dominates
+
+I called restoration "the better bet" and the persister route "the fallback." That was wrong, because
+it ignored the axis the whole toxicity section exists to protect.
+
+| | persister kill | restore visibility |
+|---|---|---|
+| result | **1.000** at 0.050/day | **0.873** at 75% restored |
+| second drug | **stopped at year 1** | **continued indefinitely** |
+| mechanism evidence | no anchor for the rate | established, with canine target engagement upstream |
+
+**The persister route reached 1.000 with the drug stopped at year one — it keeps the one-year
+induction.** The restoration route gives that up. So the persister route is better on *toxicity* and
+worse on *evidence*; restoration is better on evidence and worse on toxicity. They're alternatives
+with different prices, not a preference and a backup.
+
+**How to choose:** the antigen-retention stain decides which is even available. If antigen loss is
+epigenetic, restoration is on the table and costs lifelong dosing. If it's deletional, restoration is
+impossible and the persister route is the only option — which happens to be the one that keeps the
+induction short.
+
+*What was not simulated:* partial restoration plus partial persister kill. Both are unanchored
+effects, and combining two unmeasured quantities to clear a threshold would be exactly the arithmetic
+this analysis has refused elsewhere.
 
 *Still unmeasured:* how much presentation a STING agonist or RNA-LPA actually restores in canine HSA.
 Both canine studies measured interferon-stimulated genes, which is upstream. **Nobody has measured

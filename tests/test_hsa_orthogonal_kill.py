@@ -357,6 +357,21 @@ def test_the_stain_becomes_a_treatment_assignment_decision():
 def test_the_verdict_names_what_was_abandoned():
     v = ok.VERDICT_ON_ROUTE_8
     assert "one-year induction" in v["what_had_to_be_abandoned_to_get_there"]
-    assert "no anchor at all" in v["the_two_routes_compared"]
+    assert "NEITHER DOMINATES" in v["the_two_routes_compared"]
+    assert "STOPPED AT YEAR ONE" in v["the_two_routes_compared"], (
+        "the persister route preserves the induction and that must not be lost")
+    assert "alternatives with different prices" in v["how_to_choose_between_them"]
+    assert "not simulated" in v["the_combination_nobody_has_costed"]
     assert "Nobody has measured the 75%" in v["what_is_still_unmeasured"]
     assert "not a demonstrated result" in v["the_honest_status"]
+
+
+def test_the_persister_route_keeps_the_one_year_induction():
+    """RESCUE_BY_PERSISTER_KILL was run with the second drug withdrawn at year one, so its 1.000
+    preserves the toxicity solution. The restoration route's 0.873 requires indefinite dosing.
+    Presenting one as simply 'better' loses that distinction."""
+    persister = ok.RESCUE_BY_PERSISTER_KILL[0.050]
+    restoration = ok.RESTORED_REACH_TIMES_DRUG_SCHEDULE[0.75]["never_stop"]
+    assert persister > restoration
+    assert ok.RESTORED_REACH_TIMES_DRUG_SCHEDULE[0.75]["stop_at_year_1"] == 0.0, (
+        "restoration cannot hold with the drug withdrawn")

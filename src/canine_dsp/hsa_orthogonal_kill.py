@@ -464,11 +464,26 @@ VERDICT_ON_ROUTE_8 = {
     "what_had_to_be_abandoned_to_get_there": "the one-year induction. Every version of this route "
                                              "that withdraws the second drug fails, at every level "
                                              "of restoration tested.",
-    "the_two_routes_compared": "restoration-plus-drug needs 75% of a transcriptional effect with a "
-                               "known mechanism and canine target-engagement data upstream. The "
-                               "persister route needs 0.045/day of killing with no anchor at all. "
-                               "The first is the better bet; the second remains the fallback if "
-                               "antigen loss turns out to be deletional rather than epigenetic.",
+    "the_two_routes_compared": "NEITHER DOMINATES, and an earlier draft that called restoration the "
+                               "better bet and the persister route the fallback was wrong, because "
+                               "it ignored the axis the whole toxicity section exists to protect. "
+                               "The persister route reached 1.000 WITH THE SECOND DRUG STOPPED AT "
+                               "YEAR ONE -- it preserves the one-year induction. The restoration "
+                               "route requires the drug indefinitely. So the persister route is "
+                               "better on toxicity and worse on evidence; restoration is better on "
+                               "evidence and worse on toxicity.",
+    "how_to_choose_between_them": "by what the antigen-retention stain shows, and then by which "
+                                  "cost is acceptable. If antigen loss is epigenetic, restoration "
+                                  "is available and costs lifelong dosing. If it is deletional, "
+                                  "restoration is impossible and the persister route is the only "
+                                  "option -- which is also the one that keeps the induction short. "
+                                  "They are alternatives with different prices, not a preference "
+                                  "and a backup.",
+    "the_combination_nobody_has_costed": "partial restoration plus partial persister kill was not "
+                                         "simulated. Both are unanchored effects and combining two "
+                                         "unmeasured quantities to clear a threshold would be "
+                                         "exactly the kind of arithmetic this analysis has "
+                                         "repeatedly refused elsewhere.",
     "what_is_still_unmeasured": "how much antigen presentation a STING agonist or RNA-LPA actually "
                                 "restores in canine hemangiosarcoma. Both canine studies measured "
                                 "interferon-stimulated genes, which is upstream. Nobody has "
