@@ -8,11 +8,11 @@ The uploadable file is **`hypothesis_note.pdf`** (in this folder).
 
 ---
 
-## One thing I need from you first
+## Author
 
-The PDF says **[Author name]**. Give me a name or handle and I will drop it in and
-re-render — or post with a name yourself. A deposit needs at least one author name;
-"Independent Researcher" is fine as the affiliation, but Zenodo requires a name field.
+Byline is set to **Weston Wang, Independent Researcher**. (If you'd rather add your PhD
+field in the honest, in-scope form — "PhD, [field]; this analysis is outside my area of
+training" — say the word and I'll re-render.)
 
 Optional, both free and one-time:
 - A **dedicated email** (a fresh Gmail/Proton) as the contact, so notifications land
@@ -28,7 +28,7 @@ Optional, both free and one-time:
 > MTAP loss and PRMT5 synthetic lethality as an untested, non-reroutable maintenance target in canine histiocytic sarcoma
 
 **Authors**
-> [Your name] (Independent Researcher)
+> Weston Wang (Independent Researcher)
 
 **Resource type**: Preprint  ·  **License**: Creative Commons Attribution 4.0 (CC-BY-4.0)
 
