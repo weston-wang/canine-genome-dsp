@@ -209,3 +209,78 @@ def test_the_experiment_puts_the_cheap_step_first():
     assert "drug-tolerant fraction specifically" in exp["step_2"]
     assert "0.045/day" in exp["step_3"]
     assert "cheap answer and an" in exp["why_this_ordering_matters"]
+
+
+# ---------------------------------------------------------------------------------------------
+# The better answer: restore visibility rather than out-kill the invisible cell.
+
+def test_antigen_loss_is_recorded_as_often_but_not_always_reversible():
+    entry = ok.ANTIGEN_LOSS_IS_OFTEN_REVERSIBLE
+    assert "33671123" in entry["citation"]
+    assert "EPIGENETIC MODIFICATIONS" in entry["the_mechanism"]
+    assert "deletional and irreversible" in entry["the_limit_of_the_claim"]
+
+
+def test_the_field_immaturity_is_quoted_from_the_authors_themselves():
+    caution = ok.ANTIGEN_LOSS_IS_OFTEN_REVERSIBLE["the_authors_own_caution"]
+    assert "LEAST ADVANCED AREA" in caution
+    assert "not be quoted as a solved problem" in caution
+
+
+def test_the_obvious_epigenetic_agents_are_recorded_as_having_failed_here():
+    """SAHA and VPA were tried in canine HSA and did not work in vivo. That has to be said."""
+    entry = ok.HDAC_INHIBITION_WAS_TRIED_IN_CANINE_HSA_AND_FAILED
+    assert "35568976" in entry["citation"]
+    assert "DID NOT AFFECT TUMOUR GROWTH" in entry["the_in_vivo_result"]
+    assert "did not work" in entry["the_honest_conclusion"]
+
+
+def test_the_hdac_macrophage_risk_is_flagged_against_the_hsa_specific_finding():
+    entry = ok.HDAC_INHIBITION_WAS_TRIED_IN_CANINE_HSA_AND_FAILED
+    assert "attracted macrophage" in entry["the_second_problem"]
+    assert "Gulay 2022" in entry["the_second_problem"]
+    assert "plausible harm" in entry["the_second_problem"]
+
+
+def test_jq1_is_not_credited_as_an_antigen_restoration_answer():
+    survives = ok.HDAC_INHIBITION_WAS_TRIED_IN_CANINE_HSA_AND_FAILED["what_survives"]
+    assert "not an antigen-restoration mechanism" in survives
+    assert "does not address route" in survives
+
+
+def test_type_i_interferon_is_presented_as_antigen_agnostic():
+    entry = ok.TYPE_I_INTERFERON_IS_THE_CONVERGENCE_POINT
+    assert "antigen-agnostic" in entry["the_mechanism"]
+    assert "does not require knowing which antigen was lost" in entry["the_mechanism"]
+
+
+def test_it_unifies_three_findings_rather_than_adding_a_fourth_agent():
+    why = ok.TYPE_I_INTERFERON_IS_THE_CONVERGENCE_POINT["why_this_unifies_three_separate_findings"]
+    assert "one intervention, not three" in why
+    assert "epitope spreading" in why
+
+
+def test_both_canine_sting_studies_carry_design_and_result():
+    entry = ok.TYPE_I_INTERFERON_IS_THE_CONVERGENCE_POINT
+    first = entry["canine_evidence_1_sting_in_client_owned_dogs"]
+    assert "41381219" in first["citation"]
+    assert "19 client-owned dogs" in first["design"]
+    assert "TUMOR TISSUE" in first["the_result"]
+    second = entry["canine_evidence_2_a_formulation_without_the_toxicity"]
+    assert "42096576" in second["citation"]
+    assert "WITHOUT CYTOKINE RELEASE SYNDROME" in second["the_result"]
+
+
+def test_the_toxicity_objection_and_its_candidate_answer_are_both_recorded():
+    entry = ok.TYPE_I_INTERFERON_IS_THE_CONVERGENCE_POINT
+    assert "cytokine release syndrome" in entry[
+        "canine_evidence_1_sting_in_client_owned_dogs"]["safety"]
+    assert "reports avoiding it" in entry[
+        "canine_evidence_2_a_formulation_without_the_toxicity"]["why_it_matters_here"]
+
+
+def test_the_inferred_step_is_named_as_inferred():
+    """Both canine studies measured ISGs, not MHC-I. The module must not claim the last step."""
+    gap = ok.TYPE_I_INTERFERON_IS_THE_CONVERGENCE_POINT["what_is_not_established"]
+    assert "neither canine study measured MHC-I" in gap
+    assert "the specific link is inferred" in gap

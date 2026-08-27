@@ -254,3 +254,115 @@ THE_EXPERIMENT_THIS_POINTS_AT = {
     "the_models_already_exist": "Andersen's canine angiosarcoma tumorgrafts, the ISOS-1 syngeneic "
                                 "line, and the canine ferroptosis panel Chatterji validated.",
 }
+
+
+# =============================================================================================
+# THE BETTER ANSWER: DO NOT OUT-KILL THE INVISIBLE CELL, MAKE IT VISIBLE.
+#
+# The persister route needs ~0.045/day of new killing with no anchor for it. There is a cheaper
+# target: the antigen is often SILENCED rather than absent. Antigen-presentation loss in cancer is
+# frequently transcriptional and epigenetic, not deletional -- the machinery is present and switched
+# off. If it can be switched back on, the 0.042/day vaccine already in the regimen does the work,
+# and no new killing is required at all.
+# =============================================================================================
+
+ANTIGEN_LOSS_IS_OFTEN_REVERSIBLE = {
+    "citation": "Shukla et al. 2021, Int J Mol Sci 22(4):1964, PMID 33671123, "
+                "doi 10.3390/ijms22041964",
+    "the_mechanism": "'A key mechanism of cancer immune evasion is downregulation of MHC-I and key "
+                     "proteins of the antigen processing and presentation machinery (APM).' NLRC5 "
+                     "is the master transcriptional activator of those genes, and 'genetic lesions "
+                     "and EPIGENETIC MODIFICATIONS of NLRC5 are the most common cause of MHC-I "
+                     "defects in cancers'.",
+    "why_that_matters_here": "an epigenetically silenced antigen is present in the genome and "
+                             "switched off. It can in principle be switched back on, which converts "
+                             "route 8's catastrophic case into its benign one rather than requiring "
+                             "a new kill mechanism.",
+    "the_authors_own_caution": "'reversing the MHC-I defects remains the LEAST ADVANCED AREA of "
+                               "tumor immunology.' This is a real mechanism in an immature field, "
+                               "and it should not be quoted as a solved problem.",
+    "the_limit_of_the_claim": "'genetic lesions AND epigenetic modifications' -- some fraction of "
+                              "antigen loss is deletional and irreversible. Nothing here tells us "
+                              "the split in canine hemangiosarcoma, and that split bounds how much "
+                              "of the blind spot is recoverable.",
+}
+
+# The obvious epigenetic agent, tested in this disease, and it does not work.
+HDAC_INHIBITION_WAS_TRIED_IN_CANINE_HSA_AND_FAILED = {
+    "citation": "Suzuki et al. 2022, Vet Comp Oncol 20(4):805-816, PMID 35568976, "
+                "doi 10.1111/vco.12840",
+    "what_was_tested": "two HDAC inhibitors (SAHA, valproic acid) and one BET inhibitor (JQ1) in "
+                       "canine hemangiosarcoma cell lines, in vitro and in vivo",
+    "the_in_vitro_promise": "SAHA and JQ1 induced apoptosis; SAHA and VPA upregulated "
+                            "inflammatory-related genes",
+    "the_in_vivo_result": "'JQ1 suppressed HSA tumour cell proliferation in vivo ALTHOUGH SAHA AND "
+                          "VPA DID NOT AFFECT TUMOUR GROWTH.' The two HDAC inhibitors -- the agents "
+                          "that would be used for antigen re-expression -- failed the in vivo test "
+                          "in this disease.",
+    "the_second_problem": "SAHA and VPA 'attracted macrophage cell line RAW264 cells'. Given that "
+                          "canine HSA macrophages are M2-polarised and PD-L1-positive and associate "
+                          "with FEWER T cells (Gulay 2022), recruiting more macrophages into this "
+                          "particular tumour is a plausible harm rather than a neutral side effect.",
+    "the_honest_conclusion": "the most obvious antigen-re-expression agents were tried in the right "
+                            "disease and did not work, and may make the microenvironment worse. "
+                            "This route is not closed by reaching for an HDAC inhibitor.",
+    "what_survives": "JQ1 worked in vivo, but BET inhibition is a proliferation and autophagy "
+                     "effect here, not an antigen-restoration mechanism. It does not address route "
+                     "8.",
+}
+
+# =============================================================================================
+# WHAT DOES RESTORE PRESENTATION -- AND HAS BEEN GIVEN SYSTEMICALLY TO DOGS, TWICE.
+# =============================================================================================
+
+TYPE_I_INTERFERON_IS_THE_CONVERGENCE_POINT = {
+    "the_mechanism": "type I interferon signalling upregulates MHC-I and the antigen-processing "
+                     "machinery, which is the transcriptional programme whose loss produces the "
+                     "invisible cell in the first place. Inducing it is antigen-agnostic -- it does "
+                     "not require knowing which antigen was lost.",
+    "why_this_unifies_three_separate_findings": "the RNA-LPA result that improved survivorship in "
+                                                "client-owned dogs with glioma works through early "
+                                                "type-I interferon responses; the same group showed "
+                                                "those responses are what ENABLE epitope spreading; "
+                                                "and STING agonism is a third entry point to the "
+                                                "same axis. Restoring presentation, spreading the "
+                                                "response beyond the vaccine's antigens, and "
+                                                "reprogramming the suppressive microenvironment are "
+                                                "one intervention, not three.",
+    "canine_evidence_1_sting_in_client_owned_dogs": {
+        "citation": "Lenz et al. 2025, J Immunother Cancer 13(12):e013715, PMID 41381219, "
+                    "doi 10.1136/jitc-2025-013715",
+        "design": "GSK856, a small-molecule dimeric amidobenzimidazole STING agonist, given "
+                  "INTRAVENOUSLY to 19 client-owned dogs with naturally developing solid tumours; "
+                  "two doses a week apart, then definitive-intent surgery",
+        "the_result": "'Transcriptional analyses of pretreatment and post-treatment blood AND TUMOR "
+                      "TISSUE revealed robust induction of ISGs' -- intratumoral target engagement, "
+                      "not just a blood signal",
+        "safety": "transient fever, lethargy and nausea, with IL-6 elevation consistent with "
+                  "cytokine release syndrome; tolerated dose levels were identified",
+        "why_it_matters_here": "this is the same class of target-engagement evidence this analysis "
+                               "demanded of trametinib, delivered in the right species and in "
+                               "tumour tissue.",
+    },
+    "canine_evidence_2_a_formulation_without_the_toxicity": {
+        "citation": "Zhou et al. 2026, Science 392(6798):eadx1893, PMID 42096576, "
+                    "doi 10.1126/science.adx1893",
+        "the_agent": "CRYSTAL, a structurally ordered intermetallic nanoparticle self-assembled "
+                     "from manganese ions intercalated with cyclic dinucleotides",
+        "the_result": "'At an ultralow intravenous dose (0.003 milligrams per kilogram), CRYSTAL "
+                      "activated STING in mice, DOGS, and nonhuman primates WITHOUT CYTOKINE "
+                      "RELEASE SYNDROME'",
+        "the_additional_effect": "'remodeled immunosuppressive environments, and promoted host "
+                                 "STING-dependent CD8+ T cell priming' -- the same suppressive "
+                                 "microenvironment routes 1 and 2 were built to lift",
+        "why_it_matters_here": "the cytokine release syndrome seen with GSK856 is the obvious "
+                               "objection to chronic STING agonism. This is a formulation that "
+                               "reports avoiding it, across three species including dogs.",
+    },
+    "what_is_not_established": "no STING agonist or RNA-LPA has been given for hemangiosarcoma, "
+                               "none has been dosed over the horizon this plan needs, and neither "
+                               "canine study measured MHC-I or antigen re-expression directly -- "
+                               "they measured interferon-stimulated genes, which is upstream of the "
+                               "effect this route depends on. The mechanism is right and the "
+                               "specific link is inferred.",
+}
