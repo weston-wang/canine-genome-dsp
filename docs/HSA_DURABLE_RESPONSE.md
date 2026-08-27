@@ -1338,7 +1338,45 @@ transfer. This one has **no measured effect size in this compartment at all** an
 essentially all of whatever it has. It is the least comfortable answer in the analysis, and the only
 answer to this case.
 
-**Verdict: closable, not closed.** The mechanism is right, the species and disease evidence exists,
+### What actually closes it
+
+Two candidates, both measured. Neither works alone.
+
+| approach (95% coverage, blind spot resistant) | result |
+|---|---|
+| nothing | 0.000 |
+| restore antigen fully, drug stopped at yr 1 | 0.273 |
+| persister kill 0.035/day | 0.000 |
+| persister kill 0.050/day | 1.000 *(no anchor for the rate)* |
+| **75% restored reach + drug continued** | **0.873** |
+| **100% restored reach + drug continued** | **1.000** |
+
+**Restoring the antigen alone tops out at 0.273** — it moves the cell from *covered by nothing* to
+*covered by the vaccine only*, and the vaccine wanes between two-monthly boosters, so a
+drug-resistant clone starting at 5% of the tumour outruns it.
+
+**The missing piece was already in the regimen.** Putting the second drug back — the one the toxicity
+work had converted into a one-year induction — supplies the 0.0225/day the waning vaccine can't hold.
+**75% restored reach plus continuous dosing gives 0.873**, beating the 0.840 no-blind-spot baseline
+and essentially matching the 0.888 reference. Below that it collapses: 50% gives 0.020.
+
+**The price is real and I won't hide it: the one-year induction is gone for these dogs.** Every
+withdrawal arm fails at every restoration level. This route doesn't escape the toxicity finding — it
+reopens it for the subgroup with a blind spot.
+
+**Which makes the one stain a treatment-assignment decision.** Antigen survives on drug-tolerant
+cells → one-year induction. It doesn't → indefinite dosing plus an interferon-axis agent.
+
+*Why this beats the persister route:* 0.045/day of novel killing has no measured anchor anywhere.
+Restoring three-quarters of antigen presentation is a transcriptional effect with an established
+mechanism and two independent systemic canine demonstrations of the upstream trigger. The persister
+route stays as the fallback if antigen loss turns out to be deletional rather than epigenetic.
+
+*Still unmeasured:* how much presentation a STING agonist or RNA-LPA actually restores in canine HSA.
+Both canine studies measured interferon-stimulated genes, which is upstream. **Nobody has measured
+the 75%.**
+
+**Verdict on the persister route alone: closable, not closed.** The mechanism is right, the species and disease evidence exists,
 an orally dosed agent exists — and the required rate has never been measured for any of them.
 
 **And do the cheap step first:** stain canine HSA for the vaccine antigen before and after PI3K/mTOR
@@ -1373,7 +1411,7 @@ emphasis would understate it: the condition is not a caveat, it is the entire re
 | 5 | splenic rupture / haemorrhage | **OPEN** → partially closed (§5) |
 | 6 | vaccine failure without antigen loss | **OPEN** → closable (§5) |
 | 7 | disease outside the resected compartment | **OPEN** → already closed (§5) |
-| 8 | antigen inadequacy on day zero | **SPLIT** (§3h) — harmless if drug-sensitive; **0.000 at 95% coverage** if it overlaps drug resistance, and continuous dosing does not rescue it |
+| 8 | antigen inadequacy on day zero | **CLOSED at a cost** (§3h) — harmless if drug-sensitive; if it overlaps resistance, needs 75% restored antigen presentation **plus the second drug continued indefinitely** (0.873) |
 
 Routes 1–3 are closed **by construction, not by potency**: none of these resistance lesions requires
 shedding the antigen a real HSA vaccine targets, so the vaccine still sees those cells. Route 3 sets

@@ -318,3 +318,45 @@ def test_the_premature_writeup_is_owned():
 def test_it_reconnects_to_the_toxicity_finding_rather_than_escaping_it():
     implication = ok.RESTORATION_ALONE_DOES_NOT_CLOSE_IT["what_it_implies_about_the_regimen"]
     assert "second drug cannot be withdrawn" in implication
+
+
+# ---------------------------------------------------------------------------------------------
+# The combination that closes it.
+
+def test_neither_half_closes_it_alone():
+    assert ok.DURABILITY_BY_RESTORED_REACH[1.00][0] < 0.35, "restoration alone falls short"
+    assert ok.RESTORED_REACH_TIMES_DRUG_SCHEDULE[0.50]["never_stop"] < 0.1, (
+        "continuing the drug with only half the reach restored is still a failure")
+
+
+def test_three_quarters_restoration_plus_continuous_drug_clears_the_reference():
+    got = ok.RESTORED_REACH_TIMES_DRUG_SCHEDULE[0.75]["never_stop"]
+    assert got > 0.84, "must beat the no-blind-spot baseline"
+    assert ok.RESTORED_REACH_TIMES_DRUG_SCHEDULE[1.00]["never_stop"] == pytest.approx(1.0)
+
+
+def test_every_withdrawal_arm_fails():
+    """The one-year induction is unavailable on this route, at every restoration level."""
+    for reach, arms in ok.RESTORED_REACH_TIMES_DRUG_SCHEDULE.items():
+        assert arms["stop_at_year_1"] < arms["never_stop"] or arms["never_stop"] == 0.0, reach
+    assert ok.RESTORED_REACH_TIMES_DRUG_SCHEDULE[0.75]["stop_at_year_1"] == 0.0
+    assert ok.RESTORED_REACH_TIMES_DRUG_SCHEDULE[1.00]["stop_at_year_1"] < 0.35
+
+
+def test_the_price_is_stated_not_buried():
+    price = ok.THIS_IS_THE_CLOSURE["the_price_and_it_is_not_small"]
+    assert "indefinite dosing" in price
+    assert "does not escape the toxicity finding" in price
+
+
+def test_the_stain_becomes_a_treatment_assignment_decision():
+    worth = ok.THIS_IS_THE_CLOSURE["what_this_makes_the_stain_worth"]
+    assert "which of two regimens" in worth
+
+
+def test_the_verdict_names_what_was_abandoned():
+    v = ok.VERDICT_ON_ROUTE_8
+    assert "one-year induction" in v["what_had_to_be_abandoned_to_get_there"]
+    assert "no anchor at all" in v["the_two_routes_compared"]
+    assert "Nobody has measured the 75%" in v["what_is_still_unmeasured"]
+    assert "not a demonstrated result" in v["the_honest_status"]

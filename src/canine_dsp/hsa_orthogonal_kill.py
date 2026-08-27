@@ -405,3 +405,75 @@ RESTORATION_ALONE_DOES_NOT_CLOSE_IT = {
                                          "0.0225/day on top. That reconnects this route to the "
                                          "toxicity finding rather than escaping it.",
 }
+
+
+# =============================================================================================
+# THE COMBINATION THAT CLOSES IT.
+#
+# Restoration alone tops out at 0.273 because the cell is still drug-resistant and the vaccine wanes
+# between boosters. The missing 0.0225/day is already in the regimen -- it is the second drug, which
+# the toxicity work had converted into a one-year induction. Putting it back closes the route.
+# =============================================================================================
+
+RESTORED_REACH_TIMES_DRUG_SCHEDULE = {
+    #  restored reach: {second drug withdrawn at year 1, second drug never withdrawn}
+    0.50: {"stop_at_year_1": 0.000, "never_stop": 0.020},
+    0.75: {"stop_at_year_1": 0.000, "never_stop": 0.873},
+    1.00: {"stop_at_year_1": 0.273, "never_stop": 1.000},
+}
+
+THIS_IS_THE_CLOSURE = {
+    "the_result": "75% restoration of vaccine reach with the second drug CONTINUED gives 0.873, "
+                  "which beats the 0.840 no-blind-spot baseline and essentially matches the 0.888 "
+                  "reference. Full restoration with the drug continued gives 1.000.",
+    "what_each_part_contributes": "neither half works alone. Restoration alone tops out at 0.273; "
+                                  "continuing the drug alone was measured earlier at 0.000. "
+                                  "Together they clear it, because the vaccine supplies a target "
+                                  "the drug cannot kill and the drug supplies the margin the "
+                                  "waning vaccine cannot hold.",
+    "the_threshold_is_between_50_and_75_percent": "at half restoration with the drug continued the "
+                                                  "figure is 0.020 -- still a failure. The usable "
+                                                  "range starts somewhere between 50% and 75%, and "
+                                                  "the grid does not resolve it more finely than "
+                                                  "that.",
+    "why_this_is_a_softer_ask_than_the_persister_route": "0.045/day of novel killing against "
+                                                         "persisters has no measured anchor "
+                                                         "anywhere. Restoring three quarters of "
+                                                         "antigen presentation is a transcriptional "
+                                                         "effect with an established mechanism "
+                                                         "(type I interferon on MHC-I and the "
+                                                         "antigen-processing machinery) and two "
+                                                         "independent systemic canine "
+                                                         "demonstrations of the upstream trigger.",
+    "the_price_and_it_is_not_small": "the second drug goes back to indefinite dosing for these "
+                                     "dogs. The one-year induction that solved the toxicity problem "
+                                     "is only available to dogs WITHOUT a blind spot. This route "
+                                     "does not escape the toxicity finding -- it reopens it for a "
+                                     "subgroup, and says so.",
+    "what_this_makes_the_stain_worth": "the single antigen-retention stain now decides which of two "
+                                       "regimens a dog gets: a one-year induction if the antigen "
+                                       "survives on drug-tolerant cells, or indefinite dosing plus "
+                                       "an interferon-axis agent if it does not. That is a "
+                                       "treatment-assignment decision resting on one measurement.",
+}
+
+VERDICT_ON_ROUTE_8 = {
+    "is_the_dangerous_case_closed": "yes, in the model, by a combination that needs no new agent "
+                                    "class beyond the interferon-axis one -- 75% restored antigen "
+                                    "presentation plus the second drug continued reaches 0.873.",
+    "what_had_to_be_abandoned_to_get_there": "the one-year induction. Every version of this route "
+                                             "that withdraws the second drug fails, at every level "
+                                             "of restoration tested.",
+    "the_two_routes_compared": "restoration-plus-drug needs 75% of a transcriptional effect with a "
+                               "known mechanism and canine target-engagement data upstream. The "
+                               "persister route needs 0.045/day of killing with no anchor at all. "
+                               "The first is the better bet; the second remains the fallback if "
+                               "antigen loss turns out to be deletional rather than epigenetic.",
+    "what_is_still_unmeasured": "how much antigen presentation a STING agonist or RNA-LPA actually "
+                                "restores in canine hemangiosarcoma. Both canine studies measured "
+                                "interferon-stimulated genes, which is upstream. Nobody has "
+                                "measured the 75%.",
+    "the_honest_status": "closed in the model, on a mechanism with real canine evidence for its "
+                         "trigger and none for its magnitude. Same standard as every other route "
+                         "here: a defensible plan, not a demonstrated result.",
+}
