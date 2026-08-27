@@ -1175,6 +1175,7 @@ surgical and chemotherapy backbone, gated on recovered effector function — not
 | 5 | splenic rupture / haemorrhage | **OPEN** → partially closed (§5) |
 | 6 | vaccine failure without antigen loss | **OPEN** → closable (§5) |
 | 7 | disease outside the resected compartment | **OPEN** → already closed (§5) |
+| 8 | **antigen inadequacy on day zero** | **OPEN** — added §3h; distinct from route 4 and not closable by height |
 
 Routes 1–3 are closed **by construction, not by potency**: none of these resistance lesions requires
 shedding the antigen a real HSA vaccine targets, so the vaccine still sees those cells. Route 3 sets
