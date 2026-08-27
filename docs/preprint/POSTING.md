@@ -3,18 +3,21 @@
 Goal: maximum reach, minimal interfacing. You upload once and you are done; nothing
 obliges you to respond to anyone. The uploadable file is **`hypothesis_note.pdf`**.
 
-**Recommended plan (updated):**
-- **Primary — Preprints.org** (Route A): accepts an honest hypothesis note *as-is*, gives
-  a permanent DOI, is indexed by Google Scholar/Crossref → better field reach than Zenodo,
-  near-certain acceptance. This is the best fit for your goals.
+**Recommended plan:**
+- **Primary — OSF Preprints** (Route A): run by the *Center for Open Science* (nonprofit,
+  clean reputation, no publisher baggage, minimal email spam). Accepts an honest hypothesis
+  note *as-is*, gives a permanent DOI, indexed by Google Scholar → better field reach than
+  Zenodo, near-certain acceptance. Best fit for your goals.
+- **Fallback — Research Square**: legitimate, established (powers Springer Nature's "In
+  Review"), free to post, DOI, Scholar-indexed. Commercial but not controversial. Use if
+  OSF stalls.
 - **Permanence anchor — Zenodo** (Route B): guaranteed, permanent, zero screening. Do this
-  too, or instead, if you just want the record to exist forever. (Note: this field does not
-  browse Zenodo, so its reach is search-only.)
-- **Skip bioRxiv for now** (Route C): its policy is that all articles must contain data and
-  that commentaries/hypothesis pieces are *not* accepted — so it would very likely reject
-  this note as written. Details in Route C.
+  too, or instead, if you just want the record to exist forever. (This field does not browse
+  Zenodo, so its reach is search-only.)
+- **Skip bioRxiv** (Route C): its policy requires data and excludes commentary/hypothesis
+  pieces, so it would very likely reject this note as written. Details in Route C.
 
-Post to **one** preprint server (duplicate preprints are discouraged). Preprints.org for
+Post to **one** preprint server (duplicate preprints are discouraged). OSF Preprints for
 reach, plus Zenodo if you want a second permanent copy, is the sweet spot.
 
 ---
@@ -49,28 +52,35 @@ researcher searches — the terms above appear in the first two sentences on pur
 
 ---
 
-## Route A — Preprints.org (recommended primary)
+## Route A — OSF Preprints (recommended primary)
 
-Free, run by MDPI, gives a permanent DOI, indexed by Google Scholar and Crossref, and it
-**accepts hypothesis/perspective pieces** — so the note goes as-is, no reframing. Light
-editorial screening (scope / plagiarism / not-offensive), usually cleared in a few days.
+Run by the **Center for Open Science** (nonprofit). Free, permanent DOI, indexed by Google
+Scholar, accepts hypothesis/theoretical pieces (no "must contain data" rule), light
+moderation for scope/appropriateness. Clean reputation, minimal solicitation email.
 
-1. Go to **preprints.org** → **Submit** → create an account (or log in).
-2. Upload **`hypothesis_note.pdf`** as the manuscript. (PDF is accepted; if it asks for a
-   source file, the PDF is fine for a preprint.)
-3. Fields to paste:
+1. Go to **osf.io** → create a free account (or log in). Confirm your email.
+2. Top menu → **Create new** → **Preprint**. Choose the provider **OSF Preprints** (the
+   general one), not a branded community.
+3. **Upload** `hypothesis_note.pdf` as the preprint file.
+4. Fields to paste:
    - **Title / Abstract / Keywords** — from the metadata block above.
-   - **Author**: Wes Wang. **Affiliation**: put **Unaffiliated** (the field is required).
-     **Email**: your dedicated address.
-   - **Subject category**: *Medicine & Pharmacology → Oncology* (or *Biology & Life
-     Sciences*); note it concerns veterinary / comparative oncology.
+   - **Authors**: Wes Wang. (Affiliation optional on OSF — leave blank, or "Unaffiliated".)
+     Add your dedicated email as contact.
+   - **Subjects** (OSF taxonomy): *Medicine and Health Sciences → Oncology* (and/or
+     *Life Sciences*). It concerns veterinary / comparative oncology.
    - **License**: CC BY 4.0.
-   - **Conflicts / funding**: none. **AI disclosure**: state that the analysis was prepared
-     with AI assistance and you take responsibility (already in the note's Limitations).
-4. Submit. After the short screen it posts with a DOI and is picked up by Scholar.
+   - **Conflicts / funding**: none. AI assistance is already disclosed in the note's
+     Limitations; no extra field needed.
+5. **Submit.** After a brief moderation it posts with a DOI and is picked up by Scholar.
 
-**Fallback if Preprints.org stalls: Research Square.** Same idea — free standalone preprint,
-DOI, indexed. Go to **researchsquare.com**, "Post a preprint," same fields as above.
+### Fallback if OSF stalls — Research Square
+Legitimate and established (it powers Springer Nature's "In Review"); free to post, DOI,
+Scholar-indexed; commercial but not controversial. Go to **researchsquare.com** →
+**Post a preprint**, upload the same PDF, paste the same metadata.
+
+(Preprints.org — run by the publisher MDPI — is another option but comes with heavy
+journal-solicitation email and a mixed publisher reputation; OSF and Research Square are
+cleaner, so it's not the recommendation.)
 
 ---
 
