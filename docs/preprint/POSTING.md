@@ -10,9 +10,7 @@ The uploadable file is **`hypothesis_note.pdf`** (in this folder).
 
 ## Author
 
-Byline is set to **Weston Wang, Independent Researcher**. (If you'd rather add your PhD
-field in the honest, in-scope form — "PhD, [field]; this analysis is outside my area of
-training" — say the word and I'll re-render.)
+Byline is set to **Wes Wang, Independent Researcher — PhD, digital signal processing** (noted as outside your field of training; the DSP background supports the quantitative modeling).
 
 Optional, both free and one-time:
 - A **dedicated email** (a fresh Gmail/Proton) as the contact, so notifications land
@@ -28,7 +26,7 @@ Optional, both free and one-time:
 > MTAP loss and PRMT5 synthetic lethality as an untested, non-reroutable maintenance target in canine histiocytic sarcoma
 
 **Authors**
-> Weston Wang (Independent Researcher)
+> Wes Wang (Independent Researcher)
 
 **Resource type**: Preprint  ·  **License**: Creative Commons Attribution 4.0 (CC-BY-4.0)
 
