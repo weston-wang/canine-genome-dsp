@@ -281,8 +281,10 @@ CLOSURE_LEG_1_THE_DRUG_ABSORBS_IT = {
     "the_condition_it_depends_on": "the blind spot must not overlap drug resistance, and the first "
                 "drug must not be withdrawn. This analysis already requires the first drug "
                 "continuously; it is the SECOND drug that becomes a one-year induction.",
-    "status": "CLOSED conditionally -- and the condition is measurable by the experiment in "
-              "WHAT_TO_MEASURE_INSTEAD.",
+    "status": "CLOSED for a purely drug-sensitive blind spot and WORTHLESS otherwise -- see "
+              "OVERLAP_IS_THE_WHOLE_BALLGAME. Any resistant component takes durability to 0.000, "
+              "and continuous dosing does not rescue it. This leg describes the benign case; it "
+              "is not a defence against the dangerous one.",
 }
 
 CLOSURE_LEG_2_POLYVALENT_VACCINES_SIDESTEP_IT = {
@@ -373,14 +375,18 @@ VERDICT = {
     "the_route": "8 -- antigen inadequacy on day zero, distinct from route 4's antigen loss.",
     "is_it_closable": "yes, and by more than one route, but not by the component that closes "
                       "route 4.",
-    "the_strongest_closer_is_free": "the first drug already absorbs a drug-sensitive blind spot "
-                                    "down to 60% coverage without losing anything, because it runs "
-                                    "continuously and does not care what the vaccine can see.",
-    "the_condition_that_decides_it": "whether the blind spot overlaps drug resistance. That is one "
-                                     "stain on treated versus untreated cells in models that "
-                                     "already exist, and it is now the single cheapest decisive "
-                                     "experiment in this analysis.",
-    "the_backups_if_it_does_overlap": "polyvalent tumour-derived vaccines close it outright at the "
+    "the_free_closer_only_covers_the_benign_case": "the first drug absorbs a drug-SENSITIVE blind "
+                                    "spot down to 40% coverage for nothing, because it runs "
+                                    "continuously and does not care what the vaccine sees. The "
+                                    "moment any of the blind spot is drug-resistant, durability "
+                                    "is 0.000 at 95% coverage and continuous dosing does not "
+                                    "change that.",
+    "the_condition_that_decides_it": "whether the blind spot overlaps drug resistance -- and it is "
+                                     "not a spectrum but a cliff between 0.84 and 0.00. One stain "
+                                     "on treated versus untreated cells in models that already "
+                                     "exist settles it, which makes it a GO/NO-GO gate that has "
+                                     "to precede a trial rather than accompany one.",
+    "the_only_answers_if_it_does_overlap": "polyvalent tumour-derived vaccines close it outright at the "
                                       "cost of per-dog manufacture; epitope spreading repairs "
                                       "coverage and has been demonstrated clinically; RNA-LPAs "
                                       "induce that spreading without needing to know the antigen "
@@ -388,4 +394,68 @@ VERDICT = {
     "what_this_does_not_claim": "none of the four legs has been tested in canine hemangiosarcoma. "
                                 "The route is closable on paper and on mechanism, in the same sense "
                                 "and with the same caveats as every other route in this analysis.",
+}
+
+
+# =============================================================================================
+# THE CASE THE FIRST RESULT EXCLUDED, RUN. IT IS NOT A DEGRADATION -- IT IS A CLIFF.
+#
+# The flat 0.864 above depended on the antigen-null fraction being drug-sensitive. Here the same
+# grid is run with that fraction specified three ways: drug-sensitive, half-and-half, and carrying
+# clone 1's resistance. Seven clones, same seed, 250 trials. At full coverage all three agree, which
+# is again the fairness check.
+# =============================================================================================
+
+DURABILITY_BY_WHERE_THE_BLIND_SPOT_LANDS = {
+    #  coverage: (null drug-sensitive, null mixed 50/50, null drug-resistant)
+    1.00: (0.840, 0.840, 0.840),
+    0.95: (0.840, 0.000, 0.000),
+    0.90: (0.828, 0.000, 0.000),
+    0.80: (0.836, 0.000, 0.000),
+}
+
+# And the obvious rescue -- never withdraw the second drug -- does not work either.
+CONTINUOUS_DOSING_DOES_NOT_RESCUE_AN_OVERLAPPING_BLIND_SPOT = {
+    0.95: {"stop_at_year_1": 0.000, "never_stop": 0.000},
+    0.90: {"stop_at_year_1": 0.000, "never_stop": 0.000},
+    0.80: {"stop_at_year_1": 0.000, "never_stop": 0.000},
+}
+
+OVERLAP_IS_THE_WHOLE_BALLGAME = {
+    "the_finding": "a blind spot that overlaps drug resistance is not a worse outcome, it is a "
+                   "total one. At 95% coverage -- five percent of the sensitive compartment both "
+                   "antigen-null and drug-resistant -- ten-year durability is 0.000. Not 0.5, not "
+                   "the correction-alone floor. Zero, in 250 of 250 trials.",
+    "the_mixed_case_is_no_softer": "splitting the null fraction half drug-sensitive and half "
+                                   "drug-resistant gives 0.000 as well. It takes only the resistant "
+                                   "half to do it; the sensitive half being covered buys nothing.",
+    "why_it_is_absolute": "such a cell is covered by nothing. The vaccine cannot see it, the first "
+                          "drug cannot kill it, and the second drug's 0.0225/day does not close the "
+                          "gap to its growth rate. Net growth stays positive, and positive net "
+                          "growth over ten years is arithmetic, not chance.",
+    "continuous_dosing_does_not_save_it": "withdrawing the second drug at year one and never "
+                                          "withdrawing it give the same 0.000. This is the one place "
+                                          "in the entire analysis where the toxicity trade-off is "
+                                          "irrelevant, because neither arm works.",
+    "what_this_does_to_leg_1": "the first closure leg -- 'the drug absorbs it' -- is not a general "
+                               "result. It holds for a purely drug-sensitive blind spot and fails "
+                               "completely the moment any part of the blind spot is resistant. It "
+                               "is a description of the benign case, not a defence against the "
+                               "dangerous one.",
+    "what_this_does_to_the_measurement": "coverage in the drug-resistant fraction stops being the "
+                                         "cheapest informative experiment and becomes a GO/NO-GO "
+                                         "GATE. There is no version of this plan that survives an "
+                                         "antigen-null resistant subpopulation at even five "
+                                         "percent, so the measurement has to precede the trial "
+                                         "rather than accompany it.",
+    "what_this_does_to_legs_2_to_4": "polyvalent tumour-derived vaccines, epitope spreading and "
+                                     "RNA-LPA-induced spreading stop being backups and become the "
+                                     "only candidate answers, because they are the only ones that "
+                                     "can put an antigen on a cell whose antigen was never there. "
+                                     "None of them has been tested against a resistant "
+                                     "subpopulation specifically.",
+    "the_honest_reading": "route 8 is closed in the benign case and open in the dangerous one, and "
+                          "nothing currently distinguishes which case canine hemangiosarcoma is. "
+                          "Recording it as 'closed conditionally' without that emphasis would "
+                          "understate it: the condition is not a caveat, it is the entire result.",
 }

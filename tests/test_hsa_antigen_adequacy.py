@@ -220,7 +220,8 @@ def test_all_four_closure_legs_carry_a_status():
 def test_leg_1_states_the_condition_it_depends_on():
     leg = ag.CLOSURE_LEG_1_THE_DRUG_ABSORBS_IT
     assert "must not overlap drug resistance" in leg["the_condition_it_depends_on"]
-    assert "conditionally" in leg["status"]
+    assert "WORTHLESS otherwise" in leg["status"], (
+        "leg 1 must not read as a general closure -- it fails completely on overlap")
 
 
 def test_leg_2_records_the_cost_it_reintroduces():
@@ -259,3 +260,52 @@ def test_the_verdict_keeps_the_route_honest():
     assert "overlaps drug resistance" in v["the_condition_that_decides_it"]
     assert "none of the four legs has been tested in canine hemangiosarcoma" in v[
         "what_this_does_not_claim"]
+
+
+# ---------------------------------------------------------------------------------------------
+# The dangerous case: a blind spot that overlaps drug resistance.
+
+def test_all_three_specifications_agree_at_full_coverage():
+    """Fairness check again: at phi = 1 there is no blind spot to place anywhere."""
+    sensitive, mixed, resistant = ag.DURABILITY_BY_WHERE_THE_BLIND_SPOT_LANDS[1.00]
+    assert sensitive == pytest.approx(mixed) == pytest.approx(resistant)
+
+
+def test_a_drug_sensitive_blind_spot_stays_harmless():
+    for coverage, row in ag.DURABILITY_BY_WHERE_THE_BLIND_SPOT_LANDS.items():
+        assert row[0] > 0.80, f"sensitive blind spot should not bite at coverage {coverage}"
+
+
+def test_any_resistant_component_is_total_failure_not_degradation():
+    """0.000, not a reduced number -- the distinction the module has to preserve."""
+    for coverage, (_sens, mixed, resistant) in ag.DURABILITY_BY_WHERE_THE_BLIND_SPOT_LANDS.items():
+        if coverage < 1.0:
+            assert resistant == 0.0, f"coverage {coverage}"
+            assert mixed == 0.0, f"coverage {coverage}: half-resistant is no softer"
+
+
+def test_the_cliff_is_between_neighbouring_specifications_not_across_coverage():
+    """Coverage barely matters; where the blind spot lands is everything."""
+    at_95 = ag.DURABILITY_BY_WHERE_THE_BLIND_SPOT_LANDS[0.95]
+    assert at_95[0] - at_95[2] > 0.8
+
+
+def test_continuous_dosing_does_not_rescue_an_overlapping_blind_spot():
+    for coverage, arms in ag.CONTINUOUS_DOSING_DOES_NOT_RESCUE_AN_OVERLAPPING_BLIND_SPOT.items():
+        assert arms["stop_at_year_1"] == 0.0, coverage
+        assert arms["never_stop"] == 0.0, coverage
+
+
+def test_the_module_refuses_to_soften_the_result():
+    entry = ag.OVERLAP_IS_THE_WHOLE_BALLGAME
+    assert "not a worse outcome, it is a total one" in entry["the_finding"]
+    assert "250 of 250 trials" in entry["the_finding"]
+    assert "GO/NO-GO GATE" in entry["what_this_does_to_the_measurement"]
+    assert "the condition is not a caveat, it is the entire result" in entry["the_honest_reading"]
+
+
+def test_the_backup_legs_are_promoted_to_the_only_answers():
+    entry = ag.OVERLAP_IS_THE_WHOLE_BALLGAME
+    assert "stop being backups" in entry["what_this_does_to_legs_2_to_4"]
+    assert "None of them has been tested" in entry["what_this_does_to_legs_2_to_4"]
+    assert "the_only_answers_if_it_does_overlap" in ag.VERDICT

@@ -1226,10 +1226,39 @@ is the dangerous one: a blind spot that overlaps drug resistance, covered by not
 coverage measured *in the drug-resistant fraction* — cells surviving PI3K/mTOR inhibition. One stain
 on treated versus untreated cells, in models that already exist (Andersen's tumorgrafts, ISOS-1).
 
+### The excluded case, run — and it is a cliff, not a slope
+
+The flat result above depended entirely on the antigen-null cells being drug-*sensitive*. Running the
+same grid with that fraction specified three ways:
+
+| coverage | null = drug-sensitive | null = half-and-half | null = drug-resistant |
+|---|---|---|---|
+| 100% | 0.840 | 0.840 | 0.840 |
+| **95%** | 0.840 | **0.000** | **0.000** |
+| 90% | 0.828 | **0.000** | **0.000** |
+| 80% | 0.836 | **0.000** | **0.000** |
+
+**Five percent of the tumour being both antigen-null and drug-resistant takes ten-year durability to
+zero — in 250 of 250 trials.** Not a reduced number. Zero. And the half-and-half case is no softer:
+it takes only the resistant half to do it.
+
+**Why it's absolute:** such a cell is covered by nothing. The vaccine can't see it, the first drug
+can't kill it, and the second drug's 0.0225/day doesn't close the gap to its growth. Net growth stays
+positive, and positive net growth over ten years is arithmetic, not chance.
+
+**And continuous dosing does not rescue it.** Stopping the second drug at year one and never stopping
+it both give 0.000. This is the one place in the whole analysis where the toxicity trade-off is
+irrelevant, because neither arm works.
+
+So the measurement isn't the cheapest informative experiment any more — it's a **go/no-go gate** that
+has to precede a trial rather than accompany one.
+
 ### Closing it — four legs, none of which needs to know the antigen
 
-1. **The drug absorbs it.** A drug-sensitive blind spot costs nothing down to 40% coverage, because
-   the first drug never stops. *Conditional on no overlap with resistance.*
+1. **The drug absorbs it — but only in the benign case.** A drug-*sensitive* blind spot costs nothing
+   down to 40% coverage, because the first drug never stops. It is **worthless** the moment any part
+   of the blind spot is resistant. This describes the benign case; it is not a defence against the
+   dangerous one.
 2. **Polyvalent tumour-derived vaccines can't have a coverage gap** — their antigens come from the
    tumour. Both positive HSA vaccine results are of this type. Cost: per-dog manufacture, which is
    exactly what Calviri calls *"impractical… and prohibitively expensive for use in dogs."*
@@ -1248,8 +1277,13 @@ Missing-self recognition needs MHC-I downregulation, so it covers route 4's anti
 target that was never displayed on cells with intact presentation. Listing it here would repeat the
 exact conflation this section exists to undo.
 
-*Nothing in the four legs has been tested in canine hemangiosarcoma. Route 8 is closable on paper and
-on mechanism, in the same sense and with the same caveats as every other route here.*
+**Legs 2–4 are therefore not backups — they are the only candidate answers**, because they are the
+only things that can put an antigen on a cell whose antigen was never there. None has been tested
+against a resistant subpopulation specifically.
+
+*Route 8 is closed in the benign case and open in the dangerous one, and nothing currently
+distinguishes which case canine hemangiosarcoma is. Calling it "closed conditionally" without that
+emphasis would understate it: the condition is not a caveat, it is the entire result.*
 
 *Tests: `test_hsa_antigen_adequacy.py`*
 
@@ -1266,7 +1300,7 @@ on mechanism, in the same sense and with the same caveats as every other route h
 | 5 | splenic rupture / haemorrhage | **OPEN** → partially closed (§5) |
 | 6 | vaccine failure without antigen loss | **OPEN** → closable (§5) |
 | 7 | disease outside the resected compartment | **OPEN** → already closed (§5) |
-| 8 | antigen inadequacy on day zero | **CLOSED conditionally** (§3h) — absorbed by the continuous first drug unless the blind spot overlaps drug resistance |
+| 8 | antigen inadequacy on day zero | **SPLIT** (§3h) — harmless if drug-sensitive; **0.000 at 95% coverage** if it overlaps drug resistance, and continuous dosing does not rescue it |
 
 Routes 1–3 are closed **by construction, not by potency**: none of these resistance lesions requires
 shedding the antigen a real HSA vaccine targets, so the vaccine still sees those cells. Route 3 sets
