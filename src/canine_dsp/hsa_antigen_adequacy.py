@@ -202,3 +202,190 @@ COVERAGE_EXPLAINS_WHICH_VACCINES_WORKED = {
     "the_honest_status": "four results is not a dataset and the sorting is retrospective. This is a "
                          "hypothesis that happens to make a falsifiable prediction, not a finding.",
 }
+
+
+# =============================================================================================
+# WHAT THE ENGINE SAYS -- AND IT IS NOT WHAT THE MODULE'S AUTHOR EXPECTED.
+#
+# Both modes run at the plan's own operating point: vaccine height 0.042/day, second drug withdrawn
+# after one year. Same engine, same seed, 250 trials, six clones (the five as before plus an
+# antigen-null compartment). At full coverage the two modes are identical, which is the check that
+# the comparison is fair.
+# =============================================================================================
+
+DURABILITY_BY_COVERAGE = {
+    #  coverage: (A uniform -- every cell dimmer, B heterogeneous -- some cells blind)
+    1.00: (0.864, 0.864),
+    0.95: (0.708, 0.864),
+    0.90: (0.648, 0.864),
+    0.80: (0.496, 0.864),
+    0.60: (0.500, 0.860),
+    0.40: (0.276, 0.848),
+}
+
+THE_RESULT_INVERTS_THE_EXPECTATION = {
+    "what_was_expected": "that the heterogeneous blind spot would be far worse than uniform "
+                         "dimming, because a pre-existing antigen-null population starts at high "
+                         "frequency instead of having to be seeded at 1e-8/day.",
+    "what_happened": "the opposite. Uniform dimming falls 0.864 -> 0.496 by 80% coverage. The blind "
+                     "spot does not move at all: 0.864 down to 0.848 across the entire range, including at 40% coverage where uniform dimming has fallen to 0.276.",
+    "why": "the antigen-null cells in this specification are DRUG-SENSITIVE, and the first drug -- "
+           "the PI3K/mTOR inhibitor -- runs continuously for the whole ten years. It holds them "
+           "whatever the vaccine can or cannot see. Uniform dimming, by contrast, weakens the "
+           "vaccine everywhere INCLUDING on the drug-resistant clones, and covering those clones is "
+           "the vaccine's entire job in this plan.",
+    "the_reframing": "antigen coverage per se is not what matters. What matters is whether the "
+                     "antigen covers the DRUG-RESISTANT cells. Coverage of drug-sensitive cells is "
+                     "largely redundant with the drug that is already killing them.",
+    "the_honest_caveat": "this is a consequence of a modelling choice -- that the antigen-null "
+                         "fraction inherits the sensitive clone's drug response. That choice is "
+                         "doing the work, and the case it excludes is the dangerous one: a blind "
+                         "spot that overlaps drug resistance, covered by nothing.",
+}
+
+# The design rule that falls out, which is the useful part.
+WHAT_TO_MEASURE_INSTEAD = {
+    "the_wrong_experiment": "quantitative immunohistochemistry for antigen coverage across bulk "
+                            "hemangiosarcoma tissue. It answers a question the model says is not "
+                            "decisive.",
+    "the_right_experiment": "measure antigen coverage IN THE DRUG-RESISTANT FRACTION -- cells "
+                            "surviving PI3K/mTOR inhibition. If the antigen is retained on the "
+                            "cells the drug cannot kill, incomplete coverage elsewhere is largely "
+                            "absorbed. If it is lost on exactly those cells, the plan has no cover "
+                            "at all.",
+    "why_this_is_cheap": "it is the same stain on a treated versus untreated cell line or "
+                         "tumorgraft, not a new trial. Andersen's canine angiosarcoma tumorgrafts "
+                         "and the ISOS-1 syngeneic model both already exist for it.",
+    "the_precedent_that_makes_it_plausible": "antigen retention under targeted-therapy pressure is "
+                                             "not guaranteed in either direction -- drug-tolerant "
+                                             "persister states are widely reported to shift surface "
+                                             "phenotype. Assuming retention is exactly the kind of "
+                                             "unexamined assumption this module was written to stop "
+                                             "making.",
+}
+
+
+# =============================================================================================
+# CLOSING THE ROUTE.
+#
+# Route 8 is closable, and unusually the closers do not require knowing the antigen -- which is the
+# point, because the failure mode is not knowing the antigen. Four legs, ordered by how much of the
+# evidence sits in dogs.
+# =============================================================================================
+
+CLOSURE_LEG_1_THE_DRUG_ABSORBS_IT = {
+    "claim": "a blind spot among drug-sensitive cells is held by the first drug, which runs "
+             "continuously regardless of the vaccine.",
+    "evidence": "DURABILITY_BY_COVERAGE: heterogeneous coverage from 1.00 down to 0.60 leaves "
+                "ten-year durability at 0.864-0.860, flat.",
+    "the_condition_it_depends_on": "the blind spot must not overlap drug resistance, and the first "
+                "drug must not be withdrawn. This analysis already requires the first drug "
+                "continuously; it is the SECOND drug that becomes a one-year induction.",
+    "status": "CLOSED conditionally -- and the condition is measurable by the experiment in "
+              "WHAT_TO_MEASURE_INSTEAD.",
+}
+
+CLOSURE_LEG_2_POLYVALENT_VACCINES_SIDESTEP_IT = {
+    "claim": "a vaccine whose antigens come from the tumour itself cannot have a coverage gap "
+             "against that tumour, because its antigen set is defined by what the tumour expresses.",
+    "evidence_in_this_disease": "both polyvalent hemangiosarcoma vaccines were positive. The "
+                                "ER-stress-peptide secretome vaccine gave TTP 195 vs 160 days "
+                                "(p=0.001) and OS 276 vs 175 days (p=0.002) in 28 vaccinated "
+                                "against 32 controls; autologous monocyte-derived dendritic cells "
+                                "gave median survival 256 days with an adjusted hazard ratio of "
+                                "0.30.",
+    "the_cost": "polyvalent tumour-derived products are manufactured per dog from that dog's own "
+                "tumour, which is exactly the logistics Calviri cites as 'impractical to build and "
+                "prohibitively expensive for use in dogs'. Sidestepping the antigen problem "
+                "reintroduces a manufacturing one.",
+    "status": "CLOSED at the cost of per-dog manufacture -- an availability problem, not a biology "
+              "problem.",
+}
+
+CLOSURE_LEG_3_EPITOPE_SPREADING_REPAIRS_COVERAGE = {
+    "claim": "killing antigen-positive cells releases the tumour's other antigens, and the response "
+             "broadens to targets the vaccine never contained. A coverage gap can close itself.",
+    "clinical_evidence": "NEO-PV-01, a personalised neoantigen vaccine given with chemotherapy and "
+                         "anti-PD-1 to 38 patients with non-squamous NSCLC: 'Epitope spread to "
+                         "NON-VACCINATING neoantigens, including responses to KRAS G12C and G12V "
+                         "mutations, were detected post-vaccination.' "
+                         "(Awad et al. 2022, Cancer Cell 40(9):1010-1026, PMID 36027916)",
+    "why_it_bears_on_route_8": "it is direct evidence that a DEFINED-antigen vaccine can end up "
+                               "covering antigens it did not contain -- which is the failure mode "
+                               "route 8 describes, repairing itself over time.",
+    "the_limits": "human lung cancer, given alongside checkpoint blockade and chemotherapy, so the "
+                  "spreading is not attributable to the vaccine alone; and spreading was detected, "
+                  "not shown to be sufficient.",
+    "status": "PARTIAL -- a real mechanism with clinical demonstration, no dose-response and "
+              "nothing in this species or tumour.",
+}
+
+CLOSURE_LEG_4_FORCE_THE_SPREADING_WITHOUT_KNOWING_THE_ANTIGEN = {
+    "claim": "epitope spreading can be induced deliberately, using RNA that codes for "
+             "TUMOUR-UNSPECIFIC antigens -- so the intervention does not need to know the target "
+             "at all.",
+    "mechanism": "multi-lamellar RNA lipid particle aggregates (RNA-LPAs) given systemically "
+                 "activate RIG-I in stromal cells rather than TLRs in immune cells, producing a "
+                 "large cytokine and chemokine response with dendritic cell and lymphocyte "
+                 "trafficking",
+    "the_canine_evidence": "'In client-owned canines with terminal gliomas, RNA-LPAs improved "
+                           "survivorship and reprogrammed the TME, which became \"hot\" within days "
+                           "of a single infusion.' "
+                           "(Mendez-Gomez et al. 2024, Cell 187(10):2521-2535, PMID 38697107)",
+    "the_human_evidence": "a first-in-human glioblastoma trial showed rapid cytokine release, "
+                          "immune trafficking, tissue-confirmed pseudoprogression and "
+                          "glioma-specific immune responses",
+    "the_epitope_spreading_link": "the companion study shows early type-I interferon responses "
+                                  "mediate epitope spreading in poorly immunogenic tumours and that "
+                                  "boosting them with tumour-unspecific RNA enables it "
+                                  "(Qdaisat et al. 2025, Nat Biomed Eng 9(9):1437-1452, "
+                                  "PMID 40681861)",
+    "why_this_is_the_most_interesting_leg": "it attacks route 8 and routes 1-2 with one agent. The "
+                                            "coverage gap is repaired by spreading, and the "
+                                            "suppressive microenvironment this analysis spent three "
+                                            "routes trying to lift is reprogrammed directly -- in "
+                                            "dogs, systemically, after a single infusion.",
+    "the_limits": "glioma, not hemangiosarcoma. Survivorship in terminal disease, not an adjuvant "
+                  "setting. No coverage measurement, and nothing about how long the effect lasts, "
+                  "which is the axis this analysis has repeatedly found to be the weak one.",
+    "status": "PARTIAL -- the strongest antigen-agnostic candidate, with canine in-vivo data, in "
+              "the wrong tumour.",
+}
+
+# NK cells were already in the regimen for route 4. How much do they help here?
+THE_NK_COMPONENT_ONLY_PARTLY_TRANSFERS = {
+    "the_tempting_argument": "NK cells are antigen-agnostic, so they should cover any cell the "
+                             "vaccine cannot see, closing route 8 for free with a component the "
+                             "regimen already contains.",
+    "why_it_does_not_fully_work": "NK recognition here is MISSING-SELF: it is triggered by MHC-I "
+                                  "downregulation. A cell that lost the antigen by losing antigen "
+                                  "presentation is NK-visible. A cell that never displayed the "
+                                  "vaccine's target while keeping normal MHC-I is not.",
+    "what_it_does_cover": "route 4 -- antigen loss through MHC-I downregulation -- which is what it "
+                          "was added for.",
+    "what_it_does_not_cover": "route 8's heterogeneous mode, where the target was simply never "
+                              "there and antigen presentation is intact.",
+    "the_correction": "listing NK cells as a route 8 closer would be exactly the conflation this "
+                      "module exists to undo.",
+}
+
+VERDICT = {
+    "the_route": "8 -- antigen inadequacy on day zero, distinct from route 4's antigen loss.",
+    "is_it_closable": "yes, and by more than one route, but not by the component that closes "
+                      "route 4.",
+    "the_strongest_closer_is_free": "the first drug already absorbs a drug-sensitive blind spot "
+                                    "down to 60% coverage without losing anything, because it runs "
+                                    "continuously and does not care what the vaccine can see.",
+    "the_condition_that_decides_it": "whether the blind spot overlaps drug resistance. That is one "
+                                     "stain on treated versus untreated cells in models that "
+                                     "already exist, and it is now the single cheapest decisive "
+                                     "experiment in this analysis.",
+    "the_backups_if_it_does_overlap": "polyvalent tumour-derived vaccines close it outright at the "
+                                      "cost of per-dog manufacture; epitope spreading repairs "
+                                      "coverage and has been demonstrated clinically; RNA-LPAs "
+                                      "induce that spreading without needing to know the antigen "
+                                      "and have improved survival in client-owned dogs.",
+    "what_this_does_not_claim": "none of the four legs has been tested in canine hemangiosarcoma. "
+                                "The route is closable on paper and on mechanism, in the same sense "
+                                "and with the same caveats as every other route in this analysis.",
+}
