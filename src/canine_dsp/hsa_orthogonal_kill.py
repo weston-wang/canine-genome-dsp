@@ -203,14 +203,29 @@ IT_WORKS_BUT_IT_IS_A_KNIFE_EDGE = {
                    "against one compartment, nearly what the entire regimen delivers against the "
                    "whole tumour.",
     },
-    "what_makes_it_less_implausible_than_it_sounds": "the kill is aimed at a small compartment "
-                                                     "rather than the bulk tumour, ferroptosis is a "
-                                                     "complete death mechanism rather than a "
-                                                     "cytostatic one, and the in vivo envelope "
-                                                     "measured for the MEK/mTOR combination in "
-                                                     "canine angiosarcoma was 0.110-0.143/day -- so "
-                                                     "rates of this magnitude are achievable in "
-                                                     "this tumour type, if not yet by this agent.",
+    "the_comparison_that_does_not_work": "an earlier draft argued the ask was less daunting than it "
+                                         "looks because the MEK/mTOR combination was measured "
+                                         "removing 0.110-0.143/day in canine angiosarcoma, so rates "
+                                         "of this magnitude are achievable in this tumour. That is a "
+                                         "CATEGORY ERROR and it is withdrawn. Andersen's envelope "
+                                         "was measured on drug-SENSITIVE bulk tumour, and it was "
+                                         "achieved BY THE VERY DRUGS this cell is resistant to. What "
+                                         "a drug does to cells that respond to it says nothing about "
+                                         "what any agent does to cells that do not.",
+    "the_other_mitigation_that_does_not_work": "nor does 'it only has to cover a small compartment'. "
+                                               "The requirement is a RATE, per cell per day: net "
+                                               "growth has to go negative regardless of how many "
+                                               "cells there are. Population size affects delivery "
+                                               "and toxicity, not the threshold.",
+    "what_actually_remains_true": "ferroptosis is a complete death mechanism rather than a "
+                                  "cytostatic one, so it is at least the KIND of mechanism that can "
+                                  "produce a negative net rate rather than merely slowing growth. "
+                                  "That is a statement about mechanism class, not about magnitude, "
+                                  "and it is the only mitigation that survives.",
+    "the_position_this_leaves": "weaker than the earlier draft claimed. There is no anchor at all "
+                                "for the rate a ferroptosis inducer achieves against persisters in "
+                                "vivo -- not a demanding bar with a reassuring comparison, but a bar "
+                                "with nothing to compare it to.",
     "how_this_compares_to_the_other_routes": "the three vaccine-height routes needed only 7-45% of "
                                              "their measured effect to transfer. This one has no "
                                              "measured effect size at all in this compartment, and "

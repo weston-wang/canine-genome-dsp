@@ -1315,10 +1315,23 @@ negative, and there's no partial credit. The required ~0.045/day is **2× what t
 asked for and 87% of the bar itself**: the persister agent would have to deliver, against one
 compartment, nearly what the whole regimen delivers against the tumour.
 
-*What makes it less implausible than it sounds:* the kill targets a small compartment rather than
-bulk disease, ferroptosis is a complete death mechanism rather than cytostatic, and the in vivo
-envelope measured for MEK/mTOR in canine angiosarcoma was 0.110–0.143/day — so rates of this
-magnitude are achievable in this tumour, if not yet by this agent.
+*A comparison I made and have withdrawn:* I argued the ask was less daunting because MEK/mTOR was
+measured removing 0.110–0.143/day in canine angiosarcoma, so rates of that magnitude are achievable
+here. **That is a category error.** Andersen's envelope was measured on drug-*sensitive* bulk tumour,
+and achieved **by the very drugs this cell resists**. What a drug does to cells that respond to it
+says nothing about what any agent does to cells that don't.
+
+*The other mitigation fails too:* "it only has to cover a small compartment" doesn't help, because
+the requirement is a **rate** — net growth must go negative regardless of how many cells there are.
+Population size affects delivery and toxicity, not the threshold.
+
+*What survives:* ferroptosis is a complete death mechanism rather than cytostatic, so it is at least
+the *kind* of mechanism that can drive a net rate negative rather than merely slow growth. That is a
+claim about mechanism class, not magnitude — and it is the only mitigation left.
+
+**So the position is weaker than I first wrote.** There is no anchor at all for the rate a
+ferroptosis inducer achieves against persisters in vivo. Not a demanding bar with a reassuring
+comparison — a bar with nothing to compare it to.
 
 *How it compares:* the three vaccine-height routes needed only **7–45%** of their measured effect to
 transfer. This one has **no measured effect size in this compartment at all** and would need

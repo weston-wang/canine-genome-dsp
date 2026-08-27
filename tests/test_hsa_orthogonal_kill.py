@@ -162,11 +162,30 @@ def test_the_size_of_the_ask_is_computed_not_asserted():
     assert ask["as_a_multiple_of_the_mek_requirement"] > 1.5, "this is a large ask, not a small one"
 
 
-def test_the_ask_sits_inside_a_measured_in_vivo_envelope():
-    """0.045/day is big, but rates of that magnitude have been measured in this tumour type."""
-    mitigation = ok.IT_WORKS_BUT_IT_IS_A_KNIFE_EDGE["what_makes_it_less_implausible_than_it_sounds"]
-    assert "0.110-0.143/day" in mitigation
-    assert ok.IT_WORKS_BUT_IT_IS_A_KNIFE_EDGE["how_big_the_ask_is"]["required_per_day"] < 0.110
+def test_the_reassuring_comparison_is_explicitly_withdrawn():
+    """Andersen's 0.110-0.143/day was measured on drug-SENSITIVE tumour, by the drugs this cell
+    resists. Citing it as evidence the ask is reachable is a category error, and the module has to
+    say so rather than quietly drop it."""
+    entry = ok.IT_WORKS_BUT_IT_IS_A_KNIFE_EDGE
+    withdrawn = entry["the_comparison_that_does_not_work"]
+    assert "CATEGORY ERROR" in withdrawn
+    assert "withdrawn" in withdrawn
+    assert "drug-SENSITIVE bulk tumour" in withdrawn
+    assert "what_makes_it_less_implausible_than_it_sounds" not in entry
+
+
+def test_the_population_size_mitigation_is_also_rejected():
+    """A rate requirement does not get easier because the compartment is small."""
+    other = ok.IT_WORKS_BUT_IT_IS_A_KNIFE_EDGE["the_other_mitigation_that_does_not_work"]
+    assert "RATE, per cell per day" in other
+    assert "not the threshold" in other
+
+
+def test_only_a_mechanism_class_claim_survives():
+    survives = ok.IT_WORKS_BUT_IT_IS_A_KNIFE_EDGE["what_actually_remains_true"]
+    assert "not about magnitude" in survives
+    assert "only mitigation that survives" in survives
+    assert "nothing to compare it to" in ok.IT_WORKS_BUT_IT_IS_A_KNIFE_EDGE["the_position_this_leaves"]
 
 
 def test_it_is_compared_honestly_against_the_easier_routes():
