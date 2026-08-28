@@ -503,10 +503,16 @@ PLASTICITY_DRAINS_THE_SANCTUARY_BUT_ONLY_THE_EPIGENETIC_PART = {
                      "q, so it SHRINKS once q exceeds the holding rate of 0.0334/day -- a mean "
                      "residence in the null state of about thirty days.",
     "the_two_way_version": "if the state is reversible it is reversible both ways, so cells also "
-                           "re-enter the null state at q_in. At equilibrium the lineage spends "
-                           "q_out/(q_out + q_in) of its time visible, and closure needs that "
-                           "fraction to exceed 0.0334/0.042 = 0.795 -- the null state has to be a "
-                           "MINORITY state, occupied under a fifth of the time.",
+                           "re-enter the null state at q_in. I first estimated closure by a "
+                           "time-averaging argument -- the lineage spends q_out/(q_out + q_in) of "
+                           "its time visible, so closure needs that fraction to exceed "
+                           "0.0334/0.042 = 0.795. THAT ESTIMATE IS WRONG and is superseded by "
+                           "`THE_TWO_WAY_RESULT_INVERTS_THE_IDEA`. Time-averaging treats the "
+                           "lineage as well-mixed; the correct object is the dominant eigenvalue of "
+                           "the two-compartment system, and it is stricter. At q_out = 0.08 and "
+                           "q_in = 0.02 the lineage is visible 80% of the time -- comfortably past "
+                           "0.795 -- and the exact eigenvalue is +0.0034/day, positive. The "
+                           "simulation agrees: 0.000.",
     "why_this_is_not_a_closure_on_its_own": "it drains the epigenetically silenced fraction and does "
                                             "nothing whatever to a genetically deleted one. If any "
                                             "part of the blind spot is genetically null, that part "
@@ -778,4 +784,94 @@ WHAT_LOOKING_DEEPER_ACTUALLY_FOUND = {
                                          "element of that sentence is currently missing, and the "
                                          "decomposition is what makes it a checkable sentence rather "
                                          "than an aspiration.",
+}
+
+
+# =============================================================================================
+# THE PLASTICITY SIMULATION, WHICH INVERTED THE IDEA IT WAS BUILT TO TEST.
+# =============================================================================================
+
+PLASTICITY_RESCUE = {
+    # q_out (antigen-null -> antigen-positive, per day):
+    #   {"one_way": durability with no back-conversion, "q_in_0.005": ..., "q_in_0.02": ...}
+    0.000: {"one_way": 0.000, "q_in_0.005": None, "q_in_0.02": None},
+    0.005: {"one_way": 0.000, "q_in_0.005": 0.000, "q_in_0.02": 0.000},
+    0.010: {"one_way": 0.000, "q_in_0.005": 0.000, "q_in_0.02": 0.000},
+    0.020: {"one_way": 0.000, "q_in_0.005": 0.000, "q_in_0.02": 0.000},
+    0.034: {"one_way": 0.000, "q_in_0.005": 0.000, "q_in_0.02": 0.000},
+    0.050: {"one_way": 0.267, "q_in_0.005": 0.000, "q_in_0.02": 0.000},
+    0.080: {"one_way": 0.233, "q_in_0.005": 0.008, "q_in_0.02": 0.000},
+}
+
+
+def two_compartment_growth_rate(q_out: float, q_in: float,
+                                net_growth: float = BLIND_SPOT_NET_GROWTH_PER_DAY,
+                                vaccine_kill: float = 0.042) -> float:
+    """Dominant eigenvalue of the antigen-positive / antigen-null resistant pair, per day.
+
+    The visible compartment grows at `net_growth` and is killed at `vaccine_kill`; the null one
+    grows at `net_growth` and is killed by nothing. Cells move null -> visible at q_out and back at
+    q_in. The lineage's fate is the dominant eigenvalue of
+
+        [[g - k - q_in,   q_out ],
+         [     q_in,     g - q_out]]
+
+    which is the correct object. A time-averaged "fraction of life spent visible" estimate is not,
+    and gave the wrong answer at the one place the two disagree.
+    """
+    g, k = net_growth, vaccine_kill
+    tr = (g - k - q_in) + (g - q_out)
+    det = (g - k - q_in) * (g - q_out) - q_out * q_in
+    disc = tr * tr - 4.0 * det
+    if disc < 0:
+        return float(tr / 2.0)
+    return float((tr + math.sqrt(disc)) / 2.0)
+
+
+THE_TWO_WAY_RESULT_INVERTS_THE_IDEA = {
+    "what_the_one_way_case_shows": "with no back-conversion, plasticity does partially rescue: "
+                                   "durability rises from 0.000 to 0.267 once the null state's mean "
+                                   "residence falls to about twenty days. That is a real effect from "
+                                   "no new agent at all.",
+    "but_it_saturates_immediately": "faster reversion does not help. q_out = 0.080 gives 0.233 "
+                                    "against 0.267 at 0.050 -- the same within Monte Carlo noise at "
+                                    "120 trials. The eigenvalue explains why: once the null "
+                                    "compartment drains quickly, the rate-limiting step stops being "
+                                    "the drain and becomes the ANTIGEN-POSITIVE resistant clone's "
+                                    "own net decline, which is only g - k = -0.0086/day. Plasticity "
+                                    "can at best make the blind spot as controllable as a visible "
+                                    "resistant clone, and that clone is barely controlled.",
+    "and_it_never_reaches_the_no_blind_spot_baseline": "0.267 against roughly 0.84 with no blind "
+                                                       "spot at all. Even perfect one-way plasticity "
+                                                       "recovers about a third of what the blind "
+                                                       "spot costs.",
+    "THE_FINDING_THAT_MATTERS": "back-conversion destroys it. At q_in = 0.005/day -- a mean "
+                                "residence of 200 days in the VISIBLE state, which is slow -- the "
+                                "rescue collapses from 0.267 to 0.000. At q_in = 0.02 every "
+                                "q_out tested gives 0.000, including one where cells spend 80% of "
+                                "their life visible.",
+    "why_that_happens": "reversibility is symmetric. A state that can be exited can be entered, and "
+                        "the antigen-positive resistant population is a standing reservoir that "
+                        "continuously MANUFACTURES new blind-spot cells. The same property that "
+                        "drains the sanctuary also refills it, and the model says the refilling "
+                        "wins at strikingly low rates.",
+    "so_plasticity_is_not_a_free_gift": "I went into this expecting plasticity to be the cheap "
+                                        "closure -- no drug, no duration criterion, just a property "
+                                        "the tumour might happen to have. The simulation says the "
+                                        "opposite: a plastic antigen phenotype is a LIABILITY, "
+                                        "because it gives the tumour a route into the sanctuary that "
+                                        "a fixed phenotype does not. The only configuration that "
+                                        "helps is one-way escape from the null state, which is "
+                                        "biologically the least likely of the three.",
+    "the_estimate_this_corrects": "my own time-averaging argument put the threshold at 79.5% of life "
+                                  "spent visible. At 80% visible the exact eigenvalue is +0.0034/day "
+                                  "and the simulation returns 0.000. The naive estimate sits right "
+                                  "on the boundary and falls on the wrong side of it, which is the "
+                                  "worst place for an approximation to be.",
+    "how_the_eigenvalue_tracks_the_simulation": "every sign matches. Positive eigenvalue gives 0.000 "
+                                                "in all five such cells; negative gives non-zero in "
+                                                "two of three, the exception being q_out = 0.08 with "
+                                                "q_in = 0.005 at -0.0042/day, which returns 0.008 -- "
+                                                "a marginal eigenvalue where other escape routes "
+                                                "dominate before the drain finishes.",
 }

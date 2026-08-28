@@ -327,11 +327,14 @@ def test_plasticity_is_labelled_a_log_remover_not_a_closure():
 
 
 def test_the_plasticity_threshold_matches_the_holding_rate():
-    """The claim that shrinkage starts when q exceeds the holding rate."""
+    """The one-way claim stands; the two-way estimate is marked wrong rather than deleted."""
     d = ra.PLASTICITY_DRAINS_THE_SANCTUARY_BUT_ONLY_THE_EPIGENETIC_PART
     assert "0.0334" in d["the_mechanism"]
-    assert "0.795" in d["the_two_way_version"]
     assert ra.BLIND_SPOT_NET_GROWTH_PER_DAY / 0.042 == pytest.approx(0.795, abs=0.005)
+    # The superseded estimate must still be quoted, and marked as superseded.
+    assert "0.795" in d["the_two_way_version"]
+    assert "THAT ESTIMATE IS WRONG" in d["the_two_way_version"]
+    assert "THE_TWO_WAY_RESULT_INVERTS_THE_IDEA" in d["the_two_way_version"]
 
 
 def test_bystander_failure_is_attributed_to_supply_not_to_potency():
@@ -497,3 +500,84 @@ def test_the_headline_does_not_claim_a_fourth_mechanism_was_found():
     h = ra.WHAT_LOOKING_DEEPER_ACTUALLY_FOUND["the_honest_headline"]
     assert h.startswith("no single mechanism closes")
     assert "better than a fourth candidate" in h
+
+
+# ---------------------------------------------------------------------------------------------
+# The plasticity simulation, which inverted the idea it was built to test.
+# ---------------------------------------------------------------------------------------------
+
+def test_one_way_plasticity_rescues_only_partially_and_saturates():
+    t = ra.PLASTICITY_RESCUE
+    assert t[0.034]["one_way"] == 0.0, "at the holding rate net growth is zero, not negative"
+    assert t[0.050]["one_way"] > 0.2, "past the holding rate it should rescue"
+    # Doubling the reversion rate again does not help: same within Monte Carlo noise.
+    assert abs(t[0.080]["one_way"] - t[0.050]["one_way"]) < 0.10
+    # And it never approaches the ~0.84 available with no blind spot at all.
+    assert t[0.050]["one_way"] < 0.5
+
+
+def test_back_conversion_destroys_the_rescue():
+    """The finding that inverts the idea: reversibility is symmetric and the refill wins."""
+    t = ra.PLASTICITY_RESCUE
+    assert t[0.050]["one_way"] > 0.2 and t[0.050]["q_in_0.005"] == 0.0
+    for q_out, row in t.items():
+        if row["q_in_0.02"] is not None:
+            assert row["q_in_0.02"] == 0.0, f"q_out={q_out} should fail entirely at q_in=0.02"
+
+
+def test_the_rescue_is_monotone_in_back_conversion():
+    for q_out, row in ra.PLASTICITY_RESCUE.items():
+        if row["q_in_0.005"] is None:
+            continue
+        assert row["one_way"] >= row["q_in_0.005"] >= row["q_in_0.02"], q_out
+
+
+def test_the_eigenvalue_sign_predicts_every_simulated_cell():
+    """Positive dominant eigenvalue must correspond to total failure."""
+    for q_out, row in ra.PLASTICITY_RESCUE.items():
+        for key, q_in in (("one_way", 0.0), ("q_in_0.005", 0.005), ("q_in_0.02", 0.02)):
+            val = row[key]
+            if val is None:
+                continue
+            lam = ra.two_compartment_growth_rate(q_out, q_in)
+            if lam > 0:
+                assert val == 0.0, f"q_out={q_out} q_in={q_in} lambda={lam:+.4f} but sim={val}"
+
+
+def test_the_eigenvalue_saturates_at_the_visible_clones_own_decline():
+    """Why faster reversion stops helping: the drain is no longer rate-limiting."""
+    fast = ra.two_compartment_growth_rate(0.05, 0.0)
+    faster = ra.two_compartment_growth_rate(0.50, 0.0)
+    assert fast == pytest.approx(faster, abs=1e-6)
+    assert fast == pytest.approx(ra.BLIND_SPOT_NET_GROWTH_PER_DAY - 0.042, abs=1e-6)
+
+
+def test_the_eigenvalue_rises_with_back_conversion():
+    seq = [ra.two_compartment_growth_rate(0.05, q) for q in (0.0, 0.005, 0.02, 0.05)]
+    assert seq == sorted(seq)
+
+
+def test_no_plasticity_reproduces_the_bare_holding_rate():
+    assert ra.two_compartment_growth_rate(0.0, 0.0) == pytest.approx(
+        ra.BLIND_SPOT_NET_GROWTH_PER_DAY)
+
+
+def test_the_inversion_is_stated_as_against_my_own_expectation():
+    d = ra.THE_TWO_WAY_RESULT_INVERTS_THE_IDEA
+    assert "LIABILITY" in d["so_plasticity_is_not_a_free_gift"]
+    assert "expecting plasticity to be the cheap" in d["so_plasticity_is_not_a_free_gift"]
+    assert "MANUFACTURES" in d["why_that_happens"]
+
+
+def test_the_superseded_estimate_is_owned_with_its_number():
+    d = ra.THE_TWO_WAY_RESULT_INVERTS_THE_IDEA
+    t = d["the_estimate_this_corrects"]
+    assert "79.5%" in t
+    assert "my own time-averaging argument" in t
+    assert "wrong side" in t
+
+
+def test_the_saturation_explanation_names_the_limiting_step():
+    d = ra.THE_TWO_WAY_RESULT_INVERTS_THE_IDEA
+    assert "-0.0086/day" in d["but_it_saturates_immediately"]
+    assert "ANTIGEN-POSITIVE resistant clone" in d["but_it_saturates_immediately"]
