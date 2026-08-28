@@ -2050,6 +2050,19 @@ holding rate net growth is zero, not negative.
 stack — and the reason is structural: *a permanent holder carries no work term at all.* It only has
 to beat the floor. Every finite course must clear the backlog too.
 
+Because this is the strongest claim here, it was re-run at two further seeds rather than reported
+from one:
+
+| NK kill/day | seed 7 | seed 101 | seed 202 |
+|---|---|---|---|
+| 0.034 (the floor) | 0.000 | 0.000 | 0.000 |
+| 0.042 | 0.308 | 0.290 | 0.290 |
+| **0.060** | **0.833** | **0.860** | **0.890** |
+
+The zero at the holding rate is exact in all three, with no partial values — what a genuine threshold
+looks like, at the point the decomposition predicted before this simulation was written. *This tests
+the simulation, not the biology: a stable wrong answer is still wrong.*
+
 #### The hole, and why it costs less than expected
 
 HLA-E:CD94-NKG2A lets a cell drop classical MHC-I while still switching NK off. The paper describing

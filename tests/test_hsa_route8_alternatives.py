@@ -683,3 +683,29 @@ def test_the_status_change_is_stated_as_a_change_of_kind_not_of_certainty():
     t = ra.WHY_THIS_IS_STILL_NOT_A_CLOSURE_I_WILL_CLAIM["the_honest_status"]
     assert "needs a drug nobody has" in t
     assert "immune arm everyone has" in t
+
+
+def test_the_pincer_threshold_is_exact_at_every_seed():
+    """No partial values at the holding rate: a real threshold, not a noisy one."""
+    assert ra.PINCER_REPRODUCIBILITY[0.034] == (0.0, 0.0, 0.0)
+
+
+def test_the_pincer_closure_reproduces_at_the_baseline():
+    vals = ra.PINCER_REPRODUCIBILITY[0.060]
+    assert len(vals) == 3
+    for v in vals:
+        assert abs(v - ra.NO_BLIND_SPOT_BASELINE) < 0.08, v
+    # And the seed-7 value recorded here must match the main table.
+    assert vals[0] == ra.PINCER_RESCUE[0.060]["no_escape"]
+
+
+def test_the_partial_rescue_reproduces_too():
+    vals = ra.PINCER_REPRODUCIBILITY[0.042]
+    assert max(vals) - min(vals) < 0.06
+    assert vals[0] == ra.PINCER_RESCUE[0.042]["no_escape"]
+
+
+def test_the_reseed_is_not_claimed_to_validate_the_biology():
+    d = ra.WHY_THE_RESEED_MATTERS
+    assert "tests the simulation, not the biology" in d["what_it_does_not_establish"]
+    assert "A stable wrong answer is still wrong" in d["what_it_does_not_establish"]

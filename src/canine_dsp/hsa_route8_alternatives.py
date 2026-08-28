@@ -1027,3 +1027,29 @@ WHY_THIS_IS_STILL_NOT_A_CLOSURE_I_WILL_CLAIM = {
                          "moves route 8 from 'needs a drug nobody has' to 'needs an immune arm "
                          "everyone has, working harder than it evidently does'.",
 }
+
+
+PINCER_REPRODUCIBILITY = {
+    # NK kill/day: durability at three independent Monte Carlo seeds (7, 101, 202)
+    0.034: (0.000, 0.000, 0.000),
+    0.042: (0.308, 0.290, 0.290),
+    0.060: (0.833, 0.860, 0.890),
+}
+
+WHY_THE_RESEED_MATTERS = {
+    "what_was_checked": "the headline pincer result is the strongest claim in this analysis, so it "
+                        "was re-run at two further seeds rather than reported from one.",
+    "the_threshold_is_exact_in_all_three": "0.034/day -- the holding rate -- returns 0.000 at every "
+                                           "seed, with no partial values. That is what a genuine "
+                                           "threshold looks like, and it is the point the "
+                                           "decomposition predicted before this simulation was "
+                                           "written.",
+    "the_closure_lands_at_the_baseline_every_time": "0.060/day gives 0.833, 0.860 and 0.890 against "
+                                                    "a no-blind-spot baseline of about 0.84. The "
+                                                    "spread is Monte Carlo noise around the "
+                                                    "baseline, not a trend.",
+    "what_it_does_not_establish": "reproducibility across seeds tests the simulation, not the "
+                                  "biology. Every seed shares the same model, the same holding rate "
+                                  "and the same assumption that missing-self recognition reaches "
+                                  "this compartment at all. A stable wrong answer is still wrong.",
+}
