@@ -278,3 +278,147 @@ def test_the_sweep_conclusion_does_not_overreach_into_vaccine_design():
     assert "not about vaccine design" in d["the_one_reading_it_does_not_support"]
     assert "WHEN the blind spot arrives, not WHETHER" in \
         d["why_a_uniformly_null_table_is_the_strongest_form_of_this_result"]
+
+
+# ---------------------------------------------------------------------------------------------
+# The stability requirement, the plasticity drain, and the two-term decomposition.
+# ---------------------------------------------------------------------------------------------
+
+def test_the_horizon_costs_hundreds_of_generations():
+    assert ra.GENERATIONS_OVER_HORIZON == pytest.approx(263, abs=2)
+    assert ra.BLIND_SPOT_DOUBLING_DAYS == pytest.approx(13.9, abs=0.2)
+
+
+def test_null_lineage_survival_collapses_with_modest_reversion():
+    assert ra.null_lineage_surviving(0.10) < 1e-10
+    assert ra.null_lineage_surviving(0.01) == pytest.approx(0.071, abs=0.01)
+    assert ra.null_lineage_surviving(0.0) == 1.0
+
+
+def test_null_lineage_survival_is_monotone_and_validated():
+    seq = [ra.null_lineage_surviving(p) for p in (0.0, 0.001, 0.01, 0.1)]
+    assert seq == sorted(seq, reverse=True)
+    with pytest.raises(ValueError):
+        ra.null_lineage_surviving(1.0)
+    with pytest.raises(ValueError):
+        ra.null_lineage_surviving(-0.1)
+
+
+def test_the_recorded_stability_table_matches_the_function():
+    for p, frac in ra.THE_STABILITY_THE_DANGEROUS_CASE_REQUIRES["how_fragile_that_requirement_is"].items():
+        assert frac == pytest.approx(ra.null_lineage_surviving(p), rel=1e-9)
+
+
+def test_the_stability_question_records_both_sides():
+    d = ra.THE_STABILITY_THE_DANGEROUS_CASE_REQUIRES
+    assert "TRANSIENT" in d["what_the_persister_literature_says"]
+    assert "JAK1/JAK2" in d["what_cuts_the_other_way"]
+    assert "B2M" in d["what_cuts_the_other_way"]
+    assert "so_the_question_has_a_binary_answer" in d
+    assert "Both exist in real tumours" in d["so_the_question_has_a_binary_answer"]
+
+
+def test_plasticity_is_labelled_a_log_remover_not_a_closure():
+    d = ra.PLASTICITY_DRAINS_THE_SANCTUARY_BUT_ONLY_THE_EPIGENETIC_PART
+    assert "why_this_is_not_a_closure_on_its_own" in d
+    assert "genetically deleted one" in d["why_this_is_not_a_closure_on_its_own"]
+    assert "unless the genetic fraction is exactly zero" in d["why_this_is_not_a_closure_on_its_own"]
+    assert "log-remover" in d["what_it_therefore_is"]
+
+
+def test_the_plasticity_threshold_matches_the_holding_rate():
+    """The claim that shrinkage starts when q exceeds the holding rate."""
+    d = ra.PLASTICITY_DRAINS_THE_SANCTUARY_BUT_ONLY_THE_EPIGENETIC_PART
+    assert "0.0334" in d["the_mechanism"]
+    assert "0.795" in d["the_two_way_version"]
+    assert ra.BLIND_SPOT_NET_GROWTH_PER_DAY / 0.042 == pytest.approx(0.795, abs=0.005)
+
+
+def test_bystander_failure_is_attributed_to_supply_not_to_potency():
+    d = ra.BYSTANDER_KILLING_FAILS_FOR_A_REASON_WORTH_RECORDING
+    assert "DISSIPATE" in d["the_finding_that_kills_it"]
+    assert "factory" in d["the_shape_this_shares_with_containment"]
+    assert "category of false answer worth naming" in d["the_shape_this_shares_with_containment"]
+
+
+def test_bystander_and_containment_are_linked_as_the_same_trap():
+    d = ra.BYSTANDER_KILLING_FAILS_FOR_A_REASON_WORTH_RECORDING
+    t = d["the_shape_this_shares_with_containment"]
+    assert "competitive release" in t.lower() or "competition" in t.lower()
+    assert "the very population the plan is designed to destroy" in t
+
+
+# ---------------------------------------------------------------------------------------------
+# The decomposition.
+# ---------------------------------------------------------------------------------------------
+
+def test_the_decomposition_reproduces_the_standalone_requirement():
+    r = ra.required_rate_decomposed(ra.BLIND_SPOT_NET_GROWTH_PER_DAY, ra.blind_spot_initial_cells())
+    assert r == pytest.approx(pe.required_rate_for_course(335), rel=1e-9)
+
+
+def test_the_decomposition_floors_at_the_holding_rate():
+    """No amount of up-front removal takes the requirement below the floor."""
+    for cells in (1e8, 1e4, 10.0, 1.0):
+        r = ra.required_rate_decomposed(ra.BLIND_SPOT_NET_GROWTH_PER_DAY, cells)
+        assert r >= ra.BLIND_SPOT_NET_GROWTH_PER_DAY
+    assert ra.required_rate_decomposed(ra.BLIND_SPOT_NET_GROWTH_PER_DAY, 1.0) == pytest.approx(
+        ra.BLIND_SPOT_NET_GROWTH_PER_DAY)
+
+
+def test_the_decomposition_returns_zero_only_when_nothing_survives():
+    assert ra.required_rate_decomposed(ra.BLIND_SPOT_NET_GROWTH_PER_DAY, 0.5) == 0.0
+    with pytest.raises(ValueError):
+        ra.required_rate_decomposed(0.03, 1e5, course_days=0)
+
+
+def test_a_longer_course_lowers_the_requirement_toward_the_floor():
+    long = ra.required_rate_decomposed(ra.BLIND_SPOT_NET_GROWTH_PER_DAY, 1e5, course_days=100000)
+    assert long == pytest.approx(ra.BLIND_SPOT_NET_GROWTH_PER_DAY, abs=1e-3)
+
+
+def test_the_floor_is_only_moved_by_lowering_growth():
+    tbl = ra.THE_TWO_TERMS_AND_THEIR_DIFFERENT_LEVERS["what_actually_lowers_the_floor"]
+    vals = [tbl[c] for c in sorted(tbl)]
+    assert vals == sorted(vals, reverse=True)
+    # 0% penalty must equal a 9.5% three-day kill at the measured holding rate.
+    assert tbl[0.0] == pytest.approx(1 - pe.viability_after(ra.BLIND_SPOT_NET_GROWTH_PER_DAY), abs=0.002)
+
+
+def test_the_decomposition_reconciles_the_earlier_rejections():
+    d = ra.THE_TWO_TERMS_AND_THEIR_DIFFERENT_LEVERS
+    t = d["the_reconciliation_this_provides"]
+    assert "not worthless" in t
+    assert "rejected as a CLOSURE" in t and "real as a TERM" in t
+
+
+def test_the_stack_is_monotone_and_never_reaches_zero():
+    entries = sorted(ra.THE_STACK.values())
+    logs = [v[0] for v in ra.THE_STACK.values()]
+    rates = [v[1] for v in ra.THE_STACK.values()]
+    # More logs removed must never mean a higher requirement.
+    pairs = sorted(zip(logs, rates))
+    assert [r for _, r in pairs] == sorted([r for _, r in pairs], reverse=True)
+    # And every entry stays above the irreducible floor.
+    for r in rates:
+        assert r > ra.BLIND_SPOT_NET_GROWTH_PER_DAY
+
+
+def test_the_stack_numbers_match_the_quoted_summary():
+    assert ra.THE_STACK["nothing"][1] == pytest.approx(0.090, abs=0.002)
+    assert ra.THE_STACK["eBAT alone"][1] == pytest.approx(0.068, abs=0.002)
+    assert ra.THE_STACK["eBAT plus plasticity to 1e5"][1] == pytest.approx(0.046, abs=0.002)
+    assert "0.046/day, 13%" in ra.WHAT_THE_STACK_MEANS["the_numbers"]
+
+
+def test_the_stack_does_not_claim_to_remove_the_need_for_a_killing_agent():
+    d = ra.WHAT_THE_STACK_MEANS
+    assert "does not remove the need" in d["what_it_still_does_not_do"]
+    assert "neither holds the floor" in d["what_it_still_does_not_do"]
+    assert "no amount of stacking changes that" in d["what_it_still_does_not_do"]
+
+
+def test_the_deciding_experiment_is_a_sequencing_question():
+    t = ra.WHAT_THE_STACK_MEANS["the_single_experiment_that_decides_the_most"]
+    assert "sequence" in t.lower()
+    assert "Genetic loss" in t and "Epigenetic silencing" in t

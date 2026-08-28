@@ -432,3 +432,216 @@ WHAT_THE_SWEEP_SETTLES = {
                                                                "result is the easiest kind to be "
                                                                "quietly wrong about.",
 }
+
+
+# =============================================================================================
+# THE ASSUMPTION UNDER THE STRUCTURAL RESULT: THAT THE BLIND SPOT IS A FIXED COMPARTMENT.
+#
+# Every route-8 probe passed `mutation=np.eye(7)` -- an identity transition matrix, asserting that
+# no cell ever changes phenotype. The engine supports interconversion natively
+# (`state[t+1] = grown @ model.mutation`), so this was never a limitation of the tooling. It was an
+# assumption, it was never examined, and it does enormous work: under it the antigen-null state is
+# a permanent sanctuary, and the only exit is death.
+# =============================================================================================
+
+BLIND_SPOT_DOUBLING_DAYS = math.log(2) / 0.050
+GENERATIONS_OVER_HORIZON = HORIZON_DAYS / BLIND_SPOT_DOUBLING_DAYS
+
+
+def null_lineage_surviving(per_generation_reversion: float,
+                           generations: float = GENERATIONS_OVER_HORIZON) -> float:
+    """Fraction of an antigen-null lineage still null after `generations`, given per-division reversion."""
+    if not 0.0 <= per_generation_reversion < 1.0:
+        raise ValueError("per_generation_reversion must lie in [0, 1)")
+    return float((1.0 - per_generation_reversion) ** generations)
+
+
+THE_STABILITY_THE_DANGEROUS_CASE_REQUIRES = {
+    "the_arithmetic": "the blind spot doubles about every 14 days, so reaching the ten-year horizon "
+                      "takes roughly 263 cell generations. For route 8's dangerous case to be real, "
+                      "the antigen-null state has to be heritable and stable across every one of "
+                      "them.",
+    "generations": GENERATIONS_OVER_HORIZON,
+    "how_fragile_that_requirement_is": {
+        # per-generation reversion probability: fraction of the lineage still null at ten years
+        0.100: null_lineage_surviving(0.100),
+        0.010: null_lineage_surviving(0.010),
+        0.001: null_lineage_surviving(0.001),
+    },
+    "the_reading": "a per-division reversion probability of one in ten leaves essentially none of "
+                   "the lineage still invisible at ten years. One in a hundred leaves seven percent. "
+                   "The dangerous case does not merely require antigen loss -- it requires antigen "
+                   "loss that does not drift for 263 divisions.",
+    "why_this_is_the_right_question": "it converts 'is the blind spot dangerous' from a question "
+                                      "about size or coverage, which the sweep showed is worthless, "
+                                      "into a question about STABILITY, which is a different "
+                                      "physical property with a different experiment behind it.",
+    "what_the_persister_literature_says": "the analogous drug-tolerant state is explicitly not "
+                                          "stable: 'their partial resistance phenotype is TRANSIENT "
+                                          "AND REVERSIBLE upon removal of the drug', and persisters "
+                                          "'are not necessarily preexisting dormant cells; in fact, "
+                                          "they may be INDUCED'. If the resistance half of the "
+                                          "overlap is a transient state, the overlap has to be "
+                                          "maintained by two independent unstable properties at "
+                                          "once.",
+    "what_cuts_the_other_way": "antigen-presentation loss is sometimes genetic and then it does not "
+                               "drift at all. Zaretsky's melanomas acquired resistance through "
+                               "loss-of-function JAK1/JAK2 mutations 'concurrent with deletion of "
+                               "the wild-type allele', and B2M truncating mutations are a recurrent "
+                               "immune-escape lesion. A deleted gene is stable for 263 generations "
+                               "and for any number after that.",
+    "so_the_question_has_a_binary_answer": "if the blind spot's antigen-null state is epigenetic, it "
+                                           "leaks and cannot persist. If it is genetic, it is a "
+                                           "permanent sanctuary. Both exist in real tumours. Nobody "
+                                           "has looked in canine hemangiosarcoma.",
+}
+
+PLASTICITY_DRAINS_THE_SANCTUARY_BUT_ONLY_THE_EPIGENETIC_PART = {
+    "the_mechanism": "if an antigen-null cell regains the antigen at rate q per day, it becomes "
+                     "visible to the 0.042/day vaccine already in the regimen and is killed. No new "
+                     "agent is involved. The null compartment's net growth becomes its growth minus "
+                     "q, so it SHRINKS once q exceeds the holding rate of 0.0334/day -- a mean "
+                     "residence in the null state of about thirty days.",
+    "the_two_way_version": "if the state is reversible it is reversible both ways, so cells also "
+                           "re-enter the null state at q_in. At equilibrium the lineage spends "
+                           "q_out/(q_out + q_in) of its time visible, and closure needs that "
+                           "fraction to exceed 0.0334/0.042 = 0.795 -- the null state has to be a "
+                           "MINORITY state, occupied under a fifth of the time.",
+    "why_this_is_not_a_closure_on_its_own": "it drains the epigenetically silenced fraction and does "
+                                            "nothing whatever to a genetically deleted one. If any "
+                                            "part of the blind spot is genetically null, that part "
+                                            "behaves exactly like the original clone -- and the "
+                                            "structural result says a compartment with positive net "
+                                            "growth reaches carrying capacity from ANY starting "
+                                            "size. Plasticity shrinks the sanctuary; it does not "
+                                            "abolish it unless the genetic fraction is exactly zero.",
+    "what_it_therefore_is": "a log-remover, in exactly the same currency as eBAT. Draining a 1.5e8 "
+                            "blind spot down to a genetically-null remnant of 1e5 removes 7.3 "
+                            "natural logs; down to 1e3 removes 11.9.",
+    "and_it_is_free": "no drug, no dosing, no duration criterion. It is a property the tumour either "
+                      "has or does not have, and it is the only lever in this entire analysis that "
+                      "costs nothing if it happens to be true.",
+}
+
+BYSTANDER_KILLING_FAILS_FOR_A_REASON_WORTH_RECORDING = {
+    "the_idea": "antibody-drug conjugates with cleavable linkers and membrane-permeable payloads "
+                "kill antigen-NEGATIVE cells by payload diffusion from antigen-positive neighbours. "
+                "It is the established answer to heterogeneous antigen expression, it is clinically "
+                "validated in HER2-low and heterogeneous disease, and it clears both gates here: it "
+                "does not need the antigen on the target cell, and MMAE-class payloads act on "
+                "tubulin rather than through the kinase pathway.",
+    "citation": "Singh & Shah 2017, J Pharmacokinet Pharmacodyn, PMID 27670282",
+    "the_finding_that_kills_it": "'the bystander effect of ADC INCREASES WITH INCREASING FRACTION OF "
+                                 "Ag+ CELLS', and 'the bystander effect of the ADC can DISSIPATE "
+                                 "OVER THE PERIOD OF TIME AS THE POPULATION OF Ag+ CELLS DECLINES'.",
+    "why_that_is_fatal_in_this_setting": "bystander killing is manufactured by the antigen-positive "
+                                         "cells. This regimen's entire purpose is to eliminate them. "
+                                         "So the mechanism is strongest at the start and gone "
+                                         "precisely when the blind spot is all that is left. It "
+                                         "shrinks the compartment early and cannot hold it down "
+                                         "late.",
+    "the_shape_this_shares_with_containment": "competitive release fails because killing the "
+                                              "sensitive cells removes the competition suppressing "
+                                              "the blind spot. Bystander killing fails because "
+                                              "killing the sensitive cells removes the factory "
+                                              "making the payload. Both are mechanisms whose supply "
+                                              "is the very population the plan is designed to "
+                                              "destroy. That is a category of false answer worth "
+                                              "naming, because it is not obvious in advance and two "
+                                              "separate good ideas fell into it.",
+    "what_it_still_is": "a log-remover applied early, like eBAT. Not a floor-holder.",
+}
+
+# =============================================================================================
+# THE DECOMPOSITION THAT THE WHOLE SEARCH HAS BEEN CONVERGING ON.
+# =============================================================================================
+
+def required_rate_decomposed(holding_rate: float, surviving_cells: float,
+                             course_days: float = 335.0) -> float:
+    """The route-8 requirement, split into the two terms that have different levers.
+
+        required = holding_rate + ln(surviving_cells) / course_days
+
+    The first term is irreducible by anything that removes cells: whatever is left must be killed
+    faster than it grows, for as long as it exists. The second is the cost of clearing what remains
+    in the time available, and every "log-remover" in this analysis reduces it.
+    """
+    if surviving_cells < 1.0:
+        return 0.0
+    if course_days <= 0:
+        raise ValueError("course_days must be positive")
+    return float(holding_rate + math.log(surviving_cells) / course_days)
+
+
+THE_TWO_TERMS_AND_THEIR_DIFFERENT_LEVERS = {
+    "the_form": "required rate = HOLDING RATE + ln(surviving cells) / course days.",
+    "term_1_the_floor": "the holding rate, 0.0334/day at the nadir density this regimen achieves. "
+                        "Whatever survives has to be killed faster than it grows, for as long as it "
+                        "exists. NO amount of up-front cell removal touches this term. It is the "
+                        "irreducible ask, and in assay units it is a 9.5% three-day kill.",
+    "what_actually_lowers_the_floor": {
+        # antigen-null growth penalty: resulting irreducible three-day kill
+        0.00: 0.095,
+        0.15: 0.082,
+        0.30: 0.068,
+        0.50: 0.049,
+    },
+    "the_reconciliation_this_provides": "the three levers dismissed earlier are not worthless -- "
+                                        "they are terms in this equation that are insufficient on "
+                                        "their own. A fitness cost lowers the floor. Containment "
+                                        "lowers the floor by raising density, at a burden cost this "
+                                        "disease cannot pay. Coverage lowers the second term, "
+                                        "logarithmically and therefore feebly. Each was correctly "
+                                        "rejected as a CLOSURE and each is real as a TERM.",
+    "term_2_the_work": "ln(surviving cells) over the course length. Every log-remover reduces it: "
+                       "eBAT by a measured 5.2-7.8, plasticity by however far it drains the "
+                       "epigenetic fraction, bystander killing by whatever it achieves before the "
+                       "antigen-positive population is gone.",
+    "why_this_is_the_answer_to_looking_deeper": "there is no fourth mechanism hiding. There is a "
+                                                "two-term requirement, one term that only killing "
+                                                "can satisfy and one that several things can chip "
+                                                "at, and the honest closure is a STACK rather than a "
+                                                "single agent. That is a more useful statement than "
+                                                "any of the individual mechanisms, because it says "
+                                                "what would have to be true rather than what might "
+                                                "work.",
+}
+
+THE_STACK = {
+    # description: (logs removed up front, resulting one-year requirement per day)
+    "nothing": (0.0, required_rate_decomposed(BLIND_SPOT_NET_GROWTH_PER_DAY, blind_spot_initial_cells())),
+    "eBAT alone": (7.2, required_rate_decomposed(BLIND_SPOT_NET_GROWTH_PER_DAY,
+                                                 blind_spot_initial_cells() * math.exp(-7.2))),
+    "plasticity to a 1e5 genetic remnant": (
+        math.log(blind_spot_initial_cells()) - math.log(1e5),
+        required_rate_decomposed(BLIND_SPOT_NET_GROWTH_PER_DAY, 1e5)),
+    "eBAT plus plasticity to 1e5": (
+        7.2 + math.log(blind_spot_initial_cells()) - math.log(1e5),
+        required_rate_decomposed(BLIND_SPOT_NET_GROWTH_PER_DAY, 1e5 * math.exp(-7.2))),
+}
+
+WHAT_THE_STACK_MEANS = {
+    "the_numbers": "nothing: 0.090/day, a 24% three-day kill. eBAT alone: 0.068/day, 18%. Plasticity "
+                   "down to a 1e5 genetic remnant: 0.068/day, 18%. Both together: 0.046/day, 13%.",
+    "the_floor_they_converge_on": "0.0334/day, a 9.5% three-day kill, which no stacking can go "
+                                  "below because something must still out-run the compartment's own "
+                                  "growth.",
+    "why_this_is_progress": "the standalone ask was a 24% three-day kill from an agent with no "
+                            "chronic canine dosing record. The stacked ask is 13%, approaching a "
+                            "floor of 9.5%. That is not a different kind of answer, but it is a "
+                            "materially smaller one, and two of the three contributions are things "
+                            "that either already exist or cost nothing.",
+    "what_it_still_does_not_do": "it does not remove the need for a sustained killing agent. Both "
+                                 "log-removers act up front; neither holds the floor. If no agent "
+                                 "can sustain 0.0334/day against this compartment, route 8's "
+                                 "dangerous case does not close, and no amount of stacking changes "
+                                 "that.",
+    "the_single_experiment_that_decides_the_most": "sequence the antigen locus and the "
+                                                   "antigen-presentation machinery in the "
+                                                   "drug-tolerant fraction of canine "
+                                                   "hemangiosarcoma. Genetic loss means a permanent "
+                                                   "sanctuary and the full stack is needed. "
+                                                   "Epigenetic silencing means the sanctuary leaks, "
+                                                   "and the vaccine already in the plan drains it "
+                                                   "for free.",
+}
