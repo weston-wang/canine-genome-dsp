@@ -1791,6 +1791,24 @@ It's worthless, because starting below the floor only delays arrival at it, and 
 **A five-hundred-fold reduction in the size of the blind spot buys 174 days against a 3650-day
 horizon.** Coverage is not the lever.
 
+And the simulation agrees, which matters because an argument predicting a uniform result is the
+easiest kind to be quietly wrong about. Twenty combinations — coverage 95% to 99.5%, antigen-null
+growth penalty none to half, no persister kill, no restored presentation:
+
+| coverage | cost 0% | cost 15% | cost 30% | cost 50% |
+|---|---|---|---|---|
+| 95.0% | 0.000 | 0.000 | 0.000 | 0.000 |
+| 97.0% | 0.000 | 0.000 | 0.000 | 0.000 |
+| 98.0% | 0.000 | 0.000 | 0.000 | 0.000 |
+| 99.0% | 0.000 | 0.000 | 0.000 | 0.000 |
+| 99.5% | 0.000 | 0.000 | 0.000 | 0.000 |
+
+**Twenty of twenty.** A sweep that found a threshold somewhere would invite tuning — push coverage a
+little further, assume a slightly larger fitness cost. There is nothing to tune toward. The table has
+no gradient because the mechanism has none: these levers change *when* the blind spot arrives, not
+*whether*. (What this does not say is that the levers are worthless in general — a 99% coverage
+vaccine is a better vaccine. They are worthless against *this specific failure*.)
+
 ### A fitness-cost inconsistency in my own model
 
 The engine charges the *acquired* antigen-loss escape clone a growth penalty — 0.0425 against 0.055,

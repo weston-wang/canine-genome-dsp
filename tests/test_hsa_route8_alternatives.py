@@ -254,3 +254,27 @@ def test_the_combination_does_not_describe_the_ferroptosis_side_as_measured():
     assert "two separately measured effects', which is false" in t
     # And it must not be reintroduced anywhere in the entry.
     assert "arithmetic on two separately measured effects" not in repr(d)
+
+
+def test_the_sweep_is_uniformly_zero_across_every_combination():
+    """Twenty of twenty. If any cell ever becomes non-zero, the structural claim needs revisiting."""
+    for coverage, row in ra.COVERAGE_TIMES_FITNESS_COST.items():
+        for cost, value in row.items():
+            assert value == 0.0, f"coverage {coverage}, cost {cost}"
+
+
+def test_the_sweep_spans_a_wide_enough_range_to_mean_something():
+    covs = sorted(ra.COVERAGE_TIMES_FITNESS_COST)
+    assert min(covs) <= 0.95 and max(covs) >= 0.995
+    costs = sorted(next(iter(ra.COVERAGE_TIMES_FITNESS_COST.values())))
+    assert min(costs) == 0.0 and max(costs) >= 0.50
+    # The engine's own antigen-loss penalty must be one of the values tested.
+    assert 0.15 in costs
+
+
+def test_the_sweep_conclusion_does_not_overreach_into_vaccine_design():
+    d = ra.WHAT_THE_SWEEP_SETTLES
+    assert "nothing to tune toward" in d["why_a_uniformly_null_table_is_the_strongest_form_of_this_result"]
+    assert "not about vaccine design" in d["the_one_reading_it_does_not_support"]
+    assert "WHEN the blind spot arrives, not WHETHER" in \
+        d["why_a_uniformly_null_table_is_the_strongest_form_of_this_result"]

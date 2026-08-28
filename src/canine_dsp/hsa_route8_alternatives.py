@@ -384,3 +384,51 @@ VERDICT_ON_THE_SEARCH = {
                                     "subpopulation, because nobody has ever shown that such a "
                                     "subpopulation exists in this disease.",
 }
+
+
+# =============================================================================================
+# THE SIMULATED CONFIRMATION.
+#
+# The structural argument above is arithmetic: any positive net growth reaches carrying capacity
+# from any starting size over 3650 days. Arithmetic can be wrong about a simulation, so the
+# simulation was run. Twenty combinations, no persister kill and no restored presentation, drug
+# stopped at year one -- the same setup that gave 0.000 at 95% coverage in `hsa_antigen_adequacy`.
+# =============================================================================================
+
+COVERAGE_TIMES_FITNESS_COST = {
+    # antigen coverage: {antigen-null growth penalty: 10-year durability}
+    0.950: {0.00: 0.000, 0.15: 0.000, 0.30: 0.000, 0.50: 0.000},
+    0.970: {0.00: 0.000, 0.15: 0.000, 0.30: 0.000, 0.50: 0.000},
+    0.980: {0.00: 0.000, 0.15: 0.000, 0.30: 0.000, 0.50: 0.000},
+    0.990: {0.00: 0.000, 0.15: 0.000, 0.30: 0.000, 0.50: 0.000},
+    0.995: {0.00: 0.000, 0.15: 0.000, 0.30: 0.000, 0.50: 0.000},
+}
+
+WHAT_THE_SWEEP_SETTLES = {
+    "the_result": "twenty of twenty combinations return 0.000. Coverage from 95% to 99.5%, "
+                  "antigen-null growth penalty from none to half, and every cell is a total loss.",
+    "why_a_uniformly_null_table_is_the_strongest_form_of_this_result": "a sweep that found a "
+                                                                      "threshold somewhere would "
+                                                                      "invite tuning -- push "
+                                                                      "coverage a little further, "
+                                                                      "assume a slightly larger "
+                                                                      "fitness cost. There is "
+                                                                      "nothing to tune toward. The "
+                                                                      "table has no gradient because "
+                                                                      "the mechanism has no "
+                                                                      "gradient: these levers change "
+                                                                      "WHEN the blind spot arrives, "
+                                                                      "not WHETHER.",
+    "the_one_reading_it_does_not_support": "that the levers are worthless in general. A ninety-nine "
+                                           "percent coverage vaccine is a better vaccine and a "
+                                           "fitness cost is real biology. They are worthless "
+                                           "AGAINST THIS SPECIFIC FAILURE, which is a claim about "
+                                           "route 8's dangerous case and not about vaccine design.",
+    "and_it_confirms_the_arithmetic_rather_than_replacing_it": "the structural argument predicted "
+                                                               "exactly this, including that the "
+                                                               "highest coverage tested would still "
+                                                               "fail. The simulation was run because "
+                                                               "an argument that predicts a uniform "
+                                                               "result is the easiest kind to be "
+                                                               "quietly wrong about.",
+}
