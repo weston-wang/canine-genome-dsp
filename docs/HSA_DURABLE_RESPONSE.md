@@ -2014,6 +2014,66 @@ at 10:1 in vitro, significant PDX growth delay in vivo, and a first-in-dog trial
 log-remover. Tumours shed soluble MIC to decoy NKG2D. And 80% cytotoxicity in a short in vitro assay
 is not a per-day rate in an animal; no number is derived from it here.
 
+### The pincer — and this one closes it in the model
+
+The decomposition demanded a floor-holder and showed only immunity is permanent. That was a
+constraint, not an answer: it still needed a reason why the immune system should cover *this*
+compartment. There is a structural one.
+
+- Drop the vaccine's antigen but keep MHC-I → the cell still presents everything else, so polyvalent
+  antigens and epitope spreading reach it.
+- Drop MHC-I to escape T cells altogether → that is exactly what **missing-self** describes.
+
+Malmberg puts it directly: immune selection by tumour-specific CD8 T cells *"paves way for NK-cell
+missing self recognition."* **The pressure that creates route 8's dangerous case is the pressure that
+makes it an NK target.** Antigen status alone offers no escape from both arms — this is one escape
+route feeding another mechanism's recognition criterion, not two agents stacked.
+
+Simulated as an NK kill on the antigen-null compartments only, running permanently, with the vaccine
+keeping the antigen-positive ones:
+
+| NK kill/day | 3-day kill | no escape | 5% HLA-E | 20% HLA-E |
+|---|---|---|---|---|
+| 0.020 | 5.8% | 0.000 | 0.000 | 0.000 |
+| 0.034 | 9.7% | 0.000 | 0.000 | 0.000 |
+| 0.042 | 11.8% | 0.308 | 0.308 | 0.308 |
+| **0.060** | **16.5%** | **0.833** | **0.833** | **0.825** |
+| 0.090 | 23.7% | 0.825 | 0.825 | 0.825 |
+
+**0.000 → 0.833, which is the no-blind-spot baseline of ~0.84.** Route 8's dangerous case is not
+mitigated, it is removed. It **saturates** at the baseline rather than climbing past it — the
+signature of a closure rather than an extra source of kill. And the threshold falls exactly on the
+0.0334/day floor the decomposition derived independently: 0.034 still gives 0.000, because at the
+holding rate net growth is zero, not negative.
+
+**It is the smallest ask in the analysis** — 16.5% against 24% standalone and 13% for the best finite
+stack — and the reason is structural: *a permanent holder carries no work term at all.* It only has
+to beat the floor. Every finite course must clear the backlog too.
+
+#### The hole, and why it costs less than expected
+
+HLA-E:CD94-NKG2A lets a cell drop classical MHC-I while still switching NK off. The paper describing
+it is uncomfortably well matched here — **circulating tumour cells, platelet-driven** — in an analysis
+of a blood-vessel tumour that disseminates haematogenously and consumes platelets to the point of DIC.
+
+The simulation says the hole costs almost nothing (0.825 vs 0.833 at 20%). **The reason matters more
+than the number:** those cells stay *drug-sensitive*, and the primary agent covers them. The dangerous
+case is a **triple overlap** — antigen-null *and* NK-evading *and* drug-resistant — which needs no
+separate run, because it is the original blind spot with the NK arm removed, i.e. 0.000. Every level
+of this analysis has turned on an intersection rather than any single property.
+
+#### What I will not claim
+
+No rate has been measured against this compartment in this disease; the canine NK evidence is
+osteosarcoma; DLA-E is unexamined in dogs; MIC shedding blunts NKG2D. And the strongest objection is
+mine, not a paper's: **every dog with hemangiosarcoma already has NK cells, and died anyway.** Baseline
+surveillance is evidently below threshold in the compartments that matter, so the pincer needs NK
+function *augmented*, not merely present — which reintroduces an intervention with its own duration
+question.
+
+**This moves route 8 from "needs a drug nobody has" to "needs an immune arm everyone has, working
+harder than it evidently does."** That is a change of kind, not of certainty.
+
 ### Final position
 
 **No single mechanism closes route 8's dangerous case**, and the search produced something more useful
@@ -2021,7 +2081,9 @@ than a fourth candidate: a statement of what any closure must supply, a split be
 floor-holders, and a named trap that caught two attractive ideas.
 
 The status stays **closed conditional on a named experiment**. The ask has come down from a 24%
-three-day kill to about 13% stacked, against a floor of 9.5% — and it is not closed. **Nobody has yet
+three-day kill to about 13% stacked, and to **16.5% for the pincer — which reaches the full
+no-blind-spot baseline** and is the only candidate structurally shaped to hold the floor. It is still
+not closed. **Nobody has yet
 shown the compartment exists in canine hemangiosarcoma at all.**
 
 What would make me call it closed: *a measured per-day kill rate, in canine hemangiosarcoma, against a
