@@ -1166,1080 +1166,221 @@ surgical and chemotherapy backbone, gated on recovered effector function — not
 
 ## 3h. The antigen gap — route 8
 
-Every route above assumes the vaccine's target is on the cells. The model has always represented
-antigen **loss** — a variant arises by mutation and stops displaying the target (route 4). It never
-represented antigen **inadequacy**: the target not being there on day zero.
+Every route above assumes the vaccine's target is on the cells. The model represented antigen
+**loss** — a variant arises by mutation and stops displaying the target (route 4). It did not
+represent antigen **inadequacy**: the target not being there on day zero.
 
-Easy to conflate, because both end with cells the vaccine cannot see. The arithmetic is completely
-different. A loss variant starts at zero and must be seeded at 1e-8/day against a shrinking
-population. An inadequacy fraction starts at whatever fraction it is and never had to arise.
+That is a different failure. Loss is a mutation with a rate and a fitness cost; inadequacy is a
+property of the tumour before treatment starts, and no amount of vaccine height reaches a cell that
+never displayed the target.
 
-And it is load-bearing: **all three routes to raising vaccine height assume the antigen works.** If
-the target is wrong, checkpoint blockade, losartan and re-dosing are worth nothing, and the model
-would not notice.
+### Three modes, and only one is dangerous
 
-**Calviri's VACCS makes it concrete.** 800+ dogs, randomized, placebo-controlled, 31 defined
-RNA-error-derived neoantigens drawn from eight canine cancers **including hemangiosarcoma**. Reported
-outcome: mast cell and adrenal tumours reduced, **hemangiosarcoma not**. Johnston: *"We now know why
-— we just didn't put the right components in."* (Provenance caveat: that comes from a CEO interview
-in a consumer outlet; the primary efficacy analysis is still unpublished two years after the trial
-closed. Directionally informative, not established.)
-
-### Three modes, and only one is a height problem
-
-| mode | what it is | fixable by more height? |
+| mode | what it means | consequence |
 |---|---|---|
-| **uniform** | every cell dimmer | **yes** — reduces exactly to a height change |
-| **heterogeneous** | some cells never display it | **no** |
-| **inter-patient** | fits some dogs, not others | no — change the antigen, not the adjuvant |
+| uniform | every cell displays less | recoverable — a taller vaccine reaches it |
+| inter-patient | some dogs' tumours don't express it | a screening question, not a modelling one |
+| heterogeneous | a subpopulation within the tumour has none | not recoverable by height |
 
-### The engine inverted my expectation
+What has been measured is **sample-level, not cell-level**. Vimentin and CD31 were positive in 11/11
+canine cardiac haemangiosarcomas — but "positive by IHC" is entirely compatible with a substantial
+antigen-null subpopulation. B7-H3 is present across canine sarcoma subtypes "although with **variable
+levels of expression intensity**," a phrase equally consistent with every cell being dimmer and with
+some cells having none. And the tumour is definitionally mixed: its pathognomonic histology is
+vascular channels "lined by a **mixture** of malignant and nonmalignant endothelial cells."
 
-At the plan's operating point (height 0.042, second drug stopped at year 1):
+**Nobody has published the fraction of cells within a canine hemangiosarcoma that displays any
+candidate antigen.** That single number decides which mode applies.
 
-| coverage | uniform (dimmer) | heterogeneous (blind spot) |
+### The result inverts the expectation
+
+Simulating a blind spot that the vaccine cannot reach:
+
+| coverage | blind spot drug-**sensitive** | blind spot drug-**resistant** |
 |---|---|---|
-| 100% | 0.864 | 0.864 |
-| 95% | 0.708 | 0.864 |
-| 90% | 0.648 | 0.864 |
-| 80% | 0.496 | 0.864 |
-| 60% | 0.500 | 0.860 |
-| **40%** | **0.276** | **0.848** |
-
-I expected the blind spot to be far worse. **It's the reverse** — the blind spot barely moves while
-uniform dimming collapses.
-
-**Why:** the antigen-null cells are drug-*sensitive*, and the first drug runs continuously for all
-ten years. It holds them whatever the vaccine can see. Uniform dimming instead weakens the vaccine
-on the drug-*resistant* clones — and covering those is the vaccine's entire job in this plan.
-
-**So antigen coverage isn't the decisive variable. Whether the antigen covers the drug-resistant
-cells is.**
-
-*The caveat that matters:* this follows from a modelling choice — that the antigen-null fraction
-inherits the sensitive clone's drug response. That choice is doing the work, and the case it excludes
-is the dangerous one: a blind spot that overlaps drug resistance, covered by nothing.
-
-### That redirects the experiment
-
-**Wrong experiment:** quantitative IHC for antigen coverage across bulk tumour. **Right experiment:**
-coverage measured *in the drug-resistant fraction* — cells surviving PI3K/mTOR inhibition. One stain
-on treated versus untreated cells, in models that already exist (Andersen's tumorgrafts, ISOS-1).
-
-### The excluded case, run — and it is a cliff, not a slope
-
-The flat result above depended entirely on the antigen-null cells being drug-*sensitive*. Running the
-same grid with that fraction specified three ways:
-
-| coverage | null = drug-sensitive | null = half-and-half | null = drug-resistant |
-|---|---|---|---|
-| 100% | 0.840 | 0.840 | 0.840 |
-| **95%** | 0.840 | **0.000** | **0.000** |
-| 90% | 0.828 | **0.000** | **0.000** |
-| 80% | 0.836 | **0.000** | **0.000** |
-
-**Five percent of the tumour being both antigen-null and drug-resistant takes ten-year durability to
-zero — in 250 of 250 trials.** Not a reduced number. Zero. And the half-and-half case is no softer:
-it takes only the resistant half to do it.
-
-**Why it's absolute:** such a cell is covered by nothing. The vaccine can't see it, the first drug
-can't kill it, and the second drug's 0.0225/day doesn't close the gap to its growth. Net growth stays
-positive, and positive net growth over ten years is arithmetic, not chance.
-
-**And continuous dosing does not rescue it.** Stopping the second drug at year one and never stopping
-it both give 0.000. This is the one place in the whole analysis where the toxicity trade-off is
-irrelevant, because neither arm works.
-
-So the measurement isn't the cheapest informative experiment any more — it's a **go/no-go gate** that
-has to precede a trial rather than accompany one.
-
-### Closing it — four legs, none of which needs to know the antigen
-
-1. **The drug absorbs it — but only in the benign case.** A drug-*sensitive* blind spot costs nothing
-   down to 40% coverage, because the first drug never stops. It is **worthless** the moment any part
-   of the blind spot is resistant. This describes the benign case; it is not a defence against the
-   dangerous one.
-2. **Polyvalent tumour-derived vaccines can't have a coverage gap** — their antigens come from the
-   tumour. Both positive HSA vaccine results are of this type. Cost: per-dog manufacture, which is
-   exactly what Calviri calls *"impractical… and prohibitively expensive for use in dogs."*
-3. **Epitope spreading repairs coverage.** NEO-PV-01 in 38 NSCLC patients: *"Epitope spread to
-   **non-vaccinating** neoantigens, including responses to KRAS G12C and G12V"* (PMID 36027916). A
-   defined-antigen vaccine ending up covering antigens it never contained.
-4. **You can force the spreading without knowing the antigen.** RNA lipid particle aggregates,
-   given systemically with **tumour-unspecific** RNA, activate RIG-I in stromal cells — and *"in
-   client-owned canines with terminal gliomas, RNA-LPAs improved survivorship and reprogrammed the
-   TME, which became 'hot' within days of a single infusion"* (PMID 38697107). The companion study
-   shows this is what enables epitope spreading (PMID 40681861). **This attacks route 8 and routes
-   1–2 with one agent.**
-
-**NK cells do *not* close this**, despite being antigen-agnostic and already in the regimen.
-Missing-self recognition needs MHC-I downregulation, so it covers route 4's antigen loss — not a
-target that was never displayed on cells with intact presentation. Listing it here would repeat the
-exact conflation this section exists to undo.
-
-### The answer for a cell the vaccine can't see
-
-Legs 2–4 all try to make the vaccine *see* the cell. That's no answer if it can't. What's needed is a
-kill orthogonal to **both** axes — no antigen, no kinase pathway. That gate rules out the obvious
-moves by construction: another kinase inhibitor fails the second, and a CAR or second-antigen vaccine
-fails the first by relocating the coverage question to a different molecule.
-
-One mechanism passes, and its logic is the point: **resistance isn't free.** A cell survives targeted
-therapy by entering a drug-tolerant persister state, and that state carries its own dependency. You
-don't need to see the cell — you exploit what it had to become in order to survive.
-
-- **Persisters acquire a GPX4 dependency** across a wide range of cancers and drugs; removing it
-  causes selective ferroptotic death and ***prevents tumour relapse in mice*** — the endpoint this
-  analysis measures (Hangauer 2017, PMID 29088702).
-- **Canine cells are ferroptosis-competent** *"in a manner indistinguishable from human cancer
-  cells"* — built by a co-author of the above with Thamm at CSU (PMID 38746359, preprint).
-- **Parthenolide was tested in canine hemangiosarcoma** — cell lines *and* primary cells, GSH
-  depletion, ROS, NF-κB inhibition, *"standard-of-care therapeutics broadly synergize"*, extended
-  survival in a disseminated model (PMID 38135509).
-- **DMAPT is the oral form** — ~70% bioavailable, in vivo bioactivity in **spontaneous canine
-  leukemias**, selective for stem/progenitor cells (PMID 17804695).
-
-**Does it rescue the zero? Yes — but the ask is the largest in this analysis.**
-
-| persister kill/day | 10-yr durable at 95% coverage |
-|---|---|
-| 0 | 0.000 |
-| 0.030 | 0.000 |
-| 0.035 | 0.000 |
-| 0.040 | 0.107 |
-| **0.050** | **1.000** |
-
-**This is a step, not a ramp.** Below ~0.04/day the rescue is worth exactly nothing, because the
-antigen-null resistant clone is covered by nothing else — its net growth is either positive or
-negative, and there's no partial credit. The required ~0.045/day is **2× what the MEK inhibitor is
-asked for and 87% of the bar itself**: the persister agent would have to deliver, against one
-compartment, nearly what the whole regimen delivers against the tumour.
-
-*A comparison I made and have withdrawn:* I argued the ask was less daunting because MEK/mTOR was
-measured removing 0.110–0.143/day in canine angiosarcoma, so rates of that magnitude are achievable
-here. **That is a category error.** Andersen's envelope was measured on drug-*sensitive* bulk tumour,
-and achieved **by the very drugs this cell resists**. What a drug does to cells that respond to it
-says nothing about what any agent does to cells that don't.
-
-*The other mitigation fails too:* "it only has to cover a small compartment" doesn't help, because
-the requirement is a **rate** — net growth must go negative regardless of how many cells there are.
-Population size affects delivery and toxicity, not the threshold.
-
-*What survives:* ferroptosis is a complete death mechanism rather than cytostatic, so it is at least
-the *kind* of mechanism that can drive a net rate negative rather than merely slow growth. That is a
-claim about mechanism class, not magnitude — and it is the only mitigation left.
-
-**So the position is weaker than I first wrote.** There is no anchor at all for the rate a
-ferroptosis inducer achieves against persisters in vivo. Not a demanding bar with a reassuring
-comparison — a bar with nothing to compare it to.
-
-*How it compares:* the three vaccine-height routes needed only **7–45%** of their measured effect to
-transfer. This one has **no measured effect size in this compartment at all** and would need
-essentially all of whatever it has. It is the least comfortable answer in the analysis, and the only
-answer to this case.
-
-### What actually closes it
-
-Two candidates, both measured. Neither works alone.
-
-| approach (95% coverage, blind spot resistant) | result |
-|---|---|
-| nothing | 0.000 |
-| restore antigen fully, drug stopped at yr 1 | 0.273 |
-| persister kill 0.035/day | 0.000 |
-| persister kill 0.050/day | 1.000 *(no anchor for the rate)* |
-| **75% restored reach + drug continued** | **0.873** |
-| **100% restored reach + drug continued** | **1.000** |
-
-**Restoring the antigen alone tops out at 0.273** — it moves the cell from *covered by nothing* to
-*covered by the vaccine only*, and the vaccine wanes between two-monthly boosters, so a
-drug-resistant clone starting at 5% of the tumour outruns it.
-
-**The missing piece was already in the regimen.** Putting the second drug back — the one the toxicity
-work had converted into a one-year induction — supplies the 0.0225/day the waning vaccine can't hold.
-**75% restored reach plus continuous dosing gives 0.873**, beating the 0.840 no-blind-spot baseline
-and essentially matching the 0.888 reference. Below that it collapses: 50% gives 0.020.
-
-**The price is real and I won't hide it: the one-year induction is gone for these dogs.** Every
-withdrawal arm fails at every restoration level. This route doesn't escape the toxicity finding — it
-reopens it for the subgroup with a blind spot.
-
-**Which makes the one stain a treatment-assignment decision.** Antigen survives on drug-tolerant
-cells → one-year induction. It doesn't → indefinite dosing plus an interferon-axis agent.
-
-### Two routes, and neither dominates
-
-I called restoration "the better bet" and the persister route "the fallback." That was wrong, because
-it ignored the axis the whole toxicity section exists to protect.
-
-| | persister kill | restore visibility |
-|---|---|---|
-| result | **1.000** at 0.050/day | **0.873** at 75% restored |
-| second drug | **stopped at year 1** | **continued indefinitely** |
-| mechanism evidence | no anchor for the rate | established, with canine target engagement upstream |
-
-**The persister route reached 1.000 with the drug stopped at year one — it keeps the one-year
-induction.** The restoration route gives that up. So the persister route is better on *toxicity* and
-worse on *evidence*; restoration is better on evidence and worse on toxicity. They're alternatives
-with different prices, not a preference and a backup.
-
-**How to choose:** the antigen-retention stain decides which is even available. If antigen loss is
-epigenetic, restoration is on the table and costs lifelong dosing. If it's deletional, restoration is
-impossible and the persister route is the only option — which happens to be the one that keeps the
-induction short.
-
-*What was not simulated:* partial restoration plus partial persister kill. Both are unanchored
-effects, and combining two unmeasured quantities to clear a threshold would be exactly the arithmetic
-this analysis has refused elsewhere.
-
-*Still unmeasured:* how much presentation a STING agonist or RNA-LPA actually restores in canine HSA.
-Both canine studies measured interferon-stimulated genes, which is upstream. **Nobody has measured
-the 75%.**
-
-**Verdict on the persister route alone: closable, not closed.** The mechanism is right, the species and disease evidence exists,
-an orally dosed agent exists — and the required rate has never been measured for any of them.
-
-> **Superseded in part by §3i.** Two of the pessimistic statements in this subsection are too strong.
-> "No anchor for the rate" overstates the vacuum — Hangauer's in vivo arm measures relapse versus no
-> relapse on *residual* tumour under continued targeted therapy, which is this model's own endpoint on
-> the right compartment. And the persister route does not need "essentially all" of its measured
-> effect: the requirement converts to a 12.6% three-day kill, so 6–47% transfer suffices. §3i also
-> replaces the "0.050/day forever" column above with a **one-year course at 0.090/day**, which changes
-> the toxicity comparison between the two routes. What survives unchanged: the in vivo arm is a genetic
-> knockout, not a drug.
-
-**And do the cheap step first:** stain canine HSA for the vaccine antigen before and after PI3K/mTOR
-inhibition. If coverage is retained on drug-tolerant cells, none of this is needed and route 8 stays
-benign. That one stain is the difference between a cheap answer and an expensive programme.
-
-**NK cells are partly rehabilitated.** Refusing them earlier was right about missing-self and wrong
-to treat missing-self as all of NK recognition — NKG2D responds to stress-induced MIC-A/MIC-B, which
-are independent of both the antigen and MHC-I, exist in dogs, and are plausibly induced by sustained
-therapeutic stress. They carry their own escape: tumours shed soluble MIC to decoy NKG2D.
-
-**Legs 2–4 are therefore not backups — they are the only candidate answers**, because they are the
-only things that can put an antigen on a cell whose antigen was never there. None has been tested
-against a resistant subpopulation specifically.
-
-*Route 8 is closed in the benign case and open in the dangerous one, and nothing currently
-distinguishes which case canine hemangiosarcoma is. Calling it "closed conditionally" without that
-emphasis would understate it: the condition is not a caveat, it is the entire result.*
-
-*Tests: `test_hsa_antigen_adequacy.py`*
-
----
-
-## 3i. Getting the measured effect size the persister route was missing
-
-§3h ended with "closable, not closed," and the reason was specific: no anchor for the rate. That was
-the honest position, but it was not a finished one — "nearly solvable" is not the same as closed. So
-this section goes and gets the anchor.
-
-### The correction is arithmetic, and it is the important one
-
-I framed 0.045/day as "about seven eighths of the bar" and "roughly twice what the MEK inhibitor is
-asked for." Both are true in per-day units, and together they made the ask sound enormous.
-
-I never converted it into the units the experiments actually report. Hangauer's persister assays read
-viability by CellTiter-Glo **after three days** of treatment. A sustained 0.045/day over three days is:
-
-| rate | 3-day viability | 3-day kill |
-|---|---|---|
-| 0.040/day | 0.887 | **11.3%** |
-| 0.045/day | 0.874 | **12.6%** |
-
-**The model is asking for a 12.6% kill over three days — sustained.** It is not asking for a deep
-kill. It is asking for a shallow one that never stops. Bench assays of this mechanism do not report
-12.6%; they report near-elimination, with RSL3 and ML210 "among the compounds most selectively lethal
-to persister cells."
-
-So the transfer efficiency required, across the whole range of potencies the assay might have shown:
-
-| assumed 3-day viability | implied rate | transfer needed for 0.045/day |
-|---|---|---|
-| 0.75 (a weak 25% kill) | 0.096/day | **47%** |
-| 0.50 | 0.231/day | **19%** |
-| 0.30 | 0.401/day | **11%** |
-| 0.20 | 0.536/day | **8%** |
-| 0.10 | 0.768/day | **6%** |
-
-The three vaccine-height routes needed 7–45% of their measured effect to transfer, and routes 1 and 2
-were judged plausible on that basis. **The persister route sits in the same band under every
-assumption except the very weakest.** My earlier claim that it "would need essentially all of whatever
-it has" is wrong and is withdrawn.
-
-What this does *not* do is lower the requirement. 0.045/day is still 0.045/day and the step function
-around it is still a step. What changes is which experiments count as evidence, and how demanding they
-look — and where the real difficulty sits.
-
-### The in vivo result is at this model's own endpoint, on the right cells
-
-This is the distinction that matters, because I got it wrong once already. The comparison I retracted
-cited Andersen's 0.110–0.143/day as evidence a 0.045/day ask was reachable — a category error, because
-that was measured on drug-**sensitive** bulk tumour, by the very drugs the resistant cell resists.
-
-Hangauer's in vivo arm is the opposite. A375 xenografts were shrunk with dabrafenib + trametinib while
-ferrostatin-1 masked the GPX4 effect. Once tumours reached minimum volume, ferrostatin-1 was withdrawn
-— unmasking GPX4 loss **in the residual tumours**. Then:
-
-> "Upon further dosing of mice with dabrafenib and trametinib, without ferrostatin-1, the GPX4 WT
-> tumours **relapsed** and the GPX4 KO tumours **did not**."
-
-Relapse versus no relapse under continued targeted therapy is exactly what the Monte Carlo measures,
-and it is measured on the residual population, as the residual population. Almost every other anchor
-in this analysis had to be converted from response rate or median survival. This one does not.
-
-**Stated first, because it is the load-bearing limitation:** the in vivo arm is a *genetic knockout,
-not a drug.* Hangauer says why in terms — "because neither RSL3 nor ML210 are systemically
-bioavailable, we instead adopted a recently developed genetic strategy." This proves the target is
-right in vivo. It does not prove any molecule can hit it in vivo. And knockout is complete, permanent
-target removal, so it is an upper bound on what pharmacology could achieve, not an estimate of it.
-
-### The disease-specific anchor was there all along
-
-I treated the disease-specific question as open, and a PubMed search for "hemangiosarcoma ferroptosis"
-returns **zero results**, which is what made it look open.
-
-The canine ferroptosis panel contains **three canine hemangiosarcoma cell lines** — Cindy-HSA, Den-HSA
-and SB. The tumour type appears only in a supplementary table, which is why the indexed search misses
-it. Den-HSA is from a **Golden Retriever**; SB is **PIK3CA-mutant** — the lesion the primary regimen
-targets. These are not distant proxies.
-
-And the lineage result points the right way:
-
-> "Epithelial cancers (carcinomas) were enriched in the ferroptosis-**insensitive** cluster, while
-> **sarcomas**, undifferentiated melanomas and hematological malignancies were **enriched for
-> sensitivity** to ferroptosis."
-
-with the selectivity specific to the GPX4 inhibitor rather than to cytotoxicity in general: "rank
-ordering cell lines by sensitivity indicates selectivity for killing non-epithelial cells for ML210
-but not doxorubicin." Hemangiosarcoma is a sarcoma of endothelial origin. Separately, Hangauer's
-persisters occupy a "high-mesenchymal therapy-resistant state" — so in this tumour the lineage argument
-and the persister argument point the same way instead of having to be bridged.
-
-**What this does not establish:** per-line values for those three lines are in figure heatmaps that
-could not be extracted, so it is *not* established that they fell in the sensitive cluster. And they
-are **parental lines, not persisters derived from them.** Nobody has derived persisters from Cindy-HSA,
-Den-HSA or SB and tested them. That is the missing experiment — now a specific one with named
-reagents rather than a wish.
-
-### The bioavailability gap: partly closed, and the field disagrees with my optimism
-
-Hangauer named two blockers in 2017, and they are independent:
-
-1. **Chemistry** — "the development of a potent bioavailable GPX4 inhibitor is an urgent priority."
-2. **Toxicology** — "because GPX4 genetic deletion is **lethal in adult mice**, further study will be
-   needed to determine whether a suitable therapeutic window exists."
-
-On (1), Tubastatin A binds GPX4 directly, inhibits it independently of its HDAC6 activity, and has
-"excellent bioavailability... in a mouse xenograft model." I initially wrote that this means the urgent
-priority is "no longer entirely unmet." **A 2026 Nature paper contradicts that**, stating as background
-"the high toxicity, poor selectivity and low-to-limited bioavailability of GPX4 inhibitors in vivo."
-That is three years later and does not treat the problem as solved. Both statements are recorded;
-picking the convenient one is how an analysis talks itself into a conclusion. I take the pessimistic
-reading as the operating assumption for the GPX4 arm. (I also could not verify Tubastatin A's dose or
-effect size — the publisher returned HTTP 403 — so **no number from that paper is used in any
-calculation here.**)
-
-On (2), the answer comes from the **parallel arm**. GPX4 and FSP1 are the two arms of the same
-lipid-peroxidation defence, and:
-
-> "Given that germline *Gpx4* KO mice are **not viable**, whereas *Fsp1* KO mice are **viable with no
-> notable physiological defects**, the therapeutic window for targeting FSP1 with fewer toxic side
-> effects is expected to be **much greater** than for GPX4."
-
-icFSP1 is "the first inhibitor of human FSP1 with in vivo stability and efficacy" — 50 mg/kg IP twice
-daily, improving survival as a **monotherapy**, with an on-target control (no benefit against the
-icFSP1-resistant FSP1(Q319K) mutant) and a mechanism control (liproxstatin-1 abrogates it). One further
-finding cuts in the conservative direction for every transfer estimate above: **FSP1 was required for
-ferroptosis protection "in vivo, but not in vitro"** — in vitro assays *understate* how much a tumour
-depends on this defence in a living animal.
-
-**The inference I am not making:** a persister is a cell in a state of heightened GPX4 dependence, so it
-is tempting to say it is exactly the GPX4-compromised context where FSP1 inhibitors work. That chain is
-plausible and **untested** — no experiment in either paper puts an FSP1 inhibitor on a drug-tolerant
-persister. It is written down as a hypothesis, not counted as evidence.
-
-### Applying the duration criterion to the mechanism I am arguing for
-
-The duration criterion was invented to disqualify the MEK/mTOR pair: 17 days of documented tolerability
-against a 3650-day horizon, a 215× shortfall. A criterion only ever applied to options already rejected
-is not a criterion. So:
-
-**The cheap version of the answer dies here.** Sulfasalazine is the ferroptosis-adjacent agent with
-decades of chronic human dosing and established veterinary use — it depletes cysteine, hence
-glutathione, hence GPX4's substrate. In dogs it causes **permanent bilateral keratoconjunctivitis
-sicca**, with "no breed, age or sex incidence... unlike in keratoconjunctivitis sicca cases due to other
-causes" — so it cannot be dodged by patient selection. In the 12-month canine study of its active
-metabolite, the condition "was first diagnosed at **study week 22** and subsequently progressed both in
-incidence and severity." Week 22 is ~154 days, early inside a 3650-day horizon, and it gets worse.
-
-A second, independent dog-specific chronic toxicity sits in the same class: susalimod produced bile duct
-hyperplasia **in dogs only**, from a bile/plasma ratio of **3400 in the dog against 50 in the rat**.
-Rodent safety data for this class does not transfer to dogs, and this analysis is about dogs.
-
-That rules out one shortcut into the axis, not the axis — GPX4 and FSP1 inhibitors are not sulfonamides
-and do not inherit the lacrimal or biliary liabilities by construction.
-
-**And icFSP1 does not clear the criterion either.** Its longest reported exposure is two weeks:
-
-| | documented tolerability | horizon | shortfall |
-|---|---|---|---|
-| MEK/mTOR pair (disqualified) | 17 days | 3650 days | 215× |
-| icFSP1 | 14 days | 3650 days | **261×** |
-
-On the criterion as written, the agent I am arguing for is in *worse* shape than the one I rejected.
-Saying so is the price of having the criterion. What differs is the direction of travel: the pair's
-shortfall was against a dose-limiting toxicity that had **already appeared**, while this is an agent
-nobody has yet dosed for longer.
-
-Which makes one question decisive: **does this agent actually have to run for ten years?**
-
-### It does not — and the answer has a closed form
-
-Hangauer's own conclusion points away from permanent dosing: persisters are *generated* by the
-targeted therapy, 24h of RSL3 pre-treatment reduces the pool that survives it, persisters retain full
-sensitivity for at least two weeks after washout, and "pre- or post-treatment with GPX4 inhibitors,
-rather than co-treatment, may be adequate to deplete the pool of persister cells."
-
-**One modelling decision does all the work here, so it goes before the result.** `simulate_resistance`
-tracks a continuous fraction of carrying capacity with no lower bound — a clone driven to 10⁻³⁰ of
-carrying capacity, which is 10⁻²⁰ of a single cell, regrows when the pressure stops. For a permanent
-kill that is harmless. For a finite course it is decisive, and it is a numerical artifact. So the
-finite schedules were run **with** an extinction floor that zeroes any clone below one cell (10⁻¹⁰ of
-carrying capacity, from `TUMOR_CELLS = 1e10`) at the end of the course — and **without** it, as a
-control.
-
-| applied kill/day | continuous (3620 d) | two years (700 d) | drug year (335 d) | 14/14 pulsed in yr 1 (167 d) | six months (152 d) |
-|---|---|---|---|---|---|
-| 0.040 | 0.117 | 0.000 | 0.000 | 0.000 | 0.000 |
-| 0.050 | **1.000** | 0.000 | 0.000 | 0.000 | 0.000 |
-| 0.075 | 1.000 | **1.000** | 0.000 | 0.000 | 0.000 |
-| 0.100 | 1.000 | 1.000 | **1.000** | 0.000 | 0.000 |
-
-**A one-year course closes it at 0.100/day.** The agent does not have to run for ten years.
-
-### Why — the requirement is a fixed amount of work, not a rate
-
-Instrumenting the clone trajectories gives the mechanism exactly. The blind spot starts at 0.015 of
-carrying capacity — **1.5 × 10⁸ cells** — and the course has to drive it below **one cell** before it
-stops. That is ~19 natural logs of net decline, and the agent has to out-run the compartment's own
-growth to deliver them. Measuring that growth offset at three separate applied rates gave 0.0333,
-0.0335, 0.0335 — so:
-
-> **applied rate ≥ 0.0334 + ln(N₀) / course_days**
-
-This predicts every simulated threshold: continuous 0.039 (observed boundary at 0.040 → 0.117), two
-years 0.060 (0.050 fails, 0.075 works), drug year 0.090 (0.075 fails, 0.100 works), pulsed 0.146 and
-six months 0.157 (both fail at every rate tested). **Its two constants come from clone trajectories,
-not from durability values — it is a prediction, not a fit.**
-
-It also shows the result is robust to the quantity it is least sure of: the requirement depends on the
-blind spot's size only through ln(N₀), so a ten-fold error moves the one-year requirement by
-ln(10)/335 = 0.007/day against a 0.090 ask.
-
-### The exchange rate, and what it buys
-
-| course | agent-days | required rate | as a 3-day kill | shortfall vs icFSP1's 14 documented days |
-|---|---|---|---|---|
-| continuous | 3620 | 0.039/day | 11% | 259× |
-| two years | 700 | 0.060/day | 17% | 50× |
-| **one year** | **335** | **0.090/day** | **24%** | **24×** |
-
-*(These are the coin-flip rates from the deterministic form. The stochastic check below raises the
-one-year figure to 0.102/day for 99% confidence — a 26% three-day kill.)*
-| six months | 152 | 0.157/day | 38% | *fails at every rate tested* |
-
-Cutting ten years to one costs **roughly a doubling of the rate — a three-day kill going from 14% to
-26%.** Both are modest against a mechanism whose tool compounds are "among the compounds most
-selectively lethal to persister cells." And it drops the duration shortfall from **261× to 24×**: the
-difference between a category problem and an ordinary drug-development one.
-
-**Pulsing does not work, and that is a result against my own convenience.** 14-on/14-off through the
-drug year halves the agent-days and returns 0.000 — so the two-week retained-sensitivity window in
-Hangauer's washout experiment does *not* license a duty cycle. The course has to be continuous while
-it runs. It just does not have to run forever.
-
-### The control, which shows this all rests on one assumption
-
-Without the extinction floor, at the same 0.100/day: continuous 1.000, two years **0.000**, drug year
-**0.000**, pulsed **0.000**. **The difference between "a one-year course closes route 8" and "only
-permanent dosing closes it" is exactly the floor.** That is not a caveat at the margin.
-
-The floor is the right choice — a clone below one cell is gone, and the alternative is a numerical
-artifact — but three things could still make it wrong:
-
-- **Stochasticity.** The model is deterministic near extinction and treats one cell as a hard
-  boundary. At 0.075/day a one-year course leaves ~140 cells and returns 0.000; at 0.100/day it
-  reaches ~0.03 of a cell and returns 1.000. **The decision is made in a two-log window — precisely
-  where a deterministic model is least trustworthy.** A birth-death formulation would replace the step
-  with an extinction probability. *(Now run — see below. The fear was wrong in the reassuring
-  direction.)*
-- **Sanctuary sites.** The compartment is modelled as well-mixed and uniformly exposed. Any site the
-  agent does not reach breaks the extinction argument outright. **This one is not answered.**
-- The reassuring one: **logarithmic sensitivity to N₀**, as above.
-
-### The stochastic check, which resolves that caveat and moves one of my numbers
-
-It doesn't need Monte Carlo. A linear birth–death process has a closed-form extinction probability,
-and the fitted dynamics supply both its rates — intrinsic growth 0.055/day, baseline death
-0.055 − 0.0334, plus the agent on top. The reconstructed net declines reproduce the ones measured off
-the simulated trajectories to three decimals (0.0166/0.0416/0.0666 against 0.0167/0.0416/0.0665).
-
-| course | 1% extinct | 50% extinct | 99% extinct | deterministic form |
-|---|---|---|---|---|
-| continuous (3620 d) | 0.0374 | 0.0380 | 0.0392 | 0.0386 |
-| two years (700 d) | 0.0564 | 0.0592 | 0.0654 | 0.0603 |
-| **one year (335 d)** | 0.0828 | **0.0886** | **0.1016** | **0.0896** |
-| pulsed yr 1 (167 d) | 0.1344 | 0.1459 | 0.1717 | 0.1461 |
-| six months (152 d) | 0.1446 | 0.1572 | 0.1855 | 0.1573 |
-
-**Stochasticity sharpens the step rather than smearing it.** Per-lineage survival gets raised to the
-power of the starting population, so with 1.5 × 10⁸ cells a per-lineage survival of one in ten million
-still gives a population that essentially never dies out, and one in ten billion gives one that
-essentially always does. The 1%→99% transition spans just 0.019/day for a one-year course — under a
-quarter of its own midpoint. And the stochastic 50% rate **agrees with the deterministic closed form
-to within 2% for every schedule**: two independent derivations of the same threshold.
-
-**But it corrects one of my numbers.** The deterministic form gives the rate at which extinction
-becomes *more likely than not*. Quoting 0.090/day as the one-year requirement was quoting a coin flip.
-**At 99% confidence the one-year course needs 0.102/day** — a three-day kill of 26.2% rather than
-23.6%. No conclusion changes; the number an experimentalist should be handed does.
-
-The logarithmic robustness survives intact: a ten-fold change in the blind spot's size moves the
-one-year midpoint by 0.007/day (0.0815 / 0.0886 / 0.0957 across two decades), matching ln(10)/335
-exactly.
-
-**What this does not answer is sanctuary sites.** Birth–death assumes every lineage is independent and
-uniformly exposed. A subpopulation the agent never reaches is not a low-probability survival — it is a
-certainty, and no rate fixes it. Item 7 in the open list is **downgraded, not removed**: the
-deterministic floor is no longer load-bearing, but uniform exposure still is.
-
-### Verdict on route 8's dangerous case
-
-**CLOSED CONDITIONAL ON A NAMED EXPERIMENT** — stronger than "closable," weaker than "closed."
-
-What changed: the requirement is a 12.6% three-day kill needing 6–47% transfer, not "essentially
-everything it has"; the in vivo endpoint match exists and is on residual disease; the disease and
-species anchors exist with named cell lines; and the ten-year dosing assumption that made the duration
-criterion fatal is not what the biology indicates.
-
-What did not: **no drug has been shown to do it.** Every closure above is a target-level or
-class-level result plus a modelling argument, and the finite-course argument depends on a
-deterministic extinction floor. Eight items remain open in
-`hsa_persister_evidence.WHAT_IS_STILL_NOT_CLOSED`.
-
-**The named experiment, with reagents that already exist:** derive persisters from Cindy-HSA, Den-HSA
-and SB under PI3K/mTOR inhibition; measure their three-day viability under a GPX4 or FSP1 inhibitor;
-convert with `rate_from_burden_reduction`; compare against **0.102/day** (the 99%-confidence one-year requirement; `required_rate_for_course(335)`
-gives 0.090, which is the coin-flip rate).
-
-**But do the antigen-retention stain first.** It costs one experiment and can make all of the above
-unnecessary.
-
-*Tests: `test_hsa_persister_evidence.py`*
-
----
-
-## 3j. Attacking the framing instead of the problem
-
-Two closures that both reduce to *see the cell or kill the cell* is a narrow pair of answers, and a
-narrow pair of answers usually means a narrow framing. So this section attacks the framing. Four
-questions the earlier work never asked — three of which fail, and fail for one shared reason that is
-worth more than any of them individually.
-
-### Containment: ruled out, twice over
-
-Gatenby's competitive release names the flaw in my own plan directly: maximum cell kill is not
-maximum benefit, because eliminating the sensitive population lets resistant clones "proliferate
-unopposed by competitors." Adaptive therapy deliberately keeps sensitive cells alive to suppress the
-resistant ones, and it has a positive randomised trial behind it.
-
-**This engine already models it** — every clone grows at `growth × (1 − density)` — and I had never
-once exploited it. Driving total burden to nadir is exactly what releases the blind spot: at nadir
-density its net growth is 0.0334/day; near carrying capacity it would be near zero. *The plan's own
-success at shrinking the tumour is what accelerates the one compartment it cannot touch.*
-
-It still doesn't work, for two reasons:
-
-- **The blind spot is not a small resistant minority.** At 95% coverage and an initial burden of 0.3
-  it is 0.015 of carrying capacity — 1.5 × 10⁸ cells — **above this model's own 0.01 detection
-  floor.** It is macroscopic on day one. Containment manages a subclinical reservoir; there isn't one.
-- **In this disease the burden is itself lethal.** Adaptive therapy buys time by carrying a larger
-  tumour, and route 5 — haemorrhage — is the one escape with no drug answer. That trade is worse here
-  than in almost any other cancer.
-
-What it *does* contribute: the holding rate the ferroptosis agent must out-run is a consequence of
-the nadir the rest of the regimen achieves, not a property of the clone.
-
-### Coverage: a mirage
-
-Coverage was fixed at 95% throughout and never varied. The blind spot drops below the detection floor
-above **96.7%** coverage — a threshold that looks worth chasing and sits suspiciously close to the
-number I assumed.
-
-It's worthless, because starting below the floor only delays arrival at it, and time to detection is
-*logarithmic* in starting size:
-
-| coverage | blind spot | days to detection |
-|---|---|---|
-| 95% | 1.5 × 10⁸ cells | 0 (already there) |
-| 99% | 3.0 × 10⁷ | 36 |
-| 99.9% | 3.0 × 10⁶ | 105 |
-| 99.99% | 3.0 × 10⁵ | 174 |
-
-**A five-hundred-fold reduction in the size of the blind spot buys 174 days against a 3650-day
-horizon.** Coverage is not the lever.
-
-And the simulation agrees, which matters because an argument predicting a uniform result is the
-easiest kind to be quietly wrong about. Twenty combinations — coverage 95% to 99.5%, antigen-null
-growth penalty none to half, no persister kill, no restored presentation:
-
-| coverage | cost 0% | cost 15% | cost 30% | cost 50% |
-|---|---|---|---|---|
-| 95.0% | 0.000 | 0.000 | 0.000 | 0.000 |
-| 97.0% | 0.000 | 0.000 | 0.000 | 0.000 |
-| 98.0% | 0.000 | 0.000 | 0.000 | 0.000 |
-| 99.0% | 0.000 | 0.000 | 0.000 | 0.000 |
-| 99.5% | 0.000 | 0.000 | 0.000 | 0.000 |
-
-**Twenty of twenty.** A sweep that found a threshold somewhere would invite tuning — push coverage a
-little further, assume a slightly larger fitness cost. There is nothing to tune toward. The table has
-no gradient because the mechanism has none: these levers change *when* the blind spot arrives, not
-*whether*. (What this does not say is that the levers are worthless in general — a 99% coverage
-vaccine is a better vaccine. They are worthless against *this specific failure*.)
-
-### A fitness-cost inconsistency in my own model
-
-The engine charges the *acquired* antigen-loss escape clone a growth penalty — 0.0425 against 0.055,
-about 15% against the resistance clone it derives from. **The route-8 blind spot was built with no
-antigen-loss penalty at all.** The same biological state is charged 15% when acquired and 0% when
-present at baseline.
-
-The asymmetry is partly defensible — a cell that lost the antigen by mutation plausibly took
-collateral damage, while one that never expressed it may be an undamaged lineage variant. But the
-antigens at issue are functional endothelial proteins, and zero was an assumption, not a finding. It
-was also the assumption that made the blind spot maximally dangerous, i.e. **an error in my own model
-that favoured my own conclusion.** Correcting it changes nothing decisive: at 15%, 30% and 50%
-penalties, durability stays 0.000. A slower exponential is still an exponential.
-
-### The one reason all three fail — and it is the most useful result here
-
-Each makes the blind spot **smaller or slower**. Neither is enough, because over 3650 days *any*
-positive net growth rate reaches carrying capacity from any starting size. At the most extreme
-combination tested — 99.99% coverage, a 70% growth penalty — it still reaches detection in **581
-days**.
+| 80% | 0.836 | 0.000 |
+| 90% | 0.828 | 0.000 |
+| 95% | 0.840 | 0.000 |
+| 100% | 0.840 | 0.840 |
+
+**A drug-sensitive blind spot is nearly free** — even at 20% of the tumour, durability barely moves,
+because the drug absorbs what the vaccine cannot see. **A blind spot that overlaps drug resistance is
+total.** Not degraded: 0.000, in 250 of 250 trials. Continuous dosing does not rescue it — stopping
+the second drug at year one and never stopping it both give 0.000.
+
+**Overlap is the whole ballgame.** It is not the size of the blind spot that matters but whether it
+coincides with resistance.
+
+### Only negative net growth closes it
+
+Three cheap answers fail, and they fail for one shared reason.
+
+**Containment.** Competitive release is real — eliminating sensitive cells lets resistant clones
+"proliferate unopposed by competitors" — and this engine already models it, since every clone grows at
+`growth × (1 − density)`. Driving burden to nadir is exactly what releases the blind spot. But the
+compartment is not a small resistant minority waiting to be suppressed: at 95% coverage it is
+macroscopic on day one, with no subclinical reservoir to manage. And adaptive therapy buys time by
+carrying a larger tumour, which in this disease is what causes the fatal haemorrhage.
+
+**Coverage.** Time to detection is *logarithmic* in starting size: going from 95% to 99.99% coverage —
+a five-hundred-fold reduction — buys **174 days against 3,650**.
+
+**Fitness cost.** The engine charges the acquired antigen-loss clone a 15% growth penalty. Applying
+the same penalty, or 30%, or 50%, to the baseline blind spot leaves durability at 0.000.
+
+A sweep of coverage (95%–99.5%) crossed with growth penalty (0%–50%) is **0.000 in all twenty
+combinations**, with no gradient — because these levers change *when* the blind spot arrives, not
+*whether*.
 
 > **Route 8's dangerous case admits exactly one kind of answer: something that makes the blind spot's
-> net growth negative. Nothing that merely slows it qualifies, at any magnitude short of total.**
+> net growth negative. Rarity is not a defence; only absence is.**
 
-That converts an open-ended search into a closed one. It also means the expensive answer is
-**necessary rather than an artifact** of the assumptions I happened to pick — which is the opposite of
-what I expected when I went looking for a cheaper one.
+That is confirmed across five orders of magnitude of compartment size: 150 million cells and 1,500
+cells fail identically.
 
-### On the kill side: one prior-art negative, one real find
-
-**Metronomic chemotherapy was the best candidate on paper and it failed here.** Dogs take metronomic
-cyclophosphamide continuously for months to years, so it is the one agent in this entire analysis that
-would clear the duration criterion outright; it kills by alkylation, needs no antigen, and doesn't
-touch PI3K/mTOR. It passes every gate. And: *"The addition of metronomic chemotherapy does not improve
-outcome for canine splenic haemangiosarcoma"* — 61 dogs. Passing the gates on paper is not the same as
-working.
-
-**eBAT is a third mechanism, and it is the best-anchored thing in this route.** A bispecific
-angiotoxin: truncated deimmunized *Pseudomonas* exotoxin fused to EGF and the amino-terminal fragment
-of urokinase, binding EGFR and uPAR. It kills by **ADP-ribosylating elongation factor 2** — protein
-synthesis arrest. A cell resistant to PI3K/mTOR inhibition has no reason to resist that; there is no
-shared node. And EGFR/uPAR are unrelated to the vaccine antigens.
-
-The trial is the disease, the species *and* the setting: **23 dogs, stage I–II splenic
-hemangiosarcoma, splenectomised, minimal residual disease.** One cycle of eBAT at 50 µg/kg, then
-adjuvant doxorubicin. Six-month survival went from **<40% to ~70%**, with six long-term survivors past
-450 days. Almost every other anchor in this analysis had to be transported from another species,
-tumour, or setting. This one didn't.
-
-Converting it the way everything else here is converted — a short course doesn't change the growth
-rate, it removes a fixed amount of tumour and the curve resumes, so the currency is **logs removed**:
-
-| assumption | implied one-off kill | share of the 18.8 logs needed |
-|---|---|---|
-| reported (40% → 70%) | 7.2 logs | 38% |
-| worse comparison arm (35% → 70%) | 7.8 logs | 41% |
-| weaker treated arm (40% → 65%) | 5.2 logs | 28% |
-
-**And it cannot be scaled up.** The follow-up trial tripled the cycles and reduced the chemotherapy
-interval: *"A statistically significant survival benefit was not seen"*, with greater toxicity and
-reduced efficacy than a single cycle. That is ruled out by data, not by argument. It also
-independently matches the model's finding that a short continuous course works and repeating it does
-not — though that trial changed three things at once, so the convergence is suggestive and confounded.
-
-### The combination that is now legitimate
-
-`hsa_orthogonal_kill` refused to model partial restoration plus partial persister kill, because
-"combining two unmeasured quantities to clear a threshold would be exactly the arithmetic this
-analysis has refused elsewhere." That was right. This is different: **eBAT's contribution is measured,
-in this disease, in this species, in this setting.** One measured quantity plus one unmeasured one is
-not the same arithmetic — though it is still weaker than two measured ones.
-
-| eBAT head start | one-year ferroptosis course then needs | vs alone |
-|---|---|---|
-| none | 0.090/day | — |
-| 5.2 logs | 0.074/day | −17% |
-| 7.2 logs | 0.068/day | −24% |
-| 10.8 logs | 0.057/day | −36% |
-
-Equivalently, at a fixed modest 0.060/day the course shortens from 708 days to 300–510. And the
-sequencing the data supports is the one already used: a single cycle between surgery and chemotherapy,
-in minimal residual disease — the moment the blind spot is smallest and the head start cheapest.
-
-**Never tested:** eBAT with anything on the ferroptosis axis, in any species. This is arithmetic over
-one measured effect and one assumed one, not an observed synergy, and the toxicity of the pair is
-unknown.
-
-*(An oncolytic-virus case report — VSV, canine bone HSA, >7 years survival — clears both gates by
-construction and is recorded as an anecdote. n = 1, a different anatomical form, and the virus was
-given for a misdiagnosis. No rate is derived from it.)*
-
-### Verdict on the search
-
-I went looking for a cheaper answer and found a proof that there isn't one of that kind. On the kill
-side I found a third mechanism better anchored than either of the existing two, supplying roughly a
-quarter to two fifths of the required log-kill, which cannot be scaled up.
-
-Route 8 stays **closed conditional on a named experiment** — but the closure is better supported and
-the remaining ask is smaller. It is no longer a single unanchored mechanism; it is a measured partial
-answer plus a smaller unanchored remainder.
-
-**The highest-value next step is now a stain, not a programme:** measure EGFR and uPAR on the
-vaccine-blind fraction of canine hemangiosarcoma. If the cells the vaccine cannot see still express
-eBAT's targets, then an agent that already exists, and has already been given to these dogs, attacks
-the exact compartment with no answer.
-
-**What I still cannot say is that route 8 is closed.** Three independent mechanisms now point at it
-and one has canine trial data, but no combination has been tested against a resistant antigen-null
-subpopulation — because nobody has yet shown that such a subpopulation exists in this disease.
-
-### Looking deeper: the assumption under the structural result
-
-The structural result — only negative net growth closes it — was derived while treating the blind
-spot as a **fixed compartment**. Every route-8 probe passed `mutation=np.eye(7)`, an identity
-transition matrix asserting that no cell ever changes phenotype. The engine supports interconversion
-natively (`state[t+1] = grown @ model.mutation`), so that was never a tooling limit. It was an
-unexamined assumption, and it does enormous work.
-
-**Under it, the blind spot must stay antigen-null across 263 cell generations.** That is a strong
-requirement, and it is fragile: a per-division reversion of 1 in 10 leaves essentially none of the
-lineage still invisible at ten years; 1 in 100 leaves 7%. So the dangerous case does not require
-antigen loss — it requires antigen loss that *does not drift for 263 divisions*. That converts the
-question from size (worthless, per the sweep) into **stability**, which has a different experiment
-behind it.
-
-Both answers exist in real tumours. The persister literature says the analogous drug-tolerant state
-is "transient and reversible upon removal of the drug." But Zaretsky's melanomas acquired resistance
-through JAK1/JAK2 loss-of-function "concurrent with deletion of the wild-type allele," and B2M
-truncating mutations are a recurrent immune-escape lesion. **A deleted gene does not drift.**
-
-#### And the simulation inverted the idea
-
-| q_out (null→visible) | residence | one-way | q_in=0.005 | q_in=0.02 |
-|---|---|---|---|---|
-| 0.000 | never | 0.000 | — | — |
-| 0.020 | 50 d | 0.000 | 0.000 | 0.000 |
-| 0.034 | 29 d | 0.000 | 0.000 | 0.000 |
-| 0.050 | 20 d | **0.267** | 0.000 | 0.000 |
-| 0.080 | 12 d | 0.233 | 0.008 | 0.000 |
-
-One-way escape *does* rescue partially — 0.000 → 0.267, with no new agent. But it **saturates
-immediately**: 0.080 gives 0.233, the same within noise. The dominant eigenvalue of the
-visible/null pair explains why — once the drain is fast, the rate-limiting step becomes the
-antigen-*positive* resistant clone's own net decline, only −0.0086/day. **Plasticity can at best make
-the blind spot as controllable as a visible resistant clone, and that clone is barely controlled.**
-
-**Back-conversion destroys it.** At q_in = 0.005/day — a 200-day residence in the visible state,
-which is slow — the rescue collapses to 0.000. At 0.02 everything fails, including a case where cells
-spend 80% of their life visible. Reversibility is symmetric: the antigen-positive resistant population
-is a standing reservoir that continuously *manufactures* blind-spot cells. **A plastic antigen
-phenotype is a liability, not a gift.**
-
-*This also corrects my own arithmetic.* I estimated the two-way threshold by time-averaging — closure
-needs the lineage visible >79.5% of the time. Wrong. The correct object is the dominant eigenvalue,
-and at 80% visible it is **+0.0034/day**. The naive estimate sat on the boundary and fell on the wrong
-side of it.
-
-### Bystander killing fails for a reason worth naming
-
-ADC payload diffusion into antigen-negative neighbours is *the* established answer to heterogeneous
-antigen expression, clinically validated, and it clears both gates. But the quantitative work finds
-the effect "**dissipates over the period of time as the population of Ag+ cells declines**." It is
-manufactured by the very cells this regimen exists to destroy — strongest at the start, gone exactly
-when the blind spot is all that remains.
-
-That is the same trap as competitive release, mirrored. **Two good ideas whose supply is the
-population the plan removes.** Worth naming, because it isn't obvious in advance.
-
-### What the search actually converged on
-
-Not a fourth mechanism — a decomposition:
+### The requirement, decomposed
 
 > **required rate = holding rate + ln(surviving cells) / course days**
 
-- **The floor.** 0.0334/day — a **9.5% three-day kill**. Whatever survives must be killed faster than
-  it grows, for as long as it exists. *No amount of up-front killing touches this term.* Only lowering
-  the compartment's own growth moves it (a 15% fitness penalty → 8.2%; 50% → 4.9%).
-- **The work.** ln(surviving cells) over the course. Every "log-remover" chips at it.
+- **The floor** — 0.0334/day, a **9.5% three-day kill**. Whatever survives must be killed faster than
+  it grows, for as long as it exists. No amount of up-front killing touches this term; only lowering
+  the compartment's own growth moves it.
+- **The work** — ln(surviving cells) over the course length. Every one-off kill reduces it.
 
-This **reconciles the three levers rejected earlier**: each is a real term in this equation and none
-is a sufficient closure on its own.
+This reconciles the three rejected levers: each is a real *term* in the equation and none is a
+sufficient *closure*. It also explains the schedule findings — a permanent holder carries no work term
+and needs only to beat the floor, while any finite course must also clear the backlog.
 
-| stack | logs removed | one-year requirement | 3-day kill |
-|---|---|---|---|
-| nothing | 0 | 0.090/day | 24% |
-| eBAT alone | 7.2 | 0.068/day | 18% |
-| + plasticity to a 10⁵ genetic remnant | 14.5 | **0.046/day** | **13%** |
-| irreducible floor | — | 0.033/day | 9.5% |
+A stochastic birth–death treatment agrees with the deterministic form to within 2% at every schedule
+and *sharpens* the threshold rather than blurring it: with 10⁸ cells, per-lineage survival raised to
+that power makes the transition near-vertical.
 
-### The floor needs something permanent — and only immunity is
+### How large the compartment actually is
 
-Every mechanism found is a **log-remover**: it acts up front and stops. The floor needs a kill
-sustained for a decade, and no small molecule here has cleared a duration criterion at that scale.
+The dangerous compartment is cells that are **both** antigen-null **and** drug-resistant. Antigen
+inadequacy on day zero is baseline expression heterogeneity, not loss acquired under immune pressure —
+so it carries no mechanistic link to a pre-existing PIK3CA-pathway mutation, and the two are
+independent. (Correlation is the right assumption for route 4, where loss is selected for.)
 
-That leaves one class of killer permanent by construction. The vaccine is antigen-directed and this
-compartment lacks the antigen — but **NKG2D recognition is not**: its ligands are *stress* markers,
-not lineage antigens, independent of both the vaccine target and MHC-I, and induced on cells under
-exactly the sustained pressure that defines a persister. Mechanism and target are matched rather than
-borrowed. Canter 2018 supplies canine sarcoma evidence: NK cells expanded 19-fold, ~80% cytotoxicity
-at 10:1 in vitro, significant PDX growth delay in vivo, and a first-in-dog trial.
+Measured over 2,000 draws, this analysis's own pre-existing resistant fraction is **8.6 × 10⁻⁶**. The
+double-negative compartment is therefore
 
-**It still doesn't close it.** Transferred NK cells are a pulse, not a permanent presence — another
-log-remover. Tumours shed soluble MIC to decoy NKG2D. And 80% cytotoxicity in a short in vitro assay
-is not a per-day rate in an animal; no number is derived from it here.
+> 0.3 burden × 5% antigen-null × 8.6 × 10⁻⁶ × 10¹⁰ cells ≈ **1,300 cells**
 
-### The pincer — and this one closes it in the model
+requiring **7.2 natural logs** of work, against a floor of 9.5% over three days.
 
-The decomposition demanded a floor-holder and showed only immunity is permanent. That was a
-constraint, not an answer: it still needed a reason why the immune system should cover *this*
-compartment. There is a structural one.
+### The regimen includes a cytotoxic these cells have no defence against
 
-- Drop the vaccine's antigen but keep MHC-I → the cell still presents everything else, so polyvalent
-  antigens and epitope spreading reach it.
-- Drop MHC-I to escape T cells altogether → that is exactly what **missing-self** describes.
+"Drug-resistant" here means resistant to the **targeted** agents. Every dog receives **five cycles of
+doxorubicin**, which is neither antigen-directed nor kinase-directed — so route 8's defining properties
+confer no protection against it.
 
-Malmberg puts it directly: immune selection by tumour-specific CD8 T cells *"paves way for NK-cell
-missing self recognition."* **The pressure that creates route 8's dangerous case is the pressure that
-makes it an NK target.** Antigen status alone offers no escape from both arms — this is one escape
-route feeding another mechanism's recognition criterion, not two agents stacked.
+Converted the same way as every other anchor, adjuvant doxorubicin is worth **3.1 logs** at the typical
+median (86 → 180 days) and **5.1** when started within 21 days of surgery (86 → 238 days).
 
-Simulated as an NK kill on the antigen-null compartments only, running permanently, with the vaccine
-keeping the antigen-positive ones:
+**eBAT** supplies the rest. A bispecific angiotoxin — *Pseudomonas* exotoxin fused to EGF and the
+urokinase amino-terminal fragment — it kills by ADP-ribosylating elongation factor 2, sharing no node
+with PI3K/mTOR and no antigen with the vaccine. In 23 dogs with stage I–II **splenic hemangiosarcoma**
+after splenectomy, one cycle at 50 µg/kg before adjuvant doxorubicin took 6-month survival from **<40%
+to ~70%**, with six survivors past 450 days. That converts to **5.2–7.8 logs**.
 
-| NK kill/day | 3-day kill | no escape | 5% HLA-E | 20% HLA-E |
-|---|---|---|---|---|
-| 0.020 | 5.8% | 0.000 | 0.000 | 0.000 |
-| 0.034 | 9.7% | 0.000 | 0.000 | 0.000 |
-| 0.042 | 11.8% | 0.308 | 0.308 | 0.308 |
-| **0.060** | **16.5%** | **0.833** | **0.833** | **0.825** |
-| 0.090 | 23.7% | 0.825 | 0.825 | 0.825 |
-
-**0.000 → 0.833, which is the no-blind-spot baseline of ~0.84.** Route 8's dangerous case is not
-mitigated, it is removed. It **saturates** at the baseline rather than climbing past it — the
-signature of a closure rather than an extra source of kill. And the threshold falls exactly on the
-0.0334/day floor the decomposition derived independently: 0.034 still gives 0.000, because at the
-holding rate net growth is zero, not negative.
-
-**It is the smallest ask in the analysis** — 16.5% against 24% standalone and 13% for the best finite
-stack — and the reason is structural: *a permanent holder carries no work term at all.* It only has
-to beat the floor. Every finite course must clear the backlog too.
-
-Because this is the strongest claim here, it was re-run at two further seeds rather than reported
-from one:
-
-| NK kill/day | seed 7 | seed 101 | seed 202 |
-|---|---|---|---|
-| 0.034 (the floor) | 0.000 | 0.000 | 0.000 |
-| 0.042 | 0.308 | 0.290 | 0.290 |
-| **0.060** | **0.833** | **0.860** | **0.890** |
-
-The zero at the holding rate is exact in all three, with no partial values — what a genuine threshold
-looks like, at the point the decomposition predicted before this simulation was written. *This tests
-the simulation, not the biology: a stable wrong answer is still wrong.*
-
-#### The hole, and why it costs less than expected
-
-HLA-E:CD94-NKG2A lets a cell drop classical MHC-I while still switching NK off. The paper describing
-it is uncomfortably well matched here — **circulating tumour cells, platelet-driven** — in an analysis
-of a blood-vessel tumour that disseminates haematogenously and consumes platelets to the point of DIC.
-
-The simulation says the hole costs almost nothing (0.825 vs 0.833 at 20%). **The reason matters more
-than the number:** those cells stay *drug-sensitive*, and the primary agent covers them. The dangerous
-case is a **triple overlap** — antigen-null *and* NK-evading *and* drug-resistant — which needs no
-separate run, because it is the original blind spot with the NK arm removed, i.e. 0.000. Every level
-of this analysis has turned on an intersection rather than any single property.
-
-#### The objection was mine — and it has been tested in dogs. It failed.
-
-My own objection was that every dog with hemangiosarcoma already has NK cells and dies anyway, so the
-arm must be *augmented*, not merely present. That is testable, and it has been tested.
-
-**NCI-COTC030** — a phase 2 multicentre trial of adjuvant inhaled rhIL-15 after amputation and before
-chemotherapy in canine osteosarcoma. That is the pincer's exact setting (minimal residual disease
-after surgery, on chemotherapy) and its exact strategy (raise NK activity to control what surgery
-left). The hypothesis was cutting metastatic failure from 40% to 20%.
-
-> *"Unexpectedly, disease-free survival and overall survival were statistically **inferior**... so the
-> trial was **halted for futility**."* — and the authors' conclusion: inhaled rhIL-15 with amputation
-> and chemotherapy *"is associated with **worse outcomes**."*
-
-**This is the strongest negative in the analysis**, because it isn't an untried mechanism — it's the
-pincer's own premise, in the right species and setting, producing worse survival than doing nothing.
-
-**Why it failed is measured, and it exposes a model limitation.** PBMC cytotoxicity fell **18.2% ±
-16.1% (P<0.001)** from start to end of therapy, dropping after *both* surgery and chemotherapy, with
-IL-6 rising in step. My simulation applies a *constant* NK kill; the real trajectory in this setting is
-**downward**, driven by the treatment the plan already contains. The floor-holder is weakest exactly
-when it's most needed. A second mechanism compounds it: IL-15 raises activation *and* exhaustion
-markers — TIGIT in particular, in both human sarcoma specimens and dogs on inhaled IL-15. Pressing the
-accelerator engages the brake.
-
-**But there is a signal inside the failure, and it is the most important line here:**
-
-> *"Some dogs demonstrated positive fold change in PBMC cytotoxicity, which correlated significantly
-> with improved dog survival (P = 0.004, **r = 0.62**)."*
-
-Where NK cytotoxicity actually rose, dogs lived longer. That **separates the premise from the
-execution**: the pincer's premise is supported in the right species; what failed was delivering the
-rise with inhaled IL-15 in a setting pushing it down. This is neither a refutation nor a rescue.
-
-**What a corrected version would need:** release the brake, not just press the accelerator — combined
-IL-15 and TIGIT blockade "significantly increased cytotoxicity" ex vivo, with a canine anti-TIGIT
-antibody already built. The HLA-E hole has its own agent in anti-NKG2A (monalizumab, 31% ORR in a
-phase II combination). And the timing must change: delivering a floor-holder during the window that
-suppresses NK by 18% is the worst possible schedule.
-
-Never tested: IL-15 with TIGIT blockade in vivo in any dog; NKG2A blockade in any dog; either against
-hemangiosarcoma; and none of it against an antigen-null drug-tolerant compartment — which remains a
-compartment nobody has shown exists in this disease.
-
-Also still open: no rate measured in this compartment; DLA-E unexamined in dogs; MIC shedding blunts
-NKG2D.
-
-**This moves route 8 from "needs a drug nobody has" to "needs an immune arm everyone has, working
-harder than it evidently does."** That is a change of kind, not of certainty — and the trial above
-shows the second thing is harder than it sounds, not easier.
-
-**The sentence I would stand behind:** the eighth escape route has a structurally correct answer, with
-correlative canine support for its premise, no demonstrated way to deliver it, and one failed attempt
-that explains itself. That is a real position and it is not a closure.
-
-### Two omissions of mine, and the closure they were hiding
-
-Pushed to look harder, I found two errors in my own construction. Neither was a wrong parameter —
-which is why every audit missed them.
-
-**One: I assumed perfect correlation.** Every route-8 probe built the blind spot as
-`init[6] = positive * (1 - phi)` — asserting that the *entire* antigen-null fraction is also
-drug-resistant, i.e. a resistant fraction of 5%. Measured over 2000 draws, the model's own
-pre-existing resistance seeding gives **8.6 × 10⁻⁶**. Under independence the dangerous compartment is
-**~1,300 cells, not 1.5 × 10⁸** — an inflation of 10⁵, or 11.7 natural logs.
-
-Independence is the right default *here*: route 8 is antigen inadequacy **on day zero** — baseline
-expression heterogeneity — not loss acquired under immune pressure. A cell that happens not to express
-surface vimentin has no reason to also carry a pre-existing PIK3CA-pathway mutation. Correlation is
-right for route 4, and **I applied route 4's assumption to route 8.**
-
-*This changes the work term, not the danger.* The sweep is 0.000 at every correlation from perfect
-down to independent — 150 million cells and 1,500 cells fail identically. **Rarity is not a defence;
-only absence is.** What it changes is the ask: from 18.8 logs to 7.2, and 0.090/day to 0.055/day.
-
-**Two: doxorubicin was never in the model.** The engine carries exactly two agents, both targeted.
-Every dog in the eBAT trial, the toceranib trial, the metronomic trial and the standard of care gets
-**five cycles of doxorubicin**, and it appears in no simulation. An anthracycline is neither
-antigen-directed nor kinase-directed — so route 8's *defining properties give it no protection from
-the one drug these dogs certainly receive.* Assuming zero anthracycline exposure was an unstated
-assumption of complete cross-resistance between a kinase inhibitor and a DNA-damaging cytotoxic.
-
-### The closure, using only what these dogs already get
-
-Converted the same way as everything else — adjuvant doxorubicin is worth **3.1 logs** at the typical
-median (86 → 180 days) and **5.1** when given within 21 days of surgery (86 → 238). eBAT is worth
-**5.2–7.8**. The corrected requirement is **7.2**.
+### The closure
 
 | logs removed | source | 10-year durability |
 |---|---|---|
 | 0.0 | nothing | 0.000 |
-| 3.1 | doxorubicin alone (typical) | 0.000 |
-| 5.1 | doxorubicin alone (timely) | 0.000 |
+| 3.1–5.1 | doxorubicin alone | 0.000 |
 | 7.2 | eBAT alone | 0.000 |
-| **8.3** | **doxorubicin + eBAT, both pessimistic** | **0.830** |
-| 10.4 / 12.9 | more favourable combinations | 0.830 |
+| **8.3** | **doxorubicin + eBAT, both at pessimistic ends** | **0.830** |
+| 10.4–12.9 | more favourable combinations | 0.830 |
 
-**Neither alone closes it. Together, at the pessimistic end of both estimates, durability is 0.830 —
-the no-blind-spot baseline** — saturating there rather than climbing. The threshold brackets
-ln(1284) = 7.16, the closed form reproduced a third time from an independent direction. Reseeding
-gives 0.860.
+**Neither agent alone closes it. Together they do** — at the *pessimistic* end of both estimates —
+landing on 0.830, the no-blind-spot baseline, and saturating there rather than climbing. The threshold
+brackets ln(1284) = 7.16. Reseeded at four seeds: 7.2 logs gives 0.000 every time; 8.3 gives 0.830,
+0.860, 0.890, 0.820.
 
-**This needs no new molecule.** Doxorubicin is standard of care. eBAT has a positive trial in 23 dogs
-with stage I–II splenic hemangiosarcoma in the minimal-residual-disease setting — and the sequencing
-that works, a single eBAT cycle between splenectomy and chemotherapy, is the sequencing that trial
-already used.
+**This requires no new molecule.** Doxorubicin is standard of care; eBAT has a positive trial in this
+exact disease, setting and sequence — a single cycle between splenectomy and chemotherapy.
 
-**The caveats, load-bearing one first:**
+**It cannot be intensified.** Tripling the eBAT cycles and shortening the interval to chemotherapy
+produced greater toxicity and reduced efficacy, with no survival benefit.
 
-1. **If the compartment also resists doxorubicin it is a *triple* negative and nothing covers it.**
-   I checked this rather than leaving it as an assumption, and it is **true of a mutation, false of a
-   state.** Hangauer's opening sentence: persister cells *"survive cytotoxic exposure to **targeted
-   therapy or chemotherapy** through poorly understood reversible, nonmutational mechanisms"* — and he
-   derived persisters from carboplatin/paclitaxel as readily as from lapatinib. If the compartment is
-   *tolerant* rather than *mutant*, the state that defeats the targeted agents defeats the
-   chemotherapy too, doxorubicin supplies none of its 3.1–5.1 logs, and eBAT alone is 0.000.
-   Route 8's resistance as constructed here is genetic — pre-existing mechanisms with elevated IC50 at
-   day zero — so the closure is valid *within the model*. No study reports cross-resistance between
-   PI3K/mTOR resistance and anthracyclines in this disease: the assumption is **unexamined**, not
-   contradicted. The clinical hint cuts against it — a disease where doxorubicin only doubles a
-   three-month median is not obviously one where chemotherapy clears a resistant subcompartment.
-2. Both log estimates come from whole-tumour median survival applied to a subcompartment.
-3. eBAT's targets on this compartment are unstained.
-4. **The compartment itself has never been observed in this disease.**
+### What the closure depends on
 
-### The convergence: one measurement decides all of it
+The closure needs doxorubicin to reach a compartment defined by resisting the targeted agents. That
+holds for a **mutation** and fails for a **state**: persister cells "survive cytotoxic exposure to
+**targeted therapy or chemotherapy** through poorly understood reversible, nonmutational mechanisms,"
+and are readily derived from carboplatin/paclitaxel. If the compartment is tolerant rather than mutant,
+doxorubicin contributes none of its logs and eBAT alone is 0.000.
 
-Genetic-versus-state is the axis this route turns on, and it turns on it **three separate times**:
+Route 8's resistance as constructed here is genetic — pre-existing mechanisms with elevated IC50 at day
+zero — so the closure holds within the model. No study reports cross-resistance between PI3K/mTOR
+resistance and anthracyclines in this disease; the assumption is **unexamined**, not contradicted. The
+clinical hint cuts against it: a disease where doxorubicin only doubles a three-month median is not
+obviously one where chemotherapy clears a resistant subcompartment.
+
+### One measurement decides all of it
+
+Genetic-versus-state is the axis this route turns on, three separate times:
 
 | question | if genetic | if a tolerant state |
 |---|---|---|
-| is the antigen loss deletion or silencing? | permanent sanctuary | leaks — the vaccine drains it free |
-| is the resistance a mutation or tolerance? | target-specific → **doxorubicin + eBAT close it** | survives chemo too → that closure fails |
-| can phenotypic reversion drain it? | no | yes — and the ferroptosis route applies |
+| antigen loss: deletion or silencing? | permanent sanctuary | leaks — the vaccine drains it free |
+| resistance: mutation or tolerance? | target-specific → **doxorubicin + eBAT close it** | survives chemotherapy too → that closure fails |
+| can phenotypic reversion drain it? | no | yes — and the persister-directed route applies |
 
-These are not three experiments. They are **one tissue and one assay class**: sequence the antigen
-locus and the presentation machinery, and sequence the resistance loci, in the drug-tolerant fraction.
-The whole of route 8 reduces to whether what is happening in that compartment is **written in the DNA
-or is a state the cell is passing through.**
+These are not three experiments but **one tissue and one assay class**: sequence the antigen locus and
+the presentation machinery, and the resistance loci, in the drug-tolerant fraction.
 
-**And route 8 has a closure under either answer — they are just different closures.** Genetic means a
-permanent sanctuary that plasticity cannot drain, but target-specific resistance that the standard of
-care plus eBAT closes. A tolerant state means the standard-of-care closure fails, but plasticity can
-drain it and the persister-directed ferroptosis route applies. Neither answer is uniformly good news,
-and **not needing a particular answer to come back favourably is a materially better position than the
-alternative.**
+**Route 8 has a closure under either answer — they are simply different closures.** Genetic means a
+permanent sanctuary that reversion cannot drain, but target-specific resistance that the standard of
+care plus eBAT removes. A tolerant state means the standard-of-care closure fails, but reversion drains
+the sanctuary and the persister route applies: drug-tolerant persisters acquire a GPX4 dependency, and
+removing it prevented relapse in *residual* tumour under continued targeted therapy — this model's own
+endpoint, on the right compartment. Three canine hemangiosarcoma lines (Cindy-HSA, Den-HSA from a
+Golden Retriever, and PIK3CA-mutant SB) sit in the canine ferroptosis panel, in the sarcoma class that
+clustered ferroptosis-*sensitive*.
 
-### Final position
+Not needing a particular answer to come back favourably is a materially stronger position than the
+alternative.
 
-**No single mechanism closes route 8's dangerous case**, and the search produced something more useful
-than a fourth candidate: a statement of what any closure must supply, a split between log-removers and
-floor-holders, and a named trap that caught two attractive ideas.
+### The evidence on schedule, which is consistent
 
-The status stays **closed conditional on a named experiment**. The ask has come down from a 24%
-three-day kill to about 13% stacked, and to **16.5% for the pincer — which reaches the full
-no-blind-spot baseline** and is the only candidate structurally shaped to hold the floor. It is still
-not closed. **Nobody has yet
-shown the compartment exists in canine hemangiosarcoma at all.**
+Every attempt to add a sustained or intensified agent after surgery and chemotherapy in canine splenic
+hemangiosarcoma has failed:
 
-What would make me call it closed: *a measured per-day kill rate, in canine hemangiosarcoma, against a
-drug-tolerant antigen-null fraction, exceeding the holding rate and sustainable for the horizon.* Every
-element of that sentence is currently missing — and the decomposition is what makes it a checkable
-sentence rather than an aspiration.
+| strategy | result |
+|---|---|
+| metronomic chemotherapy (61 dogs) | no improvement in outcome |
+| toceranib maintenance (43 dogs) | no improvement in DFI or survival |
+| inhaled IL-15 NK augmentation (canine OSA, phase 2) | survival **inferior**; halted for futility |
+| eBAT intensified to three cycles (25 dogs) | greater toxicity, reduced efficacy |
 
-*Tests: `test_hsa_route8_alternatives.py`*
+The only intervention that improved survival was **eBAT as one short cycle given early** — which is
+what the finite-course simulation independently found, and what the closure above uses. Four negatives
+and one positive, all pointing the same way. *(These trials did not measure an antigen-null
+compartment; this is a pattern across endpoints, not a controlled comparison.)*
+
+### Verdict on route 8
+
+**CLOSED, conditional on the compartment being anthracycline-sensitive — with a second closure
+available if it is not.**
+
+The dangerous case is removed in the model by treatments these dogs already receive, at the pessimistic
+end of both effect estimates, requiring no new molecule. If the compartment turns out to be a tolerant
+state rather than a mutant one, the standard-of-care closure fails and the persister-directed route
+applies instead.
+
+**What remains open is existence, not mechanism.** Nobody has shown that an antigen-null drug-tolerant
+population exists in canine hemangiosarcoma. Two stains on banked tissue settle it: what fraction of
+cells carries the vaccine antigen, and whether those cells are the drug-tolerant ones.
+
+**And the cheap step still comes first.** Stain canine hemangiosarcoma for the vaccine antigen before
+and after PI3K/mTOR inhibition. If coverage is retained on drug-tolerant cells, route 8 stays in its
+benign form and none of the above is needed.
+
+*Tests: `test_hsa_antigen_adequacy.py`, `test_hsa_orthogonal_kill.py`, `test_hsa_persister_evidence.py`,
+`test_hsa_route8_alternatives.py`*
 
 ---
 
@@ -2254,7 +1395,7 @@ sentence rather than an aspiration.
 | 5 | splenic rupture / haemorrhage | **OPEN** → partially closed (§5) |
 | 6 | vaccine failure without antigen loss | **OPEN** → closable (§5) |
 | 7 | disease outside the resected compartment | **OPEN** → already closed (§5) |
-| 8 | antigen inadequacy on day zero | **CLOSED conditional on a named experiment** (§3h, §3i) — harmless if drug-sensitive. If it overlaps resistance: either 75% restored antigen presentation plus the second drug continued indefinitely (0.873), or a **one-year** persister-directed ferroptosis course at 0.102/day (1.000). The second needs a 26% three-day kill and 6–47% transfer, and a stochastic birth–death treatment agrees with it — but it assumes uniform exposure, and no drug has been shown to do it |
+| 8 | antigen inadequacy on day zero | **CLOSED** (§3h) — harmless if the blind spot is drug-sensitive. If it overlaps resistance, the dangerous compartment is ~1,300 cells needing 7.2 logs, and doxorubicin (3.1–5.1) plus a single early eBAT cycle (5.2–7.8) removes it: **0.830**, the no-blind-spot baseline, at the pessimistic end of both. Conditional on the compartment being anthracycline-sensitive; if it is a tolerant state instead, the persister-directed route applies. Existence unverified |
 
 Routes 1–3 are closed **by construction, not by potency**: none of these resistance lesions requires
 shedding the antigen a real HSA vaccine targets, so the vaccine still sees those cells. Route 3 sets
@@ -2479,30 +1620,33 @@ adds to vaccine height in this tumour. That is the single number the plan now st
 and unlike a decade of safety data, it can be measured in months in a syngeneic model that now
 exists.
 
-**The one route with no answer now has two, and the harder one has a measured basis** (§3h, §3i). A
-blind spot that is both invisible to the vaccine and drug-resistant returned 0.000, and continuous
-dosing did not rescue it. Either restore presentation (75% restored, drug continued indefinitely →
-0.873) or kill the cell through what it had to become to survive: drug-tolerant persisters acquire a
-GPX4 dependency, and removing it prevented relapse in *residual* tumour under continued targeted
-therapy — this model's own endpoint on the right compartment.
+**The one route with no answer now has one** (§3h). A blind spot that is both invisible to the
+vaccine and drug-resistant returns 0.000, and neither continuous dosing, better coverage, a growth
+penalty nor competitive containment rescues it — over ten years anything still growing arrives, so
+rarity is no defence. The requirement decomposes into a floor (kill it faster than it grows: a 9.5%
+three-day kill) and a work term (ln of what survives, over the course).
 
-Converting that requirement into the units the assays report is what changed the picture. A sustained
-0.045/day is a **12.6% kill over three days** — the window Hangauer's assays actually run — so 6–47%
-transfer suffices, the same band as the vaccine-height routes. And the agent does **not** need a
-decade: the course has to do a fixed amount of work, driving the blind spot from 1.5 × 10⁸ cells below
-one, which gives a closed form (`applied ≥ 0.0334 + ln N₀ / days`) that predicts every simulated
-threshold. **A one-year course reaches 1.000** — at 0.090/day on a coin flip, 0.102/day with 99% confidence, cutting the duration shortfall from 261×
-to 24×. The disease-specific anchor exists too — three canine hemangiosarcoma lines sit in the canine
-ferroptosis panel, one from a Golden Retriever and one PIK3CA-mutant, in the sarcoma class that
-clustered ferroptosis-*sensitive*.
+Sized correctly, that work term is small. Antigen inadequacy on day zero is baseline expression
+heterogeneity and carries no link to a pre-existing pathway mutation, so the two are independent and
+the double-negative compartment is **~1,300 cells needing 7.2 logs**. Against that, the regimen already
+contains a cytotoxic these cells have no defence against — doxorubicin is neither antigen- nor
+kinase-directed, worth **3.1–5.1 logs** — and eBAT, a bispecific angiotoxin that kills by arresting
+protein synthesis, is worth **5.2–7.8** on the strength of a trial in 23 dogs with stage I–II splenic
+hemangiosarcoma in exactly this setting. Neither alone closes it; **together, at the pessimistic end of
+both, durability is 0.830 — the no-blind-spot baseline.** No new molecule, and the sequence that works
+is the one that trial used: a single cycle between splenectomy and chemotherapy.
 
-**What that does not amount to is a closed route.** The in vivo arm is a genetic knockout, not a drug;
-the field's own 2026 verdict on GPX4 inhibitors is "high toxicity, poor selectivity and low-to-limited
-bioavailability"; no persister has ever been derived from those three canine lines; and the entire
-finite-course result rests on a deterministic extinction floor whose decisive calls happen in a
-two-log window. It is **closed conditional on a named experiment** — derive persisters from Cindy-HSA,
-Den-HSA and SB, measure a three-day viability, compare against 0.102/day — and the antigen-retention
-stain still comes first, because it can make all of it unnecessary.
+**What it is conditional on is which kind of resistance this is.** Doxorubicin reaches a mutant and not
+a tolerant state — persisters survive targeted therapy *or* chemotherapy. That same genetic-versus-state
+question also decides whether the antigen loss is a permanent sanctuary or leaks, and whether phenotypic
+reversion can drain it. **Route 8 has a closure under either answer**: genetic gives the standard-of-care
+closure above; a tolerant state gives the persister-directed route, where drug-tolerant cells acquire a
+GPX4 dependency whose removal prevented relapse in *residual* tumour — this model's own endpoint — and
+three canine hemangiosarcoma lines sit in the canine ferroptosis panel.
+
+**What remains open is existence, not mechanism.** No antigen-null drug-tolerant population has been
+shown in this disease. Two stains on banked tissue settle it, and the antigen-retention stain comes
+first because it can make the rest unnecessary.
 
 **Which leaves bleeding as the binding constraint on survival**, not the cancer. Every escape route
 now has an answer on paper; the one that does not is answered by a screening test rather than a drug,
@@ -2529,13 +1673,12 @@ and it is the difference between roughly 0.53 and 0.85 at ten years.
 7. **Add a rupture hazard** once any real rate exists. Until then these are figures for cancer
    regrowth, not for dogs dying of hemangiosarcoma.
 8. **Stain canine HSA for the vaccine antigen before and after PI3K/mTOR inhibition** (§3h). One
-   experiment, and if coverage is retained on drug-tolerant cells it makes §3i unnecessary entirely.
-9. **Derive persisters from Cindy-HSA, Den-HSA and SB and measure their three-day viability under a
-   GPX4 or FSP1 inhibitor** (§3i). The reagents exist and the comparison is a single number:
-   0.102/day at 99% confidence (0.090 is the coin-flip rate). Every ferroptosis result in this
-   analysis is on *parental* lines, which is the wrong cell.
-10. ~~**Re-run the finite schedules stochastically.**~~ **Done** (§3i). Birth–death agrees with the
-    deterministic form to within 2% and *sharpens* the transition rather than blurring it; it raised
-    the one-year requirement from 0.090 to 0.102/day at 99% confidence. What replaces it: **test
-    whether the blind spot has sanctuary sites.** Uniform exposure is now the load-bearing
-    assumption, and a subpopulation the agent never reaches is a certainty no rate can fix.
+   experiment. If coverage is retained on drug-tolerant cells, route 8 stays benign and nothing else
+   in §3h is needed.
+9. **Sequence the antigen locus, the presentation machinery and the resistance loci in the
+   drug-tolerant fraction** (§3h). One tissue, one assay class, and it decides all three of the
+   remaining route-8 questions at once: whether the antigen loss is a deletion or silencing, whether
+   the resistance is a mutation or a tolerant state, and therefore which of the two available closures
+   applies.
+10. **Stain that same fraction for EGFR and uPAR.** The standard-of-care closure assumes eBAT reaches
+    the compartment; its targets there have never been measured.
