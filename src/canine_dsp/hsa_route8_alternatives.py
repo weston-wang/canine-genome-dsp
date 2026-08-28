@@ -875,3 +875,155 @@ THE_TWO_WAY_RESULT_INVERTS_THE_IDEA = {
                                                 "a marginal eigenvalue where other escape routes "
                                                 "dominate before the drain finishes.",
 }
+
+
+# =============================================================================================
+# THE PINCER: WHAT ESCAPES THE T-CELL ARM IS THE ENTRY CONDITION FOR THE NK ARM.
+#
+# The decomposition demands a floor-holder, and only immunity is permanent. That is a constraint,
+# not yet an answer. The answer needs a reason why the immune system should cover THIS compartment
+# specifically, and there is a structural one.
+#
+#   - Lose only the vaccine's antigen and keep MHC-I: the cell still presents everything else, so
+#     polyvalent antigens and epitope spreading reach it. Already in the analysis.
+#   - Lose MHC-I to escape T cells altogether: that is exactly what "missing self" describes.
+#
+# The two arms are complementary rather than redundant, and the escape from one is the entry
+# condition for the other. There is no phenotype that evades both by antigen status alone.
+# =============================================================================================
+
+MISSING_SELF_IS_THE_COMPLEMENT_OF_THE_VACCINE = {
+    "citation": "Malmberg et al. 2017, Immunogenetics, PMID 28699110",
+    "the_statement": "'Immune selection during tumor checkpoint inhibition therapy PAVES WAY FOR "
+                     "NK-cell missing self recognition'. Loss of HLA class I 'may result from immune "
+                     "selection of escape variants by tumor-specific CD8 T cells'.",
+    "why_it_matters_here": "the pressure that creates route 8's dangerous case is the same pressure "
+                           "that makes it an NK target. The vaccine selects for cells that cannot "
+                           "present; cells that cannot present are missing-self. This is not two "
+                           "agents stacked, it is one escape route feeding another mechanism's "
+                           "recognition criterion.",
+    "the_logical_pincer": "a cell can drop the vaccine's antigen and keep MHC-I -- then polyvalent "
+                          "antigens and epitope spreading reach it. Or it can drop MHC-I -- then "
+                          "missing-self reaches it. Antigen status alone does not provide an escape "
+                          "from both.",
+    "and_why_this_is_the_only_candidate_that_fits_the_floor": "NK surveillance is endogenous and "
+                                                              "permanent. It carries no duration "
+                                                              "criterion, which every drug in this "
+                                                              "analysis has failed. A floor-holder "
+                                                              "has to be permanent, and this is the "
+                                                              "only permanent thing on the list.",
+}
+
+PINCER_RESCUE = {
+    # NK kill/day on the antigen-null compartments:
+    #   {"no_escape": durability, "hla_e_5pct": ..., "hla_e_20pct": ...}
+    0.000: {"no_escape": 0.000, "hla_e_5pct": None, "hla_e_20pct": None},
+    0.020: {"no_escape": 0.000, "hla_e_5pct": 0.000, "hla_e_20pct": 0.000},
+    0.034: {"no_escape": 0.000, "hla_e_5pct": 0.000, "hla_e_20pct": 0.000},
+    0.042: {"no_escape": 0.308, "hla_e_5pct": 0.308, "hla_e_20pct": 0.308},
+    0.060: {"no_escape": 0.833, "hla_e_5pct": 0.833, "hla_e_20pct": 0.825},
+    0.090: {"no_escape": 0.825, "hla_e_5pct": 0.825, "hla_e_20pct": 0.825},
+}
+
+NO_BLIND_SPOT_BASELINE = 0.84
+
+THE_PINCER_CLOSES_IT = {
+    "the_result": "an NK kill of 0.060/day applied to the antigen-null compartments takes ten-year "
+                  "durability from 0.000 to 0.833 -- which IS the no-blind-spot baseline of about "
+                  "0.84. Route 8's dangerous case is not mitigated, it is removed.",
+    "the_signature_that_it_is_a_real_closure": "it saturates at the baseline rather than climbing "
+                                               "past it. 0.090/day gives 0.825, the same. You cannot "
+                                               "do better than removing the problem, and a mechanism "
+                                               "that stops exactly there is behaving like a closure "
+                                               "rather than like an extra source of kill.",
+    "the_threshold_is_exactly_where_the_decomposition_said": "0.034/day -- a 9.7% three-day kill, "
+                                                             "essentially the 0.0334 holding rate -- "
+                                                             "still gives 0.000, because at the "
+                                                             "holding rate net growth is zero rather "
+                                                             "than negative. 0.042 gives 0.308 and "
+                                                             "0.060 gives 0.833. The transition sits "
+                                                             "on the floor the decomposition "
+                                                             "predicted, derived independently.",
+    "what_it_costs": "a 16.5% three-day kill sustained on the antigen-null compartment. That is "
+                     "roughly twice the irreducible floor and it is the SMALLEST ask any candidate "
+                     "in this analysis has produced for this compartment -- against 24% for a "
+                     "one-year ferroptosis course and 13% for the best stack.",
+    "why_it_is_cheaper_than_everything_else": "because it never stops. A permanent holder carries no "
+                                              "ln(N0)/days work term at all -- it only has to beat "
+                                              "the floor. Every finite course has to clear the "
+                                              "backlog as well, and that is what made the other asks "
+                                              "larger.",
+}
+
+THE_HLA_E_HOLE_AND_WHAT_IT_ACTUALLY_COSTS = {
+    "the_documented_escape": "a tumour can drop classical MHC-I to evade T cells while retaining or "
+                             "upregulating HLA-E, which engages the inhibitory CD94/NKG2A receptor "
+                             "and switches NK off. That is the hole in the pincer.",
+    "citation": "Cancer Cell 2023, PMID 36706761: 'Immune checkpoint HLA-E:CD94-NKG2A mediates "
+                "evasion of CIRCULATING TUMOR CELLS from NK cell surveillance', with "
+                "platelet-derived RGS18 driving HLA-E expression.",
+    "why_that_paper_is_uncomfortably_well_matched_to_this_disease": "it is about circulating tumour "
+                                                                    "cells and the driver is "
+                                                                    "PLATELET-derived. "
+                                                                    "Hemangiosarcoma is a tumour of "
+                                                                    "blood vessels that disseminates "
+                                                                    "haematogenously and consumes "
+                                                                    "platelets to the point of "
+                                                                    "causing disseminated "
+                                                                    "intravascular coagulation. If "
+                                                                    "there is a tumour where a "
+                                                                    "platelet-driven NK escape "
+                                                                    "should be expected, it is this "
+                                                                    "one.",
+    "what_the_simulation_says_it_costs": "almost nothing, at 5% or 20% of the null compartment: "
+                                         "0.833 against 0.833, and 0.825 against 0.833. The hole is "
+                                         "not load-bearing.",
+    "why_not_and_this_is_the_important_part": "because the NK-evading cells in this test are "
+                                              "DRUG-SENSITIVE. The primary agent runs throughout and "
+                                              "covers them. A cell that evades the vaccine and NK but "
+                                              "still answers to the drug is not a sanctuary.",
+    "the_case_that_would_be_dangerous": "a compartment that is antigen-null AND NK-evading AND "
+                                        "drug-resistant. That is not tested above, and it does not "
+                                        "need to be: it is by construction the original blind spot "
+                                        "with the NK arm removed, which returns 0.000. The pincer "
+                                        "closes route 8 exactly to the extent that the triple "
+                                        "overlap is absent.",
+    "the_pattern_this_repeats": "`hsa_antigen_adequacy.OVERLAP_IS_THE_WHOLE_BALLGAME` found that a "
+                                "blind spot only matters where it overlaps drug resistance. The same "
+                                "rule reappears one level up: an NK escape only matters where it "
+                                "overlaps the other two. Every level of this analysis has turned on "
+                                "an intersection rather than on any single property.",
+}
+
+WHY_THIS_IS_STILL_NOT_A_CLOSURE_I_WILL_CLAIM = {
+    "no_rate_has_been_measured": "0.060/day against an antigen-null drug-tolerant compartment in "
+                                 "canine hemangiosarcoma is a requirement, not an observation. The "
+                                 "canine NK evidence is osteosarcoma, and the in vitro cytotoxicity "
+                                 "figures are not per-day rates in an animal.",
+    "endogenous_nk_is_already_present_and_the_tumour_grew_anyway": "the strongest objection, and it "
+                                                                   "is mine rather than a paper's. "
+                                                                   "Every dog with hemangiosarcoma "
+                                                                   "already has NK cells, and the "
+                                                                   "disease killed it. Whatever "
+                                                                   "surveillance exists at baseline "
+                                                                   "is evidently below the threshold "
+                                                                   "in the compartments that matter. "
+                                                                   "The pincer therefore requires NK "
+                                                                   "function to be AUGMENTED, not "
+                                                                   "merely present -- and that "
+                                                                   "reintroduces an intervention "
+                                                                   "with its own duration question.",
+    "the_shedding_escape_is_unaddressed": "soluble MIC-A and MIC-B decoy NKG2D. Missing-self and "
+                                          "NKG2D are different recognition modes and shedding "
+                                          "attacks the second, but a tumour under NK pressure has "
+                                          "documented routes to blunt both.",
+    "dla_e_is_unknown": "the HLA-E hole is characterised in humans. The canine equivalent, DLA-E, has "
+                        "not been examined in hemangiosarcoma, so the size of the hole in the species "
+                        "this analysis is about is simply unknown.",
+    "the_honest_status": "this is the first mechanism in the analysis that is structurally the RIGHT "
+                         "SHAPE -- permanent, antigen-independent, complementary to the vaccine by "
+                         "construction rather than by addition, and cheapest in required potency "
+                         "precisely because it never stops. It is not a demonstrated closure. It "
+                         "moves route 8 from 'needs a drug nobody has' to 'needs an immune arm "
+                         "everyone has, working harder than it evidently does'.",
+}

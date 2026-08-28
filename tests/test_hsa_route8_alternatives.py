@@ -581,3 +581,105 @@ def test_the_saturation_explanation_names_the_limiting_step():
     d = ra.THE_TWO_WAY_RESULT_INVERTS_THE_IDEA
     assert "-0.0086/day" in d["but_it_saturates_immediately"]
     assert "ANTIGEN-POSITIVE resistant clone" in d["but_it_saturates_immediately"]
+
+
+# ---------------------------------------------------------------------------------------------
+# The pincer. These tests exist because this is the strongest result in the module, which makes it
+# the one most likely to be overstated later.
+# ---------------------------------------------------------------------------------------------
+
+def test_the_pincer_reaches_the_no_blind_spot_baseline():
+    t = ra.PINCER_RESCUE
+    assert t[0.060]["no_escape"] == pytest.approx(ra.NO_BLIND_SPOT_BASELINE, abs=0.05)
+
+
+def test_the_pincer_saturates_rather_than_climbing_past_the_baseline():
+    """A closure removes the problem; it does not overshoot. Overshoot would mean something else."""
+    t = ra.PINCER_RESCUE
+    assert t[0.090]["no_escape"] <= t[0.060]["no_escape"] + 0.05
+    assert t[0.090]["no_escape"] <= ra.NO_BLIND_SPOT_BASELINE + 0.05
+
+
+def test_the_pincer_threshold_sits_on_the_independently_derived_floor():
+    t = ra.PINCER_RESCUE
+    # At or below the holding rate, nothing happens.
+    assert t[0.020]["no_escape"] == 0.0
+    assert t[0.034]["no_escape"] == 0.0
+    assert 0.034 >= ra.BLIND_SPOT_NET_GROWTH_PER_DAY
+    # Just above it, the rescue begins.
+    assert t[0.042]["no_escape"] > 0.2
+
+
+def test_the_pincer_is_monotone_in_nk_rate_up_to_saturation():
+    rates = sorted(ra.PINCER_RESCUE)
+    vals = [ra.PINCER_RESCUE[r]["no_escape"] for r in rates]
+    assert vals == sorted(vals[:-1]) + [vals[-1]]
+    assert vals[0] == 0.0
+
+
+def test_the_pincer_ask_is_the_smallest_in_the_analysis():
+    """16.5% three-day kill against 24% standalone and 13% for the best finite stack."""
+    pincer = 1 - pe.viability_after(0.060)
+    assert pincer == pytest.approx(0.165, abs=0.005)
+    standalone = 1 - pe.viability_after(pe.required_rate_for_course(335))
+    assert pincer < standalone
+    # And it must still be above the irreducible floor.
+    assert pincer > 1 - pe.viability_after(ra.BLIND_SPOT_NET_GROWTH_PER_DAY)
+
+
+def test_why_the_permanent_holder_is_cheaper_is_stated():
+    d = ra.THE_PINCER_CLOSES_IT
+    assert "never stops" in d["why_it_is_cheaper_than_everything_else"]
+    assert "no ln(N0)/days work term" in d["why_it_is_cheaper_than_everything_else"]
+
+
+def test_the_complementarity_is_structural_not_additive():
+    d = ra.MISSING_SELF_IS_THE_COMPLEMENT_OF_THE_VACCINE
+    assert "PAVES WAY" in d["the_statement"]
+    assert "not two agents stacked" in d["why_it_matters_here"]
+    assert "does not provide an escape from both" in d["the_logical_pincer"]
+
+
+def test_the_hla_e_hole_is_measured_and_its_harmlessness_is_explained():
+    d = ra.THE_HLA_E_HOLE_AND_WHAT_IT_ACTUALLY_COSTS
+    t = ra.PINCER_RESCUE
+    # Measured: the hole barely moves the result.
+    assert abs(t[0.060]["hla_e_20pct"] - t[0.060]["no_escape"]) < 0.05
+    # Explained: because those cells remain drug-sensitive.
+    assert "DRUG-SENSITIVE" in d["why_not_and_this_is_the_important_part"]
+
+
+def test_the_dangerous_triple_overlap_is_named_and_not_claimed_covered():
+    d = ra.THE_HLA_E_HOLE_AND_WHAT_IT_ACTUALLY_COSTS
+    t = d["the_case_that_would_be_dangerous"]
+    assert "AND drug-resistant" in t
+    assert "returns 0.000" in t
+    assert "OVERLAP_IS_THE_WHOLE_BALLGAME" in d["the_pattern_this_repeats"]
+
+
+def test_the_platelet_link_is_flagged_as_matching_this_disease():
+    d = ra.THE_HLA_E_HOLE_AND_WHAT_IT_ACTUALLY_COSTS
+    t = d["why_that_paper_is_uncomfortably_well_matched_to_this_disease"]
+    assert "PLATELET" in t
+    assert "intravascular coagulation" in t
+
+
+def test_the_strongest_objection_is_recorded_and_is_the_authors_own():
+    d = ra.WHY_THIS_IS_STILL_NOT_A_CLOSURE_I_WILL_CLAIM
+    t = d["endogenous_nk_is_already_present_and_the_tumour_grew_anyway"]
+    assert "mine rather than a paper's" in t
+    assert "AUGMENTED, not merely present" in t
+    assert "reintroduces an intervention" in t
+
+
+def test_the_pincer_is_not_claimed_as_demonstrated():
+    d = ra.WHY_THIS_IS_STILL_NOT_A_CLOSURE_I_WILL_CLAIM
+    assert "requirement, not an observation" in d["no_rate_has_been_measured"]
+    assert "not a demonstrated closure" in d["the_honest_status"]
+    assert "DLA-E" in d["dla_e_is_unknown"]
+
+
+def test_the_status_change_is_stated_as_a_change_of_kind_not_of_certainty():
+    t = ra.WHY_THIS_IS_STILL_NOT_A_CLOSURE_I_WILL_CLAIM["the_honest_status"]
+    assert "needs a drug nobody has" in t
+    assert "immune arm everyone has" in t
