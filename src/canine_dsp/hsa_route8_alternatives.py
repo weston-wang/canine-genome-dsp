@@ -1369,3 +1369,126 @@ RARITY_IS_NOT_A_DEFENCE = {
                                        "justification for caring about it rests entirely on whether "
                                        "it exists, and not at all on how common it is.",
 }
+
+
+# =============================================================================================
+# THE SECOND OMISSION: THE MODEL NEVER CONTAINED THE CHEMOTHERAPY EVERY ONE OF THESE DOGS GETS.
+#
+# The engine carries exactly two agents, both targeted: the PI3K/mTOR inhibitor and the MEK
+# inhibitor. Doxorubicin is discussed in half a dozen modules and is in NONE of the simulations.
+# Every dog in the eBAT trial, the toceranib trial, the metronomic trial and the standard of care
+# receives five cycles of it.
+#
+# So "the blind spot is drug-resistant" has always meant resistant to the TARGETED agents. An
+# anthracycline is neither antigen-directed nor kinase-directed, and PI3K-pathway resistance confers
+# no anthracycline resistance -- that is a third, independent property. Giving the compartment zero
+# anthracycline exposure was an assumption I never made explicit and never justified.
+# =============================================================================================
+
+DOXORUBICIN_WAS_NEVER_IN_THE_MODEL = {
+    "what_the_engine_contains": "two agents. `ic50_nM`/`max_kill` for the PI3K/mTOR inhibitor and "
+                                "`ic50_nM_2`/`max_kill_2` for the MEK inhibitor. There is no third "
+                                "concentration channel and no cytotoxic.",
+    "what_every_dog_actually_receives": "splenectomy, then five cycles of single-agent doxorubicin. "
+                                        "That is the standard of care and it is the backbone of "
+                                        "every trial cited in this module.",
+    "why_the_omission_matters_specifically_for_route_8": "the compartment is defined by resisting "
+                                                         "the targeted agents and by lacking the "
+                                                         "vaccine antigen. Doxorubicin is neither "
+                                                         "antigen-directed nor kinase-directed, so "
+                                                         "route 8's defining properties give it no "
+                                                         "protection at all from the one drug these "
+                                                         "dogs certainly get.",
+    "the_assumption_this_exposes": "every route-8 result in this analysis was computed for a regimen "
+                                   "no dog actually receives, in which the dangerous compartment "
+                                   "gets zero anthracycline. That is not conservatism -- it is an "
+                                   "unstated and unjustified assumption of complete cross-resistance "
+                                   "between a kinase inhibitor and a DNA-damaging cytotoxic.",
+    "the_pattern_with_the_first_error": "both of my route-8 errors were the same kind. Neither was a "
+                                        "wrong number: one was in how the compartment was "
+                                        "CONSTRUCTED and the other in what the regimen OMITTED. "
+                                        "Parameter audits do not catch either.",
+}
+
+DOXORUBICIN_EFFECT_IN_LOGS = {
+    "surgery_alone_median_days": 86,
+    "with_adjuvant_doxorubicin_median_days": 180,
+    "timely_adjuvant_median_days": 238,
+    "delayed_adjuvant_median_days": 146,
+    "citations": "timely-versus-delayed adjuvant chemotherapy in non-metastatic splenic "
+                 "hemangiosarcoma, 70 dogs, PMID 36633399: median overall survival 238 days when "
+                 "chemotherapy started within 21 days of surgery against 146 days when later.",
+    "logs_typical": (180 - 86) * BLIND_SPOT_NET_GROWTH_PER_DAY,
+    "logs_timely": (238 - 86) * BLIND_SPOT_NET_GROWTH_PER_DAY,
+    "logs_delayed": (146 - 86) * BLIND_SPOT_NET_GROWTH_PER_DAY,
+    "the_conversion_caveat": "this is the same delay-times-growth-rate conversion used for eBAT, and "
+                             "it inherits the same weakness: the survival benefit is measured on the "
+                             "WHOLE tumour, which is mostly drug-sensitive, and is being applied to "
+                             "a subcompartment. It is an estimate of what doxorubicin does in this "
+                             "disease, not a measurement of what it does to this compartment.",
+}
+
+CLOSURE_BY_WHAT_THEY_ALREADY_GET = {
+    # logs removed up front: 10-year durability at the corrected compartment size (1284 cells)
+    0.0: 0.000,
+    3.1: 0.000,          # doxorubicin alone, typical
+    5.1: 0.000,          # doxorubicin alone, timely
+    7.2: 0.000,          # eBAT alone
+    8.3: 0.830,          # doxorubicin + eBAT, both at their PESSIMISTIC ends
+    10.4: 0.830,
+    12.9: 0.830,
+}
+
+THIS_IS_THE_CLOSURE_AND_IT_NEEDS_NO_NEW_DRUG = {
+    "the_result": "at the corrected compartment size, neither doxorubicin alone nor eBAT alone "
+                  "closes route 8's dangerous case -- both give 0.000. Together, at the PESSIMISTIC "
+                  "end of both effect estimates, durability is 0.830, which is the no-blind-spot "
+                  "baseline. It saturates there rather than climbing, the same signature the pincer "
+                  "showed.",
+    "the_threshold": "between 7.2 and 8.3 logs, which is ln(1284) = 7.16 plus the margin needed to "
+                     "cross below one cell. The simulation reproduces the closed-form requirement "
+                     "for a third time, derived independently each time.",
+    "why_this_is_different_from_every_other_candidate": "no new agent. Doxorubicin is the standard of "
+                                                        "care in this disease. eBAT has a positive "
+                                                        "trial in 23 dogs with stage I-II splenic "
+                                                        "hemangiosarcoma in the minimal-residual-"
+                                                        "disease setting, and the sequencing that "
+                                                        "works -- a single eBAT cycle between "
+                                                        "splenectomy and chemotherapy -- is the "
+                                                        "sequencing already used.",
+    "and_it_clears_at_the_pessimistic_end": "8.3 logs is doxorubicin at its weakest published "
+                                            "estimate plus eBAT at its weakest. Every more "
+                                            "favourable combination also clears. The closure does "
+                                            "not depend on optimistic readings of either.",
+    "what_had_to_be_corrected_to_see_it": "two of my own errors, compounding. Assuming perfect "
+                                          "correlation between antigen-nullity and kinase resistance "
+                                          "inflated the requirement from 7.2 to 18.8 logs. Omitting "
+                                          "doxorubicin removed 3-5 logs from the answer. Together "
+                                          "they made a closable problem look unclosable, and neither "
+                                          "was visible as a wrong parameter.",
+    "THE_CAVEATS_THAT_STILL_STAND": {
+        "the_compartment_may_also_resist_doxorubicin": "this is the load-bearing one. If the "
+                                                       "compartment is anthracycline-resistant as "
+                                                       "well, it is a TRIPLE negative and nothing in "
+                                                       "the regimen covers it. Hemangiosarcoma is "
+                                                       "clinically chemoresistant -- doxorubicin "
+                                                       "roughly doubles a short median -- so a high "
+                                                       "anthracycline-resistant fraction is entirely "
+                                                       "plausible in this disease.",
+        "the_conversion_is_from_bulk_survival": "both the doxorubicin and eBAT log estimates come "
+                                                "from whole-tumour median survival applied to a "
+                                                "subcompartment.",
+        "ebat_targets_on_this_compartment_are_unmeasured": "EGFR and uPAR have not been stained on "
+                                                           "the vaccine-blind fraction.",
+        "and_the_compartment_itself_is_unverified": "nobody has shown that an antigen-null "
+                                                    "drug-tolerant population exists in canine "
+                                                    "hemangiosarcoma. This closes a compartment that "
+                                                    "has never been observed.",
+    },
+    "the_honest_status": "route 8's dangerous case is CLOSED IN THE MODEL by the standard of care "
+                         "plus one agent that already has a positive trial in this disease, at the "
+                         "pessimistic end of both effect estimates, requiring no new molecule. That "
+                         "is a materially stronger position than anything earlier in this analysis. "
+                         "It is still conditional on the compartment being anthracycline-sensitive "
+                         "and on it existing at all, and both are stains rather than programmes.",
+}

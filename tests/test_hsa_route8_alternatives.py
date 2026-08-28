@@ -937,3 +937,100 @@ def test_the_concern_is_scoped_to_existence_not_frequency():
     d = ra.RARITY_IS_NOT_A_DEFENCE
     assert "yes/no question" in d["what_that_means_for_whether_this_scenario_is_real"]
     assert "never been observed" in d["the_honest_scope_of_the_concern"]
+
+
+# ---------------------------------------------------------------------------------------------
+# The second omission and the closure it exposed.
+# ---------------------------------------------------------------------------------------------
+
+def test_the_engine_really_has_no_third_agent():
+    """The omission this section is about must be verifiable, not asserted."""
+    from canine_dsp import hsa_scenarios as hs
+    m5, _, _, _ = hs.hsa_vaccine_followon_scenarios(vaccine_max_kill_values=[0.03])[0.03]
+    assert not hasattr(m5, "ic50_nM_3")
+    assert not hasattr(m5, "max_kill_3")
+
+
+def test_the_omission_is_named_as_an_unjustified_assumption():
+    d = ra.DOXORUBICIN_WAS_NEVER_IN_THE_MODEL
+    t = d["the_assumption_this_exposes"]
+    assert "no dog actually receives" in t
+    assert "complete cross-resistance" in t
+    assert "not conservatism" in t
+
+
+def test_both_route_8_errors_are_characterised_the_same_way():
+    d = ra.DOXORUBICIN_WAS_NEVER_IN_THE_MODEL
+    t = d["the_pattern_with_the_first_error"]
+    assert "CONSTRUCTED" in t and "OMITTED" in t
+    assert "Parameter audits do not catch either" in t
+
+
+def test_doxorubicin_logs_match_the_recorded_medians():
+    d = ra.DOXORUBICIN_EFFECT_IN_LOGS
+    g = ra.BLIND_SPOT_NET_GROWTH_PER_DAY
+    assert d["logs_typical"] == pytest.approx((180 - 86) * g)
+    assert d["logs_timely"] == pytest.approx((238 - 86) * g)
+    assert d["logs_delayed"] < d["logs_typical"] < d["logs_timely"]
+    assert d["logs_typical"] == pytest.approx(3.1, abs=0.1)
+
+
+def test_the_doxorubicin_conversion_carries_the_same_caveat_as_ebat():
+    d = ra.DOXORUBICIN_EFFECT_IN_LOGS
+    t = d["the_conversion_caveat"]
+    assert "WHOLE tumour" in t
+    assert "not a measurement of what it does to this compartment" in t
+
+
+def test_neither_agent_alone_closes_it():
+    t = ra.CLOSURE_BY_WHAT_THEY_ALREADY_GET
+    assert t[3.1] == 0.0, "doxorubicin alone must not close it"
+    assert t[5.1] == 0.0, "doxorubicin at its best alone must not close it"
+    assert t[7.2] == 0.0, "eBAT alone must not close it"
+
+
+def test_the_combination_closes_it_at_the_pessimistic_end():
+    t = ra.CLOSURE_BY_WHAT_THEY_ALREADY_GET
+    assert t[8.3] == pytest.approx(ra.NO_BLIND_SPOT_BASELINE, abs=0.05)
+    # And it saturates rather than climbing past the baseline.
+    assert t[12.9] == pytest.approx(t[8.3])
+
+
+def test_the_threshold_brackets_the_closed_form_requirement():
+    need = math.log(ra.double_negative_cells())
+    t = ra.CLOSURE_BY_WHAT_THEY_ALREADY_GET
+    failed = [k for k, v in t.items() if v == 0.0]
+    passed = [k for k, v in t.items() if v > 0.5]
+    assert max(failed) >= need - 0.2
+    assert min(passed) > need
+    assert need == pytest.approx(7.16, abs=0.05)
+
+
+def test_the_pessimistic_sum_is_actually_the_pessimistic_sum():
+    """8.3 must be doxorubicin's weakest plus eBAT's weakest, not a favourable pick."""
+    dox_worst = ra.DOXORUBICIN_EFFECT_IN_LOGS["logs_typical"]
+    ebat_worst = min(ra.EBAT_EFFECT_IN_LOGS.values())
+    assert dox_worst + ebat_worst == pytest.approx(8.3, abs=0.2)
+
+
+def test_the_closure_requires_no_new_agent():
+    d = ra.THIS_IS_THE_CLOSURE_AND_IT_NEEDS_NO_NEW_DRUG
+    assert "no new agent" in d["why_this_is_different_from_every_other_candidate"]
+    assert "standard of care" in d["why_this_is_different_from_every_other_candidate"]
+    assert "does not depend on optimistic readings" in d["and_it_clears_at_the_pessimistic_end"]
+
+
+def test_the_load_bearing_caveat_is_anthracycline_resistance():
+    c = ra.THIS_IS_THE_CLOSURE_AND_IT_NEEDS_NO_NEW_DRUG["THE_CAVEATS_THAT_STILL_STAND"]
+    t = c["the_compartment_may_also_resist_doxorubicin"]
+    assert "load-bearing" in t
+    assert "TRIPLE negative" in t
+    assert "clinically chemoresistant" in t
+
+
+def test_the_closure_is_scoped_to_the_model_and_to_an_unverified_compartment():
+    d = ra.THIS_IS_THE_CLOSURE_AND_IT_NEEDS_NO_NEW_DRUG
+    assert "CLOSED IN THE MODEL" in d["the_honest_status"]
+    c = d["THE_CAVEATS_THAT_STILL_STAND"]
+    assert "never been observed" in c["and_the_compartment_itself_is_unverified"]
+    assert len(c) == 4
