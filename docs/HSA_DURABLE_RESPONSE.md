@@ -2075,17 +2075,60 @@ case is a **triple overlap** — antigen-null *and* NK-evading *and* drug-resist
 separate run, because it is the original blind spot with the NK arm removed, i.e. 0.000. Every level
 of this analysis has turned on an intersection rather than any single property.
 
-#### What I will not claim
+#### The objection was mine — and it has been tested in dogs. It failed.
 
-No rate has been measured against this compartment in this disease; the canine NK evidence is
-osteosarcoma; DLA-E is unexamined in dogs; MIC shedding blunts NKG2D. And the strongest objection is
-mine, not a paper's: **every dog with hemangiosarcoma already has NK cells, and died anyway.** Baseline
-surveillance is evidently below threshold in the compartments that matter, so the pincer needs NK
-function *augmented*, not merely present — which reintroduces an intervention with its own duration
-question.
+My own objection was that every dog with hemangiosarcoma already has NK cells and dies anyway, so the
+arm must be *augmented*, not merely present. That is testable, and it has been tested.
+
+**NCI-COTC030** — a phase 2 multicentre trial of adjuvant inhaled rhIL-15 after amputation and before
+chemotherapy in canine osteosarcoma. That is the pincer's exact setting (minimal residual disease
+after surgery, on chemotherapy) and its exact strategy (raise NK activity to control what surgery
+left). The hypothesis was cutting metastatic failure from 40% to 20%.
+
+> *"Unexpectedly, disease-free survival and overall survival were statistically **inferior**... so the
+> trial was **halted for futility**."* — and the authors' conclusion: inhaled rhIL-15 with amputation
+> and chemotherapy *"is associated with **worse outcomes**."*
+
+**This is the strongest negative in the analysis**, because it isn't an untried mechanism — it's the
+pincer's own premise, in the right species and setting, producing worse survival than doing nothing.
+
+**Why it failed is measured, and it exposes a model limitation.** PBMC cytotoxicity fell **18.2% ±
+16.1% (P<0.001)** from start to end of therapy, dropping after *both* surgery and chemotherapy, with
+IL-6 rising in step. My simulation applies a *constant* NK kill; the real trajectory in this setting is
+**downward**, driven by the treatment the plan already contains. The floor-holder is weakest exactly
+when it's most needed. A second mechanism compounds it: IL-15 raises activation *and* exhaustion
+markers — TIGIT in particular, in both human sarcoma specimens and dogs on inhaled IL-15. Pressing the
+accelerator engages the brake.
+
+**But there is a signal inside the failure, and it is the most important line here:**
+
+> *"Some dogs demonstrated positive fold change in PBMC cytotoxicity, which correlated significantly
+> with improved dog survival (P = 0.004, **r = 0.62**)."*
+
+Where NK cytotoxicity actually rose, dogs lived longer. That **separates the premise from the
+execution**: the pincer's premise is supported in the right species; what failed was delivering the
+rise with inhaled IL-15 in a setting pushing it down. This is neither a refutation nor a rescue.
+
+**What a corrected version would need:** release the brake, not just press the accelerator — combined
+IL-15 and TIGIT blockade "significantly increased cytotoxicity" ex vivo, with a canine anti-TIGIT
+antibody already built. The HLA-E hole has its own agent in anti-NKG2A (monalizumab, 31% ORR in a
+phase II combination). And the timing must change: delivering a floor-holder during the window that
+suppresses NK by 18% is the worst possible schedule.
+
+Never tested: IL-15 with TIGIT blockade in vivo in any dog; NKG2A blockade in any dog; either against
+hemangiosarcoma; and none of it against an antigen-null drug-tolerant compartment — which remains a
+compartment nobody has shown exists in this disease.
+
+Also still open: no rate measured in this compartment; DLA-E unexamined in dogs; MIC shedding blunts
+NKG2D.
 
 **This moves route 8 from "needs a drug nobody has" to "needs an immune arm everyone has, working
-harder than it evidently does."** That is a change of kind, not of certainty.
+harder than it evidently does."** That is a change of kind, not of certainty — and the trial above
+shows the second thing is harder than it sounds, not easier.
+
+**The sentence I would stand behind:** the eighth escape route has a structurally correct answer, with
+correlative canine support for its premise, no demonstrated way to deliver it, and one failed attempt
+that explains itself. That is a real position and it is not a closure.
 
 ### Final position
 

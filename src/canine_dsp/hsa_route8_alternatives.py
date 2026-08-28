@@ -1053,3 +1053,137 @@ WHY_THE_RESEED_MATTERS = {
                                   "and the same assumption that missing-self recognition reaches "
                                   "this compartment at all. A stable wrong answer is still wrong.",
 }
+
+
+# =============================================================================================
+# THE PINCER HAS BEEN ATTEMPTED IN DOGS. IT FAILED, AND THE FAILURE IS INSTRUCTIVE.
+#
+# The model says the pincer closes route 8 if NK activity can be sustained at 0.060/day against the
+# antigen-null compartment. The obvious objection was mine: every dog already has NK cells and dies
+# anyway, so the arm must be AUGMENTED. That is a testable proposition, and it has been tested.
+# =============================================================================================
+
+AUGMENTING_NK_WAS_TRIED_IN_DOGS_AND_MADE_THINGS_WORSE = {
+    "citation": "NCI-COTC030 phase 2, Frontiers in Immunology 2025, PMID 41209004",
+    "why_this_is_the_right_trial_to_check": "adjuvant inhaled recombinant human IL-15 after "
+                                            "amputation and before chemotherapy in dogs with "
+                                            "appendicular osteosarcoma. That is the pincer's exact "
+                                            "setting -- minimal residual disease after surgery, on "
+                                            "chemotherapy -- and its exact strategy: raise NK "
+                                            "activity to control what surgery left behind.",
+    "the_hypothesis": "two weeks of inhaled rhIL-15 would cut metastatic failure at the end of "
+                      "chemotherapy from a historical 40% to 20%, powered at 80% with 40 dogs.",
+    "the_result": "'Unexpectedly, disease-free survival and overall survival were statistically "
+                  "INFERIOR for dogs in the intent-to-treat population compared to a well-validated "
+                  "historical control cohort, so the trial was HALTED FOR FUTILITY.'",
+    "the_authors_conclusion": "'Inhaled rhIL-15 combined with amputation and chemotherapy is "
+                              "associated with WORSE OUTCOMES in dogs with OSA.'",
+    "how_this_lands_on_the_pincer": "it is the strongest negative in this entire analysis, because "
+                                    "it is not a mechanism that was never tried -- it is the pincer's "
+                                    "own premise, executed in the right species and the right "
+                                    "clinical setting, producing worse survival than doing nothing.",
+    "what_it_does_not_show": "it does not show missing-self recognition cannot reach an antigen-null "
+                             "compartment, and it is osteosarcoma rather than hemangiosarcoma. It "
+                             "shows that ONE way of trying to raise NK activity, in a "
+                             "surgery-plus-chemotherapy setting, failed.",
+}
+
+WHY_IT_FAILED_IS_MEASURED_AND_IT_MATTERS = {
+    "the_setting_suppresses_the_very_arm_the_pincer_needs": "'Cytotoxicity assays of PBMCs showed "
+                                                            "significant DECREASES after both "
+                                                            "surgery and chemotherapy with an "
+                                                            "overall decrease from the start to end "
+                                                            "of therapy (-18.2 +/- 16.1%, "
+                                                            "P<0.001).' Inflammatory cytokines "
+                                                            "including IL-6 rose after amputation "
+                                                            "and after chemotherapy, correlating "
+                                                            "with the fall in cytotoxicity.",
+    "why_that_is_a_problem_the_model_does_not_capture": "the simulation applies a constant NK kill "
+                                                        "from the start of therapy. The trial says "
+                                                        "the real trajectory in this setting is "
+                                                        "DOWNWARD, and that the treatment the plan "
+                                                        "already includes -- surgery, then "
+                                                        "chemotherapy -- is what drives it down. The "
+                                                        "pincer's floor-holder is weakest exactly "
+                                                        "when it is most needed.",
+    "the_second_mechanism_is_exhaustion": "IL-15 stimulation raises activation AND exhaustion "
+                                          "markers, TIGIT in particular, in human soft tissue "
+                                          "sarcoma specimens and in dogs receiving inhaled IL-15 "
+                                          "(PMID 33158916). Pushing the accelerator also engages the "
+                                          "brake.",
+    "the_signal_inside_the_failure": "'Some dogs demonstrated POSITIVE fold change in PBMC "
+                                     "cytotoxicity, which correlated significantly with IMPROVED dog "
+                                     "survival (P = 0.004, r = 0.62).' Where NK cytotoxicity "
+                                     "actually rose, dogs lived longer.",
+    "why_that_line_is_the_most_important_one_here": "it separates the premise from the execution. "
+                                                    "The pincer's premise -- that NK activity "
+                                                    "against residual disease translates into "
+                                                    "survival -- is SUPPORTED by this trial, at r = "
+                                                    "0.62 in the right species. What failed is the "
+                                                    "attempt to deliver that rise with inhaled IL-15 "
+                                                    "in a setting that was pushing it down.",
+    "the_honest_reading": "this is neither a refutation of the pincer nor a rescue of it. It is "
+                          "evidence that the mechanism matters and that the obvious way of engaging "
+                          "it does not work, which is a more specific position than either.",
+}
+
+WHAT_THE_CORRECTED_VERSION_WOULD_HAVE_TO_BE = {
+    "release_the_brake_rather_than_only_pressing_the_accelerator": "'Ex vivo, combined IL-15 and "
+                                                                   "TIGIT blockade using soft tissue "
+                                                                   "sarcoma blood and tumour "
+                                                                   "specimens significantly "
+                                                                   "increased cytotoxicity against "
+                                                                   "STS targets', and the same group "
+                                                                   "built a novel anti-TIGIT "
+                                                                   "antibody and ran the canine work "
+                                                                   "alongside the human "
+                                                                   "(PMID 33158916).",
+    "and_the_hole_in_the_pincer_has_its_own_agent": "anti-NKG2A. Monalizumab 'enhanced NK cell "
+                                                    "activity against various tumor cells and "
+                                                    "rescued CD8+ T cell function', with a 31% "
+                                                    "objective response rate in a phase II "
+                                                    "combination (PMID 30503213). That is the "
+                                                    "documented HLA-E escape addressed by a drug "
+                                                    "that exists.",
+    "the_timing_implication_the_trial_forces": "if surgery and chemotherapy suppress NK cytotoxicity "
+                                               "by about 18%, then delivering a floor-holder in that "
+                                               "window is the worst possible schedule. Either the "
+                                               "immune arm is engaged before that suppression, or "
+                                               "after it recovers, or the suppression itself has to "
+                                               "be mitigated. The model has no opinion on this "
+                                               "because it applies a constant rate.",
+    "what_has_never_been_tested": "IL-15 with TIGIT blockade in vivo in any dog; NKG2A blockade in "
+                                  "any dog; either against hemangiosarcoma; and none of it against "
+                                  "an antigen-null drug-tolerant compartment, which remains a "
+                                  "compartment nobody has shown exists in this disease.",
+}
+
+THE_PINCER_VERDICT_AFTER_THE_TRIAL = {
+    "what_survives": "the structure. Missing-self is still the complement of the vaccine by "
+                     "construction, NK is still the only permanent floor-holder available, the "
+                     "required rate is still the smallest ask in the analysis, and the trial's own "
+                     "correlation between rising cytotoxicity and survival supports the premise in "
+                     "the right species.",
+    "what_does_not": "any suggestion that this is close to deliverable. The one prospective "
+                     "multicentre canine trial of adjuvant NK augmentation was halted for futility "
+                     "with worse survival than controls, and the setting the pincer occupies is the "
+                     "setting that suppresses NK function most.",
+    "the_status": "route 8's dangerous case remains CLOSED CONDITIONAL ON A NAMED EXPERIMENT. The "
+                  "pincer changes what kind of experiment that is -- from finding a molecule to "
+                  "measuring and then sustaining an immune function -- and the trial above shows "
+                  "that second thing is harder than it sounds, not easier.",
+    "the_sentence_i_would_stand_behind": "the eighth escape route has a structurally correct answer "
+                                         "with correlative canine support for its premise, no "
+                                         "demonstrated way to deliver it, and one failed attempt "
+                                         "that explains itself. That is a real position and it is "
+                                         "not a closure.",
+    "why_finding_this_was_worth_more_than_not_finding_it": "the pincer looked like the cleanest "
+                                                           "result in the analysis until this trial "
+                                                           "was checked. Reporting it without "
+                                                           "checking whether anyone had tried it "
+                                                           "would have repeated the exact failure "
+                                                           "mode this whole project keeps catching: "
+                                                           "an attractive mechanism, no prior-art "
+                                                           "search, and a conclusion one rank "
+                                                           "stronger than the evidence.",
+}

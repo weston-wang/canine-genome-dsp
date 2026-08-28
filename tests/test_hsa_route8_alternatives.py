@@ -709,3 +709,93 @@ def test_the_reseed_is_not_claimed_to_validate_the_biology():
     d = ra.WHY_THE_RESEED_MATTERS
     assert "tests the simulation, not the biology" in d["what_it_does_not_establish"]
     assert "A stable wrong answer is still wrong" in d["what_it_does_not_establish"]
+
+
+# ---------------------------------------------------------------------------------------------
+# The prior-art check on the pincer itself. These matter most: the pincer was the cleanest result
+# in the module until this trial was found, which is exactly when a claim is easiest to overstate.
+# ---------------------------------------------------------------------------------------------
+
+def test_the_canine_nk_augmentation_trial_is_recorded_as_a_failure():
+    d = ra.AUGMENTING_NK_WAS_TRIED_IN_DOGS_AND_MADE_THINGS_WORSE
+    assert "HALTED FOR FUTILITY" in d["the_result"]
+    assert "INFERIOR" in d["the_result"]
+    assert "WORSE OUTCOMES" in d["the_authors_conclusion"]
+
+
+def test_the_trial_is_matched_to_the_pincers_own_setting_and_strategy():
+    d = ra.AUGMENTING_NK_WAS_TRIED_IN_DOGS_AND_MADE_THINGS_WORSE
+    t = d["why_this_is_the_right_trial_to_check"]
+    assert "minimal residual disease after surgery" in t
+    assert "raise NK activity" in t
+    assert "strongest negative" in d["how_this_lands_on_the_pincer"]
+
+
+def test_the_trials_scope_limit_is_also_recorded():
+    d = ra.AUGMENTING_NK_WAS_TRIED_IN_DOGS_AND_MADE_THINGS_WORSE
+    t = d["what_it_does_not_show"]
+    assert "osteosarcoma rather than hemangiosarcoma" in t
+    assert "ONE way of trying" in t
+
+
+def test_the_failure_mechanism_is_quantified():
+    d = ra.WHY_IT_FAILED_IS_MEASURED_AND_IT_MATTERS
+    assert "-18.2" in d["the_setting_suppresses_the_very_arm_the_pincer_needs"]
+    assert "TIGIT" in d["the_second_mechanism_is_exhaustion"]
+
+
+def test_the_model_limitation_the_trial_exposes_is_admitted():
+    d = ra.WHY_IT_FAILED_IS_MEASURED_AND_IT_MATTERS
+    t = d["why_that_is_a_problem_the_model_does_not_capture"]
+    assert "constant NK kill" in t
+    assert "weakest exactly when it is most needed" in t
+
+
+def test_the_supporting_signal_inside_the_failure_is_kept():
+    """The premise is supported even though the execution failed; both must be recorded."""
+    d = ra.WHY_IT_FAILED_IS_MEASURED_AND_IT_MATTERS
+    assert "r = 0.62" in d["the_signal_inside_the_failure"]
+    assert "IMPROVED dog survival" in d["the_signal_inside_the_failure"]
+    assert "separates the premise from the execution" in d["why_that_line_is_the_most_important_one_here"]
+
+
+def test_the_reading_is_neither_refutation_nor_rescue():
+    t = ra.WHY_IT_FAILED_IS_MEASURED_AND_IT_MATTERS["the_honest_reading"]
+    assert "neither a refutation" in t and "nor a rescue" in t
+
+
+def test_the_corrected_version_names_agents_and_the_timing_problem():
+    d = ra.WHAT_THE_CORRECTED_VERSION_WOULD_HAVE_TO_BE
+    assert "TIGIT blockade" in d["release_the_brake_rather_than_only_pressing_the_accelerator"]
+    assert "Monalizumab" in d["and_the_hole_in_the_pincer_has_its_own_agent"]
+    assert "worst possible schedule" in d["the_timing_implication_the_trial_forces"]
+    untested = d["what_has_never_been_tested"]
+    assert "in any dog" in untested
+    assert "nobody has shown exists in this disease" in untested
+
+
+def test_the_post_trial_verdict_separates_structure_from_deliverability():
+    d = ra.THE_PINCER_VERDICT_AFTER_THE_TRIAL
+    assert "the structure" in d["what_survives"]
+    assert "halted for futility" in d["what_does_not"]
+    assert "CLOSED CONDITIONAL ON A NAMED EXPERIMENT" in d["the_status"]
+
+
+def test_the_verdict_does_not_call_the_pincer_a_closure():
+    d = ra.THE_PINCER_VERDICT_AFTER_THE_TRIAL
+    t = d["the_sentence_i_would_stand_behind"]
+    assert "no demonstrated way to deliver it" in t
+    assert "it is not a closure" in t
+
+
+def test_the_reason_for_doing_the_prior_art_check_is_recorded():
+    t = ra.THE_PINCER_VERDICT_AFTER_THE_TRIAL["why_finding_this_was_worth_more_than_not_finding_it"]
+    assert "no prior-art search" in t
+    assert "one rank stronger than the evidence" in t
+
+
+def test_the_earlier_pincer_optimism_is_not_left_unqualified():
+    """THE_PINCER_CLOSES_IT must not be the module's last word on the pincer."""
+    names = [n for n in dir(ra) if "PINCER" in n]
+    assert "THE_PINCER_VERDICT_AFTER_THE_TRIAL" in names
+    assert "AUGMENTING_NK_WAS_TRIED_IN_DOGS_AND_MADE_THINGS_WORSE" in dir(ra)
