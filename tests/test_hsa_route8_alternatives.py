@@ -893,3 +893,47 @@ def test_the_empirical_verdict_is_linked_to_the_simulation_finding():
     assert "agree on the shape of the answer" in d["and_it_matches_what_the_model_found_independently"]
     # The simulation claim it refers to must still exist.
     assert ra.PLASTICITY_RESCUE is not None
+
+
+def test_the_correlation_sweep_is_uniformly_zero():
+    """Five orders of magnitude of compartment size, all total failure."""
+    for frac, row in ra.CORRELATION_SWEEP.items():
+        for key in ("no_agent", "ebat_5_2", "ebat_7_2"):
+            assert row[key] == 0.0, f"frac_res={frac} {key}"
+
+
+def test_the_sweep_spans_five_orders_of_magnitude():
+    cells = [row["cells"] for row in ra.CORRELATION_SWEEP.values()]
+    assert max(cells) / min(cells) == pytest.approx(1e5, rel=0.01)
+    # And the smallest is the independence estimate.
+    assert min(cells) == pytest.approx(ra.double_negative_cells(), rel=0.2)
+
+
+def test_rarity_is_explicitly_not_treated_as_a_defence():
+    d = ra.RARITY_IS_NOT_A_DEFENCE
+    assert "Rarity is not a defence. Only absence is." in d["the_sharpest_statement_of_route_8"]
+    assert "binary in EXISTENCE, not graded in SIZE" in d["WHAT_THIS_CORRECTS_IN_MY_OWN_ACCOUNT"]
+
+
+def test_the_self_correction_does_not_let_the_correlation_fix_off_the_hook():
+    """The work-term saving is real; the danger reduction is not. Both must be stated."""
+    d = ra.RARITY_IS_NOT_A_DEFENCE
+    t = d["WHAT_THIS_CORRECTS_IN_MY_OWN_ACCOUNT"]
+    assert "0.090 to 0.055/day" in t
+    assert "did not create the danger and correcting it does not reduce it" in t
+
+
+def test_the_ebat_knife_edge_is_stated_quantitatively():
+    d = ra.RARITY_IS_NOT_A_DEFENCE
+    t = d["why_eBAT_does_not_rescue_even_the_smallest"]
+    assert "1.1" in t
+    assert "same size is not the same as being enough" in t
+    # Check the arithmetic it asserts.
+    import math
+    assert 1500 * math.exp(-7.2) == pytest.approx(1.1, abs=0.15)
+
+
+def test_the_concern_is_scoped_to_existence_not_frequency():
+    d = ra.RARITY_IS_NOT_A_DEFENCE
+    assert "yes/no question" in d["what_that_means_for_whether_this_scenario_is_real"]
+    assert "never been observed" in d["the_honest_scope_of_the_concern"]

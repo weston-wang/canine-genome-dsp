@@ -1321,3 +1321,51 @@ EVERY_MAINTENANCE_STRATEGY_IN_THIS_DISEASE_HAS_FAILED = {
                    "besides the one being drawn here. This is a pattern across endpoints, not a "
                    "controlled comparison.",
 }
+
+
+CORRELATION_SWEEP = {
+    # fraction of the antigen-null compartment that is also drug-resistant:
+    #   {"cells": double-negative cells, "no_agent": durability, "ebat_5_2": ..., "ebat_7_2": ...}
+    1e-0: {"cells": 1.5e8, "no_agent": 0.000, "ebat_5_2": 0.000, "ebat_7_2": 0.000},
+    1e-1: {"cells": 1.5e7, "no_agent": 0.000, "ebat_5_2": 0.000, "ebat_7_2": 0.000},
+    1e-2: {"cells": 1.5e6, "no_agent": 0.000, "ebat_5_2": 0.000, "ebat_7_2": 0.000},
+    1e-3: {"cells": 1.5e5, "no_agent": 0.000, "ebat_5_2": 0.000, "ebat_7_2": 0.000},
+    1e-4: {"cells": 1.5e4, "no_agent": 0.000, "ebat_5_2": 0.000, "ebat_7_2": 0.000},
+    1e-5: {"cells": 1.5e3, "no_agent": 0.000, "ebat_5_2": 0.000, "ebat_7_2": 0.000},
+}
+
+RARITY_IS_NOT_A_DEFENCE = {
+    "the_result": "durability is 0.000 at every correlation tested, from perfect down to "
+                  "independent -- a compartment of 1.5e8 cells and a compartment of 1500 cells give "
+                  "identically total failure. eBAT's 5.2 or 7.2 logs do not rescue any of them.",
+    "why_eBAT_does_not_rescue_even_the_smallest": "1500 cells reduced by 7.2 logs leaves about 1.1 "
+                                                  "cells, which is above the one-cell extinction "
+                                                  "floor and regrows. The requirement and the "
+                                                  "measured effect are the same size, and being the "
+                                                  "same size is not the same as being enough.",
+    "WHAT_THIS_CORRECTS_IN_MY_OWN_ACCOUNT": "having found that I inflated the compartment by five "
+                                            "orders of magnitude, the natural inference is that the "
+                                            "danger was correspondingly overstated. It was not. The "
+                                            "correlation error inflated the WORK TERM -- the "
+                                            "one-year ask falls from 0.090 to 0.055/day, which is "
+                                            "real and worth having -- but it did not create the "
+                                            "danger and correcting it does not reduce it. Route 8's "
+                                            "dangerous case is binary in EXISTENCE, not graded in "
+                                            "SIZE.",
+    "the_sharpest_statement_of_route_8": "a compartment that nothing kills reaches carrying capacity "
+                                         "within the horizon from any starting size above zero. "
+                                         "Rarity is not a defence. Only absence is.",
+    "what_that_means_for_whether_this_scenario_is_real": "the question is not 'how big is the "
+                                                         "compartment' and never was. It is 'does a "
+                                                         "compartment exist that is both invisible "
+                                                         "to the vaccine and resistant to the drug'. "
+                                                         "That is a yes/no question, nobody has "
+                                                         "asked it in this disease, and it is "
+                                                         "answerable by staining tissue that already "
+                                                         "exists.",
+    "the_honest_scope_of_the_concern": "this remains a compartment that has never been observed. "
+                                       "What the sweep establishes is that if it is there at all, "
+                                       "its scarcity will not save the animal -- so the "
+                                       "justification for caring about it rests entirely on whether "
+                                       "it exists, and not at all on how common it is.",
+}
