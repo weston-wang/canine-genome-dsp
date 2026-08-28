@@ -1492,3 +1492,30 @@ THIS_IS_THE_CLOSURE_AND_IT_NEEDS_NO_NEW_DRUG = {
                          "It is still conditional on the compartment being anthracycline-sensitive "
                          "and on it existing at all, and both are stains rather than programmes.",
 }
+
+
+CLOSURE_REPRODUCIBILITY = {
+    # seed: {logs removed: durability}
+    7: {7.2: 0.000, 8.3: 0.830},
+    101: {7.2: 0.000, 8.3: 0.860},
+    202: {7.2: 0.000, 8.3: 0.890},
+    303: {7.2: 0.000, 8.3: 0.820},
+}
+
+WHY_THE_CLOSURE_RESEED_MATTERS = {
+    "what_was_checked": "the closure is the strongest claim this analysis has produced, so the "
+                        "decisive pair of points was re-run at three further seeds.",
+    "the_threshold_is_exact_at_every_seed": "7.2 logs -- eBAT alone, and just under the ln(1284) = "
+                                            "7.16 requirement plus the margin to cross below one "
+                                            "cell -- returns 0.000 at all four seeds with no partial "
+                                            "values.",
+    "the_closure_reproduces_at_the_baseline": "8.3 logs gives 0.830, 0.860, 0.890 and 0.820 against "
+                                              "a no-blind-spot baseline of about 0.84. The spread is "
+                                              "noise around the baseline, not a trend.",
+    "what_it_does_not_establish": "the same caution as every other reseed in this analysis. This "
+                                  "tests the simulation, not the biology. All four seeds share the "
+                                  "corrected compartment size, the assumption that the compartment "
+                                  "is anthracycline-sensitive, and the conversion of two bulk "
+                                  "survival benefits into log-kills. A stable answer built on those "
+                                  "is stably conditional on them.",
+}

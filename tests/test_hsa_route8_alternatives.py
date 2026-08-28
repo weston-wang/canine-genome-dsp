@@ -1034,3 +1034,29 @@ def test_the_closure_is_scoped_to_the_model_and_to_an_unverified_compartment():
     c = d["THE_CAVEATS_THAT_STILL_STAND"]
     assert "never been observed" in c["and_the_compartment_itself_is_unverified"]
     assert len(c) == 4
+
+
+def test_the_closure_threshold_is_exact_at_every_seed():
+    for seed, row in ra.CLOSURE_REPRODUCIBILITY.items():
+        assert row[7.2] == 0.0, f"seed {seed} should fail below the requirement"
+
+
+def test_the_closure_reproduces_at_the_baseline_at_every_seed():
+    vals = [row[8.3] for row in ra.CLOSURE_REPRODUCIBILITY.values()]
+    assert len(vals) == 4
+    for v in vals:
+        assert abs(v - ra.NO_BLIND_SPOT_BASELINE) < 0.08, v
+    assert max(vals) - min(vals) < 0.10
+
+
+def test_the_seed_7_values_match_the_main_closure_table():
+    assert ra.CLOSURE_REPRODUCIBILITY[7][7.2] == ra.CLOSURE_BY_WHAT_THEY_ALREADY_GET[7.2]
+    assert ra.CLOSURE_REPRODUCIBILITY[7][8.3] == ra.CLOSURE_BY_WHAT_THEY_ALREADY_GET[8.3]
+
+
+def test_the_closure_reseed_carries_its_own_caveat():
+    d = ra.WHY_THE_CLOSURE_RESEED_MATTERS
+    t = d["what_it_does_not_establish"]
+    assert "tests the simulation, not the biology" in t
+    assert "anthracycline-sensitive" in t
+    assert "stably conditional on them" in t
