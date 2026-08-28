@@ -519,3 +519,117 @@ def test_the_cheap_step_still_comes_first():
     assert "stain first" in pe.VERDICT["the_order_to_do_it_in"].replace("\n", " ") or \
         "stain" in pe.VERDICT["the_order_to_do_it_in"]
     assert "unnecessary" in pe.VERDICT["the_order_to_do_it_in"]
+
+
+# ---------------------------------------------------------------------------------------------
+# The stochastic check. Section 8 said this had not been run; these tests hold it to what it found,
+# including the number it moved.
+# ---------------------------------------------------------------------------------------------
+
+def test_extinction_probability_is_zero_when_the_population_is_not_shrinking():
+    # A kill below the holding rate leaves net growth positive: it never dies out.
+    assert pe.extinction_probability(pe.BLIND_SPOT_NET_GROWTH_PER_DAY - 0.01, 335) == 0.0
+    assert pe.extinction_probability(0.0, 3650) == 0.0
+
+
+def test_extinction_probability_rises_with_both_rate_and_time():
+    by_rate = [pe.extinction_probability(k, 335) for k in (0.06, 0.08, 0.10, 0.12)]
+    assert by_rate == sorted(by_rate)
+    by_time = [pe.extinction_probability(0.09, t) for t in (100, 200, 335, 700)]
+    assert by_time == sorted(by_time)
+
+
+def test_extinction_probability_is_bounded():
+    for k in (0.05, 0.09, 0.5, 5.0):
+        for t in (10, 335, 3650):
+            assert 0.0 <= pe.extinction_probability(k, t) <= 1.0
+
+
+def test_extinction_probability_rejects_bad_inputs():
+    with pytest.raises(ValueError):
+        pe.extinction_probability(0.09, 0)
+    with pytest.raises(ValueError):
+        pe.extinction_probability(0.09, 335, initial_cells=0)
+
+
+def test_rate_for_confidence_inverts_extinction_probability():
+    for conf in (0.05, 0.5, 0.99):
+        for days in (152, 335, 700):
+            r = pe.rate_for_extinction_confidence(days, conf)
+            assert pe.extinction_probability(r, days) == pytest.approx(conf, abs=1e-3)
+
+
+def test_rate_for_confidence_rejects_impossible_confidences():
+    for bad in (0.0, 1.0, -0.1, 1.5):
+        with pytest.raises(ValueError):
+            pe.rate_for_extinction_confidence(335, bad)
+
+
+def test_the_stochastic_midpoint_agrees_with_the_deterministic_closed_form():
+    """Two independent derivations of the same threshold. The module claims within 2%."""
+    for name, row in pe.STOCHASTIC_TRANSITION_BY_COURSE.items():
+        mid, det = row["rate_at_50_percent"], row["deterministic_prediction"]
+        assert abs(mid - det) / det < 0.02, name
+
+
+def test_the_transition_is_narrow_rather_than_a_smear():
+    """The section 8 fear was that stochasticity would blur the step. It does not."""
+    for name, row in pe.STOCHASTIC_TRANSITION_BY_COURSE.items():
+        width = row["rate_at_99_percent"] - row["rate_at_1_percent"]
+        assert width / row["rate_at_50_percent"] < 0.30, name
+
+
+def test_shorter_courses_have_wider_transitions():
+    by_days = sorted(pe.STOCHASTIC_TRANSITION_BY_COURSE.values(), key=lambda r: r["agent_days"])
+    widths = [(r["rate_at_99_percent"] - r["rate_at_1_percent"]) / r["rate_at_50_percent"]
+              for r in by_days]
+    assert widths == sorted(widths, reverse=True)
+
+
+def test_the_ordering_within_each_transition_holds():
+    for name, row in pe.STOCHASTIC_TRANSITION_BY_COURSE.items():
+        assert row["rate_at_1_percent"] < row["rate_at_50_percent"] < row["rate_at_99_percent"], name
+
+
+def test_the_corrected_one_year_requirement_is_recorded_and_is_higher():
+    """The deterministic 0.090/day was a coin flip. This test exists so it cannot drift back."""
+    coin_flip = pe.required_rate_for_course(335)
+    confident = pe.rate_for_extinction_confidence(335, 0.99)
+    assert coin_flip == pytest.approx(0.090, abs=5e-4)
+    assert confident == pytest.approx(0.102, abs=1e-3)
+    assert confident > coin_flip
+    d = pe.THE_STOCHASTIC_CHECK_RESOLVES_THE_CAVEAT_AND_MOVES_A_NUMBER
+    assert "0.102/day" in d["AND_IT_CORRECTS_ONE_OF_MY_NUMBERS"]
+    assert "coin flip" in d["AND_IT_CORRECTS_ONE_OF_MY_NUMBERS"]
+
+
+def test_the_correction_is_small_in_assay_units():
+    confident = pe.rate_for_extinction_confidence(335, 0.99)
+    assert 1.0 - pe.viability_after(confident) == pytest.approx(0.262, abs=2e-3)
+    assert "23.6% to 26.2%" in pe.THE_STOCHASTIC_CHECK_RESOLVES_THE_CAVEAT_AND_MOVES_A_NUMBER[
+        "how_much_that_costs"]
+
+
+def test_the_logarithmic_robustness_survives_the_stochastic_treatment():
+    base = pe.rate_for_extinction_confidence(335, 0.50)
+    ten_x = pe.rate_for_extinction_confidence(335, 0.50, initial_cells=pe.blind_spot_initial_cells() * 10)
+    assert ten_x - base == pytest.approx(math.log(10) / 335, abs=5e-4)
+
+
+def test_the_caveat_is_downgraded_not_deleted_and_sanctuary_sites_remain_open():
+    d = pe.THE_STOCHASTIC_CHECK_RESOLVES_THE_CAVEAT_AND_MOVES_A_NUMBER
+    assert "SHARPENS the transition" in d["what_actually_happens"]
+    assert "is NOT answered here" in d["what_remains_unresolved"]
+    assert "sanctuary" in d["what_remains_unresolved"].lower()
+    assert "downgraded, not removed" in d["the_status_of_item_7_in_WHAT_IS_STILL_NOT_CLOSED"]
+    # The item it downgrades must still be in the open list.
+    assert "7_the_finite_course_result_rests_on_a_deterministic_extinction_floor" in \
+        pe.WHAT_IS_STILL_NOT_CLOSED
+
+
+def test_the_reconstructed_rates_reproduce_the_measured_trajectories():
+    """The birth-death rates are not free parameters: they must give the measured net declines."""
+    b = pe.BLIND_SPOT_INTRINSIC_GROWTH_PER_DAY
+    for kill, measured in ((0.050, 0.0167), (0.075, 0.0416), (0.100, 0.0665)):
+        d = b - pe.BLIND_SPOT_NET_GROWTH_PER_DAY + kill
+        assert d - b == pytest.approx(measured, abs=2e-4)

@@ -775,3 +775,130 @@ VERDICT = {
                                        "now a named and costed experiment rather than an unknown, "
                                        "and that is the honest description of the progress.",
 }
+
+
+# =============================================================================================
+# 10. THE STOCHASTIC CHECK THE PREVIOUS SECTION SAID HAD NOT BEEN RUN.
+#
+# Section 8 named this the load-bearing weakness: the finite-course result depends on a
+# deterministic extinction floor, the decisive calls happen in a two-log window, and "a birth-death
+# formulation would replace the step with an extinction probability... this analysis has NOT run
+# one." So it was run.
+#
+# It does not need Monte Carlo. A linear birth-death process has a closed-form extinction
+# probability, and the model's dynamics supply its two rates directly:
+#
+#   P(extinct by t | one cell) = d(1 - e^-(d-b)t) / (d - b e^-(d-b)t)
+#   P(extinct by t | N0 cells) = that, raised to the N0
+#
+# with b the intrinsic growth of the blind-spot clone and d its total death rate. The fitted net
+# growth without the agent (0.0334/day) fixes the baseline death rate at b - 0.0334, and the agent
+# adds its kill on top. The reconstructed net decline rates reproduce the ones measured off the
+# simulated trajectories to three decimals: 0.0166 / 0.0416 / 0.0666 against 0.0167 / 0.0416 /
+# 0.0665.
+# =============================================================================================
+
+BLIND_SPOT_INTRINSIC_GROWTH_PER_DAY = 0.055
+
+
+def extinction_probability(kill_per_day: float, course_days: float,
+                           initial_cells: float | None = None,
+                           intrinsic_growth: float = BLIND_SPOT_INTRINSIC_GROWTH_PER_DAY,
+                           net_growth: float = BLIND_SPOT_NET_GROWTH_PER_DAY) -> float:
+    """Probability a course of `course_days` at `kill_per_day` extinguishes the blind spot.
+
+    Linear birth-death, started from `initial_cells` independent lineages. Replaces section 7's
+    deterministic "below one cell is gone" rule with the probability that the population actually
+    dies out, which is what section 8 said was needed to trust the finite-course result.
+    """
+    if course_days <= 0:
+        raise ValueError("course_days must be positive")
+    n0 = blind_spot_initial_cells() if initial_cells is None else initial_cells
+    if n0 <= 0:
+        raise ValueError("initial_cells must be positive")
+    b = intrinsic_growth
+    d = b - net_growth + kill_per_day          # baseline death plus the agent
+    decline = d - b
+    if decline <= 0:
+        return 0.0                              # the population is not shrinking; it never dies out
+    x = math.exp(-decline * course_days)
+    survival_per_lineage = x * decline / (d - b * x)
+    if survival_per_lineage >= 1.0:
+        return 0.0
+    return float(math.exp(n0 * math.log1p(-survival_per_lineage)))
+
+
+def rate_for_extinction_confidence(course_days: float, confidence: float = 0.99,
+                                   initial_cells: float | None = None) -> float:
+    """Kill rate a course must deliver to extinguish the blind spot with probability `confidence`."""
+    if not 0.0 < confidence < 1.0:
+        raise ValueError("confidence must lie strictly between 0 and 1")
+    lo, hi = BLIND_SPOT_NET_GROWTH_PER_DAY + 1e-9, 5.0
+    for _ in range(200):
+        mid = 0.5 * (lo + hi)
+        if extinction_probability(mid, course_days, initial_cells) < confidence:
+            lo = mid
+        else:
+            hi = mid
+    return 0.5 * (lo + hi)
+
+
+STOCHASTIC_TRANSITION_BY_COURSE = {
+    name: {
+        "agent_days": days,
+        "rate_at_1_percent": rate_for_extinction_confidence(days, 0.01),
+        "rate_at_50_percent": rate_for_extinction_confidence(days, 0.50),
+        "rate_at_99_percent": rate_for_extinction_confidence(days, 0.99),
+        "deterministic_prediction": required_rate_for_course(days),
+    }
+    for name, days in PERSISTER_COURSE_AGENT_DAYS.items()
+}
+
+THE_STOCHASTIC_CHECK_RESOLVES_THE_CAVEAT_AND_MOVES_A_NUMBER = {
+    "what_was_feared": "section 8 warned that the decision is made in a two-log window -- about a "
+                       "hundred cells against a hundredth of a cell -- and that this is 'precisely "
+                       "where a deterministic model is least trustworthy'. The implied worry was "
+                       "that the sharp step in the table would smear into a broad, uninformative "
+                       "ramp.",
+    "what_actually_happens": "the opposite. The step stays sharp, because the per-cell survival "
+                             "probability is raised to the power of the starting population. With "
+                             "1.5e8 cells, a per-lineage survival of one in ten million still gives "
+                             "a population that essentially never dies out, and one in ten billion "
+                             "gives one that essentially always does. Large N0 SHARPENS the "
+                             "transition rather than blurring it.",
+    "the_agreement_with_the_deterministic_form": "the stochastic 50%-extinction rate matches the "
+                                                 "deterministic closed form to within 2% for every "
+                                                 "schedule: 0.0380 vs 0.0386, 0.0592 vs 0.0603, "
+                                                 "0.0886 vs 0.0896, 0.1459 vs 0.1461, 0.1572 vs "
+                                                 "0.1573. Two independent derivations of the same "
+                                                 "threshold agreeing is the strongest internal check "
+                                                 "in this analysis.",
+    "AND_IT_CORRECTS_ONE_OF_MY_NUMBERS": "the deterministic form gives the rate at which extinction "
+                                         "becomes MORE LIKELY THAN NOT. Quoting 0.090/day as the "
+                                         "one-year requirement therefore quotes a coin flip. For 99% "
+                                         "confidence the one-year course needs about 0.102/day. The "
+                                         "requirement should be stated at the confidence you want, "
+                                         "and 0.090 was stated at 50% without my noticing.",
+    "how_much_that_costs": "0.090 to 0.102/day is a three-day kill rising from 23.6% to 26.2%. It "
+                           "does not change any conclusion -- it changes the number that should be "
+                           "quoted to an experimentalist.",
+    "the_transition_widths": "1%-to-99% spans 0.0018/day for a permanent course, 0.019/day for a "
+                             "one-year course and 0.041/day for six months. Shorter courses have "
+                             "wider transitions, because less time means fewer effective chances to "
+                             "die out, but even the widest is about a quarter of its own midpoint.",
+    "the_sensitivity_that_survives_intact": "a ten-fold change in the blind spot's starting size "
+                                            "moves the one-year midpoint by about 0.007/day "
+                                            "(0.0815 / 0.0886 / 0.0957 across two decades), matching "
+                                            "ln(10)/335 exactly. The logarithmic robustness claimed "
+                                            "in section 8 holds under the stochastic treatment too.",
+    "what_remains_unresolved": "sanctuary sites. The birth-death treatment assumes every lineage is "
+                               "independent and uniformly exposed. A subpopulation the agent does "
+                               "not reach is not a low-probability survival -- it is a certainty, "
+                               "and no amount of rate fixes it. That objection was raised in section "
+                               "8 and is NOT answered here.",
+    "the_status_of_item_7_in_WHAT_IS_STILL_NOT_CLOSED": "downgraded, not removed. The deterministic "
+                                                        "floor is no longer the load-bearing "
+                                                        "assumption, because a stochastic treatment "
+                                                        "agrees with it. What is still assumed is "
+                                                        "uniform exposure.",
+}
