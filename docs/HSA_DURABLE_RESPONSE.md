@@ -1919,6 +1919,116 @@ the exact compartment with no answer.
 and one has canine trial data, but no combination has been tested against a resistant antigen-null
 subpopulation — because nobody has yet shown that such a subpopulation exists in this disease.
 
+### Looking deeper: the assumption under the structural result
+
+The structural result — only negative net growth closes it — was derived while treating the blind
+spot as a **fixed compartment**. Every route-8 probe passed `mutation=np.eye(7)`, an identity
+transition matrix asserting that no cell ever changes phenotype. The engine supports interconversion
+natively (`state[t+1] = grown @ model.mutation`), so that was never a tooling limit. It was an
+unexamined assumption, and it does enormous work.
+
+**Under it, the blind spot must stay antigen-null across 263 cell generations.** That is a strong
+requirement, and it is fragile: a per-division reversion of 1 in 10 leaves essentially none of the
+lineage still invisible at ten years; 1 in 100 leaves 7%. So the dangerous case does not require
+antigen loss — it requires antigen loss that *does not drift for 263 divisions*. That converts the
+question from size (worthless, per the sweep) into **stability**, which has a different experiment
+behind it.
+
+Both answers exist in real tumours. The persister literature says the analogous drug-tolerant state
+is "transient and reversible upon removal of the drug." But Zaretsky's melanomas acquired resistance
+through JAK1/JAK2 loss-of-function "concurrent with deletion of the wild-type allele," and B2M
+truncating mutations are a recurrent immune-escape lesion. **A deleted gene does not drift.**
+
+#### And the simulation inverted the idea
+
+| q_out (null→visible) | residence | one-way | q_in=0.005 | q_in=0.02 |
+|---|---|---|---|---|
+| 0.000 | never | 0.000 | — | — |
+| 0.020 | 50 d | 0.000 | 0.000 | 0.000 |
+| 0.034 | 29 d | 0.000 | 0.000 | 0.000 |
+| 0.050 | 20 d | **0.267** | 0.000 | 0.000 |
+| 0.080 | 12 d | 0.233 | 0.008 | 0.000 |
+
+One-way escape *does* rescue partially — 0.000 → 0.267, with no new agent. But it **saturates
+immediately**: 0.080 gives 0.233, the same within noise. The dominant eigenvalue of the
+visible/null pair explains why — once the drain is fast, the rate-limiting step becomes the
+antigen-*positive* resistant clone's own net decline, only −0.0086/day. **Plasticity can at best make
+the blind spot as controllable as a visible resistant clone, and that clone is barely controlled.**
+
+**Back-conversion destroys it.** At q_in = 0.005/day — a 200-day residence in the visible state,
+which is slow — the rescue collapses to 0.000. At 0.02 everything fails, including a case where cells
+spend 80% of their life visible. Reversibility is symmetric: the antigen-positive resistant population
+is a standing reservoir that continuously *manufactures* blind-spot cells. **A plastic antigen
+phenotype is a liability, not a gift.**
+
+*This also corrects my own arithmetic.* I estimated the two-way threshold by time-averaging — closure
+needs the lineage visible >79.5% of the time. Wrong. The correct object is the dominant eigenvalue,
+and at 80% visible it is **+0.0034/day**. The naive estimate sat on the boundary and fell on the wrong
+side of it.
+
+### Bystander killing fails for a reason worth naming
+
+ADC payload diffusion into antigen-negative neighbours is *the* established answer to heterogeneous
+antigen expression, clinically validated, and it clears both gates. But the quantitative work finds
+the effect "**dissipates over the period of time as the population of Ag+ cells declines**." It is
+manufactured by the very cells this regimen exists to destroy — strongest at the start, gone exactly
+when the blind spot is all that remains.
+
+That is the same trap as competitive release, mirrored. **Two good ideas whose supply is the
+population the plan removes.** Worth naming, because it isn't obvious in advance.
+
+### What the search actually converged on
+
+Not a fourth mechanism — a decomposition:
+
+> **required rate = holding rate + ln(surviving cells) / course days**
+
+- **The floor.** 0.0334/day — a **9.5% three-day kill**. Whatever survives must be killed faster than
+  it grows, for as long as it exists. *No amount of up-front killing touches this term.* Only lowering
+  the compartment's own growth moves it (a 15% fitness penalty → 8.2%; 50% → 4.9%).
+- **The work.** ln(surviving cells) over the course. Every "log-remover" chips at it.
+
+This **reconciles the three levers rejected earlier**: each is a real term in this equation and none
+is a sufficient closure on its own.
+
+| stack | logs removed | one-year requirement | 3-day kill |
+|---|---|---|---|
+| nothing | 0 | 0.090/day | 24% |
+| eBAT alone | 7.2 | 0.068/day | 18% |
+| + plasticity to a 10⁵ genetic remnant | 14.5 | **0.046/day** | **13%** |
+| irreducible floor | — | 0.033/day | 9.5% |
+
+### The floor needs something permanent — and only immunity is
+
+Every mechanism found is a **log-remover**: it acts up front and stops. The floor needs a kill
+sustained for a decade, and no small molecule here has cleared a duration criterion at that scale.
+
+That leaves one class of killer permanent by construction. The vaccine is antigen-directed and this
+compartment lacks the antigen — but **NKG2D recognition is not**: its ligands are *stress* markers,
+not lineage antigens, independent of both the vaccine target and MHC-I, and induced on cells under
+exactly the sustained pressure that defines a persister. Mechanism and target are matched rather than
+borrowed. Canter 2018 supplies canine sarcoma evidence: NK cells expanded 19-fold, ~80% cytotoxicity
+at 10:1 in vitro, significant PDX growth delay in vivo, and a first-in-dog trial.
+
+**It still doesn't close it.** Transferred NK cells are a pulse, not a permanent presence — another
+log-remover. Tumours shed soluble MIC to decoy NKG2D. And 80% cytotoxicity in a short in vitro assay
+is not a per-day rate in an animal; no number is derived from it here.
+
+### Final position
+
+**No single mechanism closes route 8's dangerous case**, and the search produced something more useful
+than a fourth candidate: a statement of what any closure must supply, a split between log-removers and
+floor-holders, and a named trap that caught two attractive ideas.
+
+The status stays **closed conditional on a named experiment**. The ask has come down from a 24%
+three-day kill to about 13% stacked, against a floor of 9.5% — and it is not closed. **Nobody has yet
+shown the compartment exists in canine hemangiosarcoma at all.**
+
+What would make me call it closed: *a measured per-day kill rate, in canine hemangiosarcoma, against a
+drug-tolerant antigen-null fraction, exceeding the holding rate and sustainable for the horizon.* Every
+element of that sentence is currently missing — and the decomposition is what makes it a checkable
+sentence rather than an aspiration.
+
 *Tests: `test_hsa_route8_alternatives.py`*
 
 ---
