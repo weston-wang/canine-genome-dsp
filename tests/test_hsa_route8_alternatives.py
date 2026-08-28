@@ -1060,3 +1060,50 @@ def test_the_closure_reseed_carries_its_own_caveat():
     assert "tests the simulation, not the biology" in t
     assert "anthracycline-sensitive" in t
     assert "stably conditional on them" in t
+
+
+def test_the_closures_assumption_is_scoped_to_genetic_resistance():
+    d = ra.WHETHER_DOXORUBICIN_REACHES_IT_DEPENDS_ON_WHICH_KIND_OF_RESISTANCE
+    assert "GENETIC lesion" in d["when_that_is_true"]
+    assert "present at day zero" in d["when_that_is_true"]
+    assert "TARGETED THERAPY OR CHEMOTHERAPY" in d["when_it_is_false"]
+
+
+def test_the_qualification_states_the_closure_would_fail():
+    d = ra.WHETHER_DOXORUBICIN_REACHES_IT_DEPENDS_ON_WHICH_KIND_OF_RESISTANCE
+    t = d["why_that_is_a_serious_qualification"]
+    assert "supplies none of the 3.1-5.1 logs" in t
+    assert "eBAT alone is 0.000" in t
+    # And that must match the simulated table.
+    assert ra.CLOSURE_BY_WHAT_THEY_ALREADY_GET[7.2] == 0.0
+
+
+def test_the_literature_gap_is_recorded_as_unexamined_not_supportive():
+    d = ra.WHETHER_DOXORUBICIN_REACHES_IT_DEPENDS_ON_WHICH_KIND_OF_RESISTANCE
+    t = d["what_the_literature_does_not_settle"]
+    assert "not contradicted by the literature; it is unexamined by it" in t
+    assert "chemoresistant in practice" in d["the_clinical_hint_that_cuts_against_it"]
+
+
+def test_the_three_questions_reduce_to_one_measurement():
+    d = ra.THE_SAME_MEASUREMENT_DECIDES_THREE_SEPARATE_QUESTIONS
+    assert "question_1_the_antigen" in d
+    assert "question_2_the_resistance" in d
+    assert "question_3_the_plasticity" in d
+    assert "not three experiments" in d["why_this_matters_practically"]
+    assert "WRITTEN IN THE DNA" in d["why_this_matters_practically"]
+
+
+def test_both_answers_have_a_closure_attached():
+    d = ra.THE_SAME_MEASUREMENT_DECIDES_THREE_SEPARATE_QUESTIONS
+    t = d["which_way_the_answer_points"]
+    assert "if genetic" in t.lower() and "tolerant state" in t
+    assert "Neither answer is uniformly good news" in t
+    assert "closure under BOTH answers" in d["the_useful_consequence"]
+
+
+def test_the_genetic_branch_points_at_the_standard_of_care_closure():
+    t = ra.THE_SAME_MEASUREMENT_DECIDES_THREE_SEPARATE_QUESTIONS["which_way_the_answer_points"]
+    assert "doxorubicin plus eBAT close it" in t
+    # and the tolerant branch points at the ferroptosis route, which must still exist
+    assert "ferroptosis route applies" in t

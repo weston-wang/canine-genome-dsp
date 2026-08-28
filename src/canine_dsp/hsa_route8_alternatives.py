@@ -1519,3 +1519,76 @@ WHY_THE_CLOSURE_RESEED_MATTERS = {
                                   "survival benefits into log-kills. A stable answer built on those "
                                   "is stably conditional on them.",
 }
+
+
+# =============================================================================================
+# THE CLOSURE'S LOAD-BEARING ASSUMPTION, CHECKED AGAINST THE LITERATURE.
+#
+# The closure rests on doxorubicin reaching a compartment defined by resisting the TARGETED agents.
+# I justified that by saying PI3K-pathway resistance confers no anthracycline resistance. That is
+# true of a MUTATION and false of a STATE, and the distinction decides the whole thing.
+# =============================================================================================
+
+WHETHER_DOXORUBICIN_REACHES_IT_DEPENDS_ON_WHICH_KIND_OF_RESISTANCE = {
+    "the_assumption_the_closure_rests_on": "that a cell resistant to PI3K/mTOR inhibition has no "
+                                           "reason to resist a DNA-damaging cytotoxic, because the "
+                                           "mechanisms are unrelated.",
+    "when_that_is_true": "when the resistance is a GENETIC lesion in the targeted pathway -- a "
+                         "PIK3CA-pathway mutation raising the IC50 of one drug class. That is "
+                         "target-specific and confers nothing against an anthracycline. It is also "
+                         "exactly how route 8's resistance is constructed in this model: clones 1-3 "
+                         "are pre-existing mechanisms with elevated IC50, present at day zero.",
+    "when_it_is_false": "when the resistance is a drug-tolerant PERSISTER STATE. Hangauer's own "
+                        "opening sentence: 'Persister cells, which are present across a wide range "
+                        "of tumour types, survive cytotoxic exposure to TARGETED THERAPY OR "
+                        "CHEMOTHERAPY through poorly understood reversible, nonmutational "
+                        "mechanisms.' He derived persisters from carboplatin plus paclitaxel as "
+                        "readily as from lapatinib or vemurafenib.",
+    "why_that_is_a_serious_qualification": "if the compartment is tolerant rather than mutant, the "
+                                           "very state that makes it survive the targeted agents "
+                                           "also makes it survive the chemotherapy. Doxorubicin then "
+                                           "supplies none of the 3.1-5.1 logs the closure needs from "
+                                           "it, and eBAT alone is 0.000.",
+    "what_the_literature_does_not_settle": "no study reports cross-resistance between PI3K/mTOR "
+                                           "pathway resistance and anthracyclines in canine "
+                                           "hemangiosarcoma, or in hemangiosarcoma at all. Targeted "
+                                           "searches return nothing either way. The load-bearing "
+                                           "assumption is not contradicted by the literature; it is "
+                                           "unexamined by it.",
+    "the_clinical_hint_that_cuts_against_it": "hemangiosarcoma is chemoresistant in practice -- "
+                                              "doxorubicin roughly doubles a median of about three "
+                                              "months. A disease where chemotherapy achieves that "
+                                              "little is not obviously one where chemotherapy clears "
+                                              "a resistant subcompartment.",
+}
+
+THE_SAME_MEASUREMENT_DECIDES_THREE_SEPARATE_QUESTIONS = {
+    "the_convergence": "genetic-versus-state is the axis this entire route turns on, and it turns on "
+                       "it three times independently.",
+    "question_1_the_antigen": "is the antigen loss a deletion or epigenetic silencing? Deletion is a "
+                              "permanent sanctuary; silencing leaks, and the vaccine drains it for "
+                              "free.",
+    "question_2_the_resistance": "is the drug resistance a mutation or a tolerant state? A mutation "
+                                 "is target-specific and doxorubicin covers it -- which is the "
+                                 "closure. A tolerant state survives chemotherapy too, and the "
+                                 "closure fails.",
+    "question_3_the_plasticity": "the same answer decides whether the compartment can be drained by "
+                                 "phenotypic reversion at all, which `PLASTICITY_RESCUE` showed "
+                                 "requires the state to be reversible.",
+    "why_this_matters_practically": "these are not three experiments. They are one tissue and one "
+                                    "assay class -- sequence the antigen locus and the "
+                                    "antigen-presentation machinery, sequence the resistance loci, "
+                                    "in the drug-tolerant fraction. The entire route-8 question "
+                                    "reduces to whether what is going on in that compartment is "
+                                    "WRITTEN IN THE DNA or is a state the cell is passing through.",
+    "which_way_the_answer_points": "if genetic: the sanctuary is permanent, plasticity cannot drain "
+                                   "it, but it is target-specific and doxorubicin plus eBAT close "
+                                   "it. If a tolerant state: plasticity can drain it and the "
+                                   "persister-directed ferroptosis route applies, but doxorubicin "
+                                   "does not cover it and the standard-of-care closure fails. "
+                                   "Neither answer is uniformly good news, and each has a different "
+                                   "closure attached to it.",
+    "the_useful_consequence": "route 8 has a closure under BOTH answers -- they are just different "
+                              "closures. That is a materially better position than needing one "
+                              "particular answer to come back favourably.",
+}
