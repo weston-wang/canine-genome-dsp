@@ -2130,6 +2130,67 @@ shows the second thing is harder than it sounds, not easier.
 correlative canine support for its premise, no demonstrated way to deliver it, and one failed attempt
 that explains itself. That is a real position and it is not a closure.
 
+### Two omissions of mine, and the closure they were hiding
+
+Pushed to look harder, I found two errors in my own construction. Neither was a wrong parameter —
+which is why every audit missed them.
+
+**One: I assumed perfect correlation.** Every route-8 probe built the blind spot as
+`init[6] = positive * (1 - phi)` — asserting that the *entire* antigen-null fraction is also
+drug-resistant, i.e. a resistant fraction of 5%. Measured over 2000 draws, the model's own
+pre-existing resistance seeding gives **8.6 × 10⁻⁶**. Under independence the dangerous compartment is
+**~1,300 cells, not 1.5 × 10⁸** — an inflation of 10⁵, or 11.7 natural logs.
+
+Independence is the right default *here*: route 8 is antigen inadequacy **on day zero** — baseline
+expression heterogeneity — not loss acquired under immune pressure. A cell that happens not to express
+surface vimentin has no reason to also carry a pre-existing PIK3CA-pathway mutation. Correlation is
+right for route 4, and **I applied route 4's assumption to route 8.**
+
+*This changes the work term, not the danger.* The sweep is 0.000 at every correlation from perfect
+down to independent — 150 million cells and 1,500 cells fail identically. **Rarity is not a defence;
+only absence is.** What it changes is the ask: from 18.8 logs to 7.2, and 0.090/day to 0.055/day.
+
+**Two: doxorubicin was never in the model.** The engine carries exactly two agents, both targeted.
+Every dog in the eBAT trial, the toceranib trial, the metronomic trial and the standard of care gets
+**five cycles of doxorubicin**, and it appears in no simulation. An anthracycline is neither
+antigen-directed nor kinase-directed — so route 8's *defining properties give it no protection from
+the one drug these dogs certainly receive.* Assuming zero anthracycline exposure was an unstated
+assumption of complete cross-resistance between a kinase inhibitor and a DNA-damaging cytotoxic.
+
+### The closure, using only what these dogs already get
+
+Converted the same way as everything else — adjuvant doxorubicin is worth **3.1 logs** at the typical
+median (86 → 180 days) and **5.1** when given within 21 days of surgery (86 → 238). eBAT is worth
+**5.2–7.8**. The corrected requirement is **7.2**.
+
+| logs removed | source | 10-year durability |
+|---|---|---|
+| 0.0 | nothing | 0.000 |
+| 3.1 | doxorubicin alone (typical) | 0.000 |
+| 5.1 | doxorubicin alone (timely) | 0.000 |
+| 7.2 | eBAT alone | 0.000 |
+| **8.3** | **doxorubicin + eBAT, both pessimistic** | **0.830** |
+| 10.4 / 12.9 | more favourable combinations | 0.830 |
+
+**Neither alone closes it. Together, at the pessimistic end of both estimates, durability is 0.830 —
+the no-blind-spot baseline** — saturating there rather than climbing. The threshold brackets
+ln(1284) = 7.16, the closed form reproduced a third time from an independent direction. Reseeding
+gives 0.860.
+
+**This needs no new molecule.** Doxorubicin is standard of care. eBAT has a positive trial in 23 dogs
+with stage I–II splenic hemangiosarcoma in the minimal-residual-disease setting — and the sequencing
+that works, a single eBAT cycle between splenectomy and chemotherapy, is the sequencing that trial
+already used.
+
+**The caveats, load-bearing one first:**
+
+1. **If the compartment also resists doxorubicin it is a *triple* negative and nothing covers it.**
+   Hemangiosarcoma is clinically chemoresistant — doxorubicin roughly doubles a short median — so a
+   substantial anthracycline-resistant fraction is entirely plausible.
+2. Both log estimates come from whole-tumour median survival applied to a subcompartment.
+3. eBAT's targets on this compartment are unstained.
+4. **The compartment itself has never been observed in this disease.**
+
 ### Final position
 
 **No single mechanism closes route 8's dangerous case**, and the search produced something more useful
