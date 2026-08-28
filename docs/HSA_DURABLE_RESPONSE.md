@@ -1741,6 +1741,170 @@ unnecessary.
 
 ---
 
+## 3j. Attacking the framing instead of the problem
+
+Two closures that both reduce to *see the cell or kill the cell* is a narrow pair of answers, and a
+narrow pair of answers usually means a narrow framing. So this section attacks the framing. Four
+questions the earlier work never asked — three of which fail, and fail for one shared reason that is
+worth more than any of them individually.
+
+### Containment: ruled out, twice over
+
+Gatenby's competitive release names the flaw in my own plan directly: maximum cell kill is not
+maximum benefit, because eliminating the sensitive population lets resistant clones "proliferate
+unopposed by competitors." Adaptive therapy deliberately keeps sensitive cells alive to suppress the
+resistant ones, and it has a positive randomised trial behind it.
+
+**This engine already models it** — every clone grows at `growth × (1 − density)` — and I had never
+once exploited it. Driving total burden to nadir is exactly what releases the blind spot: at nadir
+density its net growth is 0.0334/day; near carrying capacity it would be near zero. *The plan's own
+success at shrinking the tumour is what accelerates the one compartment it cannot touch.*
+
+It still doesn't work, for two reasons:
+
+- **The blind spot is not a small resistant minority.** At 95% coverage and an initial burden of 0.3
+  it is 0.015 of carrying capacity — 1.5 × 10⁸ cells — **above this model's own 0.01 detection
+  floor.** It is macroscopic on day one. Containment manages a subclinical reservoir; there isn't one.
+- **In this disease the burden is itself lethal.** Adaptive therapy buys time by carrying a larger
+  tumour, and route 5 — haemorrhage — is the one escape with no drug answer. That trade is worse here
+  than in almost any other cancer.
+
+What it *does* contribute: the holding rate the ferroptosis agent must out-run is a consequence of
+the nadir the rest of the regimen achieves, not a property of the clone.
+
+### Coverage: a mirage
+
+Coverage was fixed at 95% throughout and never varied. The blind spot drops below the detection floor
+above **96.7%** coverage — a threshold that looks worth chasing and sits suspiciously close to the
+number I assumed.
+
+It's worthless, because starting below the floor only delays arrival at it, and time to detection is
+*logarithmic* in starting size:
+
+| coverage | blind spot | days to detection |
+|---|---|---|
+| 95% | 1.5 × 10⁸ cells | 0 (already there) |
+| 99% | 3.0 × 10⁷ | 36 |
+| 99.9% | 3.0 × 10⁶ | 105 |
+| 99.99% | 3.0 × 10⁵ | 174 |
+
+**A five-hundred-fold reduction in the size of the blind spot buys 174 days against a 3650-day
+horizon.** Coverage is not the lever.
+
+### A fitness-cost inconsistency in my own model
+
+The engine charges the *acquired* antigen-loss escape clone a growth penalty — 0.0425 against 0.055,
+about 15% against the resistance clone it derives from. **The route-8 blind spot was built with no
+antigen-loss penalty at all.** The same biological state is charged 15% when acquired and 0% when
+present at baseline.
+
+The asymmetry is partly defensible — a cell that lost the antigen by mutation plausibly took
+collateral damage, while one that never expressed it may be an undamaged lineage variant. But the
+antigens at issue are functional endothelial proteins, and zero was an assumption, not a finding. It
+was also the assumption that made the blind spot maximally dangerous, i.e. **an error in my own model
+that favoured my own conclusion.** Correcting it changes nothing decisive: at 15%, 30% and 50%
+penalties, durability stays 0.000. A slower exponential is still an exponential.
+
+### The one reason all three fail — and it is the most useful result here
+
+Each makes the blind spot **smaller or slower**. Neither is enough, because over 3650 days *any*
+positive net growth rate reaches carrying capacity from any starting size. At the most extreme
+combination tested — 99.99% coverage, a 70% growth penalty — it still reaches detection in **581
+days**.
+
+> **Route 8's dangerous case admits exactly one kind of answer: something that makes the blind spot's
+> net growth negative. Nothing that merely slows it qualifies, at any magnitude short of total.**
+
+That converts an open-ended search into a closed one. It also means the expensive answer is
+**necessary rather than an artifact** of the assumptions I happened to pick — which is the opposite of
+what I expected when I went looking for a cheaper one.
+
+### On the kill side: one prior-art negative, one real find
+
+**Metronomic chemotherapy was the best candidate on paper and it failed here.** Dogs take metronomic
+cyclophosphamide continuously for months to years, so it is the one agent in this entire analysis that
+would clear the duration criterion outright; it kills by alkylation, needs no antigen, and doesn't
+touch PI3K/mTOR. It passes every gate. And: *"The addition of metronomic chemotherapy does not improve
+outcome for canine splenic haemangiosarcoma"* — 61 dogs. Passing the gates on paper is not the same as
+working.
+
+**eBAT is a third mechanism, and it is the best-anchored thing in this route.** A bispecific
+angiotoxin: truncated deimmunized *Pseudomonas* exotoxin fused to EGF and the amino-terminal fragment
+of urokinase, binding EGFR and uPAR. It kills by **ADP-ribosylating elongation factor 2** — protein
+synthesis arrest. A cell resistant to PI3K/mTOR inhibition has no reason to resist that; there is no
+shared node. And EGFR/uPAR are unrelated to the vaccine antigens.
+
+The trial is the disease, the species *and* the setting: **23 dogs, stage I–II splenic
+hemangiosarcoma, splenectomised, minimal residual disease.** One cycle of eBAT at 50 µg/kg, then
+adjuvant doxorubicin. Six-month survival went from **<40% to ~70%**, with six long-term survivors past
+450 days. Almost every other anchor in this analysis had to be transported from another species,
+tumour, or setting. This one didn't.
+
+Converting it the way everything else here is converted — a short course doesn't change the growth
+rate, it removes a fixed amount of tumour and the curve resumes, so the currency is **logs removed**:
+
+| assumption | implied one-off kill | share of the 18.8 logs needed |
+|---|---|---|
+| reported (40% → 70%) | 7.2 logs | 38% |
+| worse comparison arm (35% → 70%) | 7.8 logs | 41% |
+| weaker treated arm (40% → 65%) | 5.2 logs | 28% |
+
+**And it cannot be scaled up.** The follow-up trial tripled the cycles and reduced the chemotherapy
+interval: *"A statistically significant survival benefit was not seen"*, with greater toxicity and
+reduced efficacy than a single cycle. That is ruled out by data, not by argument. It also
+independently matches the model's finding that a short continuous course works and repeating it does
+not — though that trial changed three things at once, so the convergence is suggestive and confounded.
+
+### The combination that is now legitimate
+
+`hsa_orthogonal_kill` refused to model partial restoration plus partial persister kill, because
+"combining two unmeasured quantities to clear a threshold would be exactly the arithmetic this
+analysis has refused elsewhere." That was right. This is different: **eBAT's contribution is measured,
+in this disease, in this species, in this setting.** One measured quantity plus one unmeasured one is
+not the same arithmetic — though it is still weaker than two measured ones.
+
+| eBAT head start | one-year ferroptosis course then needs | vs alone |
+|---|---|---|
+| none | 0.090/day | — |
+| 5.2 logs | 0.074/day | −17% |
+| 7.2 logs | 0.068/day | −24% |
+| 10.8 logs | 0.057/day | −36% |
+
+Equivalently, at a fixed modest 0.060/day the course shortens from 708 days to 300–510. And the
+sequencing the data supports is the one already used: a single cycle between surgery and chemotherapy,
+in minimal residual disease — the moment the blind spot is smallest and the head start cheapest.
+
+**Never tested:** eBAT with anything on the ferroptosis axis, in any species. This is arithmetic over
+one measured effect and one assumed one, not an observed synergy, and the toxicity of the pair is
+unknown.
+
+*(An oncolytic-virus case report — VSV, canine bone HSA, >7 years survival — clears both gates by
+construction and is recorded as an anecdote. n = 1, a different anatomical form, and the virus was
+given for a misdiagnosis. No rate is derived from it.)*
+
+### Verdict on the search
+
+I went looking for a cheaper answer and found a proof that there isn't one of that kind. On the kill
+side I found a third mechanism better anchored than either of the existing two, supplying roughly a
+quarter to two fifths of the required log-kill, which cannot be scaled up.
+
+Route 8 stays **closed conditional on a named experiment** — but the closure is better supported and
+the remaining ask is smaller. It is no longer a single unanchored mechanism; it is a measured partial
+answer plus a smaller unanchored remainder.
+
+**The highest-value next step is now a stain, not a programme:** measure EGFR and uPAR on the
+vaccine-blind fraction of canine hemangiosarcoma. If the cells the vaccine cannot see still express
+eBAT's targets, then an agent that already exists, and has already been given to these dogs, attacks
+the exact compartment with no answer.
+
+**What I still cannot say is that route 8 is closed.** Three independent mechanisms now point at it
+and one has canine trial data, but no combination has been tested against a resistant antigen-null
+subpopulation — because nobody has yet shown that such a subpopulation exists in this disease.
+
+*Tests: `test_hsa_route8_alternatives.py`*
+
+---
+
 ## 4. Escape routes
 
 | # | Route | Status |
