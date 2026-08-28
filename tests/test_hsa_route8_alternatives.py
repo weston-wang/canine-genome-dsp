@@ -422,3 +422,78 @@ def test_the_deciding_experiment_is_a_sequencing_question():
     t = ra.WHAT_THE_STACK_MEANS["the_single_experiment_that_decides_the_most"]
     assert "sequence" in t.lower()
     assert "Genetic loss" in t and "Epigenetic silencing" in t
+
+
+# ---------------------------------------------------------------------------------------------
+# The floor-holder question, and the final position.
+# ---------------------------------------------------------------------------------------------
+
+def test_the_floor_holder_argument_is_structural_not_enthusiastic():
+    d = ra.ONLY_IMMUNITY_IS_PERMANENT
+    assert "duration criterion" in d["the_structural_argument"]
+    assert "week 22" in d["the_structural_argument"]
+    assert "ANTIGEN-DIRECTED" in d["what_is_left"]
+
+
+def test_the_nk_arm_is_antigen_independent_for_a_stated_reason():
+    d = ra.ONLY_IMMUNITY_IS_PERMANENT
+    t = d["the_one_immune_arm_that_does_not_need_the_antigen"]
+    assert "STRESS markers, not lineage" in t
+    assert "independent of the vaccine target and of MHC-I" in t
+
+
+def test_the_canine_nk_evidence_is_scoped_to_the_wrong_tumour():
+    d = ra.ONLY_IMMUNITY_IS_PERMANENT
+    assert "29254507" in d["the_canine_evidence"]
+    assert "osteosarcoma rather than" in d["why_that_evidence_is_the_right_species_and_the_wrong_tumour"]
+    assert "resistant antigen-null" in d["why_that_evidence_is_the_right_species_and_the_wrong_tumour"]
+
+
+def test_nk_is_explicitly_not_claimed_as_a_closure():
+    d = ra.WHY_NK_STILL_DOES_NOT_CLOSE_IT
+    assert "log-remover, not a" in d["the_first_problem_is_that_transferred_cells_are_a_pulse"]
+    assert "soluble MIC" in d["the_second_problem_is_the_documented_escape"]
+    assert "No number is derived from it here" in d["the_third_problem_is_that_no_rate_exists"]
+
+
+def test_no_rate_is_derived_from_the_in_vitro_nk_cytotoxicity():
+    """80% at 10:1 in a short assay must not become a per-day rate anywhere."""
+    blob = repr(ra.ONLY_IMMUNITY_IS_PERMANENT) + repr(ra.WHY_NK_STILL_DOES_NOT_CLOSE_IT)
+    assert "/day" not in blob
+    assert "category error" in ra.WHY_NK_STILL_DOES_NOT_CLOSE_IT[
+        "the_third_problem_is_that_no_rate_exists"]
+
+
+def test_the_final_position_separates_log_removers_from_floor_holders():
+    d = ra.WHAT_LOOKING_DEEPER_ACTUALLY_FOUND
+    t = d["the_two_kinds_of_answer"]
+    assert "LOG-REMOVERS" in t and "FLOOR-HOLDERS" in t
+    for name in ("eBAT", "plasticity", "bystander"):
+        assert name in t
+
+
+def test_the_supply_trap_is_named_and_covers_both_ideas():
+    t = ra.WHAT_LOOKING_DEEPER_ACTUALLY_FOUND["the_trap_that_caught_two_good_ideas"]
+    assert "competitive release" in t and "bystander" in t
+    assert "supply is the thing you are eliminating" in t
+
+
+def test_the_final_status_is_not_upgraded():
+    d = ra.WHAT_LOOKING_DEEPER_ACTUALLY_FOUND
+    assert "CLOSED CONDITIONAL ON A NAMED EXPERIMENT" in d["the_status_i_will_not_upgrade"]
+    assert "it is not closed" in d["the_status_i_will_not_upgrade"]
+    assert "exists in canine hemangiosarcoma at all" in d["the_status_i_will_not_upgrade"]
+
+
+def test_the_closure_condition_is_stated_as_a_checkable_sentence():
+    t = ra.WHAT_LOOKING_DEEPER_ACTUALLY_FOUND["what_would_make_me_call_it_closed"]
+    for element in ("per-day kill rate", "canine hemangiosarcoma", "antigen-null",
+                    "holding rate", "sustainable"):
+        assert element in t
+    assert "currently missing" in t
+
+
+def test_the_headline_does_not_claim_a_fourth_mechanism_was_found():
+    h = ra.WHAT_LOOKING_DEEPER_ACTUALLY_FOUND["the_honest_headline"]
+    assert h.startswith("no single mechanism closes")
+    assert "better than a fourth candidate" in h

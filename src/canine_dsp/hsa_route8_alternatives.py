@@ -645,3 +645,137 @@ WHAT_THE_STACK_MEANS = {
                                                    "and the vaccine already in the plan drains it "
                                                    "for free.",
 }
+
+
+# =============================================================================================
+# WHAT CAN HOLD THE FLOOR?
+#
+# The decomposition splits the requirement into a term that up-front killing reduces and a term
+# that nothing reduces. eBAT, plasticity and bystander killing are all up-front: they remove logs
+# and stop. The floor -- out-running the compartment's own growth for as long as it exists -- needs
+# something PERMANENT.
+#
+# Every drug in this analysis fails that on the duration criterion, and the criterion is not a
+# technicality: it disqualified the MEK/mTOR pair at 215x and icFSP1 at 261x, and it killed the one
+# chronically-dosed ferroptosis-adjacent agent on canine keratoconjunctivitis sicca at week 22.
+#
+# There is exactly one class of killer that is permanently present by construction.
+# =============================================================================================
+
+ONLY_IMMUNITY_IS_PERMANENT = {
+    "the_structural_argument": "the floor requires a kill rate sustained for as long as the "
+                               "compartment exists, which on this horizon is a decade. No small "
+                               "molecule in this analysis has cleared a duration criterion at that "
+                               "scale, and the one agent that is dosed chronically in dogs failed on "
+                               "a canine-specific toxicity at study week 22. A drug that must be "
+                               "given for ten years is the shape of answer this analysis keeps "
+                               "rejecting.",
+    "what_is_left": "the immune system, which is present for the life of the animal at no recurring "
+                    "toxicity cost. That is why the vaccine carries the plan in the first place. The "
+                    "problem is specific and narrow: the vaccine is ANTIGEN-DIRECTED, and this "
+                    "compartment is defined by not having the antigen.",
+    "the_one_immune_arm_that_does_not_need_the_antigen": "NKG2D-mediated NK recognition. NKG2D "
+                                                         "ligands -- MIC-A and MIC-B among eight -- "
+                                                         "are 'poorly expressed on normal cells but "
+                                                         "become upregulated on the surface of "
+                                                         "damaged, transformed or infected cells'. "
+                                                         "They are STRESS markers, not lineage "
+                                                         "antigens, so they are independent of the "
+                                                         "vaccine target and of MHC-I.",
+    "why_the_persister_state_is_the_right_target_for_it": "the compartment this has to cover is a "
+                                                          "cell surviving sustained therapeutic "
+                                                          "pressure. Stress-ligand induction is "
+                                                          "exactly what that state should produce. "
+                                                          "The mechanism and the target are matched "
+                                                          "rather than borrowed -- which is not true "
+                                                          "of anything else proposed for this "
+                                                          "compartment.",
+    "the_canine_evidence": "Canter et al. 2018, J Immunother Cancer, PMID 29254507: dog NK cells "
+                           "(CD5dim, NKp46+) expanded 19-fold to 2.6e8 cells; post-radiotherapy "
+                           "cytotoxicity reached about 80% at effector:target ratios of 10:1 in "
+                           "vitro; allogeneic NK cells 'produced significant PDX tumour growth delay "
+                           "in vivo'; and there was a FIRST-IN-DOG clinical trial in spontaneous "
+                           "osteosarcoma combining radiotherapy with intratumoral autologous NK "
+                           "transfer.",
+    "why_that_evidence_is_the_right_species_and_the_wrong_tumour": "canine, sarcoma, in vivo, and "
+                                                                   "into a real clinical trial. It "
+                                                                   "is osteosarcoma rather than "
+                                                                   "hemangiosarcoma, and nothing "
+                                                                   "here was measured against a "
+                                                                   "resistant antigen-null "
+                                                                   "compartment.",
+}
+
+WHY_NK_STILL_DOES_NOT_CLOSE_IT = {
+    "the_first_problem_is_that_transferred_cells_are_a_pulse": "adoptively transferred NK cells do "
+                                                               "not persist indefinitely without "
+                                                               "cytokine support. A course of NK "
+                                                               "transfer is another log-remover, not "
+                                                               "a floor-holder. The floor argument "
+                                                               "only works for ENDOGENOUS "
+                                                               "surveillance, which is permanent by "
+                                                               "construction but is also whatever it "
+                                                               "already is in a dog whose tumour "
+                                                               "grew anyway.",
+    "the_second_problem_is_the_documented_escape": "tumours shed soluble MIC-A and MIC-B, which decoy "
+                                                   "NKG2D and impede NK cytotoxicity -- already "
+                                                   "recorded in `hsa_orthogonal_kill."
+                                                   "NK_CELLS_ARE_PARTLY_REHABILITATED`. An arm that "
+                                                   "the tumour can disable by secretion is not a "
+                                                   "reliable floor-holder.",
+    "the_third_problem_is_that_no_rate_exists": "80% cytotoxicity at 10:1 in a short in vitro assay "
+                                               "is not a per-day rate in a living animal, and "
+                                               "converting it would be the same category error this "
+                                               "analysis already retracted once. No number is "
+                                               "derived from it here.",
+    "what_it_nonetheless_changes": "it identifies the shape of the only answer that can satisfy the "
+                                   "floor term without a ten-year drug. Everything else on offer is "
+                                   "up-front. If route 8's dangerous case closes durably rather than "
+                                   "by a finite course, it closes through antigen-independent innate "
+                                   "surveillance, and the question becomes whether that can be tuned "
+                                   "high enough rather than whether a new molecule can be found.",
+}
+
+# =============================================================================================
+# THE FINAL POSITION.
+# =============================================================================================
+
+WHAT_LOOKING_DEEPER_ACTUALLY_FOUND = {
+    "the_honest_headline": "no single mechanism closes route 8's dangerous case, and the search "
+                           "produced something better than a fourth candidate: a decomposition that "
+                           "says what any closure must supply, and a reason why several attractive "
+                           "ideas cannot supply it.",
+    "the_requirement": "required rate = holding rate + ln(surviving cells) / course days. The second "
+                       "term is negotiable and several things reduce it. The first is not, and it is "
+                       "a 9.5% three-day kill sustained for as long as the compartment exists.",
+    "the_two_kinds_of_answer": "LOG-REMOVERS act up front and stop -- eBAT (measured, 5.2-7.8 logs, "
+                               "cannot be scaled), plasticity (free if the loss is epigenetic, "
+                               "useless if genetic), bystander killing (dissipates as its own supply "
+                               "is destroyed). FLOOR-HOLDERS must be permanent, which rules out "
+                               "every drug here on the duration criterion and leaves only "
+                               "antigen-independent innate surveillance.",
+    "the_trap_that_caught_two_good_ideas": "competitive release and ADC bystander killing both "
+                                           "depend on the antigen-positive population the regimen "
+                                           "exists to destroy. A mechanism whose supply is the thing "
+                                           "you are eliminating cannot hold a late compartment. That "
+                                           "is not obvious in advance and it is worth naming.",
+    "the_two_experiments_that_decide_it": "first, sequence the antigen locus and the presentation "
+                                          "machinery in the drug-tolerant fraction -- genetic loss "
+                                          "means a permanent sanctuary and the full stack is needed, "
+                                          "epigenetic silencing means the sanctuary leaks and the "
+                                          "vaccine drains it for free. Second, stain that same "
+                                          "fraction for EGFR, uPAR and NKG2D ligands, which decides "
+                                          "whether the two agents that already exist can reach it.",
+    "the_status_i_will_not_upgrade": "route 8's dangerous case remains CLOSED CONDITIONAL ON A NAMED "
+                                     "EXPERIMENT. It is better supported than it was -- the ask has "
+                                     "come down from a 24% three-day kill to about 13% stacked, "
+                                     "against a floor of 9.5% -- and it is not closed. Nobody has "
+                                     "yet shown that the compartment this is all about exists in "
+                                     "canine hemangiosarcoma at all.",
+    "what_would_make_me_call_it_closed": "a measured per-day kill rate, in canine hemangiosarcoma, "
+                                         "against a drug-tolerant antigen-null fraction, exceeding "
+                                         "the holding rate and sustainable for the horizon. Every "
+                                         "element of that sentence is currently missing, and the "
+                                         "decomposition is what makes it a checkable sentence rather "
+                                         "than an aspiration.",
+}
