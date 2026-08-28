@@ -799,3 +799,97 @@ def test_the_earlier_pincer_optimism_is_not_left_unqualified():
     names = [n for n in dir(ra) if "PINCER" in n]
     assert "THE_PINCER_VERDICT_AFTER_THE_TRIAL" in names
     assert "AUGMENTING_NK_WAS_TRIED_IN_DOGS_AND_MADE_THINGS_WORSE" in dir(ra)
+
+
+# ---------------------------------------------------------------------------------------------
+# The correlation error, and the empirical verdict on floor-holding in this disease.
+# ---------------------------------------------------------------------------------------------
+
+def test_double_negative_cells_matches_hand_arithmetic():
+    # 0.3 burden * 5% null * 8.56e-6 resistant * 1e10 cells = ~1284 cells.
+    assert ra.double_negative_cells() == pytest.approx(1284, abs=5)
+
+
+def test_double_negative_cells_scales_with_both_factors():
+    base = ra.double_negative_cells()
+    assert ra.double_negative_cells(resistant_fraction=8.56e-5) == pytest.approx(base * 10)
+    assert ra.double_negative_cells(coverage=0.90) == pytest.approx(base * 2)
+
+
+def test_double_negative_cells_rejects_impossible_coverage():
+    with pytest.raises(ValueError):
+        ra.double_negative_cells(coverage=1.0)
+    with pytest.raises(ValueError):
+        ra.double_negative_cells(coverage=-0.1)
+
+
+def test_the_inflation_is_about_five_orders_of_magnitude():
+    d = ra.THE_CORRELATION_ASSUMPTION_WAS_MINE_AND_IT_WAS_WRONG
+    assert d["the_inflation"] > 1e4
+    assert d["in_logs"] == pytest.approx(11.7, abs=0.2)
+    # And it must be computed from the two sizes, not asserted.
+    assert d["the_inflation"] == pytest.approx(1.5e8 / 1284.0, rel=1e-6)
+
+
+def test_the_corrected_work_term_is_much_smaller_but_the_floor_is_not():
+    corrected = ra.required_rate_decomposed(ra.BLIND_SPOT_NET_GROWTH_PER_DAY,
+                                            ra.double_negative_cells())
+    as_modelled = ra.required_rate_decomposed(ra.BLIND_SPOT_NET_GROWTH_PER_DAY,
+                                              pe.blind_spot_initial_cells())
+    assert corrected < as_modelled
+    assert corrected == pytest.approx(0.055, abs=0.002)
+    # The floor is untouched: both remain above it, and neither can go below.
+    assert corrected > ra.BLIND_SPOT_NET_GROWTH_PER_DAY
+
+
+def test_the_error_is_owned_as_mine_and_route_specific():
+    d = ra.THE_CORRELATION_ASSUMPTION_WAS_MINE_AND_IT_WAS_WRONG
+    assert "what_i_assumed" in d
+    assert "ON DAY ZERO" in d["why_independence_is_the_right_default_for_ROUTE_8"]
+    assert "applied route 4's assumption to route 8" in \
+        d["why_independence_is_the_right_default_for_ROUTE_8"]
+    assert "FIVE ORDERS OF MAGNITUDE short" in d["what_the_earlier_module_did_test"]
+
+
+def test_correcting_the_error_is_not_claimed_to_close_route_8():
+    d = ra.THE_CORRELATION_ASSUMPTION_WAS_MINE_AND_IT_WAS_WRONG
+    t = d["what_this_does_not_change"]
+    assert "the floor" in t
+    assert "progresses just as surely" in t
+    assert "does not by itself close route 8" in t
+
+
+def test_the_measured_resistant_fraction_is_recorded_with_its_method():
+    d = ra.MEASURED_PREEXISTING_RESISTANT_FRACTION
+    assert d["median"] < d["mean"]
+    assert "sample_initial_state" in d["how_it_was_obtained"]
+    assert 0.0 < d["fraction_of_draws_with_any_resistant_cell"] < 1.0
+
+
+def test_toceranib_maintenance_is_recorded_as_the_direct_floor_holder_test():
+    d = ra.TOCERANIB_MAINTENANCE_WAS_TRIED_AND_FAILED
+    assert "DOES NOT IMPROVE" in d["the_result"]
+    assert "SPLENIC hemangiosarcoma" in d["the_trial"]
+    assert "clears the duration criterion" in d["why_it_was_a_strong_floor_holder_candidate"]
+    assert "closest thing to a direct test" in d["why_it_matters_most_of_all_the_negatives"]
+
+
+def test_the_tally_covers_four_failures_and_one_success():
+    d = ra.EVERY_MAINTENANCE_STRATEGY_IN_THIS_DISEASE_HAS_FAILED
+    assert len(d["the_tally"]) == 4
+    assert "SINGLE SHORT CYCLE" in d["the_one_thing_that_worked"]
+    assert "Four negatives and one positive" in d["THE_PATTERN"]
+
+
+def test_the_pattern_is_flagged_as_uncontrolled():
+    d = ra.EVERY_MAINTENANCE_STRATEGY_IN_THIS_DISEASE_HAS_FAILED
+    t = d["the_caution"]
+    assert "not tests of route 8" in t
+    assert "not a controlled comparison" in t
+
+
+def test_the_empirical_verdict_is_linked_to_the_simulation_finding():
+    d = ra.EVERY_MAINTENANCE_STRATEGY_IN_THIS_DISEASE_HAS_FAILED
+    assert "agree on the shape of the answer" in d["and_it_matches_what_the_model_found_independently"]
+    # The simulation claim it refers to must still exist.
+    assert ra.PLASTICITY_RESCUE is not None

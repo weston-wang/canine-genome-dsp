@@ -31,6 +31,7 @@ import math
 
 from .hsa_persister_evidence import (
     BLIND_SPOT_NET_GROWTH_PER_DAY,
+    TUMOR_CELLS,
     blind_spot_initial_cells,
     required_rate_for_course,
     viability_after,
@@ -1186,4 +1187,137 @@ THE_PINCER_VERDICT_AFTER_THE_TRIAL = {
                                                            "an attractive mechanism, no prior-art "
                                                            "search, and a conclusion one rank "
                                                            "stronger than the evidence.",
+}
+
+
+# =============================================================================================
+# THE CORRELATION I ASSUMED, WHICH INFLATED THE PROBLEM BY FIVE ORDERS OF MAGNITUDE.
+#
+# Every route-8 probe, including the ones in `hsa_antigen_adequacy`, built the blind spot as
+#
+#     init[6] = positive * (1 - phi)
+#
+# which asserts that the ENTIRE antigen-null fraction is also drug-resistant -- a resistant fraction
+# of five percent. The model's own pre-existing resistance seeding produces a resistant fraction of
+# about 8.6e-6 (median over 2000 draws). I overrode the model's own parameter by roughly 6000-fold
+# and never noticed, because the override was implicit in how the compartment was constructed.
+# =============================================================================================
+
+MEASURED_PREEXISTING_RESISTANT_FRACTION = {
+    "median": 8.56e-6,
+    "mean": 1.06e-4,
+    "how_it_was_obtained": "2000 draws of `mapk_resistance.sample_initial_state` with this "
+                           "analysis's own seeding weights and pre-existing probability, summing "
+                           "clones 1-3 and dividing by total burden.",
+    "fraction_of_draws_with_any_resistant_cell": 0.72,
+}
+
+
+def double_negative_cells(coverage: float = 0.95, resistant_fraction: float = 8.56e-6,
+                          burden: float = 0.3, tumour_cells: float = TUMOR_CELLS) -> float:
+    """Cells that are BOTH antigen-null and drug-resistant, if the two are independent."""
+    if not 0.0 <= coverage < 1.0:
+        raise ValueError("coverage must lie in [0, 1)")
+    return float(burden * (1.0 - coverage) * resistant_fraction * tumour_cells)
+
+
+THE_CORRELATION_ASSUMPTION_WAS_MINE_AND_IT_WAS_WRONG = {
+    "what_i_assumed": "that antigen-nullity and drug resistance are perfectly correlated -- every "
+                      "cell lacking the vaccine antigen also carries a resistance mechanism. That "
+                      "gives a dangerous compartment of 0.3 * 0.05 * 1e10 = 1.5e8 cells.",
+    "what_the_model_itself_says": "the pre-existing resistant fraction is about 8.6e-6. Under "
+                                  "independence the double-negative compartment is 0.3 * 0.05 * "
+                                  "8.6e-6 * 1e10, about 1300 cells.",
+    "the_inflation": 1.5e8 / 1284.0,
+    "in_logs": math.log(1.5e8 / 1284.0),
+    "why_independence_is_the_right_default_for_ROUTE_8": "route 8 is antigen inadequacy ON DAY ZERO "
+                                                         "-- baseline heterogeneity in expression "
+                                                         "level -- not antigen loss acquired under "
+                                                         "immune pressure. A cell that happens not "
+                                                         "to express surface vimentin has no "
+                                                         "mechanistic reason to also carry a "
+                                                         "pre-existing PIK3CA-pathway mutation. "
+                                                         "Correlation is the right default for ROUTE "
+                                                         "4, where loss is acquired under selection, "
+                                                         "and I applied route 4's assumption to "
+                                                         "route 8.",
+    "what_the_earlier_module_did_test": "`hsa_antigen_adequacy` reports that 'splitting the null "
+                                        "fraction half drug-sensitive and half drug-resistant gives "
+                                        "0.000 as well'. That is true, and it stopped FIVE ORDERS OF "
+                                        "MAGNITUDE short of the independent value. Testing 0.5 when "
+                                        "the model implies 8.6e-6 is not a sensitivity analysis.",
+    "what_this_changes": "the work term. ln(1.5e8) = 18.8 natural logs becomes ln(1300) = 7.2. The "
+                         "one-year course requirement falls from 0.090/day to 0.055/day, a 15.2% "
+                         "three-day kill.",
+    "what_this_does_not_change": "the floor. A compartment of 1300 cells growing at 0.0334/day "
+                                 "reaches the detection threshold in about 330 days and progresses "
+                                 "just as surely as one of 1.5e8. Size sets the work, never the "
+                                 "floor -- which is the structural result restated, and it is why "
+                                 "correcting this error does not by itself close route 8.",
+    "the_uncomfortable_part": "this error made the problem look five orders of magnitude harder than "
+                              "the model's own parameters imply, and it survived every previous pass "
+                              "including one explicitly hunting for assumptions that favoured my "
+                              "conclusions. It was invisible because it lived in how the compartment "
+                              "was CONSTRUCTED rather than in a number anyone would think to check.",
+}
+
+# =============================================================================================
+# THE PATTERN ACROSS EVERY ADJUVANT TRIAL IN THIS DISEASE.
+# =============================================================================================
+
+TOCERANIB_MAINTENANCE_WAS_TRIED_AND_FAILED = {
+    "citation": "Gardner et al. 2015, BMC Vet Res, PMID 26062540",
+    "why_it_was_a_strong_floor_holder_candidate": "toceranib is an approved canine tyrosine kinase "
+                                                  "inhibitor given chronically for years, so it "
+                                                  "clears the duration criterion outright. It hits "
+                                                  "VEGFR2/PDGFR/KIT -- a different kinase axis from "
+                                                  "the PI3K/mTOR resistance this compartment "
+                                                  "carries -- in a tumour of endothelial origin that "
+                                                  "should depend on that axis.",
+    "the_trial": "43 dogs, stage I-II SPLENIC hemangiosarcoma, splenectomy then five cycles of "
+                 "doxorubicin, then toceranib MAINTENANCE at 3.25 mg/kg every other day in the 31 "
+                 "dogs still free of metastasis.",
+    "the_result": "median disease-free interval 161 days and median survival 172 days in the "
+                  "toceranib-treated dogs. 'The use of toceranib following DOX chemotherapy DOES NOT "
+                  "IMPROVE either disease free interval or overall survival in dogs with stage I or "
+                  "II HSA.'",
+    "why_it_matters_most_of_all_the_negatives": "this is a chronic maintenance agent, in this exact "
+                                                "disease, in this exact adjuvant setting, doing "
+                                                "exactly what a floor-holder is supposed to do. It "
+                                                "is the closest thing to a direct test of the "
+                                                "floor-holding strategy that exists, and it "
+                                                "produced nothing.",
+}
+
+EVERY_MAINTENANCE_STRATEGY_IN_THIS_DISEASE_HAS_FAILED = {
+    "the_tally": {
+        "metronomic chemotherapy (61 dogs, splenic HSA)": "no improvement in outcome",
+        "toceranib maintenance (43 dogs, splenic HSA)": "no improvement in DFI or survival",
+        "inhaled IL-15 NK augmentation (canine OSA, phase 2)": "survival INFERIOR, halted for futility",
+        "eBAT intensified to three cycles (25 dogs, splenic HSA)": "greater toxicity, reduced efficacy",
+    },
+    "the_one_thing_that_worked": "eBAT as a SINGLE SHORT CYCLE given early, between splenectomy and "
+                                 "chemotherapy: 6-month survival from under 40% to about 70% in 23 "
+                                 "dogs, with six long-term survivors.",
+    "THE_PATTERN": "every attempt to add a sustained or intensified agent after surgery and "
+                   "chemotherapy in canine splenic hemangiosarcoma has failed. The only intervention "
+                   "that improved survival was one short course given early. Four negatives and one "
+                   "positive, all pointing the same way.",
+    "why_this_is_the_most_important_finding_in_the_module": "it is an EMPIRICAL verdict on the "
+                                                            "floor-holding strategy, and it is "
+                                                            "negative. The decomposition said route "
+                                                            "8 needs a permanent holder; the "
+                                                            "clinical record of this disease says "
+                                                            "permanent holders do not work here and "
+                                                            "early elimination does.",
+    "and_it_matches_what_the_model_found_independently": "the finite-course simulation found that a "
+                                                         "short continuous course closes route 8 and "
+                                                         "that pulsing or repeating does not. Four "
+                                                         "trials and one simulation, arrived at "
+                                                         "separately, agree on the shape of the "
+                                                         "answer.",
+    "the_caution": "these trials are not tests of route 8. None of them measured an antigen-null "
+                   "drug-tolerant compartment, and their failure has many possible explanations "
+                   "besides the one being drawn here. This is a pattern across endpoints, not a "
+                   "controlled comparison.",
 }
