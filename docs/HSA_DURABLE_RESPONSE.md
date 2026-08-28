@@ -2185,11 +2185,42 @@ already used.
 **The caveats, load-bearing one first:**
 
 1. **If the compartment also resists doxorubicin it is a *triple* negative and nothing covers it.**
-   Hemangiosarcoma is clinically chemoresistant — doxorubicin roughly doubles a short median — so a
-   substantial anthracycline-resistant fraction is entirely plausible.
+   I checked this rather than leaving it as an assumption, and it is **true of a mutation, false of a
+   state.** Hangauer's opening sentence: persister cells *"survive cytotoxic exposure to **targeted
+   therapy or chemotherapy** through poorly understood reversible, nonmutational mechanisms"* — and he
+   derived persisters from carboplatin/paclitaxel as readily as from lapatinib. If the compartment is
+   *tolerant* rather than *mutant*, the state that defeats the targeted agents defeats the
+   chemotherapy too, doxorubicin supplies none of its 3.1–5.1 logs, and eBAT alone is 0.000.
+   Route 8's resistance as constructed here is genetic — pre-existing mechanisms with elevated IC50 at
+   day zero — so the closure is valid *within the model*. No study reports cross-resistance between
+   PI3K/mTOR resistance and anthracyclines in this disease: the assumption is **unexamined**, not
+   contradicted. The clinical hint cuts against it — a disease where doxorubicin only doubles a
+   three-month median is not obviously one where chemotherapy clears a resistant subcompartment.
 2. Both log estimates come from whole-tumour median survival applied to a subcompartment.
 3. eBAT's targets on this compartment are unstained.
 4. **The compartment itself has never been observed in this disease.**
+
+### The convergence: one measurement decides all of it
+
+Genetic-versus-state is the axis this route turns on, and it turns on it **three separate times**:
+
+| question | if genetic | if a tolerant state |
+|---|---|---|
+| is the antigen loss deletion or silencing? | permanent sanctuary | leaks — the vaccine drains it free |
+| is the resistance a mutation or tolerance? | target-specific → **doxorubicin + eBAT close it** | survives chemo too → that closure fails |
+| can phenotypic reversion drain it? | no | yes — and the ferroptosis route applies |
+
+These are not three experiments. They are **one tissue and one assay class**: sequence the antigen
+locus and the presentation machinery, and sequence the resistance loci, in the drug-tolerant fraction.
+The whole of route 8 reduces to whether what is happening in that compartment is **written in the DNA
+or is a state the cell is passing through.**
+
+**And route 8 has a closure under either answer — they are just different closures.** Genetic means a
+permanent sanctuary that plasticity cannot drain, but target-specific resistance that the standard of
+care plus eBAT closes. A tolerant state means the standard-of-care closure fails, but plasticity can
+drain it and the persister-directed ferroptosis route applies. Neither answer is uniformly good news,
+and **not needing a particular answer to come back favourably is a materially better position than the
+alternative.**
 
 ### Final position
 
