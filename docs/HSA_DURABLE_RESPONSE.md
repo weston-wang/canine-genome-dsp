@@ -1645,6 +1645,9 @@ ln(10)/335 = 0.007/day against a 0.090 ask.
 | continuous | 3620 | 0.039/day | 11% | 259× |
 | two years | 700 | 0.060/day | 17% | 50× |
 | **one year** | **335** | **0.090/day** | **24%** | **24×** |
+
+*(These are the coin-flip rates from the deterministic form. The stochastic check below raises the
+one-year figure to 0.102/day for 99% confidence — a 26% three-day kill.)*
 | six months | 152 | 0.157/day | 38% | *fails at every rate tested* |
 
 Cutting ten years to one costs **roughly a doubling of the rate — a three-day kill going from 14% to
@@ -1670,10 +1673,47 @@ artifact — but three things could still make it wrong:
   boundary. At 0.075/day a one-year course leaves ~140 cells and returns 0.000; at 0.100/day it
   reaches ~0.03 of a cell and returns 1.000. **The decision is made in a two-log window — precisely
   where a deterministic model is least trustworthy.** A birth-death formulation would replace the step
-  with an extinction probability. I have not run one.
+  with an extinction probability. *(Now run — see below. The fear was wrong in the reassuring
+  direction.)*
 - **Sanctuary sites.** The compartment is modelled as well-mixed and uniformly exposed. Any site the
-  agent does not reach breaks the extinction argument outright.
+  agent does not reach breaks the extinction argument outright. **This one is not answered.**
 - The reassuring one: **logarithmic sensitivity to N₀**, as above.
+
+### The stochastic check, which resolves that caveat and moves one of my numbers
+
+It doesn't need Monte Carlo. A linear birth–death process has a closed-form extinction probability,
+and the fitted dynamics supply both its rates — intrinsic growth 0.055/day, baseline death
+0.055 − 0.0334, plus the agent on top. The reconstructed net declines reproduce the ones measured off
+the simulated trajectories to three decimals (0.0166/0.0416/0.0666 against 0.0167/0.0416/0.0665).
+
+| course | 1% extinct | 50% extinct | 99% extinct | deterministic form |
+|---|---|---|---|---|
+| continuous (3620 d) | 0.0374 | 0.0380 | 0.0392 | 0.0386 |
+| two years (700 d) | 0.0564 | 0.0592 | 0.0654 | 0.0603 |
+| **one year (335 d)** | 0.0828 | **0.0886** | **0.1016** | **0.0896** |
+| pulsed yr 1 (167 d) | 0.1344 | 0.1459 | 0.1717 | 0.1461 |
+| six months (152 d) | 0.1446 | 0.1572 | 0.1855 | 0.1573 |
+
+**Stochasticity sharpens the step rather than smearing it.** Per-lineage survival gets raised to the
+power of the starting population, so with 1.5 × 10⁸ cells a per-lineage survival of one in ten million
+still gives a population that essentially never dies out, and one in ten billion gives one that
+essentially always does. The 1%→99% transition spans just 0.019/day for a one-year course — under a
+quarter of its own midpoint. And the stochastic 50% rate **agrees with the deterministic closed form
+to within 2% for every schedule**: two independent derivations of the same threshold.
+
+**But it corrects one of my numbers.** The deterministic form gives the rate at which extinction
+becomes *more likely than not*. Quoting 0.090/day as the one-year requirement was quoting a coin flip.
+**At 99% confidence the one-year course needs 0.102/day** — a three-day kill of 26.2% rather than
+23.6%. No conclusion changes; the number an experimentalist should be handed does.
+
+The logarithmic robustness survives intact: a ten-fold change in the blind spot's size moves the
+one-year midpoint by 0.007/day (0.0815 / 0.0886 / 0.0957 across two decades), matching ln(10)/335
+exactly.
+
+**What this does not answer is sanctuary sites.** Birth–death assumes every lineage is independent and
+uniformly exposed. A subpopulation the agent never reaches is not a low-probability survival — it is a
+certainty, and no rate fixes it. Item 7 in the open list is **downgraded, not removed**: the
+deterministic floor is no longer load-bearing, but uniform exposure still is.
 
 ### Verdict on route 8's dangerous case
 
@@ -1691,7 +1731,8 @@ deterministic extinction floor. Eight items remain open in
 
 **The named experiment, with reagents that already exist:** derive persisters from Cindy-HSA, Den-HSA
 and SB under PI3K/mTOR inhibition; measure their three-day viability under a GPX4 or FSP1 inhibitor;
-convert with `rate_from_burden_reduction`; compare against `required_rate_for_course(335)` = **0.090/day.**
+convert with `rate_from_burden_reduction`; compare against **0.102/day** (the 99%-confidence one-year requirement; `required_rate_for_course(335)`
+gives 0.090, which is the coin-flip rate).
 
 **But do the antigen-retention stain first.** It costs one experiment and can make all of the above
 unnecessary.
@@ -1711,7 +1752,7 @@ unnecessary.
 | 5 | splenic rupture / haemorrhage | **OPEN** → partially closed (§5) |
 | 6 | vaccine failure without antigen loss | **OPEN** → closable (§5) |
 | 7 | disease outside the resected compartment | **OPEN** → already closed (§5) |
-| 8 | antigen inadequacy on day zero | **CLOSED conditional on a named experiment** (§3h, §3i) — harmless if drug-sensitive. If it overlaps resistance: either 75% restored antigen presentation plus the second drug continued indefinitely (0.873), or a **one-year** persister-directed ferroptosis course at 0.090/day (1.000). The second needs a 24% three-day kill and 6–47% transfer — but rests on a deterministic extinction floor, and no drug has been shown to do it |
+| 8 | antigen inadequacy on day zero | **CLOSED conditional on a named experiment** (§3h, §3i) — harmless if drug-sensitive. If it overlaps resistance: either 75% restored antigen presentation plus the second drug continued indefinitely (0.873), or a **one-year** persister-directed ferroptosis course at 0.102/day (1.000). The second needs a 26% three-day kill and 6–47% transfer, and a stochastic birth–death treatment agrees with it — but it assumes uniform exposure, and no drug has been shown to do it |
 
 Routes 1–3 are closed **by construction, not by potency**: none of these resistance lesions requires
 shedding the antigen a real HSA vaccine targets, so the vaccine still sees those cells. Route 3 sets
@@ -1948,7 +1989,7 @@ Converting that requirement into the units the assays report is what changed the
 transfer suffices, the same band as the vaccine-height routes. And the agent does **not** need a
 decade: the course has to do a fixed amount of work, driving the blind spot from 1.5 × 10⁸ cells below
 one, which gives a closed form (`applied ≥ 0.0334 + ln N₀ / days`) that predicts every simulated
-threshold. **A one-year course at 0.090/day reaches 1.000**, cutting the duration shortfall from 261×
+threshold. **A one-year course reaches 1.000** — at 0.090/day on a coin flip, 0.102/day with 99% confidence, cutting the duration shortfall from 261×
 to 24×. The disease-specific anchor exists too — three canine hemangiosarcoma lines sit in the canine
 ferroptosis panel, one from a Golden Retriever and one PIK3CA-mutant, in the sarcoma class that
 clustered ferroptosis-*sensitive*.
@@ -1958,7 +1999,7 @@ the field's own 2026 verdict on GPX4 inhibitors is "high toxicity, poor selectiv
 bioavailability"; no persister has ever been derived from those three canine lines; and the entire
 finite-course result rests on a deterministic extinction floor whose decisive calls happen in a
 two-log window. It is **closed conditional on a named experiment** — derive persisters from Cindy-HSA,
-Den-HSA and SB, measure a three-day viability, compare against 0.090/day — and the antigen-retention
+Den-HSA and SB, measure a three-day viability, compare against 0.102/day — and the antigen-retention
 stain still comes first, because it can make all of it unnecessary.
 
 **Which leaves bleeding as the binding constraint on survival**, not the cancer. Every escape route
@@ -1989,9 +2030,10 @@ and it is the difference between roughly 0.53 and 0.85 at ten years.
    experiment, and if coverage is retained on drug-tolerant cells it makes §3i unnecessary entirely.
 9. **Derive persisters from Cindy-HSA, Den-HSA and SB and measure their three-day viability under a
    GPX4 or FSP1 inhibitor** (§3i). The reagents exist and the comparison is a single number:
-   `required_rate_for_course(335)` = 0.090/day. Every ferroptosis result in this analysis is on
-   *parental* lines, which is the wrong cell.
-10. **Re-run the finite schedules stochastically.** The one-year result depends on a deterministic
-    extinction floor; a birth–death formulation would replace the step with an extinction probability
-    and give a real number for the 0.075/day case instead of a 0.000 that means "about a hundred cells
-    left."
+   0.102/day at 99% confidence (0.090 is the coin-flip rate). Every ferroptosis result in this
+   analysis is on *parental* lines, which is the wrong cell.
+10. ~~**Re-run the finite schedules stochastically.**~~ **Done** (§3i). Birth–death agrees with the
+    deterministic form to within 2% and *sharpens* the transition rather than blurring it; it raised
+    the one-year requirement from 0.090 to 0.102/day at 99% confidence. What replaces it: **test
+    whether the blind spot has sanctuary sites.** Uniform exposure is now the load-bearing
+    assumption, and a subpopulation the agent never reaches is a certainty no rate can fix.
