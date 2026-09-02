@@ -417,7 +417,139 @@ PMID 33961622) — though reversal raises normal-tissue exposure, so it is not f
 
 ---
 
-## 10. The answer
+## 10. The combination search: every mechanism, every escape, searched rather than proposed
+
+Sections 1–9 enumerated escape routes in prose and asserted their closures. That is how the same
+route can be CLOSED in one place and OPEN in another. This section replaces the assertions with a
+model in which **coverage is derived** and the combination is **searched** — the method the
+histiocytic-sarcoma analysis used, applied to lymphoma (`core/regimen.py`,
+`core/lymphoma_catalogue.py`, `core/lymphoma_search.py`).
+
+**Escapes and agents are located by axis and height.** An agent fails an escape in exactly three
+derived ways, never by assertion:
+
+| failure mode | rule | lymphoma example |
+|---|---|---|
+| **position** | on a serial axis a block covers lesions *above* it and is defeated *at or below* | an NF-κB-independence lesion defeats a BTK inhibitor acting above it |
+| **display** | an antigen-directed effector dies with its target — and only if *every* antigen it targets is gone | CD20 loss defeats a CD20 CAR; a **tandem CD19/CD20 CAR survives it** |
+| **efflux** | a pump clone defeats exactly its **substrates** | P-gp defeats doxorubicin and vincristine, **not prednisolone** (measured, PMID 24975508) |
+
+and delivery caps everything: **effective kill = potency × access × duty**, priced *per compartment*.
+
+### The eleven escapes, across eight axes
+
+Two efflux pumps (P-gp, BCRP), apoptosis evasion, CD20 loss, CD19 loss, BCR/NF-κB independence,
+PI3K bypass, the drug-tolerant persister, autophagy independence, immune exhaustion, and B-lineage
+switch. Every axis carries its own "independence" escape so that no agent is handed a free pass its
+neighbours do not get.
+
+### Three filters, and what survives all of them
+
+- **Persister** → the agent must not be division-gated. This excludes *every conventional cytotoxic*:
+  doxorubicin, vincristine, cyclophosphamide, rabacfosadine, lomustine, radiation.
+- **Antigen loss** → the effector must not depend on a single displayed target.
+- **Efflux** → the agent must not be a P-glycoprotein substrate. This excludes the two most active
+  drugs in CHOP, and it is the filter that is *measured in this disease*.
+
+The intersection is short and **contains no conventional chemotherapy**: prednisolone,
+hydroxychloroquine, venetoclax (T-cell only), a BTK inhibitor, and a cellular immune effector.
+
+### What the search returns
+
+Minimal = smallest closing combination; robust = best worst-case margin with ≤5 obtainable agents.
+The bar is 0.0903/day.
+
+| compartment | phenotype | minimal closing regimen | robust regimen (margin) |
+|---|---|---|---|
+| systemic | B | prednisolone + CD20 CAR-T (+0.0097) | doxorubicin + vincristine + prednisolone + CD20 CAR-T + HCQ (**+0.2297, 3.5× bar**) |
+| systemic | T | prednisolone + HCQ (+0.0097) | doxorubicin + vincristine + anti-PD-1 + HCQ + **venetoclax** (**+0.1997, 3.2× bar**) |
+| CNS sanctuary | B | prednisolone + intrathecal cytarabine + CD20 CAR-T + HCQ (+0.0097) | + craniospinal radiotherapy (**+0.0270, 1.3× bar**) |
+| **CNS sanctuary** | **T** | **nothing obtainable closes it** | — |
+
+Two things to read off this table. First, the **robust systemic regimens still contain doxorubicin
+and vincristine even though the pump clone defeats them** — they earn their place against the other
+nine escapes, and the model correctly declines to throw a drug away for failing one. Second, the
+**minimal** combinations sit only +0.0097 over the bar; a two-agent regimen with no headroom is not
+the recommendation, the robust one is.
+
+### The sanctuary needed a different modality, not a bigger dose
+
+The first search left the CNS short on exactly three escapes — CD20 loss, CD19 loss and immune
+exhaustion — all *immune-axis* escapes, which by the own-axis rule must be covered by *non-immune*
+agents, and in the CNS those were throttled to 5% access. The gap was therefore a **delivery** gap.
+Adding the agents that are the real clinical answer to it — **intrathecal cytarabine**, high-dose
+methotrexate and craniospinal radiotherapy — closes the B-cell sanctuary, and the weakest link then
+*moves* to the persister. Closing one gap exposing the next is the method working.
+
+### The one cell that does not close, and exactly why
+
+**CNS sanctuary, T-cell.** Every obtainable agent combined leaves a worst margin of **−0.0127**, and
+the binding escape is the **drug-tolerant persister**, reached at 0.0776/day against the 0.0903 bar —
+short by a factor of **1.16**. The reason is precise: the persister demands a non-division-gated
+agent, and in the CNS the ones available to T-cell disease are only prednisolone (0.04),
+hydroxychloroquine (0.03) and venetoclax at small-molecule access (0.008). B-cell disease clears the
+same bar because **CD20 CAR-T adds 0.06 by trafficking across the barrier under its own power**, and
+T-lineage has no obtainable equivalent.
+
+If a CD5/CD52-directed cellular effector existed for dogs, the cell closes immediately
+(prednisolone + intrathecal cytarabine + HCQ + that effector, +0.0097). **So the gap is one missing,
+nameable, buildable object** — not a dose, a schedule, or a delivery trick. The model does not price
+the fratricide hazard such a product faces (a CD5-directed T cell attacks T cells, including
+itself), so that counterfactual is an upper bound.
+
+### The false positive this catalogue caught
+
+The first run returned **"CD20 CAR-T + venetoclax" as the minimal T-cell regimen. T-cell lymphoma is
+CD20-negative** — the agent had no target, and the search could not see it because the catalogue
+offered every agent to every immunophenotype. The correction is not a smaller number: **antigen
+availability is a property of the disease, not of the drug**, so the agent pool itself has to depend
+on immunophenotype. Once corrected, the T-cell arm loses its obtainable cellular effector entirely,
+and the gap the category error had hidden becomes that phenotype's headline finding.
+
+### Assuming early detection
+
+Early detection is usually argued as a timing lever. The model says the real prize is larger and
+different: an escape arising at rate *r* per cell is present with probability 1 − e^(−rN), so **at a
+small enough burden several escapes have not arisen at all** and do not need to be out-killed.
+
+| escape class | rate | P(present) at 10¹¹ | at 10⁸ (early) | at 10⁶ (MRD) |
+|---|---|---|---|---|
+| mutational (efflux, antigen loss, TP53, BCR, PI3K) | 1e-8 | 1.000 | 0.632 | 0.010 |
+| **phenotypic (persister, exhaustion)** | 1e-7 | 1.000 | **1.000** | 0.095 |
+| rare (autophagy independence, lineage switch) | 1e-9 | 1.000 | 0.095 | 0.001 |
+
+Expected escapes present: **11.0** at clinically obvious burden, **6.6** early-detected, **0.26** at
+MRD level. So early detection genuinely **shrinks the problem — it removes the rare mutational
+escapes**. But it leaves the **phenotypic** ones untouched: the persister and immune exhaustion are
+still effectively certain at 10⁸ cells, **so the non-division-gated agent stays mandatory no matter
+how early the disease is found.** Early detection shrinks the problem; it does not change its shape.
+
+And it **does not open the sanctuary**: the CNS answer is identical early and late, because the
+escapes that bind there are present at both burdens. Finding the disease earlier does not help with
+the compartment the drug cannot reach.
+
+> **One result must be read as fragile, not as a recommendation.** Against early-detected disease
+> the search returns **hydroxychloroquine alone** as sufficient systemically. That holds only
+> because the single escape that defeats it — autophagy independence — has not yet arisen at that
+> burden, and it rests on an assumed potency sitting +0.0097 over the bar. A single agent with no
+> headroom and one unarisen counter-escape is a knife-edge. The robust multi-agent regimens are what
+> the analysis supports.
+
+### Honesty accounting
+
+Every potency in the catalogue is **assumed** except one: venetoclax, whose EC50 split by
+immunophenotype is measured (PMID 36433867). The mechanisms are far better evidenced than the
+magnitudes — P-gp efflux and its reversal, CD20 loss, HCQ's tumour accumulation, the transplant cure
+fraction and the CAR-T tolerability are all real in this disease — but **the per-day kill rates that
+decide whether a combination clears the bar are not**. The search reports that count for every
+regimen it returns, because a combination assembled entirely from assumed potencies is a hypothesis,
+not a result.
+
+*Tests: `tests/test_lymphoma_search.py` re-derives all of the above from the model.*
+
+---
+
+## 11. The answer
 
 A lasting remission runs through **immunotherapy**, not chemotherapy. CHOP makes the tumour shrink —
 completely, in ~90%+ of dogs — and does essentially nothing to stop it returning, because the clone
