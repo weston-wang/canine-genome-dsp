@@ -40,7 +40,7 @@ Optional, both free and one-time:
 ## Copy-paste metadata (use for Zenodo and any preprint server)
 
 **Title**
-> MTAP loss and PRMT5 synthetic lethality as an untested, non-reroutable maintenance target in canine histiocytic sarcoma
+> MTAP loss as an untested, genotype-anchored maintenance target in canine histiocytic sarcoma: PRMT5 and MAT2A synthetic lethality
 
 **Authors**
 > Wes Wang   (affiliation: leave blank, or "Unaffiliated" if required)
@@ -48,10 +48,10 @@ Optional, both free and one-time:
 **Resource type**: Preprint  ·  **License**: Creative Commons Attribution 4.0 (CC-BY-4.0)
 
 **Keywords** (these drive discovery — keep them)
-> canine histiocytic sarcoma; MTAP; PRMT5; synthetic lethality; CDKN2A; PTPN11; Bernese Mountain Dog; MEK inhibitor; maintenance therapy; comparative oncology; ctDNA; precision oncology
+> canine histiocytic sarcoma; MTAP; PRMT5; MAT2A; synthetic lethality; CDKN2A; PTPN11; Bernese Mountain Dog; MEK inhibitor; maintenance therapy; comparative oncology; ctDNA; precision oncology
 
-**Abstract** (paste the abstract from the note verbatim; it is written to match how a
-researcher searches — the terms above appear in the first two sentences on purpose)
+**Abstract** (paste verbatim)
+> Canine histiocytic sarcoma (HS) is an aggressive malignancy with a strong breed predisposition (notably the Bernese Mountain Dog) mapping to the CDKN2A/MTAP germline locus, and with somatic MAPK-pathway drivers — chiefly PTPN11/SHP2 — in roughly 60% of tumours. Current translational effort centres on MEK inhibition, now in a canine Phase I, and on ctDNA monitoring of the PTPN11 driver. These pathway targets are reroutable, so durable control depends on surveillance and drug-switching. I note a specific, testable gap: despite MTAP being co-located with the CDKN2A predisposition locus and homozygous MTAP deletion conferring PRMT5 synthetic-lethal dependency in ~10–15% of human cancers, I found no published evaluation of MTAP status or PRMT5-inhibitor sensitivity in canine HS. If an MTAP-null subset exists, two clinical-stage drug classes exploit that deletion — MTA-cooperative PRMT5 inhibitors (including brain-penetrant congeners) and MAT2A inhibitors — offering the most genotype-anchored maintenance option in this disease, complementing the reroutable MEK majority. This anchor is not absolute: acquired PRMT5-inhibitor resistance is documented without MTAP restoration, via MAPK reprogramming, and confers collateral MEK sensitivity — a defined second line rather than an open exit. I outline the hypothesis, a genotype-tiered maintenance-at-emergence (prevention) framing, and a small set of cheap, decisive experiments led by MTAP immunostaining of archived tissue. This is a computational, model-assisted synthesis intended to orient research; it contains no new experimental data.
 
 ---
 

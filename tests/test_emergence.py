@@ -36,11 +36,17 @@ def test_surveillance_lifts_the_reroutable_tier():
     assert lift["absolute_lift"] > 0.05  # detect-and-switch measurably raises P for MAPK
 
 
-def test_surveillance_barely_moves_the_lock():
-    """A locked tier needs no watching, so surveillance should add little -- unlike the reroutable one."""
-    off = _p("MTAP", "Lung / disseminated", with_surveillance=False).p_median
-    on = _p("MTAP", "Lung / disseminated", with_surveillance=True).p_median
-    assert abs(on - off) < 0.05
+def test_surveillance_helps_the_anchored_tier_less_than_the_reroutable_one():
+    """REVISED: the MTAP tier is genotype-ANCHORED, not immune. Acquired PRMT5i resistance via MAPK
+    reprogramming is documented (DOI 10.64898/2026.04.16.719008), so surveillance genuinely helps it
+    too -- just less than it helps a pathway target, which is the honest ordering."""
+    mtap_off = _p("MTAP", "Lung / disseminated", with_surveillance=False).p_median
+    mtap_on = _p("MTAP", "Lung / disseminated", with_surveillance=True).p_median
+    mapk_off = _p("MAPK", "Lung / disseminated", with_surveillance=False).p_median
+    mapk_on = _p("MAPK", "Lung / disseminated", with_surveillance=True).p_median
+    mtap_lift, mapk_lift = mtap_on - mtap_off, mapk_on - mapk_off
+    assert mtap_lift > 0.0                 # not immune to escape -- watching still pays
+    assert mtap_lift < mapk_lift           # but less than for a reroutable pathway target
 
 
 def test_negative_margin_collapses_to_the_no_maintenance_floor():

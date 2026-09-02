@@ -89,7 +89,7 @@ genotype gets a matched pill — what varies is the *strength* of the ten-year h
 
 | Tumour genotype | Rough share | Maintenance pill (all brain-penetrant, oral, continuous) | Durability grade |
 | --- | --- | --- | --- |
-| MTAP deleted | recurrent minority | PRMT5 inhibitor (MTA-cooperative; brain-penetrant **TNG456**, Phase I/II; also TNG462 / BMS-986504) | **Strongest** — non-reroutable, genotype-locked |
+| MTAP deleted | recurrent minority | PRMT5 inhibitor (MTA-cooperative; brain-penetrant **TNG456**, Ph I/II; also TNG462 / BMS-986504). Parallel: **MAT2A inhibitor** (AG-270 class). PRMT5 **PROTAC degraders** emerging | **Strongest** — genotype-anchored (the deletion cannot be undone). *Not absolute*: acquired resistance documented, but it confers collateral **MEK** sensitivity → defined second line |
 | PTEN deleted | minority | PI3K inhibitor (paxalisib) | Strong dependency |
 | CDKN2A deleted, RB1 intact | minority | CDK4/6 inhibitor (abemaciclib) | Strong dependency |
 | SHP2 / KRAS driver | **~59%** | MEK inhibitor (mirdametinib, CNS-penetrant) | Medium — surveillance-dependent |
@@ -205,7 +205,7 @@ lock (gaps 3–4), `ε_surv` = detect-and-switch (gap 3); `Λ` = emergence (gap 
 
 | Genotype tier | P(10-year durable), no surveillance | with detect-and-switch |
 | --- | --- | --- |
-| **MTAP (locked)** | **0.90 [0.76, 0.97]** | ~unchanged (a lock needs no watching) |
+| **MTAP (genotype-anchored)** | **0.71 [0.44, 0.88]** | **0.86** — watching still pays, just less than for a pathway target |
 | MAPK majority (reroutable) | 0.56 [0.25, 0.80] | **0.81 [0.55, 0.93]** |
 | PTEN / CDKN2A (dependency) | 0.60 [0.29, 0.83] | higher |
 | No target (floor) | 0.38 [0.12, 0.65] | modest |
@@ -248,6 +248,62 @@ drug" — each computed from data in hand.
 
 *Numbers are model outputs conditional on documented priors (see `emergence.py`, `pkpd.py`); they are
 calibrated confidence with intervals, not measured durability. Trial data via PubMed.*
+
+---
+
+## Literature sweep (2026) — five findings that changed this analysis
+
+A broad re-check of the literature surfaced five items the earlier drafts missed. One of them
+corrects a load-bearing claim. *Retrieved via PubMed; DOIs linked.*
+
+**1. The MTAP "lock" is not absolute — the central correction.** Acquired resistance to
+MTA-cooperative PRMT5 inhibitors (BMS-986504/MRTX1719) is documented in MTAP-null cells
+**without** restoration of MTAP or loss of MTA — escape proceeds by downstream MAPK
+transcriptional reprogramming ([DOI](https://doi.org/10.64898/2026.04.16.719008)). The earlier
+framing ("you cannot reroute around a deleted gene, therefore the decade is unconditional") was
+too clean: the exit is downstream, not via undoing the deletion. Consequences applied here:
+the tier is relabelled **genotype-anchored** rather than *locked*; its reroute prior in
+`emergence.py` rises from an indefensible 0.02 to **0.18 [0.08–0.35]**; and its ten-year
+probability falls from 0.90 to **0.71 [0.44, 0.88]**. The mitigating half is real, though:
+that resistance confers **collateral sensitivity to MEK inhibition**, so the anchor tier has a
+*defined second line* rather than an open exit — and surveillance now measurably helps it too
+(+0.15), where we previously claimed it needed none.
+
+**2. MAT2A inhibition — a second, independent way to exploit the same MTAP deletion.**
+Inhibiting MAT2A depletes SAM, deepening the MTA-mediated suppression of PRMT5. AG-270/S095033
+completed Phase I in patients selected for CDKN2A/MTAP deletion or MTAP protein loss:
+proof of mechanism (plasma SAM down 54–70%, tumour SDMA reduced), 2 partial responses, 5 with
+stable disease ≥16 weeks, manageable safety ([DOI](https://doi.org/10.1038/s41467-024-55316-5)).
+Next-generation MAT2A inhibitors are being designed **with CNS penetration**
+([DOI](https://doi.org/10.1021/acs.jmedchem.5c02185)). This materially de-risks the single-drug-class
+dependency of the MTAP arm.
+
+**3. PRMT5 PROTAC degraders — a third modality.** Catalytic degradation of PRMT5 is being
+pursued explicitly to overcome intrinsic and acquired resistance to catalytic inhibitors. Also
+worth stating plainly: **no PRMT5 inhibitor has regulatory approval**, despite more than a dozen
+in trials ([DOI](https://doi.org/10.2174/0115680266473173260408073728)).
+
+**4. Canine disseminated HS is frequently *not* metastasis — it is multiple independent
+primaries.** Divergent PTPN11 hotspot mutations were found across tumour sites within the same
+dog; after correcting for hotspot detectability the authors estimate **24–45% of disseminated
+cases harbour clonally independent tumours**, confirmed by NGS in two lines from one patient
+([DOI](https://doi.org/10.1371/journal.pone.0345429)). This is the strongest existing empirical
+support for the premise under this whole analysis — that predisposed dogs genuinely generate
+independent new primaries, which is exactly what maintenance-at-emergence targets. It also
+sharpens two cautions: genotyping a single lesion may not represent the others, and a
+hotspot-only ctDNA assay can miss divergent clones.
+
+**5. Focused ultrasound as a CNS-delivery route.** MR-guided focused ultrasound BBB opening plus
+chemotherapy produced a **~40% increase in overall survival** in a glioblastoma trial — the first
+demonstrated survival benefit for the approach — and FUS BBB opening has been performed safely in
+dogs. This is a delivery lever that does **not** require an intrinsically brain-penetrant molecule,
+bearing directly on the analysis's worst term (CNS reach).
+
+*Also noted:* a 1,824-compound screen across 10 canine HS cell lines identified **duvelisib**
+(PI3Kγ/δ) as selectively active in one molecular subgroup (median IC50 287 nM, sparing normal
+PBMCs, acting through Akt) — better-grounded canine-HS evidence than the transferred PI3K option
+used above ([DOI](https://doi.org/10.1111/vco.70077)); and oncolytic virotherapy against canine HS
+shows early in-vitro activity ([DOI](https://doi.org/10.1007/s11259-026-11428-5)).
 
 ---
 
@@ -552,7 +608,7 @@ practice. It covers the same sites and escapes and gives every genotype a matche
 | CDKN2A maint. (RB1 intact) | palbociclib (CDK4/6) | human-approved, off-label | **best-evidenced:** growth inhibition in *all* canine HS lines + disseminated xenograft, CDKN2A down / Rb preserved ([DOI](https://doi.org/10.1111/vco.12812)) |
 | PTEN maintenance | everolimus / alpelisib (PI3K/mTOR) | approved, off-label | PI3K pathway active in HS lines ([DOI](https://doi.org/10.1111/vco.12812)) |
 | Floor | lomustine cycled + monitoring | vet-standard | Skorupski CCNU data (repo) |
-| **MTAP locked decade** | **no obtainable equivalent** | — | closest: genotype-directed antimetabolite (pemetrexed / thiopurine) ± methionine restriction — non-reroutable target but not continuously dosable → surveillance-grade, not locked |
+| **MTAP locked decade** | **no obtainable equivalent** | — | closest: genotype-directed antimetabolite (pemetrexed / thiopurine) ± methionine restriction — same genotype-anchored target but not continuously dosable → surveillance-grade |
 
 **What makes Tier B's decade hold: switch-on-reroute + molecular monitoring.** Tier B's maintenance
 targets are reroutable, so its decade is *managed*, not guaranteed: dose continuously, catch each new

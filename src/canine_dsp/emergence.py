@@ -131,8 +131,16 @@ def reach_fail_param(site_name: str) -> Param:
 # maintenance_durability.Lock kind, so the four robustness classes get distinct, ordered priors.
 _REROUTE_PRIORS = {
     # lock kind : (center, lo, hi, source)
-    "LOCKED": (0.02, 0.005, 0.06,
-               "MTAP deletion non-reroutable; residual = unknown synthetic-lethal-dependency bypass"),
+    # REVISED (2026): the MTAP tier is NOT non-reroutable. Acquired resistance to MTA-cooperative
+    # PRMT5 inhibitors (BMS-986504/MRTX1719) is documented in MTAP-null cells WITHOUT restoration of
+    # MTAP or reduction of MTA -- escape occurs by downstream MAPK transcriptional reprogramming
+    # (DOI 10.64898/2026.04.16.719008). The prior therefore rises from an earlier, indefensible 0.02.
+    # It stays below the pathway tiers because the dependency is still genotype-anchored (the deletion
+    # cannot be undone), escape needs downstream reprogramming rather than a point mutation, and the
+    # documented escape confers COLLATERAL SENSITIVITY TO MEK -- i.e. a defined second line.
+    "LOCKED": (0.18, 0.08, 0.35,
+               ("genotype-anchored but not absolute: acquired PRMT5i resistance via MAPK reprogramming "
+                "(DOI 10.64898/2026.04.16.719008); collateral MEK sensitivity = defined second line")),
     "REROUTABLE": (0.35, 0.15, 0.60,
                    "pathway (MEK) bypass over 10 y; human targeted-adjuvant recurrence + PMID 39576953"),
     "DEPENDENCY": (0.30, 0.12, 0.55,

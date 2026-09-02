@@ -60,7 +60,9 @@ DUTY_CONTINUOUS = 1.0  # a maintenance pill taken every day
 class Lock(Enum):
     """Can the tumour reroute around the maintenance target?"""
 
-    LOCKED = "genotype-locked (synthetic-lethal on a homozygous deletion; non-reroutable)"
+    LOCKED = ("genotype-anchored (synthetic-lethal on a homozygous deletion). NOT absolute: acquired "
+              "PRMT5i resistance is documented without MTAP restoration, via downstream MAPK "
+              "reprogramming -- but it confers collateral MEK sensitivity, a defined second line")
     REROUTABLE = "pathway target; reroutable in an established lesion"
     DEPENDENCY = "strong dependency, but with known resistance routes"
     FLOOR = "no targetable dependency; monitored surveillance only"
@@ -98,7 +100,10 @@ class Site:
 # the dependency tiers carry no derived margin until an IC50 + Cmax is measured.
 TIERS: tuple[GenotypeTier, ...] = (
     GenotypeTier("MTAP deleted", "recurrent minority",
-                 "PRMT5 inhibitor -- brain-penetrant TNG456 (Ph I/II); also TNG462/BMS-986504",
+                 "PRMT5 inhibitor -- brain-penetrant TNG456 (Ph I/II); also TNG462/BMS-986504. "
+                 "Parallel MTAP-directed option: MAT2A inhibitor (AG-270/S095033 class, Ph I done, "
+                 "CNS-penetrant next-gen). PRMT5 PROTAC degraders emerging for resistance. "
+                 "On acquired resistance -> switch to MEK (collateral sensitivity)",
                  Lock.LOCKED, "tng908", "PRMT5 inhibitor"),
     GenotypeTier("MAPK driver (SHP2/KRAS)", "~59%", "MEK inhibitor (mirdametinib)",
                  Lock.REROUTABLE, "cobimetinib", "mirdametinib"),
@@ -257,11 +262,15 @@ def brain_spread_answer() -> dict:
 # decade then holds *conditionally*, on a monitor-and-switch loop that closes the reroute window.
 SURVEILLANCE_MODEL = {
     "locked_vs_reroutable": (
-        "LOCKED (MTAP/PRMT5): synthetic-lethal on a homozygous deletion; escaping would mean "
-        "re-acquiring a discarded locus, so the margin cannot be eroded -- the decade needs no "
-        "watching. REROUTABLE (MEK for the MAPK majority, PI3K for PTEN, CDK4/6 for CDKN2A): a "
-        "pathway node an established lesion can bypass by upstream/parallel reactivation, so the "
-        "kill is reliable only against a single founding cell -- the decade is conditional."),
+        "GENOTYPE-ANCHORED (MTAP/PRMT5): synthetic-lethal on a homozygous deletion, so the tumour "
+        "cannot escape by re-acquiring the discarded locus -- but this is NOT absolute. Acquired "
+        "resistance to MTA-cooperative PRMT5 inhibitors is documented WITHOUT MTAP restoration or MTA "
+        "loss, via downstream MAPK transcriptional reprogramming (DOI 10.64898/2026.04.16.719008). "
+        "The saving grace is that this escape confers COLLATERAL SENSITIVITY TO MEK, so the anchor "
+        "tier has a defined second line rather than an open exit. It therefore still needs watching, "
+        "just less than a pathway target. REROUTABLE (MEK for the MAPK majority, PI3K for PTEN, "
+        "CDK4/6 for CDKN2A): a pathway node an established lesion can bypass by upstream/parallel "
+        "reactivation, so the kill is reliable only against a single founding cell."),
     "why_it_still_suppresses_at_emergence": (
         "Subcritical branching means every FRESH founding cell is extinguished regardless of lock; "
         "the only way a reroutable tier loses the decade is an established lesion that reroutes and "
@@ -328,7 +337,9 @@ class Durability:
     def robustness(self) -> str:
         """How robust the ten-year hold is, once suppression at emergence is granted."""
         return {
-            Verdict.DURABLE_10Y: "locked (non-reroutable; holds even past the emergence window)",
+            Verdict.DURABLE_10Y: "genotype-anchored (most durable tier; holds past the emergence "
+                                 "window, though acquired resistance is documented and carries a "
+                                 "defined MEK second line)",
             Verdict.SURVEILLANCE_DEPENDENT: "reroute-vulnerable once a lesion establishes; the decade "
                                             "holds conditionally, on a detect-and-switch loop (serial "
                                             "ctDNA + the genotype switch tree) -- see "
@@ -383,8 +394,11 @@ def durability(tier: GenotypeTier, site: Site) -> Durability:
 
     if tier.lock is Lock.LOCKED:
         return Durability(tier, site, k_eff, margin, Verdict.DURABLE_10Y,
-                          "subcritical branching + non-reroutable target: founding cells go extinct "
-                          "with probability 1, so no second primary establishes")
+                          "subcritical branching on a genotype-anchored target: the deletion cannot be "
+                          "undone, so founding cells are reliably suppressed. Not absolute -- acquired "
+                          "PRMT5i resistance via MAPK reprogramming is documented -- but it carries a "
+                          "defined second line (collateral MEK sensitivity), so this remains the most "
+                          "durable tier")
     if tier.lock is Lock.REROUTABLE:
         return Durability(tier, site, k_eff, margin, Verdict.SURVEILLANCE_DEPENDENT,
                           "kill wins against a single founding cell, but an established lesion can "
@@ -479,8 +493,11 @@ def headline() -> str:
         "primary is a single dividing founding cell the matched pill catches before it can reroute "
         "or go dormant. So the ten-year maintenance mechanism applies to the whole breed, not an "
         "MTAP subset. What differs across combinations is ROBUSTNESS, not whether it works: MTAP is "
-        f"genotype-locked ({', '.join(locked_tiers)}) -- non-reroutable, so it holds even past the "
-        "emergence window; the MAPK majority, PTEN and CDKN2A tiers suppress the founding cell at "
+        f"genotype-ANCHORED ({', '.join(locked_tiers)}) -- the deletion cannot be undone, so it is the "
+        "most durable tier and holds past the emergence window; it is NOT absolute, since acquired "
+        "PRMT5i resistance via MAPK reprogramming is documented, but that escape confers collateral "
+        "MEK sensitivity and so has a defined second line. The MAPK majority, PTEN and CDKN2A tiers "
+        "suppress the founding cell at "
         "emergence too but are reroute-vulnerable once a lesion establishes, so they lean on "
         "continuous dosing and catching recurrences early; the floor tier is the immune/cytotoxic "
         "backstop. Brain spread is STRENGTHENED and scoped honestly: the CNS lock no longer leans on "
