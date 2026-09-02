@@ -1,7 +1,12 @@
 import numpy as np
 
 from canine_dsp.control import ControlWeights, optimize_vaccine, trajectory_cost
-from canine_dsp.evolution import EvolutionModel, ImmuneKernels, simulate_evolution, volterra_response
+from canine_dsp.evolution import (
+    EvolutionModel,
+    ImmuneKernels,
+    simulate_evolution,
+    volterra_response,
+)
 
 
 def small_system():

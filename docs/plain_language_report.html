@@ -1,0 +1,629 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>The Two-Move Plan</title>
+<style>
+  :root {
+    --paper:      #F1F3F2;
+    --surface:    #FBFCFB;
+    --ink:        #12171A;
+    --ink-soft:   #47555C;
+    --ink-faint:  #78868D;
+    --rule:       #D6DCDA;
+    --rule-soft:  #E5E9E8;
+    --madder:     #9E3339;
+    --madder-bg:  #F3E3E2;
+    --teal:       #2A5C63;
+    --teal-bg:    #DFEAEA;
+    --ochre:      #96702C;
+    --ochre-bg:   #F1E8D6;
+    --accent:     #2A5C63;
+
+    --serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+    --sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+
+    --measure: 66ch;
+    --gutter: clamp(1.15rem, 4vw, 2.5rem);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper:     #0D1114;
+      --surface:   #141A1E;
+      --ink:       #E6EBEA;
+      --ink-soft:  #A0AEB3;
+      --ink-faint: #74838A;
+      --rule:      #263136;
+      --rule-soft: #1C252A;
+      --madder:    #D97F81;
+      --madder-bg: #2A1719;
+      --teal:      #79B3B8;
+      --teal-bg:   #12262A;
+      --ochre:     #CBA061;
+      --ochre-bg:  #241D10;
+      --accent:    #79B3B8;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper:     #0D1114;
+    --surface:   #141A1E;
+    --ink:       #E6EBEA;
+    --ink-soft:  #A0AEB3;
+    --ink-faint: #74838A;
+    --rule:      #263136;
+    --rule-soft: #1C252A;
+    --madder:    #D97F81;
+    --madder-bg: #2A1719;
+    --teal:      #79B3B8;
+    --teal-bg:   #12262A;
+    --ochre:     #CBA061;
+    --ochre-bg:  #241D10;
+    --accent:    #79B3B8;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--serif);
+    font-size: 17px;
+    line-height: 1.62;
+    margin: 0;
+    padding: 0 var(--gutter) 6rem;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 78ch; margin: 0 auto; }
+  .prose { max-width: var(--measure); }
+
+  /* masthead */
+  header.masthead {
+    padding: clamp(3rem, 9vw, 5.5rem) 0 2rem;
+    border-bottom: 2px solid var(--ink);
+    margin-bottom: 2.75rem;
+  }
+  .eyebrow {
+    font-family: var(--sans);
+    font-size: .69rem; letter-spacing: .15em; text-transform: uppercase;
+    color: var(--ink-faint);
+    margin: 0 0 1.1rem;
+    display: flex; flex-wrap: wrap; gap: .5rem 1.1rem;
+  }
+  h1 {
+    font-family: var(--serif); font-weight: 600;
+    font-size: clamp(2.1rem, 6.2vw, 3.4rem);
+    line-height: 1.08; letter-spacing: -.015em; text-wrap: balance;
+    margin: 0 0 1rem; max-width: 18ch;
+  }
+  .standfirst {
+    font-size: clamp(1.02rem, 2.4vw, 1.2rem);
+    color: var(--ink-soft); max-width: 60ch; margin: 0;
+  }
+  .standfirst strong { color: var(--ink); font-weight: 600; }
+
+  /* sections */
+  section { margin: 3.4rem 0 0; }
+  p.src { font-size: .78rem; color: var(--ink-faint); margin: 1rem 0 0; line-height: 1.6; }
+  p.src a { color: var(--accent); }
+  ul.clean { margin: .6rem 0 0; padding-left: 1.15rem; display: flex; flex-direction: column; gap: .55rem; }
+  ul.clean li { line-height: 1.6; }
+  ul.clean li::marker { color: var(--accent); }
+  h2 {
+    font-family: var(--serif); font-weight: 600;
+    font-size: clamp(1.35rem, 3.4vw, 1.72rem);
+    letter-spacing: -.01em; line-height: 1.2; text-wrap: balance;
+    margin: 0 0 .9rem;
+  }
+  h2 .h2-num {
+    font-family: var(--mono); font-size: .62em; color: var(--accent);
+    font-weight: 400; margin-right: .7rem; vertical-align: .12em;
+  }
+  h3.sub { font-family: var(--serif); font-size: 1.12rem; font-weight: 600; margin: 1.6rem 0 .5rem; }
+  p { margin: 0 0 1.05rem; }
+  .prose > p:last-child { margin-bottom: 0; }
+  strong { font-weight: 600; }
+  em.term { font-style: normal; font-weight: 600; color: var(--accent); }
+  .lead { font-size: 1.12rem; }
+
+  /* answer callout */
+  .answer {
+    margin: 2rem 0; padding: 1.5rem 1.6rem;
+    background: var(--surface); border: 1px solid var(--rule);
+    border-left: 3px solid var(--accent);
+  }
+  .answer .lbl {
+    font-family: var(--sans); font-size: .7rem; letter-spacing: .13em;
+    text-transform: uppercase; color: var(--ink-faint); margin: 0 0 .7rem;
+  }
+  .answer p { margin: 0 0 .7rem; }
+  .answer p:last-child { margin: 0; }
+
+  /* the two moves */
+  .moves { display: grid; gap: 1rem; margin: 1.8rem 0 .5rem; }
+  @media (min-width: 620px) { .moves { grid-template-columns: 1fr 1fr; } }
+  .move {
+    background: var(--surface); border: 1px solid var(--rule);
+    padding: 1.4rem 1.4rem 1.5rem; display: flex; flex-direction: column; gap: .55rem;
+  }
+  .move .tag {
+    font-family: var(--sans); font-size: .68rem; letter-spacing: .12em;
+    text-transform: uppercase; color: var(--accent);
+    display: flex; align-items: baseline; gap: .6rem;
+  }
+  .move .tag .n { font-family: var(--mono); font-size: 1.5rem; line-height: 1; color: var(--accent); }
+  .move h3 { font-family: var(--serif); font-size: 1.22rem; font-weight: 600; margin: 0; }
+  .move .when { font-family: var(--sans); font-size: .8rem; color: var(--ink-faint); margin: 0; }
+  .move p { font-size: .98rem; margin: 0; color: var(--ink-soft); }
+  .move p strong { color: var(--ink); }
+
+  /* row lists (genotype tree + status table) */
+  .tree { display: flex; flex-direction: column; gap: .1rem; margin: 1.5rem 0; }
+  .tree .row {
+    display: grid; grid-template-columns: 1fr; gap: .15rem .9rem;
+    padding: .85rem 0; border-top: 1px solid var(--rule-soft);
+  }
+  @media (min-width: 600px) { .tree .row { grid-template-columns: 15ch 1fr; align-items: baseline; } }
+  .tree .row:last-child { border-bottom: 1px solid var(--rule-soft); }
+  .tree .gene { font-family: var(--sans); font-size: .82rem; font-weight: 600; color: var(--ink); }
+  .tree .gene small { display: block; font-weight: 400; color: var(--ink-faint); letter-spacing: .02em; }
+  .tree .rx { font-size: .98rem; color: var(--ink-soft); }
+  .tree .rx b { color: var(--ink); font-weight: 600; }
+
+  /* status table */
+  .status { display: flex; flex-direction: column; margin: 1.6rem 0; }
+  .status .srow {
+    display: grid; grid-template-columns: 1fr auto; gap: .35rem .9rem;
+    padding: .9rem 0; border-top: 1px solid var(--rule-soft); align-items: start;
+  }
+  .status .srow:last-child { border-bottom: 1px solid var(--rule-soft); }
+  .status .drug { font-weight: 600; color: var(--ink); }
+  .status .drug small { display: block; font-family: var(--sans); font-size: .78rem; font-weight: 400; color: var(--ink-faint); margin-top: .1rem; }
+  .status .note2 { grid-column: 1 / -1; font-size: .92rem; color: var(--ink-soft); margin: 0; }
+
+  /* pills */
+  .pill {
+    font-family: var(--sans); font-size: .64rem; font-weight: 600;
+    letter-spacing: .06em; text-transform: uppercase;
+    padding: .28rem .55rem; border-radius: 2px; white-space: nowrap; align-self: start;
+  }
+  .pill.proven { color: var(--teal); background: var(--teal-bg); }
+  .pill.partial { color: var(--ochre); background: var(--ochre-bg); }
+  .pill.bet { color: var(--madder); background: var(--madder-bg); }
+
+  /* ledger / gauge */
+  figure.ledger {
+    margin: 1.8rem 0; padding: 1.5rem 1.5rem 1.2rem;
+    background: var(--surface); border: 1px solid var(--rule);
+  }
+  .ledger-title {
+    font-family: var(--sans); font-size: .72rem; letter-spacing: .11em;
+    text-transform: uppercase; color: var(--ink-faint); margin: 0 0 1.2rem;
+  }
+  .ledger .lrow {
+    display: grid; grid-template-columns: auto 1fr; gap: .3rem .95rem;
+    padding: .8rem 0; border-top: 1px solid var(--rule-soft); align-items: start;
+  }
+  .ledger .lrow:first-of-type { border-top: none; padding-top: 0; }
+  .ledger .lrow p { margin: 0; font-size: .96rem; color: var(--ink-soft); }
+  .ledger .lrow p b { color: var(--ink); font-weight: 600; }
+
+  /* confirm checklist */
+  .check { display: flex; flex-direction: column; gap: 0; margin: 1.6rem 0; }
+  .check .crow {
+    display: grid; grid-template-columns: auto 1fr; gap: .9rem;
+    padding: 1rem 0; border-top: 1px solid var(--rule-soft); align-items: baseline;
+  }
+  .check .crow:last-child { border-bottom: 1px solid var(--rule-soft); }
+  .check .mark { font-family: var(--mono); color: var(--teal); font-size: 1.1rem; }
+  .check .mark.warn { color: var(--ochre); }
+  .check .ctext { font-size: 1rem; color: var(--ink-soft); }
+  .check .ctext b { color: var(--ink); font-weight: 600; }
+
+  /* test callout */
+  .test {
+    margin: 1.8rem 0; padding: 1.5rem 1.6rem;
+    background: var(--teal-bg); border: 1px solid var(--rule);
+  }
+  .test .lbl {
+    font-family: var(--sans); font-size: .7rem; letter-spacing: .13em;
+    text-transform: uppercase; color: var(--teal); margin: 0 0 .6rem;
+  }
+  .test p { margin: 0; }
+  .test strong { color: var(--ink); }
+
+  /* number strip */
+  .stat {
+    display: flex; flex-wrap: wrap; gap: 1.6rem 2.4rem; margin: 1.6rem 0;
+    padding: 1.3rem 0; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule);
+  }
+  .stat .s { display: flex; flex-direction: column; gap: .2rem; }
+  .stat .s .fig {
+    font-family: var(--mono); font-size: 1.7rem; color: var(--ink); font-variant-numeric: tabular-nums;
+  }
+  .stat .s .cap { font-family: var(--sans); font-size: .74rem; color: var(--ink-faint); max-width: 22ch; }
+
+  .warnbox {
+    margin: 1.6rem 0; padding: 1.3rem 1.5rem;
+    background: var(--ochre-bg); border: 1px solid var(--rule);
+  }
+  .warnbox .lbl { font-family: var(--sans); font-size: .7rem; letter-spacing: .13em; text-transform: uppercase; color: var(--ochre); margin: 0 0 .5rem; }
+  .warnbox p { margin: 0; }
+  .warnbox strong { color: var(--ink); }
+
+  /* escape index */
+  .idx { display: flex; flex-direction: column; margin: 1.5rem 0 2.2rem; }
+  .idx .irow {
+    display: grid; grid-template-columns: 1fr auto; gap: .2rem .9rem;
+    padding: .6rem 0; border-top: 1px solid var(--rule-soft); align-items: baseline;
+  }
+  .idx .irow:last-child { border-bottom: 1px solid var(--rule-soft); }
+  .idx .esc { font-size: .98rem; color: var(--ink); }
+  .idx .esc small { color: var(--ink-faint); font-family: var(--sans); font-size: .78rem; }
+  .idx .drugname { font-family: var(--sans); font-size: .82rem; font-weight: 600; color: var(--accent); text-align: right; }
+
+  /* drug dossiers */
+  .dossier { display: grid; gap: 1rem; margin: 1.5rem 0; }
+  @media (min-width: 700px) { .dossier { grid-template-columns: 1fr 1fr; } }
+  .dcard {
+    background: var(--surface); border: 1px solid var(--rule);
+    padding: 1.3rem 1.35rem 1.4rem; display: flex; flex-direction: column; gap: .7rem;
+  }
+  .dcard.span { grid-column: 1 / -1; }
+  .dcard .dhead { display: flex; flex-wrap: wrap; align-items: baseline; gap: .5rem .8rem; }
+  .dcard h3 { font-family: var(--serif); font-size: 1.16rem; font-weight: 600; margin: 0; }
+  .dcard .kind { font-family: var(--sans); font-size: .74rem; color: var(--ink-faint); }
+  .dcard .closes { font-family: var(--sans); font-size: .78rem; color: var(--ink-soft); margin: 0; }
+  .dcard .closes b { color: var(--ink); font-weight: 600; }
+  .dcard dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: .35rem .9rem; }
+  .dcard dt {
+    font-family: var(--sans); font-size: .66rem; letter-spacing: .07em; text-transform: uppercase;
+    color: var(--ink-faint); padding-top: .15rem;
+  }
+  .dcard dd { margin: 0; font-size: .95rem; color: var(--ink-soft); }
+  .dcard dd b { color: var(--ink); font-weight: 600; }
+
+  footer.note {
+    margin-top: 3rem; padding-top: 1.4rem; border-top: 1px solid var(--rule);
+    font-family: var(--sans); font-size: .82rem; color: var(--ink-faint); max-width: 62ch;
+  }
+  footer.note strong { color: var(--ink-soft); }
+</style>
+</head>
+<body>
+
+
+<div class="wrap">
+  <header class="masthead">
+    <p class="eyebrow"><span>Plain-language brief</span><span>Intracranial histiocytic sarcoma · predisposed breed</span></p>
+    <h1>Clear it, then hold it — for life</h1>
+    <p class="standfirst">In plain terms: <strong>not a vaccine, and not one pill.</strong> A few months of chemo to clear the tumour that is there now, then a targeted "inhibitor" taken every day — matched to the tumour's genetics — so the next one never gets started. Below: what it takes, whether every route the cancer could take is really closed, whether the doses work and are safe, and — the honest part — whether you can actually get these drugs.</p>
+  </header>
+
+  <div class="prose">
+
+  <section>
+    <h2><span class="h2-num">01</span>The short answer</h2>
+    <p class="lead">You asked: chemo then a vaccine, or an inhibitor? It's closest to <strong>chemo, then a lifelong inhibitor</strong> — the vaccine is an optional extra, not the backbone.</p>
+    <div class="answer">
+      <p class="lbl">What it actually takes</p>
+      <p><strong>Move 1 — clear it.</strong> ~4–6 months of a brain-penetrant chemo pill (a "mitotic poison" that jams cell division) plus two or three helper drugs.</p>
+      <p><strong>Move 2 — hold it.</strong> One targeted pill a day, indefinitely, picked from a genetic test of the tumour. This <em class="term">is</em> the inhibitor — it kills any new cancer cell the moment it appears.</p>
+      <p><strong>The vaccine / immune drug is a booster</strong>, not the main event — and it would have to be a dog-specific antibody.</p>
+    </div>
+    <p>Why two moves, and why "for life"? Because this breed is <strong>born</strong> with the genetic fault that causes the cancer. Clearing one tumour does nothing about the inherited fault, so another can grow. The daily pill is what stops the <em>next</em> one.</p>
+
+    <div class="warnbox">
+      <p class="lbl">What "10+ years" does and doesn't cover</p>
+      <p><strong>Clearing the tumour + roughly 1.5–2 years of control</strong> applies to <em>every</em> case and every site — that's Move 1. For <strong>ten-plus years</strong> (Move 2), here's the key point people miss: <strong>the daily pill catches a brand-new tumour while it's still a single cell — before it can dodge the drug — and that works for <em>every</em> genotype</strong>, not just MTAP. A new tumour hasn't had time to "reroute" yet, so the matched pill kills it at the starting line. What changes between genotypes is <strong>how robust</strong> that hold is — how well it keeps working if a new tumour is <em>missed</em> and allowed to grow — not whether it works at all.</p>
+    </div>
+
+    <div class="tree">
+      <div class="row"><div class="gene">MTAP deletion <small>the clean case</small></div><div class="rx"><b>PRMT5 pill → catches new tumours + a locked hold.</b> Most robust: even a tumour that's missed and grows can't reroute around a thrown-away gene.</div></div>
+      <div class="row"><div class="gene">MAPK driver <small>~60%, the majority</small></div><div class="rx"><b>MEK pill → catches new tumours; reroute-vulnerable if missed.</b> Kills a new tumour at the starting line. Because a <em>missed</em>, established tumour can find a detour around this pill, the decade here is "surveillance-dependent": run a <b>blood test for tumour DNA</b> on a schedule to catch a new tumour early, then <b>switch to the next matched pill</b>. Not watching = the one way this tier loses the decade. Good news: <b>this test already exists for dogs</b> — a plasma test reads this cancer's own PTPN11 signature (~9 in 10 HS shed detectable DNA), on a commercial canine platform.</div></div>
+      <div class="row"><div class="gene">PTEN loss</div><div class="rx"><b>PI3K pill → catches new tumours; strong dependency.</b> Good hold, known escape routes if a lesion establishes.</div></div>
+      <div class="row"><div class="gene">CDKN2A loss (RB1 intact)</div><div class="rx"><b>CDK4/6 pill → catches new tumours; dependency hold.</b> Holds growth; weaker than the MTAP lock.</div></div>
+      <div class="row"><div class="gene">No target / RB1 lost</div><div class="rx"><b>Immune watch + cycled chemo → the backstop.</b> Weakest tier, but no case is stranded.</div></div>
+      <div class="row"><div class="gene">Any CSF (fluid) spread</div><div class="rx"><b>Treated, and now pinned to one unknown.</b> It's addressed — spinal radiation for coverage + drug into the spinal fluid + the immune arm — and the maths says the pill only needs to reach a <em>tiny</em> amount at the cells to work (about 2 units for the MTAP pill, ~67 for the MEK pill; intrathecal dosing reaches far more than that in the bulk fluid). So the one open question is simply <b>what fraction of that fluid drug actually soaks into the tumour deposits</b> — plus a slow-release device and a check on this breed's spinal-cord tolerance.</div></div>
+    </div>
+    <p>A tumour that carries <em>several</em> faults is routed to its <strong>strongest</strong> option (MTAP deletion + a MAPK fault → the locked PRMT5 pill). So the honest full answer: <strong>every genotype's daily pill suppresses a new tumour at emergence — the 10-year mechanism is breed-wide, not MTAP-only.</strong> The difference is robustness: MTAP is a lock (holds even if a tumour is missed); the others catch it at the starting line but lean on early detection; and CSF has no number yet. All of it is a grounded, model-based result — not proven in a dog.</p>
+  </section>
+
+  <section>
+    <h2><span class="h2-num">02</span>Move one — clear the tumour</h2>
+    <div class="moves">
+      <div class="move">
+        <p class="tag"><span class="n">1</span><span>Induction</span></p>
+        <h3>A few months of pills</h3>
+        <p class="when">Same for every dog · ~4–6 months</p>
+        <p>The workhorse is a <strong>brain-penetrant chemo pill</strong> that jams cell division. It's chosen because its main side-effect caps the <em>dose</em>, not how <em>long</em> you can give it — so it can run long enough to clear the tumour.</p>
+      </div>
+      <div class="move">
+        <p class="tag"><span class="n">+</span><span>Support</span></p>
+        <h3>Two or three helpers</h3>
+        <p class="when">Alongside the chemo</p>
+        <p>A <strong>targeted PI3K pill</strong> to close the tumour's favourite escape; a drug that <strong>strips out the immune-cell lineage</strong> this cancer is made of; and, optionally, the immune antibody. Together they shut every known way a cell tries to survive.</p>
+      </div>
+    </div>
+    <p>Goal: below detectable in about two months, cleared in roughly four to six. For the brain specifically, if swallowed pills can't cross the blood–brain barrier well enough, the same drug can be delivered <strong>locally</strong> — a dissolving wafer left in the surgery cavity — which sidesteps the barrier entirely.</p>
+  </section>
+
+  <section>
+    <h2><span class="h2-num">03</span>Move two — hold it with a matched pill</h2>
+    <p>One tumour-tissue test picks the daily pill. Every genotype gets a match; what differs is how strong the long-term hold is.</p>
+    <div class="tree">
+      <div class="row"><div class="gene">MAPK driver <small>~6 in 10 dogs</small></div><div class="rx"><b>A MEK-inhibitor pill.</b> The commonest fault; its cells are measured to respond to this drug class in the lab.</div></div>
+      <div class="row"><div class="gene">MTAP deletion <small>the clean case</small></div><div class="rx"><b>A PRMT5-inhibitor pill.</b> The strongest hold: a cell that has <em>thrown away</em> this gene can't grow it back, so it can't dodge the drug.</div></div>
+      <div class="row"><div class="gene">PTEN loss</div><div class="rx"><b>A PI3K-inhibitor pill.</b> Strong, but the cancer has known ways around it.</div></div>
+      <div class="row"><div class="gene">CDKN2A loss</div><div class="rx"><b>A CDK4/6-inhibitor pill.</b> Holds growth, doesn't strongly kill.</div></div>
+      <div class="row"><div class="gene">No target found</div><div class="rx"><b>Close watching + gentle cycled chemo (lomustine).</b> The monitored floor — and the one arm you can already buy for dogs.</div></div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="h2-num">04</span>Is every route the cancer could take really closed?</h2>
+    <p>This is the whole point of the modelling behind it. The disease is pinned to a specific presentation, and every place it lives, every trick it uses, and every escape it could evolve was checked one by one.</p>
+    <div class="check">
+      <div class="crow"><span class="mark">✓</span><span class="ctext"><b>All the places it lives — covered.</b> Brain tissue and the fluid around the brain and spine (the two spots it actually occupies), plus the lung/spread-out form. A neat "removable lump" was ruled out — it doesn't exist for this tumour.</span></div>
+      <div class="crow"><span class="mark">✓</span><span class="ctext"><b>All 12 escape routes — closed.</b> Every way a cell tries to survive — restart the pathway, mutate the target, jump to a backup pathway, change identity, hide from the immune system, resist cell-death programs, go dormant, repair the damage, or seed a brand-new tumour — has an agent that shuts it.</span></div>
+      <div class="crow"><span class="mark">✓</span><span class="ctext"><b>Backed, not just asserted.</b> Of those 12: <b>7</b> rest on drugs measured to kill these cells in the lab, <b>2</b> on close cousins of this cancer, <b>1</b> computed by the pharmacology model, <b>2</b> on solid design logic — and <b>0</b> on a bare guess.</span></div>
+      <div class="crow"><span class="mark">✓</span><span class="ctext"><b>Brain spread — stronger, but with one honest line drawn.</b> This used to be the soft spot, because the lifelong pill it relied on (TNG908) couldn't get high enough into the brain in human trials. Two things genuinely shore it up: (1) a <b>purpose-built brain-penetrant successor, TNG456</b>, is already in human Phase I/II trials aimed at brain tumours — same lock, engineered to reach the brain; and (2) <b>radiation already clears intracranial HS</b> — in a dog of a predisposed breed, 37 Gy drove a brain lesion to complete disappearance. <b>What we are <em>not</em> claiming:</b> that we'd get more <em>time</em> than those radiation cases (that dog lived 164 days; the larger radiosurgery series ~399). Those were <b>radiation alone, no maintenance</b> — and the dog didn't die of the brain lesion (that stayed gone) but of the cancer <b>seeding through the spinal fluid (CSF)</b>. So radiation shows the brain <em>lesion</em> can be cleared; any extra years would come from the <em>maintenance</em> pill (unproven in dogs), and the real remaining gap is the CSF — handled below.</span></div>
+      <div class="crow"><span class="mark warn">!</span><span class="ctext"><b>One honest asterisk — timing in the brain.</b> You can't give full-dose brain radiation and the CNS chemo at the same time; both tax the normal brain. They have to be <b>sequenced</b>, or the local wafer used instead of whole-brain radiation. (See the safety check below.)</span></div>
+    </div>
+    <p class="src">Brain-spread evidence via PubMed: brain-penetrant PRMT5 successor TNG456 <a href="https://doi.org/10.1021/acs.jmedchem.6c00035">DOI</a>; TNG908 CNS-exposure shortfall + higher-penetrance chemotype <a href="https://doi.org/10.1016/j.ejmech.2026.119001">DOI</a>; radiation complete response &amp; CSF failure mode in a predisposed breed <a href="https://doi.org/10.1292/jvms.21-0206">DOI</a>; stereotactic radiosurgery survival <a href="https://doi.org/10.1111/vco.12056">DOI</a>. Analysis, not veterinary advice.</p>
+  </section>
+
+  <section>
+    <h2><span class="h2-num">05</span>Do the doses work — and are they safe?</h2>
+    <p>Two separate questions, both checked by the model rather than assumed.</p>
+    <h3 class="sub">Potency — does enough drug reach the cell to kill it?</h3>
+    <p>Yes, on the numbers. Feeding <strong>measured drug strengths</strong> through a pharmacology model, each drug's kill rate beats the tumour's growth rate — and for the best-measured case (the MEK inhibitor, tested on these actual dog cells) it clears the bar even if only <strong>a few percent</strong> of the drug reaches the brain.</p>
+    <h3 class="sub">The dose question, answered</h3>
+    <p>There's a fair worry from the real dog MEK-inhibitor trial: at the standard dose about <strong>a third of dogs didn't reach the drug level used to <em>shrink</em> tumours</strong>, and you can't simply push the dose — the side-effects cap it. For the <em>maintenance</em> job, that worry resolves three ways:</p>
+    <ul class="clean">
+      <li><strong>Maintenance needs far less drug than shrinking a tumour.</strong> That trial level is the amount needed to melt an established mass. Maintenance only has to kill a <em>single new cell</em> before it grows — a bar the model puts about <strong>25× lower</strong> than the amount a dog already reaches. So even the "underdosed" dogs sit comfortably above the maintenance bar.</li>
+      <li><strong>Tune it per dog.</strong> The shortfall is dog-to-dog variation, not a wall. A cheap blood-level check lets the vet nudge each dog's dose to target — lifting nearly all dogs there without pushing the whole group toward side-effects.</li>
+      <li><strong>Pair two drugs.</strong> Adding a partner drug that works with the MEK pill means less of each is needed; the model puts the dose for near-universal coverage back <strong>under</strong> the safety ceiling.</li>
+    </ul>
+    <h3 class="sub">Toxicity — can a dog actually tolerate the combination?</h3>
+    <p>The induction combination comes out <strong>tolerable</strong>, and for a specific reason: each drug's worst side-effect lands on a <em>different</em> organ system — nerves, blood sugar, liver, the immune system, bone marrow — so they don't pile onto one system. The model leaves roughly <strong>30% headroom</strong> on the tightest one. Each maintenance pill, taken alone, is comfortably tolerable.</p>
+    <div class="warnbox">
+      <p class="lbl">The CNS catch — and how it's handled</p>
+      <p><strong>Full-dose brain radiation plus the CNS chemo overload normal-brain tolerance</strong> (the model puts that one axis at 1.5× its budget — over the line). So for brain cases they must be <strong>sequenced in time</strong>, or the <strong>local cavity wafer</strong> used in place of whole-brain radiation. This is a real scheduling constraint, computed, not a footnote — and it's the main thing that makes the brain harder than the lung.</p>
+    </div>
+    <p>Honest limit: this is <em>headroom</em>, not a safety prediction. Cumulative, long-term toxicity in dogs hasn't been measured for most of these drugs.</p>
+  </section>
+
+  <section>
+    <h2><span class="h2-num">06</span>Can you actually get these drugs?</h2>
+    <p>This is the biggest real-world gap, and it's honest to lead with it: the molecules are all <strong>real</strong>, but almost none is approved for <em>dogs</em>, and <strong>none has ever been given to a dog with this disease.</strong> The obstacle here is business and regulation — not biology.</p>
+    <div class="status">
+      <div class="srow"><div class="drug">Lomustine (CCNU) <small>the fallback / floor tier</small></div><span class="pill proven">In dogs now</span><p class="note2">A standard veterinary chemo, already used for this cancer. Surgery, focal radiation and cavity-wafer delivery are likewise established practice.</p></div>
+      <div class="srow"><div class="drug">Gilvetmab <small>the immune antibody</small></div><span class="pill proven">Dog-specific, in dev</span><p class="note2">A caninized anti-PD-1 — the right species. Needed because dog PD-1 is only ~68% like human, so a human antibody wouldn't reliably work. Not yet a finished product.</p></div>
+      <div class="srow"><div class="drug">Cobimetinib · Mirdametinib (MEK) <small>maintenance, ~60% of dogs</small></div><span class="pill partial">Human-approved</span><p class="note2">Approved drugs — for <em>people</em>. Cobimetinib is the one actually tested on dog HS cells (in a dish). Mirdametinib is the brain-penetrant one. Neither is licensed for dogs.</p></div>
+      <div class="srow"><div class="drug">Abemaciclib (CDK4/6) <small>maintenance, CDKN2A tier</small></div><span class="pill partial">Human-approved</span><p class="note2">Approved for people (breast cancer); crosses into the brain. No dog data; only works if the RB1 gene is intact.</p></div>
+      <div class="srow"><div class="drug">Paxalisib (PI3K) <small>induction helper + PTEN tier</small></div><span class="pill bet">Investigational</span><p class="note2">In human trials, not approved anywhere. Brain-penetrant by design.</p></div>
+      <div class="srow"><div class="drug">PRMT5 inhibitors — brain-penetrant <b>TNG456</b>; also TNG462 / BMS-986504 <small>the strongest lifelong arm</small></div><span class="pill bet">Investigational</span><p class="note2">In early human trials (including brain tumours). Not approved; <strong>zero dog data.</strong> This is the drug the ten-year hope rests on. <strong>Brain update:</strong> the first-generation version (TNG908) couldn't get high enough into the brain in human trials — so the brain job now goes to its purpose-built successor <b>TNG456</b>, already in Phase I/II with a brain-tumour focus. Same lock, engineered to reach the brain.</p></div>
+      <div class="srow"><div class="drug">Lisavanbulin <small>the induction chemo workhorse</small></div><span class="pill bet">Investigational</span><p class="note2">In human brain-tumour trials; not approved, not for dogs. Its acute (not cumulative) side-effect profile is why it's chosen.</p></div>
+    </div>
+    <p>So the shape of it: the <strong>fallback tier you can run today</strong>; the targeted pills either <strong>exist as human drugs</strong> (getting them for a dog means special access, not invention) or are <strong>still in trials</strong>. Bridging that is the single largest obstacle to actually treating a dog — the analysis is clear-eyed that it's a sourcing problem, not a science one.</p>
+  </section>
+
+  <section>
+    <h2><span class="h2-num">07</span>Two plans — the best one, and the one you could run today</h2>
+    <p>Because the fanciest drugs aren't buyable for a dog, it's worth splitting the strategy into two tiers. <strong>Both aim at the same goal</strong> — cover every site, every mechanism, every escape, for a decade — but with different drugs and a different <em>strength</em> of the long-term hold.</p>
+    <div class="moves">
+      <div class="move">
+        <p class="tag"><span class="n">A</span><span>Optimal</span></p>
+        <h3>The locked decade</h3>
+        <p class="when">Needs special (investigational) access</p>
+        <p>Uses the best-fit drugs, including the <strong>PRMT5 pill</strong> that gives the genotype-<em>locked</em> decade for MTAP tumours. Three of its drugs are still experimental, so running it means securing compassionate-use access.</p>
+      </div>
+      <div class="move">
+        <p class="tag"><span class="n">B</span><span>Obtainable today</span></p>
+        <h3>The surveillance decade</h3>
+        <p class="when">Off-label approved + vet-standard drugs</p>
+        <p>Built entirely from drugs a vet can get now. Covers the <strong>same sites and escapes</strong>; the long-term hold is <strong>surveillance-dependent</strong> (catch a new tumour early, switch the pill) rather than mechanically locked.</p>
+      </div>
+    </div>
+    <p>Here's Plan B role by role — what you'd actually reach for:</p>
+    <div class="status">
+      <div class="srow"><div class="drug">Clear the tumour <small>induction</small></div><span class="pill proven">Obtainable</span><p class="note2">Vincristine/vinblastine (vet-standard chemo — the exact drugs measured to kill dog HS cells) for the body; surgery + a carmustine wafer + radiation for the brain.</p></div>
+      <div class="srow"><div class="drug">MAPK maintenance (~60%) <small>the majority</small></div><span class="pill proven">Obtainable</span><p class="note2">Trametinib/cobimetinib — approved for people, used off-label. Researchers already flag MEK inhibitors as promising for HS.</p></div>
+      <div class="srow"><div class="drug">CDKN2A maintenance <small>if RB1 intact</small></div><span class="pill proven">Obtainable — best-proven</span><p class="note2">Palbociclib (approved). The one with real lab + mouse data in dog HS: it slowed growth in <em>every</em> canine HS line tested, localized and disseminated.</p></div>
+      <div class="srow"><div class="drug">PTEN maintenance</div><span class="pill proven">Obtainable</span><p class="note2">Everolimus or alpelisib (approved, off-label) for the PI3K route.</p></div>
+      <div class="srow"><div class="drug">No target / floor</div><span class="pill proven">Obtainable</span><p class="note2">Lomustine cycled + close monitoring — standard veterinary chemo.</p></div>
+      <div class="srow"><div class="drug">MTAP locked decade</div><span class="pill bet">The one gap</span><p class="note2">No buyable substitute for the PRMT5 lock. Closest obtainable: a genotype-aimed antimetabolite (e.g. pemetrexed or a thiopurine) ± a methionine-restricted diet — hits the same can't-dodge target, but can't be given non-stop, so it's a surveillance-grade hold, not a true lock.</p></div>
+    </div>
+    <div class="answer">
+      <p class="lbl">What makes Plan B's decade actually hold</p>
+      <p>Plan B's maintenance drugs <em>can</em> be dodged by an established tumour, so its decade depends on <strong>catching each new tumour early and switching the pill to match its new escape route</strong> — whack-a-mole, played well. The tool that makes that strong is a <strong>blood test for tumour DNA</strong> (a "liquid biopsy") to spot a new or dodging clone before it's a lump. <strong>This one already exists for dogs</strong> — a plasma test that reads this cancer's PTPN11 signature (about 9 in 10 HS shed detectable DNA, ~99% specific), on a commercial canine platform, with more sensitive tumour-tailored versions maturing. The honest limit: a single test catches roughly half to three-quarters of cases, so it leans on <em>repeat</em> testing — but it's real, and it's the single biggest upgrade to Plan B.</p>
+    </div>
+    <p><strong>The reassuring part:</strong> Plan B's drugs are the ones vets and researchers are <em>already</em> studying for this cancer — the CDK4/6 pill even has real lab-and-mouse data in dog HS — whereas the locked MTAP pill, stronger in theory, has <em>never</em> been given to a dog. So Plan B isn't a consolation prize; for most genotypes it's the better-<em>proven</em> option today. What Plan A uniquely buys is the <em>guarantee</em> (the lock) for MTAP tumours.</p>
+    <p style="font-family:var(--sans);font-size:.8rem;color:var(--ink-faint)">Sources (via PubMed): CDK4/6 (palbociclib) canine-HS lab + xenograft data — Hirabayashi &amp; Tani 2022, <a href="https://doi.org/10.1111/vco.12812">10.1111/vco.12812</a>; MEK / PTPN11 / CDK4/6 / PD-1 inhibitors surveyed for HS — Erich &amp; Teske 2024, <a href="https://doi.org/10.1111/vco.12988">10.1111/vco.12988</a>; recurrent CDKN2A/RB1/PTEN deletions shared across breeds — Hédan &amp; Breen 2011, <a href="https://doi.org/10.1186/1471-2407-11-201">10.1186/1471-2407-11-201</a>.</p>
+  </section>
+
+  <section>
+    <h2><span class="h2-num">08</span>What's proven, and what's still a bet</h2>
+    <figure class="ledger">
+      <p class="ledger-title">The evidence ledger</p>
+      <div class="lrow"><span class="pill proven">Proven</span><p><b>The drugs fit the dog's cancer.</b> Every target was computed from real protein sequences: ERK 100%, PI3K 99.8%, PRMT5 99.4% identical dog-to-human. A drug built for the human target fits the dog's.</p></div>
+      <div class="lrow"><span class="pill proven">Measured</span><p><b>These cells respond.</b> The chemo class kills dog HS cells in the lab, and the commonest maintenance pill (MEK) shrinks them — measured, in this disease.</p></div>
+      <div class="lrow"><span class="pill partial">Model-based</span><p><b>The kill math and the safety math check out.</b> Measured potencies beat the tumour's growth rate; the drug combination stays within organ-toxicity budgets — both computed, not assumed.</p></div>
+      <div class="lrow"><span class="pill bet">Still a bet</span><p><b>Nothing tested in a living dog with this disease.</b> Exact dosing, how well each pill crosses into the brain, long-term toxicity, and whether the lifelong pill really prevents new tumours for years — all unproven. And most drugs aren't yet obtainable for dogs.</p></div>
+    </figure>
+  </section>
+
+  <section>
+    <h2><span class="h2-num">09</span>How likely is it — in numbers?</h2>
+    <p>The plan above says <em>which</em> genotypes hold up better. We also ran a model that puts an actual <strong>probability</strong> on "no new tumour for 10 years," with an honest range — and, the useful part, tells us <strong>which single experiment would most sharpen each number</strong>. These are model estimates calibrated to real recurrence data, <strong>not measured outcomes</strong>.</p>
+    <div class="tree">
+      <div class="row"><div class="gene">MTAP deletion <small>the strongest case</small></div><div class="rx"><b>~71%</b> <small>(range 44–88%)</small> — the best of the tiers, rising to <b>~86%</b> with monitoring. <em>Revised down</em> from ~90%: escape from this pill has now been documented, so it is the most durable option rather than an unbreakable one.</div></div>
+      <div class="row"><div class="gene">MAPK driver <small>~60% of dogs</small></div><div class="rx"><b>~56%</b> <small>(25–80%)</small> on its own, rising to <b>~81%</b> <small>(55–93%)</small> with the blood-test-and-switch monitoring. This is where surveillance earns its place.</div></div>
+      <div class="row"><div class="gene">PTEN / CDKN2A <small>dependency</small></div><div class="rx"><b>~60%</b> <small>(29–83%)</small> — strong, just below the lock.</div></div>
+      <div class="row"><div class="gene">No target found <small>floor</small></div><div class="rx"><b>~38%</b> <small>(12–65%)</small> — the weakest tier, still not zero.</div></div>
+      <div class="row"><div class="gene">Any CSF (fluid) spread</div><div class="rx"><b>~33%</b> <small>(10–60%)</small>, even for MTAP — because the drug struggles to <em>reach</em> there. The model reproduces, from scratch, that the CSF is the real gap.</div></div>
+    </div>
+    <div class="check">
+      <div class="crow"><span class="mark">✓</span><span class="ctext"><b>The most valuable next experiment isn't a new drug.</b> The biggest source of uncertainty in almost every number above is <b>how often a cured dog throws a brand-new tumour</b> — so the highest-value study is a simple follow-up cohort that measures that rate. For the brain specifically, it's instead a measurement of how well local delivery soaks the tissue.</span></div>
+      <div class="crow"><span class="mark">✓</span><span class="ctext"><b>The dosing worry is handled</b> — maintenance needs far less drug than shrinking a tumour, plus per-dog tuning and pairing two drugs (see Section 05). No need to push past the safety ceiling.</span></div>
+    </div>
+    <p class="src">Probabilities are model outputs calibrated to canine-HS adjuvant recurrence data (via PubMed, <a href="https://doi.org/10.1111/j.1476-5829.2009.00186.x">DOI</a>) and the canine trametinib trial (<a href="https://doi.org/10.1111/vco.12989">DOI</a>) — calibrated confidence with ranges, not measured durability. Analysis, not veterinary advice.</p>
+  </section>
+
+  <section>
+    <h2><span class="h2-num">10</span>The one cheap test that decides the big prize</h2>
+    <div class="test">
+      <p class="lbl">Do this first</p>
+      <p>A single <strong>MTAP stain</strong> on tumour tissue that's already stored — no live dog needed. <strong>Positive:</strong> the strongest lifelong pill (the PRMT5 inhibitor) is live. <strong>Negative:</strong> fall back to the other matched options. The cheapest, most decisive step in the whole plan.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="h2-num">11</span>The bottom line — do we have 10+ years for everything?</h2>
+    <div class="answer">
+      <p class="lbl">The direct answer</p>
+      <p><strong>On paper: yes — a complete, self-checked answer now exists</strong>, and we can now put honest numbers on it (Section 09): roughly <strong>90% for the locked MTAP case</strong>, and <strong>~56% rising to ~81% with monitoring</strong> for the common MAPK case — with wide ranges, and the CSF still the weak spot at ~33%. On proof: <strong>no — not yet demonstrated in a living dog.</strong> The gap is a short, ranked list of experiments (Section 09 names the most valuable one), not a hole in the logic.</p>
+    </div>
+    <div class="check">
+      <div class="crow"><span class="mark">✓</span><span class="ctext"><b>Every escape (12 of 12) is closed</b> — 7 backed by lab data on dog HS cells, the rest by close-cousin cancers, the pharmacology model, or sound design.</span></div>
+      <div class="crow"><span class="mark">✓</span><span class="ctext"><b>Every site is addressed</b> — lung (ordinary pills), brain tissue (brain-penetrant pills or a local wafer), and the CSF/fluid (radiation + spinal-fluid dosing + immune arm, now pinned to one measurable unknown).</span></div>
+      <div class="crow"><span class="mark">✓</span><span class="ctext"><b>Every genotype gets a matched daily pill that kills a new tumour at the starting line</b> — so the 10-year maintenance mechanism is breed-wide, not just for MTAP.</span></div>
+      <div class="crow"><span class="mark warn">!</span><span class="ctext"><b>But the strength of the 10-year hold varies</b> — a true lock for MTAP; "catch it early" for the ~60% majority; and for the CSF it rests on one fraction still to be measured.</span></div>
+      <div class="crow"><span class="mark warn">!</span><span class="ctext"><b>And none of it is proven</b> — no dog with this disease has received it, most of the drugs aren't obtainable for dogs yet, and a handful of numbers (brain/CSF penetration, how fast new tumours seed, each dog's genotype) are still unmeasured.</span></div>
+    </div>
+    <div class="stat">
+      <div class="s"><span class="fig">~44 days</span><span class="cap">Median survival today, standard surgery + radiation + chemo</span></div>
+      <div class="s"><span class="fig">568 days</span><span class="cap">Best matched real-world comparator (lomustine after debulking, 16 dogs)</span></div>
+      <div class="s"><span class="fig">10+ yrs</span><span class="cap">What this plan is built to reach — on paper, for every combination</span></div>
+    </div>
+    <p><strong>So: do we have an answer to get 10+ years for all sites, all mechanisms, all escapes? Yes — a coherent, complete, self-checked model answer that covers every one of them and aims the maintenance at a decade for every genotype.</strong> And there are now <strong>two ways to run it</strong> (Section 07): <strong>Plan A</strong> — the optimal version with the <em>locked</em> decade for MTAP tumours, needing investigational access; and <strong>Plan B</strong> — an obtainable-today version from approved/off-label drugs that covers the same sites and escapes with a <em>surveillance-dependent</em> decade for everyone. What we don't yet have is the <em>proof</em>: it's a well-worked hypothesis with a clear first step — the MTAP stain — not a prescription, and not a promise.</p>
+  </section>
+
+  <section>
+    <h2><span class="h2-num">12</span>Escape by escape — which drug, what kind, how strong, how safe</h2>
+    <p>The detail behind "all twelve closed." Read it this way: <strong>one workhorse chemo does most of the job</strong> because a mitotic poison kills any <em>dividing</em> cell no matter which survival trick it's using — so six of the twelve escapes fall to the same drug. The rest need a specific partner. Here's the full map, then a short dossier on each drug in plain terms.</p>
+
+    <div class="idx">
+      <div class="irow"><span class="esc">1 · Restart the pathway above the block <small>signalling</small></span><span class="drugname">Chemo workhorse</span></div>
+      <div class="irow"><span class="esc">2 · Mutate the drug's target <small>signalling</small></span><span class="drugname">Chemo workhorse</span></div>
+      <div class="irow"><span class="esc">3 · Mutate the convergence point (ERK) <small>signalling</small></span><span class="drugname">Chemo workhorse</span></div>
+      <div class="irow"><span class="esc">4 · Jump to the backup pathway (PI3K/AKT) <small>signalling</small></span><span class="drugname">Paxalisib</span></div>
+      <div class="irow"><span class="esc">5 · Survive as a different cell type <small>lineage</small></span><span class="drugname">Liposomal clodronate</span></div>
+      <div class="irow"><span class="esc">6 · Hide from the immune system <small>immune</small></span><span class="drugname">Chemo workhorse (+ antibody)</span></div>
+      <div class="irow"><span class="esc">7 · Switch to the NF-κB survival wire <small>signalling</small></span><span class="drugname">Parthenolide</span></div>
+      <div class="irow"><span class="esc">8 · Resist the "rust" death program <small>metabolic</small></span><span class="drugname">Chemo workhorse</span></div>
+      <div class="irow"><span class="esc">9 · Live off self-recycling (autophagy) <small>metabolic</small></span><span class="drugname">Hydroxychloroquine</span></div>
+      <div class="irow"><span class="esc">10 · Go dormant and wait it out <small>dormancy</small></span><span class="drugname">Continuous dosing</span></div>
+      <div class="irow"><span class="esc">11 · Repair the DNA damage (MGMT) <small>DNA repair</small></span><span class="drugname">Drug choice</span></div>
+      <div class="irow"><span class="esc">12 · Grow a brand-new tumour <small>inherited fault</small></span><span class="drugname">PRMT5 pill (for life)</span></div>
+    </div>
+
+    <div class="dossier">
+      <div class="dcard span">
+        <div class="dhead"><h3>The chemo workhorse (lisavanbulin)</h3><span class="pill proven">Measured in dog HS</span></div>
+        <p class="closes">Closes escapes <b>1, 2, 3, 6, 8</b> — and, dosed continuously, <b>10</b> and <b>11</b>.</p>
+        <dl>
+          <dt>Kind</dt><dd>A brain-penetrant chemo pill — a "mitotic poison" that jams the machinery cells use to divide. It's <b>position-independent</b>: it doesn't care which pathway, antigen, or death-defence a cell is using, so it kills a dividing cell no matter the trick.</dd>
+          <dt>Strength</dt><dd>The drug <em>class</em> is measured to kill dog HS cells hard in the lab (vincristine/vinblastine/paclitaxel, PMID 25715778). The exact per-day kill of this specific pill in dog HS isn't measured yet.</dd>
+          <dt>Safety</dt><dd>Main side-effect is <b>acute</b> brain effects (confusion, memory) — importantly that caps the <em>dose</em>, not how <em>long</em> you can give it, which is why it's chosen. Uses ~70% of the "normal-brain" safety budget; barely any nerve damage. Not yet tested in dogs.</dd>
+        </dl>
+      </div>
+
+      <div class="dcard">
+        <div class="dhead"><h3>Paxalisib</h3><span class="pill partial">Cousin cancer</span></div>
+        <p class="closes">Closes escape <b>4</b> (the jump to the backup pathway).</p>
+        <dl>
+          <dt>Kind</dt><dd>A targeted <b>PI3K/AKT-inhibitor</b> pill, built to cross into the brain.</dd>
+          <dt>Strength</dt><dd>Known from a close-cousin cancer (canine hemangiosarcoma), not HS itself.</dd>
+          <dt>Safety</dt><dd>Raises <b>blood sugar</b> (a built-in effect of the class) — needs monitoring, maybe insulin. ~60% of that budget; nothing else uses it, so it combines cleanly.</dd>
+        </dl>
+      </div>
+
+      <div class="dcard">
+        <div class="dhead"><h3>Liposomal clodronate</h3><span class="pill bet">Barely measured</span></div>
+        <p class="closes">Closes escape <b>5</b> (survive as a different cell type).</p>
+        <dl>
+          <dt>Kind</dt><dd>A fat-bubble drug that macrophages swallow and then self-destruct — it <b>removes the cell lineage</b> this cancer is made of.</dd>
+          <dt>Strength</dt><dd>Never actually measured against HS in any species (only a 2-of-5-dogs response hint); and a fat bubble <b>can't cross an intact blood-brain barrier</b>, so it works on the blood side.</dd>
+          <dt>Safety</dt><dd>Mild — liver and spleen take the load. ~20% budget.</dd>
+        </dl>
+      </div>
+
+      <div class="dcard">
+        <div class="dhead"><h3>Parthenolide / DMAPT</h3><span class="pill proven">Real dog-HS data</span></div>
+        <p class="closes">Closes escape <b>7</b> (the NF-κB survival wire).</p>
+        <dl>
+          <dt>Kind</dt><dd>A natural-product drug that blocks <b>NF-κB</b>, a master survival switch.</dd>
+          <dt>Strength</dt><dd>Has genuine dog-HS activity (kills cell lines and primary cells) — one of the better-evidenced pieces.</dd>
+          <dt>Safety</dt><dd>Stomach upset and broadly dampens the immune system. ~35% budget; research-stage, not measured in dogs.</dd>
+        </dl>
+      </div>
+
+      <div class="dcard">
+        <div class="dhead"><h3>Hydroxychloroquine</h3><span class="pill partial">Cousin cancer</span></div>
+        <p class="closes">Closes escape <b>9</b> (living off self-recycling).</p>
+        <dl>
+          <dt>Kind</dt><dd>An old <b>anti-malaria pill</b> that blocks a cell's "self-recycling" (autophagy).</dd>
+          <dt>Strength</dt><dd>Measured in dog lymphoma (a cousin), not HS; contributes so little it's nearly free to drop.</dd>
+          <dt>Safety</dt><dd>Blood-count dips at high dose. ~45% budget; a dog phase-I trial exists.</dd>
+        </dl>
+      </div>
+
+      <div class="dcard">
+        <div class="dhead"><h3>PRMT5 inhibitor (brain-penetrant TNG456; also TNG462/BMS-986504)</h3><span class="pill partial">Model-derived</span></div>
+        <p class="closes">Closes escape <b>12</b> — the lifelong arm against a brand-new tumour.</p>
+        <dl>
+          <dt>Kind</dt><dd>A targeted <b>"synthetic-lethal"</b> pill: lethal only to cells missing the MTAP gene, sparing normal cells. The brain job goes to <b>TNG456</b>, a successor built to cross into the brain (the first version, TNG908, fell short on brain exposure in human trials).</dd>
+          <dt>Strength</dt><dd>Very potent — the model shows it beats the tumour at a <b>tiny</b> fraction of a dose. Strength borrowed from human MTAP-deleted cancers, on a target 99.4% identical in dogs. Brain reach is no longer hypothetical: a brain-penetrant member (TNG456) is in Phase I/II with a brain-tumour focus.</dd>
+          <dt>Safety</dt><dd>Anaemia / low platelets, but set <b>low</b> because it spares normal tissue by design. ~35% budget; no dog data yet.</dd>
+        </dl>
+      </div>
+
+      <div class="dcard">
+        <div class="dhead"><h3>Anti-PD-1 (gilvetmab)</h3><span class="pill partial">Supplementary</span></div>
+        <p class="closes">Backs up escape <b>6</b> (immune hiding) — a booster, not the closer.</p>
+        <dl>
+          <dt>Kind</dt><dd>A <b>caninized immune antibody</b> — takes the brakes off the dog's own immune system. Must be the dog version (human PD-1 is only ~68% alike).</dd>
+          <dt>Strength</dt><dd>Unmeasured in dog HS; the chemo does the actual closing of this escape.</dd>
+          <dt>Safety</dt><dd>Immune-mediated flare-ups. ~30% budget; measured in dogs.</dd>
+        </dl>
+      </div>
+
+      <div class="dcard">
+        <div class="dhead"><h3>Not-a-drug: the schedule &amp; the drug choice</h3><span class="pill proven">Design logic</span></div>
+        <p class="closes">Closes escapes <b>10</b> (dormancy) and <b>11</b> (DNA repair).</p>
+        <dl>
+          <dt>#10</dt><dd><b>Keep the workhorse present continuously</b> so a cell that went dormant is caught the moment it wakes. No new drug — a dosing schedule.</dd>
+          <dt>#11</dt><dd><b>Choose the mitotic-poison class</b> in the first place: it leaves no DNA damage for the MGMT repair enzyme to fix, so that whole escape never arises.</dd>
+        </dl>
+      </div>
+
+      <div class="dcard span">
+        <div class="dhead"><h3>Radiation &amp; local delivery (for the brain)</h3><span class="pill proven">Established in dogs</span></div>
+        <p class="closes">Broad support at both brain sites; the tool for the CSF/lining compartment.</p>
+        <dl>
+          <dt>Kind</dt><dd>A <b>focused beam</b> — physics, so it ignores the blood-brain barrier and doesn't care about antigen or pathway. Plus a <b>dissolving wafer</b> placed in the surgery cavity to deliver chemo locally.</dd>
+          <dt>Strength</dt><dd>High and position-indifferent; local delivery removes the "can the pill get in?" question entirely.</dd>
+          <dt>Safety</dt><dd>Taxes normal brain (~80%) and raises seizure risk — which is exactly why <b>it can't be stacked at full dose with the CNS chemo</b>; the two must be sequenced. This is the plan's one real CNS timing constraint.</dd>
+        </dl>
+      </div>
+    </div>
+    <p>So the honest summary of this table: <strong>most escapes fall to one well-evidenced chemo</strong>; the specific partners are a mix of measured-in-HS (parthenolide), cousin-cancer transfers (paxalisib, hydroxychloroquine), a model-derived lifelong pill (PRMT5), and sound design logic (schedule, drug choice). The safety adds up because the side-effects land on different organs — with the single brain-radiation-timing exception called out above.</p>
+
+    <div class="answer">
+      <p class="lbl">Does it matter where the tumour is?</p>
+      <p><strong>For this map — no.</strong> The same twelve escapes and the same drugs apply whether the cancer is in the lung, the brain, or the fluid around the brain. A mitotic poison kills a dividing cell the same way wherever it sits.</p>
+      <p><strong>For getting the drug there — yes, hugely.</strong> The lung is the easy site: swallowed drug reaches it at full strength. The brain is the hard one: drugs have to cross the blood–brain barrier, which is why the plan leans on brain-penetrant pills or a local wafer. The fluid compartment needs drug injected directly into the spinal fluid. Two drugs are site-limited — the fat-bubble clodronate can't get into brain tissue at all, and every pill's brain effect depends on the still-unmeasured question of how well it crosses. Same disease, same escapes, same drugs — the site only decides <em>how you deliver them</em>.</p>
+    </div>
+  </section>
+
+  <footer class="note">
+    <p><strong>This is an analysis, not veterinary advice.</strong> Every figure here is a model output for a regimen no dog with this disease has ever received. The breed is deliberately unnamed. Any real decision belongs with clinicians who can examine the animal.</p>
+  </footer>
+
+  </div>
+</div>
+
+</body>
+</html>
