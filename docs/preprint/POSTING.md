@@ -3,25 +3,38 @@
 Goal: maximum reach, minimal interfacing. You upload once and you are done; nothing
 obliges you to respond to anyone. The uploadable file is **`hypothesis_note.pdf`**.
 
-**Recommended plan (updated Aug 2025):**
-- **~~OSF Preprints~~ — no longer usable.** OSF **suspended its generalist preprint server
-  on 8/25/2025**; only discipline-specific community servers (psychology/social science/
-  education) remain, none fitting canine oncology. Skip OSF.
-- **Primary — Research Square** (Route A): multidisciplinary, free, permanent DOI,
-  Scholar-indexed, no "must-contain-data" rule → accepts the honest note as-is. Legitimate
-  (powers Springer Nature's "In Review"); commercial but not controversial. Confirmed open.
-  Tip: upload a **.docx** if you have one — Research Square renders Word files as full-text
-  HTML, which is more discoverable than a PDF-only record.
-- **Permanence anchor — Zenodo** (Route B): guaranteed, permanent, zero screening. Do this
-  too, or instead, if you just want the record to exist forever. (Search-only reach.)
-- **Also fine — Preprints.org** (MDPI): works and is biomedical-appropriate, but expect
-  heavy journal-solicitation email and a mixed publisher reputation. Use only if you prefer
-  it to Research Square.
-- **Skip bioRxiv** (Route C): its policy requires data and excludes commentary/hypothesis
-  pieces, so it would very likely reject this note as written.
+## Status log
 
-Post to **one** preprint server (duplicate preprints are discouraged). Research Square for
-reach, plus Zenodo if you want a second permanent copy, is the sweet spot.
+- **Research Square — SUBMITTED, then REJECTED at screening (Sep 2026).** Their editorial
+  policy states that *"theories, commentaries, and non-systematic reviews are not eligible for
+  preprinting."* This note is a hypothesis piece, so it was excluded on **manuscript type**;
+  the rejection letter says explicitly that it does not reflect quality or importance.
+  **Do not resubmit there.** The earlier recommendation in this file (that Research Square had
+  no content-type restriction) was wrong.
+
+**The pattern, now confirmed:** general preprint servers screen out data-free hypothesis
+pieces *as a class*. bioRxiv excludes them by policy, Research Square rejected this one on
+exactly that ground, and the OSF generalist server no longer exists. Two routes remain.
+
+**Recommended plan (revised Sep 2026):**
+- **Primary — Preprints.org** (Route A): the one general server whose accepted-type list
+  *explicitly names hypotheses* — "articles, reviews, conference papers, data descriptions,
+  essays, brief reports, case reports, communications, short notes, technical notes, and
+  hypotheses"; only editorials, discussion papers, and coursework are excluded. Biomedical-
+  appropriate, free, permanent DOI, Google Scholar-indexed. Run by MDPI, so expect heavy
+  journal-solicitation email and a mixed publisher reputation — that is the cost of being the
+  only general server that accepts this manuscript type.
+- **Permanence anchor — Zenodo** (Route B): zero screening, guaranteed permanent DOI. This is
+  the only route that *cannot* reject the note. Do it regardless of what else happens.
+  (Search-only reach.)
+- **~~OSF Preprints~~ — dead.** OSF suspended its generalist preprint server on 8/25/2025;
+  only discipline-specific community servers (psychology/social science/education) remain,
+  none fitting canine oncology.
+- **~~Research Square~~ — rejected, see status log above.**
+- **Skip bioRxiv** (Route C): policy requires data and excludes commentary/hypothesis pieces.
+
+Post to **one** preprint server (duplicate preprints are discouraged). Preprints.org for
+reach, plus Zenodo for permanence, is now the plan.
 
 ---
 
@@ -55,29 +68,31 @@ Optional, both free and one-time:
 
 ---
 
-## Route A — Research Square (recommended primary)
+## Route A — Preprints.org (recommended primary)
 
-Multidisciplinary, free, permanent DOI, Google Scholar-indexed, no "must-contain-data" rule.
-Screening is light (complete author info, declaration statements, health-risk check).
+Multidisciplinary, free, permanent DOI, Google Scholar-indexed. Critically, **"hypotheses" is
+a named accepted article type** — which is precisely what Research Square rejected this note
+for lacking a slot for.
 
-1. Go to **researchsquare.com/submit** → create an account (or log in). Confirm email.
-2. **Upload** the manuscript. **Prefer a `.docx`** if available — Research Square renders
-   Word files as **full-text HTML** (more discoverable); `hypothesis_note.pdf` also works.
+1. Go to **preprints.org** → create an account (or log in). Confirm email.
+2. **Upload** the manuscript. Prefer a `.docx` if available (renders as full-text HTML, more
+   discoverable); `hypothesis_note.pdf` also works.
 3. Fields to enter:
    - **Title / Abstract / Keywords** — from the metadata block above.
-   - **Article type**: pick the closest available to a hypothesis/perspective. If there is no
-     "Hypothesis" option, choose **Research Article** (their screen is about completeness and
-     health-risk, not requiring data).
-   - **Area of study / subject**: **Oncology** (and/or Biology / Veterinary Medicine).
+   - **Article type**: choose **Hypothesis**. Do not pick "Research Article" — the note has no
+     original data and the type list has an exact match for what it is.
+   - **Subject area**: Medicine & Pharmacology → **Oncology**; secondary Biology & Life
+     Sciences, and Veterinary Medicine if offered.
    - **Authors**: Wes Wang. Affiliation: **Unaffiliated** if required; dedicated email.
    - **Declarations**: **Competing interests** = none; **Funding** = none; **Data
      availability** = no new data (optionally link `github.com/weston-wang/canine-genome-dsp`).
      AI assistance is already disclosed in the note's Limitations.
    - **License**: CC BY 4.0 if offered.
-4. **Submit.** After the short screen it posts with a DOI (`10.21203/rs...`) and is indexed.
+4. **Submit.** Screening is normally 24–48h; it then posts with a DOI (`10.20944/preprints...`)
+   and is indexed.
 
-(Alternative: **Preprints.org** — run by MDPI — is biomedical-appropriate and works the same
-way, but expect heavy journal-solicitation email and a mixed publisher reputation.)
+Expect solicitation email from MDPI journals afterwards. Muting the account's notifications
+(see "Keeping interfacing to zero") handles it.
 
 ---
 
