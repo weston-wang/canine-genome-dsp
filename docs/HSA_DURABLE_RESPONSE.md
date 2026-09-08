@@ -7,6 +7,14 @@ This document is the narrative record for the HSA pipeline. The modules under `s
 carry the code and the constants; the reasoning, provenance and caveats live here. Every figure is
 recomputed from the engine by the tests named in each section.
 
+**Published reports drawn from this document.** Three audiences, one analysis:
+
+| Report | Audience | Link |
+|---|---|---|
+| Splenic Hemangiosarcoma Consolidated Analysis | technical reader wanting the whole argument | https://claude.ai/code/artifact/12202c48-d95e-4ca1-abde-b51369d64181 |
+| The Three-Move Plan | plain language — clear it, hold it, catch it early | https://claude.ai/code/artifact/3e895f36-2140-4bd3-a533-5545e987c8d8 |
+| The Potency Gap | researchers — what is additive here, and the six experiments ranked | https://claude.ai/code/artifact/c70ccea7-571f-406f-bcec-bd0c29671e33 |
+
 **Nothing here is a treatment recommendation.** Growth rates, kill ceilings and vaccine potency are
 illustrative placeholders swept across ranges, not fitted measurements. What is real and cited: the
 cell-line potency, the drug exposure, the trial survival figures, and the toxicity data. No
