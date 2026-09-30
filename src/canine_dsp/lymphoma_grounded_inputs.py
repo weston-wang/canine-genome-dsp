@@ -242,3 +242,90 @@ def cytarabine_cri(immunophenotype: str, compartment: str = "systemic") -> Deriv
     return derive("cytarabine CRI", ic50, conc, assay_days=2.0,
                   note="steady-state concentration during a 12 h infusion; total not free (cytarabine is "
                        "little protein bound). Whether cytarabine is a canine P-gp substrate is NOT FOUND.")
+
+
+# ---- hydroxychloroquine: TRANSFERRED potency, canine tumour concentration ---------------------------------
+#: No canine-lymphoma IC50 exists. Human lymphoid IC50s: primary B-CLL 32 +/- 7 ug/mL = ~95 uM at 24 h
+#: (PMID 11167827); adult T-cell leukaemia/lymphoma lines 25.9 +/- 15.1 uM at 48 h (PMID 34407152). The
+#: canine TUMOUR concentration is measured (about 31 uM, PMID 24991836). Justification for the transfer: the
+#: mechanism is lysosomal accumulation (a physicochemical property, PMID 32389720), not a species-specific
+#: target; the conservative (CLL, 24 h) IC50 is used. Caveat that reduces coverage: HCQ is a P-gp substrate
+#: (P-gp-overexpressing cells 5.2x more resistant, PMID 32992777), so it is marked a substrate.
+HCQ_IC50_HUMAN_CLL_NM = M(32.0 / _HCQ_MW * 1e6, Quantity.IC50_NM,
+                          Population(Species.HUMAN, Disease.NONE, agent="hydroxychloroquine",
+                                     note="primary B-CLL cells, 24 h"), "PMID 11167827", n=20,
+                          provenance=Provenance.MEASURED)
+HCQ_IC50_TRANSFERRED = HCQ_IC50_HUMAN_CLL_NM.transfer_to(
+    _cells("hydroxychloroquine"),
+    "lysosomotropic accumulation is a physicochemical property shared across species; the most conservative "
+    "human lymphoid IC50 (CLL, 24 h) is used; human ATLL lines are 4-7x more sensitive", scale=1.0)
+
+
+def hcq_transfer() -> DerivedPotency:
+    """Kill per day: transferred human IC50 x measured canine tumour concentration, 24 h assay."""
+    return derive("hydroxychloroquine (autophagy)", HCQ_IC50_TRANSFERRED, HCQ_TUMOUR, assay_days=1.0,
+                  note="TRANSFERRED IC50 (human CLL) with a measured canine tumour concentration")
+
+
+# ---- radiation: kill DERIVED from measured canine lymphoid-line survival ---------------------------------
+#: Clonogenic survival of canine lymphoid lines after gamma irradiation, SF2 and SF5 from linear-quadratic
+#: fits (PMID 27257868, Table 1). Alpha and beta are solved from the two points (arithmetic, not in the paper).
+#: Canine lymphoid lines are NOT highly radiosensitive (SF2 0.53-0.85), and human PCNSL shows a similar
+#: 'relative radioresistance' (PMID 1572835, 10563430). The most resistant line is the CONSERVATIVE input.
+RT_SURVIVAL = {"CLBL1": (0.53, 0.06), "OSW": (0.61, 0.15), "1771": (0.75, 0.27), "CLL1390": (0.85, 0.36)}
+
+
+def lq_alpha_beta(sf2: float, sf5: float) -> tuple:
+    """Solve ln SF(D) = -alpha*D - beta*D^2 from SF2 and SF5; alpha is floored at 0 (a negative alpha has no
+    meaning), in which case beta is refit to SF2 alone."""
+    a, b = -math.log(sf2), -math.log(sf5)          # a = 2 alpha + 4 beta ; b = 5 alpha + 25 beta
+    beta = (b - 2.5 * a) / 15.0
+    alpha = a / 2.0 - 2.0 * beta
+    if alpha < 0.0:
+        alpha, beta = 0.0, a / 4.0
+    return alpha, beta
+
+
+def rt_efolds(line: str, dose_per_fraction_gy: float, fractions: int) -> float:
+    """e-folds of kill for a course of `fractions` acute fractions (no repair between them beyond the LQ
+    single-fraction model, and no repopulation: both favour the tumour less than reality)."""
+    alpha, beta = lq_alpha_beta(*RT_SURVIVAL[line])
+    d = dose_per_fraction_gy
+    return fractions * (alpha * d + beta * d * d)
+
+
+#: Courses: craniospinal 23.4 Gy in 13 x 1.8 Gy (the human reduced-dose WBRT schedule, PMID 24101038; canine
+#: whole-brain 10 x 4 Gy is tolerated, PMID 41420297); half-body 6 Gy per half in one fraction (PMID 19627472,
+#: 42525883); total body 10 Gy as 2 x 5 Gy (PMID 22882500, 31146304). Course length in days sets the per-day rate.
+RT_COURSES = {
+    "craniospinal radiotherapy": (1.8, 13, 18.0),
+    "half-body irradiation (low-dose-rate)": (6.0, 1, 28.0),
+    "total body irradiation + transplant": (5.0, 2, 14.0),
+}
+
+
+def rt_kill_per_day(agent_name: str, line: str = "CLL1390") -> float:
+    d, n, days = RT_COURSES[agent_name]
+    return rt_efolds(line, d, n) / days
+
+
+# ---- continuous intrathecal cytarabine: a DESIGN specification with computed requirements -------------------
+#: Free cytarabine leaves the canine CSF with a half-life of 113 +/- 26 min (PMID 1742843), so a bolus gives
+#: hours of exposure. A pump holds a setpoint instead. Continuous intrathecal pump infusion is done in dogs
+#: for other drugs (baclofen up to 28 d, PMID 8164885; morphine caused catheter-tip masses, PMID 31124198).
+#: Human sustained-release intrathecal cytarabine keeps CSF above the cytotoxic threshold 0.1 mg/L (= 411 nM)
+#: for >= 14 d (PMID 10506606, 24129691, 17112293). Dog CSF volume is NOT FOUND here; 30 mL is an assumed
+#: round number and only scales the infusion rate, not the derived kill.
+ARAC_CSF_HALF_LIFE_MIN = 113.0
+DOG_CSF_VOLUME_ML = 30.0
+
+
+def continuous_it_cytarabine(immunophenotype: str, csf_setpoint_nM: float = 3000.0) -> dict:
+    """Kill per day at a held CSF concentration (canine lymphoma-line IC50, 48 h) and the infusion rate the
+    canine CSF half-life implies for that setpoint: rate = C x V x k_elim."""
+    ic50 = ARAC_IC50_T if immunophenotype == "T" else ARAC_IC50_B
+    kill = emax_kill_rate(ic50.value, csf_setpoint_nM, 2.0)
+    k_elim_per_h = math.log(2) / (ARAC_CSF_HALF_LIFE_MIN / 60.0)
+    mg_per_day = csf_setpoint_nM * 1e-9 * _ARAC_MW * (DOG_CSF_VOLUME_ML / 1000.0) * k_elim_per_h * 24.0 * 1000.0
+    return {"kill_per_day": kill, "ic50_nM": ic50.value, "setpoint_nM": csf_setpoint_nM,
+            "infusion_mg_per_day": mg_per_day}

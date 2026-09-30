@@ -103,6 +103,19 @@ LEDGER_REGIMENS = {
         (SYSTEMIC, "B", ("doxorubicin", "prednisolone (glucocorticoid)", "hydroxychloroquine (autophagy)")),
     "T-cell, no assumed potency":
         (SYSTEMIC, "T", ("doxorubicin", "vincristine", "venetoclax (BCL2 inhibitor)")),
+    "B-cell body, licensed and off-label agents only: HCQ + verdinexor":
+        (SYSTEMIC, "B", ("hydroxychloroquine (autophagy)", "verdinexor (XPO1 inhibitor)")),
+    "B-cell body with the trial-stage antibody: HCQ + verdinexor + antibody":
+        (SYSTEMIC, "B", ("hydroxychloroquine (autophagy)", "verdinexor (XPO1 inhibitor)",
+                         "anti-CD20 monoclonal antibody")),
+    "T-cell body: HCQ + verdinexor + venetoclax":
+        (SYSTEMIC, "T", ("hydroxychloroquine (autophagy)", "verdinexor (XPO1 inhibitor)",
+                         "venetoclax (BCL2 inhibitor)")),
+    "B-cell CNS: HCQ + continuous intrathecal cytarabine":
+        (CNS, "B", ("hydroxychloroquine (autophagy)", "continuous intrathecal cytarabine")),
+    "T-cell CNS: HCQ + venetoclax + continuous intrathecal cytarabine":
+        (CNS, "T", ("hydroxychloroquine (autophagy)", "venetoclax (BCL2 inhibitor)",
+                    "continuous intrathecal cytarabine")),
 }
 
 
@@ -121,6 +134,60 @@ def _closed_on(m_strict: float, m_outcome: float, m_all: float) -> str:
     else:
         return "NOT CLOSED"
     return label + (f" (THIN, <{THIN}/day)" if m < THIN else "")
+
+
+#: The closing PROGRAMS: a body regimen and a CNS regimen given together. Found by the sound-grade search
+#: (potencies measured, derived or transferred with a written basis; no bare assumptions), then stress-tested.
+PROGRAMS = {
+    "B-cell": ("B", ("hydroxychloroquine", "verdinexor", "continuous intrathecal", "anti-CD20")),
+    "B-cell, no trial-stage antibody": ("B", ("hydroxychloroquine", "verdinexor", "continuous intrathecal")),
+    "T-cell, existing drugs plus the pump": ("T", ("hydroxychloroquine", "verdinexor", "venetoclax",
+                                                   "continuous intrathecal")),
+    "T-cell, with a T-lineage CAR-T": ("T", ("hydroxychloroquine", "verdinexor", "continuous intrathecal",
+                                             "CD7-directed")),
+}
+
+
+def _pick(comp, ip, names, mod=None):
+    ag = {a.name: a for a in G.grounded_agents(comp, ip)}
+    out = []
+    for n in names:
+        k = next((k for k in ag if k.startswith(n)), None)
+        if k is None:
+            continue                       # the agent does not exist in this compartment (e.g. the pump in the body)
+        a = ag[k]
+        out.append(mod(a) if mod else a)
+    return out
+
+
+def program_report(label: str) -> dict:
+    """Body and CNS clearing, union organ loads, and the stress tests, for one program."""
+    from .core.lymphoma_toxicity import axis_loads
+    ip, names = PROGRAMS[label]
+    esc = _escapes(ip, BURDEN_EARLY_DETECTED)
+    esc = tuple(e for e in G.GROUNDED_ESCAPES if not (ip == "T" and e.removes_antigen in B_LINEAGE_ANTIGENS)
+                and not (ip == "B" and e.removes_antigen == "CD7"))            # EVERY escape, not just the likely ones
+    out = {"label": label, "agents": names}
+    for comp, key in ((SYSTEMIC, "body"), (CNS, "cns")):
+        r = _pick(comp, ip, names)
+        ev = G.evaluate_best_schedule(r, esc, burden=BURDEN_EARLY_DETECTED, compartment=comp)
+        out[key] = {"agents": tuple(a.name for a in r), "margin": ev.worst_derated, "weakest": ev.weakest,
+                    "verdict": ev.horizon_strict.verdict(), "clear_day": ev.horizon_strict.clear_day,
+                    "closes": ev.closes and ev.horizon_strict.cure_inside_window,
+                    "halved_potency_clears": G.clears(G.discounted(r, 0.5), esc, burden=BURDEN_EARLY_DETECTED,
+                                                      compartment=comp),
+                    "any_one_removed_clears": all(G.clears(r[:i] + r[i + 1:], esc, burden=BURDEN_EARLY_DETECTED,
+                                                           compartment=comp) for i in range(len(r)) if len(r) > 1)}
+        if comp == CNS:
+            out[key]["capacity_cells"] = G.cns_capacity(r, esc)
+    r = _pick(SYSTEMIC, ip, names)
+    clin = G.evaluate_best_schedule(r, esc, burden=BURDEN_CLINICALLY_OBVIOUS, compartment=SYSTEMIC)
+    out["body_at_clinical_burden"] = clin.horizon_strict.verdict()
+    union = _pick(CNS, ip, names) + [a for a in r if a.name not in {x.name for x in _pick(CNS, ip, names)}]
+    out["union_loads"] = {k.name.lower(): round(v, 2) for k, v in
+                          axis_loads(G.regimen_profiles(union, G.gi.EFFLUX_CO_DOSE_MULTIPLIER_CANINE_PROXY)).items()}
+    out["grades"] = {a.name: G.potency_grade(a) for a in union}
+    return out
 
 
 def escape_ledger(comp: str, ip: str, names, burden: float = BURDEN_EARLY_DETECTED) -> list:

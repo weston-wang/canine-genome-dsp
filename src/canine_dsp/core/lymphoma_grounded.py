@@ -72,6 +72,9 @@ AVAILABILITY = {
     "hydroxychloroquine (autophagy)": OFF_LABEL, "venetoclax (BCL2 inhibitor)": OFF_LABEL,
     "acalabrutinib (BTK)": OFF_LABEL, "verdinexor (XPO1 inhibitor)": LICENSED,
     "cytarabine CRI (q14d)": OFF_LABEL, "cytarabine CRI (q7d)": OFF_LABEL,
+    "continuous intrathecal cytarabine (pump) [buildable]": NONE,
+    "CD7-directed CAR-T (canine binder, fratricide-resistant) [buildable]": NONE,
+    "CD5 + CD7 dual-target CAR-T (canine binder) [buildable]": NONE,
     "P-gp / TGF-beta-inhibitor chemosensitiser": TRIAL,
     "CD5/CD52-directed cellular effector (T-lineage)": NONE,
 }
@@ -94,7 +97,11 @@ NEW_ESCAPES = (
                     "(PMID 26130852). Rate ASSUMED.",
            note="Matters only if lomustine is a closing agent."),
 )
-GROUNDED_ESCAPES = tuple(V1_ESCAPES) + NEW_ESCAPES
+CD7_LOSS = Escape("CD7 antigen loss (T-lineage CAR relapse)", Axis.IMMUNE_EFFECTOR, Layer.RECEPTOR, 1e-8,
+                  antigen_intact=False, removes_antigen="CD7", evidence="HUMAN: 4 of 6 relapses after donor-derived "
+                  "CD7 CAR-T had lost CD7 (PMID 37020231); lineage-switch relapses also seen (PMID 42810712).",
+                  note="Only meaningful for T-cell disease with a CD7-directed agent; a CD5+CD7 construct covers it.")
+GROUNDED_ESCAPES = tuple(V1_ESCAPES) + NEW_ESCAPES + (CD7_LOSS,)
 PGP = next(e for e in V1_ESCAPES if "P-glycoprotein" in e.name)
 PERSISTER = next(e for e in V1_ESCAPES if not e.requires_division)
 
@@ -152,6 +159,25 @@ def _ground(a: Agent, immunophenotype: str) -> Agent:
         kw["vulnerable_to"] = frozenset({"mgmt_repair"})
     if a.name.startswith("anti-PD-1"):
         kw["vulnerable_to"] = frozenset({"antigen_presentation"})
+    if a.name.startswith("hydroxychloroquine"):
+        h = gi.hcq_transfer()
+        kw["potency"] = h.kill_per_day
+        kw["efflux_substrate"] = True      # P-gp-overexpressing cells 5.2x more resistant (PMID 32992777)
+        kw["potency_evidence"] = (f"TRANSFER: {h.kill_per_day:.2f}/day = human CLL IC50 ~95 uM (24 h, PMID "
+                                  "11167827) against the MEASURED canine tumour concentration ~31 uM (100x "
+                                  "plasma, PMID 24991836). Human ATLL IC50 13-26 uM would give more. A P-gp "
+                                  "substrate (PMID 32992777), so it does not cover the pump clone.")
+    if a.name.startswith("venetoclax"):
+        kw["efflux_substrate"] = True      # sources conflict (PMID 29441961, 26927160 vs 34475043): conservative
+    # CNS access replaced by non-canine MEASUREMENTS where they exist (each written as a transfer):
+    if a.name.startswith("prednisolone") and a.access < 1.0:
+        kw["access"] = 0.08
+        kw["note"] = a.note + (" CNS access 0.08 = primate CSF:plasma of prednisolone (PMID 3806166); the "
+                               "earlier 0.40 was assumed.")
+    if a.name.startswith("venetoclax") and a.access < 1.0:
+        kw["access"] = 0.0074
+        kw["note"] = a.note + (" CNS access 0.0074 = human CSF/plasma 0.74% (PMID 39286959, adult leukemia); "
+                               "the earlier 0.05 was assumed.")
     if a.name == REVERSER:
         kw["potency"] = 0.0     # acts by REVERSING efflux (see _kill_against), not as a free-standing kill
         kw["evidence"] = ("in vitro: PSC833 fully reversed dox/vincristine resistance (PMID 24975508); "
@@ -221,6 +247,36 @@ def _new_agents(compartment: str, immunophenotype: str) -> tuple:
                               f"{interval:.0f} d."),
             note="Division-gated (S-phase). P-gp substrate status in dogs NOT FOUND; human cytarabine is not "
                  "a classical P-gp substrate (transfer)."))
+    if compartment == CNS:
+        it = gi.continuous_it_cytarabine(immunophenotype)
+        out.append(Agent(
+            "continuous intrathecal cytarabine (pump) [buildable]", Axis.CYTOTOXIC, Layer.RECEPTOR,
+            it["kill_per_day"], 1.0, 1.0, False, division_gated=True, efflux_substrate=False,
+            evidence="DESIGN. Continuous intrathecal pump infusion is done in dogs for other drugs (PMID 8164885); "
+                     "canine CSF cytarabine half-life measured (PMID 1742843); human sustained-release "
+                     "intrathecal cytarabine holds cytotoxic CSF levels >= 14 d (PMID 10506606).",
+            potency_evidence=(f"TRANSFER: {it['kill_per_day']:.2f}/day at a held CSF setpoint of "
+                              f"{it['setpoint_nM']/1000:.0f} uM against the canine-lymphoma-line IC50 "
+                              f"({it['ic50_nM']/1000:.2f} uM, 48 h, PMID 25715778). The setpoint is a design "
+                              f"choice; holding it needs about {it['infusion_mg_per_day']:.2f} mg/day if canine CSF "
+                              "volume is ~30 mL (assumed) and clearance follows the measured 113 min half-life."),
+            note="Division-gated; chronic intrathecal exposure toxicity in dogs NOT FOUND."))
+    if immunophenotype == "T":
+        tl = ("TRANSFER-OUTCOME: human CD7 CAR-T gives MRD-negative remission in 19/20 (PMID 35500125) and "
+              "94% (PMID 37740926); CD5 CAR-T avoids fratricide by CD5 down-modulation (PMID 38145560, "
+              "38986621). Canine biology assumed to match; the kill rate itself is not measured.")
+        out += [
+            Agent("CD7-directed CAR-T (canine binder, fratricide-resistant) [buildable]", Axis.IMMUNE_EFFECTOR,
+                  Layer.RECEPTOR, 0.12, cell, 1.0, False, division_gated=False, antigen_targets=("CD7",),
+                  resists_axis_independence=True,
+                  evidence="HUMAN clinical data only; no canine product. Relapse by CD7 loss in 4 of 6 "
+                           "relapses (PMID 37020231).", potency_evidence=tl),
+            Agent("CD5 + CD7 dual-target CAR-T (canine binder) [buildable]", Axis.IMMUNE_EFFECTOR,
+                  Layer.RECEPTOR, 0.12, cell, 1.0, False, division_gated=False,
+                  antigen_targets=("CD5", "CD7"), resists_axis_independence=True,
+                  evidence="HUMAN clinical data only for each target; dual construct is a design that answers "
+                           "CD7-loss relapse.", potency_evidence=tl),
+        ]
     if immunophenotype == "B":
         out += [
             Agent("CD20 CAR-T with PD-1/CD28 switch receptor", Axis.IMMUNE_EFFECTOR, Layer.RECEPTOR, 0.12,
@@ -235,14 +291,30 @@ def _new_agents(compartment: str, immunophenotype: str) -> tuple:
                   Layer.RECEPTOR, 0.12, cell, 1.0, False, division_gated=False, antigen_targets=("CD20",),
                   resists_axis_independence=True,
                   evidence="NONE (does not exist). A specification: what the CAR-T would have to do.",
-                  potency_evidence="ASSUMED."),
+                  potency_evidence=("TRANSFER-OUTCOME: human CD19 CAR-T trafficks to the CNS and gives ORR 58-62% "
+                                    "in CNS lymphoma (PMID 35167655, 36537908); detectable to 270 d with a "
+                                    "human-compatible binder (PMID 35435984). Canine kill rate not measured.")),
         ]
     return tuple(out)
 
 
+def _apply_rt(a: Agent) -> Agent:
+    """Radiation potency from measured canine lymphoid-line survival (see lymphoma_grounded_inputs)."""
+    if a.name not in gi.RT_COURSES:
+        return a
+    lo, mid, hi = (gi.rt_kill_per_day(a.name, ln) for ln in ("CLL1390", "1771", "CLBL1"))
+    d, n, days = gi.RT_COURSES[a.name]
+    return replace(
+        a, potency=lo, duty=days / 365.0,
+        potency_evidence=(f"PARTIAL: derived from measured clonogenic survival of canine lymphoid lines (PMID "
+                          f"27257868): {lo:.3f}/day for the most resistant line (used), {mid:.3f} for the median "
+                          f"line, {hi:.3f} for the most sensitive, over a {days:.0f}-day course of {n} x {d} Gy. "
+                          "Assumes the prescribed dose reaches the tumour cell."))
+
+
 def grounded_agents(compartment: str, immunophenotype: str = "B") -> tuple:
     base = [_ground(a, immunophenotype) for a in agents_for(compartment, immunophenotype)]
-    return tuple(base) + _new_agents(compartment, immunophenotype)
+    return tuple(_apply_rt(a) for a in tuple(base) + _new_agents(compartment, immunophenotype))
 
 
 def available(agents, tier: str) -> tuple:
@@ -255,6 +327,25 @@ def available(agents, tier: str) -> tuple:
 #: OUTCOME adds agents whose benefit is a measured clinical outcome but whose kill rate is not measured.
 STRICT_GRADES = frozenset({"DERIVED", "PARTIAL", "MEASURED"})
 OUTCOME_GRADES = STRICT_GRADES | {"OUTCOME", "REGIMEN-CALIBRATED", "MECHANISM"}
+#: 'Scientifically sound' (the user's standard, 2026-09-30): adds potency, exposure or access figures
+#: TRANSFERRED from another species or disease with a written justification. A number with no basis
+#: stays ASSUMED and is not in this set.
+SOUND_GRADES = OUTCOME_GRADES | {"TRANSFER", "TRANSFER-OUTCOME", "BRACKET"}
+#: A BRACKET agent is admitted at the LOW end of its measured bracket; a HINGE agent (no potency at all)
+#: is not admitted until an IC50 is transferred for it.
+BRACKET_LOW = {"prednisolone (glucocorticoid)": 0.0098}
+
+
+def sound_pool(agents) -> list:
+    out = []
+    for a in agents:
+        g = potency_grade(a)
+        if g not in SOUND_GRADES:
+            continue
+        if g == "BRACKET":
+            a = replace(a, potency=BRACKET_LOW.get(a.name, a.potency))
+        out.append(a)
+    return out
 
 #: Fraction of the pre-treatment burden that seeds the CNS (lymphoma_scenarios.LYMPHOMA_CNS_SEED_FRACTION).
 CNS_SEED_FRACTION = 0.05
@@ -370,7 +461,7 @@ def escapes_to_close(burden: float, escapes=GROUNDED_ESCAPES, threshold: float =
 def evaluate(agents, escapes, *, growth=GROWTH_PER_DAY, f=CYCLING_FRACTION_DEFAULT,
              r=RETAINED_TOLERANCE_DEFAULT, efflux_multiplier=gi.EFFLUX_CO_DOSE_MULTIPLIER_CANINE_PROXY,
              burden=BURDEN_EARLY_DETECTED, clock=False, compartment=SYSTEMIC, starts=None,
-             schedule="all agents from day 0") -> Evaluation:
+             schedule="all agents from day 0", cns_fraction=None) -> Evaluation:
     agents = tuple(agents)
     d_agents, factors, profs = derate(agents, efflux_multiplier)
     mf = {e.name: margin_for(agents, e, growth, f, r) for e in escapes}
@@ -386,7 +477,7 @@ def evaluate(agents, escapes, *, growth=GROWTH_PER_DAY, f=CYCLING_FRACTION_DEFAU
         availability=tuple(AVAILABILITY.get(a.name, NONE) for a in agents))
     ev.schedule = schedule
     if clock:
-        h_fraction = CNS_SEED_FRACTION if compartment == CNS else 1.0
+        h_fraction = (CNS_SEED_FRACTION if cns_fraction is None else cns_fraction) if compartment == CNS else 1.0
         for label, key in (("horizon_strict", "sustainable_days"), ("horizon_extended", "hard_cap_days")):
             sustain = {a.name: getattr(profile_for(a.name), key) for a in agents}
             # De-rating is decided per PHASE: only the agents given together share organ budgets.
@@ -441,6 +532,10 @@ FAMILY = {
     "CD20 CAR-T": "CD20 CAR", "tandem CD19/CD20 CAR-T": "CD20 CAR",
     "CD20 CAR-T with PD-1/CD28 switch receptor": "CD20 CAR",
     "persistence-engineered canine-binder CAR-T (specification)": "CD20 CAR",
+    "intrathecal cytarabine": "IT cytarabine", "continuous intrathecal cytarabine (pump) [buildable]": "IT cytarabine",
+    "CD7-directed CAR-T (canine binder, fratricide-resistant) [buildable]": "T CAR",
+    "CD5 + CD7 dual-target CAR-T (canine binder) [buildable]": "T CAR",
+    "CD5/CD52-directed cellular effector (T-lineage)": "T CAR",
     "total body irradiation + transplant": "whole/half-body RT",
     "half-body irradiation (low-dose-rate)": "whole/half-body RT",
 }
@@ -452,6 +547,7 @@ def one_per_family(combo) -> bool:
 
 
 MAX_COMBO = 5
+EVALUATE_ALL_UP_TO = 6000
 SMALL_N = 3     # every closing regimen up to this size gets the clock, whatever its margin
 
 
@@ -489,13 +585,16 @@ def search(compartment: str, immunophenotype: str = "B", tier: str = "off-label"
     # and (c) regimens that close only WITHOUT de-rating (they may be tolerable if staged).
     picked, seen = [], set()
     by_raw = sorted(rows, key=lambda t: (-t[3], t[1]))
-    for source in (rows, by_raw):
-        count = 0
-        for worst, n, c, raw in source:
-            if id(c) in seen:
-                continue
-            if n <= SMALL_N or count < max(top * 6, 40):
-                seen.add(id(c)); picked.append(c); count += 1
+    if len(rows) <= EVALUATE_ALL_UP_TO:
+        picked = [c for _, _, c, _ in rows]          # small enough: run the clock on every closing regimen
+    else:
+        for source in (rows, by_raw):
+            count = 0
+            for worst, n, c, raw in source:
+                if id(c) in seen:
+                    continue
+                if n <= SMALL_N or count < max(top * 6, 40):
+                    seen.add(id(c)); picked.append(c); count += 1
     evaluated = [evaluate_best_schedule(c, escapes, f=f, r=r, efflux_multiplier=efflux_multiplier,
                                         burden=burden, compartment=compartment) for c in picked]
     evaluated.sort(key=lambda ev: -ev.worst_derated)
@@ -507,3 +606,52 @@ def search(compartment: str, immunophenotype: str = "B", tier: str = "off-label"
             "top_by_margin": evaluated[:top],
             "cured_inside_window": [e for e in evaluated if e.horizon_strict.cure_inside_window],
             "all_rows": rows}
+
+
+# --- fault tolerance --------------------------------------------------------------------------------
+
+def discounted(agents, delta: float):
+    """Every potency multiplied by `delta` (a global 'the real world is weaker than the derivation')."""
+    return [replace(a, potency=a.potency * delta) for a in agents]
+
+
+def clears(agents, escapes, **kw) -> bool:
+    ev = evaluate_best_schedule(agents, escapes, **kw)
+    return ev.closes and ev.horizon_strict.cure_inside_window
+
+
+def fault_tolerant(agents, escapes, delta: float = 0.5, **kw) -> bool:
+    """True if the regimen still clears every lineage inside the documented windows (a) with all potencies
+    multiplied by `delta` and (b) after removing ANY ONE agent (also at `delta`). This is the test that a
+    'closing' combination does not hang on a single agent or a single potency."""
+    agents = list(agents)
+    if not clears(discounted(agents, delta), escapes, **kw):
+        return False
+    for i in range(len(agents)):
+        rest = agents[:i] + agents[i + 1:]
+        if not rest or not clears(discounted(rest, delta), escapes, **kw):
+            return False
+    return True
+
+
+def cns_capacity(agents, escapes, burden: float = BURDEN_EARLY_DETECTED, **kw) -> float:
+    """The largest number of CNS tumour cells this regimen clears inside its documented windows (every
+    present lineage keeps at least one cell). The sanctuary's real size at early detection is unmeasured,
+    so this is reported as a capacity rather than a yes/no. Returns 0 if it clears even one cell only
+    with a negative margin, i.e. cannot clear at all."""
+    def ok(frac):
+        ev = evaluate_best_schedule(list(agents), escapes, burden=burden, compartment=CNS,
+                                    cns_fraction=frac, **kw)
+        return ev.closes and ev.horizon_strict.cure_inside_window
+    lo_exp, hi_exp = -8.0, 0.0                      # fraction of the whole-tumour burden, log10
+    if not ok(10 ** lo_exp):
+        return 0.0
+    if ok(10 ** hi_exp):
+        return burden * 1.0
+    for _ in range(14):
+        mid = (lo_exp + hi_exp) / 2
+        if ok(10 ** mid):
+            lo_exp = mid
+        else:
+            hi_exp = mid
+    return burden * 10 ** lo_exp

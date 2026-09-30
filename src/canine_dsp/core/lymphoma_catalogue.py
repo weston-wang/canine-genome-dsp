@@ -42,7 +42,9 @@ CNS_PENETRANT_ACCESS = {SYSTEMIC: 1.0, CNS: 0.50}    # lomustine class
 LYSOSOMOTROPIC_ACCESS = {SYSTEMIC: 1.0, CNS: 0.30}   # hydroxychloroquine: accumulates in tissue
 ANTIBODY_ACCESS = {SYSTEMIC: 1.0, CNS: 0.002}
 HIGH_DOSE_ACCESS = {SYSTEMIC: 1.0, CNS: 0.30}        # high-dose methotrexate saturates the barrier
-GLUCOCORTICOID_ACCESS = {SYSTEMIC: 1.0, CNS: 0.40}   # corticosteroids cross readily and are a
+GLUCOCORTICOID_ACCESS = {SYSTEMIC: 1.0, CNS: 0.40}   # v1 value, ASSUMED. The grounded catalogue replaces
+                                                     # it with the primate CSF:plasma ratio 0.08
+                                                     # (prednisolone) / 0.15 (dexamethasone), PMID 3806166   # corticosteroids cross readily and are a
                                                      # mainstay of CNS lymphoma management; giving
                                                      # them generic small-molecule access (0.05)
                                                      # understated the one non-division-gated agent

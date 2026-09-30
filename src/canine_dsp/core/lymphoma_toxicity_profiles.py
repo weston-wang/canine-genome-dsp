@@ -110,6 +110,15 @@ PROFILES["high-dose methotrexate"] = P(
     secondary_axis=O.GI, secondary_fraction=0.30, extra_loads=((O.MARROW, 0.30),),
     sustainable_days=84.0, hard_cap_days=None, reversible=True)
 
+PROFILES["continuous intrathecal cytarabine (pump) [buildable]"] = P(
+    O.CNS_LOCAL, 0.60, False,
+    "chronic intrathecal exposure: chemical arachnoiditis / neurotoxicity; bolus IT cytarabine + methotrexate "
+    "gave 1 seizure in 112 dogs and 8 cats (PMID 25041580); dog catheter-tip masses with continuous morphine "
+    "(PMID 31124198)",
+    source="ASSUMED budget; canine chronic intrathecal cytarabine toxicity NOT FOUND. Pump patency: 67% of "
+           "catheters patent >30 d in dogs (PMID 24694254).",
+    sustainable_days=84.0, hard_cap_days=None, reversible=True)
+
 PROFILES["cytarabine CRI (q14d)"] = P(
     O.GI, 0.55, True,
     "GI toxicity in 17/26 (65.3%; grade III-IV in 19.2%), neutropenia in 9/26 (34.6%) after a single "
@@ -173,10 +182,27 @@ PROFILES["CD20 CAR-T with PD-1/CD28 switch receptor"] = P(
     cumulative=False, sustainable_days=50.0, hard_cap_days=50.0, reversible=True)
 
 PROFILES["persistence-engineered canine-binder CAR-T (specification)"] = P(
-    O.IMMUNE_MEDIATED, 0.35, False,
-    "DOES NOT EXIST -- this is a specification, not a product",
-    source="Included so the search can state what persistence a CAR-T would need. No canine data.",
-    cumulative=False, sustainable_days=None, hard_cap_days=None, reversible=True)
+    O.IMMUNE_MEDIATED, 0.40, False,
+    "DOES NOT EXIST in dogs. Human CD19 CAR-T in CNS lymphoma: ICANS 44% (grade >=3 35%), severe CRS 7% "
+    "(PMID 36537908)",
+    source="TRANSFER from human. Persistence window 270 d is the longest detectable persistence in the human "
+           "CD7 series (PMID 35435984); a canine-derived binder is assumed to remove the anti-mouse loss.",
+    cumulative=False, sustainable_days=270.0, hard_cap_days=None, reversible=True)
+
+PROFILES["CD7-directed CAR-T (canine binder, fratricide-resistant) [buildable]"] = P(
+    O.IMMUNE_MEDIATED, 0.50, False,
+    "HUMAN: CRS in 87-92% (grade 3/4 about 11%), neurotoxicity ~5%, grade 3-4 cytopenias 96-100%, severe "
+    "infection late because non-CAR T and NK cells become CD7-negative (PMID 37020231, 37740926, 40712157)",
+    source="TRANSFER from human T-ALL/T-LBL. Persistence to 270 d (PMID 35435984).",
+    secondary_axis=O.MARROW, secondary_fraction=0.40,
+    cumulative=False, sustainable_days=270.0, hard_cap_days=None, reversible=False)
+PROFILES["CD5 + CD7 dual-target CAR-T (canine binder) [buildable]"] = P(
+    O.IMMUNE_MEDIATED, 0.55, False,
+    "as the CD7 CAR-T plus loss of CD5+ normal T cells (human CD5 CAR-T: no grade >=3 CRS or neurotoxicity "
+    "in 9 treated, PMID 38145560)",
+    source="TRANSFER from human; the dual construct itself has no clinical data.",
+    secondary_axis=O.MARROW, secondary_fraction=0.40,
+    cumulative=False, sustainable_days=270.0, hard_cap_days=None, reversible=False)
 
 PROFILES["CD5/CD52-directed cellular effector"] = P(
     O.IMMUNE_MEDIATED, 0.50, False,
