@@ -26,7 +26,8 @@ WHAT IT REPORTS, PER ESCAPE
 INPUTS AND THEIR STRENGTH
 
 `sustain` maps agent name -> days (None = uncapped) and is built from `core/lymphoma_toxicity.py`;
-`margin_fn(active_agents, escape)` lets the grounded search inject its own margin rule (efflux
+`starts` maps agent name -> start day, so a staged plan (induction, then consolidation) is scored with
+each phase's organ loads separately via `transform(active)`. `margin_fn(active_agents, escape)` lets the grounded search inject its own margin rule (efflux
 reversal, dormancy) so the clock and the search cannot disagree, and `kill_of(agent)` the per-agent
 kill used for the drug-sensitive bulk.
 
@@ -104,12 +105,14 @@ class HorizonResult:
         return "not cleared: margin never positive for some lineage"
 
 
-def _active(agents, sustain, t):
-    """Agents still deliverable at day t. `sustain` maps agent name -> days (None = uncapped)."""
+def _active(agents, sustain, t, starts=None):
+    """Agents being given at day t: started (`starts`, default day 0) and not yet at the end of their
+    window. `sustain` maps agent name -> days of window (None = uncapped)."""
     out = []
     for a in agents:
+        s = (starts or {}).get(a.name, 0.0)
         cap = sustain.get(a.name)
-        if cap is None or t < cap:
+        if t >= s and (cap is None or t < s + cap):
             out.append(a)
     return out
 
@@ -123,7 +126,7 @@ def _margin(active, escape, growth, f, r):
 def horizon(agents, escapes, sustain: dict, burden: float, growth: float, *,
             f: float = CYCLING_FRACTION_DEFAULT, r: float = RETAINED_TOLERANCE_DEFAULT,
             presence_threshold: float = 0.5, margin_fn=None, always_present=(),
-            kill_of=None, fraction: float = 1.0) -> HorizonResult:
+            kill_of=None, fraction: float = 1.0, starts=None, transform=None) -> HorizonResult:
     """Walk the schedule: at each day some agents drop out, the margin of every lineage is
     recomputed, and each lineage is either cleared, relapses, or is never cleared.
 
@@ -138,8 +141,14 @@ def horizon(agents, escapes, sustain: dict, burden: float, growth: float, *,
         if e.name in always_present or escape_presence_probability(e, burden) >= presence_threshold:
             lineages.append((e.name, max(e.seeding_rate * burden * fraction, 1.0), e))
 
-    cutoffs = sorted({c for a in agents for c in [sustain.get(a.name)] if c is not None})
-    boundaries = [0.0] + cutoffs + [math.inf]
+    starts = starts or {}
+    marks = {0.0}
+    for a in agents:
+        st = starts.get(a.name, 0.0)
+        marks.add(st)
+        if sustain.get(a.name) is not None:
+            marks.add(st + sustain[a.name])
+    boundaries = sorted(marks) + [math.inf]
     result = HorizonResult(burden)
 
     for name, n0, esc in lineages:
@@ -148,7 +157,9 @@ def horizon(agents, escapes, sustain: dict, burden: float, growth: float, *,
         outcome = None
         for i in range(len(boundaries) - 1):
             t0, t1 = boundaries[i], boundaries[i + 1]
-            act = _active(agents, sustain, t0)
+            act = _active(agents, sustain, t0, starts)
+            if transform is not None:
+                act = transform(act)      # e.g. organ-budget de-rating of the agents given TOGETHER
             if esc is None:
                 kill = kill_of if kill_of is not None else (lambda a: a.effective_kill)
                 m = sum(kill(a) for a in act) - BULK_GROWTH_PER_DAY
@@ -159,7 +170,8 @@ def horizon(agents, escapes, sustain: dict, burden: float, growth: float, *,
             if first_margin is None:
                 first_margin = m
             if m <= 0.0:
-                dropped = tuple(a.name for a in agents if a not in act)
+                act_names = {a.name for a in act}
+                dropped = tuple(a.name for a in agents if a.name not in act_names)
                 outcome = EscapeOutcome(name, n0, "relapses" if t0 > 0 else "never_cleared", t0,
                                         first_margin, dropped)
                 break

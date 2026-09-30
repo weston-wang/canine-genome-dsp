@@ -330,6 +330,7 @@ class Evaluation:
     horizon_strict: HorizonResult | None = None
     horizon_extended: HorizonResult | None = None
     availability: tuple = ()
+    schedule: str = "all agents from day 0"
 
     @property
     def names(self) -> tuple:
@@ -351,7 +352,8 @@ def escapes_to_close(burden: float, escapes=GROUNDED_ESCAPES, threshold: float =
 
 def evaluate(agents, escapes, *, growth=GROWTH_PER_DAY, f=CYCLING_FRACTION_DEFAULT,
              r=RETAINED_TOLERANCE_DEFAULT, efflux_multiplier=gi.EFFLUX_CO_DOSE_MULTIPLIER_CANINE_PROXY,
-             burden=BURDEN_EARLY_DETECTED, clock=False, compartment=SYSTEMIC) -> Evaluation:
+             burden=BURDEN_EARLY_DETECTED, clock=False, compartment=SYSTEMIC, starts=None,
+             schedule="all agents from day 0") -> Evaluation:
     agents = tuple(agents)
     d_agents, factors, profs = derate(agents, efflux_multiplier)
     mf = {e.name: margin_for(agents, e, growth, f, r) for e in escapes}
@@ -365,16 +367,51 @@ def evaluate(agents, escapes, *, growth=GROWTH_PER_DAY, f=CYCLING_FRACTION_DEFAU
         worst_full=min(mf.values()), worst_derated=md[weakest], weakest=weakest,
         assumed=sum(1 for a in agents if potency_grade(a) in ("ASSUMED", "BRACKET", "HINGE")),
         availability=tuple(AVAILABILITY.get(a.name, NONE) for a in agents))
+    ev.schedule = schedule
     if clock:
         h_fraction = CNS_SEED_FRACTION if compartment == CNS else 1.0
         for label, key in (("horizon_strict", "sustainable_days"), ("horizon_extended", "hard_cap_days")):
             sustain = {a.name: getattr(profile_for(a.name), key) for a in agents}
-            hz = horizon(d_agents, escapes, sustain, burden, growth, f=f, r=r, fraction=h_fraction,
-                         margin_fn=lambda act, esc: margin_for([in_window(a) for a in act], esc, growth, f, r),
-                         always_present=FOUNDER_ESCAPES,
-                         kill_of=lambda a: in_window(a).effective_kill)
+            # De-rating is decided per PHASE: only the agents given together share organ budgets.
+            transform = lambda act: [in_window(a) for a in derate(act, efflux_multiplier)[0]]
+            hz = horizon(agents, escapes, sustain, burden, growth, f=f, r=r, fraction=h_fraction,
+                         margin_fn=lambda act, esc: margin_for(act, esc, growth, f, r),
+                         always_present=FOUNDER_ESCAPES, kill_of=lambda a: a.effective_kill,
+                         starts=starts, transform=transform)
             setattr(ev, label, hz)
     return ev
+
+
+#: Agents that are delivered as a discrete course or a cell product, and so are naturally given AFTER
+#: cytoreduction rather than stacked on it.
+STAGEABLE = COURSE_AGENTS | {"CD20 CAR-T", "tandem CD19/CD20 CAR-T",
+                             "CD20 CAR-T with PD-1/CD28 switch receptor",
+                             "persistence-engineered canine-binder CAR-T (specification)",
+                             "CD5/CD52-directed cellular effector (T-lineage)"}
+STAGE_DAYS = (28, 56, 84)
+
+
+def schedule_options(names) -> list:
+    """(label, starts) options: everything from day 0, or the stageable agents started later."""
+    opts = [("all agents from day 0", None)]
+    stage = [n for n in names if n in STAGEABLE]
+    if stage and len(stage) < len(names):
+        for d in STAGE_DAYS:
+            opts.append((f"course/cell agents start day {d}", {n: float(d) for n in stage}))
+    return opts
+
+
+def evaluate_best_schedule(agents, escapes, **kw) -> Evaluation:
+    """Run the clock under each schedule option and keep the one that clears everything earliest
+    (or, failing that, the first)."""
+    best = None
+    for label, starts in schedule_options([a.name for a in agents]):
+        ev = evaluate(agents, escapes, clock=True, starts=starts, schedule=label, **kw)
+        ok = ev.horizon_strict.cure_inside_window
+        key = (not ok, ev.horizon_strict.clear_day if ok else 0.0)
+        if best is None or key < best[0]:
+            best = (key, ev)
+    return best[1]
 
 
 MAX_COMBO = 5
@@ -401,24 +438,32 @@ def search(compartment: str, immunophenotype: str = "B", tier: str = "off-label"
             if not all(covered(combo, e) for e in escapes):
                 continue
             n_cov += 1
+            raw = min(margin_for(combo, e, GROWTH_PER_DAY, f, r) for e in escapes)
+            if raw <= 0.0:
+                continue
             d_agents, factors, _ = derate(combo, efflux_multiplier)
             worst = min(margin_for(d_agents, e, GROWTH_PER_DAY, f, r) for e in escapes)
-            rows.append((worst, n, combo))
+            rows.append((worst, n, combo, raw))
     rows.sort(key=lambda t: (-t[0], t[1]))
     closing = [t for t in rows if t[0] > 0.0]
-    # Run the clock on the best-margin regimens AND on every closing regimen of <= SMALL_N agents, so
-    # the smallest sets are never missed just because their margin is not the largest.
+    # The clock runs on (a) the best-margin regimens, (b) every closing regimen of <= SMALL_N agents,
+    # and (c) regimens that close only WITHOUT de-rating (they may be tolerable if staged).
     picked, seen = [], set()
-    for _, n, c in closing:
-        if (n <= SMALL_N or len(picked) < max(top * 6, 40)) and id(c) not in seen:
-            seen.add(id(c))
-            picked.append(c)
-    evaluated = [evaluate(c, escapes, f=f, r=r, efflux_multiplier=efflux_multiplier, burden=burden,
-                          clock=True, compartment=compartment) for c in picked]
+    by_raw = sorted(rows, key=lambda t: (-t[3], t[1]))
+    for source in (rows, by_raw):
+        count = 0
+        for worst, n, c, raw in source:
+            if id(c) in seen:
+                continue
+            if n <= SMALL_N or count < max(top * 6, 40):
+                seen.add(id(c)); picked.append(c); count += 1
+    evaluated = [evaluate_best_schedule(c, escapes, f=f, r=r, efflux_multiplier=efflux_multiplier,
+                                        burden=burden, compartment=compartment) for c in picked]
     evaluated.sort(key=lambda ev: -ev.worst_derated)
     return {"compartment": compartment, "immunophenotype": immunophenotype, "tier": tier,
             "burden": burden, "escapes": tuple(e.name for e in escapes), "pool": tuple(a.name for a in pool),
-            "coverage_complete": n_cov, "closing_after_derating": len(closing),
+            "coverage_complete": n_cov, "closing_without_derating": len(rows),
+            "closing_after_derating": len(closing),
             "best_uncleared_margin": rows[0][0] if rows else None,
             "top_by_margin": evaluated[:top],
             "cured_inside_window": [e for e in evaluated if e.horizon_strict.cure_inside_window],
