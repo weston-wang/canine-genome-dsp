@@ -92,6 +92,13 @@ class Escape:
     effluxes_substrates: bool = False  # True => agents that are efflux substrates are defeated
     evidence: str = "ASSUMED"
     note: str = ""
+    defeats: frozenset = frozenset()   # GENERIC defeat tags: an agent whose `vulnerable_to` shares a
+                                       # tag is defeated. Added for mechanisms that are neither
+                                       # position, display nor efflux: loss of antigen PRESENTATION
+                                       # ("antigen_presentation"), host rejection of a mouse-derived
+                                       # binder ("murine_binder"), MGMT repair of a nitrosourea
+                                       # ("mgmt_repair"). Empty for every earlier escape, so earlier
+                                       # results are unchanged.
 
     @property
     def is_axis_independence(self) -> bool:
@@ -106,7 +113,7 @@ class Escape:
         those was a bug that made cyclophosphamide fail against the efflux clone and made a tandem
         CD19/CD20 CAR indistinguishable from a single-antigen one.
         """
-        return not self.removes_antigen and not self.effluxes_substrates
+        return (not self.removes_antigen and not self.effluxes_substrates and not self.defeats)
 
 
 @dataclass(frozen=True)
@@ -133,6 +140,11 @@ class Agent:
                                        # these honestly is the difference between a result and a
                                        # hypothesis.
     note: str = ""
+    vulnerable_to: frozenset = frozenset()   # tags this agent is defeated by (see Escape.defeats)
+    resists_axis_independence: bool = False  # True for an agent engineered to work despite a
+                                             # generic loss of its own axis, e.g. a CAR-T carrying a
+                                             # PD-1/CD28 switch receptor against exhaustion. Default
+                                             # False, so no earlier agent changes.
 
     @property
     def antigen_directed(self) -> bool:
@@ -156,12 +168,16 @@ class Agent:
         # An efflux clone defeats exactly the agents that are its substrates.
         if escape.effluxes_substrates and self.efflux_substrate:
             return False
+        # Generic tagged defeat (antigen presentation, murine binder, MGMT repair).
+        if escape.defeats & self.vulnerable_to:
+            return False
         if self.axis in POSITION_INDEPENDENT:
             # Position-independent agents still do not get a free pass against a GENERIC
             # independence escape on their OWN axis -- losing BCL2 dependence defeats a BCL2
             # inhibitor. But an escape with its own explicit mechanic (efflux, antigen loss) has
             # already been adjudicated above, and must not be re-blocked here.
-            if escape.axis is self.axis and escape.is_axis_independence:
+            if (escape.axis is self.axis and escape.is_axis_independence
+                    and not self.resists_axis_independence):
                 return False
             return True
         if self.axis is not escape.axis:
