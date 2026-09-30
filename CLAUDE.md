@@ -20,6 +20,11 @@ Concrete failures (so the rules have a reason):
    (`core/toxicity.py`, `core/tolerable_search.py`) and provenance rules (`core/evidence.py`) were dropped.
 4. **Overstating closure.** "Every escape is closed" was said when the accurate claim was "the model
    contains an agent that covers it."
+5. **Declaring a search complete over a candidate list that was never enumerated.** The lymphoma
+   closing-combination was reported as "found" when the catalogue had no vaccine and no separate
+   stem-cell/transplant mechanism, and the user had to point that out ("even I know vaccine should be part of
+   the equation, and maybe even stem cell. Go back and be thorough"). A result is only as complete as the
+   candidate universe it searched.
 
 ## Rules
 
@@ -47,6 +52,13 @@ Concrete failures (so the rules have a reason):
    results and known gaps), commit and push. The next thread cannot see this one.
 8. **When the user corrects a lapse, add the lesson here in the same session** and propagate it to every
    branch.
+9. **Before any "closed / found / complete" claim, enumerate the candidate universe and record it.** List every
+   modality class that could plausibly matter (for cancer work at least: cytotoxics, targeted drugs,
+   antibodies and ADCs, bispecifics, cell therapies, stem-cell and marrow transplant, vaccines and other active
+   immunotherapy, checkpoint and cytokine agents, radiation, sanctuary-site delivery), from the literature,
+   not from memory. For each, record in git whether it is in the model, evaluated and excluded with a reason,
+   or not yet assessed. State the claim as "closed within this catalogue of N agents and M escapes", and list
+   what is outside it. Do the same for the escape list (independent audit, not the list already in hand).
 
 ## Standing standards for the cancer durable-response work (the user's words)
 
