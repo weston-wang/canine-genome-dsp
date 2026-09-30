@@ -209,11 +209,13 @@ conditioning window on top of CHOP + sub-threshold immunotherapy, 10-year durabl
 moves (0.240 → 0.193 → 0.190 → 0.217 across TBI intensity) and dips within Monte Carlo noise. A
 duration-capped kill, however intense, does not clear a bar that persists for a decade.
 
-This is not a strike against transplant — it is the reason **the real curative protocol does not stop
-at transplant.** Gareau et al. 2021 reached their cure fraction by adding **adoptive T-cell therapy**
-to CHOP + transplant (see §6): a persistent immune effector on top of the consolidation. The model
-and the real protocol agree — consolidation sets up the response; a persistent immune mechanism
-carries it.
+> **CORRECTION (2026-09-30).** The original text here said Gareau et al. 2021 reached their cure fraction
+> *by adding* adoptive T cells. That was wrong. Their abstract (PMID 34950726) says adding adoptive T cells
+> did **not** significantly increase disease-free interval or survival versus CHOP + autologous transplant
+> alone (DFI 199.5 d vs 565 d historical, p=0.567; OS 752 vs 531 d, p=0.72; n=10, no randomisation). The 4/10
+> (40%) is the **transplant cohort's** cure fraction, not evidence that the T cells help. The model argument
+> that a capped-duration kill does not buy 10-year durability stands; the claim that the real protocol proves
+> a persistent immune effector carries it does not.
 
 *Tests: `test_capped_duration_tbi_does_not_buy_ten_year_durability`*
 
@@ -311,13 +313,14 @@ for what "cure or 10-year durability" actually costs.
 - **T-cell** (Warry, Willcox, Suter 2014, *J Vet Intern Med* 28(2):529-37, PMID 24467413): 15 dogs,
   DFI 184 d, OS 240 d, 2/13 alive past 740 days — worse than B-cell, as everywhere else.
 - **The cure fraction** (Gareau, Ripoll, Suter 2021, *Front Vet Sci* 8:787373, PMID 34950726): CHOP +
-  autoPBHSCT + **adoptive T-cell therapy** in 10 high-grade B-cell dogs — **4/10 (40%) disease-free
-  for ≥2 years** (their explicit cure definition), against the ~70% of transplanted dogs that
-  otherwise relapse from residual disease.
+  autoPBHSCT + adoptive T-cell therapy in 10 high-grade B-cell dogs — **4/10 (40%) disease-free
+  for ≥2 years** (their explicit cure definition), against ~70% of autologously transplanted dogs that
+  relapse from residual disease. **The T cells were not shown to help** (see the correction in §5);
+  the 40% is the cohort outcome.
 
 The 40% cure fraction is why the engine's story is calibrated to land *near*, not far above, that
-number, and why the model treats transplant as consolidation + a persistent immune effector rather
-than as a stronger dose of chemotherapy. It is the real proof that durability is achievable in this
+number. (Earlier text also said this shows the model's "persistent immune effector" is what carries it;
+the source does not show that. See the correction in §5.) It is the real proof that durability is achievable in this
 disease — and its cost, the ~7–13% treatment-related mortality, is route 7.
 
 ---
@@ -592,10 +595,9 @@ analysis. **Immunotherapy take** is a measurable lever, read out by MRD. **Treat
 mortality** of the curative consolidation is the largest real subtraction, and partly reducible.
 **Early detection** helps decide timing, not durability.
 
-And durability is not hypothetical here: transplant plus adoptive T cells already cures **40%** of
-dogs in a real cohort. The open work is raising that fraction — a stronger, potency-measured immune
-effector; a tandem construct to insure against antigen loss; lower-toxicity conditioning — not
-proving it is possible.
+And durability is not hypothetical here: a transplant cohort (CHOP + autologous transplant +
+adoptive T cells, where the T cells were not shown to add benefit) had **40%** disease-free at 2 years in
+10 dogs. The open work is raising that fraction.
 
 On the two questions the goal put sharply: **every mechanism and escape is closed by real data, a
 rigorous model, or both**, with potency *and* toxicity considered for each (§8, §9) — the only two
