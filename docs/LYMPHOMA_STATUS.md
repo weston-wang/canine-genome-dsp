@@ -131,3 +131,22 @@ not picked those commits up.
   inputs never tuned to force closure.
 - **Known gaps:** every agent load-bearing (no redundancy); HCQ CNS access assumed; verdinexor
   derived-vs-clinical mismatch; pump chronic toxicity unknown; buildable agents; mean-field clock.
+
+## Gap raised by the user (2026-09-30): "How come vaccine isn't part of this"
+
+- **Record check:** the rebuilt catalogue (`core/lymphoma_grounded.py`, `core/lymphoma_catalogue.py`) has **no
+  vaccine agent**, and no document records a decision to exclude one. The only "vaccine" in the lymphoma work is
+  v1's use of the vaccine *engine* (`run_monte_carlo_with_vaccine`) as a stand-in for a CD20 effector
+  (`LYMPHOMA_DURABLE_RESPONSE.md` s5). So this is **not covered**, and was an omission, not a settled exclusion.
+- **Canine lymphoma vaccine literature found (PubMed, not yet graded or modelled):** dTERT genetic vaccine +
+  COP (PMID 20531395; 13/14 immune responders, survival >97.8 vs 37 wk historic controls) and larger follow-up
+  (PMID 23902422; >76.1 vs 29.3 wk); Tel-eVax + CHOP (PMID 30537967; OS 64.5 wk, no control arm);
+  autologous tumour-cell + hGM-CSF vaccine, randomised placebo-controlled, **no clinical benefit**
+  (PMID 19754780); autologous DC vaccine pulsed with a canine B-cell leukaemia lysate gave no DTH response
+  (PMID 17917377). Reviews: PMIDs 41006003, 26545847.
+- **Why it may matter:** a vaccine targets a different antigen (e.g. TERT) from CD20/CD19, so it is a candidate
+  for the antigen-loss escapes. **Why it is not yet closure:** the evidence is survival in weeks against
+  historical controls, not a kill rate against persisters; it would be graded at best REGIMEN-CALIBRATED and
+  cannot be called closing without a derived potency.
+- **Next step, not done:** add a TERT-vaccine agent to the grounded catalogue with an explicit transfer basis,
+  and test whether it removes the "every agent is load-bearing" weakness.
