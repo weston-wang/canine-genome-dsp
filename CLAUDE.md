@@ -57,6 +57,10 @@ Concrete failures (so the rules have a reason):
 - "assuming early detection"
 - Reports "in layman's terms"
 - "I'm not asking if it's been demonstrated, I know it's not."
+- "I'm okay with no specific data but if scientifically sound" (2026-09-30). So a potency, exposure or
+  access figure transferred from another species, disease or a class-level mechanism is acceptable **if the
+  transfer is justified in writing** and the number is graded TRANSFERRED (never MEASURED). A number with no
+  basis at all stays ASSUMED and does not count as closure. Do not tune any input to force a closure.
 - Method reference: "Look at how we went and found all possible mechanisms and routes of escapes, then
   searched and found combined approaches for closing each" -- the user calls this "the HSA branch";
   its content is histiocytic sarcoma (see terminology).
