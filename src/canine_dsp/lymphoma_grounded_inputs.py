@@ -214,3 +214,31 @@ RECURRENT_LESIONS = {
              "note": "not predictive of worse prognosis (PMID 36016811)."},
     "NFKBIA (intestinal T-cell)": {"T_cell_fraction": 31 / 54, "n": 54, "pmid": "40877743", "note": ""},
 }
+
+
+# ---- cytarabine by continuous infusion: CNS access is MEASURED in dogs -------------------------------
+_ARAC_MW = 243.2
+#: Scott-Moncrieff 1991 (PMID 1742843), ten healthy dogs, 600 mg/m2 as a 12 h infusion (50 mg/m2/h):
+#: plasma steady state 14.1 +/- 4.2 uM, CSF steady state 8.3 +/- 1.1 uM, CSF:plasma 0.62 +/- 0.14.
+ARAC_PLASMA_SS = M(14_100.0, Quantity.CTROUGH_NM, _dog("cytarabine"), "PMID 1742843", n=4,
+                   provenance=Provenance.MEASURED)
+ARAC_CSF_SS = M(8_300.0, Quantity.CTROUGH_NM, _dog("cytarabine"), "PMID 1742843 (CSF, intact barrier)",
+                n=4, provenance=Provenance.MEASURED)
+#: IC50 in canine lymphoma lines, 48 h (PMID 25715778 Table 1): CLBL-1 (B) 91.7 ng/mL, Ema (T,
+#: P-gp-active) 736 ng/mL.
+ARAC_IC50_B = M(ng_per_ml_to_nM(91.7, _ARAC_MW), Quantity.IC50_NM, _cells("cytarabine", LYM_B),
+                "PMID 25715778 (CLBL-1, 48 h)", n=1, provenance=Provenance.MEASURED)
+ARAC_IC50_T = M(ng_per_ml_to_nM(736.0, _ARAC_MW), Quantity.IC50_NM, _cells("cytarabine", LYM_T),
+                "PMID 25715778 (Ema, 48 h)", n=1, provenance=Provenance.MEASURED)
+ARAC_INFUSION_H = 12.0
+
+
+def cytarabine_cri(immunophenotype: str, compartment: str = "systemic") -> DerivedPotency:
+    """Kill per day DURING the infusion, from the measured steady-state concentration in the named
+    compartment (plasma or CSF) against the canine-lymphoma-line IC50. Duty (12 h per interval) is
+    applied by the caller."""
+    ic50 = ARAC_IC50_T if immunophenotype == "T" else ARAC_IC50_B
+    conc = ARAC_CSF_SS if compartment == "cns" else ARAC_PLASMA_SS
+    return derive("cytarabine CRI", ic50, conc, assay_days=2.0,
+                  note="steady-state concentration during a 12 h infusion; total not free (cytarabine is "
+                       "little protein bound). Whether cytarabine is a canine P-gp substrate is NOT FOUND.")

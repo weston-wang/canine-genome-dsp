@@ -208,19 +208,37 @@ def test_v1_t_cell_robust_regimen_needs_derating_under_organ_budgets():
 
 @pytest.mark.parametrize("comp,ip,tier", [(SYSTEMIC, B, "off-label"), (SYSTEMIC, T, "off-label"),
                                           (SYSTEMIC, T, "trial"), (CNS, B, "off-label"),
-                                          (CNS, T, "off-label")])
-def test_no_regimen_closes_every_escape_using_strict_grade_potencies_alone(comp, ip, tier):
+                                          (CNS, T, "off-label"), (CNS, T, "trial"), (CNS, B, "trial")])
+def test_these_cells_have_no_strict_grade_regimen_that_clears_every_lineage(comp, ip, tier):
     res = G.search(comp, ip, tier, pool=_pool(comp, ip, tier, G.STRICT_GRADES))
-    assert res["closing_after_derating"] == 0 and not res["cured_inside_window"]
+    assert not res["cured_inside_window"]
 
 
-def test_two_strict_agents_cover_b_cell_but_do_not_clear_inside_the_windows():
+def test_systemic_b_cell_has_a_regimen_of_only_strict_grade_agents_once_cytarabine_is_derived():
+    """Canine anti-CD20 antibody (measured) + verdinexor (derived) + cytarabine CRI (derived from the
+    measured plasma steady state and canine-lymphoma-line IC50). Needs the trial-stage antibody."""
     res = G.search(SYSTEMIC, B, "trial", pool=_pool(SYSTEMIC, B, "trial", G.STRICT_GRADES))
-    assert res["closing_after_derating"] == 1 and not res["cured_inside_window"]
-    only = res["top_by_margin"][0]
-    assert set(only.names) == {"anti-CD20 monoclonal antibody", "verdinexor (XPO1 inhibitor)"}
-    assert only.worst_derated == pytest.approx(0.009, abs=0.003)     # razor thin
-    assert "verdinexor" in only.horizon_strict.verdict()             # it must stop at its 56-day window
+    assert res["cured_inside_window"]
+    best = min(res["cured_inside_window"], key=lambda e: (len(e.agents), -e.worst_derated))
+    assert {n.split(" (")[0] for n in best.names} == {"anti-CD20 monoclonal antibody", "verdinexor",
+                                                      "cytarabine CRI"}
+    assert best.worst_derated == pytest.approx(0.101, abs=0.01)
+    assert best.assumed == 0
+
+
+def test_no_regimen_may_contain_two_versions_of_one_drug():
+    for res in (G.search(SYSTEMIC, B, "trial", max_n=5), G.search(CNS, B, "trial", max_n=5)):
+        for ev in res["cured_inside_window"] + res["top_by_margin"]:
+            assert G.one_per_family(ev.agents), ev.names
+
+
+def test_cytarabine_is_derived_in_the_cns_from_the_measured_csf_concentration():
+    """CSF steady state 8.3 uM, CSF:plasma 0.62 (PMID 1742843) against the canine-lymphoma-line IC50."""
+    b = gi.cytarabine_cri(B, "cns")
+    t = gi.cytarabine_cri(T, "cns")
+    assert b.kill_per_day == pytest.approx(1.57, abs=0.03) and t.kill_per_day == pytest.approx(0.66, abs=0.03)
+    assert b.fully_measured and t.fully_measured
+    assert gi.ARAC_CSF_SS.value / gi.ARAC_PLASMA_SS.value == pytest.approx(0.62, abs=0.14)   # paper: mean of ratios 0.62 +/- 0.14
 
 
 def test_b_cell_smallest_anchored_set_is_doxorubicin_antibody_verdinexor():
@@ -242,27 +260,22 @@ def test_t_cell_smallest_anchored_set_needs_venetoclax():
     assert sets[0].worst_derated < 0.02          # 2-agent set is thin; the 3-agent set has +0.06
 
 
-def test_cns_is_open_at_every_evidence_grade():
-    """With potencies limited to strict or outcome grade no regimen closes the sanctuary at all."""
+def test_cns_has_no_regimen_of_measured_or_outcome_grade_potency_that_clears():
     for ip in (B, T):
         for tier in ("off-label", "trial"):
-            outcome = G.search(CNS, ip, tier, pool=_pool(CNS, ip, tier, G.OUTCOME_GRADES))
-            assert outcome["closing_after_derating"] == 0
+            res = G.search(CNS, ip, tier, pool=_pool(CNS, ip, tier, G.OUTCOME_GRADES))
+            assert not res["cured_inside_window"]
 
 
-def test_cns_closes_in_the_model_only_through_a_trial_stage_cell_therapy_on_assumed_potency():
+def test_cns_b_cell_clears_only_with_unmeasured_potencies_and_cns_t_cell_still_does_not():
     off = G.search(CNS, B, "off-label")
-    assert not off["cured_inside_window"]                       # nothing licensed or off-label clears it
-    trial = G.search(CNS, B, "trial")
-    assert trial["cured_inside_window"]
-    for ev in trial["cured_inside_window"]:
-        assert "CD20 CAR-T" in ev.names                          # the cell that crosses the barrier
-        assert ev.assumed >= 4                                   # and four of five potencies assumed
-    # T-cell: no obtainable agent does it, even trial-stage; only the non-existent T-lineage effector
+    assert off["cured_inside_window"]                        # cytarabine CRI (derived) + radiation, staged
+    for ev in off["cured_inside_window"]:
+        assert any(n.startswith("cytarabine CRI") for n in ev.names)
+        assert ev.assumed >= 2                               # radiation and prednisolone are not measured
     for tier in ("off-label", "trial"):
         assert not G.search(CNS, T, tier)["cured_inside_window"]
     any_t = G.search(CNS, T, "any")
-    assert any_t["cured_inside_window"]
     assert all(any(n.startswith("CD5/CD52") for n in ev.names) for ev in any_t["cured_inside_window"])
 
 

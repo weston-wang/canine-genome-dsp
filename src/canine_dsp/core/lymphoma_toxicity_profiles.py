@@ -110,6 +110,22 @@ PROFILES["high-dose methotrexate"] = P(
     secondary_axis=O.GI, secondary_fraction=0.30, extra_loads=((O.MARROW, 0.30),),
     sustainable_days=84.0, hard_cap_days=None, reversible=True)
 
+PROFILES["cytarabine CRI (q14d)"] = P(
+    O.GI, 0.55, True,
+    "GI toxicity in 17/26 (65.3%; grade III-IV in 19.2%), neutropenia in 9/26 (34.6%) after a single "
+    "cytarabine CRI added to CEOP",
+    source="Dog, PMID 31769013 (26 dogs). Healthy dogs: no clinically significant toxicity in 21 days "
+           "after 600 mg/m2 over 12 h (PMID 1742843, n=10). A 14-day repeat interval is an ASSUMED schedule.",
+    secondary_axis=O.MARROW, secondary_fraction=0.35,
+    sustainable_days=84.0, hard_cap_days=None, reversible=True)
+
+PROFILES["cytarabine CRI (q7d)"] = P(
+    O.GI, 0.90, False,
+    "as the q14d schedule, doubled for weekly repetition: NOT measured, weekly CRI tolerability not found",
+    source="ASSUMED doubling of the single-dose incidence in PMID 31769013.",
+    secondary_axis=O.MARROW, secondary_fraction=0.60,
+    sustainable_days=84.0, hard_cap_days=None, reversible=True)
+
 PROFILES["intrathecal cytarabine"] = P(
     O.CNS_LOCAL, 0.25, False,
     "chemical arachnoiditis / neurotoxicity; one canine case gave only a 3-week CNS remission "
@@ -256,7 +272,7 @@ def _check_no_gaps() -> None:
         heads.setdefault(h, []).append(k)
     dup = {h: ks for h, ks in heads.items() if len(ks) > 1}
     # Deliberate near-duplicates are disambiguated by exact match in `profile_for`.
-    allowed = {"cyclophosphamide", "prednisolone", "cd20 car-t"}
+    allowed = {"cyclophosphamide", "prednisolone", "cd20 car-t", "cytarabine cri"}
     bad = {h: ks for h, ks in dup.items() if h not in allowed}
     assert not bad, f"ambiguous profile heads: {bad}"
 

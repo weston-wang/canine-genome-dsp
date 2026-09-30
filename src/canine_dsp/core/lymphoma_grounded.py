@@ -71,6 +71,7 @@ AVAILABILITY = {
     "anti-PD-1 / anti-PD-L1 checkpoint blockade": OFF_LABEL,
     "hydroxychloroquine (autophagy)": OFF_LABEL, "venetoclax (BCL2 inhibitor)": OFF_LABEL,
     "acalabrutinib (BTK)": OFF_LABEL, "verdinexor (XPO1 inhibitor)": LICENSED,
+    "cytarabine CRI (q14d)": OFF_LABEL, "cytarabine CRI (q7d)": OFF_LABEL,
     "P-gp / TGF-beta-inhibitor chemosensitiser": TRIAL,
     "CD5/CD52-directed cellular effector (T-lineage)": NONE,
 }
@@ -204,6 +205,22 @@ def _new_agents(compartment: str, immunophenotype: str) -> tuple:
               note="A one-time consolidation with REAL multi-year remission data. See the model-conflict "
                    "note in docs/LYMPHOMA_STATUS.md."),
     ]
+    # Cytarabine by CRI: kill computed per compartment from the MEASURED plasma or CSF steady state, so
+    # access is 1.0 here (the CSF:plasma ratio 0.62 is inside the concentration, not a multiplier).
+    ara = gi.cytarabine_cri(immunophenotype, "cns" if compartment == CNS else "systemic")
+    for name, interval in (("cytarabine CRI (q14d)", 14.0), ("cytarabine CRI (q7d)", 7.0)):
+        out.append(Agent(
+            name, Axis.CYTOTOXIC, Layer.RECEPTOR, ara.kill_per_day, 1.0, (gi.ARAC_INFUSION_H / 24.0) / interval,
+            True, division_gated=True, efflux_substrate=False,
+            evidence="MEASURED in dogs: CSF:plasma 0.62 at a 12 h infusion, healthy dogs (PMID 1742843); "
+                     "IC50 in canine lymphoma lines (PMID 25715778); used in canine CNS lymphoma (PMID 22210944, "
+                     "37732143).",
+            potency_evidence=(f"DERIVED: {ara.kill_per_day:.2f}/day during a 12 h infusion, from the measured "
+                              f"{'CSF' if compartment == CNS else 'plasma'} steady state and the "
+                              f"{'Ema' if immunophenotype == 'T' else 'CLBL-1'} IC50 (48 h); duty 12 h per "
+                              f"{interval:.0f} d."),
+            note="Division-gated (S-phase). P-gp substrate status in dogs NOT FOUND; human cytarabine is not "
+                 "a classical P-gp substrate (transfer)."))
     if immunophenotype == "B":
         out += [
             Agent("CD20 CAR-T with PD-1/CD28 switch receptor", Axis.IMMUNE_EFFECTOR, Layer.RECEPTOR, 0.12,
@@ -414,6 +431,26 @@ def evaluate_best_schedule(agents, escapes, **kw) -> Evaluation:
     return best[1]
 
 
+#: Versions of one drug or one construct exclude each other: a regimen cannot contain two schedules of
+#: cytarabine, both cyclophosphamide regimens, two prednisolone doses, two CD20 CARs, or whole-body plus
+#: half-body irradiation (the first contains the second). Without this the search double-counted a drug.
+FAMILY = {
+    "cytarabine CRI (q14d)": "cytarabine CRI", "cytarabine CRI (q7d)": "cytarabine CRI",
+    "cyclophosphamide": "cyclophosphamide", "cyclophosphamide (metronomic)": "cyclophosphamide",
+    "prednisolone (glucocorticoid)": "prednisolone", "prednisolone (maintenance dose)": "prednisolone",
+    "CD20 CAR-T": "CD20 CAR", "tandem CD19/CD20 CAR-T": "CD20 CAR",
+    "CD20 CAR-T with PD-1/CD28 switch receptor": "CD20 CAR",
+    "persistence-engineered canine-binder CAR-T (specification)": "CD20 CAR",
+    "total body irradiation + transplant": "whole/half-body RT",
+    "half-body irradiation (low-dose-rate)": "whole/half-body RT",
+}
+
+
+def one_per_family(combo) -> bool:
+    fams = [FAMILY.get(a.name, a.name) for a in combo]
+    return len(set(fams)) == len(fams)
+
+
 MAX_COMBO = 5
 SMALL_N = 3     # every closing regimen up to this size gets the clock, whatever its margin
 
@@ -435,6 +472,8 @@ def search(compartment: str, immunophenotype: str = "B", tier: str = "off-label"
     n_cov = 0
     for n in range(1, min(n_pool, max_n) + 1):
         for combo in combinations(pool, n):
+            if not one_per_family(combo):
+                continue
             if not all(covered(combo, e) for e in escapes):
                 continue
             n_cov += 1
