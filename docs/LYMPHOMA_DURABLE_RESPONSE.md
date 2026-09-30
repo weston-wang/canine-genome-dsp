@@ -221,6 +221,13 @@ carries it.
 
 ## 5. Closing the open routes
 
+> **Qualified 2026-09-30 (see `LYMPHOMA_COVERAGE_LEDGER.md` §5 and §7).** The CNS closure below assumes an
+> effector that persists for years. Measured canine CAR-T persistence is about 14 to 50 days (anti-mouse
+> antibodies, PMID 32002286, 35898541). Under the treatment clock the sanctuary is open at every
+> evidence grade; for B-cell the model clears it only with the trial-stage CD20 CAR-T plus two radiation
+> courses on four assumed potencies.
+
+
 ### Route 5 — the CNS sanctuary → CLOSED by immunotherapy (the model upgrade)
 
 The central nervous system is a pharmacologic sanctuary: the blood-brain barrier excludes most CHOP
@@ -404,6 +411,13 @@ allows — not any one of them traded away.
 
 ## 9. The completeness ledger
 
+> **Qualified 2026-09-30.** "Closed two ways" for P-gp (below) means: effector construction, and drug-side
+> reversal in vitro. A canine randomised trial of valspodar + doxorubicin (n = 20, PMID 28357033) showed no
+> survival difference. The ledger here graded mechanisms; the rebuilt ledger (`LYMPHOMA_COVERAGE_LEDGER.md`
+> §6) grades each escape by the strength of the *potency* that closes it and adds two escapes
+> (antigen-presentation loss, MGMT repair).
+
+
 `ESCAPE_ROUTE_COMPLETENESS` records, for every modelled mechanism and escape, the evidence class
 that closes it and whether potency and toxicity were considered. Every route is closed by real data,
 a rigorous model, or both. Two honest exceptions are flagged, not hidden: **apoptosis evasion**
@@ -418,6 +432,15 @@ PMID 33961622) — though reversal raises normal-tissue exposure, so it is not f
 ---
 
 ## 10. The combination search: every mechanism, every escape, searched rather than proposed
+
+> **Qualified 2026-09-30.** The recorded results below use hand-set potencies, no organ budgets and a
+> persister "wall". Re-scored under potency grading, organ budgets, the two-state persister and the
+> treatment clock: every *minimal* closing regimen below relapses when a drug must stop; the "most robust"
+> B-cell regimen is unchanged (+0.2297) and clears by day 52; the T-cell one is over budget on marrow and
+> falls to +0.177. The "three filters" statement that no conventional cytotoxic survives the persister
+> filter no longer holds (a division-gated agent counts f times its kill). See
+> `LYMPHOMA_COVERAGE_LEDGER.md` §5 to §7.
+
 
 Sections 1–9 enumerated escape routes in prose and asserted their closures. That is how the same
 route can be CLOSED in one place and OPEN in another. This section replaces the assertions with a

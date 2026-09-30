@@ -36,44 +36,79 @@ confirmation and were not confirmed interactively.
 | `core/regimen.py` | derived-coverage object model | **Ported earlier** (`core/regimen.py`, plus an efflux mechanic) |
 | `core/catalogue.py` | escapes and agents, per-compartment access | **Ported earlier** (`core/lymphoma_catalogue.py`) |
 | `core/combination_search.py` | search over combinations | **Ported earlier** (`core/lymphoma_search.py`) |
-| `pkpd.py` `emax_kill_rate`, `free concentration`, `margin`, `DrugPKPD`, `min_access_to_close` | kill rate derived from measured IC50 x exposure; can report "does not close" | **To port** (this rebuild) |
+| `pkpd.py` `emax_kill_rate`, `free concentration`, `margin`, `DrugPKPD`, `min_access_to_close` | kill rate derived from measured IC50 x exposure; can report "does not close" | **Ported** (`lymphoma_pkpd.py`), plus a required-IC50 inversion for agents with an exposure but no IC50 |
 | `pkpd.py` trametinib target-attainment / dose-for-attainment / dosing workaround | population-PK spread for one HS drug | **Skipped**: built on one HS drug's Phase I; no lymphoma equivalent input. Revisit if a canine PK spread is found for a lymphoma agent |
-| `core/evidence.py` | `Measurement` that refuses to be read for another population; `transfer_to()` | **To port** (this rebuild), with lymphoma `Disease` members added |
-| `core/toxicity.py` | organ-axis budgets; same-axis adds; de-rating not free; `profile_for` raises rather than failing open; efflux co-dose multiplier | **To port** (this rebuild) |
-| `core/tolerable_search.py` | search under organ budgets; efflux co-dose charged on partner's axis | **To port** (this rebuild) |
-| `core/dormancy.py` | persister is a duty-cycle problem, not a wall for division-gated agents | **To adapt** (this rebuild). **Not raised earlier in this project.** It changes the lymphoma "persister filter". Its `kill_from` multiplies by duty twice (`effective_kill` already contains duty); do not copy that |
-| `core/response_duration.py`, `core/treatment_horizon.py` | time to clear = ln(N0)/margin; treatment clock vs cumulative toxicity; "cure" only if cleared inside the tolerable window | **To adapt** (this rebuild). Bears directly on 10+ year durability |
-| `core/schedule_coherence.py` | access and duty must come from one dosing schedule | **To adapt** as a per-agent check (CAR-T persistence, IT cytarabine, TBI, HD-MTX) |
+| `core/evidence.py` | `Measurement` that refuses to be read for another population; `transfer_to()` | **Ported** verbatim (`core/evidence.py`) + 3 lymphoma `Disease` members |
+| `core/toxicity.py` | organ-axis budgets; same-axis adds; de-rating not free; `profile_for` raises rather than failing open; efflux co-dose multiplier | **Ported** (`core/lymphoma_toxicity.py`, `_profiles.py`) **plus a time dimension** (evidence-limited window and hard cap per agent) |
+| `core/tolerable_search.py` | search under organ budgets; efflux co-dose charged on partner's axis | **Adapted** (`core/lymphoma_grounded.py`): the reverser is a mechanism that charges its partners |
+| `core/dormancy.py` | persister is a duty-cycle problem, not a wall for division-gated agents | **Adapted and corrected** (`core/lymphoma_dormancy.py`). Not raised earlier in this project. HS `kill_from` counts duty twice and credits division-gated kill at full strength against a partly-awake pool; the exact two-state solution weights it by the awake fraction f |
+| `core/response_duration.py`, `core/treatment_horizon.py` | time to clear = ln(N0)/margin; treatment clock vs cumulative toxicity; "cure" only if cleared inside the tolerable window | **Adapted** (`core/lymphoma_horizon.py`) | 
+| `core/schedule_coherence.py` | access and duty must come from one dosing schedule | **Partly adapted**: courses (TBI, HBI, RT) use full strength inside the course in the clock; CAR-T persistence is a measured duration cap. A full access-vs-duty schedule check per agent is not built |
 | `core/delivery.py` | delivery routes as composable objects (FUS, CED, IT, efflux inhibition) | **Partly covered**: lymphoma CNS routes are already agents with per-compartment access. FUS/CED **skipped** (not evaluated for lymphoma; flagged) |
-| `core/hs_drug_sensitivity.py` | IC50 measured in the actual disease, outranks assumed potency | **To adapt** as canine-lymphoma sensitivity inputs (PMID 25715778 includes canine lymphoma lines) |
+| `core/hs_drug_sensitivity.py` | IC50 measured in the actual disease, outranks assumed potency | **Adapted** as canine-lymphoma inputs (`lymphoma_grounded_inputs.py`) |
 | `sequence_conservation.py` | human-vs-dog target identity for transferred drugs | **Skipped for now**: lymphoma agents that are human-designed (acalabrutinib, venetoclax) have canine in-vivo or in-vitro measurements. Flagged: revisit for any agent whose potency ends up TRANSFERRED |
-| `docs/PRIOR_ART_COMBINATIONS.md` | has each proposed combination been tried, in what species | **Not covered here yet.** To do for the combinations that survive the search |
-| `docs/THERAPY_STRATEGY.md` coverage-by-evidence-tier table | escape x closing agent x evidence grade | **To adapt** as the lymphoma coverage ledger (this is the direct answer to the coverage question) |
+| `docs/PRIOR_ART_COMBINATIONS.md` | has each proposed combination been tried, in what species | **Not covered here yet.** To do for the regimens in `LYMPHOMA_COVERAGE_LEDGER.md` §6 |
+| `docs/THERAPY_STRATEGY.md` coverage-by-evidence-tier table | escape x closing agent x evidence grade | **Adapted**: `docs/LYMPHOMA_COVERAGE_LEDGER.md` |
 | `core/durable_regimen.py`, `cycled_regimen.py`, `breed_wide_durability.py`, `genotype_tiered_durability.py`, `microtubule_route.py`, `brain_*.py`, `intraarterial_route.py`, `metronomic_bbb_check.py`, `mgmt_escape.py`, `presentation.py` | HS-specific: brain tumour, MTAP/breed, intra-arterial route, MGMT | **Skipped**: no lymphoma analogue (different organ, driver and route). The P-gp escape already plays the MGMT role |
 | `docs/CONSOLIDATED_REPORT.md`, `plain_language_report.html`, `researcher_brief.html`, `preprint/` | HS write-ups | **Skipped** as outputs; the lymphoma layman report exists and is updated only if conclusions change |
 
-## Known gaps versus the histiocytic-sarcoma method (factual, not yet fixed)
+## Settled by the potency / toxicity / clock rebuild (2026-09-30; do not re-raise as new)
 
-- Catalogue potencies are hand-set and labelled ASSUMED (only venetoclax's B/T EC50 split is measured).
-  `pkpd.py` (kill from measured IC50 x canine exposure) was not ported.
-- Toxicity in the search is a crude `duty` factor plus prose. Organ-axis budgets (`core/toxicity.py`) and
-  the toxicity-aware search (`core/tolerable_search.py`) were not ported, so the "robust" multi-agent
-  regimens were never checked for organ oversubscription. The P-gp chemosensitiser's raised normal-tissue
-  exposure is written in prose and never charged.
-- `core/evidence.py` provenance enforcement was not ported; evidence is free-text labels.
-- Found after the reports and not yet in the catalogue: half-body radiation (real multi-year remissions),
-  verdinexor (fully approved 2026), T-cell kinase inhibitors, the dog anti-CD20 antibody 1E4-cIgGB, canine
-  IL-15, the PD-1/CD28 switch receptor (armored canine CAR-T, lab only). Immune rejection of mouse-derived
-  CAR binders is not modelled.
-- Model conflict: real half-body radiation and transplant data show multi-year remissions, but the model
-  says a one-time consolidation adds no durability. Hypothesis (untested): the model treats leftover
-  resistant cells as a continuous quantity that can never reach zero, while real tumours are countable.
-- The model treats immune exhaustion as defeating every immune agent, so an armored CAR-T cannot earn
-  credit for resisting it.
-- Other sanctuaries (eyes, testes), non-DLBCL subtypes and breed effects were raised once by an assistant
-  and never discussed with the user; treat as unscoped, not as agreed gaps.
-- Proposed, awaiting the user's go-ahead: rebuild the catalogue on the potency and toxicity modules and
-  re-run the search under organ budgets.
+Full record: `docs/LYMPHOMA_COVERAGE_LEDGER.md`. Tests: `tests/test_lymphoma_ledger.py`,
+`tests/test_lymphoma_grounded.py`.
+
+- **Answer to "did we cover all mechanisms and escapes, with potency and toxicity considered":** every
+  mechanism raised is in the model and reached by an agent (13 lineages: the earlier 11 plus
+  antigen-presentation loss and MGMT repair). **Not every escape is closed by measured or derived
+  potency.** No combination of only STRICT-grade agents (verdinexor, the canine anti-CD20 antibody,
+  venetoclax on T-cell) closes every escape.
+- **Smallest anchored sets:** B-cell doxorubicin + canine anti-CD20 antibody + verdinexor (+0.101, clears
+  by day 51, 25% tightest-axis headroom, TP53 closes on strict potency at only +0.009); T-cell
+  doxorubicin + vincristine + venetoclax (+0.060) or doxorubicin + venetoclax (+0.008). With licensed and
+  off-label agents only, nothing outcome-graded clears the B-cell persister inside the windows.
+- **The CNS sanctuary is open at every evidence grade.** B-cell clears in the model only with the
+  trial-stage CD20 CAR-T + craniospinal RT + half-body irradiation on four assumed potencies; T-cell needs
+  the non-existent T-lineage effector.
+- **Corrections to earlier statements** (kept in place in `LYMPHOMA_DURABLE_RESPONSE.md`, qualified there):
+  (a) the two-drug "minimal closing" regimens relapse when a drug has to stop; (b) the CNS B-cell closure by
+  immunotherapy holds only while the CAR-T lasts, and measured canine persistence is about 14 to 50 days
+  (anti-mouse antibodies, PMID 32002286, 35898541); (c) P-gp is closed in vitro from the drug side but a
+  canine randomised trial of valspodar + doxorubicin (n = 20, PMID 28357033) showed no survival difference;
+  (d) the "no efficacious caninized anti-CD20 product is established" note is out of date (PMID 38662527,
+  41742528); (e) the persister "wall" is the corner f = 1, r = 1 of the two-state model, so the "three
+  filters" claim that no conventional cytotoxic survives the persister filter no longer holds: a
+  division-gated agent counts f times its kill; (f) the primary source for observed CD20 loss in dogs is
+  PMID 32002286 (exons 4 and 5 absent), not only the Peng 2026 citation.
+- **Model conflict resolved in direction, not in size.** The old model said a one-time consolidation adds
+  no durability because it averaged a 28-day course over a year. The clock uses in-course strength: adding
+  low-dose-rate half-body irradiation to CHOP removes the pump-lineage relapses, in the direction of the
+  real data (first remission 39% vs 8.7% at 2 y, 18% vs 4.4% at 5 y, n = 75 vs 115, PMID 42525883). The
+  deterministic clock gives cure or relapse, not fractions.
+- **Calibration:** CHOP alone at a clinically obvious burden is predicted to relapse (bulk after day 126,
+  pump lineages after day 150) against real median PFS 176 d. Regression: the grounded model reproduces
+  v1's recorded margins for v1's regimens.
+- **Founder lesions:** TP53 (25.6%) and TRAF3 (58.1%) are present from the start in that share of B-cell
+  dogs (PMID 39922874), so earlier detection cannot remove those escapes; they stay in the set to close.
+
+## Known gaps (factual)
+
+- **Potencies still ASSUMED or unresolved:** rabacfosadine, lomustine, high-dose methotrexate, IT
+  cytarabine, radiation, anti-PD-1, CD20 CAR-T in vivo, acalabrutinib (killing modest, no IC50). Hinges:
+  hydroxychloroquine closes only if its canine-lymphoma IC50 <= ~100 uM (none found); prednisolone is a
+  bracket 0.0098-0.144/day (two canine measurements disagree ~15x); venetoclax T-cell exposure is
+  second-hand and its free fraction unmeasured.
+- **Verdinexor:** derived kill 0.27/day (B) vs clinical response 37%, median duration 18 d. Unexplained.
+- **Loads are summed as if every agent were given at once**; a scheduling layer (induction then
+  consolidation) is not built. It penalises sequenced consolidation: full CHOP + TBI puts marrow at 1.5.
+- **The clock is mean-field** and clears only lineages present at diagnosis.
+- **Persister awake fraction f, retained tolerance r, switching rate** are unmeasured in canine lymphoma.
+- Not built (flagged skips from the inventory): genotype-tiered agent choice (TRAF3/TP53 status),
+  focused-ultrasound / convection-enhanced delivery, target-conservation checks, per-combination prior
+  art. T-cell kinase inhibitors and canine IL-15 armouring: nothing found to model.
+- Other sanctuaries (eye, testis, marrow niche) and breed effects remain unscoped: no canine mechanistic
+  data found; one testis-to-brain relapse case (PMID 37265807).
+- **The HS dormancy module (`core/dormancy.py` on the HS branch) has the double-duty / full-strength
+  issue described in `LYMPHOMA_COVERAGE_LEDGER.md` §2.** Not changed there; it is the user's call.
 
 ## Branch drift
 

@@ -271,6 +271,7 @@ def test_the_anchored_b_cell_regimen_has_no_single_point_of_failure_and_headroom
     rows = L.escape_ledger(comp, ip, names)
     assert all(not r["single_points_of_failure"] for r in rows)
     assert all(r["closed_on"] != "NOT CLOSED" for r in rows)
+    assert any("THIN" in r["closed_on"] for r in rows)         # the TP53 row is +0.009 on strict potency
     hr = L.potency_headroom(comp, ip, names)
     assert all(v < 1.0 for v in hr.values())
     s = L.regimen_summary(comp, ip, names)
@@ -281,7 +282,7 @@ def test_the_assumed_potency_b_cell_regimen_is_closed_only_on_assumed_kill():
     comp, ip, names = L.LEDGER_REGIMENS["B-cell, off-label agents only, some potencies ASSUMED"]
     rows = L.escape_ledger(comp, ip, names)
     pgp = next(r for r in rows if "P-glycoprotein" in r["escape"])
-    assert pgp["closed_on"] == "ASSUMED potency only" and pgp["margin_strict_only"] < 0
+    assert pgp["closed_on"].startswith("ASSUMED potency only") and pgp["margin_strict_only"] < 0
 
 
 def test_dormancy_sweep_shows_the_old_wall_model_is_the_only_corner_that_relapses():

@@ -106,6 +106,23 @@ LEDGER_REGIMENS = {
 }
 
 
+THIN = 0.02      # a margin under this many per day is inside the noise of every assumed input
+
+
+def _closed_on(m_strict: float, m_outcome: float, m_all: float) -> str:
+    """The strictest evidence tier on which the escape closes, flagged THIN when the margin there is
+    smaller than the uncertainty of the inputs beneath it."""
+    if m_strict > 0:
+        label, m = "strict-grade potency alone", m_strict
+    elif m_outcome > 0:
+        label, m = "outcome-grade potency", m_outcome
+    elif m_all > 0:
+        label, m = "ASSUMED potency only", m_all
+    else:
+        return "NOT CLOSED"
+    return label + (f" (THIN, <{THIN}/day)" if m < THIN else "")
+
+
 def escape_ledger(comp: str, ip: str, names, burden: float = BURDEN_EARLY_DETECTED) -> list:
     """One row per escape for a named regimen: carriers, margins at three evidence strictnesses, and
     single points of failure. Margins are after toxicity de-rating."""
@@ -135,9 +152,7 @@ def escape_ledger(comp: str, ip: str, names, burden: float = BURDEN_EARLY_DETECT
             "carriers": carriers, "margin_all": round(m_all, 4), "margin_strict_only": round(m_strict, 4),
             "margin_outcome_or_better": round(m_outcome, 4), "single_points_of_failure": spof,
             "founder": e.name in G.FOUNDER_ESCAPES,
-            "closed_on": ("strict-grade potency alone" if m_strict > 0 else
-                          "outcome-grade potency" if m_outcome > 0 else
-                          "ASSUMED potency only" if m_all > 0 else "NOT CLOSED"),
+            "closed_on": _closed_on(m_strict, m_outcome, m_all),
         })
     return rows
 

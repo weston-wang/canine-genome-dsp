@@ -205,6 +205,82 @@
 
 <section>
   <div class="wrap">
+    <p class="kicker">Update, September 30, 2026</p>
+    <h2>We re-checked the plan against real drug strengths and real side effects</h2>
+    <p class="lede">The first version of this report showed that every escape route has a treatment that
+      reaches it. This update asks a harder question: is each treatment's strength measured, and can
+      the dog actually take it for long enough?</p>
+    <div class="stats">
+      <div class="stat"><div class="n">13</div><div class="l">escape routes now in the model (two were missing)</div></div>
+      <div class="stat"><div class="n warn">3</div><div class="l">treatments whose killing strength is measured or worked out from measurements</div></div>
+      <div class="stat"><div class="n open">0</div><div class="l">combinations of only those three that close every route</div></div>
+    </div>
+    <div class="ledger">
+      <div class="route">
+        <div class="num">+</div>
+        <div class="head"><span class="title">Two escape routes were missing</span>
+          <span class="tag closed">Added</span></div>
+        <div class="body">The tumor can hide from the immune system by losing the markers that show
+          its antigens (low levels predict relapse in 160 dogs), and it can repair the damage the
+          drug lomustine causes. Both are now in the model. Some escapes are also present from the
+          start in many dogs, for example a defect in the cell-death switch in about 1 in 4 B-cell
+          cases. Finding the cancer earlier cannot remove those.</div>
+      </div>
+      <div class="route">
+        <div class="num">3</div>
+        <div class="head"><span class="title">Few treatments have a measured strength</span>
+          <span class="tag open">The main gap</span></div>
+        <div class="body">Verdinexor (a licensed lymphoma pill), the dog anti-CD20 antibody, and
+          venetoclax for T-cell lymphoma are the only ones. The strengths of the steroid, the
+          hydroxychloroquine, the CAR-T cells and most chemotherapy drugs are either estimates or
+          only pinned down by the overall outcome of the regimen. Hydroxychloroquine works only if
+          the cancer cells are sensitive at about 100 micromolar or less, and nobody has measured that.</div>
+      </div>
+      <div class="route">
+        <div class="num">1</div>
+        <div class="head"><span class="title">The smallest plan built on measured strengths</span>
+          <span class="tag closed">B-cell</span></div>
+        <div class="body">Doxorubicin, the dog anti-CD20 antibody and verdinexor. In the model it
+          clears every cancer cell type by about day 51 and stays inside the body's limits, with
+          about a quarter of the tightest limit to spare. It still leans on a trial-stage antibody,
+          one escape route closes by a hair (the cell-death defect), and verdinexor's real-world
+          result in dogs (37% respond, for a median 18 days) is much weaker than its measured
+          killing strength suggests. For T-cell lymphoma the equivalent is doxorubicin plus venetoclax.</div>
+      </div>
+      <div class="route">
+        <div class="num">&#9202;</div>
+        <div class="head"><span class="title">Drugs can only be given for so long</span>
+          <span class="tag open">Changes the answer</span></div>
+        <div class="body">Doxorubicin is limited by the heart to about 6 doses, lomustine by the liver
+          to about 4, prednisolone at full dose to about 5 months, and dog CAR-T cells last only
+          2 to 7 weeks because the dog's immune system attacks their mouse-derived part. Once these
+          limits are counted, every two-drug plan from the first report relapses when one of the
+          drugs has to stop.</div>
+      </div>
+      <div class="route">
+        <div class="num">&#129504;</div>
+        <div class="head"><span class="title">The brain hideout is still open</span>
+          <span class="tag open">Not closed</span></div>
+        <div class="body">With licensed or off-label drugs, nothing clears it. For B-cell lymphoma the
+          model clears it only with trial-stage CAR-T cells plus two radiation courses, and four of
+          those five strengths are assumed. For T-cell lymphoma it needs a cell therapy that does not
+          exist yet.</div>
+      </div>
+    </div>
+    <div class="concept">
+      <p class="kicker">One correction to the first report</p>
+      <p>The first report said the drug pump was closed "two ways." One of them, blocking the pump
+        with a drug, works in the lab. In the one dog trial that tested it (20 dogs, valspodar with
+        doxorubicin) it was safe but did not improve survival.</p>
+    </div>
+    <p>The full accounting, with every escape route, what closes it, how strong the evidence is, and
+      what each measurement would settle, is in <span class="mono">docs/LYMPHOMA_COVERAGE_LEDGER.md</span>.
+      This is a model, not a treatment recommendation.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
     <p class="kicker">The situation</p>
     <h2>The best chemotherapy is a brilliant pause, not a cure</h2>
     <p>Lymphoma is the most common blood cancer in dogs. The standard treatment, called CHOP, is a
@@ -327,8 +403,8 @@
       <div class="route">
         <div class="num">5</div>
         <div class="head"><span class="title">Hiding in the brain</span>
-          <span class="tag open">Closed by immunotherapy</span></div>
-        <div class="body">The brain is shielded by a barrier that blocks most chemo drugs — a hideout
+          <span class="tag open">Open, see update</span></div>
+        <div class="body">Update: this holds only while the immune cells last, and dog CAR-T cells last 2 to 7 weeks. The brain is shielded by a barrier that blocks most chemo drugs — a hideout
           where cancer regrows untouched. In the model, when the drug can't get in, the brain becomes
           the <em>main</em> place relapse happens. Immune cells travel there on their own, so they
           close the hideout the drug can't reach. This is the sharpest single argument for
@@ -468,7 +544,8 @@
     <p>Listing escape routes in prose lets you quietly claim one is "handled." So instead we built a
       model where each treatment's coverage is <em>computed</em> from how it works, then had a
       computer try every combination and report which ones close <strong>all eleven</strong> escape
-      routes at once.</p>
+      routes at once. (The update above adds two routes and re-scores these results with real
+      side-effect limits; the cards below are the first-pass results.)</p>
     <p>A treatment fails an escape route in exactly three ways, and the model works each one out
       rather than taking our word for it:</p>
     <ul class="clean">
@@ -489,7 +566,7 @@
       <div class="route">
         <div class="num">✓</div>
         <div class="head"><span class="title">Body-wide B-cell lymphoma</span>
-          <span class="tag closed">Closes comfortably</span></div>
+          <span class="tag open">Closes on assumed strengths</span></div>
         <div class="body">Chemotherapy plus a steroid, CD20 cell therapy and hydroxychloroquine
           closes every route with roughly <strong>3.5× the killing power needed</strong> — the
           widest safety margin anywhere in the analysis.</div>
@@ -497,7 +574,7 @@
       <div class="route">
         <div class="num">✓</div>
         <div class="head"><span class="title">Body-wide T-cell lymphoma</span>
-          <span class="tag closed">Closes — with a different drug</span></div>
+          <span class="tag open">Closes, with a different drug</span></div>
         <div class="body">Here <strong>venetoclax</strong> earns its place. Real lab data shows dog
           T-cell lymphoma is <em>highly sensitive</em> to it while most B-cell lymphoma is
           resistant — so the two types genuinely need different recipes, not the same one at
@@ -506,7 +583,7 @@
       <div class="route">
         <div class="num">✓</div>
         <div class="head"><span class="title">B-cell lymphoma hiding in the brain</span>
-          <span class="tag closed">Closes, but only just</span></div>
+          <span class="tag open">Relapses when CAR-T ends</span></div>
         <div class="body">Needs a change of <em>delivery</em>, not a bigger dose: chemotherapy
           injected directly into the spinal fluid, plus radiation, steroid, cell therapy and
           hydroxychloroquine. Margin is thin — about 1.3× what's needed.</div>
@@ -588,12 +665,16 @@
         <li>Chemotherapy's 98% response rate and ~6-month typical remission.</li>
         <li>CD20 loss happening in real dogs treated with CD20 therapy — and the two-target fix.</li>
         <li>The 40% cure rate with transplant plus immune cells, and its risks.</li>
+        <li>Half-body radiation added to chemotherapy: still in remission at 2 years in 39% of dogs versus 8.7% with chemotherapy alone, and at 5 years in 18% versus 4.4%.</li>
+        <li>How long CAR-T cells last in dogs, and that the dog's immune system attacks their mouse-derived part.</li>
         <li>Blood tests that detect leftover cancer before it's visible.</li>
       </ul>
       <h3 style="margin-top:1.1rem">Illustrative — the model's assumptions, not measurements</h3>
       <ul>
         <li>The exact growth speeds, kill strengths, and the precise height of the bar.</li>
-        <li>How strong a real CD20 immune therapy actually is — never yet measured in a finished dog trial.</li>
+        <li>How strong a real CD20 immune therapy actually is. Its strength in a living dog has not been measured, and the cells last only weeks.</li>
+        <li>The strengths of the steroid, hydroxychloroquine, and most chemotherapy drugs against the resistant cells.</li>
+        <li>The body-limit numbers for each drug. They rank how much each drug uses up an organ; they do not predict side effects.</li>
         <li>How completely the brain barrier blocks each chemo drug in dogs.</li>
       </ul>
     </div>
@@ -625,6 +706,7 @@
       <li>Willcox, Pruitt &amp; Suter 2012 — autologous transplant in B-cell lymphoma. <a href="https://doi.org/10.1111/j.1939-1676.2012.00980.x">DOI</a>; Warry et al. 2014, T-cell. <a href="https://doi.org/10.1111/jvim.12302">DOI</a></li>
       <li>Gareau, Ripoll &amp; Suter 2021 — transplant + adoptive T cells, 40% cured. <a href="https://doi.org/10.3389/fvets.2021.787373">DOI</a></li>
       <li>Benedict, Suter &amp; Meritet 2024 — transplant-related mortality. <a href="https://doi.org/10.1177/03009858241249114">DOI</a></li>
+      <li>Update sources: verdinexor phase 1 <a href="https://doi.org/10.1371/journal.pone.0087585">DOI</a> and phase 2 <a href="https://doi.org/10.1186/s12917-018-1587-9">DOI</a>; canine anti-CD20 antibody trials (PubMed 38662527, 41742528); CAR-T persistence and anti-mouse antibodies <a href="https://doi.org/10.1080/2162402X.2019.1676615">DOI</a>; valspodar with doxorubicin, 20 dogs <a href="https://doi.org/10.12688/f1000research.6055.3">DOI</a>; half-body radiation with chemotherapy (PubMed 42525883); recurrent gene changes in canine B-cell lymphoma (PubMed 39922874, 39134766).</li>
       <li>Aresu et al. 2014 <a href="https://doi.org/10.1016/j.tvjl.2014.03.006">DOI</a> and Sato et al. 2016 <a href="https://doi.org/10.1016/j.tvjl.2016.05.012">DOI</a> — detecting leftover disease (MRD).</li>
     </ol>
   </div>
