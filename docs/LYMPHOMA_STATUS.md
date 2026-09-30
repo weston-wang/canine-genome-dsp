@@ -150,3 +150,14 @@ not picked those commits up.
   cannot be called closing without a derived potency.
 - **Next step, not done:** add a TERT-vaccine agent to the grounded catalogue with an explicit transfer basis,
   and test whether it removes the "every agent is load-bearing" weakness.
+
+## Correction (2026-09-30): the closing-combination result is INTERIM, not "goal completed"
+
+The user: "I don't get how you can claim the goal is completed when even I know vaccine should be part of the
+equation, and maybe even stem cell. Go back and be thorough." Accepted. The closing programs are closure
+within 26 catalogue entries and 14 escapes only; the candidate universe was not enumerated (no vaccine, no
+separate stem-cell/transplant mechanism beyond one OUTCOME-graded TBI+transplant entry, no CD52/ADC/bispecific/
+proteasome/HDAC etc. sweep) and the escape list was not independently audited (for example glucocorticoid-
+receptor loss and cytarabine dCK loss are not separate escapes). Lesson recorded in `CLAUDE.md` (failure 5, rule
+9) on all four branches that carry it. Work in progress: four literature sweeps (vaccines; stem cell/transplant;
+all other modalities; independent escape audit), then catalogue additions, re-search, and a universe ledger.
