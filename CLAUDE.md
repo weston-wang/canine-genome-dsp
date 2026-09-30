@@ -1,83 +1,83 @@
 # Working agreements for canine-genome-dsp
 
-These exist because of specific failures, not as generic advice. Read this file first, every session.
+**This file is byte-identical on every branch, on purpose.** That keeps merges conflict-free and means a
+thread on any branch reads the same rules. Branch-specific state goes in `docs/*_STATUS.md`, not here.
+If you change this file, apply the same change to every branch listed under "Where things live".
 
-## What went wrong (so the rules below have a reason)
+## Why this exists
 
-1. **Re-raising settled work as a new gap.** Asked "did we cover everything?", I listed gaps that were
-   already in our reports or in my own earlier answers, without checking. The user had to point it out.
-2. **Grading against a bar the user never set.** The user's standard is "closed by real data **or a
-   rigorous model**." I graded against "demonstrated in dogs," which they never asked for and explicitly
-   said they already know is unmet.
-3. **Replicating half of a referenced method and calling it the method.** Told to "do what the HSA branch
-   did," I ported its object model and dropped its potency derivation (`pkpd.py`), its toxicity
-   constraints (`core/toxicity.py`, `core/tolerable_search.py`) and its provenance rules
-   (`core/evidence.py`), even though my own plan listed PK/PD-derived kill rates as a key part.
+The user has flagged the same failure repeatedly, across threads and branches: context that was already
+settled gets dropped or re-litigated. Each thread starts with no memory of any other thread. Only two
+things cross threads: files in git, and account or environment settings. So state must live in git.
+
+Concrete failures (so the rules have a reason):
+1. **Re-raising settled work as a new gap.** Asked "did we cover everything?", gaps were listed that were
+   already in the reports or in earlier answers, without checking.
+2. **Grading against a bar the user never set.** The user's bar is "real data **or a rigorous model**."
+   It was graded against "demonstrated in dogs," which the user said they already know is unmet.
+3. **Replicating half of a referenced method and calling it the method.** Told to "do what the HSA
+   branch did," only its object model was ported; its potency derivation (`pkpd.py`), toxicity budgets
+   (`core/toxicity.py`, `core/tolerable_search.py`) and provenance rules (`core/evidence.py`) were dropped.
 4. **Overstating closure.** "Every escape is closed" was said when the accurate claim was "the model
    contains an agent that covers it."
 
 ## Rules
 
-- **Search the record before answering any "did we cover X / what's missing / did we already discuss Y"
-  question.** The record is: the session transcript (`/root/.claude/projects/*/*.jsonl`), `docs/`, `git log
-  --all`, and the reference branch. For every item, say **already covered (where)** or **not covered**.
-  Only items that survive that check may be presented as gaps. Never write "supposedly" or guess at what
-  was discussed; check.
-- **Use the user's stated success criteria verbatim.** At the start of a task, restate the user's own
-  words (see "Standing standards" below) and grade against exactly those. Do not substitute a stricter or
-  looser bar of my own.
-- **When told to replicate a method or branch, inventory every component first.** List each module as
-  ported, adapted, or deliberately skipped with a reason, and get the user's agreement to any skip. Do
-  not describe a partial port as the method.
-- **Do not present a settled conclusion as news.** Anything listed under "Settled" below is referenced,
-  not re-derived or re-raised.
-- **Claim what was shown, not what was intended.** Separate "the model has an agent covering this" from
-  "this is supported by real data" from "this is assumed," in that vocabulary.
-- **When a user corrects a lapse, add it here in the same session**, so it persists.
+1. **Search the record before answering any "what did we cover / what's missing / did we discuss X"
+   question.** The record is: this file; `docs/`; `git log --all`; **other branches** via
+   `git fetch origin` then `git show origin/<branch>:<path>`; and this session's transcript
+   (`/root/.claude/projects/*/*.jsonl`, which covers only the current session). Label every item
+   "already covered (where)" or "not covered". Only items that survive that check may be presented as
+   gaps. Never write "supposedly" or guess at what was discussed; check.
+2. **Quote the user's success criteria verbatim at the start of a task and grade against exactly
+   those.** Do not substitute a stricter or looser bar. If the user says they already know something is
+   unmet, do not report it back as a finding.
+3. **When told to replicate a method, branch or approach, inventory every component of the reference
+   first.** List each as ported, adapted, or skipped with a reason, and get agreement to any skip. Never
+   call a partial port the method.
+4. **Do not present a settled conclusion as news.** Check the `docs/*_STATUS.md` files first.
+5. **Report results at the strength shown.** Keep "the model has an agent covering this" separate from
+   "real data supports this" and from "assumed".
+6. **A new or reset session rebuilds context before acting.** Read this file and the relevant
+   `docs/*_STATUS.md`, run `git fetch origin`, and compare with `git log HEAD..origin/<branch>`. A fresh
+   container can hold a stale checkout (this has happened: a local branch reset to `main`, hiding all
+   the work on the remote branch).
+7. **Record state in git before finishing.** When the user states a standard or a decision, or a
+   meaningful result is reached, write it into this file (standards) or a `docs/*_STATUS.md` (settled
+   results and known gaps), commit and push. The next thread cannot see this one.
+8. **When the user corrects a lapse, add the lesson here in the same session** and propagate it to every
+   branch.
 
-## Standing standards (the user's words)
+## Standing standards for the cancer durable-response work (the user's words)
 
 - "make sure every mechanism and every escape is closed by either real data or rigorous model, potency,
   toxicity etc all need to be considered"
-- "looking for 10+ years of durability"; and whether 2+ years disease-free is a reasonable inference for 10+
+- "looking for 10+ years of durability"; and whether 2+ years disease-free is a reasonable inference
+  for 10+
 - "assuming early detection"
 - Reports "in layman's terms"
 - "I'm not asking if it's been demonstrated, I know it's not."
-- Method reference: the HSA branch `origin/claude/canine-hs-analysis-graft` ("how we went and found all
-  possible mechanisms and routes of escapes, then searched and found combined approaches for closing each").
+- Method reference: "Look at how we went and found all possible mechanisms and routes of escapes, then
+  searched and found combined approaches for closing each" -- the user calls this "the HSA branch";
+  its content is histiocytic sarcoma (see terminology).
 
-## Settled (do not re-raise as new; see the doc)
+## Where things live
 
-All in `docs/LYMPHOMA_DURABLE_RESPONSE.md` unless noted.
-- The bar (~0.090/day, set by P-glycoprotein efflux; chemo moves it ~2%), §1.
-- Immunotherapy threshold at the bar, and CD20 antigen loss behaviour, §2-3.
-- Lower-the-bar, tandem CD19/CD20, and "a one-time consolidation is not persistence" (in the model), §4.
-- CNS sanctuary and the `sanctuary_penetration_multiplier` engine upgrade, §5.
-- 2-year to 10-year inference: mechanism-dependent; ~3% late drug-resistant tail at the bar, §7.
-- Toxicity ledger and chemo de-rating findings, §8; completeness ledger and its two flagged exceptions
-  (apoptosis evasion partly covered; late tail managed not eliminated), §9.
-- Combination search (derived coverage, three filters, early detection removes rare mutational escapes but
-  not phenotypic ones), §10. **CNS T-cell does not close with anything obtainable** (short 1.16x on the
-  persister; a T-lineage cellular effector that traffics into the CNS is the missing object).
-- Second cancers / therapy-related neoplasia are noted as a limit that cuts against long-term durability, §7.
+Verify with `git branch -a`; this list can drift.
 
-## Known gaps versus the HSA method (factual, not yet fixed)
+| branch | what it holds |
+|---|---|
+| `main` | base DSP engine, melanoma and osteosarcoma benchmarks. No durable-response work. |
+| `claude/canine-hs-analysis-graft` (PR #3) | **Histiocytic sarcoma** pipeline. `src/canine_dsp/core/` (regimen object model, catalogue, combination search, `tolerable_search`, `toxicity`, `evidence`), `pkpd.py`, `docs/THERAPY_STRATEGY.md`, `docs/CONSOLIDATED_REPORT.md`, `docs/PRIOR_ART_COMBINATIONS.md`. **The method reference.** |
+| `claude/codex-branch-audit-clfeiz` (PR #2, closed) | **Hemangiosarcoma** durable-response analysis: `docs/HSA_DURABLE_RESPONSE.md` and the `hsa_*` modules. |
+| `claude/duplicate-codex-prefix-branch-lt1qh6` (PR #4) | The codex branch as of `66cfa76`, merged with `main`, plus the **lymphoma** work: `docs/LYMPHOMA_DURABLE_RESPONSE.md`, `docs/LYMPHOMA_PLAIN_LANGUAGE.html`, `docs/LYMPHOMA_STATUS.md`, `src/canine_dsp/lymphoma_*.py`, `src/canine_dsp/core/lymphoma_*.py`. |
 
-- Lymphoma catalogue potencies are hand-set and labelled ASSUMED (only venetoclax's B/T EC50 split is
-  measured). `pkpd.py` (kill from measured IC50 x canine exposure) was not ported.
-- Toxicity in the search is a crude `duty` factor plus prose. Organ-axis budgets (`core/toxicity.py`) and
-  the toxicity-aware search (`core/tolerable_search.py`) were not ported, so the "robust" multi-agent
-  regimens were never checked for organ oversubscription. The P-gp chemosensitiser's raised normal-tissue
-  exposure is written in prose and never charged.
-- `core/evidence.py` provenance enforcement was not ported; evidence is free-text labels.
-- Found after the reports and not yet in the catalogue: half-body radiation (real multi-year remissions),
-  verdinexor (fully approved 2026), T-cell kinase inhibitors, the dog anti-CD20 antibody 1E4-cIgGB, canine
-  IL-15, the PD-1/CD28 switch receptor (armored canine CAR-T, lab only). Immune rejection of mouse-derived
-  CAR binders is not modelled.
-- Model conflict: real half-body radiation and transplant data show multi-year remissions, but the model
-  says a one-time consolidation adds no durability. Hypothesis (untested): the model treats leftover
-  resistant cells as a continuous quantity that can never reach zero, while real tumours are countable.
-- The model treats immune exhaustion as defeating every immune agent, so an armored CAR-T cannot earn credit
-  for resisting it.
-- Other sanctuaries (eyes, testes), non-DLBCL subtypes and breed effects were raised once by me and never
-  discussed with the user; treat as unscoped, not as agreed gaps.
+Read the lymphoma state without switching branches:
+`git show origin/claude/duplicate-codex-prefix-branch-lt1qh6:docs/LYMPHOMA_STATUS.md`
+
+## Terminology
+
+- **HS** = histiocytic sarcoma (branch `claude/canine-hs-analysis-graft`).
+- **HSA** = hemangiosarcoma (branch `claude/codex-branch-audit-clfeiz`).
+- The user has referred to the HS branch as "the HSA branch". If the difference matters to the task,
+  confirm which is meant before building on it.
