@@ -69,7 +69,7 @@ Verify with `git branch -a`; this list can drift.
 |---|---|
 | `main` | base DSP engine, melanoma and osteosarcoma benchmarks. No durable-response work. |
 | `claude/canine-hs-analysis-graft` (PR #3) | **Histiocytic sarcoma** pipeline. `src/canine_dsp/core/` (regimen object model, catalogue, combination search, `tolerable_search`, `toxicity`, `evidence`), `pkpd.py`, `docs/THERAPY_STRATEGY.md`, `docs/CONSOLIDATED_REPORT.md`, `docs/PRIOR_ART_COMBINATIONS.md`. **The method reference.** |
-| `claude/codex-branch-audit-clfeiz` (PR #2, closed) | **Hemangiosarcoma** durable-response analysis: `docs/HSA_DURABLE_RESPONSE.md` and the `hsa_*` modules. |
+| `claude/codex-branch-audit-clfeiz` (PR #5 open; the earlier PR #2 is closed) | **Hemangiosarcoma** durable-response analysis: `docs/HSA_DURABLE_RESPONSE.md` and the `hsa_*` modules. |
 | `claude/duplicate-codex-prefix-branch-lt1qh6` (PR #4) | The codex branch as of `66cfa76`, merged with `main`, plus the **lymphoma** work: `docs/LYMPHOMA_DURABLE_RESPONSE.md`, `docs/LYMPHOMA_PLAIN_LANGUAGE.html`, `docs/LYMPHOMA_STATUS.md`, `src/canine_dsp/lymphoma_*.py`, `src/canine_dsp/core/lymphoma_*.py`. |
 
 Read the lymphoma state without switching branches:
