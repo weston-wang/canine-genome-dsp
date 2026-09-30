@@ -427,3 +427,15 @@ def test_the_b_cell_program_union_is_within_every_organ_budget():
     r = _pick(CNS, B, ["hydroxychloroquine", "verdinexor", "continuous intrathecal", "anti-CD20"])
     loads = axis_loads(G.regimen_profiles(r, 1.43))
     assert max(loads.values()) <= 1.0
+
+
+def test_programs_close_body_and_cns_at_model_level():
+    from canine_dsp.lymphoma_coverage_ledger import PROGRAMS, program_report
+    for label in PROGRAMS:
+        r = program_report(label)
+        assert r["body"]["closes"] and r["cns"]["closes"], label
+        assert r["cns"]["capacity_cells"] >= 1e7, label
+        # honesty check: no program is redundant to losing an agent
+        assert not r["body"]["any_one_removed_clears"], label
+    assert program_report("B-cell")["body"]["halved_potency_clears"]
+    assert not program_report("T-cell, existing drugs plus the pump")["body"]["halved_potency_clears"]

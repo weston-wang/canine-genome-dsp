@@ -115,3 +115,19 @@ Full record: `docs/LYMPHOMA_COVERAGE_LEDGER.md`. Tests: `tests/test_lymphoma_led
 `claude/codex-branch-audit-clfeiz` has moved since this branch duplicated it at `66cfa76`; its tip is now
 `5656f74` (2026-09-08, "Record the three published HSA reports in the narrative document"). This branch has
 not picked those commits up.
+
+
+## Closing-combination result (see `LYMPHOMA_CLOSING_COMBINATION.md`)
+
+- **Settled at MODEL strength:** with derived cytarabine, transferred HCQ, derived radiotherapy and
+  sustained intrathecal delivery, programs exist that close every modelled escape in body and CNS. Best:
+  B-cell = HCQ + verdinexor + continuous intrathecal cytarabine + anti-CD20 (survives halved potencies).
+- **T-cell:** existing-drug version is fragile (fails halving, fails clinical burden); CD7 CAR-T version
+  closes body robustly but brain fails at halved potency. T-cell brain needs the pump.
+- **Corrections to earlier notes:** HCQ is a P-gp substrate (not independent of efflux); derived
+  radiotherapy potency is lower than the assumed 0.30; CNS access values corrected; CNS clearing needs
+  sustained intrathecal delivery, not bolus.
+- **Standard recorded:** sound-grade bar = measured, derived, or transferred-with-written-basis; assumed
+  inputs never tuned to force closure.
+- **Known gaps:** every agent load-bearing (no redundancy); HCQ CNS access assumed; verdinexor
+  derived-vs-clinical mismatch; pump chronic toxicity unknown; buildable agents; mean-field clock.
