@@ -8,7 +8,7 @@ know vaccine should be part of the equation, and maybe even stem cell. Go back a
 stem cell and transplant; every other modality; independent escape audit). Every PMID in those files was fetched from
 PubMed by an agent; they are agent-written and should be spot-checked before quoting. Where a sweep could only
 read an abstract, the file says so. A fifth sweep (exposures, P-gp status, CD52 source, glucocorticoid IC50s) was cut
-off by a rate limit and is being re-run; its items are marked **needs exposure**.
+off by a rate limit and resumed; its partial output (panobinostat, CD52) is saved as `docs/universe/SWEEP_pk_partial.md`; items still missing are marked **needs exposure**.
 
 Status words: **IN MODEL** (an agent or escape object, graded) / **EVALUATED, EXCLUDED** (assessed; reason given) /
 **NEEDS EXPOSURE** (canine IC50 exists, no exposure, so no derived kill) / **NOT ASSESSABLE** (no kill measurement of
@@ -26,7 +26,7 @@ any kind) / **OUTSIDE MODEL** (cannot be expressed as an agent or escape here).
 | Targeted | HDAC (vorinostat, panobinostat), proteasome (bortezomib, ixazomib), CDK9 (flavopiridol) | NEEDS EXPOSURE | canine IC50s measured (18 nM, 15 nM, 400 nM); no dog exposure found; P-gp/BCRP status mixed |
 | Targeted | oclacitinib (JAK1), CDK4/6, ATR, PARP, BET, EZH2, BCL6, MCL1, mTOR, MDM2, azacitidine/decitabine | EVALUATED, EXCLUDED | in vitro only, conflicting or no dog clinical data, no exposure |
 | Antibody | anti-CD20 | IN MODEL | MEASURED depletion; trial-stage |
-| Antibody | anti-CD52 | NOT ASSESSABLE | one review sentence claims a conditional licence; primary source not found (re-check running) |
+| Antibody | anti-CD52 (AT-005, Tactress) | EVALUATED, EXCLUDED | **licensed (conditional 2014, full 2016) but the only peer-reviewed RCT (n=49, with L-CHOP) showed no benefit: median PFS 64 d vs 103 d placebo, p=0.82; the authors report the antibody lacks binding specificity for CD52 and it is off the market (PMID 36329876).** Not a usable T-lineage antibody |
 | Antibody | anti-CD22/CD19/CD79b/CD25/CD30, ADCs, radioimmunotherapy, CD3-bispecifics | NOT ASSESSABLE | reagents or imaging only in dogs; no therapy data |
 | Antibody | anti-CD47 / SIRP-alpha-Fc + opsonin | NOT ASSESSABLE | conserved axis; mouse xenograft cures; human DLBCL ORR 40%; no dog trial or kill rate. Escape E10 added instead |
 | Checkpoint | anti-PD-1 / PD-L1 | IN MODEL, re-graded | **zero objective responses in 15 dogs with lymphoma (gilvetmab, PMID 42247661)**; the model's ASSUMED 0.04 /day is contradicted |
