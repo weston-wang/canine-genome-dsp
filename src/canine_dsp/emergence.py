@@ -47,6 +47,7 @@ the gap. This is an analysis, not veterinary advice.
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass, field
 
 import numpy as np
@@ -142,6 +143,79 @@ _CSF_PHARM_FAIL = (0.12, 0.05, 0.30)      # fluid-to-cell fraction below the com
 _CSF_DELIVERY_FAIL = (0.35, 0.20, 0.55)   # sustained intrathecal exposure not maintainable for 10 y
 
 
+# ---- The other three site priors, derived the same way ---------------------------------------
+#
+# The lung, brain-local and brain-systemic terms were the last bare point priors in the live chain:
+# 0.05 / 0.08 / 0.30 with a one-line rationale and no arithmetic. They are now derived from the same
+# two ingredients the CSF term uses, both of which already exist in the repo:
+#
+#   AVAILABLE access  -- core.catalogue's per-compartment figures, which are MEASURED for a small
+#                        molecule in normal brain (0.021 parenchyma, chlorambucil, PMC6128565;
+#                        0.005 leptomeningeal) and 1.0 by construction for local delivery and for
+#                        systemic exposure at a non-barrier site.
+#   REQUIRED access   -- pkpd.min_access_to_close(), i.e. the Kp,uu at which the model-derived kill
+#                        first beats the growth bar. Drug-specific, so the site priors become
+#                        drug-specific too.
+#
+# p_reach_fail is then P(available < required) with a lognormal spread on the available figure,
+# because the uncertainty on a penetration ratio is multiplicative. This is the honest form: it
+# reproduces the project's existing site-split finding from first principles rather than asserting
+# it -- the MEK drug fails in the parenchyma on access while the PRMT5i class clears it with room,
+# which is exactly what the four-cell analysis found by hand.
+#
+# Spread is set once, not per site: a factor-of-3 geometric SD on a cross-species penetration
+# transfer. Nothing is tuned per site to land on a preferred answer.
+
+_ACCESS_GEOMETRIC_SD = 3.0
+
+#: Available unbound access per site. MEASURED where the note says so; 1.0 where physics or route
+#: makes the barrier irrelevant.
+_SITE_ACCESS = {
+    "Lung / disseminated": (1.0, "no barrier; systemic exposure reaches the site directly"),
+    "Brain -- local delivery (cavity implant / CED / SRS)": (
+        1.0, "barrier bypassed by construction (implant / CED / radiation physics)"),
+    "Brain -- systemic penetration": (
+        0.021, "MEASURED small-molecule unbound access in normal brain (chlorambucil, PMC6128565); "
+               "core.catalogue uses the same figure"),
+}
+
+
+def _lognormal_below(threshold: float, median: float, geometric_sd: float) -> float:
+    """P(X < threshold) for X lognormal with the given median and geometric SD."""
+    if threshold <= 0:
+        return 0.0
+    if median <= 0:
+        return 1.0
+    from . import pkpd as _pk
+    z = math.log(threshold / median) / math.log(geometric_sd)
+    return _pk._phi(z)
+
+
+def site_reach_fail_derivation(site_name: str, drug_key: str = "tng908") -> dict | None:
+    """Derive p_reach_fail for a site from measured compartment access versus the access the PK/PD
+    model says the drug needs. Returns None for the CSF site, which has its own decomposition."""
+    from . import pkpd
+
+    entry = _SITE_ACCESS.get(site_name)
+    if entry is None:
+        return None
+    available, basis = entry
+    required = pkpd.PARAMS[drug_key].min_access_to_close()
+    centre = _lognormal_below(required, available, _ACCESS_GEOMETRIC_SD)
+    # Interval reflects the spread on the transfer itself, not a second source of error.
+    lo = _lognormal_below(required, available, _ACCESS_GEOMETRIC_SD ** 0.5)
+    hi = _lognormal_below(required, available, _ACCESS_GEOMETRIC_SD ** 2)
+    return {
+        "site": site_name,
+        "drug": pkpd.PARAMS[drug_key].name,
+        "available_access": available,
+        "available_basis": basis,
+        "required_access": round(required, 5),
+        "headroom_fold": round(available / required, 1) if required > 0 else None,
+        "p_reach_fail": (round(centre, 3), round(min(lo, hi), 3), round(max(lo, hi), 3)),
+    }
+
+
 def _combine_independent(a: float, b: float) -> float:
     """Probability at least one of two independent failure modes occurs."""
     return 1.0 - (1.0 - a) * (1.0 - b)
@@ -166,17 +240,34 @@ def csf_reach_fail_terms() -> dict:
 
 
 # Per-site drug-presence failure (margin not held at the founding cell). Tied to reach/penetration.
-def reach_fail_param(site_name: str) -> Param:
+def reach_fail_param(site_name: str, pkpd_key: str | None = None) -> Param:
+    """The site penetration term. DRUG-SPECIFIC and DERIVED where the drug has a PK/PD entry, because
+    a single flat prior per site cannot be right for both a 10 nM synthetic-lethal agent and a 372 nM
+    MEK inhibitor at the same barrier. The flat priors below remain as the fallback for tiers with no
+    measured IC50 (the dependency and floor tiers), and are the honest ordinal judgements they always
+    were -- now labelled as fallbacks rather than presented as the model's position."""
+    if pkpd_key is not None:
+        derived = site_reach_fail_derivation(site_name, pkpd_key)
+        if derived is not None:
+            c, lo, hi = derived["p_reach_fail"]
+            return Param(
+                f"p_reach_fail[{site_name}]", "beta", c, lo, hi, Provenance.DERIVED,
+                f"DERIVED, superseding a flat per-site prior: P(available access < access the PK/PD "
+                f"model requires) for {derived['drug']}. Available {derived['available_access']} "
+                f"({derived['available_basis']}); required {derived['required_access']} from "
+                f"min_access_to_close() at the derived growth bar; headroom "
+                f"{derived['headroom_fold']}x. Lognormal spread (geometric SD 3) on the "
+                f"cross-species penetration transfer, set once for all sites and not tuned per site.")
     csf = csf_reach_fail_terms()["combined"]
     table = {
         "Lung / disseminated": (0.05, 0.02, 0.12, Provenance.ASSUMED,
-                                "systemic exposure; MEK inputs measured in canine HS (PMID 39202410)"),
+                                "FALLBACK for tiers with no measured IC50: systemic exposure, no barrier"),
         "Brain -- local delivery (cavity implant / CED / SRS)": (
             0.08, 0.03, 0.18, Provenance.ASSUMED,
-            "barrier-free local delivery; radiation control demonstrated PMID 34556593"),
+            "FALLBACK: barrier-free local delivery; radiation control demonstrated PMID 34556593"),
         "Brain -- systemic penetration": (
             0.30, 0.15, 0.55, Provenance.ASSUMED,
-            "canine CNS Kp,uu unmeasured; brain-penetrant TNG456 in Ph I/II PMID 42150143"),
+            "FALLBACK: canine CNS Kp,uu unmeasured; deliberately pessimistic ordinal judgement"),
         "Leptomeninges / CSF": (
             csf[0], csf[1], csf[2], Provenance.DERIVED,
             "DERIVED, superseding an assumed 0.70: pharmacologic failure (fluid-to-cell fraction "
@@ -241,6 +332,9 @@ class Scenario:
     lock_kind: str             # "LOCKED" | "REROUTABLE" | "DEPENDENCY" | "FLOOR" (maintenance_durability.Lock)
     with_surveillance: bool
     margin: float | None       # from pkpd; None where no measured IC50+Cmax (dependency/floor tiers)
+    #: The tier's pkpd key, so the site penetration term is DRUG-SPECIFIC rather than one flat prior
+    #: per site. None falls back to the site-level default.
+    pkpd_key: str | None = None
 
     @property
     def locked(self) -> bool:
@@ -269,7 +363,7 @@ def assess(scenario: Scenario, draws: int = DEFAULT_DRAWS,
     rng = np.random.default_rng(seed)
     params = {
         "Lambda": lambda_param(),
-        "reach_fail": reach_fail_param(scenario.site),
+        "reach_fail": reach_fail_param(scenario.site, scenario.pkpd_key),
         "reroute": reroute_param(scenario.lock_kind),
         "eps_surv": surveillance_param(scenario.with_surveillance),
     }
@@ -307,7 +401,8 @@ def _scenarios(with_surveillance: bool) -> list[Scenario]:
     for tier in md.TIERS:
         for site in md.SITES:
             d = md.durability(tier, site)
-            out.append(Scenario(tier.genotype, site.name, tier.lock.name, with_surveillance, d.margin))
+            out.append(Scenario(tier.genotype, site.name, tier.lock.name, with_surveillance,
+                                d.margin, tier.pkpd_key))
     return out
 
 
@@ -327,8 +422,8 @@ def surveillance_lift(genotype_startswith: str = "MAPK",
     site = next(s for s in md.SITES if s.name == site_name)
     margin = md.durability(tier, site).margin
     lk = tier.lock.name
-    off = assess(Scenario(tier.genotype, site.name, lk, False, margin), draws=draws)
-    on = assess(Scenario(tier.genotype, site.name, lk, True, margin), draws=draws)
+    off = assess(Scenario(tier.genotype, site.name, lk, False, margin, tier.pkpd_key), draws=draws)
+    on = assess(Scenario(tier.genotype, site.name, lk, True, margin, tier.pkpd_key), draws=draws)
     return {
         "genotype": tier.genotype, "site": site.name,
         "P_no_surveillance": off.p_median, "P_with_surveillance": on.p_median,
@@ -344,9 +439,12 @@ def headline(draws: int = DEFAULT_DRAWS) -> str:
     mapk = next(t for t in md.TIERS if t.genotype.startswith("MAPK"))
     m_mtap = md.durability(mtap, md.SITES[0]).margin
     m_mapk = md.durability(mapk, md.SITES[0]).margin
-    p_mtap = assess(Scenario(mtap.genotype, lung, mtap.lock.name, False, m_mtap), draws=draws)
-    p_mapk_off = assess(Scenario(mapk.genotype, lung, mapk.lock.name, False, m_mapk), draws=draws)
-    p_mapk_on = assess(Scenario(mapk.genotype, lung, mapk.lock.name, True, m_mapk), draws=draws)
+    p_mtap = assess(Scenario(mtap.genotype, lung, mtap.lock.name, False, m_mtap, mtap.pkpd_key),
+                    draws=draws)
+    p_mapk_off = assess(Scenario(mapk.genotype, lung, mapk.lock.name, False, m_mapk, mapk.pkpd_key),
+                        draws=draws)
+    p_mapk_on = assess(Scenario(mapk.genotype, lung, mapk.lock.name, True, m_mapk, mapk.pkpd_key),
+                       draws=draws)
     return (
         "Probabilistic ten-year durability (P = no second primary establishes), lung site, 90% CI: "
         f"MTAP (locked) {p_mtap.p_median:.2f} [{p_mtap.p_lo:.2f}, {p_mtap.p_hi:.2f}]; "

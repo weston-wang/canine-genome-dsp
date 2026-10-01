@@ -93,3 +93,35 @@ def test_csf_terms_name_delivery_as_the_dominant_risk():
     # combination is a probability, and strictly worse than either term alone
     c = t["combined"][0]
     assert max(t["delivery_fail"][0], t["pharmacologic_fail"][0]) < c < 1.0
+
+
+def test_site_penetration_is_derived_and_drug_specific():
+    """A single flat prior per site cannot be right for a 10 nM synthetic-lethal agent and a 372 nM
+    MEK inhibitor at the same barrier. The term must be derived, and must differ between them."""
+    from canine_dsp.core.evidence import Provenance
+
+    brain = "Brain -- systemic penetration"
+    prmt5 = em.reach_fail_param(brain, "tng908")
+    mek = em.reach_fail_param(brain, "cobimetinib")
+    assert prmt5.provenance is Provenance.DERIVED
+    assert mek.provenance is Provenance.DERIVED
+    # the whole point: the MEK drug fails on brain access where the synthetic-lethal agent clears it
+    assert mek.center > 0.5 > prmt5.center
+
+
+def test_the_derivation_reproduces_the_known_site_split():
+    """Independent check that the derivation is not tuned: it must recover the four-cell analysis's
+    hand-derived finding that MEK closes the lung and fails in brain parenchyma."""
+    lung = em.site_reach_fail_derivation("Lung / disseminated", "cobimetinib")
+    brain = em.site_reach_fail_derivation("Brain -- systemic penetration", "cobimetinib")
+    assert lung["headroom_fold"] > 1.0        # closes systemically
+    assert brain["headroom_fold"] < 1.0       # fails behind the barrier
+
+
+def test_derivation_cuts_both_ways_so_it_is_not_tuned_for_closure():
+    """A derivation that only ever improves the answer is a tuned one. This must worsen the MAPK
+    brain term while improving the MTAP brain term, relative to the old flat 0.30."""
+    brain = "Brain -- systemic penetration"
+    old_flat = 0.30
+    assert em.reach_fail_param(brain, "tng908").center < old_flat
+    assert em.reach_fail_param(brain, "cobimetinib").center > old_flat

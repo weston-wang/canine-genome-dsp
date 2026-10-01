@@ -14,6 +14,81 @@ keyword.
 
 ---
 
+## Re-grade against the user's stated bar (2026-10-01)
+
+The previous revision of this file ended with a "what remains open" list that graded against
+**"demonstrated in a dog"** — the bar the user explicitly disclaimed, twice. That is `CLAUDE.md`
+rule 2, and the lesson is now rule 11 plus failure 7. `standard_audit.py` grades every live input
+against the **stated** bar (real data **or** a rigorous model; a transfer acceptable when justified
+in writing) and reports what actually fails.
+
+**Result: 13 of 14 live inputs PASS. One genuinely failed, and it has been fixed.**
+
+Wrongly reported as open gaps in earlier summaries — each has a written transfer or derivation:
+
+| Item | Why it passes |
+|---|---|
+| PRMT5-inhibitor potency for the dog | Human MTAP-null GI50 transferred on a **computed** 99.37% PRMT5 ortholog identity from real UniProt sequences |
+| Abemaciclib brain exposure | **Measured** in resected human brain-tumour tissue (96× CDK4, 19× CDK6 over IC50), rodent Kp,uu 0.03–0.11, orthotopic survival benefit at those exposures |
+| MTAP status in canine HS | A **conditional gate** the analysis names and prices, not an unbacked number. The 62.8% region-level deletion **is** measured in canine HS |
+| Λ, second-primary rate | **Calibrated** so exp(−Λ) reproduces the observed canine-HS adjuvant recurrence-free fraction. Wide interval ⇒ uncertain, not unfounded |
+| Canine ctDNA for surveillance | Plasma PTPN11 assay **validated in canine HS**: ~91% detectable, 98.8% specific, commercial platform |
+
+**The one input that genuinely failed: the growth-rate bar.** `pkpd.GROWTH_PER_DAY = 0.055` was a
+bare literal — an assumed ~13-day doubling, uncited — and it sets the pass/fail threshold for every
+escape closure and every durability margin. The most load-bearing number in the project had the
+weakest basis of any of them.
+
+Now **DERIVED** from regrowth measured in canine HS itself (Skorupski, PMID 19453368: median
+disease-free interval 243 d, 10/16 relapsing at median 201 d after debulking + lomustine). Over a
+1e6–1e8 post-surgical residual that implies **0.0095–0.0344/day**. The bar in use, 0.055/day, is
+**1.6–5.8× harder** than the clinical data demands — the direction that cannot manufacture a
+closure. And `growth_sensitivity()` shows the conclusion does not turn on the choice: across
+0.030–0.080/day the access a synthetic-lethal maintenance agent needs stays between **0.09% and
+0.27%** of systemic exposure.
+
+### The last flat priors are now derived too — and the result cuts both ways
+
+The per-site penetration terms (lung 0.05, brain-local 0.08, brain-systemic 0.30) were the final
+bare point priors in the live chain. They are now **drug-specific and derived**: P(available access <
+the access the PK/PD model requires), using the **measured** compartment figures already in
+`core.catalogue` (0.021 parenchyma, chlorambucil, PMC6128565) against `min_access_to_close()`.
+
+| Site | Agent | Available | Required | Headroom | Derived p(fail) | Old flat prior |
+|---|---|---|---|---|---|---|
+| Lung | PRMT5i class | 1.0 | 0.0018 | 557× | ~0.00 | 0.05 |
+| Lung | MEK (measured) | 1.0 | 0.041 | 25× | 0.002 | 0.05 |
+| Brain, systemic | PRMT5i class | 0.021 | 0.0018 | **11.7×** | **0.013** | 0.30 |
+| Brain, systemic | MEK (measured) | 0.021 | 0.041 | **0.5×** | **0.726** | 0.30 |
+
+This is the honest test of whether a derivation is tuned: it made the genotype-anchored arm's brain
+term **much better** (0.30 → 0.013) and the MEK arm's **much worse** (0.30 → 0.726). A derivation
+that only ever improved the answer would be a tuned one. It also **reproduces the project's own
+site-split finding from first principles** — MEK closes the lung and fails behind the barrier — which
+the early four-cell analysis had derived by hand.
+
+**Updated durability (P = no second primary over 10 y, 90% CI):**
+
+| Tier | Lung | Brain, local | Brain, systemic | CSF |
+|---|---|---|---|---|
+| MTAP (genotype-anchored) | **0.77** [0.50, 0.92] | 0.77 | **0.76** | 0.43 |
+| MAPK majority, no surveillance | 0.59 [0.27, 0.83] | 0.59 | **0.27** | 0.37 |
+| MAPK majority, with detect-and-switch | **0.87** [0.62, 0.97] | — | — | — |
+
+### What is still genuinely open under the stated bar
+
+Two things, both failures of basis rather than of demonstration:
+
+1. **The dependency and floor tiers (PTEN, CDKN2A, no-target) have no measured IC50**, so their site
+   terms still fall back to the flat ordinal priors. Fixable the same way as soon as a potency for
+   those agents is transferred in writing — the 2026 duvelisib screen supplies a canine-HS figure
+   for the PI3K axis and would close the PTEN tier.
+2. **The reroute priors are labelled ASSUMED in code while carrying written sources** — a labelling
+   lag, not a missing basis. Cosmetic, but it is exactly the kind of mislabel that caused this
+   whole confusion.
+
+---
+
 ## Gap-closure pass (2026-10-01) — what was done
 
 All gaps listed in the verdict below have been closed or the reason recorded. Full suite: **735

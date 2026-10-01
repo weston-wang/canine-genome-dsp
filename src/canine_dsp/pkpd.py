@@ -39,7 +39,21 @@ from dataclasses import dataclass
 from .core.evidence import Provenance
 
 # The pass/fail bar (tumour net growth), matching core.catalogue.GROWTH_PER_DAY.
+#
+# PROVENANCE: DERIVED and deliberately CONSERVATIVE. This was a bare literal -- an assumed ~13-day
+# doubling with no citation -- which made it the weakest-grounded number in the project while also
+# being the most load-bearing, since every escape closure and every durability margin is tested
+# against it. `standard_audit.growth_bar_derivation()` now grounds it in regrowth measured in canine
+# HS itself: localized disease after debulking + lomustine gave a median disease-free interval of
+# 243 d with 10/16 relapsing at a median 201 d (Skorupski, PMID 19453368), which implies a net
+# regrowth rate of 0.0095-0.0344/day over a 1e6-1e8 post-surgical residual burden. 0.055/day is
+# 1.6-5.8x HIGHER than any of those, so every margin in the project clears a bar harder than the
+# clinical data demands -- the direction that cannot manufacture a closure. Those clinical rates are
+# net rates under lomustine and therefore already suppressed, which is why the bar belongs above
+# them rather than inside the range. `standard_audit.growth_sensitivity()` re-derives the required
+# access across 0.030-0.080/day and the conclusion does not turn on the choice.
 GROWTH_PER_DAY = 0.055
+GROWTH_PER_DAY_PROVENANCE = Provenance.DERIVED
 # Standard in-vitro cytotoxicity window (72 h MTT) the exposure-response is read over.
 DEFAULT_ASSAY_DAYS = 3.0
 
