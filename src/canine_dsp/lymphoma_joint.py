@@ -49,7 +49,7 @@ def _resolve(prefix: str, pools) -> str:
     raise KeyError(prefix)
 
 
-def joint_report(ip: str, prefixes, *, kill: float = CENTRAL["kill"], duty: float = CENTRAL["duty"]) -> dict:
+def joint_report(ip: str, prefixes, *, kill: float = CENTRAL["kill"], duty: float = CENTRAL["duty"], **ev_kw) -> dict:
     """Clears / halved / any-one-removed for the union, in both compartments."""
     pools = _pools(ip, kill, duty)
     esc = _escapes(ip)
@@ -70,13 +70,17 @@ def joint_report(ip: str, prefixes, *, kill: float = CENTRAL["kill"], duty: floa
             r = regimen(ns, comp)
             if delta != 1.0:
                 r = G.discounted(r, delta)
-            if not G.clears(r, esc, compartment=comp):
+            kw = dict(ev_kw)
+            if comp == SYSTEMIC:
+                kw.pop("cns_fraction", None)
+            if not G.clears(r, esc, compartment=comp, **kw):
                 return False
         return True
 
     margins = {}
     for comp in (SYSTEMIC, CNS):
-        ev = G.evaluate_best_schedule(regimen(names, comp), esc, compartment=comp)
+        ev = G.evaluate_best_schedule(regimen(names, comp), esc, compartment=comp,
+                                      **({k: v for k, v in ev_kw.items() if not (comp == SYSTEMIC and k == "cns_fraction")}))
         margins[comp] = (ev.worst_derated, ev.weakest, ev.horizon_strict.verdict())
     clears = ok(names)
     halved = ok(names, 0.5)

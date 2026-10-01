@@ -196,3 +196,9 @@ uncovered), which agrees with the human result that CAR-T alone leaves 59% CNS r
 3. Outside the model: unattributed multidrug resistance (E12), eye and testis, late second cancers (21% at 10 years in human CAR-T survivors), non-relapse mortality (18% at 10 years), parenchymal access.
 4. The tumour vaccine is not load-bearing: the 7-agent B-cell program still clears with it removed.
 5. A note on method: the search's clock stage evaluates only a subset of sets when more than 6000 cover every escape, so counts of "robust" sets from the search are lower bounds; the programs above were verified by direct evaluation.
+
+**Sensitivity to the inputs that still have no source** (`joint_report(..., f=, r=, cns_fraction=)`): the share of tumour cells that are cycling (0.05 to 0.5), the
+fraction of persister tolerance retained (0 to 0.9), and the share of burden that seeds the brain (0.05 to 1.0). The T-cell 5-agent program clears, survives halving and
+survives removing any agent across all of them. The B-cell 7-agent program clears and survives halving across all of them, and loses only the any-one-removed test when retained
+tolerance is 0.5 or more or the brain seed fraction is 0.5 or more. Per `CLAUDE.md` rule 11 these are not reported as gaps: no closure depends on a particular value of any of them.
+Which assumed numbers still carry weight: hydroxychloroquine brain access 0.3 has no source, but removing hydroxychloroquine does not break any program above.
