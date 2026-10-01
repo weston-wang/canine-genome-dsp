@@ -80,6 +80,8 @@ AVAILABILITY = {
     "CD5/CD52-directed cellular effector (T-lineage)": NONE,
     "autologous tumour vaccine (APAVAC-type, HSPPC + hydroxyapatite)": TRIAL,
     "autologous T-cell add-back after chemotherapy": TRIAL,
+    "panobinostat (HDAC inhibitor)": OFF_LABEL, "vorinostat (HDAC inhibitor)": OFF_LABEL,
+    "bortezomib (proteasome inhibitor)": OFF_LABEL,
 }
 
 REVERSER = "P-gp / TGF-beta-inhibitor chemosensitiser"

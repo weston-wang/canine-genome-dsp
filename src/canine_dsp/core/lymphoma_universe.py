@@ -155,6 +155,35 @@ def universe_agents(compartment: str, immunophenotype: str) -> tuple:
                               "data, so brain access 0." % outcome_kill(APAVAC_TTP_RATIO)),
             note="Antigen-independent of CD20/CD19 (patient's own tumour antigens) but needs MHC-I; needs a surgical "
                  "node excision at diagnosis. Investigational in Europe."))
+    # --- exposure-transfer agents from the resumed PK sweep (docs/universe/SWEEP_pk_partial.md, sections 12, 14) ---
+    # k = ln(1 + C/IC50)/assay_days, C = time-averaged FREE HUMAN exposure at label dosing (TRANSFER), IC50 = canine
+    # CLBL-1 / lymphoid assay (MEASURED). The central scenario is used; the sweep's low/high are in the file.
+    # Division-gating is assumed True for all three (cycle-independence is not shown) and brain access is 0 unless a
+    # transferred value exists, both conservative. Substrate status from the label / mouse studies.
+    out += [
+        Agent("panobinostat (HDAC inhibitor)", Axis.APOPTOSIS, Layer.RECEPTOR, 0.115, 0.25 if not sys_ else 1.0, 1.0,
+              True, division_gated=True, efflux_substrate=True,
+              evidence="IN VITRO canine CLBL-1 IC50 5.4 nM (PMID 29983882) and 18.32 nM (PMID 37711439), both 24 h; "
+                       "human label exposure 20 mg three times weekly; P-gp and BCRP substrate (label; mouse, PMID 37827699).",
+              potency_evidence="TRANSFER: 0.115 /day central (range 0.017-0.38) from the geometric-mean IC50 9.95 nM "
+                               "against a time-averaged free human concentration; no dog PK found. Brain access 0.25 "
+                               "= mouse unbound Kp,uu 0.2-0.3 (PMID 37827699).",
+              note="A pump substrate, so it does not reach the quiescent efflux-high progenitor (E5)."),
+        Agent("vorinostat (HDAC inhibitor)", Axis.APOPTOSIS, Layer.RECEPTOR, 0.026, 0.0 if not sys_ else 1.0, 1.0,
+              True, division_gated=True, efflux_substrate=False,
+              evidence="IN VITRO canine IC50 0.6-4.8 uM, T-cell lines most sensitive (PMID 18593248; per-line values "
+                       "and duration not retrieved); not limited by P-gp/BCRP in mouse (PMID 39893010).",
+              potency_evidence="TRANSFER: 0.026 /day central (range 0.005-0.09) from human label exposure; the 2-day assay "
+                               "duration is ASSUMED. Brain access 0 (no figure found).",
+              note="Not a pump substrate."),
+        Agent("bortezomib (proteasome inhibitor)", Axis.BCR_SIGNAL, Layer.NFKB, 0.048, 0.0 if not sys_ else 1.0, 1.0,
+              True, division_gated=True, efflux_substrate=True,
+              evidence="IN VITRO canine CLBL-1 IC50 15.1 nM at 48 h (thesis, PMID 38237918); NF-kB abolished (PMID "
+                       "23337362); dog blood proteasome inhibition 66-90% at 1 h, n=2 (PMID 23579193).",
+              potency_evidence="TRANSFER: 0.048 /day central (range 0.026-0.13) from human label exposure; below the bar "
+                               "in every scenario. Antagonised by the cyclophosphamide metabolite in vitro (PMID 38237918).",
+              note="Acts at the NF-kB layer of the serial B-cell receptor axis; P-gp substrate in cultured cells."),
+    ]
     out.append(Agent(
         "autologous T-cell add-back after chemotherapy", Axis.IMMUNE_EFFECTOR, Layer.RECEPTOR,
         outcome_kill(CD8_ADDBACK_TFS_RATIO), 1.0 if sys_ else 0.0, 1.0, True, division_gated=True,
