@@ -326,10 +326,19 @@ PROFILES = {
         secondary_axis=Organ.GI, secondary_fraction=0.20),
     "abemaciclib (CDK4/6, brain-penetrant)": ToxicityProfile(
         Organ.MARROW, 0.45, False,
-        "Neutropenia and diarrhoea are the class dose-limiting toxicities. Abemaciclib is the one "
-        "CDK4/6 inhibitor that crosses the blood-brain barrier efficiently; dosed continuously.",
-        source="Class effect; canine data absent. Depends on RB1 being INTACT -- an RB1-deleted "
-               "tumour (a recurrent minority) is refractory, which is why this tier is gated on Rb.",
+        "Neutropenia and diarrhoea are the class dose-limiting toxicities. Abemaciclib reaches brain "
+        "tumour tissue at therapeutic levels; dosed continuously, and human adjuvant use runs 2 y.",
+        source="Toxicity budget: class effect, canine data absent. BRAIN EXPOSURE IS NO LONGER A "
+               "CLASS ASSUMPTION -- it is MEASURED: unbound active abemaciclib analytes in resected "
+               "human brain-metastasis tissue ran 96x (CDK4) and 19x (CDK6) above the IC50 "
+               "(DOI 10.1158/1078-0432.CCR-20-1764). Efflux is real but not disqualifying: it is a "
+               "P-gp/BCRP substrate with oral Kp,uu 0.03 (mouse) to 0.11 (rat), and it still "
+               "extended survival in orthotopic glioma at those exposures "
+               "(DOI 10.1124/dmd.114.062745). Dog toxicology: repeat-dose to 3 months, target organs "
+               "marrow, GI, lymphoid, male reproductive (FDA NDA 208716); canine exposure figures "
+               "not extracted. Depends on RB1 being INTACT -- canine HS lines have Rb preserved at "
+               "baseline (PMID 35278028), but ACQUIRED RB1 loss / CDK2-cyclin E bypass is an "
+               "enumerated escape (escape_audit.A15), so this arm is surveillance-dependent.",
         secondary_axis=Organ.GI, secondary_fraction=0.30),
     "intrathecal sustained release": ToxicityProfile(
         Organ.CNS_LOCAL, 0.40, False, "arachnoiditis", source="Formulation does not exist."),

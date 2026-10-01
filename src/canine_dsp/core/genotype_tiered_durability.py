@@ -8,7 +8,15 @@ disease. The measured somatic driver landscape of canine histiocytic sarcoma is:
 
     PTPN11 / SHP2 activating mutation      ~56%   (PMID 39258288; MAPK pathway)
     KRAS activating mutation               ~3%    (same; MAPK pathway)
-    MTAP / CDKN2A homozygous deletion      recurrent minority (CFA11q16)
+    MTAP / CDKN2A homozygous deletion      62.8% of HS cases at the REGION level (CFA11q16 deletion
+                                           spanning CDKN2A/B: 60.7% of the predisposed breed, 66.7%
+                                           of Flat-Coated Retrievers; PMID 21341759). CORRECTED from
+                                           "recurrent minority" -- it is the MOST recurrent somatic
+                                           aberration in this disease, not a minority one. The caveat
+                                           is directional, not deflationary: 62.8% is the deleted
+                                           REGION, and MTAP co-deletion with CDKN2A is common but not
+                                           universal, so 62.8% is an UPPER BOUND on the MTAP-null
+                                           fraction. The MTAP immunostain remains the gate.
     RB1 deletion                           minority
     PTEN deletion                          minority
 
@@ -116,9 +124,19 @@ class Tier:
 
 #: Priority order: strongest anchor first. The best anchor a tumour qualifies for wins.
 TIERS = (
-    Tier("MTAP-deleted", "recurrent minority", "PRMT5 inhibitor (MTA-cooperative)",
+    Tier("MTAP-deleted", "<=62.8% (region-level CFA11q16 deletion; upper bound)",
+         "PRMT5 inhibitor (MTA-cooperative)",
          AnchorKind.SYNTHETIC_LETHAL, Grade.STRONG, Axis.CYTOTOXIC, Layer.RECEPTOR, False, True,
-         "Synthetic lethal; not division-gated; the clean ten-year anchor."),
+         "Synthetic lethal; not division-gated; the genotype-anchored ten-year arm -- anchored, NOT "
+         "absolute (acquired PRMT5i resistance via MAPK reprogramming is documented, with collateral "
+         "MEK sensitivity as the defined second line). Frequency CORRECTED from 'recurrent minority': "
+         "the CFA11q16 deletion is the most recurrent somatic aberration in canine HS at 62.8% "
+         "(PMID 21341759), which bounds the MTAP-null fraction from above. TWO IMPLICATIONS the old "
+         "label hid: (1) the same deletion removes CDKN2A, so a CDK4/6 inhibitor attacks the SAME "
+         "lesion with far better brain evidence than any PRMT5i currently has (see HS_STATUS "
+         "section A) -- for the brain site, lead with abemaciclib and add a PRMT5i if TNG456 reads "
+         "out; (2) at ~63% this tier OVERLAPS the ~59% MAPK majority in most tumours, which is why "
+         "best_tier_for() now returns a COMBINATION for that overlap rather than a priority winner."),
     Tier("PTEN-deleted", "minority", "paxalisib",
          AnchorKind.DEPENDENCY, Grade.STRONG, Axis.PI3K_PARALLEL, Layer.RECEPTOR, True, True,
          "PTEN loss forces PI3K/AKT dependence; paxalisib is already in induction and is oral, "
@@ -185,7 +203,11 @@ def maintenance_tolerable(tier: Tier) -> bool:
 
 def best_tier_for(genotype: set) -> Tier:
     """Pick the strongest anchor a tumour qualifies for. `genotype` is a set of markers, e.g.
-    {'MTAP_del'}, {'SHP2'}, {'CDKN2A_del','RB1_intact'}, {'PTEN_del'}, or empty for the floor."""
+    {'MTAP_del'}, {'SHP2'}, {'CDKN2A_del','RB1_intact'}, {'PTEN_del'}, or empty for the floor.
+
+    This returns a SINGLE tier and is kept for the categorical grid. Where a tumour carries markers
+    from more than one tier, `maintenance_plan_for` is the correct entry point -- a priority winner
+    is the wrong answer for the MTAP-and-MAPK overlap (see that function)."""
     if "MTAP_del" in genotype:
         return TIERS[0]
     if "PTEN_del" in genotype:
@@ -195,6 +217,61 @@ def best_tier_for(genotype: set) -> Tier:
     if genotype & {"SHP2", "PTPN11", "KRAS"}:
         return TIERS[3]
     return TIERS[4]
+
+
+#: Marker sets that call for a COMBINATION rather than a priority winner, with the basis for each.
+#: Driven by evidence, not by a preference for combinations -- each entry names its source.
+_COMBINATION_RULES: tuple[tuple[frozenset, str, str], ...] = (
+    (frozenset({"MTAP_del", "MAPK"}),
+     "MTA-cooperative PRMT5 inhibitor (or MAT2A inhibitor) PLUS a MAPK-pathway inhibitor",
+     "Knoll et al., Cancer Res 2025 (DOI 10.1158/0008-5472.CAN-25-1464): in CDKN2A/MTAP-null, "
+     "RAS-active tumours, MAPK-pathway inhibitors SYNERGISE with MTA-cooperative PRMT5i, and "
+     "PRMT5i + KRAS or RAF inhibitor produced COMPLETE RESPONSES in vivo; resistance to one did "
+     "not confer resistance to the other. Priority selection would discard the partner that the "
+     "data says to add. This overlap is not an edge case in canine HS: the CFA11q16 deletion is "
+     "62.8% (PMID 21341759) and MAPK drivers ~59%, so most MTAP-null tumours are also MAPK-driven."),
+    (frozenset({"MTAP_del", "RB1_intact"}),
+     "CDK4/6 inhibitor (abemaciclib) PLUS an MTAP-directed agent",
+     "The CFA11q16 deletion removes CDKN2A as well as MTAP, so one lesion licenses two anchors. "
+     "Abemaciclib has measured human brain-tumour tissue exposure 19-96x the CDK4/6 IC50 "
+     "(DOI 10.1158/1078-0432.CCR-20-1764) and met its endpoint in CDK-pathway meningioma, the same "
+     "extra-axial niche (DOI 10.1038/s41591-025-04141-4), while no MTAP-directed agent has human "
+     "CNS activity data. TNG456's own Phase 1/2 (NCT06810544) pairs exactly these two. Requires "
+     "RB1 intact -- canine HS lines have Rb preserved at baseline (PMID 35278028)."),
+)
+
+
+@dataclass(frozen=True)
+class MaintenancePlan:
+    """What to actually give a tumour whose markers span more than one tier."""
+
+    tiers: tuple[Tier, ...]
+    regimen: str
+    is_combination: bool
+    basis: str
+
+
+def maintenance_plan_for(genotype: set) -> MaintenancePlan:
+    """The maintenance plan for a genotype, returning a COMBINATION where the evidence calls for one.
+
+    `best_tier_for` answers "which single anchor is strongest", which is the right question for a
+    categorical grid and the wrong one for a real tumour: a tumour carrying an MTAP deletion AND a
+    MAPK driver is precisely the population in which the combination produced complete responses,
+    so picking a winner discards evidence. Markers accepted: as `best_tier_for`, plus 'MAPK' as a
+    synonym for the SHP2/PTPN11/KRAS group.
+    """
+    g = set(genotype)
+    if g & {"SHP2", "PTPN11", "KRAS"}:
+        g.add("MAPK")
+    for markers, regimen, basis in _COMBINATION_RULES:
+        if markers <= g:
+            tiers = tuple(t for t in TIERS if t.genotype.startswith("MTAP")
+                          or (("MAPK" in markers) and t.kind is AnchorKind.PATHWAY_DRIVER)
+                          or (("RB1_intact" in markers) and t.axis is Axis.CELL_CYCLE))
+            return MaintenancePlan(tiers, regimen, True, basis)
+    tier = best_tier_for(genotype)
+    return MaintenancePlan((tier,), tier.anchor_agent, False,
+                           "Single-anchor tier; no combination rule applies to these markers.")
 
 
 # --- computed results ---------------------------------------------------------------------------------

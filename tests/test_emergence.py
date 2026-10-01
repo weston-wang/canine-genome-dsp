@@ -71,3 +71,25 @@ def test_headline_states_probabilities_and_stays_honest():
     assert "90% ci" in h or "ci" in h
     assert "locked" in h
     assert "not proof" in h or "not proof of a decade" in h
+
+
+def test_csf_reach_failure_is_derived_not_assumed():
+    """The CSF prior was a flat 0.70 ASSUMED, written before the bar was computed. It must now be
+    DERIVED, and lower, because the pharmacologic term turned out to be the weak one."""
+    from canine_dsp.core.evidence import Provenance
+
+    p = em.reach_fail_param("Leptomeninges / CSF")
+    assert p.provenance is Provenance.DERIVED
+    assert p.center < 0.70
+    assert p.lo < p.center < p.hi
+
+
+def test_csf_terms_name_delivery_as_the_dominant_risk():
+    """The point of decomposing the term: the CSF is delivery-limited, not potency-limited."""
+    t = em.csf_reach_fail_terms()
+    assert t["dominant_term"] == "delivery"
+    assert t["delivery_fail"][0] > t["pharmacologic_fail"][0]
+    assert t["superseded_assumed_value"] == 0.70
+    # combination is a probability, and strictly worse than either term alone
+    c = t["combined"][0]
+    assert max(t["delivery_fail"][0], t["pharmacologic_fail"][0]) < c < 1.0

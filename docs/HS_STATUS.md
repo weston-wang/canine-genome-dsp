@@ -14,6 +14,35 @@ keyword.
 
 ---
 
+## Gap-closure pass (2026-10-01) — what was done
+
+All gaps listed in the verdict below have been closed or the reason recorded. Full suite: **735
+passed**; the single failure (`test_validation_changes_no_analysis_module`, a melanoma-module import
+check) **fails identically on the clean tree** and is unrelated to this work.
+
+| Gap | Closed by | Result |
+|---|---|---|
+| Therapy universe never enumerated (rule 9) | new `candidate_universe.py` + tests | **25 modality classes, 0 unassessed.** 15 in model, 10 excluded with recorded reasons. Newly assessed: ADCs, bispecific engagers, marrow transplant, oncolytic virus |
+| Escape list never independently audited (rule 9) | new `escape_audit.py` + tests | **18 candidates enumerated from outside the project; 4 new route gaps found → 16 audited escapes.** All 4 close on a measurement, a justified transfer or a structural argument; none on a bare assumption |
+| CSF prior assumed at 0.70 | `emergence.csf_reach_fail_terms()` | **Derived 0.428 [0.24, 0.69]**, decomposed into pharmacologic (0.12) × delivery (0.35). CSF durability rises 0.33 → **0.434**. Dominant risk is now correctly named as **sustained delivery, not potency** |
+| "Recurrent minority" label | `genotype_tiered_durability`, `maintenance_durability` | Corrected to **≤62.8% region-level** (upper bound on MTAP-null), with the stain still the gate |
+| MTAP∩MAPK resolved by priority | new `maintenance_plan_for()` | Returns a **combination** for MTAP+MAPK and for MTAP+RB1-intact, each with its evidence basis; `best_tier_for` kept for the categorical grid |
+| TNG462 called "designed brain-penetrant" | `core/breed_wide_durability.py` | Corrected: **0/23 partial responses** in evaluable glioblastoma patients; CNS lead moved to CDK4/6 |
+| Abemaciclib brain claim graded "class effect" | `core/toxicity.py` | Replaced with **measured** human brain-tumour exposure (96× CDK4, 19× CDK6) plus the honest efflux numbers (Kp,uu 0.03–0.11) |
+| PRMT5-before-MAT2A ordering | `maintenance_durability` MTAP tier | **Split by site:** MAT2A first at systemic sites on response rate; CDK4/6 first in the brain; PRMT5i added when a CNS readout exists |
+| Immune floor scored as independent | `maintenance_durability` floor tier | Records **MTA-mediated suppression** — the floor is weakest in exactly the genotype the MTAP arm targets |
+| Stale verdict counts in the report | `CONSOLIDATED_REPORT.md` | Corrected to 7 measured / 2 transfer / 1 model-derived / 2 structural / **0 assumed**, and scoped to the stated catalogue |
+
+**The audit's most important single finding is structural, not biological:** six of the twelve
+original escape closures rest on **one agent class** (the microtubule cytotoxic), and its resistance
+mechanism — ABCB1/ABCG2 efflux — is *measured present* in canine HS lines in the very paper that
+establishes the class's potency (PMID 25715778). The escape list had never named the failure of the
+drug doing most of the work. It is now route **A13**, answered by drug choice: a colchicine-site
+binder that retains activity in P-gp-overexpressing and tubulin-mutant cells (PMID 28797699), which
+is what `core.microtubule_route` had already selected on independent access grounds.
+
+---
+
 ## Big-picture verdict (2026-10-01): do the combinations hold for 10+ years?
 
 Graded against the user's words: *"make sure every mechanism and every escape is closed by either
@@ -23,9 +52,9 @@ scientifically sound."*
 
 | Part | Verdict | Basis (where) |
 |---|---|---|
-| Clearing the first tumour, all 12 escapes | **Holds within the catalogue.** Every escape has a closing agent: 7 measured in canine HS, 2 transferred, 1 model-derived, 2 structural, 0 assumed; all 45 pairs and 120 triples covered; toxicity budgets computed, one collision (radiation + CNS microtubule agent) resolved by sequencing | `CONSOLIDATED_REPORT.md` "Escape coverage", `coverage_assessment` |
-| "Every mechanism" | **Not established.** The therapy universe was never enumerated for HS (rule 9): antibodies/ADCs, bispecifics, cell therapy, marrow transplant not assessed; oncolytic virus mentioned only. The 12-escape list has not had an independent audit for this case | rule 9; section B row 8 |
-| Staying clear for 10 years | **Scientifically sound hypothesis, not a result.** Model P(10-year), systemic sites: 0.56–0.71 without monitoring, 0.81–0.86 with detect-and-switch. Brain-local hinges on drug access. CSF 0.33 rests on an ASSUMED reach-failure prior (0.70) that predates the computed result that intrathecal dosing exceeds the bar by orders of magnitude in bulk CSF; the open quantity there is fluid-to-cell transfer | `emergence.py`; `maintenance_durability.csf_answer()` |
+| Clearing the first tumour | **Holds within a now-stated catalogue.** Every escape has a closing agent: of the original 12, 7 measured in canine HS, 2 transferred, 1 model-derived, 2 structural, **0 assumed**; all 45 pairs and 120 triples covered; toxicity budgets computed, one collision (radiation + CNS microtubule agent) resolved by sequencing. The 4 audit-added routes close on 1 measurement-backed drug choice, 2 transfers, 1 structural argument | `CONSOLIDATED_REPORT.md`, `coverage_assessment`, `escape_audit` |
+| "Every mechanism" | **Now established, as a scoped claim.** "Closed within this catalogue of **25 modality classes and 16 escape routes**", 0 classes unassessed, 10 excluded with reasons named. Not the same as "every conceivable mechanism" — it is a claim whose boundary is written down | `candidate_universe.closure_claim()`, `escape_audit` |
+| Staying clear for 10 years | **Scientifically sound hypothesis, not a result.** Model P(10-year), systemic sites: 0.56–0.72 without monitoring, 0.81–0.86 with detect-and-switch. Brain-local hinges on drug access. **CSF now 0.434 [0.17, 0.69]** on a derived rather than assumed prior, and the binding constraint there is sustained delivery (no intrathecal sustained-release product exists), not potency | `emergence.py`; `maintenance_durability.csf_answer()` |
 | Oct 2026 literature | **No change to the design.** PRMT5 brain arm weaker, CDK4/6 brain arm better evidenced on the same deletion (section A); the deletion is common (62.8%), which widens coverage; the immune floor is weaker in MTAP-null tumours | sections A, B |
 | Largest uncertainty | **How often a cleared, predisposed dog throws a new primary (Λ)** — 50–90% of the variance. Not a drug question | `emergence.py` value-of-information |
 
@@ -116,18 +145,28 @@ deletion if it reads out — its own trial already pairs the two.
 
 ---
 
-## Open corrections, none applied
+## Corrections — all applied 2026-10-01
 
-| # | Correction | Where | Basis |
-|---|---|---|---|
-| 1 | CDKN2A and MTAP tiers labelled "minority"; the CDKN2A/B region is deleted in 62.8% | `core/genotype_tiered_durability.py:11,126`, `maintenance_durability.py:102` | Hédan 2011 |
-| 2 | ~~Demote TNG908 for the brain~~ | `pkpd.py` | **Already applied 2026-08-23**; the dict key is still named `"tng908"` |
-| 3 | TNG462 called "designed brain-penetrant" | `core/breed_wide_durability.py:255` | 0 PRs in 23 evaluable GBM patients |
-| 4 | Brain arm for the deletion should lead with abemaciclib (CDK4/6), PRMT5 as the pending upgrade; abemaciclib's brain claim should cite measured exposure, not "class effect" | MTAP/CDKN2A tiers; `core/toxicity.py:331` | Section A |
-| 5 | PRMT5-before-MAT2A ordering may be inverted (systemic sites) | MTAP tier maintenance string | IDE397 vs AMG 193 |
-| 6 | MTAP∩MAPK overlap resolved by priority, not combination | `best_tier_for()` | Knoll 2025 (`PRIOR_ART_COMBINATIONS.md`) |
-| 7 | Immune floor tier not independent of the MTAP tier | floor tier rationale | MTA-mediated immune coldness |
-| 8 | Oncolytic virotherapy mentioned but not assessed | catalogue | `CLAUDE.md` rule 9 |
-| 9 | Report's Verdict section says "4 of 12 measured … 4 assumed"; its evidence-grade section says 7 measured, 0 assumed. Verdict is stale | `CONSOLIDATED_REPORT.md` lines ~36–41 | internal |
-| 10 | Therapy-modality universe and independent escape audit not done for HS | new `docs/` record | `CLAUDE.md` rule 9 |
-| 11 | CSF reach-failure prior (0.70, ASSUMED) not updated to the computed intrathecal achievability | `emergence.py:124` | `maintenance_durability.csf_answer()` |
+Corrections 1–11 from the previous revision are applied; see the gap-closure table at the top.
+`pkpd.PARAMS` still keys the PRMT5 entry `"tng908"` for backward compatibility while its contents
+describe the TNG456 anchor — a naming wart, not a claim.
+
+## What remains open after this pass
+
+These are genuinely open, not deferred corrections:
+
+1. **Per-day kill rates** are fully derived only where a canine Cmax exists (cobimetinib). Everything
+   else is an IC50 plus a transferred or assumed exposure.
+2. **The growth-rate bar (0.055/day)** that sets every pass/fail is still an uncited placeholder, and
+   it enters the answer twice. Probably readable from scans already taken.
+3. **Canine CNS access** is unmeasured for every agent, including abemaciclib — whose brain evidence
+   is human and rodent.
+4. **The fluid-to-cell fraction in CSF** remains unmeasured; the derived prior bounds it rather than
+   measuring it.
+5. **Λ, the second-primary emergence rate**, still carries 50–90% of the variance in the 10-year
+   number. The highest-value study in the whole project is an observational cohort of cleared,
+   predisposed dogs — not a drug experiment.
+6. **MTAP status in canine HS has still never been measured.** Zero records. The entire MTAP arm is
+   gated on one immunostain that nobody has run.
+7. **A15 (acquired RB1 loss) inherits the surveillance dependence** — and canine HS ctDNA is
+   unvalidated, so in practice it would be detected late.

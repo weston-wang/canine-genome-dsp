@@ -36,12 +36,23 @@ Durability is therefore reached in **two moves**:
   The induction regimen closes every enumerated escape route at both occupied brain sites,
   and every double and triple combination, with zero uncovered — and the audit re-ran the
   code and confirmed the *arithmetic*. What it did **not** confirm is the inputs: graded by
-  evidence, 4 of 12 escape closures rest on a measurement in canine HS (the microtubule
-  induction class closing escapes 1–3, plus NF-κB), 2 are transfers from the wrong disease, 2 are
-  structural arguments, and 4 rest on assumed kill rates — still including the ten-year arm (see
-  "What 'closed' is actually worth" below). So the induction backbone is now measured-active, but
-  the coverage as a whole is still best read as a **structural / hypothesis-level** result, not a
-  fully empirical one.
+  evidence, **7 of the 12 original escape closures rest on a measurement in canine HS, 2 are
+  transfers from another disease or species, 1 is model-derived, 2 are structural arguments, and
+  none rests on a bare assumed kill rate** (see "What 'closed' is actually worth" below).
+  So the induction backbone is measured-active, but the coverage as a whole is still best read as
+  a **structural / hypothesis-level** result, not a fully empirical one, because what remains open
+  is quantitative: per-day kill rates, CNS access, and the growth-rate bar.
+- **The claim is now scoped to a stated catalogue, not an unstated one.** Two audits were added
+  after the above was first written, both required by the project's own rule 9:
+  `candidate_universe` enumerates **25 therapy-modality classes** (15 in the model, 10 excluded
+  with a recorded reason, **0 unassessed**), and `escape_audit` derives the escape list
+  independently of the one in hand, finding **4 route gaps** the original twelve missed —
+  so the audited count is **16 escapes**. The honest headline is therefore "closed within this
+  catalogue of 25 modality classes and 16 escape routes", with the exclusions named.
+  The most important of the four new routes is structural rather than biological: **six of the
+  twelve original closures rest on one agent class** (the microtubule cytotoxic), whose resistance
+  mechanism — ABCB1/ABCG2 efflux — is *measured present* in canine HS lines in the same paper that
+  establishes the class's potency. A single point of failure the escape list never named.
 - The **ten-year half is a scientifically grounded hypothesis, not a result.** It rests
   on a maintenance pill whose durability *grade* varies by genotype, and on numbers that
   have never been measured in a dog. It reduces to a single inequality that fails at the

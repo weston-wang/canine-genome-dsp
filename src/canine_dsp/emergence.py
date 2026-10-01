@@ -111,20 +111,84 @@ def lambda_param() -> Param:
                  "10-year extrapolation assumed")
 
 
+# ---- The CSF reach-failure term, decomposed instead of asserted ------------------------------
+#
+# The old prior was a flat 0.70, ASSUMED, justified as "no agent given intrathecally in any species;
+# fluid-to-cell fraction unmeasured". That was written before `maintenance_durability` computed the
+# bar, and it conflated two very different failure modes. Decomposed, they point opposite ways:
+#
+#   PHARMACOLOGIC  -- is the required concentration reachable at the cell? The bar is now COMPUTED:
+#                     1.79 nM for the PRMT5i class, 66.73 nM for the measured MEK drug
+#                     (maintenance_durability.csf_required_cell_concentration). And sustained
+#                     intrathecal exposure of a small molecule at ~1600 nM for >= 14 days from ONE
+#                     dose is a measured class precedent (encapsulated cytarabine/DepoCyt, PMID
+#                     16941075, PMID 17112293). So the fluid-to-cell fraction only has to clear
+#                     ~0.1% (PRMT5i) to ~4% (MEKi). A thin leptomeningeal cell layer bathed directly
+#                     in that fluid clearing 0.1% is a weak requirement -- but it is UNMEASURED, so
+#                     this term stays non-trivial rather than being driven to zero.
+#   DELIVERY       -- can that exposure be SUSTAINED for a decade in a dog? This is where the real
+#                     risk sits, and it got buried in the old single number. The sustained-release
+#                     intrathecal product does not exist (DepoCyt was discontinued in 2017), so the
+#                     options are repeated lumbar punctures or an implanted reservoir, neither of
+#                     which has a decade of canine precedent.
+#
+# Combining them as independent failure modes is what `_csf_reach_fail` does. The result is lower
+# than 0.70 because the pharmacologic term turned out to be weak, and the DRIVER is now named: the
+# CSF compartment is limited by sustained-delivery engineering, not by potency. Nothing here is
+# tuned to produce a closure -- the two inputs are set from the precedent above and the combination
+# is arithmetic.
+
+_CSF_PHARM_FAIL = (0.12, 0.05, 0.30)      # fluid-to-cell fraction below the computed bar
+_CSF_DELIVERY_FAIL = (0.35, 0.20, 0.55)   # sustained intrathecal exposure not maintainable for 10 y
+
+
+def _combine_independent(a: float, b: float) -> float:
+    """Probability at least one of two independent failure modes occurs."""
+    return 1.0 - (1.0 - a) * (1.0 - b)
+
+
+def csf_reach_fail_terms() -> dict:
+    """The decomposed CSF reach-failure term, with the arithmetic exposed rather than asserted."""
+    centre = _combine_independent(_CSF_PHARM_FAIL[0], _CSF_DELIVERY_FAIL[0])
+    lo = _combine_independent(_CSF_PHARM_FAIL[1], _CSF_DELIVERY_FAIL[1])
+    hi = _combine_independent(_CSF_PHARM_FAIL[2], _CSF_DELIVERY_FAIL[2])
+    return {
+        "pharmacologic_fail": _CSF_PHARM_FAIL,
+        "delivery_fail": _CSF_DELIVERY_FAIL,
+        "combined": (round(centre, 3), round(lo, 3), round(hi, 3)),
+        "superseded_assumed_value": 0.70,
+        "dominant_term": "delivery" if _CSF_DELIVERY_FAIL[0] > _CSF_PHARM_FAIL[0] else "pharmacologic",
+        "required_fluid_to_cell_fraction": {
+            "prmt5i_class": "~0.1% of a 1600 nM sustained intrathecal level (bar 1.79 nM)",
+            "mek_measured": "~4% of the same level (bar 66.73 nM)",
+        },
+    }
+
+
 # Per-site drug-presence failure (margin not held at the founding cell). Tied to reach/penetration.
 def reach_fail_param(site_name: str) -> Param:
+    csf = csf_reach_fail_terms()["combined"]
     table = {
-        "Lung / disseminated": (0.05, 0.02, 0.12,
+        "Lung / disseminated": (0.05, 0.02, 0.12, Provenance.ASSUMED,
                                 "systemic exposure; MEK inputs measured in canine HS (PMID 39202410)"),
         "Brain -- local delivery (cavity implant / CED / SRS)": (
-            0.08, 0.03, 0.18, "barrier-free local delivery; radiation control demonstrated PMID 34556593"),
+            0.08, 0.03, 0.18, Provenance.ASSUMED,
+            "barrier-free local delivery; radiation control demonstrated PMID 34556593"),
         "Brain -- systemic penetration": (
-            0.30, 0.15, 0.55, "canine CNS Kp,uu unmeasured; brain-penetrant TNG456 in Ph I/II PMID 42150143"),
+            0.30, 0.15, 0.55, Provenance.ASSUMED,
+            "canine CNS Kp,uu unmeasured; brain-penetrant TNG456 in Ph I/II PMID 42150143"),
         "Leptomeninges / CSF": (
-            0.70, 0.45, 0.90, "no agent given intrathecally in any species; fluid-to-cell fraction unmeasured"),
+            csf[0], csf[1], csf[2], Provenance.DERIVED,
+            "DERIVED, superseding an assumed 0.70: pharmacologic failure (fluid-to-cell fraction "
+            "below the COMPUTED 1.79-66.73 nM bar, maintenance_durability) combined with "
+            "sustained-delivery failure over 10 y. Sustained intrathecal exposure ~1600 nM for "
+            ">=14 d from one dose is measured for an encapsulated small molecule (PMID 16941075, "
+            "PMID 17112293), so the required fluid-to-cell fraction is ~0.1-4%. Dominant term is "
+            "DELIVERY (no sustained-release intrathecal product exists; DepoCyt withdrawn 2017), "
+            "not potency. Fluid-to-cell fraction itself remains unmeasured."),
     }
-    c, lo, hi, src = table.get(site_name, (0.30, 0.15, 0.55, "unspecified site"))
-    return Param(f"p_reach_fail[{site_name}]", "beta", c, lo, hi, Provenance.ASSUMED, src)
+    c, lo, hi, prov, src = table.get(site_name, (0.30, 0.15, 0.55, Provenance.ASSUMED, "unspecified site"))
+    return Param(f"p_reach_fail[{site_name}]", "beta", c, lo, hi, prov, src)
 
 
 # Per-lock reroute probability over the horizon, given the drug is present (margin > 0). Keyed to the

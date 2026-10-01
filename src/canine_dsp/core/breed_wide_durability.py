@@ -252,8 +252,16 @@ WHAT_IS_STILL_ASSUMED = (
     "this individual's tumour is among them. Recurrent is not universal.",
     "THE POTENCY, 0.15/day, as everywhere else. Synthetic lethality says a cell DIES; it does not say "
     "how fast.",
-    "THE CNS ACCESS. TNG908 and TNG462 are designed brain-penetrant and studied in glioblastoma, but "
-    "no figure for a dog exists. The sweep spans the value that decides the maintenance arm.",
+    "THE CNS ACCESS -- and this is now WORSE than 'unmeasured in the dog'. Both first-generation "
+    "agents have FAILED in the brain in humans: TNG908 did not reach therapeutic CNS exposure in "
+    "glioblastoma, and TNG462 produced ZERO partial responses in 23 evaluable glioblastoma patients "
+    "treated at active doses (median time on study under 8 weeks). So 'designed brain-penetrant and "
+    "studied in glioblastoma' -- the earlier wording here -- overstated both. The only remaining "
+    "MTAP-directed CNS candidate is TNG456, which has mouse data (84% growth inhibition at 30 mg/kg "
+    "BID in U87MG) and no human efficacy data; no brain-penetrant MAT2A inhibitor is published at "
+    "all. The practical consequence is recorded in HS_STATUS section A: for the brain site the same "
+    "CFA11q16 deletion is better attacked through CDKN2A with a CDK4/6 inhibitor, which has measured "
+    "human brain-tumour exposure and a met endpoint in the same extra-axial niche.",
     "THAT MTA-COOPERATIVE SELECTIVITY HOLDS IN VIVO WELL ENOUGH FOR INDEFINITE DOSING. The whole "
     "maintenance argument rests on normal tissue being spared, and the toxicity budget of 0.35 is an "
     "ordinal judgement with NO CANINE DATA behind it.",

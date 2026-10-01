@@ -99,11 +99,20 @@ class Site:
 # Continuous-maintenance tiers. Only MTAP and the MAPK majority have a grounded kill rate in pkpd;
 # the dependency tiers carry no derived margin until an IC50 + Cmax is measured.
 TIERS: tuple[GenotypeTier, ...] = (
-    GenotypeTier("MTAP deleted", "recurrent minority",
-                 "PRMT5 inhibitor -- brain-penetrant TNG456 (Ph I/II); also TNG462/BMS-986504. "
-                 "Parallel MTAP-directed option: MAT2A inhibitor (AG-270/S095033 class, Ph I done, "
-                 "CNS-penetrant next-gen). PRMT5 PROTAC degraders emerging for resistance. "
-                 "On acquired resistance -> switch to MEK (collateral sensitivity)",
+    GenotypeTier("MTAP deleted", "<=62.8% (region-level CFA11q16 deletion, PMID 21341759; "
+                 "upper bound on MTAP-null -- the stain is still the gate)",
+                 "SYSTEMIC SITES, by reported response rate: MAT2A inhibitor FIRST (IDE397 class -- "
+                 "38% PR squamous NSCLC, 30% urothelial, molecular response in 81% of heavily "
+                 "pre-treated patients) ahead of PRMT5 inhibition (AMG 193 ORR 21.4%, n=80, median "
+                 "DoR 8.3 mo) -- the earlier PRMT5-first ordering predates these numbers. "
+                 "BRAIN SITE: neither has human CNS activity data (TNG908 failed on CNS exposure; "
+                 "TNG462 0/23 PR in glioblastoma; TNG456 mouse-only; no brain-penetrant MAT2A "
+                 "inhibitor published), so lead with a CDK4/6 inhibitor against the CO-DELETED "
+                 "CDKN2A -- same lesion, measured human brain-tumour exposure -- and add an "
+                 "MTAP-directed agent when one reads out in the CNS. "
+                 "Dual PRMT5+MAT2A shows synthetic lethality in MTAP-null GLIOMA models. "
+                 "PRMT5 PROTAC degraders emerging for resistance. "
+                 "On acquired PRMT5i resistance -> switch to MEK (collateral sensitivity)",
                  Lock.LOCKED, "tng908", "PRMT5 inhibitor"),
     GenotypeTier("MAPK driver (SHP2/KRAS)", "~59%", "MEK inhibitor (mirdametinib)",
                  Lock.REROUTABLE, "cobimetinib", "mirdametinib"),
@@ -111,7 +120,16 @@ TIERS: tuple[GenotypeTier, ...] = (
                  Lock.DEPENDENCY, None, "paxalisib"),
     GenotypeTier("CDKN2A deleted, RB1 intact", "minority", "CDK4/6 inhibitor (abemaciclib)",
                  Lock.DEPENDENCY, None, "abemaciclib"),
-    GenotypeTier("None targetable", "residual", "immune surveillance + cycled lomustine",
+    GenotypeTier("None targetable", "residual",
+                 "immune surveillance + cycled cytotoxic. NOT INDEPENDENT OF THE MTAP TIER: an "
+                 "MTAP-null cell exports methylthioadenosine, which suppresses T-cell function and "
+                 "remodels the immune landscape (PMID 27622058, PMID 36183155), so the immune half "
+                 "of this floor is weakest in exactly the genotype the MTAP arm targets. A dog whose "
+                 "MTAP arm fails therefore falls back onto a floor that the SAME lesion has already "
+                 "degraded -- the two must not be scored as independent fallbacks "
+                 "(escape_audit.A16). Lean on the cycled cytotoxic, not the immune arm, for those "
+                 "tumours; MAT2A inhibition is directionally favourable here because it lowers SAM "
+                 "and reduces MTA accumulation, but that is mechanism, not canine data",
                  Lock.FLOOR, None, "lomustine"),
 )
 
