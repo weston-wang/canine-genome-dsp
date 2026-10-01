@@ -30,6 +30,15 @@ Concrete failures (so the rules have a reason):
    (the user: "I thought we were focused on the non-dessimated case"). In the same report, items labelled
    new were already in `docs/CONSOLIDATED_REPORT.md`; the record had been searched by keyword, and the
    report cites them by DOI.
+7. **Listing "unmeasured in the dog" as the open gaps, after the user ruled that bar out.** A
+   gap-closure summary ended with "what remains open": no canine MTAP measurement, no canine CNS
+   access, no canine ctDNA validation, unmeasured fluid-to-cell fraction. Every one of those has a
+   written transfer or a derivation behind it, so under the stated bar none is a gap — the user had
+   said, twice, that absence of demonstration is not the test ("I'm not asking if it's been
+   demonstrated, I know it's not"; "I'm okay with no specific data but if scientifically sound").
+   The genuinely failing input, a growth-rate bar that was a bare uncited literal gating every
+   margin in the project, was buried in the same list as the non-gaps. `standard_audit.py` now
+   grades every live input against the stated bar and names what actually fails.
 
 ## Rules
 
@@ -68,6 +77,14 @@ Concrete failures (so the rules have a reason):
    (non-disseminated) histiocytic sarcoma in a predisposed breed. Label evidence from another presentation
    (disseminated disease, another tumour, another species) as indirect. When checking whether a finding is
    already in the record, search by its DOI or PMID as well as by keyword.
+11. **Never report "no measurement exists" as an open gap.** The bar is real data **or** a rigorous
+   model, with a cross-species/disease/class transfer acceptable when justified in writing. So before
+   calling anything open, ask: does a written transfer or a derivation stand behind this number? If
+   yes it is CLOSED (graded TRANSFERRED or DERIVED) and saying otherwise re-grades against a bar the
+   user disclaimed. Only two things are genuinely open: a number with **no** basis at all, and a
+   number whose basis is circular, tuned, or contradicted. Run `standard_audit.failing()` rather than
+   listing absences. A number that exists but is never used to assert a closure (an inert
+   placeholder) is also not a gap — say which code path uses it.
 
 ## Standing standards for the cancer durable-response work (the user's words)
 
