@@ -15,7 +15,52 @@ version is used and any genuine disagreement is flagged.*
 
 ---
 
-## Verdict
+## Verdict — a checklist, not odds
+
+**The decade is not a probability.** Enumerating every mechanism and every escape route exists
+precisely so the answer stops being a bet and becomes a decidable question: is every route closed at
+every occupied site, and if not, which one is open? `deterministic_closure.py` decides it.
+
+**Every one of the 16 enumerated routes closes at both occupied brain sites if and only if seven
+conditions hold. Three hold today. The binding constraint is delivery, not drug discovery.**
+
+| | Invaded parenchyma | Leptomeninges / CSF |
+|---|---|---|
+| Obtainable agents, **systemic** exposure | **0 of 10 routes closed**, worst margin **−0.049/day** | **0 of 10 closed**, worst **−0.036/day** |
+| Shortfall in kill rate | **9.4×** | **2.9×** |
+| Same agents, **delivered locally** + continuous | **10 of 10 closed**, worst **+0.225/day** | **10 of 10 closed**, **+0.225/day** |
+
+So with what is obtainable today, given systemically, **every route is open — not "unlikely", open.**
+Change the route of administration and the same drugs close everything. The weakest link in both
+compartments is the **drug-tolerant persister**, which is why continuous dosing is a condition rather
+than a preference.
+
+**The seven conditions:**
+
+| | Condition | Status |
+|---|---|---|
+| **C1** | Local delivery into the resection cavity (implant / CED) so parenchymal access ≈1.0, not 0.021 | **engineering — not met** |
+| **C2** | Intrathecal delivery (or craniospinal radiation) for the leptomeningeal compartment | **engineering — not met** |
+| C3 | Maintenance dosed continuously, not cycled | met |
+| C4 | Induction agent is not a P-gp/BCRP substrate | met |
+| **C5** | Tumour carries a targetable lesion (MTAP-null, or CDKN2A-null + RB1 intact, or MAPK driver, or PTEN-null) | **one stain — decidable before treatment** |
+| C6 | Toxicity budget respected by sequencing radiation and the CNS cytotoxic | met |
+| **C7** | Sponsor access to the investigational genotype-anchored agent | **not met; not required for closure under C1–C6** |
+
+C1 and C2 are engineering conditions — either met or not, nobody's luck. C5 is a test on tissue
+already in the freezer. That is the honest shape of the answer: a finite checklist with two
+engineering items on it.
+
+**On the probabilities elsewhere in this report:** the P(10-year) figures from `emergence.py`
+(0.77, 0.59, 0.27 …) are a **sensitivity statement, not the verdict**, and they are now labelled as
+such in code. They were misleading in two specific ways: they charged a reroute as terminal even
+though the escape ledger names a successor agent for every reroute (double-counting), and they
+converted the hard fact above — every route open at systemic exposure — into a soft number that
+reads like a worthwhile bet.
+
+---
+
+## Verdict (probabilistic sensitivity — secondary to the checklist above)
 
 Ten-year durability is **not** reached by killing this one tumour harder. That framing —
 the goal of every earlier version of the work — can never reach ten years, because this

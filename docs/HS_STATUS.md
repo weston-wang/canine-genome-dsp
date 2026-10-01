@@ -14,6 +14,34 @@ keyword.
 
 ---
 
+## The headline is now deterministic, not odds (2026-10-01, third pass)
+
+The user's objection: *"I don't want odds of achieving 10 years, the whole point about looking at all
+mechanisms and escapes is to not leave it to odds."* Correct, and not a presentational point. A
+probability is what you report when failure modes are **unenumerated**. Enumerating them converts
+the question into a decidable one. `deterministic_closure.py` decides it; `emergence.py` is demoted
+to a sensitivity statement and says so in code (`emergence_is_secondary()`).
+
+**Result — and it is harder than the odds made it sound:**
+
+| | Invaded parenchyma | Leptomeninges / CSF |
+|---|---|---|
+| Obtainable agents, systemic exposure | **0/10 routes closed**, worst **−0.049/day** | **0/10**, worst **−0.036/day** |
+| Kill-rate shortfall | **9.35×** | **2.89×** |
+| Same agents, local delivery + continuous | **10/10 closed**, **+0.225/day** | **10/10**, **+0.225/day** |
+
+Binding route in both compartments: the **drug-tolerant persister**. Seven conditions, **three met
+today**; outstanding C1, C2 (engineering), C5 (one stain), C7 (sponsor). C1 and C2 are the only
+blockers that are not somebody's decision to simply make.
+
+**Two defects in reporting odds, now recorded in code:**
+1. `p_reroute` (0.18–0.60) charged a reroute as **terminal**, while the escape ledger names a
+   successor agent for every reroute — that is what "closed" means. It double-counted.
+2. It smeared a structural failure into a bet: "0.27 in brain" reads like a gamble worth taking;
+   "every route open, margin −0.049/day" is the same fact stated honestly.
+
+---
+
 ## Re-grade against the user's stated bar (2026-10-01)
 
 The previous revision of this file ended with a "what remains open" list that graded against
