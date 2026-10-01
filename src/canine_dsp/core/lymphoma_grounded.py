@@ -82,6 +82,11 @@ AVAILABILITY = {
     "autologous T-cell add-back after chemotherapy": TRIAL,
     "panobinostat (HDAC inhibitor)": OFF_LABEL, "vorinostat (HDAC inhibitor)": OFF_LABEL,
     "bortezomib (proteasome inhibitor)": OFF_LABEL,
+    "high-dose thiotepa-based consolidation with autologous stem-cell rescue [human regimen]": PRECLINICAL,
+    "anti-CD20 monoclonal antibody, intraventricular/intrathecal [buildable route]": NONE,
+    "tandem CD19/CD20 CAR-T, intraventricular/intrathecal [buildable]": NONE,
+    "CD7-directed CAR-T, intraventricular/intrathecal [buildable]": NONE,
+    "CD5 + CD7 dual-target CAR-T, intraventricular/intrathecal [buildable]": NONE,
 }
 
 REVERSER = "P-gp / TGF-beta-inhibitor chemosensitiser"
@@ -326,7 +331,7 @@ def _apply_rt(a: Agent) -> Agent:
 def grounded_agents(compartment: str, immunophenotype: str = "B") -> tuple:
     base = [_ground(a, immunophenotype) for a in agents_for(compartment, immunophenotype)]
     new = tuple(U.apply_tags(a) for a in _new_agents(compartment, immunophenotype))
-    uni = U.universe_agents(compartment, immunophenotype)
+    uni = U.universe_agents(compartment, immunophenotype) + U.brain_agents(compartment, immunophenotype)
     return tuple(_apply_rt(a) for a in tuple(base) + new + uni)
 
 
@@ -374,6 +379,7 @@ def potency_grade(a: Agent) -> str:
 #: The time-resolved clock uses full in-course strength and lets the course END, which is how a
 #: consolidation can leave a lineage extinct even though its annual average looks small.
 COURSE_AGENTS = frozenset({"craniospinal radiotherapy", "total body irradiation + transplant",
+                           "high-dose thiotepa-based consolidation with autologous stem-cell rescue [human regimen]",
                            "half-body irradiation (low-dose-rate)"})
 
 

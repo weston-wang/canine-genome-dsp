@@ -195,3 +195,68 @@ def universe_agents(compartment: str, immunophenotype: str) -> tuple:
                           % (CD8_ADDBACK_TFS_RATIO, outcome_kill(CD8_ADDBACK_TFS_RATIO))),
         note="Polyclonal, so independent of CD20/CD19; needs MHC-I. Window limited to the 49-day persistence."))
     return tuple(out)
+
+
+# --------------------------------------------------------------------------------------------------------
+# Brain-closing candidates (docs/universe/SWEEP_regional.md and SWEEP_cnsregimens.md). Added after the widened
+# search left the brain open; each is a route or regimen with human data behind it, graded below. Brain-only agents
+# are returned for the CNS compartment only. NONE of these has a canine trial.
+# --------------------------------------------------------------------------------------------------------
+IT_ANTIBODY_DUTY = 2.0 / 7.0        # two intraventricular doses a week, ~1 day of CSF coverage per dose (DERIVED, popPK n=7)
+IT_CAR_T_DUTY_CONSERVATIVE = 1.0 / 7.0   # ~1 day of CSF persistence per weekly dose (NHP 24 h); humans up to >= 1 week
+THIOTEPA_PROGRAM_DAYS = 115.0
+THIOTEPA_PROGRAM_KILL = 0.13        # low end of the 0.13-0.21 /day outcome-implied range (SWEEP_cnsregimens s9)
+
+
+def brain_agents(compartment: str, immunophenotype: str, *, car_duty: float = IT_CAR_T_DUTY_CONSERVATIVE,
+                 thiotepa_nongated: bool = False) -> tuple:
+    from .lymphoma_catalogue import CNS
+    out = [Agent(
+        "high-dose thiotepa-based consolidation with autologous stem-cell rescue [human regimen]", Axis.CYTOTOXIC,
+        Layer.RECEPTOR, THIOTEPA_PROGRAM_KILL, 1.0, THIOTEPA_PROGRAM_DAYS / 365.0, True,
+        division_gated=not thiotepa_nongated, efflux_substrate=not thiotepa_nongated,
+        evidence="HUMAN primary and secondary CNS lymphoma: 3-year PFS 78% (carmustine-thiotepa ASCT, n=114, PMID "
+                 "42486133); 8-year event-free survival 67% (thiotepa-busulfan-cyclophosphamide ASCT, PMID 35834762); "
+                 "treatment-related mortality 3-8%. Late relapses to 21 years show quiescent clones survive in some.",
+        potency_evidence=("OUTCOME: whole-program effective brain kill 0.13-0.21 /day over ~115 days (Poisson cure model "
+                          "from three randomised comparisons, residual burden 1e6-1e10 assumed; brain access is inside "
+                          "the figure). It is a program average, not a per-agent potency, and says nothing about "
+                          "division-gating, so the default is conservative: division-gated and a pump substrate "
+                          "(thiotepa transporter status NOT FOUND). Canine thiotepa PK or transplant use NOT FOUND."),
+        note="A human regimen carried to the dog by transfer only; busulfan-autologous rescue is measured in 4 dogs "
+             "(PMID 10534062) and autologous HCT is routine at specialist centres. Obligatory marrow aplasia needs a graft.")]
+    if compartment == CNS:
+        out.append(Agent(
+            "anti-CD20 monoclonal antibody, intraventricular/intrathecal [buildable route]", Axis.IMMUNE_EFFECTOR,
+            Layer.RECEPTOR, 0.099, 1.0, IT_ANTIBODY_DUTY, False, division_gated=False, antigen_targets=("CD20",),
+            vulnerable_to=frozenset({"antigen_density", "macrophage_checkpoint", "adhesion_protection"}),
+            evidence="HUMAN: intraventricular rituximab 25 mg cleared CSF lymphoma cells within hours with complement "
+                     "activation in CSF (PMID 24190981); intravenous rituximab reaches CSF at ~0.1% of serum, so the "
+                     "systemic route's 0.002 is consistent. No dog or Ommaya-in-dog data found.",
+            potency_evidence="TRANSFER: the MEASURED canine B-cell depletion rate 0.099 /day (PMID 38662527) applied "
+                             "inside the CSF compartment (access 1.0, human CSF pharmacokinetics); duty 2/7 from a "
+                             "~1-day CSF coverage per dose. Kill of a quiescent progenitor is NOT measured. Deep "
+                             "parenchymal access is unmeasured, so this is a leptomeningeal/periventricular claim.",
+            note="Complement is limited in CSF (rat); CD20 loss defeats it."))
+        if immunophenotype == "B":
+            out.append(Agent(
+                "tandem CD19/CD20 CAR-T, intraventricular/intrathecal [buildable]", Axis.IMMUNE_EFFECTOR,
+                Layer.RECEPTOR, 0.12, 1.0, car_duty, False, division_gated=False, antigen_targets=("CD19", "CD20"),
+                resists_axis_independence=True, vulnerable_to=frozenset({"antigen_density"}),
+                evidence="HUMAN: intraventricular/intrathecal CAR-T in CNS tumours reaches CSF and gives parenchymal "
+                         "regressions in glioma (PMID 38454126, 41495049); IV CD19 CAR-T ORR 58-62% in CNS lymphoma "
+                         "(PMID 35167655, 36537908). No dog data.",
+                potency_evidence="TRANSFER-OUTCOME: the model's 0.12 /day CAR-T potency (itself an assumed in-vivo "
+                                 "kill) at CSF access 1.0; persistence in CSF 1 to 7+ days per dose, so the duty is "
+                                 "conservative 1/7. Neurotoxicity 30-100% any grade, grade >=3 up to ~30% in human solid CNS trials."))
+        else:
+            for nm, ants in (("CD7-directed CAR-T, intraventricular/intrathecal [buildable]", ("CD7",)),
+                             ("CD5 + CD7 dual-target CAR-T, intraventricular/intrathecal [buildable]", ("CD5", "CD7"))):
+                out.append(Agent(
+                    nm, Axis.IMMUNE_EFFECTOR, Layer.RECEPTOR, 0.12, 1.0, car_duty, False, division_gated=False,
+                    antigen_targets=ants, resists_axis_independence=True,
+                    vulnerable_to=frozenset({"antigen_density"}) if len(ants) == 1 else frozenset(),
+                    evidence="HUMAN: CD7 CAR-T MRD-negative remission 19/20 (PMID 35500125); intraventricular CAR-T "
+                             "reaches CSF (PMID 38454126). No dog product.",
+                    potency_evidence="TRANSFER-OUTCOME: 0.12 /day at CSF access 1.0; duty conservative 1/7 per weekly dose."))
+    return tuple(out)

@@ -337,3 +337,27 @@ PROFILES["bortezomib (proteasome inhibitor)"] = P(
     "thrombocytopenia 32%, peripheral neuropathy 38% (human); in dogs only 2 treated animals were reported "
     "(conjunctivitis at ~90% inhibition, PMID 23579193)",
     source="HUMAN label (docs/universe/SWEEP_pk.md s13).", secondary_axis=O.PERIPHERAL_NERVE, secondary_fraction=0.30, sustainable_days=84.0, hard_cap_days=None, reversible=True)
+
+PROFILES["high-dose thiotepa-based consolidation with autologous stem-cell rescue [human regimen]"] = P(
+    O.MARROW, 1.0, False,
+    "obligatory marrow aplasia needing autologous rescue; treatment-related mortality 3-8% in humans (infection, "
+    "pulmonary embolism); no excess neurotoxicity vs other consolidation",
+    source="HUMAN: PMID 42486133, 35834762, 22023529, 41108618. Canine thiotepa tolerance: NOT FOUND. Busulfan 40 mg/kg "
+           "caused severe CNS toxicity in dogs (PMID 10534062).",
+    secondary_axis=O.GI, secondary_fraction=0.30, sustainable_days=115.0, hard_cap_days=115.0, reversible=False)
+PROFILES["anti-CD20 monoclonal antibody, intraventricular/intrathecal [buildable route]"] = P(
+    O.CNS_LOCAL, 0.10, False,
+    "grade 3 neurotoxicity ~4-8% in children after intraventricular rituximab; chronic CSF-access hazards "
+    "(reservoir infection ~0.2% per device-year in one human series; 100x spread across series)",
+    source="HUMAN: PMID 24190981 and the regional-delivery sweep (docs/universe/SWEEP_regional.md s11). Dogs: NOT FOUND. "
+           "Window limited by access-device hazards, not by drug toxicity.",
+    sustainable_days=365.0, hard_cap_days=None, reversible=True)
+for _n in ("tandem CD19/CD20 CAR-T, intraventricular/intrathecal [buildable]",
+           "CD7-directed CAR-T, intraventricular/intrathecal [buildable]",
+           "CD5 + CD7 dual-target CAR-T, intraventricular/intrathecal [buildable]"):
+    PROFILES[_n] = P(
+        O.CNS_LOCAL, 0.30, False,
+        "neurotoxicity (ICANS-type) 30-100% any grade, grade >=3 about 0-30% in human intraventricular/intrathecal CAR-T "
+        "for CNS tumours (n=3-65 per trial); cytokine release",
+        source="HUMAN solid-CNS trials (docs/universe/SWEEP_regional.md s11); lymphoma intrathecal CAR-T: NOT FOUND; dogs: NOT FOUND.",
+        secondary_axis=O.IMMUNE_MEDIATED, secondary_fraction=0.30, sustainable_days=270.0, hard_cap_days=None, reversible=True)
