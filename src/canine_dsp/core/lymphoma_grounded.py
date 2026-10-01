@@ -40,6 +40,7 @@ from itertools import combinations
 
 from .. import lymphoma_grounded_inputs as gi
 from . import lymphoma_toxicity_profiles  # noqa: F401  (populates PROFILES)
+from . import lymphoma_universe as U
 from .lymphoma_catalogue import (BURDEN_CLINICALLY_OBVIOUS, BURDEN_EARLY_DETECTED, BURDEN_MRD, CELL_ACCESS,
                                  CNS, ESCAPES as V1_ESCAPES, GLUCOCORTICOID_ACCESS, GROWTH_PER_DAY,
                                  RADIATION_ACCESS, SMALL_MOLECULE_ACCESS, SYSTEMIC, agents_for,
@@ -77,6 +78,8 @@ AVAILABILITY = {
     "CD5 + CD7 dual-target CAR-T (canine binder) [buildable]": NONE,
     "P-gp / TGF-beta-inhibitor chemosensitiser": TRIAL,
     "CD5/CD52-directed cellular effector (T-lineage)": NONE,
+    "autologous tumour vaccine (APAVAC-type, HSPPC + hydroxyapatite)": TRIAL,
+    "autologous T-cell add-back after chemotherapy": TRIAL,
 }
 
 REVERSER = "P-gp / TGF-beta-inhibitor chemosensitiser"
@@ -102,6 +105,8 @@ CD7_LOSS = Escape("CD7 antigen loss (T-lineage CAR relapse)", Axis.IMMUNE_EFFECT
                   "CD7 CAR-T had lost CD7 (PMID 37020231); lineage-switch relapses also seen (PMID 42810712).",
                   note="Only meaningful for T-cell disease with a CD7-directed agent; a CD5+CD7 construct covers it.")
 GROUNDED_ESCAPES = tuple(V1_ESCAPES) + NEW_ESCAPES + (CD7_LOSS,)
+#: The 14 above PLUS the audit's escapes (core/lymphoma_universe.py). Closure claims must name which set they use.
+FULL_ESCAPES = GROUNDED_ESCAPES + U.UNIVERSE_ESCAPES
 PGP = next(e for e in V1_ESCAPES if "P-glycoprotein" in e.name)
 PERSISTER = next(e for e in V1_ESCAPES if not e.requires_division)
 
@@ -192,7 +197,7 @@ def _ground(a: Agent, immunophenotype: str) -> Agent:
         kw["note"] = ("Older catalogue text said no efficacious caninized anti-CD20 product is established; "
                       "two canine trials since show B-cell depletion and responses. The antibody's own "
                       "contribution is not isolated from the chemotherapy given with it.")
-    return replace(a, **kw)
+    return U.apply_tags(replace(a, **kw))
 
 
 def _new_agents(compartment: str, immunophenotype: str) -> tuple:
@@ -314,7 +319,9 @@ def _apply_rt(a: Agent) -> Agent:
 
 def grounded_agents(compartment: str, immunophenotype: str = "B") -> tuple:
     base = [_ground(a, immunophenotype) for a in agents_for(compartment, immunophenotype)]
-    return tuple(_apply_rt(a) for a in tuple(base) + _new_agents(compartment, immunophenotype))
+    new = tuple(U.apply_tags(a) for a in _new_agents(compartment, immunophenotype))
+    uni = U.universe_agents(compartment, immunophenotype)
+    return tuple(_apply_rt(a) for a in tuple(base) + new + uni)
 
 
 def available(agents, tier: str) -> tuple:
@@ -555,10 +562,15 @@ def search(compartment: str, immunophenotype: str = "B", tier: str = "off-label"
            burden: float = BURDEN_EARLY_DETECTED, max_n: int = MAX_COMBO,
            f=CYCLING_FRACTION_DEFAULT, r=RETAINED_TOLERANCE_DEFAULT,
            efflux_multiplier=gi.EFFLUX_CO_DOSE_MULTIPLIER_CANINE_PROXY, top: int = 8,
-           extra_agents=(), pool=None) -> dict:
+           extra_agents=(), pool=None, escape_set=None, require_all=False) -> dict:
     """Every combination of up to `max_n` agents that COVERS every escape, evaluated with toxicity
-    de-rating; the best by worst de-rated margin get the clock run on them."""
-    escapes = escapes_to_close(burden)
+    de-rating; the best by worst de-rated margin get the clock run on them.
+
+    `escape_set` defaults to the 14 `GROUNDED_ESCAPES`; pass `FULL_ESCAPES` for the audit-widened set.
+    `require_all=True` closes EVERY escape in the set whether or not it is likely to be present at this burden
+    (the strict reading of "closes every possibility"); the default keeps only those likely present."""
+    escapes = (tuple(escape_set or GROUNDED_ESCAPES) if require_all
+               else escapes_to_close(burden, tuple(escape_set or GROUNDED_ESCAPES)))
     if immunophenotype == "T":
         escapes = tuple(e for e in escapes if e.removes_antigen not in B_LINEAGE_ANTIGENS)
     pool = list(pool) if pool is not None else list(available(grounded_agents(compartment, immunophenotype), tier))

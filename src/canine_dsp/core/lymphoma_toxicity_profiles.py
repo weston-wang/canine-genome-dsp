@@ -304,3 +304,19 @@ def _check_no_gaps() -> None:
 
 
 _check_no_gaps()
+
+# ---- widened universe (core/lymphoma_universe.py) ---------------------------------------------------------
+PROFILES["autologous tumour vaccine (APAVAC-type, HSPPC + hydroxyapatite)"] = P(
+    O.IMMUNE_MEDIATED, 0.05, True,
+    "no adverse events recorded in 300 dogs; needs a surgical node excision at diagnosis (procedure risk not "
+    "counted here)",
+    source="Marconato et al., 300 dogs (PMID 31174615): 'no adverse events'. Follow-up with data reaches about 3 "
+           "years. Long-term autoimmunity: NOT FOUND.",
+    cumulative=False, sustainable_days=365.0, hard_cap_days=None, reversible=True)
+
+PROFILES["autologous T-cell add-back after chemotherapy"] = P(
+    O.IMMUNE_MEDIATED, 0.10, True,
+    "no complications reported in 8 infused dogs; requires leukapheresis/expansion at a commercial laboratory",
+    source="Mason et al., 8 dogs, cells persisted up to 49 d (PMID 22355761); infusions given without adverse events "
+           "in 10 transplanted dogs (PMID 34950726). Persistence is the limit, so the window is 49 d.",
+    cumulative=False, sustainable_days=49.0, hard_cap_days=None, reversible=True)
