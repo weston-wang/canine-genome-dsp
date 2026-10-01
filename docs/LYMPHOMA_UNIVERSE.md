@@ -157,3 +157,42 @@ Two further sweeps were run: regional (spinal-fluid) delivery (`docs/universe/SW
 3. Access of the CSF-delivered cells and antibody to the brain parenchyma, unmeasured; the evidence reaches the leptomeninges and perivascular spaces (canine neural lymphoma is meningeal, perivascular and periventricular, PMID 27511313, which favours the route) but not deep tissue, and intravascular lymphoma (PMID 36329600) cannot be reached from the CSF at all.
 4. Chronic CSF access in dogs for years (reservoir infection about 0.2% per device-year in one human series, 100-fold spread); no decade-scale data exists.
 5. CNS neurotoxicity from CAR-T within budget (30-100% any grade in human CNS trials, grade 3 or higher up to ~30%).
+
+
+## E. Human-grounded CAR-T inputs and the joint programs (2026-10-01; /goal: "keep going by more research or modeling to fully close every mechanism and escape then. I know car t has human results for CNS")
+
+**The user was right that human CNS CAR-T data exist, and they replace what had been assumed.** Two sweeps (`docs/universe/SWEEP_cart_human.md`,
+`SWEEP_cart_kill.md`) gave:
+
+| input | was | now | grade |
+|---|---|---|---|
+| CAR-T kill rate in vivo | 0.12 /day, ASSUMED | low 0.12 / **central 0.35** / high 1.1 | TRANSFER from human models (Kimmel 2021 PMID 33757357; Singh 2021 PMID 33565700; Kalos 2011) |
+| CAR-T brain access, IV route | 0.5, assumed | 0.5 (range 0.1-1.0) | OUTCOME / TRANSFER: CR in CNS lymphoma 47-57% vs 40-54% systemic (ratio ~1), durability about half; CSF:blood concentration ratio ~0.01-0.03 |
+| CSF-delivered CAR-T duty | 1/7, one monkey | low 0.15 / **central 0.4** / high 0.7 | derived from human CNS-tumour trials (each dose active 5-14 d; PMIDs 38454126, 39775044, 40451950) |
+| CAR-T on non-dividing cells | assumed not gated | not division-gated | TRANSFER (in vitro, mouse, primate; human CLL clearance at 0.1-1%/day cell turnover), no human G0 measurement |
+| neurotoxicity budgets | assumed | CNS_LOCAL 0.18 (0.10-0.30), immune-mediated 0.17 | MEASURED human, scales with burden, so the low end is used for early detection |
+| 5-10 year durability | unknown | ~30% of all treated LBCL, ~60% of responders, 92% 5-year OS if event-free at 2 years, no relapse after 5.4 years (n=38) | MEASURED / TRANSFER: supports "2 years disease-free implies 10 years" in humans, not proven in dogs |
+
+**Result at the central human-grounded inputs (kill 0.35 /day, CSF duty 0.4), every one of the 23 escapes required closed, toxicity charged on
+the UNION of the whole program, body and brain evaluated together, clock inside the evidence-limited windows (`src/canine_dsp/lymphoma_joint.py`):**
+
+| program | agents | body margin | brain margin | halved potency | any one agent removed |
+|---|---|---|---|---|---|
+| B-cell, 7 agents | anti-CD20 antibody, hydroxychloroquine, persistence-engineered canine-binder CAR-T, autologous tumour vaccine, panobinostat, continuous intrathecal cytarabine pump, CSF tandem CD19/CD20 CAR-T | +0.36 | +0.30 | **clears** | **clears** |
+| B-cell, 8 agents | the above with verdinexor and cytarabine CRI in place of panobinostat | +0.39 | +0.27 | clears | clears |
+| T-cell, 5 agents | hydroxychloroquine, intrathecal pump, CD7 CAR-T, CD5+CD7 dual CAR-T, verdinexor | +0.67 | +0.34 | **clears** | **clears** |
+| T-cell, 8 agents | the above with CSF CD7 and CD5+CD7 CAR-T and venetoclax | +0.43 | +0.37 | clears | clears |
+
+At the LOW inputs (kill 0.12 /day, duty 0.15) the B-cell programs do not clear and the T-cell 5-agent program clears but is not fault tolerant; at kill 0.12 and duty 0.4
+both clear but fail halving. So **the closure depends on the CAR-T kill rate reaching its central human value, which in dogs is set by expansion**: 0.12 /day needs about
+6.5e7 CAR-T cells, 4-90 times the doses given to dogs so far, and dog CAR-T has not yet shown efficacy (Mol Ther 2026, PMID 41376156).
+
+**Calibration against the human data.** A systemic CD20-directed CAR-T alone does NOT close the brain in the model (margin -0.09 /day; CD20 loss and antigen-low are
+uncovered), which agrees with the human result that CAR-T alone leaves 59% CNS relapse by 24 months (PMID 40400509) and that thiotepa-based transplant beat it (PFS HR 0.45, PMID 41490516).
+
+**What "closed" means here, and what is still outside it.**
+1. Closed = the model, with 23 escapes and the sound-grade agents, shows every lineage cleared inside the evidence windows, with margin to spare and fault tolerance, at the central human-transfer inputs. It is NOT an observation in a dog.
+2. Every program depends on agents that do not yet exist in dogs (a persistence-capable canine-binder CAR-T with expansion; the CSF CAR-T; the continuous spinal pump) and on trial-stage anti-CD20.
+3. Outside the model: unattributed multidrug resistance (E12), eye and testis, late second cancers (21% at 10 years in human CAR-T survivors), non-relapse mortality (18% at 10 years), parenchymal access.
+4. The tumour vaccine is not load-bearing: the 7-agent B-cell program still clears with it removed.
+5. A note on method: the search's clock stage evaluates only a subset of sets when more than 6000 cover every escape, so counts of "robust" sets from the search are lower bounds; the programs above were verified by direct evaluation.

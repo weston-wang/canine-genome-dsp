@@ -206,3 +206,12 @@ tests `tests/test_lymphoma_universe.py`.
 Accepted. The CAR-T brain inputs in the model were ASSUMED (CNS access 0.5, 0.12 /day, CSF persistence swept) although human CNS CAR-T data exist.
 Two sweeps launched to replace them with transferred human numbers: `docs/universe/SWEEP_cart_human.md` (CNS lymphoma/leukaemia outcomes, CSF CAR-T
 levels, durability, antigen escape) and `docs/universe/SWEEP_cart_kill.md` (in-vivo kill-rate derivation, dog translation, dosing duty).
+
+## Result of the /goal (2026-10-01): closed within the model at human-grounded central inputs -- supersedes the brain note above
+
+Details: `LYMPHOMA_UNIVERSE.md` section E; `src/canine_dsp/lymphoma_joint.py`; tests `tests/test_lymphoma_universe.py`.
+
+- **Within the 23-escape, sound-grade model**, B-cell (7 and 8 agents) and T-cell (5 and 8 agents) programs clear the body AND the brain together, toxicity charged on the union, with all potencies halved and with any one agent removed, at the central human-grounded CAR-T inputs (kill 0.35 /day, CSF duty 0.4).
+- **Fails at the low inputs** (kill 0.12, duty 0.15). The dog value is set by CAR-T expansion, not potency; dog CAR-T efficacy is not yet shown.
+- **Replaced assumptions:** CAR-T kill rate, brain access, CSF duty, neurotoxicity budgets and 5-10 year durability now come from human data (TRANSFER/OUTCOME/MEASURED).
+- **Still outside:** E12, eye/testis, second cancers, non-relapse mortality, parenchymal access, and the existence of the agents.

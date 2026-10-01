@@ -96,3 +96,12 @@ B_PROGRAMS = {
                                              "cytarabine CRI (q7d)", "continuous intrathecal",
                                              "tandem CD19/CD20 CAR-T, intra"),
 }
+
+T_PROGRAMS = {
+    "T-cell, 5 agents": ("hydroxychloroquine", "continuous intrathecal", "CD7-directed CAR-T (canine",
+                         "CD5 + CD7 dual-target CAR-T (c", "verdinexor"),
+    "T-cell, 8 agents with spinal-fluid CAR-T": ("hydroxychloroquine", "continuous intrathecal",
+                                                 "CD7-directed CAR-T (canine", "CD5 + CD7 dual-target CAR-T (c",
+                                                 "CD7-directed CAR-T, intra", "CD5 + CD7 dual-target CAR-T, intra",
+                                                 "verdinexor", "venetoclax"),
+}
