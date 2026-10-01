@@ -128,3 +128,32 @@ it needs a DLA-identical donor, and 7-55% of transplanted dogs die of the proced
 **Not yet done.** (1) PI3K-delta and flavopiridol kill rates (no canine IC50). (2) Anything outside the model:
 unattributed multidrug resistance (E12, which bounds every closure claim), eye and testis compartments, late second cancers.
 (4) A real answer on 10 years: no dog has 10-year follow-up; the longest transplant survivor is about 8 y.
+
+
+## D. Closing the brain (2026-10-01; the user: "So your goal isn't met yet, close the brain ones")
+
+**What was missing from the universe:** sanctuary-site delivery, the class named in rule 9 of `CLAUDE.md` and skipped in the first pass.
+Two further sweeps were run: regional (spinal-fluid) delivery (`docs/universe/SWEEP_regional.md`) and human brain-lymphoma regimens
+(`docs/universe/SWEEP_cnsregimens.md`). They added four candidates, all graded below; none has a dog trial.
+
+| candidate | status | grade and basis |
+|---|---|---|
+| anti-CD20 antibody given into the ventricles/CSF (B-cell) | IN MODEL (new, buildable route) | TRANSFER. Human intraventricular rituximab cleared CSF lymphoma cells within hours with CSF complement activation (PMID 24190981); CSF access 1.0 (systemic route 0.002); potency = the measured canine depletion rate 0.099 /day; duty 2/7 (about a day of CSF coverage per dose). Quiescent-progenitor kill NOT measured; deep-parenchyma access unmeasured |
+| tandem CD19/CD20 CAR-T into the CSF (B-cell); CD7 and CD5+CD7 CAR-T into the CSF (T-cell) | IN MODEL (new, buildable) | TRANSFER-OUTCOME. Intraventricular/intrathecal CAR-T reaches CSF in human CNS tumours; potency is the model's 0.12 /day (an assumed in-vivo kill); CSF persistence 1 to 7+ days per dose, so the duty is the swept unknown; neurotoxicity budget 0.30 |
+| high-dose thiotepa consolidation with autologous stem-cell rescue | IN MODEL (new, human regimen) | OUTCOME. Human CNS lymphoma: 3-year PFS 78% (n=114 transplanted), 8-year event-free 67%; implies an effective brain kill of 0.13-0.21 /day over ~115 days (program average; low end used). Default is conservative: division-gated and a pump substrate (transporter status not found). No canine thiotepa data |
+| intrathecal glucocorticoid; depot cytarabine (DepoCyt) | EVALUATED, EXCLUDED | glucocorticoid defeated by receptor loss (E1, measured in dogs); depot cytarabine is division-gated and dCK-dependent (E2). Neither can close the quiescent-progenitor escape however well delivered |
+| lenalidomide, BTK inhibitors, intrathecal chemotherapy, whole-brain radiotherapy | EVALUATED, EXCLUDED as closers | responses last months; whole-brain radiotherapy has durable human data but real neurotoxicity (cognitive decline 64% at 8 y in the transplant comparison) and radiation is already in the model |
+
+**Result (model, sound grades, every one of the 23 escapes required closed, up to 4 agents).**
+- **B-cell brain:** closes, conditional on the CSF CAR-T being active in the CSF for at least about 35% of each dosing interval (minimum duty 0.35, found by bisection). At the conservative 1/7 duty exactly one 4-agent set clears, with margin +0.015 /day and last lineage gone by day 178: the continuous intrathecal cytarabine pump + a persistence-engineered systemic CAR-T + the CSF antibody + the CSF tandem CAR-T. At duty 0.5: 29 sets (smallest 3 agents: pump + systemic CAR-T + CSF tandem CAR-T; best margin +0.115 /day, clear by day 112). At duty 1.0: 403 sets, down to 2 agents (pump + CSF tandem CAR-T).
+- **T-cell brain:** closes under the same condition (minimum duty 0.35). At the conservative 1/7 duty nothing clears. At 0.5: 139 sets; at 1.0: 1,240.
+- **Thiotepa route:** if thiotepa is taken as acting on dormant cells and not being pumped out (the implication of its human cure plateau, but not shown), a 3-agent brain set that does not need the CSF CAR-T clears: pump + systemic CAR-T + thiotepa (28 B-cell sets, 24 T-cell sets). With the conservative default thiotepa adds nothing.
+- **Fault tolerance: none.** Every clearing set fails with all potencies halved and fails with any one agent removed, at every duty tested.
+- **What every clearing set depends on that does not exist:** the CSF CAR-T (or the systemic persistence-engineered/CD7 CAR-T), and the continuous intrathecal pump. The CAR-T potency 0.12 /day is itself an assumed in-vivo kill. The weakest escape in every best set is E2 (loss of the enzyme that activates cytarabine), carried by the other agents.
+
+**So the brain is closed in the model only conditionally.** The conditions, each of which is a measurement a trial could make:
+1. CAR-T persistence in the CSF of at least about 2.5 days out of every 7 (human intrathecal cells last 1 to 7+ days; the one monkey measurement is 24 hours).
+2. A CAR-T kill rate in vivo of about 0.12 /day, now assumed.
+3. Access of the CSF-delivered cells and antibody to the brain parenchyma, unmeasured; the evidence reaches the leptomeninges and perivascular spaces (canine neural lymphoma is meningeal, perivascular and periventricular, PMID 27511313, which favours the route) but not deep tissue, and intravascular lymphoma (PMID 36329600) cannot be reached from the CSF at all.
+4. Chronic CSF access in dogs for years (reservoir infection about 0.2% per device-year in one human series, 100-fold spread); no decade-scale data exists.
+5. CNS neurotoxicity from CAR-T within budget (30-100% any grade in human CNS trials, grade 3 or higher up to ~30%).

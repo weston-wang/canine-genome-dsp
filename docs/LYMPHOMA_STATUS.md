@@ -186,3 +186,17 @@ Full tables: `LYMPHOMA_UNIVERSE.md`; sweep reports: `docs/universe/SWEEP_*.md`; 
   not change. PI3K-delta and flavopiridol have no canine IC50, so no kill rate (`docs/universe/SWEEP_pk.md`).
 - **Still open:** E12 unattributed
   resistance, eye/testis, second cancers sit outside the model; no 10-year dog data.
+
+## Brain closure attempt (2026-10-01; user: "So your goal isn't met yet, close the brain ones")
+
+Details: `LYMPHOMA_UNIVERSE.md` section D; sweeps `docs/universe/SWEEP_regional.md`, `SWEEP_cnsregimens.md`; code `core/lymphoma_universe.brain_agents`;
+tests `tests/test_lymphoma_universe.py`.
+
+- **Status: closed in the model only conditionally, not robustly.** With CSF-delivered CAR-T (and antibody), the brain clears every one of the 23 escapes
+  for B-cell and T-cell disease IF the CSF CAR-T is active for >= ~35% of each dosing interval. At the conservative one-seventh the B-cell brain
+  barely clears (margin +0.015, day 178, one 4-agent set) and the T-cell brain does not. Every clearing set fails with halved potencies or one agent removed.
+- **Depends on agents that do not exist** (CSF CAR-T, persistence-engineered/CD7 CAR-T, the intrathecal pump) and on an assumed CAR-T kill (0.12 /day).
+- **Thiotepa-based consolidation** (human 8-year event-free 67%) is in the model as an OUTCOME program (0.13 /day); it closes the brain without the CSF CAR-T only
+  if it is accepted as acting on dormant cells and not pumped out, which the data do not show.
+- **Measurements that would settle it:** CAR-T persistence in dog CSF; in-vivo CAR-T kill; parenchymal access; chronic reservoir safety in dogs; thiotepa
+  transporter status and dormant-cell kill.

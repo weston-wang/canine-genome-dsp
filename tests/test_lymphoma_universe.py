@@ -94,3 +94,53 @@ def test_antiPD1_is_regraded_measured_negative():
     assert a.potency == 0.0
     assert G.potency_grade(a) == "MEASURED-NEGATIVE"
     assert a not in G.sound_pool([a])
+
+
+# ---- brain-closing candidates -------------------------------------------------------------------------------
+from dataclasses import replace  # noqa: E402
+
+_IT = "intraventricular/intrathecal"
+
+
+def _brain_set(ip, names, duty):
+    pool = G.grounded_agents(CNS, ip)
+    out = []
+    for n in names:
+        a = next(a for a in pool if a.name.startswith(n))
+        if _IT in a.name and "CAR-T" in a.name:
+            a = replace(a, duty=duty)
+        out.append(a)
+    return out
+
+
+def _brain_esc(ip):
+    return tuple(e for e in G.FULL_ESCAPES
+                 if not (ip == "T" and e.removes_antigen in ("CD19", "CD20"))
+                 and not (ip == "B" and e.removes_antigen == "CD7"))
+
+
+def test_spinal_fluid_antibody_is_b_cell_only_and_brain_only():
+    assert not any(_IT in a.name for a in G.grounded_agents(SYSTEMIC, "B"))
+    assert not any("anti-CD20" in a.name and _IT in a.name for a in G.grounded_agents(CNS, "T"))
+    b = [a for a in G.grounded_agents(CNS, "B") if _IT in a.name]
+    assert {G.potency_grade(a) for a in b} == {"TRANSFER", "TRANSFER-OUTCOME"}
+
+
+def test_brain_closes_in_the_model_only_if_the_spinal_fluid_cart_lasts_long_enough():
+    """The result the brain claim rests on: closure needs the intrathecal CAR-T active in the CSF for roughly a third or
+    more of each dosing interval. At the conservative one-seventh it does not clear."""
+    for ip, names in (("B", ("hydroxychloroquine", "continuous intrathecal", "persistence-engineered",
+                             "tandem CD19/CD20 CAR-T, intra")),
+                      ("T", ("hydroxychloroquine", "continuous intrathecal", "CD7-directed CAR-T (canine",
+                             "CD7-directed CAR-T, intra"))):
+        esc = _brain_esc(ip)
+        assert not G.clears(_brain_set(ip, names, 1 / 7), esc, compartment=CNS)
+        assert G.clears(_brain_set(ip, names, 1.0), esc, compartment=CNS)
+        # and it is NOT robust: halving every potency breaks it even at full duty
+        assert not G.clears(G.discounted(_brain_set(ip, names, 1.0), 0.5), esc, compartment=CNS)
+
+
+def test_thiotepa_is_conservative_by_default():
+    t = next(a for a in G.grounded_agents(CNS, "B") if a.name.startswith("high-dose thiotepa"))
+    assert t.division_gated and t.efflux_substrate and G.potency_grade(t) == "OUTCOME"
+    assert "high-dose thiotepa-based consolidation with autologous stem-cell rescue [human regimen]" in G.COURSE_AGENTS
