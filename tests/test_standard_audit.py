@@ -42,3 +42,21 @@ def test_statement_reports_both_counts():
     s = sa.statement()
     assert "PASS" in s
     assert "wrongly reported" in s.lower() or "Wrongly reported" in s
+
+
+def test_nothing_fails_the_stated_bar_any_more():
+    """The goal state: every live input backed by data, a written transfer, or a derivation."""
+    assert sa.failing() == []
+
+
+def test_no_live_scenario_uses_an_assumed_parameter():
+    """The fallbacks may remain in code, but no tier/site combination in the grid may reach them."""
+    from canine_dsp import emergence as em, maintenance_durability as md
+    from canine_dsp.core.evidence import Provenance
+
+    for tier in md.TIERS:
+        assert tier.pkpd_key is not None, tier.genotype
+        for site in md.SITES:
+            p = em.reach_fail_param(site.name, tier.pkpd_key)
+            assert p.provenance is not Provenance.ASSUMED, (tier.genotype, site.name)
+        assert em.reroute_param(tier.lock.name).provenance is not Provenance.ASSUMED

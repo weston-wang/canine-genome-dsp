@@ -116,10 +116,23 @@ TIERS: tuple[GenotypeTier, ...] = (
                  Lock.LOCKED, "tng908", "PRMT5 inhibitor"),
     GenotypeTier("MAPK driver (SHP2/KRAS)", "~59%", "MEK inhibitor (mirdametinib)",
                  Lock.REROUTABLE, "cobimetinib", "mirdametinib"),
-    GenotypeTier("PTEN deleted", "minority", "PI3K inhibitor (paxalisib)",
-                 Lock.DEPENDENCY, None, "paxalisib"),
-    GenotypeTier("CDKN2A deleted, RB1 intact", "minority", "CDK4/6 inhibitor (abemaciclib)",
-                 Lock.DEPENDENCY, None, "abemaciclib"),
+    # pkpd_key was None for both dependency tiers until 2026-10, which forced their site penetration
+    # terms onto flat ordinal fallbacks. Both now have graded entries: duvelisib's potency is
+    # MEASURED in canine HS (the first canine-HS figure on the PI3K axis, replacing the
+    # hemangiosarcoma transfer), and abemaciclib's is a written transfer commensurable with the
+    # measured human brain-tissue multiple. See pkpd.PARAMS for the limits on each.
+    GenotypeTier("PTEN deleted", "minority",
+                 "PI3K inhibitor -- duvelisib (PI3K-delta/gamma), median IC50 287 nM MEASURED in the "
+                 "responsive canine-HS subgroup and sparing normal PBMC; paxalisib retained as the "
+                 "brain-penetrant alternative. NOTE: the screen stratified by EXPRESSION subgroup, "
+                 "not PTEN status, so routing this tier on PTEN deletion is an inference beyond it",
+                 Lock.DEPENDENCY, "duvelisib", "paxalisib"),
+    GenotypeTier("CDKN2A deleted, RB1 intact", "minority",
+                 "CDK4/6 inhibitor (abemaciclib). Closes the EXTRA-AXIAL mass on measured human "
+                 "brain-tumour tissue exposure; does NOT close invaded parenchyma behind an intact "
+                 "barrier, where rodent unbound ratios give only 0.07-0.24x the CDK6 bar -- local "
+                 "delivery is still required there",
+                 Lock.DEPENDENCY, "abemaciclib", "abemaciclib"),
     GenotypeTier("None targetable", "residual",
                  "immune surveillance + cycled cytotoxic. NOT INDEPENDENT OF THE MTAP TIER: an "
                  "MTAP-null cell exports methylthioadenosine, which suppresses T-cell function and "
@@ -130,7 +143,7 @@ TIERS: tuple[GenotypeTier, ...] = (
                  "(escape_audit.A16). Lean on the cycled cytotoxic, not the immune arm, for those "
                  "tumours; MAT2A inhibition is directionally favourable here because it lowers SAM "
                  "and reduces MTA accumulation, but that is mechanism, not canine data",
-                 Lock.FLOOR, None, "lomustine"),
+                 Lock.FLOOR, "vincristine", "lomustine"),
 )
 
 SITES: tuple[Site, ...] = (
@@ -386,14 +399,24 @@ def durability(tier: GenotypeTier, site: Site) -> Durability:
                               "(see csf_answer())")
         return Durability(tier, site, None, None, Verdict.NOT_REACHED,
                           "drug saturation of this compartment is unmeasured; no margin computable")
+    # The FLOOR tier is a STRATEGY (immune surveillance + a cycled cytotoxic), not a single
+    # continuously-dosed anchor, so its verdict is decided by its lock kind and NOT by whether a
+    # potency figure happens to exist. It acquired a pkpd entry in 2026-10 purely so its site
+    # penetration term could be derived rather than falling back to a flat prior; that must not
+    # promote it to a dependency hold. Keying this branch on pkpd_key rather than on Lock.FLOOR was
+    # a real bug, caught by test_dependency_and_floor_tiers_still_resolve_without_pkpd.
+    if tier.lock is Lock.FLOOR:
+        return Durability(tier, site, None, None, Verdict.FLOOR,
+                          "immune surveillance + cycled cytotoxic; a strategy, not a single-agent "
+                          "anchor -- no case is left with nothing, but this is the weakest tier. The "
+                          "cycled schedule is why no continuous margin is quoted: vincristine's "
+                          "canine distribution half-life is 21.5 min, so average exposure sits far "
+                          "below the peak pkpd carries (see pkpd.PARAMS['vincristine'])")
     if tier.pkpd_key is None:
         # No measured IC50+Cmax to derive a margin -- defer to the repo's genotype tree, which
         # already resolves every tier (the answer the repo carries). Still resolved, just not
-        # pkpd-quantified.
-        if tier.lock is Lock.FLOOR:
-            return Durability(tier, site, None, None, Verdict.FLOOR,
-                              "immune surveillance + cycled chemo; a strategy, not a single-agent "
-                              "anchor -- no case is left with nothing, but this is the weakest tier")
+        # pkpd-quantified. As of 2026-10 every tier has an entry, so this path is unreached by the
+        # live grid; it is kept for tiers added in future.
         return Durability(tier, site, None, None, Verdict.DEPENDENCY_HOLD,
                           "matched dependency anchor from the genotype tree; strong but reroutable "
                           "via known resistance, and its per-day kill is not yet pkpd-derived "

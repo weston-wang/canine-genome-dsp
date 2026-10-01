@@ -75,17 +75,74 @@ the early four-cell analysis had derived by hand.
 | MAPK majority, no surveillance | 0.59 [0.27, 0.83] | 0.59 | **0.27** | 0.37 |
 | MAPK majority, with detect-and-switch | **0.87** [0.62, 0.97] | — | — | — |
 
-### What is still genuinely open under the stated bar
+### Both remaining items are now closed (2026-10-01, second pass)
 
-Two things, both failures of basis rather than of demonstration:
+**`standard_audit.failing()` returns `[]`. 17 of 17 live inputs pass the stated bar, and no live
+scenario reaches an ASSUMED parameter** (enforced by `test_no_live_scenario_uses_an_assumed_parameter`).
 
-1. **The dependency and floor tiers (PTEN, CDKN2A, no-target) have no measured IC50**, so their site
-   terms still fall back to the flat ordinal priors. Fixable the same way as soon as a potency for
-   those agents is transferred in writing — the 2026 duvelisib screen supplies a canine-HS figure
-   for the PI3K axis and would close the PTEN tier.
-2. **The reroute priors are labelled ASSUMED in code while carrying written sources** — a labelling
-   lag, not a missing basis. Cosmetic, but it is exactly the kind of mislabel that caused this
-   whole confusion.
+**1. The dependency and floor tiers now have graded PK/PD entries**, so their site terms derive
+instead of falling back:
+
+| Tier | Agent | IC50 | Exposure | Brain headroom |
+|---|---|---|---|---|
+| PTEN | **duvelisib** | **287 nM MEASURED in canine HS** (PMID 42129963) | 3598 nM, human label transfer | 1.5× |
+| CDKN2A/RB1-intact | **abemaciclib** | 10 nM (CDK6 enzymatic, transfer) | 588 nM, human label transfer | **6.9×** |
+| Floor | **vincristine** | **3.26 nM MEASURED in canine HS** (PMID 25715778) | **47.8 nM DERIVED from canine PK** (PMID 25649934) | 1.7× |
+
+The duvelisib entry retires the project's most-criticised provenance error: PI3K potencies had been
+borrowed from canine *hemangiosarcoma*. There is now a canine-HS figure on that axis. The
+vincristine entry is the only one in the project where potency **and** exposure are both canine.
+
+Brain headroom across all five tiers — PRMT5i class 11.7×, abemaciclib 6.9×, vincristine 1.7×,
+duvelisib 1.5×, cobimetinib 0.5× — reproduces the hand-derived site split and now ranks the arms.
+
+**2. The reroute priors are graded for what stands behind them** (`_REROUTE_PROVENANCE`): LOCKED,
+REROUTABLE and DEPENDENCY as TRANSFERRED (documented human resistance mechanisms, with the CDK4/6
+routes now named as RB1 loss and cyclin E1–CDK2 and enumerated as `escape_audit.A15`); FLOOR as
+DERIVED from the cycled schedule plus the MTA immune finding. None is MEASURED, because a ten-year
+reroute probability has never been measured in any species.
+
+### A correction this pass forced, and it matters
+
+Grounding abemaciclib exposed an **overstatement in section A below**. The measured 96× (CDK4) /
+19× (CDK6) tissue multiple comes from resected human **brain metastases** — lesions with a
+**disrupted** barrier. It therefore speaks to the **extra-axial, blood-side mass**, which is the bulk
+of this tumour, and **not** to cells behind an intact barrier. For invaded parenchyma the governing
+figures are the rodent unbound ratios: Kp,uu 0.03–0.11 on 21.8 nM unbound plasma gives 0.65–2.4 nM,
+i.e. **0.07–0.24× the CDK6 bar — it does not close there.**
+
+So "lead the brain with abemaciclib" stands for the extra-axial mass and **does not remove the need
+for local delivery in invaded parenchyma**. No agent in the catalogue does. Recorded in
+`pkpd.PARAMS['abemaciclib']` and tested.
+
+### A real bug this pass caught
+
+Giving the floor tier a PK/PD key flipped its verdict from FLOOR to DEPENDENCY_HOLD, because
+`durability()` branched on *whether a potency existed* rather than on the lock kind. The floor tier
+is a strategy (immune surveillance + a cycled cytotoxic), not a continuously-dosed anchor, so its
+verdict must key on `Lock.FLOOR`. Fixed; the pre-existing test caught it.
+
+### Updated durability, all five tiers derived (P = no second primary over 10 y, 90% CI)
+
+| Tier | Lung | Brain, local | Brain, systemic | CSF |
+|---|---|---|---|---|
+| MTAP (genotype-anchored) | **0.77** [0.50, 0.92] | 0.77 | **0.76** | 0.43 |
+| CDKN2A / RB1-intact | 0.64 | 0.64 | **0.61** | 0.39 |
+| PTEN | 0.64 | 0.64 | 0.42 | 0.39 |
+| MAPK majority (no surveillance) | 0.59 | 0.59 | **0.27** | 0.37 |
+| MAPK majority (detect-and-switch) | **0.87** [0.62, 0.97] | — | — | — |
+| Floor (no target) | 0.39 | 0.39 | 0.32 | 0.29 |
+
+The CDKN2A tier is now the **second-strongest brain tier**, which is what section A argued on
+evidence grounds and the model now reproduces independently.
+
+### What is left — uncertainty, not missing basis
+
+Nothing fails the bar. What remains is **width**, which is a different thing: Λ (the second-primary
+rate) still carries 50–90% of the variance in every scenario, so the highest-value study remains an
+observational cohort of cleared, predisposed dogs rather than any drug experiment. And the MTAP
+stain remains a **priced conditional gate** on the strongest tier — not a gap, but the one cheap
+test that would move the most.
 
 ---
 

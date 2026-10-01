@@ -232,22 +232,54 @@ GRADES: tuple[InputGrade, ...] = (
     InputGrade(
         "reroute probabilities per lock kind", "emergence._REROUTE_PRIORS",
         Provenance.TRANSFERRED, Verdict.PASSES,
-        "Each carries a written source: the LOCKED prior was raised from an indefensible 0.02 to "
-        "0.18 on documented PRMT5i resistance via MAPK reprogramming, with collateral MEK "
-        "sensitivity as the second line; REROUTABLE rests on human targeted-adjuvant recurrence. "
-        "Ordinal priors with written bases, which the bar permits. Still labelled ASSUMED in code -- "
-        "a labelling lag, not a missing basis.",
+        "Each carries a written source AND is now graded for it (_REROUTE_PROVENANCE), closing the "
+        "labelling lag: LOCKED raised from an indefensible 0.02 to 0.18 on documented PRMT5i "
+        "resistance via MAPK reprogramming with collateral MEK sensitivity as the second line; "
+        "REROUTABLE on human targeted-adjuvant recurrence; DEPENDENCY on the documented CDK4/6 "
+        "mechanisms (RB1 loss, cyclin E1-CDK2) now enumerated as escape_audit.A15; FLOOR DERIVED "
+        "from the cycled schedule plus the MTA immune finding. None is MEASURED, because a 10-year "
+        "reroute probability has never been measured in any species -- which the bar permits.",
     ),
     InputGrade(
-        "per-site penetration priors (lung, brain-local, brain-systemic)", "emergence.reach_fail_param",
-        Provenance.ASSUMED, Verdict.FAILS_NO_BASIS,
-        "THE REMAINING GENUINE GAP. Unlike the CSF term, these three are still point priors with a "
-        "one-line rationale and no arithmetic behind them: 0.05 lung, 0.08 brain-local, 0.30 "
-        "brain-systemic. They are ordinally sensible and the brain-systemic value is deliberately "
-        "pessimistic, but no derivation connects them to a measured exposure the way the CSF term is "
-        "now connected. Fixable the same way -- decompose each into the measured access figure for "
-        "the compartment (core.catalogue has them: 0.021 parenchyma, 0.005 leptomeningeal, both "
-        "MEASURED for chlorambucil) times the drug-specific efflux term.",
+        "per-site penetration (all four sites, all five tiers)", "emergence.reach_fail_param",
+        Provenance.DERIVED, Verdict.PASSES,
+        "WAS the remaining gap -- three flat point priors (0.05 lung, 0.08 brain-local, 0.30 "
+        "brain-systemic) with no arithmetic. Now DERIVED per site AND per tier drug: "
+        "P(available access < the access min_access_to_close() requires), using the MEASURED "
+        "compartment figures in core.catalogue (0.021 parenchyma, chlorambucil, PMC6128565). The "
+        "fallbacks remain in code but NO LIVE SCENARIO USES THEM -- all five tiers now have a graded "
+        "pkpd entry. Brain headroom falls out as 11.7x PRMT5i class, 6.9x abemaciclib, 1.7x "
+        "vincristine, 1.5x duvelisib, 0.5x cobimetinib, reproducing the hand-derived site split.",
+        previously_reported_as_gap=True,
+    ),
+    InputGrade(
+        "PI3K-axis potency (PTEN tier)", "pkpd.PARAMS['duvelisib']",
+        Provenance.MEASURED, Verdict.PASSES,
+        "WAS the project's most-criticised transfer -- PI3K IC50s borrowed from canine "
+        "HEMANGIOSARCOMA, catalogued in core.evidence as a provenance error. Now MEASURED IN CANINE "
+        "HS: duvelisib median IC50 287 nM in the responsive expression subgroup, >5 uM in the other "
+        "and 7.46 uM in normal PBMC (PMID 42129963). Exposure is a written human-label transfer. "
+        "Residual inference, stated: the screen stratified by expression subgroup, not PTEN status.",
+    ),
+    InputGrade(
+        "CDK4/6 potency and exposure (CDKN2A tier)", "pkpd.PARAMS['abemaciclib']",
+        Provenance.TRANSFERRED, Verdict.PASSES,
+        "CDK6 enzymatic IC50 10 nM paired with the human-label steady-state Cmax, deliberately "
+        "commensurable because the measured brain-tissue multiple is quoted against that same IC50. "
+        "Canine-HS dependency itself is MEASURED (CDKN2A down, Rb preserved, class growth inhibition "
+        "in all canine histiocytic lines; PMID 35278028). Carries a correction: the 96x/19x tissue "
+        "multiple is from brain METASTASES with a disrupted barrier, so it covers the extra-axial "
+        "mass, NOT invaded parenchyma, where the rodent unbound ratios give only 0.07-0.24x the "
+        "CDK6 bar. Parent-only, so conservative against the active metabolites.",
+    ),
+    InputGrade(
+        "floor-tier cytotoxic potency and exposure", "pkpd.PARAMS['vincristine']",
+        Provenance.DERIVED, Verdict.PASSES,
+        "The only entry whose potency AND exposure are both canine: IC50 measured in 4 canine HS "
+        "lines (PMID 25715778), Cmax DERIVED from measured canine PK (0.7 mg/m2, Vd 0.660 l/kg, "
+        "PMID 25649934) rather than transferred from humans. The derivation's own limit is recorded: "
+        "C0 from dose/Vd is a peak on a 21.5-min distribution half-life, which is exactly why the "
+        "floor tier is cycled and graded weakest.",
     ),
     InputGrade(
         "PRMT5-inhibitor canine Cmax", "pkpd.PARAMS['tng908'].cmax_nM",

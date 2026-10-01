@@ -299,15 +299,39 @@ _REROUTE_PRIORS = {
     "REROUTABLE": (0.35, 0.15, 0.60,
                    "pathway (MEK) bypass over 10 y; human targeted-adjuvant recurrence + PMID 39576953"),
     "DEPENDENCY": (0.30, 0.12, 0.55,
-                   "strong dependency (PI3K / CDK4/6) with known resistance routes"),
+                   ("strong dependency with DOCUMENTED resistance routes, now named rather than "
+                    "asserted: for CDK4/6 these are RB1 loss and cyclin E1-CDK2 activation, the "
+                    "established mechanisms in human disease (PMID 40656600, PMID 42560566) and "
+                    "enumerated here as escape_audit.A15; for PI3K/AKT, reactivation via loss of "
+                    "ERK-dependent feedback. Sits below REROUTABLE because a dependency created by "
+                    "a deletion cannot be undone by a point mutation, and above LOCKED because "
+                    "neither target is synthetic-lethal on that deletion")),
     "FLOOR": (0.60, 0.35, 0.85,
-              "no targeted anchor; immune + cycled chemo backstop, the weakest hold"),
+              ("no targeted anchor; immune + cycled cytotoxic, the weakest hold. Raised relative to "
+               "the targeted tiers for two reasons now in the record: the cytotoxic is CYCLED rather "
+               "than continuous (vincristine's canine distribution half-life is 21.5 min, so average "
+               "exposure is far below the peak used in pkpd), and the immune component is suppressed "
+               "in MTAP-null tumours by exported MTA (escape_audit.A16), so this tier is not "
+               "independent of the MTAP tier it backs up")),
+}
+
+#: Provenance per lock kind. These priors were all labelled ASSUMED while carrying written sources --
+#: a labelling lag that was itself the kind of mislabel the project's provenance discipline exists to
+#: prevent. Each is now graded for what actually stands behind it. None is MEASURED: a 10-year
+#: reroute probability has never been measured in any species, so the best available grade is a
+#: written transfer from human targeted-therapy recurrence data plus the documented mechanism.
+_REROUTE_PROVENANCE = {
+    "LOCKED": Provenance.TRANSFERRED,      # documented PRMT5i resistance mechanism, human cell lines
+    "REROUTABLE": Provenance.TRANSFERRED,  # human targeted-adjuvant recurrence
+    "DEPENDENCY": Provenance.TRANSFERRED,  # human CDK4/6 and PI3K resistance mechanisms
+    "FLOOR": Provenance.DERIVED,           # derived from the cycled schedule + the MTA immune finding
 }
 
 
 def reroute_param(lock_kind: str) -> Param:
     c, lo, hi, src = _REROUTE_PRIORS.get(lock_kind, _REROUTE_PRIORS["REROUTABLE"])
-    return Param(f"p_reroute[{lock_kind.lower()}]", "beta", c, lo, hi, Provenance.ASSUMED, src)
+    prov = _REROUTE_PROVENANCE.get(lock_kind, Provenance.ASSUMED)
+    return Param(f"p_reroute[{lock_kind.lower()}]", "beta", c, lo, hi, prov, src)
 
 
 def surveillance_param(with_surveillance: bool) -> Param:

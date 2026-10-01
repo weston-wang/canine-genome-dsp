@@ -106,3 +106,31 @@ def test_dosing_workaround_reports_all_three_levers():
     w = pkpd.dosing_workaround()
     assert set(w) >= {"lever_1_maintenance_bar_is_lower", "lever_2_individualise_dose_TDM",
                       "lever_3_synergistic_combination", "bottom_line"}
+
+
+def test_every_tier_has_a_graded_pkpd_entry():
+    """A tier with no PK/PD entry falls back to a flat ordinal site prior, which fails the bar."""
+    from canine_dsp import maintenance_durability as md, pkpd as pk
+
+    for tier in md.TIERS:
+        assert tier.pkpd_key in pk.PARAMS, tier.genotype
+
+
+def test_no_pkpd_entry_asserts_closure_on_an_assumed_exposure():
+    """An ASSUMED Cmax may only be used to expose an access threshold, never to claim a margin."""
+    from canine_dsp import pkpd as pk
+    from canine_dsp.core.evidence import Provenance
+
+    for key, d in pk.PARAMS.items():
+        if d.cmax_provenance is Provenance.ASSUMED:
+            assert "min_access_to_close" in d.note, key
+
+
+def test_abemaciclib_records_the_metastasis_versus_intact_barrier_distinction():
+    """The 96x/19x tissue multiple is from brain metastases with a disrupted barrier. Using it for
+    invaded parenchyma would be the exact class of provenance error core.evidence exists to stop."""
+    from canine_dsp import pkpd as pk
+
+    note = pk.PARAMS["abemaciclib"].note
+    assert "METASTAS" in note.upper()
+    assert "intact" in note.lower()

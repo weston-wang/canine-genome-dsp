@@ -157,6 +157,76 @@ PARAMS: dict[str, DrugPKPD] = {
              "(PMID 42190431); the brain-penetrant successor TNG456 (PMID 42150143) is the CNS "
              "anchor. Canine Cmax remains unpublished for either.",
     ),
+    # PI3K/AKT inhibitor for the PTEN-deleted tier. Added so that tier stops falling back to a flat
+    # ordinal site prior. IC50 is MEASURED IN CANINE HS -- the 2026 compound screen is the first
+    # canine-HS potency figure on this axis, replacing the hemangiosarcoma transfer the project had
+    # been criticised for. Cmax is a written human-label transfer.
+    "duvelisib": DrugPKPD(
+        name="duvelisib (PI3K-delta/gamma inhibitor; PTEN-deleted tier)",
+        ic50_nM=287.0,            # median IC50 in the responsive canine-HS expression subgroup
+        cmax_nM=3598.0,           # human label 1.5 ug/mL steady state at 25 mg BID; MW 416.9
+        ic50_provenance=Provenance.MEASURED,
+        cmax_provenance=Provenance.TRANSFERRED,
+        source="IC50: Vet Comp Oncol 2026;24(3):554-567, PMID 42129963 -- 1824-compound screen "
+               "across 10 canine HS lines; duvelisib median IC50 287 nM in Group A, >5 uM in Group "
+               "B, 7.46 uM in normal PBMC, acting through reduced phospho-Akt. Cmax: COPIKTRA US "
+               "label, geometric mean steady-state Cmax 1.5 ug/mL (CV 64%) at 25 mg BID.",
+        note="The potency is MEASURED in the right species AND disease, which is stronger than any "
+             "other targeted agent here except cobimetinib. Two honest limits: the stratifier is an "
+             "EXPRESSION subgroup, not PTEN status, so routing this tier on PTEN deletion is an "
+             "inference the screen does not make; and the exposure is a human-label transfer, so "
+             "canine dose-finding would be required. Total (not unbound) Cmax, matching the "
+             "cobimetinib entry's convention.",
+    ),
+    # CDK4/6 inhibitor for the CDKN2A-deleted / RB1-intact tier, and -- per HS_STATUS section A --
+    # the lead brain arm for the co-deleted CFA11q16 lesion. The IC50 used is the CDK6 enzymatic
+    # value BECAUSE that is the reference the measured human brain-tissue multiple is quoted
+    # against, so the two numbers are commensurable rather than independently chosen.
+    "abemaciclib": DrugPKPD(
+        name="abemaciclib (CDK4/6 inhibitor; CDKN2A-deleted, RB1-intact tier)",
+        ic50_nM=10.0,             # CDK6/cyclin D1 enzymatic IC50 (CDK4 is 2 nM; CDK6 is the harder bar)
+        cmax_nM=588.0,            # human label 298 ng/mL steady state at 200 mg BID; MW 506.6
+        ic50_provenance=Provenance.TRANSFERRED,
+        cmax_provenance=Provenance.TRANSFERRED,
+        source="IC50: CDK4/cyclin D1 2 nM, CDK6/cyclin D1 10 nM (Lilly biochemical characterisation; "
+               "the same reference the brain-tissue multiple below is expressed against). Cmax: "
+               "VERZENIO US label, mean steady-state Cmax 298 ng/mL at 200 mg BID; plasma protein "
+               "binding 96.3%, so unbound fraction ~3.7% (21.8 nM unbound). Canine-HS dependency "
+               "MEASURED: CDKN2A down, Rb preserved and class growth inhibition in all canine "
+               "histiocytic lines incl. localized HS, plus a xenograft (PMID 35278028).",
+        note="CRITICAL SITE DISTINCTION, and it corrects an overstatement in HS_STATUS section A. "
+             "The measured 96x (CDK4) / 19x (CDK6) tissue multiple comes from resected human BRAIN "
+             "METASTASES -- lesions with a DISRUPTED barrier -- so it speaks to the extra-axial, "
+             "blood-side mass that is the bulk of this tumour, NOT to cells behind an intact "
+             "barrier. For invaded parenchyma the governing figures are the rodent unbound ratios: "
+             "Kp,uu 0.03 (mouse) to 0.11 (rat) on 21.8 nM unbound plasma gives 0.65-2.4 nM, i.e. "
+             "0.07-0.24x the CDK6 IC50 -- it does NOT close there, and only approaches the 2 nM "
+             "CDK4 bar at the rat ratio. So abemaciclib is the best-evidenced option for the "
+             "extra-axial mass and does NOT remove the need for local delivery in invaded "
+             "parenchyma. Active metabolites (M2/M20/M18) add activity this parent-only entry "
+             "omits, so the entry is conservative.",
+    ),
+    # The floor tier's cycled cytotoxic. Both inputs are canine: potency measured in canine HS, and
+    # exposure DERIVED from measured canine PK parameters rather than transferred from humans.
+    "vincristine": DrugPKPD(
+        name="vincristine (position-independent microtubule cytotoxic; floor tier / induction class)",
+        ic50_nM=3.26,             # 2.69 ng/ml, the conservative top of the canine-HS range; MW 825
+        cmax_nM=47.8,            # derived below from measured canine PK
+        ic50_provenance=Provenance.MEASURED,
+        cmax_provenance=Provenance.DERIVED,
+        source="IC50: PMID 25715778 -- 4 canine HS lines, vincristine IC50 1.77-2.69 ng/ml (the top "
+               "of the range is used). Cmax DERIVED from measured canine PK: 0.7 mg/m2 IV with "
+               "Vd 0.660 +/- 0.210 l/kg in dogs (PMID 25649934); for a 20 kg dog, BSA = 0.101 * "
+               "kg^(2/3) = 0.744 m2 -> 0.521 mg into 13.2 l -> C0 39.5 ng/ml = 47.8 nM.",
+        note="The only agent in the project whose potency AND exposure are both canine. Limits: C0 "
+             "from dose/Vd is the peak of a two-compartment profile with a 21.5-min distribution "
+             "half-life, so average exposure is far lower -- which is why the floor tier is CYCLED "
+             "rather than continuous, and why its durability grade is the weakest. Vincristine is "
+             "also a canonical P-gp substrate and ABCB1/ABCG2 are elevated in these lines (same "
+             "paper), the escape recorded as escape_audit.A13; the induction regimen therefore uses "
+             "a colchicine-site, non-efflux-substrate congener, and this entry stands for the "
+             "measured class potency, not for the agent of choice in the brain.",
+    ),
 }
 
 
