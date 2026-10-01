@@ -1501,6 +1501,14 @@ height rather than a one-off clearance term.
 | 6 | vaccine failure without antigen loss | **OPEN** → closable (§5) |
 | 7 | disease outside the resected compartment | **OPEN** → already closed (§5) |
 | 8 | antigen inadequacy on day zero | **CLOSED** (§3h) — harmless if the blind spot is drug-sensitive. If it overlaps resistance, the dangerous compartment is ~1,300 cells needing 7.2 logs, and doxorubicin (3.1–5.1) plus a single early eBAT cycle (5.2–7.8) removes it: **0.830**, the no-blind-spot baseline, at the pessimistic end of both. Conditional on the compartment being anthracycline-sensitive; if it is a tolerant state instead, the persister-directed route applies. Existence unverified |
+| 9 | **anatomical sanctuary — the CNS** | **CLOSABLE** (§4a) — threat MEASURED in dogs; closure TRANSFERRED, and it selects a vaccine platform |
+| 10 | **host immunosenescence over the horizon** | **CLOSABLE** (§4a) — threat MEASURED in dogs; closed at induction by re-dosing |
+| 11 | **competing all-cause mortality** | **NOT AN ESCAPE** (§4a) — a scoping error in the endpoint, and it makes the goal easier |
+
+Routes 9–11 came from an **independent audit of the escape universe** (§4a), run as `CLAUDE.md`
+rule 9 requires: the candidate classes were enumerated from general tumour-immunology and metastasis
+biology *without* consulting the eight routes already in hand, then grepped against this document.
+Ten classes returned zero hits. They are graded in §4a and in `hsa_escape_audit`.
 
 Routes 1–3 are closed **by construction, not by potency**: none of these resistance lesions requires
 shedding the antigen a real HSA vaccine targets, so the vaccine still sees those cells. Route 3 sets
@@ -1527,6 +1535,167 @@ hypothetical peptide/MHC-I mRNA vaccine. Three independent reasons it does not t
 Simulation agrees it is minor: at potency 0.06 it never fires even at 10× the assumed seeding rate
 (1.000 / 0.990 / 0.963 at 10× / 100× / 1000×). Above the bar the antigen-positive population
 collapses before it can supply the mutation, so the route starves rather than being out-killed.
+
+---
+
+## 4a. The independent escape audit — three routes the eight did not contain
+
+The eight routes above were enumerated from the pathway model and from this disease's clinical
+literature. `CLAUDE.md` rule 9 requires that the escape list itself be audited independently rather
+than re-graded. That audit was run: the candidate classes were listed from general tumour-immunology
+and metastasis biology *without* consulting the eight, then each was grepped against this document
+and the `hsa_*` modules.
+
+**Ten classes returned zero hits.** One of them caught a trap worth naming: the word *sanctuary*
+appears twenty times in this document, and every occurrence is **phenotypic** — an antigen-null
+state. A keyword count scores anatomical sanctuary as covered. It was not mentioned anywhere.
+
+*Module: `hsa_escape_audit`. Tests: `test_hsa_escape_audit.py`.*
+
+### Route 9 — the central nervous system
+
+**The threat is MEASURED, in dogs, in this disease.** Snyder et al. 2008 (*J Vet Intern Med*
+22(1):172–177, PMID 18289306) examined 177 dogs with secondary intracranial neoplasia, all with
+complete postmortem. Secondary brain tumours were **more common than primary**, and hemangiosarcoma
+was the single largest source: **51 of 177 (29%)**, ahead of pituitary tumours (25%), lymphosarcoma
+(12%) and metastatic carcinoma (12%).
+
+*What that 29% is not:* it is the share of **secondary brain tumours** that were HSA, not the share
+of **HSA dogs** that develop brain metastasis. The denominators are different and this paper does not
+supply the second one. Secondary sources put the per-dog figure near 14% at necropsy; that is
+recorded here as **unconfirmed**.
+
+**Why it breaks the plan as written.** Every cytotoxic and small-molecule component has poor CNS
+penetration. Doxorubicin is a P-glycoprotein substrate and effectively excluded; eBAT is a ~55 kDa
+bispecific protein toxin; losartan is deliberately not CNS-penetrant; a monoclonal antibody reaches
+roughly 0.1% of its serum concentration in CSF. **The route-8 closure — doxorubicin plus one early
+eBAT cycle — does not extend to a brain deposit.**
+
+**The closure, and it is more useful than it first looks.** Activated T cells cross the blood–brain
+barrier; that is ordinary immune surveillance, not a special property of any product. Central memory
+T cells enter the CSF through the choroid plexus, and activated effectors transmigrate the barrier.
+Checkpoint inhibitors are documented to have CNS activity *despite* poor penetration, because the
+antibody acts on T cells systemically and the T cells do the crossing.
+
+So the CNS route is a **platform selector**:
+
+| vaccine | effector arm | reaches a brain deposit? |
+|---|---|---|
+| ERstrePs | humoral **and** T-cell | **yes** |
+| eVim | antibody against extracellular vimentin | **no** |
+
+This analysis had treated the two as interchangeable anchors for one 0.030/day figure. On this route
+they are not interchangeable at all. Grade: threat **MEASURED**, closure **TRANSFERRED** — T-cell
+trafficking and checkpoint CNS activity are established in humans and rodents, not in dogs with HSA
+brain metastases.
+
+*Still open:* HSA brain metastases are highly vascular and haemorrhagic. Intracranial haemorrhage is
+a lethal event no component of this plan treats, and belongs with the rupture hazard as a competing
+event rather than with the cancer-control figures.
+
+### Route 10 — the host's immune system ages out from under the plan
+
+**MEASURED in dogs.** Thymic involution reduces naive T-cell output; total T cells, B cells, CD4⁺ and
+CD8⁺ all decline with age; the CD4:CD8 ratio falls; older dogs show **lower proliferative capacity of
+CD8⁺ T cells** — the effector arm this plan runs on — and reduced antibody titres to novel antigens.
+
+This is specific to this plan rather than generic. The mean age at diagnosis in the Snyder cohort was
+**9.6 years**. A ten-year horizon runs the vaccine from roughly age 10 to age 20, across the steepest
+part of the curve.
+
+**What closes it.** The compromised step is the **primary** response; memory responses are reported
+to remain intact. The plan's structure is prime once, then boost for life — so immunosenescence
+attacks the induction and spares the maintenance.
+
+And the right tool is already in the analysis, graded against the wrong question. **Re-dosing** was
+demoted as a potency lever (118–235% transfer, §3g) and that demotion stands. But the finding behind
+it — repeat immunisation raising response *magnitude* in poor responders up to the level of good
+responders, in 118 dogs — is exactly the fix for a compromised primary response in an old animal.
+Re-dosing is not a weak version of the other levers; it answers a different question the analysis
+never asked.
+
+*Still open:* no canine study has measured a cancer vaccine's take rate against age, and none has
+followed vaccine-induced immunity in a dog for anything near ten years.
+
+### Route 11 — the endpoint is the wrong test, and that is good news
+
+Mean age at diagnosis **9.6 years**, against breed median lifespans of **10.3** (German Shepherd,
+VetCompass UK), **~11.0–12.5** (Golden Retriever) and **12.0** (Labrador). A ten-year *durable
+response from diagnosis* therefore requires the dog to reach about **20** — roughly double the breed
+median, and beyond the oldest animal in the VetCompass German Shepherd cohort (17.0 years).
+
+With the standing assumption of early detection, a 2–4 year lead moves diagnosis to ~5.6–7.6 years,
+so ten years takes the dog to 15.6–17.6: above the median, but inside the observed range.
+
+**This does not mean the analysis is wasted.** The 3,650-day horizon is a **conservative proxy for
+cure** — anything holding ten years has certainly held for the animal's remaining life. Clearing a
+stricter bar than the biology requires is a safe error.
+
+**What it does mean,** in three parts:
+
+1. The honest endpoint for this population is **"disease-free for remaining natural lifespan"** —
+   about 0.7–2.4 years from diagnosis at 9.6, and ~4–7 years with early detection. The practical
+   target is **easier** than the one being modelled, not harder.
+2. **Competing all-cause mortality** must be carried alongside the rupture hazard, or ten-year
+   figures overstate what an owner would observe.
+3. A **second primary tumour** is a real event over that horizon in these breeds, and is not an
+   escape of this treatment at all.
+
+### Routes 12–14 — closed by arguments already in the analysis
+
+| class | why it closes | grade |
+|---|---|---|
+| **dormancy / quiescence** | immune killing is not growth-dependent — a cytotoxic T cell does not need its target in cycle. The same argument that closes route 7. The drugs do not cover it; the vaccine does | TRANSFERRED |
+| **B2M / TAP loss** | the one case where the missing-self backup is *strongest*: B2M loss is the classic NK missing-self trigger, and Lerner 2023 (PMID 37537301) shows MHC-loss variants are killed through NKG2D. eVim's target needs no MHC at all | TRANSFERRED |
+| **Tregs and MDSCs** | monocytic MDSCs are recruited through CCR2, which losartan blocks, and eBAT depletes uPAR⁺ myeloid cells — two of the four levers already act here without having been credited. **Tregs specifically are not addressed by anything in the plan** | TRANSFERRED, partial |
+| **clonal evolution to a new driver** | the vaccine's coverage is antigen-based, not driver-based, so a new driver is still visible unless the antigen is also lost (routes 4 and 8). But nothing bounds how much faster a newly arising clone could be, so the claim that the bar would not move is unsupported | **ASSUMED** |
+
+### The increment the whole plan turns on — regraded ASSUMED → TRANSFERRED
+
+Every route above ultimately depends on the vaccine clearing the bar, which depends on an increment
+of 0.012/day nobody has measured in this tumour. §3g graded it honestly as unmeasured. A randomised
+trial in the **matched clinical setting** moves part of it.
+
+**KEYNOTE-942** (NCT03897881): 157 patients with completely resected high-risk stage III/IV melanoma,
+randomised 2:1 to an individualised neoantigen vaccine **plus** pembrolizumab or pembrolizumab alone.
+Three-year update: recurrence-free survival **HR 0.510** (95% CI 0.288–0.906, p=0.019); 2.5-year RFS
+**74.8% vs 55.6%**; distant-metastasis-free survival **HR 0.384** (0.172–0.858).
+
+This is the only randomised trial found that isolates what adding **one immune agent to an immune
+backbone** buys, in the adjuvant, completely resected, minimal-residual-disease setting — this plan's
+setting exactly. Every other anchor in this analysis measures a single agent against no agent, in
+measurable disease.
+
+**The per-day conversion used for the four levers fails here, and the failure is instructive.**
+Applied to KEYNOTE-942 it returns 0.0011–0.0022/day, needing 555–1111% transfer — an apparent
+catastrophe. It is an artefact. The conversion assumes time-to-event is inversely proportional to net
+growth rate, so it carries the **absolute time scale** across the species jump: human melanoma's
+median time to recurrence here is ~1,077 days, canine HSA's treated median ~180. *(The arithmetic is
+sound — converting the reported RFS rates to exponential hazards reproduces the trial's own HR: 0.495
+derived against 0.510 reported. It is the transport that is out of domain.)*
+
+**The scale-free comparison is the fair one.** Both quantities answer the same unitless question:
+what proportional reduction in the chance of failure does adding an immune agent on top of an immune
+backbone buy?
+
+| vaccine multiple | durability (stop yr 1) | equivalent HR on 10-yr failure |
+|---|---|---|
+| 1.35× | 0.732 | **0.406** |
+| **1.40×** | **0.872** | **0.178** ← the headline requirement |
+| 1.45× | 0.968 | 0.042 |
+
+Against that: measured **0.510** (RFS) and **0.384** (DMFS). So one lever delivers **39–56%** of the
+needed log-hazard at 1.40× — and **clears the 1.35× rung outright on the DMFS endpoint**, which buys
+a two-year induction at durability 0.864, just under the 0.888 drug-forever reference.
+
+**What this changes:** the increment moves from ASSUMED to **TRANSFERRED** for direction and partial
+magnitude. The combination is real, randomised, and measured in the matched setting, and the plan has
+four levers rather than one.
+
+**What it does not change:** whether canine HSA's microenvironment responds like human melanoma's,
+and whether the four levers **stack or overlap**. Routes 1 and 2 are already recorded as
+mechanistically coupled, and eBAT depletes the same macrophages the other two act on. Four coupled
+levers is not four times one.
 
 ---
 
@@ -1764,6 +1933,29 @@ first because it can make the rest unnecessary.
 **Which leaves bleeding as the binding constraint on survival**, not the cancer. Every escape route
 now has an answer on paper; the one that does not is answered by a screening test rather than a drug,
 and it is the difference between roughly 0.53 and 0.85 at ten years.
+
+**And an independent audit of the escape list found three more** (§4a), which is the strongest reason
+not to read the paragraph above as a closure claim. Two are real escapes with MEASURED threats in
+dogs and TRANSFERRED closures: the **central nervous system**, where hemangiosarcoma is the single
+largest source of secondary brain tumours and no cytotoxic component of this plan penetrates — closed
+only by the T-cell arm of the vaccine, which **selects ERstrePs over eVim** and makes the two
+non-interchangeable; and **host immunosenescence**, which attacks the induction step in a dog already
+9.6 years old at diagnosis, and is closed by re-dosing — the lever §3g demoted, graded there against
+a question it was not answering.
+
+The third is not an escape but a correction to the goal. At a mean age at diagnosis of 9.6 against
+breed median lifespans of 10.3–12.5, **a ten-year disease-free response from diagnosis requires the
+dog to live to about twenty.** The reachable form of the same goal is *no recurrence for the rest of
+the dog's life*, and the 3,650-day horizon is a conservative proxy for it. The practical target is
+easier than the one being modelled.
+
+**The number the plan turns on is no longer baseless** (§4a). KEYNOTE-942 — randomised, adjuvant,
+completely resected, which is this setting exactly — measures a vaccine added to a checkpoint backbone
+at HR 0.510 for recurrence-free and 0.384 for distant-metastasis-free survival. Scale-free, that is
+39–56% of the log-hazard the plan needs from a single lever, and it clears the 1.35× rung outright on
+the DMFS endpoint. The increment moves **ASSUMED → TRANSFERRED** for direction and partial magnitude.
+What stays open is whether canine HSA behaves like human melanoma, and whether four mechanistically
+coupled levers stack or overlap.
 
 ### What would change the answer
 

@@ -92,6 +92,40 @@ rested on monotherapy data for a combination plan. All enforced by tests in
 
 ---
 
+## The independent escape audit (2026-10-01) — three routes the eight did not contain
+
+Run per `CLAUDE.md` rule 9: classes enumerated from general tumour-immunology and metastasis biology
+*without* consulting the eight routes, then grepped against the record. **Ten classes returned zero
+hits.** Module `hsa_escape_audit`, tests `test_hsa_escape_audit.py`.
+
+| # | Route | Threat | Closure | Note |
+|---|---|---|---|---|
+| **9** | CNS anatomical sanctuary | **MEASURED** — HSA is the largest source of secondary brain tumours in dogs, 51/177 (29%), Snyder 2008 PMID 18289306 | **TRANSFERRED** — activated T cells cross the BBB; checkpoint blockade has CNS activity despite poor penetration | **Selects a vaccine platform:** ERstrePs (humoral + T-cell) covers it; eVim (antibody vs surface vimentin) does not. Doxorubicin, eBAT and losartan do not reach the brain, so the route-8 closure does not extend there |
+| **10** | Host immunosenescence | **MEASURED** in dogs — thymic involution, reduced CD8⁺ proliferative capacity, reduced titres to novel antigens | **TRANSFERRED** — memory responses are spared; the *primary* response is the compromised step | **Re-dosing is the fix**, graded in §3g against the wrong question. Its demotion as a potency lever stands |
+| **11** | Competing all-cause mortality | **MEASURED** — mean age at diagnosis 9.6 y against breed medians 10.3–12.5 y | n/a — not an escape | A 10-yr disease-free response from diagnosis needs the dog to reach ~20. The reachable goal is *no recurrence for remaining natural life*; the 3,650-day horizon is a conservative proxy. **Makes the target easier, not harder** |
+
+Closed by arguments already in the analysis: **dormancy** (immune killing is not growth-dependent),
+**B2M/TAP loss** (the strongest case for the missing-self backup), **Tregs/MDSCs** (CCR2 and uPAR
+already act here — though Tregs specifically are unaddressed). **Clonal evolution to a new driver
+stays ASSUMED**: nothing bounds how much faster a newly arising clone could be.
+
+**The keyword trap worth remembering:** "sanctuary" appears 20× in the narrative document and every
+occurrence is *phenotypic*. A keyword count scores anatomical sanctuary as covered. It was absent.
+
+### The increment, regraded ASSUMED → TRANSFERRED
+
+**KEYNOTE-942** (NCT03897881), 157 patients, randomised 2:1, individualised neoantigen vaccine +
+pembrolizumab vs pembrolizumab alone, **completely resected high-risk melanoma — this plan's setting
+exactly.** RFS HR **0.510** (0.288–0.906); DMFS HR **0.384** (0.172–0.858); 2.5-yr RFS 74.8% vs 55.6%.
+
+The per-day conversion used for the four levers returns 555–1111% transfer here and is an **artefact**
+— it transports an absolute time scale between processes running ~6× apart in tempo. (Internal check:
+converting the reported RFS rates to hazards reproduces the trial's own HR, 0.495 derived vs 0.510
+reported.) The scale-free comparison is the fair one: the plan needs HR **0.178** on 10-yr failure at
+1.40×, and **0.406** at 1.35×. One lever delivers **39–56%** of the needed log-hazard, and **clears
+the 1.35× rung outright on DMFS**. Still open: whether canine HSA behaves like human melanoma, and
+whether four mechanistically coupled levers stack or overlap.
+
 ## Open gaps, ranked (the honest list)
 
 1. **What any lever adds to vaccine height in this tumour.** Unmeasured for all four. The single
@@ -112,6 +146,17 @@ rested on monotherapy data for a combination plan. All enforced by tests in
 8. **Model mis-specifications carried knowingly**: MHC-I loss modelled where eVim's antigen is surface
    vimentin (and GD3 a glycolipid); one compartment where the engine supports two; time-courses not
    re-run at real rapamycin exposure.
+9. **The per-dog brain-metastasis rate in canine HSA** (route 9). Snyder 2008 gives the share of
+   secondary brain tumours that are HSA, not the share of HSA dogs that get brain metastases. The
+   ~14% figure circulating in secondary sources is **unverified**. Until it exists, route 9's weight
+   cannot be sized — only its existence established.
+10. **Vaccine take rate against age** (route 10). Nobody has measured a canine cancer vaccine's take
+    as a function of age, and no canine study has followed vaccine-induced immunity anywhere near a
+    decade. The longest booster evidence here is a two-monthly schedule over a trial of months.
+11. **Regulatory T cells** — unaddressed by any component of the plan and unquantified in canine HSA.
+12. **Whether the four levers stack or overlap.** Routes 1 and 2 are mechanistically coupled and eBAT
+    depletes the same macrophages; four coupled levers is not four times one. The five-arm ISOS-1
+    design must be powered for overlap.
 
 ## Pending external readouts this analysis cannot anticipate
 
