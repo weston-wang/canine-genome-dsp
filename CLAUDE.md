@@ -25,6 +25,11 @@ Concrete failures (so the rules have a reason):
    stem-cell/transplant mechanism, and the user had to point that out ("even I know vaccine should be part of
    the equation, and maybe even stem cell. Go back and be thorough"). A result is only as complete as the
    candidate universe it searched.
+6. **Scoping a finding to the wrong case, and calling settled findings new.** The HS case is primary
+   intracranial (non-disseminated) disease, but a disseminated-HS paper was headlined as the key finding
+   (the user: "I thought we were focused on the non-dessimated case"). In the same report, items labelled
+   new were already in `docs/CONSOLIDATED_REPORT.md`; the record had been searched by keyword, and the
+   report cites them by DOI.
 
 ## Rules
 
@@ -59,6 +64,10 @@ Concrete failures (so the rules have a reason):
    not from memory. For each, record in git whether it is in the model, evaluated and excluded with a reason,
    or not yet assessed. State the claim as "closed within this catalogue of N agents and M escapes", and list
    what is outside it. Do the same for the escape list (independent audit, not the list already in hand).
+10. **State the case under analysis and scope every finding to it.** For HS that is primary intracranial
+   (non-disseminated) histiocytic sarcoma in a predisposed breed. Label evidence from another presentation
+   (disseminated disease, another tumour, another species) as indirect. When checking whether a finding is
+   already in the record, search by its DOI or PMID as well as by keyword.
 
 ## Standing standards for the cancer durable-response work (the user's words)
 
