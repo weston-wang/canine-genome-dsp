@@ -230,3 +230,100 @@ def test_the_engine_and_the_arithmetic_agree_about_route_3():
 def test_the_interpolation_caveat_is_recorded():
     note = eff.WHAT_THE_MODEL_SAYS_ABOUT_PARTIAL_TRANSFER["the_interpolation_caveat"]
     assert "not simulations" in note
+
+
+# =================================================================================================
+# ROUTE 4 -- eBAT reclassified from cytotoxic log-remover to stromal lever.
+# =================================================================================================
+
+def test_ebat_effect_is_derived_from_a_tumour_it_cannot_kill():
+    """The whole point of the MC17 model is that direct cytotoxicity is excluded by design."""
+    design = eff.ROUTE_4_EBAT_STROMAL["design"]
+    assert "resistant to eBAT" in design
+    assert "microenvironment rather than direct cytotoxicity" in design
+
+
+def test_ebat_transfer_sits_between_losartan_and_the_checkpoint_route():
+    ebat = eff.TRANSFER_REQUIRED["route_4_ebat_stromal"]["transfer_needed"]
+    losartan = eff.TRANSFER_REQUIRED["route_2_losartan"]["transfer_needed"]
+    checkpoint = eff.TRANSFER_REQUIRED["route_1_checkpoint"]["transfer_needed"]
+    assert min(losartan) < min(ebat) < min(checkpoint)
+    assert max(ebat) < max(checkpoint)
+
+
+def test_ebat_needs_less_than_a_quarter_of_its_measured_effect():
+    assert max(eff.TRANSFER_REQUIRED["route_4_ebat_stromal"]["transfer_needed"]) < 0.25
+
+
+def test_ebat_beats_the_drug_forever_reference_at_a_quarter_transfer():
+    assert (eff.durability_at_transfer("route_4_ebat_stromal", 0.25)
+            > eff.REFERENCE_DRUG_FOREVER)
+
+
+def test_ebat_falls_short_of_the_reference_at_a_tenth_transfer():
+    """It clears with margin, but it is not immune to the transfer question."""
+    assert (eff.durability_at_transfer("route_4_ebat_stromal", 0.10)
+            < eff.REFERENCE_DRUG_FOREVER)
+
+
+def test_the_ebat_rate_is_computed_from_the_published_volumes():
+    expected = eff.rate_from_burden_reduction(
+        eff.EBAT_TREATED_VOLUME_MM3 / eff.EBAT_CONTROL_VOLUME_MM3, eff.EBAT_READOUT_DAY)
+    assert eff.ROUTE_4_EBAT_STROMAL["implied_rate_per_day"]["readout_day"] == pytest.approx(expected)
+
+
+def test_the_ebat_rate_is_as_cross_species_as_losartans_and_says_so():
+    limits = eff.ROUTE_4_EBAT_STROMAL["the_limits"]
+    assert "mouse fibrosarcoma" in limits
+    assert "no better than losartan" in limits
+    assert "intensification trial was negative" in limits
+
+
+def test_what_distinguishes_ebat_is_not_the_rate():
+    claim = eff.ROUTE_4_EBAT_STROMAL["what_makes_it_better_placed_than_the_other_three"]
+    assert "as cross-species as losartan" in claim
+    assert "exposure and duration IN THIS DISEASE" in claim
+
+
+def test_ebat_rescues_the_route_8_stain_rather_than_closing_it():
+    rescue = eff.ROUTE_4_EBAT_STROMAL["what_it_rescues"]
+    assert "does not need the compartment to express its targets" in rescue
+    assert "secondary" in rescue
+
+
+def test_the_misclassification_is_recorded_rather_than_quietly_fixed():
+    correction = eff.THE_THREE_ROUTES_ARE_NOT_EQUIVALENT["the_correction_route_4_forces"]
+    assert "wrong section" in correction
+
+
+def test_the_first_lever_to_measure_is_not_the_one_with_the_best_transfer():
+    pick = eff.VERDICT["which_one_to_measure_first"]
+    assert "eBAT" in pick
+    assert "losartan's is" in pick
+    best_transfer = min(
+        eff.TRANSFER_REQUIRED[r]["transfer_needed"][0] for r in eff.TRANSFER_REQUIRED)
+    assert best_transfer == eff.TRANSFER_REQUIRED["route_2_losartan"]["transfer_needed"][0]
+
+
+# =================================================================================================
+# What the checkpoint lever costs, revised upward.
+# =================================================================================================
+
+def test_the_checkpoint_toxicity_update_is_not_overstated():
+    cost = eff.WHAT_THE_CHECKPOINT_LEVER_COSTS
+    appeared = cost["the_figure_that_has_since_appeared"]
+    assert "28%" in appeared and "Grade 3" in appeared
+    assert "mast cell tumour" in appeared          # the reason it does not simply replace 5.9%
+    assert "5.9% figure remains" in cost["why_it_is_not_a_straight_replacement"]
+    assert "weakened, not withdrawn" in cost["what_it_does_change"]
+
+
+def test_the_conditional_licensure_is_recorded_alongside_the_toxicity():
+    assert "conditional licensure" in eff.WHAT_THE_CHECKPOINT_LEVER_COSTS["the_offsetting_development"]
+
+
+def test_the_randomised_negative_in_the_matched_setting_is_recorded():
+    p = eff.THE_PRECEDENT_THAT_CUTS_AGAINST_THE_VACCINE_CALIBRATION
+    assert "NO" in p["the_finding"] and "difference in recurrence-free" in p["the_finding"]
+    assert "does not invalidate" in p["what_it_does_to_the_calibration"]
+    assert "endpoint mismatch" in p["what_it_does_to_the_calibration"]

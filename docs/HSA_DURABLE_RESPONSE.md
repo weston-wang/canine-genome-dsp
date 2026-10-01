@@ -1105,9 +1105,9 @@ recruitment (losartan), re-dose the non-responders (recurrent immunisation). Two
 data; the third needs no new agent. **None of them has been measured against vaccine kill in this
 tumour**, and that remains the experiment to run.
 
-### What the three routes are actually worth
+### What the routes are actually worth
 
-Up to here the three routes were citations, not numbers. Each one's published result converts to a
+Up to here the routes were citations, not numbers. Each one's published result converts to a
 per-day rate by the same method already used for the MEK anchor (§3f) — take a measured change in
 burden or time-to-event and back out the rate implied by it. **The target is an increment of
 0.012/day** (0.030 → 0.042).
@@ -1117,6 +1117,7 @@ burden or time-to-event and back out the rate implied by it. **The target is an 
 | **1. release the brake** | Maekawa 2021, PMID 33580183 | anti-PD-L1 in 29 dogs with pulmonary metastatic melanoma: median OS **143 vs 54 days** | 0.027–0.053/day |
 | **2. stop the recruitment** | Regan 2019, PMID 30971441 | losartan cut pulmonary metastatic burden **64%** (CT26, d19) and **90%** (4T1, d14) | 0.054–0.164/day |
 | **3. re-dose non-responders** | Mason 2025, PMID 39955616 | elite survivors DFI >490 d vs short-term 150–235 d | 0.005–0.010/day |
+| **4. deplete the suppressive stroma** | Schulte 2025, PMID 40914989 | meBAT cut median tumour volume **163.1 → 55.5 mm³** (d21, p=0.03) in a tumour eBAT *cannot kill* | 0.051–0.067/day |
 
 Every one of these is cross-species, cross-tumour, or both, so the absolute rates cannot be carried
 across. What *can* be carried across is the ratio — **what fraction of the measured effect has to
@@ -1124,21 +1125,108 @@ survive the transfer** for 0.012/day to be met:
 
 | route | transfer needed |
 |---|---|
-| 1. anti-PD-L1 | **23–45%** |
 | 2. losartan | **7–22%** |
+| 4. eBAT, as a stromal lever | **18–23%** |
+| 1. anti-PD-L1 | **23–45%** |
 | 3. re-dosing | **118–235%** |
 
-**This separates three things I had been treating as equals.** Routes 1 and 2 clear the requirement
+**This separates things I had been treating as equals.** Routes 1, 2 and 4 clear the requirement
 while losing more than half — in losartan's case nearly nine tenths — of their measured effect.
 Route 3 **cannot meet the requirement alone even if its effect transferred in full**: the gap between
 the two immunological strata is smaller than the increment the plan needs. It is still free to add,
 and on a ramp every increment counts, so it belongs in the regimen. It cannot carry it.
 
-Route 1 is the shortest extrapolation — a canine antibody, in dogs, in metastatic disease. Route 2
-has the largest effect and the widest tolerance for discount, but the longest extrapolation (mouse
-models of two non-canine tumours). Its mechanism is unusually well pinned down: the effect survives
-in AT1R-knockout mice and adds nothing on top of CCR2 knockout, so CCR2 is *necessary* — direct
-cytotoxic and anti-angiogenic explanations were excluded rather than assumed away.
+#### Route 4 was in this analysis under the wrong heading
+
+eBAT entered §3h as a **cytotoxic log-remover** — a bispecific angiotoxin worth 5.2–7.8 logs against
+the antigen-null drug-resistant compartment. That classification carried a stated open assumption:
+that eBAT's targets, EGFR and uPAR, are present *on that compartment*, which nobody has measured.
+
+The originating group has since shown the assumption is largely beside the point. Schulte et al.
+2025 (*J Pharmacol Exp Ther* 392(9):103674, PMID 40914989) chose MC17 fibrosarcoma **because the
+tumour cells are resistant to eBAT** — ED50 >50–100 nM against picomolar killing of other sarcomas —
+so any antitumour effect has to come from somewhere other than direct cytotoxicity. It did:
+
+| readout | control | meBAT |
+|---|---|---|
+| median tumour volume, day 21 | 163.1 mm³ | **55.5 mm³** (p=0.03) |
+| F4/80⁺ tumour-associated macrophages | 14.7% | **5.1%** (p=0.01) |
+| phagocytic CD11b⁺ myeloid cells | 3.6% | **22.3%** (p=0.019) |
+| CD3⁺ T-cell infiltration | 0.13% | **3.68%** |
+
+Every effect was reduced or abolished in uPAR-knockout bone-marrow chimeras: the target is **host
+uPAR-expressing stroma**, not the tumour cell.
+
+Two consequences, pointing in opposite directions from what the original filing implied.
+
+**It moves eBAT into this section.** TAM depletion and T-cell infiltration are precisely the
+suppression Gulay 2022 measured as capping vaccine potency in canine HSA — CD204⁺ PD-L1⁺ macrophages
+excluding T cells. Routes 1 and 2 act on that suppression by releasing the brake and blocking
+recruitment. Route 4 depletes the cells outright.
+
+**It makes the route-8 EGFR/uPAR stain secondary rather than load-bearing.** A drug that benefits a
+tumour it cannot kill does not need the dangerous compartment to express its targets.
+
+*What does not change:* the rate is from a mouse fibrosarcoma and carries no better than losartan's.
+The volume conversion assumes a constant rate difference across an interval in which dosing ran for
+only two weeks. And eBAT's own intensification trial was negative (Borgatti 2021, PMID 32187827) —
+three cycles at a shortened interval gave more toxicity and less benefit — so this lever cannot
+simply be turned up.
+
+*What distinguishes it:* not the transfer fraction, which is worse than losartan's. eBAT is the only
+one of the four with **measured exposure at a tolerated canine dose, measured tolerability, and a
+positive trial in canine splenic hemangiosarcoma** — in the adjuvant setting, in the single-early-
+cycle sequence the finite-course simulation independently derived. A positive increment would be
+immediately actionable rather than the start of a dose-finding programme. That is the argument for
+measuring it first, and it is an argument about evidence distance, not about effect size.
+
+*Tests: `test_hsa_route_effect_sizes.py`*
+
+#### What the checkpoint lever costs, revised upward
+
+The analysis priced route 1's toxicity from gilvetmab monotherapy in 51 dogs: serious adverse events
+in 5.9%, one of them tumour haemorrhage. A combination study has since reported worse. Martin, Thamm
+& Weishaar 2026 (*Vet Comp Oncol*, PMID 42680555) gave gilvetmab with hypofractionated radiotherapy
+to 18 dogs with mast cell tumour: **nine adverse events attributed to gilvetmab in seven dogs (39%),
+five dogs (28%) with Grade 3**, and the combination "did not provide durable tumour control."
+
+This is not a straight replacement — mast cell tumour with concurrent radiation is not
+post-splenectomy hemangiosarcoma, and radiotherapy contributes its own toxicity. The 5.9% figure
+remains the right one for the antibody alone. What it does change is the claim that a q14–28d
+antibody sits in the same tolerability class as a q60d booster: that rested on the monotherapy
+number, and this plan proposes the antibody *in combination*. The claim is **weakened, not
+withdrawn**, and it compounds the haemorrhage signal already recorded as open.
+
+Offsetting it: gilvetmab now holds **conditional licensure in the United States** and is the only
+commercially available veterinary checkpoint inhibitor (Chon, Greene & Stock 2026, *JAVMA*,
+PMID 42710546). The plan had treated it as a trial agent.
+
+#### A randomised negative in the matched setting
+
+A trivalent ganglioside vaccine (GM2/GD2/GD3) with OPT-821, against OPT-821 alone, in metastatic
+sarcoma patients **rendered disease-free by surgery** — the setting this plan targets — induced a
+sustained serologic response and produced **no difference in recurrence-free or overall survival**
+(PMID 36215947). Titre rose; survival did not.
+
+This does not invalidate the 0.030/day calibration: different antigen class, different species. It
+is, however, the strongest available evidence that immunogenicity in this setting need not convert —
+which is exactly the endpoint mismatch §7 names as the reason the 1.7× shortfall is a floor rather
+than a number. It raises the value of measuring vaccine kill rate directly, and it is timely: a
+**randomised, placebo-controlled GD3 liposomal vaccine trial is now enrolling in canine splenic
+hemangiosarcoma**, which would be the first randomised vaccine trial in this disease.
+
+Route 1 is the shortest *rate* extrapolation — a canine antibody, in dogs, in metastatic disease.
+Route 2 has the largest effect and the widest tolerance for discount, but the longest extrapolation
+(mouse models of two non-canine tumours). Its mechanism is unusually well pinned down: the effect
+survives in AT1R-knockout mice and adds nothing on top of CCR2 knockout, so CCR2 is *necessary* —
+direct cytotoxic and anti-angiogenic explanations were excluded rather than assumed away. Route 4's
+rate is as distant as route 2's, and its mechanism is pinned down the same way — by knockout, in
+uPAR-deficient chimeras — but its *clinical* distance is the shortest of the four, because the
+agent already has a positive trial in this disease.
+
+**The two distances are different and should not be collapsed.** Rate distance asks how likely the
+measured effect size is to carry. Clinical distance asks how much work stands between a positive
+result and a treatable dog. Losartan wins the first; eBAT wins the second by a wide margin.
 
 **And routes 1 and 2 are not independent.** In 27 dogs on the same anti-PD-L1 antibody, **lower
 baseline MCP-1 — which is CCL2, the chemokine losartan blocks — predicted prolonged survival**
@@ -1387,6 +1475,15 @@ cells carries the vaccine antigen, and whether those cells are the drug-tolerant
 and after PI3K/mTOR inhibition. If coverage is retained on drug-tolerant cells, route 8 stays in its
 benign form and none of the above is needed.
 
+**One dependency of this closure has since weakened in its favour.** The closure needs eBAT to reach
+the compartment, and the analysis flagged that eBAT's targets there — EGFR and uPAR — had never been
+measured. Schulte et al. 2025 (PMID 40914989) show eBAT produces substantial antitumour benefit
+against a tumour whose cells are *resistant to it*, acting through host uPAR⁺ stroma rather than
+through the tumour cell. The compartment therefore does not have to express eBAT's targets for the
+closure to hold. The stain is still worth running; it is no longer the thing the closure turns on.
+The same finding moves eBAT's primary role out of this section and into §3g, as a lever on vaccine
+height rather than a one-off clearance term.
+
 *Tests: `test_hsa_antigen_adequacy.py`, `test_hsa_orthogonal_kill.py`, `test_hsa_persister_evidence.py`,
 `test_hsa_route8_alternatives.py`*
 
@@ -1607,23 +1704,31 @@ never has to hold the tumour alone — and in this disease a substantial part of
 is microenvironmental, from PD-L1⁺ M2 macrophages that measurably exclude T cells, with a caninized
 anti-PD-1 already dosed in 51 dogs on a booster-like schedule.
 
-**And there are three independent ways to raise it, not one.** Anti-PD-1 disarms the suppressive
-macrophages; losartan blocks the CCL2–CCR2 axis that recruits them; and recurrent immunisation raises
-response magnitude in poor responders. HSA is the **highest CCL2 producer** and the most
-monocyte-rich metastasiser of any canine tumour examined, and losartan is the only agent in this
-analysis to clear **both** criteria — its exposure settled by dose-escalation to a measured
-pharmacodynamic endpoint in 28 dogs, its duration by being an ARB dogs already take indefinitely.
-What is *ruled out* is swapping vaccine platforms: the strongest canine platform failed to replicate
-in 118 dogs.
+**And there are four independent ways to raise it, not one.** Anti-PD-1 disarms the suppressive
+macrophages; losartan blocks the CCL2–CCR2 axis that recruits them; eBAT depletes them outright; and
+recurrent immunisation raises response magnitude in poor responders. HSA is the **highest CCL2
+producer** and the most monocyte-rich metastasiser of any canine tumour examined. Losartan and eBAT
+are the two agents in this analysis clearing **both** criteria — losartan's exposure settled by
+dose-escalation to a measured pharmacodynamic endpoint in 28 dogs and its duration by being an ARB
+dogs already take indefinitely; eBAT's by a positive trial at a tolerated dose in 23 dogs with this
+exact disease, in this exact setting. What is *ruled out* is swapping vaccine platforms: the
+strongest canine platform failed to replicate in 118 dogs.
 
-**The three are not equal, and converting them to rates settles it** (§3g). Against the 0.888 that
+**The four are not equal, and converting them to rates settles it** (§3g). Against the 0.888 that
 the measured vaccine gives with the drug taken forever: losartan can lose three quarters of its
-measured effect crossing species and still beat it; anti-PD-L1 needs about half of its effect to
-carry over; re-dosing cannot reach it at any transfer, because the gap between the two immunological
-strata is smaller than the increment the plan needs. Re-dosing belongs in the regimen — it is free —
-but it cannot carry it.
+measured effect crossing species and still beat it; eBAT can lose three quarters too; anti-PD-L1
+needs about half of its effect to carry over; re-dosing cannot reach it at any transfer, because the
+gap between the two immunological strata is smaller than the increment the plan needs. Re-dosing
+belongs in the regimen — it is free — but it cannot carry it.
 
-**What is not established** is the increment itself. Nobody has measured what any of the three levers
+**eBAT was filed under the wrong heading and has been moved** (§3g). It entered as a cytotoxic
+log-remover for route 8. Its originating group has since shown it works mainly by depleting
+suppressive stroma — benefiting a tumour it cannot kill — which makes it a lever on vaccine *height*,
+the quantity the whole plan turns on. It is not the best on transfer fraction. It is by a wide margin
+the shortest path from a positive result to a treatable dog, and that is why it should be measured
+first.
+
+**What is not established** is the increment itself. Nobody has measured what any of the four levers
 adds to vaccine height in this tumour. That is the single number the plan now stands or falls on —
 and unlike a decade of safety data, it can be measured in months in a syngeneic model that now
 exists.
@@ -1663,10 +1768,13 @@ and it is the difference between roughly 0.53 and 0.85 at ten years.
 ### What would change the answer
 
 1. **Measure what the microenvironment levers add to vaccine height** — the number the plan now
-   turns on (§3g). Four arms in ISOS-1: vaccine, vaccine + anti-PD-1, vaccine + high-dose losartan,
-   all three; read out as a growth-rate difference, not survival. Anything at or above 1.5× converts
-   a decade of dual kinase inhibition into a one-year induction; anything below it falls back to the
-   continuous-dosing plan rather than to nothing.
+   turns on (§3g). Five arms in ISOS-1: vaccine, vaccine + eBAT, vaccine + anti-PD-1, vaccine +
+   high-dose losartan, all four; read out as a growth-rate difference, not survival. Anything at or
+   above 1.4× converts a decade of dual kinase inhibition into a one- or two-year induction; anything
+   below it falls back to the continuous-dosing plan rather than to nothing. **The eBAT arm is the
+   one to run if only one can be run** — not because its transfer fraction is best (losartan's is)
+   but because it is the only lever whose exposure and tolerability in canine splenic HSA are already
+   settled, so a positive result is actionable rather than the start of a dose-finding programme.
 2. **Measure a vaccine's kill rate directly** instead of inferring it from survival. Serial imaging or
    ctDNA on a vaccinated cohort gives the progression-free readout the engine consumes natively, and
    removes the endpoint mismatch that makes the 1.7× shortfall a floor rather than a number.
@@ -1688,5 +1796,15 @@ and it is the difference between roughly 0.53 and 0.85 at ten years.
    remaining route-8 questions at once: whether the antigen loss is a deletion or silencing, whether
    the resistance is a mutation or a tolerant state, and therefore which of the two available closures
    applies.
-10. **Stain that same fraction for EGFR and uPAR.** The standard-of-care closure assumes eBAT reaches
-    the compartment; its targets there have never been measured.
+10. **Stain that same fraction for EGFR and uPAR** — now *secondary* rather than load-bearing (§3g).
+    The closure assumed eBAT reaches the compartment and that its targets are present there. Schulte
+    2025 shows eBAT benefits a tumour it cannot kill, acting on host uPAR⁺ stroma, so the closure no
+    longer depends on the compartment expressing anything. Worth measuring; no longer decisive.
+11. **Watch for two readouts that are already in the ground.** The randomised placebo-controlled GD3
+    liposomal vaccine trial in canine splenic HSA would be the first randomised vaccine trial in this
+    disease and is the direct fix for item 2 — read against the cautionary precedent that the
+    equivalent human trivalent ganglioside vaccine, in surgically disease-free sarcoma, raised titre
+    and moved neither RFS nor OS (PMID 36215947). And VACCS — 804 dogs, five years, 31 shared
+    frameshift neoantigens, given *preventively* — has completed without publishing. A working
+    preventive vaccine would not adjust this analysis; it would reframe what "vaccine height" is
+    for.

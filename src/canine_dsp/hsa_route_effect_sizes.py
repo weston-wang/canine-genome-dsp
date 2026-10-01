@@ -1,4 +1,4 @@
-"""What the three routes are actually worth, in the engine's units.
+"""What the routes to a taller vaccine are actually worth, in the engine's units.
 
 `hsa_alternative_approach` establishes that the plan turns on raising vaccine height from the
 measured 0.030/day to about 0.042/day -- an increment of 0.012/day -- and names three routes to it:
@@ -11,7 +11,12 @@ time-to-event and back out the exponential rate implied by it. Then it asks the 
 matters for a cross-species, cross-tumour extrapolation -- what FRACTION of the measured effect has
 to survive the transfer for the plan to work.
 
-The answer separates the three routes sharply, which the citation-level treatment did not.
+The answer separates the routes sharply, which the citation-level treatment did not.
+
+A fourth route was added after the fact. eBAT was classified elsewhere in this analysis as a
+cytotoxic log-remover against the route-8 compartment. Its originating group has since shown it
+works primarily by depleting suppressive stroma -- benefiting a tumour it cannot kill -- which makes
+it a lever on vaccine height rather than only a clearance term, and puts it in this module.
 
 See docs/HSA_DURABLE_RESPONSE.md.
 """
@@ -163,6 +168,83 @@ ROUTE_3_REDOSING = {
 }
 
 # =============================================================================================
+# ROUTE 4. DEPLETE THE SUPPRESSIVE STROMA -- eBAT, reclassified.
+#
+# eBAT entered this analysis in hsa_route8_alternatives as a CYTOTOXIC log-remover: a bispecific
+# angiotoxin credited with 5.2-7.8 logs against the antigen-null drug-resistant compartment, on the
+# strength of its trial in 23 dogs. That classification carried a stated open assumption -- that
+# eBAT's targets, EGFR and uPAR, are present ON that compartment, which nobody has measured.
+#
+# The originating group has now shown the assumption is largely beside the point. eBAT's antitumour
+# effect does not require the tumour cell to be killable by it.
+# =============================================================================================
+
+EBAT_READOUT_DAY = 21.0        # tumour volumes measured day 21 after inoculation
+EBAT_TREATMENT_WINDOW_DAYS = 16.0   # dosing ran day 5 to day 21, 3x weekly for 2 weeks
+EBAT_CONTROL_VOLUME_MM3 = 163.1
+EBAT_TREATED_VOLUME_MM3 = 55.5
+
+ROUTE_4_EBAT_STROMAL = {
+    "citation": "Schulte et al. 2025, J Pharmacol Exp Ther 392(9):103674, PMID 40914989, "
+                "doi 10.1016/j.jpet.2025.103674",
+    "design": "MC17 mouse fibrosarcoma, chosen BECAUSE the tumour cells are resistant to eBAT "
+              "(ED50 >50-100 nM against picomolar killing of other sarcomas), so any antitumour "
+              "effect must come from the microenvironment rather than direct cytotoxicity. "
+              "meBAT 50 ug/kg three times weekly for two weeks from day 5, in uPAR-knockout bone "
+              "marrow chimeras that separate host stroma from tumour.",
+    "result": {
+        "median_tumour_volume_mm3": (EBAT_CONTROL_VOLUME_MM3, EBAT_TREATED_VOLUME_MM3),
+        "tumour_volume_p": 0.03,
+        "tam_infiltration_percent": (14.7, 5.1),
+        "tam_p": 0.01,
+        "phagocytic_myeloid_percent": (3.6, 22.3),
+        "phagocytic_myeloid_p": 0.019,
+        "cd3_t_cell_percent": (0.13, 3.68),
+        "survival": "3 of 4 meBAT-treated uPAR-replete chimeras survived to endpoint against "
+                    "0 of 5 uPAR-deficient chimeras",
+    },
+    "the_mechanism_is_pinned_down": "every effect was reduced or abolished in uPAR-deficient bone "
+                                    "marrow chimeras. The target is host uPAR-expressing stroma, "
+                                    "not the tumour cell -- which is why a tumour eBAT cannot kill "
+                                    "still responds to it.",
+    "implied_rate_per_day": {
+        "readout_day": rate_from_burden_reduction(
+            EBAT_TREATED_VOLUME_MM3 / EBAT_CONTROL_VOLUME_MM3, EBAT_READOUT_DAY),
+        "treatment_window": rate_from_burden_reduction(
+            EBAT_TREATED_VOLUME_MM3 / EBAT_CONTROL_VOLUME_MM3, EBAT_TREATMENT_WINDOW_DAYS),
+    },
+    "why_this_belongs_beside_the_other_three": "the effects measured are TAM depletion and T-cell "
+                                               "infiltration. That is the same suppression Gulay "
+                                               "2022 (PMID 35136176) measured as capping vaccine "
+                                               "potency in canine HSA -- CD204+ PD-L1+ macrophages "
+                                               "excluding T cells. Routes 1 and 2 act on that "
+                                               "suppression by releasing the brake and blocking "
+                                               "recruitment; this one depletes the cells outright.",
+    "what_makes_it_better_placed_than_the_other_three": "its RATE is as cross-species as losartan's "
+                                                        "-- a mouse fibrosarcoma. Everything else "
+                                                        "about it is not. eBAT has measured exposure "
+                                                        "at a tolerated canine dose, measured "
+                                                        "tolerability, and a positive trial in 23 "
+                                                        "dogs with stage I-II splenic "
+                                                        "hemangiosarcoma, in the adjuvant setting, "
+                                                        "in the single-early-cycle sequence the "
+                                                        "finite-course simulation independently "
+                                                        "derived. No other candidate lever clears "
+                                                        "exposure and duration IN THIS DISEASE.",
+    "what_it_rescues": "hsa_route8_alternatives assumed eBAT reaches the antigen-null drug-resistant "
+                       "compartment and flagged the EGFR/uPAR stain on that compartment as the check "
+                       "on whether the 0.830 closure is real. A drug that benefits a tumour it "
+                       "cannot kill does not need the compartment to express its targets. That "
+                       "experiment drops from load-bearing to secondary.",
+    "the_limits": "a mouse fibrosarcoma, not canine hemangiosarcoma, so the rate carries no better "
+                  "than losartan's. The volume conversion assumes a constant rate difference over "
+                  "the interval, which the dosing schedule (two weeks of a ten-week model) does not "
+                  "honour. And eBAT's own intensification trial was negative (Borgatti 2021, PMID "
+                  "32187827) -- three cycles at a shortened interval produced more toxicity and less "
+                  "benefit, so this lever cannot simply be turned up.",
+}
+
+# =============================================================================================
 # THE QUESTION THAT DECIDES IT: how much has to transfer?
 #
 # Every anchor above is cross-species or cross-tumour or both, so the absolute rates cannot be
@@ -194,6 +276,12 @@ TRANSFER_REQUIRED = {
             transfer_required(max(ROUTE_3_REDOSING["implied_rate_per_day"].values())),
             transfer_required(min(ROUTE_3_REDOSING["implied_rate_per_day"].values()))),
     },
+    "route_4_ebat_stromal": {
+        "effect_span_per_day": _span(ROUTE_4_EBAT_STROMAL["implied_rate_per_day"]),
+        "transfer_needed": (
+            transfer_required(max(ROUTE_4_EBAT_STROMAL["implied_rate_per_day"].values())),
+            transfer_required(min(ROUTE_4_EBAT_STROMAL["implied_rate_per_day"].values()))),
+    },
 }
 
 THE_THREE_ROUTES_ARE_NOT_EQUIVALENT = {
@@ -213,6 +301,17 @@ THE_THREE_ROUTES_ARE_NOT_EQUIVALENT = {
                                       "add, and on a ramp rather than a cliff every increment "
                                       "counts. It should be in the regimen. It should not be relied "
                                       "on.",
+    "route_4": "needs roughly 18-23%, which places it between losartan and anti-PD-L1 on the "
+               "transfer axis. What separates it is not the rate -- that is a mouse fibrosarcoma, "
+               "as distant as losartan's -- but that it is the only one of the four with measured "
+               "exposure, measured tolerability and a positive trial in canine splenic "
+               "hemangiosarcoma itself.",
+    "the_correction_route_4_forces": "eBAT was classified in this analysis as a cytotoxic "
+                                     "log-remover for route 8. Its originating group has since "
+                                     "shown it works primarily by remodelling the microenvironment, "
+                                     "which makes it a lever on vaccine HEIGHT -- the quantity the "
+                                     "whole plan turns on -- and not only a one-off clearance term. "
+                                     "It was filed in the wrong section.",
 }
 
 # The two remaining routes are not independent either, and there is canine evidence for the link.
@@ -241,16 +340,75 @@ ROUTES_1_AND_2_ARE_MECHANISTICALLY_COUPLED = {
                                                 "the duration criterion outright.",
 }
 
+# What the checkpoint lever now costs, which is more than the 51-dog study implied.
+WHAT_THE_CHECKPOINT_LEVER_COSTS = {
+    "the_figure_this_analysis_used": "gilvetmab in 51 client-owned dogs, serious adverse events in "
+                                     "5.9%, one of which was tumour haemorrhage (Chon 2026, "
+                                     "PMID 42247661).",
+    "the_figure_that_has_since_appeared": "Martin, Thamm & Weishaar 2026, Vet Comp Oncol, "
+                                          "PMID 42680555, doi 10.1111/vco.70110: gilvetmab with "
+                                          "hypofractionated radiotherapy in 18 dogs with mast cell "
+                                          "tumour. Nine adverse events attributed to gilvetmab in "
+                                          "seven dogs (39%), five dogs (28%) with Grade 3, and the "
+                                          "authors conclude the combination 'did not provide "
+                                          "durable tumour control' and that 'the AE profile "
+                                          "warrants further evaluation'.",
+    "why_it_is_not_a_straight_replacement": "mast cell tumour with concurrent radiotherapy is not "
+                                            "post-splenectomy hemangiosarcoma, and radiation "
+                                            "contributes its own toxicity. The 5.9% figure remains "
+                                            "the right one for the antibody given alone.",
+    "what_it_does_change": "the claim that a q14-28d antibody sits in the same tolerability class "
+                           "as a q60d booster was resting on the monotherapy figure alone. In "
+                           "combination the profile is worse, and this plan proposes the antibody "
+                           "in combination. The claim is weakened, not withdrawn -- and it "
+                           "compounds the tumour-haemorrhage signal already recorded as open in a "
+                           "tumour made of endothelium.",
+    "the_offsetting_development": "gilvetmab now holds conditional licensure in the United States "
+                                  "and is the only commercially available veterinary checkpoint "
+                                  "inhibitor (Chon, Greene & Stock 2026, JAVMA, PMID 42710546, "
+                                  "doi 10.2460/javma.26.06.0517). The plan had treated it as a "
+                                  "trial agent.",
+}
+
+# A randomised negative in the matched human setting, which the vaccine calibration should carry.
+THE_PRECEDENT_THAT_CUTS_AGAINST_THE_VACCINE_CALIBRATION = {
+    "citation": "randomised phase II trivalent ganglioside vaccine (GM2/GD2/GD3) with OPT-821 "
+                "against OPT-821 alone, metastatic sarcoma rendered disease-free by surgery, "
+                "PMID 36215947, doi 10.1016/j.ejca.2022.09.003",
+    "the_finding": "a sustained serologic response to vaccination was induced, and there was NO "
+                   "difference in recurrence-free or overall survival between arms.",
+    "why_it_is_the_right_comparison": "the setting is the one this plan targets -- measurable "
+                                      "disease removed by surgery, vaccine given against residual "
+                                      "burden. And a randomised, placebo-controlled GD3 liposomal "
+                                      "vaccine trial is now running in canine splenic "
+                                      "hemangiosarcoma, so the same antigen class is about to be "
+                                      "tested in the actual disease.",
+    "what_it_does_to_the_calibration": "the 0.030/day vaccine height is back-calculated from "
+                                       "survival gains in two single-arm or historical-control "
+                                       "trials. This is a randomised trial in the matched setting "
+                                       "where immunogenicity rose and survival did not. It does not "
+                                       "invalidate the peptide-vaccine figure -- different antigen "
+                                       "class, different species -- but it is the strongest "
+                                       "available evidence that immunogenicity in this setting need "
+                                       "not convert, which is exactly the endpoint mismatch this "
+                                       "analysis names.",
+}
+
 VERDICT = {
-    "the_question": "can the three routes be backed with real numbers rather than citations?",
-    "the_answer": "two of them, yes, with margin. The third is quantified and found insufficient "
-                  "alone -- which is itself a result the citation-level treatment could not have "
-                  "produced.",
+    "the_question": "can the routes be backed with real numbers rather than citations?",
+    "the_answer": "three of the four, yes, with margin. Re-dosing is quantified and found "
+                  "insufficient alone -- which is itself a result the citation-level treatment "
+                  "could not have produced.",
     "the_required_increment": REQUIRED_INCREMENT,
     "what_is_genuinely_established": "each route's published result converts to a per-day rate by "
                                      "the same method already used for the MEK anchor, and the "
-                                     "required increment sits inside the measured envelope for two "
-                                     "of the three with a large tolerance for transfer loss.",
+                                     "required increment sits inside the measured envelope for "
+                                     "three of the four with a large tolerance for transfer loss.",
+    "which_one_to_measure_first": "eBAT. Not because its transfer fraction is the best -- losartan's "
+                                  "is -- but because it is the only lever whose exposure and "
+                                  "duration are already settled in canine splenic hemangiosarcoma, "
+                                  "so a positive increment would be immediately actionable rather "
+                                  "than the start of a dose-finding programme.",
     "what_is_not": "no measurement exists of any of these levers acting on VACCINE kill, in "
                    "hemangiosarcoma, in a dog. Converting a burden reduction into a rate is "
                    "arithmetic, not evidence that the rate carries across species and tumour. The "
@@ -321,6 +479,7 @@ _ROUTE_EFFECTS = {
     "route_1_checkpoint": ROUTE_1_CHECKPOINT["implied_rate_per_day"],
     "route_2_losartan": ROUTE_2_LOSARTAN["implied_rate_per_day"],
     "route_3_redosing": ROUTE_3_REDOSING["implied_rate_per_day"],
+    "route_4_ebat_stromal": ROUTE_4_EBAT_STROMAL["implied_rate_per_day"],
 }
 
 
@@ -356,6 +515,11 @@ WHAT_THE_MODEL_SAYS_ABOUT_PARTIAL_TRANSFER = {
                          "now expressed as a durability rather than a ratio.",
     "route_3_at_full": "re-dosing, even at full transfer of its optimistic effect, does not reach "
                        "the reference. The engine and the arithmetic agree.",
+    "route_4_at_a_quarter": "eBAT's conservative effect at a quarter transfer lands above the "
+                            "drug-forever reference, alongside losartan and ahead of the "
+                            "checkpoint route. The distinguishing fact is not the durability "
+                            "number but that this is the only lever whose exposure and duration "
+                            "are already settled in this disease.",
     "why_this_is_worth_having": "the transfer fractions answer a yes/no question. This answers the "
                                 "question a trial designer actually has: if the effect is half what "
                                 "was measured, what does the dog get? On a ramp that has an answer, "
