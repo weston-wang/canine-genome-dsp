@@ -76,4 +76,49 @@ loss is MEASURED in dogs (16-27%), not only transferred.
 
 ## C. Results with the widened universe
 
-(Filled in from the search below.)
+**Claim, stated as rule 9 requires:** within a catalogue of about 28 agent entries (the count differs by lineage and compartment) and 23 escapes (the original 14 plus 9 from
+the audit; adhesion protection run separately as a sensitivity), at sound grades (measured, derived, outcome-calibrated or
+transferred with a written basis), searching every combination of up to 4 agents (5 for the first pass), requiring
+closure of EVERY escape whether or not it is likely present, and counting a regimen as closing only if the treatment
+clock clears every lineage inside the evidence-limited windows. All of it is MODELLED. Nothing here is shown in a dog.
+
+| compartment | agents allowed | does any combination close every escape? |
+|---|---|---|
+| B-cell body | licensed + off-label | **No.** Best margin +0.012 /day, response then relapse from the quiescent efflux-high progenitor (E5) |
+| B-cell body | + trial-stage | **Yes, 39 combinations of 3-4 agents.** All 3-agent ones contain the autologous vaccine, whose credit is the weakest input here. A 4-agent one without the vaccine also clears: prednisolone + anti-CD20 + HCQ + verdinexor (margin +0.201) |
+| B-cell body | + buildable (CAR-T specification) | Yes, 304 combinations, down to 2 agents (verdinexor + persistence-engineered CAR-T). The CAR-T does not exist |
+| T-cell body | licensed + off-label, or + trial | **No** (best +0.012) |
+| T-cell body | + buildable | Yes, 166 combinations, all containing the CD7 or CD5/CD7 CAR-T, which does not exist |
+| **Brain, B-cell** | **any tier, including buildable** | **No.** Best margin +0.062 /day; response then relapse from E5 (never clears inside the window) |
+| **Brain, T-cell** | **any tier, including buildable** | **No.** Same |
+
+**What changed from the first result and why.** The earlier four-part B-cell program (HCQ + verdinexor + continuous
+intrathecal cytarabine + anti-CD20) no longer closes. Two audit escapes break it. E5 (a quiescent, pump-high progenitor
+that is measured in dogs as a hierarchy) is missed by every division-gated agent and every pump substrate, which leaves
+only prednisolone, the antibody and CAR-T able to reach it, and almost none of those reach the brain. E2 (loss of the enzyme
+that activates cytarabine) removes the brain's cytarabine arm on its own. The first result was closure within 14 escapes,
+and that was its limit.
+
+**Vaccine, tested as asked.** The autologous vaccine (OUTCOME 0.055 /day, from a 2.55x time-to-progression ratio against weak
+controls) is load-bearing in every 3-agent B-cell body set. The antibody + HCQ + vaccine set clears the clock only at full vaccine credit (margin +0.064); at 0.5, 0.25 and 0 of that credit it
+does not clear (+0.036, +0.022, +0.009), so closure there rests on a credit that the
+dog data (3-year survival 10% vs 8%) do not support. The vaccine gives nothing against persisters or the brain
+by construction.
+
+**Fault tolerance.** None of the body sets tested clears with all potencies halved, and none clears after removing any one agent
+(the same weakness as before, now across the widened set).
+
+**Design requirement for the brain (and for any closure).** Adding one hypothetical agent that is not division-gated, not a
+pump substrate and not dependent on CD20/CD19 to HCQ + verdinexor (+ the intrathecal pump for the brain) closes the widened set
+only if it kills at least **0.10 /day** with full access, **0.19 /day** at half access (brain), and **not at all at 10% access**.
+No existing agent in the sound pool meets that. A T-cell effector that crosses the barrier and does not need a pump-
+vulnerable or division-gated mechanism is the class that would. **Allogeneic transplant with graft-versus-lymphoma is the only real-data route
+in this universe that plausibly belongs to that class** (T-cell mediated, not division-gated, not a pump substrate, not
+dependent on CD20/CD19; 8 of 9 first-remission DLA-identical dogs lived over 4 years without lymphoma death). Whether it
+delivers 0.10 /day in the brain is untested: there is no canine CNS or minimal-residual-disease data, no T-cell-lymphoma series,
+it needs a DLA-identical donor, and 7-55% of transplanted dogs die of the procedure depending on era.
+
+**Not yet done.** (1) Exposure data for HDAC inhibitors, bortezomib, flavopiridol and PI3K-delta inhibitors, so they could
+be entered as derived or transferred kills (sweep re-running). (2) The CD52 antibody's primary source. (3) Anything outside the model:
+unattributed multidrug resistance (E12, which bounds every closure claim), eye and testis compartments, late second cancers.
+(4) A real answer on 10 years: no dog has 10-year follow-up; the longest transplant survivor is about 8 y.

@@ -128,7 +128,10 @@ _POTENCY_TEXT = {
     "high-dose methotrexate": "ASSUMED (human transfer).",
     "intrathecal cytarabine": "ASSUMED.",
     "craniospinal radiotherapy": "ASSUMED (radiobiology transfer).",
-    "anti-PD-1 / anti-PD-L1 checkpoint blockade": "ASSUMED (melanoma transfer).",
+    "anti-PD-1 / anti-PD-L1 checkpoint blockade": "MEASURED-NEGATIVE: gilvetmab, 15 dogs with stage III-V "
+                                                  "lymphoma, NO objective responses (PMID 42247661); canine PD-1 is low "
+                                                  "or absent on T-cell lymphoma cells (PMID 29380929). The earlier "
+                                                  "ASSUMED 0.04 /day melanoma transfer is contradicted.",
     "hydroxychloroquine (autophagy)": "HINGE: tumour ~31 uM measured (100x plasma); closes only if the "
                                       "canine-lymphoma IC50 is <= ~100 uM. IC50 NOT FOUND.",
     "acalabrutinib (BTK)": "ASSUMED: BTK occupancy >90% measured but killing 'modest'; no cell-killing "
@@ -164,6 +167,7 @@ def _ground(a: Agent, immunophenotype: str) -> Agent:
         kw["vulnerable_to"] = frozenset({"mgmt_repair"})
     if a.name.startswith("anti-PD-1"):
         kw["vulnerable_to"] = frozenset({"antigen_presentation"})
+        kw["potency"] = 0.0     # measured-negative in dog lymphoma (PMID 42247661); see _POTENCY_TEXT
     if a.name.startswith("hydroxychloroquine"):
         h = gi.hcq_transfer()
         kw["potency"] = h.kill_per_day
