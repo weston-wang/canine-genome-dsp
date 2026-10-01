@@ -47,7 +47,7 @@ any kind) / **OUTSIDE MODEL** (cannot be expressed as an agent or escape here).
 | Stem-cell product | mesenchymal cells, iPSC products, gene-modified HSC | EVALUATED, EXCLUDED | no anti-lymphoma role; MSC did not prevent GVHD; iPSC only red cells/platelets |
 | Radiation | craniospinal, half-body, TBI | IN MODEL | derived from canine clonogenic survival; half-body has real 2- and 5-year remission data |
 | Delivery | continuous intrathecal pump | IN MODEL (buildable) | transfer |
-| Sanctuary | eye/uvea, testis | OUTCOME MODEL | 11.6% ocular involvement in disseminated necropsy dogs; no access data. Not modelled |
+| Sanctuary | eye/uvea, testis | OUTSIDE MODEL | 11.6% ocular involvement in disseminated necropsy dogs; no access data. Not modelled |
 
 ## B. Escape universe
 
