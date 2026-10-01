@@ -86,6 +86,16 @@ Concrete failures (so the rules have a reason):
    listing absences. A number that exists but is never used to assert a closure (an inert
    placeholder) is also not a gap — say which code path uses it.
 
+12. **Report closure as a decidable conjunction, never as odds.** The user: *"I don't want odds of
+   achieving 10 years, the whole point about looking at all mechanisms and escapes is to not leave
+   it to odds."* A probability is the right output only when failure modes are unenumerated;
+   enumerating them is what makes the question decidable. So the headline is
+   `deterministic_closure.conjunction()` — every route CLOSED or OPEN at each site, plus the finite
+   list of conditions and each one's status. `emergence.py`'s P(10-year) is a SENSITIVITY statement
+   and must never be quoted as the verdict (`deterministic_closure.emergence_is_secondary()` says
+   why: it charges a reroute as terminal although the ledger names a successor for every reroute,
+   and it converts "every route open, margin −0.049/day" into a number that reads like a good bet).
+
 ## Standing standards for the cancer durable-response work (the user's words)
 
 - "make sure every mechanism and every escape is closed by either real data or rigorous model, potency,
