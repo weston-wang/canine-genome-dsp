@@ -153,3 +153,12 @@ def test_joint_b_cell_program_is_model_robust_only_at_the_human_grounded_central
     assert central["clears"] and central["halved_clears"] and central["any_one_removed_clears"]
     low = joint_report("B", names, **LOW)
     assert not low["any_one_removed_clears"], "at the low kill and duty the program is not fault tolerant"
+
+
+def test_escape_confirmation_matrix_every_row_closed_with_three_covering_agents():
+    from canine_dsp.lymphoma_joint import B_PROGRAMS, T_PROGRAMS, escape_matrix
+    for ip, names, n_rows in (("B", B_PROGRAMS["B-cell, 7 agents"], 44), ("T", T_PROGRAMS["T-cell, 5 agents"], 42)):
+        rows = escape_matrix(ip, names)
+        assert len(rows) == n_rows          # 22 or 21 escapes x 2 compartments (the antigen set differs by lineage)
+        assert all(r["closed"] for r in rows), [r["escape"] for r in rows if not r["closed"]]
+        assert min(r["n_cover"] for r in rows) >= 3

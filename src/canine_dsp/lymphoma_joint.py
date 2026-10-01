@@ -109,3 +109,35 @@ T_PROGRAMS = {
                                                  "CD7-directed CAR-T, intra", "CD5 + CD7 dual-target CAR-T, intra",
                                                  "verdinexor", "venetoclax"),
 }
+
+
+def escape_matrix(ip: str, prefixes, *, kill: float = CENTRAL["kill"], duty: float = CENTRAL["duty"]) -> list:
+    """One row per escape per compartment for a program: the agents that reach it after toxicity de-rating, the strongest
+    evidence grade among them, the number of independent covering agents, and the net margin (kill minus the growth bar, or
+    the persister margin). A row is CLOSED only if at least one agent reaches it and the margin is positive."""
+    pools = _pools(ip, kill, duty)
+    esc = _escapes(ip)
+    names = list(dict.fromkeys(_resolve(p, pools) for p in prefixes))
+    rows = []
+    order = {"MEASURED": 0, "DERIVED": 1, "PARTIAL": 2, "TRANSFER": 3, "TRANSFER-OUTCOME": 4, "OUTCOME": 5, "BRACKET": 6}
+    for comp in (SYSTEMIC, CNS):
+        reg = []
+        for n in names:
+            if n in pools[comp]:
+                reg.append(pools[comp][n])
+            else:
+                other = pools[CNS if comp == SYSTEMIC else SYSTEMIC][n]
+                reg.append(replace(other, access=0.0))
+        d_agents, _, _ = G.derate(reg, G.gi.EFFLUX_CO_DOSE_MULTIPLIER_CANINE_PROXY)
+        for e in esc:
+            if e.requires_division:
+                cover = [a for a in d_agents if a.reaches(e)]
+            else:
+                cover = [a for a in G._effective_agents_for(d_agents, e) if a.effective_kill > 0.0 and a.covers(e)]
+            grades = [G.potency_grade(next(x for x in reg if x.name == a.name)) for a in cover]
+            best = min(grades, key=lambda g: order.get(g, 9)) if grades else "-"
+            margin = G.margin_for(d_agents, e)
+            rows.append({"compartment": comp, "escape": e.name, "covering": [a.name for a in cover],
+                         "n_cover": len(cover), "best_grade": best, "margin": margin,
+                         "closed": bool(cover) and margin > 0.0})
+    return rows
