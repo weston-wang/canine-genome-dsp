@@ -258,21 +258,45 @@ ROUTES_CLOSED_BY_EXISTING_ARGUMENTS = {
                                 "myeloid cells. So two of the four levers already act on this "
                                 "compartment without having been credited for it.",
         "grade": TRANSFERRED,
-        "what_stays_open": "regulatory T cells specifically are not addressed by any component of "
-                           "the plan, and have not been quantified in canine hemangiosarcoma.",
+        "the_treg_lever_that_was_already_in_the_record_uncredited": "Maekawa 2022 (PMID 35665759), "
+            "already cited in this analysis for the CCL2 coupling, also reports that PGE2 predicted "
+            "RESISTANCE to checkpoint blockade in dogs, and that meloxicam plus the antibody "
+            "enhanced Th1 cytokine production by canine PBMCs. PGE2 is the canonical axis for "
+            "inducing and sustaining regulatory T cells, so COX-2 inhibition is a Treg-directed "
+            "lever -- and meloxicam is already given to dogs indefinitely, so it clears the "
+            "duration criterion outright. The analysis had this in a parenthetical and never "
+            "credited it against the Treg compartment.",
+        "what_stays_open": "no measurement exists of the regulatory T-cell burden in canine "
+                           "hemangiosarcoma, and no effect size for COX-2 inhibition on it. The "
+                           "lever is identified and tolerable; its magnitude is unmeasured.",
     },
-    "clonal_evolution_to_a_new_driver": {
+    "clonal_evolution_to_a_new_resistance_driver": {
         "the_threat": "the engine carries a fixed clone set and a fixed mutation matrix. A driver "
                       "that does not exist on day zero cannot arise in it.",
         "why_it_partly_closes": "the vaccine's coverage is ANTIGEN-based, not driver-based. A cell "
                                 "that acquires a new driver is still visible to the vaccine unless "
                                 "it also loses the antigen -- which is routes 4 and 8, already "
-                                "accounted. The bar is set by the fastest clone, and a new driver "
-                                "faster than 0.052/day would raise it.",
-        "grade": ASSUMED,
-        "why_assumed": "no measurement bounds how much faster a newly arising clone could be. The "
-                       "argument that the vaccine still sees it is sound; the claim that the bar "
-                       "would not move is not supported by anything.",
+                                "accounted.",
+        "the_bound_that_closes_it_properly": "a RESISTANCE lesion cannot make a clone grow faster "
+                                             "than it would with no drug present at all, because "
+                                             "the drug only ever subtracts from the untreated rate. "
+                                             "The worst case is therefore already a row in the bar "
+                                             "table of section 1: 'no drug at all' = 0.0550/day "
+                                             "against the modelled 0.0515. A novel resistance "
+                                             "mechanism, however exotic, buys at most +6.8% on the "
+                                             "bar.",
+        "what_that_costs_the_plan": "the vaccine requirement scales with the bar, so 1.40x against "
+                                    "the modelled bar becomes 1.50x against the no-drug ceiling -- "
+                                    "which is still inside the measured ramp (1.50x returns 0.992 "
+                                    "at a one-year stop). The plan survives the worst resistance "
+                                    "clone that can exist, at the cost of one rung.",
+        "grade": TRANSFERRED,
+        "what_this_does_NOT_close": "a driver that raises INTRINSIC proliferative rate rather than "
+                                    "relieving drug pressure -- a genuinely more aggressive clone "
+                                    "than its parent. That is a different event from resistance and "
+                                    "the no-drug row does not bound it. Mitigation, not closure: "
+                                    "the requirement degrades along the ramp rather than off a "
+                                    "cliff, and such a clone is still antigen-visible.",
     },
 }
 
@@ -402,8 +426,9 @@ VERDICT = {
     "what_is_still_ASSUMED_and_therefore_still_open": (
         "the magnitude of the increment in canine hemangiosarcoma specifically",
         "whether the four levers stack or overlap",
-        "clonal evolution to a driver faster than the current bar",
-        "regulatory T cells, unaddressed by any component",
+        "a driver raising INTRINSIC proliferative rate (resistance drivers are now bounded)",
+        "the magnitude of COX-2 inhibition against the regulatory T-cell compartment",
+        "the per-dog brain-metastasis rate in canine HSA -- route 9's weight, not its existence",
         "the post-remission rupture hazard, still swept rather than measured",
         "the existence of the route-8 compartment at all",
     ),

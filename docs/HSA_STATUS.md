@@ -105,9 +105,16 @@ hits.** Module `hsa_escape_audit`, tests `test_hsa_escape_audit.py`.
 | **11** | Competing all-cause mortality | **MEASURED** — mean age at diagnosis 9.6 y against breed medians 10.3–12.5 y | n/a — not an escape | A 10-yr disease-free response from diagnosis needs the dog to reach ~20. The reachable goal is *no recurrence for remaining natural life*; the 3,650-day horizon is a conservative proxy. **Makes the target easier, not harder** |
 
 Closed by arguments already in the analysis: **dormancy** (immune killing is not growth-dependent),
-**B2M/TAP loss** (the strongest case for the missing-self backup), **Tregs/MDSCs** (CCR2 and uPAR
-already act here — though Tregs specifically are unaddressed). **Clonal evolution to a new driver
-stays ASSUMED**: nothing bounds how much faster a newly arising clone could be.
+**B2M/TAP loss** (the strongest case for the missing-self backup), **Tregs/MDSCs** (CCR2 and uPAR act
+here uncredited — and meloxicam/PGE2, already in the record as a parenthetical, is a Treg-directed
+lever that clears duration outright).
+
+**Clonal evolution to a new resistance driver is now bounded, not assumed.** A resistance lesion
+cannot outrun the untreated growth rate, because the drug only ever subtracts — so the worst case is
+already a row in §1's bar table: **no drug at all = 0.0550/day against the modelled 0.0515, at most
++6.8%.** That pushes the vaccine requirement from 1.40× to 1.50×, still inside the measured ramp
+(0.992 at a one-year stop). What stays **ASSUMED** is a driver raising *intrinsic* proliferative rate,
+which the no-drug row does not bound.
 
 **The keyword trap worth remembering:** "sanctuary" appears 20× in the narrative document and every
 occurrence is *phenotypic*. A keyword count scores anatomical sanctuary as covered. It was absent.
@@ -153,7 +160,9 @@ whether four mechanistically coupled levers stack or overlap.
 10. **Vaccine take rate against age** (route 10). Nobody has measured a canine cancer vaccine's take
     as a function of age, and no canine study has followed vaccine-induced immunity anywhere near a
     decade. The longest booster evidence here is a two-monthly schedule over a trial of months.
-11. **Regulatory T cells** — unaddressed by any component of the plan and unquantified in canine HSA.
+11. **Regulatory T cells** — a lever exists (COX-2 inhibition via the PGE2 axis, meloxicam already
+    given indefinitely) but its magnitude against this compartment is unmeasured, and the Treg burden
+    in canine HSA has never been quantified.
 12. **Whether the four levers stack or overlap.** Routes 1 and 2 are mechanistically coupled and eBAT
     depletes the same macrophages; four coupled levers is not four times one. The five-arm ISOS-1
     design must be powered for overlap.

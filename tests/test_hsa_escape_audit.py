@@ -210,10 +210,32 @@ def test_the_verdict_keeps_an_open_list_and_it_is_not_empty():
     assert len(audit.VERDICT["what_is_still_ASSUMED_and_therefore_still_open"]) >= 5
 
 
-def test_clonal_evolution_is_graded_assumed_rather_than_argued_closed():
-    entry = audit.ROUTES_CLOSED_BY_EXISTING_ARGUMENTS["clonal_evolution_to_a_new_driver"]
-    assert entry["grade"] == audit.ASSUMED
-    assert "not supported by anything" in entry["why_assumed"]
+def test_resistance_driver_evolution_is_bounded_by_the_no_drug_row():
+    """A resistance lesion cannot outrun the untreated rate; that row is already in the bar table."""
+    entry = audit.ROUTES_CLOSED_BY_EXISTING_ARGUMENTS["clonal_evolution_to_a_new_resistance_driver"]
+    assert entry["grade"] == audit.TRANSFERRED
+    assert "0.0550" in entry["the_bound_that_closes_it_properly"]
+    assert "6.8%" in entry["the_bound_that_closes_it_properly"]
+
+
+def test_the_bound_costs_exactly_one_rung_on_the_ramp():
+    cost = audit.ROUTES_CLOSED_BY_EXISTING_ARGUMENTS[
+        "clonal_evolution_to_a_new_resistance_driver"]["what_that_costs_the_plan"]
+    assert "1.40x" in cost and "1.50x" in cost
+    # and that rung must actually exist in the simulated grid
+    assert eff.durability_at_increment(0.015, stop_year=1) > 0.99
+
+
+def test_the_intrinsic_proliferation_case_is_NOT_claimed_closed():
+    entry = audit.ROUTES_CLOSED_BY_EXISTING_ARGUMENTS["clonal_evolution_to_a_new_resistance_driver"]
+    assert "Mitigation, not closure" in entry["what_this_does_NOT_close"]
+
+
+def test_the_treg_lever_is_credited_and_its_magnitude_is_not_claimed():
+    entry = audit.ROUTES_CLOSED_BY_EXISTING_ARGUMENTS[
+        "regulatory_T_cells_and_myeloid_derived_suppressor_cells"]
+    assert "meloxicam" in entry["the_treg_lever_that_was_already_in_the_record_uncredited"]
+    assert "magnitude is unmeasured" in entry["what_stays_open"]
 
 
 def test_no_argument_in_this_module_is_graded_measured():
