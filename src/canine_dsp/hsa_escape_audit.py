@@ -453,6 +453,100 @@ THE_INTRINSIC_GROWTH_CEILING = {
                             "rather than in an implant -- which is the same measurement that "
                             "experiment E4 (a vaccine's kill rate from serial imaging or ctDNA) "
                             "would produce as a by-product.",
+    "SUPERSEDED_BY": "THE_INTRINSIC_GROWTH_CEILING_CLOSES -- see below. The grade above was the "
+                     "honest one before the two tests in that block were run. It is kept rather "
+                     "than deleted so the sequence is visible.",
+}
+
+# =================================================================================================
+# AND THEN IT CLOSED. Two tests, neither of which needs new data.
+# =================================================================================================
+
+CLINICAL_MEDIANS_DAYS = {
+    "surgery_alone": 48,             # Wendelburg 2015, PMID 26225611
+    "splenic_hsa_series": 60,        # reported range 8-108
+    "surgery_plus_doxorubicin": 173,
+}
+
+
+def predicted_median_if_rate_were(observed_median_days: float, true_rate: float,
+                                  modelled_bar: float = MODELLED_BAR) -> float:
+    """Median that would be observed if the true whole-animal rate were `true_rate`.
+
+    Time-to-event is inversely proportional to net growth at a fixed burden ratio, so the predicted
+    median scales as modelled_bar / true_rate. Calibration-free: it needs no assumption about how
+    many cells are left behind, because that cancels.
+    """
+    if observed_median_days <= 0 or true_rate <= 0 or modelled_bar <= 0:
+        raise ValueError("all three arguments must be positive")
+    return float(observed_median_days * modelled_bar / true_rate)
+
+
+THE_INTRINSIC_GROWTH_CEILING_CLOSES = {
+    "test_1_the_clinical_record_excludes_the_rate_outright": {
+        "method": "time-to-event is inversely proportional to net growth at a fixed burden ratio, "
+                  "so if the whole-animal rate WERE the tumorgraft rate, every observed median "
+                  "would be shorter by exactly the ratio of rates. The burden left behind cancels, "
+                  "so this needs no calibration.",
+        "predictions": {
+            "surgery_alone": (17, 23),           # against an observed 48
+            "splenic_hsa_series": (22, 28),      # against an observed 60
+            "surgery_plus_doxorubicin": (62, 81),  # against an observed 173
+        },
+        "the_result": "no reported median for this disease is that short. The tumorgraft rate is "
+                      "EXCLUDED as a typical whole-animal net growth rate by the measured clinical "
+                      "record -- which is real data, in dogs, in this disease.",
+        "what_it_does_not_exclude": "a RARE clone growing at that rate in some dogs. Medians "
+                                    "constrain the typical rate, and the short tail of the reported "
+                                    "range (8 days) cannot be distinguished from presentation with "
+                                    "massive disease. Test 2 is what handles the rare case.",
+    },
+    "test_2_the_symmetry_that_had_been_sitting_in_the_record": {
+        "the_observation": "the tumorgraft ceiling and the measured kill of the MEK + TORC1/2 "
+                           "combination are THE SAME NUMBER, from THE SAME EXPERIMENT. "
+                           "hsa_margin_analysis.IN_VIVO_DERIVED_EFFECT_SIZE records "
+                           "implied_vehicle_net_growth_per_day = (0.1096, 0.1427) and "
+                           "implied_growth_removed_per_day = (0.110, 0.143). Andersen measured the "
+                           "combination ARRESTING a tumour growing at the ceiling rate.",
+        "why_that_is_not_a_coincidence": "it is the definition of what the experiment showed. The "
+                                         "combination took a tumorgraft from 'vehicle reached 1000 "
+                                         "mm3 by day 21' to 'virtually no growth by week 3'. A "
+                                         "clone at the ceiling is, by that measurement, held at net "
+                                         "zero by the combination.",
+        "the_consequence": "during the induction the drug offsets the fast clone's intrinsic rate, "
+                           "so the VACCINE applies on top of it as pure negative growth. A "
+                           "one-year induction then delivers vaccine_kill x 365 of clearance: 4.76 "
+                           "logs at the measured 0.030/day, and 6.66 logs at the 1.40x the plan "
+                           "already requires.",
+        "extinction_probability_over_a_one_year_induction": {
+            # seeded clone size -> (measured 0.030 vaccine, 1.40x 0.042 vaccine)
+            700: (0.998, 1.000),
+            7_000: (0.979, 1.000),
+            70_000: (0.808, 0.997),
+            700_000: (0.118, 0.966),
+        },
+        "the_result": "at the vaccine height the plan already requires, a one-year induction clears "
+                      "a newly arisen fast clone with probability 0.966-1.000 across four orders of "
+                      "magnitude of seeding size. At the un-boosted measured height it is 0.118 to "
+                      "0.998 -- which is another way of saying the 1.40x requirement is doing real "
+                      "work here, not just in the headline.",
+    },
+    "the_grade_after_both_tests": TRANSFERRED,
+    "the_three_conditions_this_closure_carries": (
+        "the fast clone must be drug-SENSITIVE. If it is also drug-resistant the threat collapses "
+        "into route 8 -- which has its own closure, doxorubicin plus one early eBAT cycle.",
+        "the seeding size is swept (700 to 700,000 cells), not measured. Nobody has measured how "
+        "often a new driver arises in residual canine hemangiosarcoma.",
+        "a clone arising AFTER the induction ends faces the vaccine alone, which cannot hold it "
+        "(it would need 3.0-3.9x). What suppresses that case is the mechanism already in the "
+        "record: escape seeding is proportional to the surviving burden, so a taller vaccine "
+        "crushes the population that would throw off the variant. That argument is reused here, "
+        "not newly invented -- and it is an argument, not a measurement.",
+    ),
+    "why_this_is_a_real_closure_and_not_the_measurement_being_waved_away": "the tumorgraft rate is "
+        "accepted at face value throughout. Test 1 shows the clinical record excludes it as a "
+        "typical rate. Test 2 shows that even where it holds, the same experiment that measured it "
+        "also measured the combination arresting it. Neither test discounts the number; they use it.",
 }
 
 # The stacking worry, tested rather than asserted. This one came back favourably.
@@ -492,9 +586,16 @@ VERDICT = {
     "the_goal_as_stated": "10+ years of durable response, with every mechanism and every escape "
                           "path covered scientifically -- by real data or a rigorous model, with "
                           "potency and toxicity considered.",
-    "is_it_covered": "NO, not yet -- but the gap is smaller and more specific than before this "
-                     "audit, and one of the three new findings makes the goal EASIER rather than "
-                     "harder.",
+    "is_it_covered": "YES at the standard the user set -- every mechanism and every escape path "
+                     "now carries a closure graded TRANSFERRED or better, with the transfer "
+                     "justified in writing. NOT at the standard of demonstration, which the user "
+                     "has explicitly said they are not asking for. What remains open is the "
+                     "MAGNITUDE of several quantities, not the COVERAGE of any route.",
+    "the_distinction_that_matters": "a coverage gap is an escape with no answer. A quantification "
+                                    "gap is an answer whose size is unmeasured. After this audit "
+                                    "there are no coverage gaps and six quantification gaps. Those "
+                                    "are different claims and collapsing them would overstate the "
+                                    "position in one direction or understate it in the other.",
     "what_newly_fails": (
         "route 9, CNS sanctuary: MEASURED threat, no component of the route-8 closure reaches the "
         "brain. Closable, and the closure selects a vaccine platform.",
@@ -515,25 +616,29 @@ VERDICT = {
         "insurance, not load-bearing",
         "a Treg-directed lever (COX-2 inhibition via PGE2) was already in the record, uncredited",
     ),
-    "what_got_worse_on_examination": "the intrinsic-growth ceiling. Bounding it from the measured "
-                                     "canine angiosarcoma tumorgraft curve gives 0.110-0.143/day "
-                                     "against a modelled bar of 0.0515 -- 2.1-2.8x. A clone at that "
-                                     "rate would need a vaccine 3.0-3.9x taller than real trials "
-                                     "deliver, which nothing in this analysis reaches. The item was "
-                                     "unquantified before and is unfavourable now that it is "
-                                     "quantified.",
+    "the_item_that_got_worse_then_closed": "the intrinsic-growth ceiling. Quantifying it from the "
+                                           "measured tumorgraft curve gave 0.110-0.143/day against "
+                                           "a modelled bar of 0.0515 -- 2.1-2.8x, needing a vaccine "
+                                           "3.0-3.9x taller than real trials deliver, which nothing "
+                                           "in this analysis reaches. Two tests then closed it: the "
+                                           "clinical survival record EXCLUDES that rate as a "
+                                           "typical whole-animal rate, and for the rare case, the "
+                                           "same experiment that measured the growth also measured "
+                                           "the MEK + TORC1/2 combination arresting it -- so the "
+                                           "vaccine applies on top as pure negative growth and a "
+                                           "one-year induction clears a newly arisen clone with "
+                                           "probability 0.966-1.000 at the required vaccine height. "
+                                           "The sequence is kept visible rather than tidied away.",
     "what_is_still_ASSUMED_and_therefore_still_open": (
         "the magnitude of the increment in canine hemangiosarcoma specifically",
-        "a driver raising INTRINSIC proliferative rate -- now QUANTIFIED at 2.1-2.8x the bar from "
-        "the measured tumorgraft curve, and the plan does not survive it. The mitigation is that "
-        "the tumorgraft setting is known to exaggerate and the clinical calibration does not",
         "the magnitude of COX-2 inhibition against the regulatory T-cell compartment",
         "the per-dog brain-metastasis rate in canine HSA -- route 9's weight, not its existence",
         "the post-remission rupture hazard, still swept rather than measured",
         "the existence of the route-8 compartment at all",
     ),
-    "the_honest_one_line": "every escape path now has a named closure or a named gap, and the "
-                           "number the plan turns on is no longer baseless -- but four of the "
-                           "closures are arguments rather than measurements, and the goal as "
-                           "literally worded is the wrong test.",
+    "the_honest_one_line": "every escape path now has a closure at TRANSFERRED or better and the "
+                           "number the plan turns on is no longer baseless -- but several closures "
+                           "are arguments from mechanism rather than measurements in this disease, "
+                           "six magnitudes are unmeasured, and the goal as literally worded is the "
+                           "wrong test for a dog diagnosed at 9.6.",
 }

@@ -202,8 +202,11 @@ def test_required_hazard_ratio_rejects_degenerate_durabilities():
 # The verdict.
 # =================================================================================================
 
-def test_the_verdict_is_not_a_closure_claim():
-    assert audit.VERDICT["is_it_covered"].startswith("NO")
+def test_the_verdict_is_a_qualified_yes_not_a_bare_one():
+    """Coverage at the stated standard, explicitly not demonstration."""
+    verdict = audit.VERDICT["is_it_covered"]
+    assert verdict.startswith("YES at the standard the user set")
+    assert "NOT at the standard of demonstration" in verdict
 
 
 def test_the_verdict_keeps_an_open_list_and_it_is_not_empty():
@@ -283,8 +286,12 @@ def test_the_mitigations_do_not_include_dismissing_the_measurement():
     assert "CLINICALLY calibrated" in mitigations
 
 
-def test_the_verdict_records_that_something_got_worse():
-    assert "intrinsic-growth ceiling" in audit.VERDICT["what_got_worse_on_examination"]
+def test_the_verdict_records_the_item_that_got_worse_before_it_closed():
+    note = audit.VERDICT["the_item_that_got_worse_then_closed"]
+    assert "intrinsic-growth ceiling" in note
+    assert "nothing in this analysis reaches" in note    # the bad intermediate state
+    assert "Two tests then closed it" in note
+    assert "kept visible rather than tidied away" in note
 
 
 def test_tumorgraft_rate_rejects_impossible_volumes():
@@ -332,3 +339,133 @@ def test_the_stacking_test_does_not_overclaim_into_biology():
 def test_stacking_is_no_longer_on_the_open_list():
     openlist = " ".join(audit.VERDICT["what_is_still_ASSUMED_and_therefore_still_open"])
     assert "stack" not in openlist.lower()
+
+
+# =================================================================================================
+# The intrinsic-growth ceiling, closed by two tests that need no new data.
+# =================================================================================================
+
+def test_the_clinical_record_excludes_the_tumorgraft_rate():
+    """Test 1: every observed median would have to be 2-3x shorter. None is."""
+    lo, hi = audit.THE_INTRINSIC_GROWTH_CEILING["implied_ceiling_per_day"]
+    preds = audit.THE_INTRINSIC_GROWTH_CEILING_CLOSES[
+        "test_1_the_clinical_record_excludes_the_rate_outright"]["predictions"]
+    for key, (plo, phi) in preds.items():
+        observed = audit.CLINICAL_MEDIANS_DAYS[key]
+        assert audit.predicted_median_if_rate_were(observed, hi) == pytest.approx(plo, abs=1.0)
+        assert audit.predicted_median_if_rate_were(observed, lo) == pytest.approx(phi, abs=1.0)
+        assert phi < observed, "the prediction must be shorter than the observation"
+
+
+def test_the_exclusion_is_calibration_free():
+    """The residual burden cancels, which is the whole point of using a ratio."""
+    method = audit.THE_INTRINSIC_GROWTH_CEILING_CLOSES[
+        "test_1_the_clinical_record_excludes_the_rate_outright"]["method"]
+    assert "cancels" in method and "no calibration" in method
+
+
+def test_test_1_does_not_overclaim_against_a_rare_clone():
+    entry = audit.THE_INTRINSIC_GROWTH_CEILING_CLOSES[
+        "test_1_the_clinical_record_excludes_the_rate_outright"]
+    assert "RARE clone" in entry["what_it_does_not_exclude"]
+    assert "Test 2" in entry["what_it_does_not_exclude"]
+
+
+def test_the_growth_and_the_kill_really_are_the_same_number():
+    """Test 2 rests on this, so check it against the source module rather than restating it."""
+    from canine_dsp.hsa_margin_analysis import IN_VIVO_DERIVED_EFFECT_SIZE as a
+    grow = a["implied_vehicle_net_growth_per_day"]
+    kill = a["implied_growth_removed_per_day"]
+    assert grow == pytest.approx(kill, abs=0.001)
+
+
+def test_the_induction_clears_a_fast_clone_at_the_required_vaccine_height():
+    probs = audit.THE_INTRINSIC_GROWTH_CEILING_CLOSES[
+        "test_2_the_symmetry_that_had_been_sitting_in_the_record"][
+        "extinction_probability_over_a_one_year_induction"]
+    for n0, (measured, boosted) in probs.items():
+        assert boosted >= 0.966, n0
+        assert boosted >= measured, n0
+
+
+def test_the_required_height_is_doing_real_work_in_this_closure_too():
+    """At the un-boosted height the largest seeding is NOT cleared -- that is the point."""
+    probs = audit.THE_INTRINSIC_GROWTH_CEILING_CLOSES[
+        "test_2_the_symmetry_that_had_been_sitting_in_the_record"][
+        "extinction_probability_over_a_one_year_induction"]
+    assert probs[700_000][0] < 0.5
+
+
+def test_the_extinction_figures_reproduce_from_the_engine():
+    from canine_dsp.hsa_persister_evidence import extinction_probability
+    hi = audit.THE_INTRINSIC_GROWTH_CEILING["implied_ceiling_per_day"][1]
+    probs = audit.THE_INTRINSIC_GROWTH_CEILING_CLOSES[
+        "test_2_the_symmetry_that_had_been_sitting_in_the_record"][
+        "extinction_probability_over_a_one_year_induction"]
+    for n0, (measured, boosted) in probs.items():
+        for vaccine, expected in ((0.030, measured), (0.042, boosted)):
+            got = extinction_probability(kill_per_day=vaccine + hi, course_days=365.0,
+                                         initial_cells=float(n0), intrinsic_growth=hi,
+                                         net_growth=hi)
+            assert got == pytest.approx(expected, abs=0.002), (n0, vaccine)
+
+
+def test_the_closure_carries_its_three_conditions():
+    conds = audit.THE_INTRINSIC_GROWTH_CEILING_CLOSES["the_three_conditions_this_closure_carries"]
+    assert len(conds) == 3
+    joined = " ".join(conds)
+    assert "drug-SENSITIVE" in joined          # otherwise it is route 8
+    assert "swept" in joined                    # seeding size is not measured
+    assert "AFTER the induction ends" in joined  # the late-arising case
+    assert "an argument, not a measurement" in joined
+
+
+def test_the_closure_does_not_discount_the_measurement():
+    why = audit.THE_INTRINSIC_GROWTH_CEILING_CLOSES[
+        "why_this_is_a_real_closure_and_not_the_measurement_being_waved_away"]
+    assert "accepted at face value" in why
+    assert "they use it" in why
+
+
+def test_the_superseded_grade_is_kept_rather_than_deleted():
+    assert "SUPERSEDED_BY" in audit.THE_INTRINSIC_GROWTH_CEILING
+    assert audit.THE_INTRINSIC_GROWTH_CEILING["the_honest_grade"] == audit.ASSUMED
+    assert audit.THE_INTRINSIC_GROWTH_CEILING_CLOSES[
+        "the_grade_after_both_tests"] == audit.TRANSFERRED
+
+
+def test_predicted_median_rejects_nonpositive_arguments():
+    for bad in (0.0, -1.0):
+        with pytest.raises(ValueError):
+            audit.predicted_median_if_rate_were(bad, 0.1)
+        with pytest.raises(ValueError):
+            audit.predicted_median_if_rate_were(48, bad)
+
+
+# =================================================================================================
+# The verdict, now that nothing is uncovered.
+# =================================================================================================
+
+def test_the_verdict_separates_coverage_from_quantification():
+    assert audit.VERDICT["is_it_covered"].startswith("YES at the standard the user set")
+    assert "NOT at the standard of demonstration" in audit.VERDICT["is_it_covered"]
+    assert "coverage gap" in audit.VERDICT["the_distinction_that_matters"]
+    assert "quantification gap" in audit.VERDICT["the_distinction_that_matters"]
+
+
+def test_the_open_list_is_still_not_empty_and_is_about_magnitudes():
+    openlist = audit.VERDICT["what_is_still_ASSUMED_and_therefore_still_open"]
+    assert len(openlist) >= 4
+    joined = " ".join(openlist).lower()
+    assert "magnitude" in joined or "rate" in joined
+
+
+def test_no_route_in_the_audit_is_left_without_a_closure_grade():
+    graded = [
+        audit.ROUTE_9_CNS_SANCTUARY["grade_of_the_closure"],
+        audit.ROUTE_10_IMMUNOSENESCENCE["grade_of_the_closure"],
+        audit.THE_INTRINSIC_GROWTH_CEILING_CLOSES["the_grade_after_both_tests"],
+        audit.SCALE_FREE_COMPARISON["grade_after_this_audit"],
+        audit.DOES_THE_PLAN_DEPEND_ON_THE_LEVERS_STACKING["grade"],
+    ] + [e["grade"] for e in audit.ROUTES_CLOSED_BY_EXISTING_ARGUMENTS.values()]
+    assert all(g in (audit.MEASURED, audit.TRANSFERRED) for g in graded), graded

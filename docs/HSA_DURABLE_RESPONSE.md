@@ -1649,7 +1649,7 @@ stricter bar than the biology requires is a safe error.
 | **B2M / TAP loss** | the one case where the missing-self backup is *strongest*: B2M loss is the classic NK missing-self trigger, and Lerner 2023 (PMID 37537301) shows MHC-loss variants are killed through NKG2D. eVim's target needs no MHC at all | TRANSFERRED |
 | **Tregs and MDSCs** | monocytic MDSCs are recruited through CCR2, which losartan blocks, and eBAT depletes uPAR⁺ myeloid cells — two of the four levers already act here uncredited. And a **Treg-directed lever was already in the record**: Maekawa 2022 reports PGE2 predicting resistance to checkpoint blockade in dogs and meloxicam enhancing Th1 cytokine production. PGE2 is the canonical Treg-induction axis, and meloxicam is given to dogs indefinitely, so it clears duration outright. The analysis had it in a parenthetical | TRANSFERRED; magnitude unmeasured |
 | **clonal evolution to a new resistance driver** | **bounded, and the bound is already in §1.** A resistance lesion cannot make a clone grow faster than it would with no drug at all, because the drug only ever subtracts. That ceiling is the "no drug" row: **0.0550/day against the modelled 0.0515 — at most +6.8% on the bar.** The vaccine requirement scales with the bar, so 1.40× becomes **1.50×**, still inside the measured ramp (0.992 at a one-year stop). The plan survives the worst resistance clone that can exist, at the cost of one rung | TRANSFERRED |
-| **a driver raising intrinsic proliferative rate** | a genuinely more aggressive clone than its parent is a different event from resistance, and the no-drug row does not bound it. Mitigation only: the requirement degrades along the ramp rather than off a cliff, and such a clone is still antigen-visible | **ASSUMED** |
+| **a driver raising intrinsic proliferative rate** | bounded from the measured tumorgraft curve at 2.1–2.8× the bar, then **closed** on two tests: the clinical survival record excludes that rate as a typical whole-animal rate, and for the rare case the same experiment that measured the growth also measured the combination arresting it, so the vaccine applies on top as pure negative growth and a one-year induction clears a newly arisen clone at p ≥ 0.966. Conditional on the clone being drug-sensitive; a late-arising clone rests on the seeding-suppression argument | TRANSFERRED |
 
 ### Two items the audit left open, worked further without new data
 
@@ -1696,10 +1696,65 @@ using the same curve, and uses it there as a *conservative* source for a kill re
 as a growth estimate); and the model's 0.0550/day is the clinically calibrated figure, which
 reproduces a real survival median, where the tumorgraft rate reproduces nothing clinical.
 
-This stays **ASSUMED**. The improvement is that it moved from an *unquantified* open item to a
-*quantified* one — and the quantification is unfavourable. What would settle it is a growth rate for
-residual disease measured in a dog rather than an implant, which experiment E4 would produce as a
-by-product.
+#### …and then it closed, on two tests that need no new data
+
+**Test 1 — the clinical record excludes that rate outright.** Time-to-event is inversely proportional
+to net growth at a fixed burden ratio, so if the whole-animal rate *were* the tumorgraft rate, every
+observed median would be shorter by exactly the ratio of rates. The burden left behind cancels, so
+this needs no calibration:
+
+| cohort | observed median | predicted if the rate were the tumorgraft rate |
+|---|---|---|
+| surgery alone (Wendelburg 2015) | 48 d | **17–23 d** |
+| splenic HSA series | 60 d | **22–28 d** |
+| surgery + doxorubicin | 173 d | **62–81 d** |
+
+**No reported median for this disease is that short.** The tumorgraft rate is excluded as a *typical*
+whole-animal net growth rate by real data, in dogs, in this disease. What that does not exclude is a
+**rare** clone growing at that rate — medians constrain the typical case, and the 8-day lower bound of
+the reported range cannot be distinguished from presentation with massive disease.
+
+**Test 2 — the symmetry that was sitting in §3f the whole time.** The tumorgraft ceiling and the
+measured kill of the MEK + TORC1/2 combination are **the same number, from the same experiment**.
+`hsa_margin_analysis` records `implied_vehicle_net_growth_per_day = (0.1096, 0.1427)` and
+`implied_growth_removed_per_day = (0.110, 0.143)`. That is not a coincidence — it is what Andersen
+measured: a tumorgraft whose vehicle arm reached 1000 mm³ by day 21, taken to *virtually no growth* by
+the combination.
+
+So during the induction the drug offsets a fast clone's intrinsic rate, and **the vaccine applies on
+top of it as pure negative growth.** A one-year induction then delivers `vaccine_kill × 365` of
+clearance — 4.76 logs at the measured 0.030/day, **6.66 logs at the 1.40× the plan already requires.**
+
+| newly arisen clone | measured vaccine (0.030) | **1.40× vaccine (0.042)** |
+|---|---|---|
+| 700 cells | 0.998 | **1.000** |
+| 7,000 | 0.979 | **1.000** |
+| 70,000 | 0.808 | **0.997** |
+| 700,000 | 0.118 | **0.966** |
+
+*Extinction probability over a one-year induction.* At the height the plan already requires, a fast
+clone is cleared with probability **0.966–1.000 across four orders of magnitude of seeding size** —
+and the un-boosted column shows the 1.40× requirement is doing real work here too, not only in the
+headline.
+
+**Grade: TRANSFERRED.** Three conditions travel with it, and they are not small:
+
+1. The fast clone must be **drug-sensitive**. If it is also drug-resistant the threat collapses into
+   route 8 — which has its own closure, doxorubicin plus one early eBAT cycle.
+2. The **seeding size is swept**, not measured. Nobody has measured how often a new driver arises in
+   residual canine hemangiosarcoma.
+3. A clone arising **after** the induction ends faces the vaccine alone, which cannot hold it. What
+   suppresses that case is the mechanism already in §3g — escape seeding is proportional to the
+   surviving burden, so a taller vaccine crushes the population that would throw off the variant.
+   That argument is reused here, not newly invented, and it is an argument rather than a measurement.
+
+*Why this is a closure and not the measurement being waved away:* the tumorgraft rate is accepted at
+face value throughout. Test 1 shows the clinical record excludes it as a typical rate; test 2 shows
+that even where it holds, the same experiment that measured it also measured the combination arresting
+it. Neither test discounts the number — both use it.
+
+*The earlier ASSUMED grade is kept in `hsa_escape_audit` rather than deleted, so the sequence
+(unquantified → quantified and unfavourable → closed) stays visible.*
 
 ### The increment the whole plan turns on — regraded ASSUMED → TRANSFERRED
 

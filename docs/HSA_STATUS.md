@@ -169,13 +169,19 @@ whether four mechanistically coupled levers stack or overlap.
 11. **Regulatory T cells** — a lever exists (COX-2 inhibition via the PGE2 axis, meloxicam already
     given indefinitely) but its magnitude against this compartment is unmeasured, and the Treg burden
     in canine HSA has never been quantified.
-12. **A driver raising INTRINSIC proliferative rate** — now quantified and unfavourable. The measured
-    canine AS tumorgraft curve (Andersen 2015) gives 0.110–0.143/day against the modelled bar of
-    0.0515, i.e. **2.1–2.8×**, which would need a vaccine 3.0–3.9× taller than real trials deliver.
-    Nothing in the analysis holds that. Mitigations: a subcutaneous tumorgraft is known to grow far
-    faster than residual disease in a dog, and the model's 0.0550/day is the clinically calibrated
-    figure that reproduces the real 48-day median. Settled by measuring growth in a dog — a
-    by-product of experiment E4.
+12. **A driver raising INTRINSIC proliferative rate — CLOSED (2026-10-01).** Quantified from the
+    measured canine AS tumorgraft curve at 0.110–0.143/day against the bar of 0.0515 (2.1–2.8×),
+    which would have needed a 3.0–3.9× vaccine and killed the plan. Closed on two tests: **(1)** the
+    clinical record excludes it — every observed median would have to be 2–3× shorter than it is
+    (48→17–23 d, 60→22–28 d, 173→62–81 d), and the ratio is calibration-free; **(2)** the tumorgraft
+    growth rate and the MEK+TORC1/2 measured kill are the **same number from the same experiment**
+    (`implied_vehicle_net_growth_per_day` == `implied_growth_removed_per_day` in
+    `hsa_margin_analysis`), so during induction the drug offsets the clone and the vaccine applies as
+    pure negative growth — a one-year induction clears a newly arisen clone at **p = 0.966–1.000**
+    at the required 1.40× height, across 700→700,000 seeded cells. **Conditions:** the clone must be
+    drug-sensitive (else it is route 8, which has a closure); seeding size is swept, not measured;
+    and a clone arising after induction rests on the seeding-suppression argument from §3g. Grade
+    TRANSFERRED.
 
 ## Pending external readouts this analysis cannot anticipate
 
