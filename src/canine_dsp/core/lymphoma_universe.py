@@ -225,7 +225,7 @@ def brain_agents(compartment: str, immunophenotype: str, *, car_duty: float = IT
                           "(thiotepa transporter status NOT FOUND). Canine thiotepa PK or transplant use NOT FOUND."),
         note="A human regimen carried to the dog by transfer only; busulfan-autologous rescue is measured in 4 dogs "
              "(PMID 10534062) and autologous HCT is routine at specialist centres. Obligatory marrow aplasia needs a graft.")]
-    if compartment == CNS:
+    if compartment == CNS and immunophenotype == "B":      # CD20 is a B-lineage antigen
         out.append(Agent(
             "anti-CD20 monoclonal antibody, intraventricular/intrathecal [buildable route]", Axis.IMMUNE_EFFECTOR,
             Layer.RECEPTOR, 0.099, 1.0, IT_ANTIBODY_DUTY, False, division_gated=False, antigen_targets=("CD20",),
@@ -238,6 +238,7 @@ def brain_agents(compartment: str, immunophenotype: str, *, car_duty: float = IT
                              "~1-day CSF coverage per dose. Kill of a quiescent progenitor is NOT measured. Deep "
                              "parenchymal access is unmeasured, so this is a leptomeningeal/periventricular claim.",
             note="Complement is limited in CSF (rat); CD20 loss defeats it."))
+    if compartment == CNS:
         if immunophenotype == "B":
             out.append(Agent(
                 "tandem CD19/CD20 CAR-T, intraventricular/intrathecal [buildable]", Axis.IMMUNE_EFFECTOR,
