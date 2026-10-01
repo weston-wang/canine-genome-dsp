@@ -203,7 +203,16 @@ def universe_agents(compartment: str, immunophenotype: str) -> tuple:
 # are returned for the CNS compartment only. NONE of these has a canine trial.
 # --------------------------------------------------------------------------------------------------------
 IT_ANTIBODY_DUTY = 2.0 / 7.0        # two intraventricular doses a week, ~1 day of CSF coverage per dose (DERIVED, popPK n=7)
-IT_CAR_T_DUTY_CONSERVATIVE = 1.0 / 7.0   # ~1 day of CSF persistence per weekly dose (NHP 24 h); humans up to >= 1 week
+#: CSF duty of a CSF-delivered CAR-T, from the human CNS-tumour trials in docs/universe/SWEEP_cart_kill.md: each dose is active about
+#: 5-14 days; low 0.15 (dosing every 14 d, cells detected in ~38% of CSF samples), central 0.4 (every 14 d), high 0.7 (weekly).
+#: DERIVED from window lengths, not measured as a duty fraction (ASSUMED-with-basis). Replaces the earlier 1/7 (one monkey, 24 h).
+IT_CAR_T_DUTY_CONSERVATIVE = 0.15
+IT_CAR_T_DUTY_CENTRAL = 0.4
+IT_CAR_T_DUTY_HIGH = 0.7
+#: In-vivo CAR-T kill rate (TRANSFER from human models; docs/universe/SWEEP_cart_kill.md): low 0.12 (Kimmel 2021 at an unexpanded
+#: pool, PMID 33757357), central 0.35 (clinical myeloma fit 0.343, PMID 33565700), high 1.1 (Kimmel saturation 1.15). The dog value is
+#: set by EXPANSION (0.12 needs ~6.5e7 CAR-T cells, 4-90x the doses given to dogs so far), not by potency.
+CAR_T_KILL_LOW, CAR_T_KILL_CENTRAL, CAR_T_KILL_HIGH = 0.12, 0.35, 1.1
 THIOTEPA_PROGRAM_DAYS = 115.0
 THIOTEPA_PROGRAM_KILL = 0.13        # low end of the 0.13-0.21 /day outcome-implied range (SWEEP_cnsregimens s9)
 
@@ -247,9 +256,10 @@ def brain_agents(compartment: str, immunophenotype: str, *, car_duty: float = IT
                 evidence="HUMAN: intraventricular/intrathecal CAR-T in CNS tumours reaches CSF and gives parenchymal "
                          "regressions in glioma (PMID 38454126, 41495049); IV CD19 CAR-T ORR 58-62% in CNS lymphoma "
                          "(PMID 35167655, 36537908). No dog data.",
-                potency_evidence="TRANSFER-OUTCOME: the model's 0.12 /day CAR-T potency (itself an assumed in-vivo "
-                                 "kill) at CSF access 1.0; persistence in CSF 1 to 7+ days per dose, so the duty is "
-                                 "conservative 1/7. Neurotoxicity 30-100% any grade, grade >=3 up to ~30% in human solid CNS trials."))
+                potency_evidence="TRANSFER-OUTCOME: 0.12 /day = the LOW end of a human-model kill rate (Kimmel 2021, PMID 33757357; "
+                                 "central 0.35, high 1.1) at CSF access 1.0; CSF window 5-14 days per dose, duty low 0.15 / "
+                                 "central 0.4 / high 0.7 (human CNS-tumour trials). The dog value is limited by expansion. "
+                                 "Neurotoxicity 30-100% any grade, grade >=3 up to ~30% in human solid CNS trials."))
         else:
             for nm, ants in (("CD7-directed CAR-T, intraventricular/intrathecal [buildable]", ("CD7",)),
                              ("CD5 + CD7 dual-target CAR-T, intraventricular/intrathecal [buildable]", ("CD5", "CD7"))):
@@ -259,5 +269,5 @@ def brain_agents(compartment: str, immunophenotype: str, *, car_duty: float = IT
                     vulnerable_to=frozenset({"antigen_density"}) if len(ants) == 1 else frozenset(),
                     evidence="HUMAN: CD7 CAR-T MRD-negative remission 19/20 (PMID 35500125); intraventricular CAR-T "
                              "reaches CSF (PMID 38454126). No dog product.",
-                    potency_evidence="TRANSFER-OUTCOME: 0.12 /day at CSF access 1.0; duty conservative 1/7 per weekly dose."))
+                    potency_evidence="TRANSFER-OUTCOME: 0.12 /day (low end of the human-model range) at CSF access 1.0; duty low 0.15."))
     return tuple(out)

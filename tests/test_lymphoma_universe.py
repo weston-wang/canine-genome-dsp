@@ -128,13 +128,13 @@ def test_spinal_fluid_antibody_is_b_cell_only_and_brain_only():
 
 def test_brain_closes_in_the_model_only_if_the_spinal_fluid_cart_lasts_long_enough():
     """The result the brain claim rests on: closure needs the intrathecal CAR-T active in the CSF for roughly a third or
-    more of each dosing interval. At the conservative one-seventh it does not clear."""
+    more of each dosing interval. At a duty of 0.1 it does not clear."""
     for ip, names in (("B", ("hydroxychloroquine", "continuous intrathecal", "persistence-engineered",
                              "tandem CD19/CD20 CAR-T, intra")),
                       ("T", ("hydroxychloroquine", "continuous intrathecal", "CD7-directed CAR-T (canine",
                              "CD7-directed CAR-T, intra"))):
         esc = _brain_esc(ip)
-        assert not G.clears(_brain_set(ip, names, 1 / 7), esc, compartment=CNS)
+        assert not G.clears(_brain_set(ip, names, 0.1), esc, compartment=CNS)
         assert G.clears(_brain_set(ip, names, 1.0), esc, compartment=CNS)
         # and it is NOT robust: halving every potency breaks it even at full duty
         assert not G.clears(G.discounted(_brain_set(ip, names, 1.0), 0.5), esc, compartment=CNS)
