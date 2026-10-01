@@ -14,6 +14,23 @@ keyword.
 
 ---
 
+## Big-picture verdict (2026-10-01): do the combinations hold for 10+ years?
+
+Graded against the user's words: *"make sure every mechanism and every escape is closed by either
+real data or rigorous model, potency, toxicity etc all need to be considered"*; *"looking for 10+
+years of durability"*; *"assuming early detection"*; *"I'm okay with no specific data but if
+scientifically sound."*
+
+| Part | Verdict | Basis (where) |
+|---|---|---|
+| Clearing the first tumour, all 12 escapes | **Holds within the catalogue.** Every escape has a closing agent: 7 measured in canine HS, 2 transferred, 1 model-derived, 2 structural, 0 assumed; all 45 pairs and 120 triples covered; toxicity budgets computed, one collision (radiation + CNS microtubule agent) resolved by sequencing | `CONSOLIDATED_REPORT.md` "Escape coverage", `coverage_assessment` |
+| "Every mechanism" | **Not established.** The therapy universe was never enumerated for HS (rule 9): antibodies/ADCs, bispecifics, cell therapy, marrow transplant not assessed; oncolytic virus mentioned only. The 12-escape list has not had an independent audit for this case | rule 9; section B row 8 |
+| Staying clear for 10 years | **Scientifically sound hypothesis, not a result.** Model P(10-year), systemic sites: 0.56–0.71 without monitoring, 0.81–0.86 with detect-and-switch. Brain-local hinges on drug access. CSF 0.33 rests on an ASSUMED reach-failure prior (0.70) that predates the computed result that intrathecal dosing exceeds the bar by orders of magnitude in bulk CSF; the open quantity there is fluid-to-cell transfer | `emergence.py`; `maintenance_durability.csf_answer()` |
+| Oct 2026 literature | **No change to the design.** PRMT5 brain arm weaker, CDK4/6 brain arm better evidenced on the same deletion (section A); the deletion is common (62.8%), which widens coverage; the immune floor is weaker in MTAP-null tumours | sections A, B |
+| Largest uncertainty | **How often a cleared, predisposed dog throws a new primary (Λ)** — 50–90% of the variance. Not a drug question | `emergence.py` value-of-information |
+
+---
+
 ## A. The brain arm for the deletion-carrying tumour: CDK4/6 now holds up better than PRMT5 (Oct 2026)
 
 ### What weakened
@@ -111,3 +128,6 @@ deletion if it reads out — its own trial already pairs the two.
 | 6 | MTAP∩MAPK overlap resolved by priority, not combination | `best_tier_for()` | Knoll 2025 (`PRIOR_ART_COMBINATIONS.md`) |
 | 7 | Immune floor tier not independent of the MTAP tier | floor tier rationale | MTA-mediated immune coldness |
 | 8 | Oncolytic virotherapy mentioned but not assessed | catalogue | `CLAUDE.md` rule 9 |
+| 9 | Report's Verdict section says "4 of 12 measured … 4 assumed"; its evidence-grade section says 7 measured, 0 assumed. Verdict is stale | `CONSOLIDATED_REPORT.md` lines ~36–41 | internal |
+| 10 | Therapy-modality universe and independent escape audit not done for HS | new `docs/` record | `CLAUDE.md` rule 9 |
+| 11 | CSF reach-failure prior (0.70, ASSUMED) not updated to the computed intrathecal achievability | `emergence.py:124` | `maintenance_durability.csf_answer()` |
