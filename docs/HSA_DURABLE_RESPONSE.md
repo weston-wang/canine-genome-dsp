@@ -1651,6 +1651,56 @@ stricter bar than the biology requires is a safe error.
 | **clonal evolution to a new resistance driver** | **bounded, and the bound is already in §1.** A resistance lesion cannot make a clone grow faster than it would with no drug at all, because the drug only ever subtracts. That ceiling is the "no drug" row: **0.0550/day against the modelled 0.0515 — at most +6.8% on the bar.** The vaccine requirement scales with the bar, so 1.40× becomes **1.50×**, still inside the measured ramp (0.992 at a one-year stop). The plan survives the worst resistance clone that can exist, at the cost of one rung | TRANSFERRED |
 | **a driver raising intrinsic proliferative rate** | a genuinely more aggressive clone than its parent is a different event from resistance, and the no-drug row does not bound it. Mitigation only: the requirement degrades along the ramp rather than off a cliff, and such a clone is still antigen-visible | **ASSUMED** |
 
+### Two items the audit left open, worked further without new data
+
+One came back favourably and one did not. Both are recorded.
+
+#### The stacking worry closes — it was never load-bearing
+
+Routes 1 and 2 are mechanistically coupled and eBAT depletes the same macrophages, so "four coupled
+levers is not four times one" went on the open list. That is testable against the existing durability
+grid. Take the **conservative** end of each lever's measured effect, then compare the two extreme
+rules:
+
+| stacking rule | transfer needed to beat the 0.888 drug-forever reference |
+|---|---|
+| full addition, all four | **10%** |
+| **winner-takes-all** — complete overlap, only the best lever counts for anything | **25%** |
+
+The assumption moves the requirement by a factor of **2.5, not a factor that decides the plan**. Both
+figures sit inside what the anchors support: losartan needs 7–22% on its own arithmetic, eBAT 18–23%,
+and KEYNOTE-942 clears the rung below the headline on a single lever. **Stacking is insurance, not an
+assumption the plan rests on.** *(This tests the arithmetic of overlap, not the biology — it shows the
+plan is robust to the levers being redundant, not that one cannot make another worse, which no data
+addresses either way.)*
+
+#### The intrinsic-growth ceiling got worse once quantified
+
+The one class the audit left ASSUMED was a driver raising *intrinsic* proliferative rate. That turned
+out to be answerable from a measurement already in this analysis, and the answer is unfavourable.
+
+Andersen et al. 2015 (PMID 25955301) — the same canine angiosarcoma tumorgraft curve §3f uses for the
+kill requirement — reports a vehicle arm going from 50–100 mm³ at implant to 1000 mm³ by day 21. That
+is a net growth rate of **0.110–0.143/day**, against the modelled bar of 0.0515: **2.1–2.8× higher.**
+
+| | |
+|---|---|
+| clinical calibration (model's untreated sensitive clone, reproduces the real 48-day median) | 0.0550/day |
+| **measured tumorgraft ceiling** | **0.110–0.143/day** |
+| vaccine requirement if a clone reached it | **3.0–3.9×**, against a headline 1.40× |
+
+**Nothing in this analysis holds a clone growing at that rate** — not the four levers stacked, not any
+induction length. Two mitigations are real and neither dismisses the measurement: a subcutaneous
+tumorgraft in a mouse is known to grow far faster than residual disease in a dog (§3f says so while
+using the same curve, and uses it there as a *conservative* source for a kill requirement rather than
+as a growth estimate); and the model's 0.0550/day is the clinically calibrated figure, which
+reproduces a real survival median, where the tumorgraft rate reproduces nothing clinical.
+
+This stays **ASSUMED**. The improvement is that it moved from an *unquantified* open item to a
+*quantified* one — and the quantification is unfavourable. What would settle it is a growth rate for
+residual disease measured in a dog rather than an implant, which experiment E4 would produce as a
+by-product.
+
 ### The increment the whole plan turns on — regraded ASSUMED → TRANSFERRED
 
 Every route above ultimately depends on the vaccine clearing the bar, which depends on an increment

@@ -109,6 +109,12 @@ Closed by arguments already in the analysis: **dormancy** (immune killing is not
 here uncredited — and meloxicam/PGE2, already in the record as a parenthetical, is a Treg-directed
 lever that clears duration outright).
 
+**The stacking worry is closed, and was never load-bearing.** Tested against the existing grid with
+the conservative end of each lever: full addition needs **10%** transfer to beat the 0.888 reference;
+**winner-takes-all — complete overlap, only the best lever counting — needs 25%.** A factor of 2.5,
+not a factor that decides the plan, and both inside what the anchors support. (Tests the arithmetic of
+overlap, not the biology: it does not rule out antagonism, which no data addresses.)
+
 **Clonal evolution to a new resistance driver is now bounded, not assumed.** A resistance lesion
 cannot outrun the untreated growth rate, because the drug only ever subtracts — so the worst case is
 already a row in §1's bar table: **no drug at all = 0.0550/day against the modelled 0.0515, at most
@@ -163,9 +169,13 @@ whether four mechanistically coupled levers stack or overlap.
 11. **Regulatory T cells** — a lever exists (COX-2 inhibition via the PGE2 axis, meloxicam already
     given indefinitely) but its magnitude against this compartment is unmeasured, and the Treg burden
     in canine HSA has never been quantified.
-12. **Whether the four levers stack or overlap.** Routes 1 and 2 are mechanistically coupled and eBAT
-    depletes the same macrophages; four coupled levers is not four times one. The five-arm ISOS-1
-    design must be powered for overlap.
+12. **A driver raising INTRINSIC proliferative rate** — now quantified and unfavourable. The measured
+    canine AS tumorgraft curve (Andersen 2015) gives 0.110–0.143/day against the modelled bar of
+    0.0515, i.e. **2.1–2.8×**, which would need a vaccine 3.0–3.9× taller than real trials deliver.
+    Nothing in the analysis holds that. Mitigations: a subcutaneous tumorgraft is known to grow far
+    faster than residual disease in a dog, and the model's 0.0550/day is the clinically calibrated
+    figure that reproduces the real 48-day median. Settled by measuring growth in a dog — a
+    by-product of experiment E4.
 
 ## Pending external readouts this analysis cannot anticipate
 

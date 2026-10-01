@@ -242,3 +242,93 @@ def test_no_argument_in_this_module_is_graded_measured():
     """Closures here are arguments or transfers. Only threats are measured."""
     for entry in audit.ROUTES_CLOSED_BY_EXISTING_ARGUMENTS.values():
         assert entry["grade"] in (audit.TRANSFERRED, audit.ASSUMED)
+
+
+# =================================================================================================
+# The intrinsic-growth ceiling -- an open item that got WORSE once quantified.
+# =================================================================================================
+
+def test_the_tumorgraft_rate_is_computed_from_the_published_volumes():
+    lo = audit.tumorgraft_growth_rate(max(audit.TUMORGRAFT_START_MM3))
+    hi = audit.tumorgraft_growth_rate(min(audit.TUMORGRAFT_START_MM3))
+    assert (lo, hi) == pytest.approx(audit.THE_INTRINSIC_GROWTH_CEILING[
+        "implied_ceiling_per_day"], rel=1e-3)
+    assert lo < hi
+
+
+def test_the_ceiling_is_well_above_the_modelled_bar():
+    lo, hi = audit.THE_INTRINSIC_GROWTH_CEILING["implied_ceiling_per_day"]
+    assert lo / audit.MODELLED_BAR > 2.0
+    assert audit.THE_INTRINSIC_GROWTH_CEILING["against_the_modelled_bar"] == pytest.approx(
+        (lo / audit.MODELLED_BAR, hi / audit.MODELLED_BAR), rel=1e-2)
+
+
+def test_the_unfavourable_result_is_graded_assumed_not_quietly_closed():
+    entry = audit.THE_INTRINSIC_GROWTH_CEILING
+    assert entry["the_honest_grade"] == audit.ASSUMED
+    assert "no configuration in this analysis holds it" in entry[
+        "what_a_clone_at_that_ceiling_would_cost"]
+
+
+def test_the_quantification_is_claimed_as_an_improvement_without_claiming_closure():
+    note = audit.THE_INTRINSIC_GROWTH_CEILING[
+        "why_it_is_still_not_closed_and_why_this_is_an_improvement_anyway"]
+    assert "UNQUANTIFIED" in note and "QUANTIFIED" in note
+    assert "does not survive" in note
+
+
+def test_the_mitigations_do_not_include_dismissing_the_measurement():
+    mitigations = " ".join(audit.THE_INTRINSIC_GROWTH_CEILING["the_two_mitigations_that_are_real"])
+    assert "grow far faster than residual disease in a dog" in mitigations
+    assert "CLINICALLY calibrated" in mitigations
+
+
+def test_the_verdict_records_that_something_got_worse():
+    assert "intrinsic-growth ceiling" in audit.VERDICT["what_got_worse_on_examination"]
+
+
+def test_tumorgraft_rate_rejects_impossible_volumes():
+    for bad in (0.0, -10.0, 2000.0):
+        with pytest.raises(ValueError):
+            audit.tumorgraft_growth_rate(bad)
+
+
+# =================================================================================================
+# The stacking worry -- an open item that CLOSED once tested.
+# =================================================================================================
+
+def test_stacking_is_not_load_bearing():
+    needed = audit.DOES_THE_PLAN_DEPEND_ON_THE_LEVERS_STACKING[
+        "transfer_needed_to_beat_the_drug_forever_reference"]
+    assert needed["winner_takes_all_best_lever_only"] > needed["full_addition_all_four"]
+    assert needed["winner_takes_all_best_lever_only"] <= 0.25
+
+
+def test_the_winner_takes_all_figure_reproduces_against_the_engine():
+    """The pessimistic extreme must actually clear the reference in the simulated grid."""
+    conservative = {k: min(v.values()) for k, v in eff._ROUTE_EFFECTS.items()}
+    best = max(conservative.values())
+    t = audit.DOES_THE_PLAN_DEPEND_ON_THE_LEVERS_STACKING[
+        "transfer_needed_to_beat_the_drug_forever_reference"]["winner_takes_all_best_lever_only"]
+    assert eff.durability_at_increment(best * t, stop_year=1) > eff.REFERENCE_DRUG_FOREVER
+    # and one rung below it must NOT clear, or the figure is not minimal
+    assert eff.durability_at_increment(best * 0.20, stop_year=1) < eff.REFERENCE_DRUG_FOREVER
+
+
+def test_the_full_addition_figure_also_reproduces():
+    conservative = {k: min(v.values()) for k, v in eff._ROUTE_EFFECTS.items()}
+    total = sum(conservative.values())
+    t = audit.DOES_THE_PLAN_DEPEND_ON_THE_LEVERS_STACKING[
+        "transfer_needed_to_beat_the_drug_forever_reference"]["full_addition_all_four"]
+    assert eff.durability_at_increment(total * t, stop_year=1) > eff.REFERENCE_DRUG_FOREVER
+
+
+def test_the_stacking_test_does_not_overclaim_into_biology():
+    caveat = audit.DOES_THE_PLAN_DEPEND_ON_THE_LEVERS_STACKING["the_caveat_that_survives"]
+    assert "ARITHMETIC of overlap, not the biology" in caveat
+    assert "ANTAGONISTIC" in caveat
+
+
+def test_stacking_is_no_longer_on_the_open_list():
+    openlist = " ".join(audit.VERDICT["what_is_still_ASSUMED_and_therefore_still_open"])
+    assert "stack" not in openlist.lower()

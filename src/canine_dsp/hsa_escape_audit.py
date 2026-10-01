@@ -401,6 +401,90 @@ SCALE_FREE_COMPARISON = {
 }
 
 # =================================================================================================
+# THE TWO ITEMS THE AUDIT LEFT OPEN THAT COULD BE WORKED FURTHER WITHOUT NEW DATA.
+#
+# One came back unfavourable and one came back favourable. Both are recorded.
+# =================================================================================================
+
+TUMORGRAFT_START_MM3 = (50.0, 100.0)
+TUMORGRAFT_END_MM3 = 1000.0
+TUMORGRAFT_DAYS = 21.0
+CLINICAL_UNTREATED_RATE = 0.0550        # model's untreated sensitive clone; reproduces the 48-day median
+MODELLED_BAR = 0.0515
+
+
+def tumorgraft_growth_rate(start_mm3: float) -> float:
+    """Net growth per day implied by the measured vehicle arm of the canine AS tumorgraft study."""
+    if not 0.0 < start_mm3 < TUMORGRAFT_END_MM3:
+        raise ValueError("start volume must be positive and below the endpoint volume")
+    return float(math.log(TUMORGRAFT_END_MM3 / start_mm3) / TUMORGRAFT_DAYS)
+
+
+THE_INTRINSIC_GROWTH_CEILING = {
+    "the_question": "the one class the audit left ASSUMED was a driver raising INTRINSIC "
+                    "proliferative rate, on the grounds that nothing bounds how fast such a clone "
+                    "could be. That turned out to be answerable from a measurement already in this "
+                    "analysis -- and the answer is unfavourable.",
+    "citation": "Andersen et al. 2015, Int J Oncol 47(1):71-80, PMID 25955301 -- canine "
+                "angiosarcoma tumorgrafts, already cited in this analysis for the kill-rate "
+                "requirement. Vehicle arm: 50-100 mm3 at implant, 1000 mm3 by day 21.",
+    "implied_ceiling_per_day": (0.1096, 0.1427),
+    "against_the_modelled_bar": (2.13, 2.77),
+    "what_a_clone_at_that_ceiling_would_cost": "the vaccine requirement scales with the bar, so the "
+                                               "headline 1.40x becomes 3.0-3.9x -- far outside the "
+                                               "measured ramp and beyond anything the four levers "
+                                               "reach, stacked or not. If a clone in a dog could "
+                                               "grow at the tumorgraft rate, no configuration in "
+                                               "this analysis holds it.",
+    "the_honest_grade": ASSUMED,
+    "why_it_is_still_not_closed_and_why_this_is_an_improvement_anyway": "it moves from an "
+        "UNQUANTIFIED open item to a QUANTIFIED one. Before, the analysis could not say how bad an "
+        "intrinsic-rate driver would be. Now it can: 2.1-2.8x on the bar, which the plan does not "
+        "survive.",
+    "the_two_mitigations_that_are_real": (
+        "a subcutaneous tumorgraft in a mouse is known to grow far faster than residual disease in "
+        "a dog -- this analysis already says so in section 3f when using the same curve, and uses "
+        "it there as a CONSERVATIVE source for a kill requirement rather than as a growth estimate",
+        "the model's 0.0550/day untreated rate is the CLINICALLY calibrated one: it independently "
+        "reproduces the real ~48-day surgery-alone median. The tumorgraft rate reproduces nothing "
+        "clinical.",
+    ),
+    "what_would_settle_it": "a growth rate for residual canine hemangiosarcoma measured in a dog "
+                            "rather than in an implant -- which is the same measurement that "
+                            "experiment E4 (a vaccine's kill rate from serial imaging or ctDNA) "
+                            "would produce as a by-product.",
+}
+
+# The stacking worry, tested rather than asserted. This one came back favourably.
+DOES_THE_PLAN_DEPEND_ON_THE_LEVERS_STACKING = {
+    "the_question": "routes 1 and 2 are mechanistically coupled and eBAT depletes the same "
+                    "macrophages, so the audit recorded 'four coupled levers is not four times "
+                    "one' as an open risk. That is testable against the existing durability grid "
+                    "without any new data.",
+    "method": "take the CONSERVATIVE (low) end of each lever's measured effect, then compare the "
+              "two extreme stacking rules: FULL ADDITION (increments sum) against "
+              "WINNER-TAKES-ALL (the levers overlap completely, so only the single best counts).",
+    "transfer_needed_to_beat_the_drug_forever_reference": {
+        "full_addition_all_four": 0.10,
+        "winner_takes_all_best_lever_only": 0.25,
+    },
+    "the_result": "the stacking assumption moves the required transfer efficiency from 10% to 25% "
+                  "-- a factor of 2.5, not a factor that decides the plan. BOTH figures sit inside "
+                  "the range the anchors support: losartan needs 7-22% and eBAT 18-23% on their own "
+                  "transfer arithmetic, and KEYNOTE-942 clears the rung below the headline on a "
+                  "single lever.",
+    "what_this_closes": "the plan does NOT depend on the four levers stacking. Even under the "
+                        "pessimistic extreme -- complete overlap, only the best lever contributing "
+                        "anything at all -- 25% transfer of losartan's conservative effect beats "
+                        "the reference. Stacking is insurance, not a load-bearing assumption.",
+    "grade": TRANSFERRED,
+    "the_caveat_that_survives": "this tests the ARITHMETIC of overlap, not the biology. It shows "
+                                "the plan is robust to the levers being redundant. It does not show "
+                                "they are not ANTAGONISTIC -- nothing here rules out one lever "
+                                "making another worse, which no data addresses either way.",
+}
+
+# =================================================================================================
 # THE VERDICT against the user's stated goal.
 # =================================================================================================
 
@@ -421,12 +505,28 @@ VERDICT = {
         "dog diagnosed at 9.6 for reasons unrelated to the cancer. The reachable version of the "
         "goal is 'no recurrence for the rest of the dog's life'.",
     ),
-    "what_newly_improves": "the increment the whole plan turns on moves ASSUMED -> TRANSFERRED on "
-                           "the strength of a randomised trial in the matched adjuvant setting.",
+    "what_newly_improves": (
+        "the increment the whole plan turns on moves ASSUMED -> TRANSFERRED on the strength of a "
+        "randomised trial in the matched adjuvant setting (KEYNOTE-942)",
+        "clonal evolution to a new RESISTANCE driver is bounded by a row the analysis already had: "
+        "the no-drug ceiling, at most +6.8% on the bar, costing one rung on the ramp",
+        "the STACKING worry is closed: under complete overlap, 25% transfer of the best single "
+        "lever still beats the drug-forever reference, against 10% under full addition. Stacking is "
+        "insurance, not load-bearing",
+        "a Treg-directed lever (COX-2 inhibition via PGE2) was already in the record, uncredited",
+    ),
+    "what_got_worse_on_examination": "the intrinsic-growth ceiling. Bounding it from the measured "
+                                     "canine angiosarcoma tumorgraft curve gives 0.110-0.143/day "
+                                     "against a modelled bar of 0.0515 -- 2.1-2.8x. A clone at that "
+                                     "rate would need a vaccine 3.0-3.9x taller than real trials "
+                                     "deliver, which nothing in this analysis reaches. The item was "
+                                     "unquantified before and is unfavourable now that it is "
+                                     "quantified.",
     "what_is_still_ASSUMED_and_therefore_still_open": (
         "the magnitude of the increment in canine hemangiosarcoma specifically",
-        "whether the four levers stack or overlap",
-        "a driver raising INTRINSIC proliferative rate (resistance drivers are now bounded)",
+        "a driver raising INTRINSIC proliferative rate -- now QUANTIFIED at 2.1-2.8x the bar from "
+        "the measured tumorgraft curve, and the plan does not survive it. The mitigation is that "
+        "the tumorgraft setting is known to exaggerate and the clinical calibration does not",
         "the magnitude of COX-2 inhibition against the regulatory T-cell compartment",
         "the per-dog brain-metastasis rate in canine HSA -- route 9's weight, not its existence",
         "the post-remission rupture hazard, still swept rather than measured",
