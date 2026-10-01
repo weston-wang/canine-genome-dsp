@@ -325,15 +325,15 @@ PROFILES["panobinostat (HDAC inhibitor)"] = P(
     O.MARROW, 0.50, False,
     "thrombocytopenia (67% grade 3/4 with bortezomib + dexamethasone in humans), neutropenia, diarrhoea; QTc "
     "prolongation at higher doses. NO canine toxicity data found (dog toxicology: testicular and marrow findings at 1.5 mg/kg)",
-    source="HUMAN label and PANORAMA-1 (docs/universe/SWEEP_pk_partial.md s13). Canine tolerability: NOT FOUND.",
+    source="HUMAN label and PANORAMA-1 (docs/universe/SWEEP_pk.md s13). Canine tolerability: NOT FOUND.",
     secondary_axis=O.GI, secondary_fraction=0.25, sustainable_days=84.0, hard_cap_days=None, reversible=True)
 PROFILES["vorinostat (HDAC inhibitor)"] = P(
     O.GI, 0.30, False,
     "diarrhoea and nausea, thrombocytopenia, fatigue (human); dog target organ GI (NOAEL 60 mg/kg/d). Canine tolerability "
     "at therapeutic exposure: valproate + doxorubicin phase I in 21 dogs was well tolerated (PMID 20705615), a different drug.",
-    source="HUMAN label (docs/universe/SWEEP_pk_partial.md s13).", sustainable_days=84.0, hard_cap_days=None, reversible=True)
+    source="HUMAN label (docs/universe/SWEEP_pk.md s13).", sustainable_days=84.0, hard_cap_days=None, reversible=True)
 PROFILES["bortezomib (proteasome inhibitor)"] = P(
     O.MARROW, 0.35, False,
     "thrombocytopenia 32%, peripheral neuropathy 38% (human); in dogs only 2 treated animals were reported "
     "(conjunctivitis at ~90% inhibition, PMID 23579193)",
-    source="HUMAN label (docs/universe/SWEEP_pk_partial.md s13).", secondary_axis=O.PERIPHERAL_NERVE, secondary_fraction=0.30, sustainable_days=84.0, hard_cap_days=None, reversible=True)
+    source="HUMAN label (docs/universe/SWEEP_pk.md s13).", secondary_axis=O.PERIPHERAL_NERVE, secondary_fraction=0.30, sustainable_days=84.0, hard_cap_days=None, reversible=True)

@@ -155,7 +155,7 @@ def universe_agents(compartment: str, immunophenotype: str) -> tuple:
                               "data, so brain access 0." % outcome_kill(APAVAC_TTP_RATIO)),
             note="Antigen-independent of CD20/CD19 (patient's own tumour antigens) but needs MHC-I; needs a surgical "
                  "node excision at diagnosis. Investigational in Europe."))
-    # --- exposure-transfer agents from the resumed PK sweep (docs/universe/SWEEP_pk_partial.md, sections 12, 14) ---
+    # --- exposure-transfer agents from the resumed PK sweep (docs/universe/SWEEP_pk.md, sections 12, 14) ---
     # k = ln(1 + C/IC50)/assay_days, C = time-averaged FREE HUMAN exposure at label dosing (TRANSFER), IC50 = canine
     # CLBL-1 / lymphoid assay (MEASURED). The central scenario is used; the sweep's low/high are in the file.
     # Division-gating is assumed True for all three (cycle-independence is not shown) and brain access is 0 unless a

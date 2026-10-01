@@ -8,7 +8,7 @@ know vaccine should be part of the equation, and maybe even stem cell. Go back a
 stem cell and transplant; every other modality; independent escape audit). Every PMID in those files was fetched from
 PubMed by an agent; they are agent-written and should be spot-checked before quoting. Where a sweep could only
 read an abstract, the file says so. A fifth sweep (exposures, P-gp status, CD52 source, glucocorticoid IC50s) was cut
-off by a rate limit and resumed; its partial output (panobinostat, CD52) is saved as `docs/universe/SWEEP_pk_partial.md`; items still missing are marked **needs exposure**.
+off by a rate limit and resumed and finished; its output is saved as `docs/universe/SWEEP_pk.md`; items still missing are marked **needs exposure**.
 
 Status words: **IN MODEL** (an agent or escape object, graded) / **EVALUATED, EXCLUDED** (assessed; reason given) /
 **NEEDS EXPOSURE** (canine IC50 exists, no exposure, so no derived kill) / **NOT ASSESSABLE** (no kill measurement of
@@ -22,8 +22,9 @@ any kind) / **OUTSIDE MODEL** (cannot be expressed as an agent or escape here).
 | Cytotoxics | actinomycin D, dacarbazine, mitoxantrone, temozolomide, MOMP, DMAC, melphalan, MOC, L-asparaginase | EVALUATED, EXCLUDED | canine rescue series exist (n 19-100) but responses last 14-130 d; no exposure-derived kill; P-gp status unverified. Sequential lines, not closure |
 | Glucocorticoid | prednisolone (full, maintenance) | IN MODEL | BRACKET; new escape E1 (GC-receptor loss) now defeats it |
 | Targeted | venetoclax, verdinexor, acalabrutinib, hydroxychloroquine | IN MODEL | see ledger |
-| Targeted | PI3K-delta (RV1001; duvelisib, idelalisib) | NEEDS EXPOSURE | dog ORR 62-77% but TTP 21-25 d; no IC50; human PTCL ORR ~48% |
-| Targeted | HDAC (vorinostat, panobinostat), proteasome (bortezomib, ixazomib), CDK9 (flavopiridol) | NEEDS EXPOSURE | canine IC50s measured (18 nM, 15 nM, 400 nM); no dog exposure found; P-gp/BCRP status mixed |
+| Targeted | PI3K-delta (RV1001; duvelisib, idelalisib) | NOT ASSESSABLE as a kill rate | dog ORR 62-77% but TTP 21-25 d; **no canine IC50 found for any**; inversion: duvelisib would need a canine free IC50 <= ~160 nM to reach the 0.09 /day bar; duvelisib and idelalisib are P-gp/BCRP substrates (labels) |
+| Targeted | panobinostat, vorinostat, bortezomib | **IN MODEL (new), TRANSFER** | canine IC50 x free human label exposure: panobinostat 0.115 /day (range 0.017-0.38; P-gp and BCRP substrate; brain Kp,uu 0.2-0.3 in mouse); vorinostat 0.026 (0.005-0.09; not a pump substrate; assay duration assumed); bortezomib 0.048 (0.026-0.13; below the bar everywhere). Dog PK not found for any |
+| Targeted | ixazomib, flavopiridol, OSU-HDAC42 | EVALUATED, EXCLUDED | ixazomib 0.001-0.024 /day; flavopiridol IC50 only bounded above (<=400 nM) so no kill derivable; OSU-HDAC42 no exposure |
 | Targeted | oclacitinib (JAK1), CDK4/6, ATR, PARP, BET, EZH2, BCL6, MCL1, mTOR, MDM2, azacitidine/decitabine | EVALUATED, EXCLUDED | in vitro only, conflicting or no dog clinical data, no exposure |
 | Antibody | anti-CD20 | IN MODEL | MEASURED depletion; trial-stage |
 | Antibody | anti-CD52 (AT-005, Tactress) | EVALUATED, EXCLUDED | **licensed (conditional 2014, full 2016) but the only peer-reviewed RCT (n=49, with L-CHOP) showed no benefit: median PFS 64 d vs 103 d placebo, p=0.82; the authors report the antibody lacks binding specificity for CD52 and it is off the market (PMID 36329876).** Not a usable T-lineage antibody |
@@ -120,7 +121,10 @@ dependent on CD20/CD19; 8 of 9 first-remission DLA-identical dogs lived over 4 y
 delivers 0.10 /day in the brain is untested: there is no canine CNS or minimal-residual-disease data, no T-cell-lymphoma series,
 it needs a DLA-identical donor, and 7-55% of transplanted dogs die of the procedure depending on era.
 
-**Not yet done.** (1) Exposure data for HDAC inhibitors, bortezomib, flavopiridol and PI3K-delta inhibitors, so they could
-be entered as derived or transferred kills (sweep re-running). (2) The CD52 antibody's primary source. (3) Anything outside the model:
+**Exposure-transfer drugs (resumed sweep).** Adding panobinostat, vorinostat and bortezomib at transferred exposures changes none of the rows above: the brain still does not close at any tier, the T-cell body still needs the unbuilt CD7 CAR-T, and the minimal B-cell sets are unchanged. They are pump substrates (panobinostat, bortezomib) or sub-bar (vorinostat 0.026), so none reaches the quiescent efflux-high progenitor (E5) at a useful rate.
+
+**Other findings from the resumed sweep.** (a) The "~15x disagreement" in the prednisolone bracket is an artefact of mixing an Emax (35% growth inhibition plateau by ~1 uM at 72 h in GL-1) with an IC50 (44 uM in line 1771, duration unstated); the two are not the same measurand. Prednisolone remains graded BRACKET at the low end. (b) Venetoclax is a P-gp and BCRP substrate by label and clinical interaction studies (not shown in canine cells); the model already flags it as a substrate. Venetoclax T-cell derived kill 0.07-2.1 /day (central 0.52), free fraction the hinge. (c) The anti-CD52 antibody is resolved (above).
+
+**Not yet done.** (1) PI3K-delta and flavopiridol kill rates (no canine IC50). (2) Anything outside the model:
 unattributed multidrug resistance (E12, which bounds every closure claim), eye and testis compartments, late second cancers.
 (4) A real answer on 10 years: no dog has 10-year follow-up; the longest transplant survivor is about 8 y.

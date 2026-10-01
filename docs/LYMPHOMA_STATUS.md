@@ -182,6 +182,7 @@ Full tables: `LYMPHOMA_UNIVERSE.md`; sweep reports: `docs/universe/SWEEP_*.md`; 
 - **Corrections found:** Gareau 2021 (T cells did not add benefit; docs fixed); anti-PD-1 has no responses in 15 lymphoma dogs
   (regraded MEASURED-NEGATIVE, potency 0); the anti-CD52 antibody (Tactress) is licensed but its RCT was null and it lacks target
   specificity (PMID 36329876); the "testis-to-brain" case is spermatic cord with no chemotherapy.
-- **Still open:** exposures for HDAC inhibitors, bortezomib, flavopiridol and PI3K-delta (sweep resumed; partial in
-  `docs/universe/SWEEP_pk_partial.md`; panobinostat is a P-gp substrate, so it would not reach E5 anyway); E12 unattributed
+- **Exposure sweep finished:** panobinostat, vorinostat, bortezomib entered at transferred exposures (TRANSFER); the conclusion does
+  not change. PI3K-delta and flavopiridol have no canine IC50, so no kill rate (`docs/universe/SWEEP_pk.md`).
+- **Still open:** E12 unattributed
   resistance, eye/testis, second cancers sit outside the model; no 10-year dog data.
