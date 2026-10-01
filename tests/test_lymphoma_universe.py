@@ -144,3 +144,12 @@ def test_thiotepa_is_conservative_by_default():
     t = next(a for a in G.grounded_agents(CNS, "B") if a.name.startswith("high-dose thiotepa"))
     assert t.division_gated and t.efflux_substrate and G.potency_grade(t) == "OUTCOME"
     assert "high-dose thiotepa-based consolidation with autologous stem-cell rescue [human regimen]" in G.COURSE_AGENTS
+
+
+def test_joint_b_cell_program_is_model_robust_only_at_the_human_grounded_central_inputs():
+    from canine_dsp.lymphoma_joint import B_PROGRAMS, CENTRAL, LOW, joint_report
+    names = B_PROGRAMS["B-cell, 7 agents"]
+    central = joint_report("B", names, **CENTRAL)
+    assert central["clears"] and central["halved_clears"] and central["any_one_removed_clears"]
+    low = joint_report("B", names, **LOW)
+    assert not low["any_one_removed_clears"], "at the low kill and duty the program is not fault tolerant"
