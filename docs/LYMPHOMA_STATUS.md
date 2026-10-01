@@ -161,3 +161,27 @@ proteasome/HDAC etc. sweep) and the escape list was not independently audited (f
 receptor loss and cytarabine dCK loss are not separate escapes). Lesson recorded in `CLAUDE.md` (failure 5, rule
 9) on all four branches that carry it. Work in progress: four literature sweeps (vaccines; stem cell/transplant;
 all other modalities; independent escape audit), then catalogue additions, re-search, and a universe ledger.
+
+## Result of the thorough re-sweep (2026-10-01) -- supersedes the closing-combination claim above
+
+Full tables: `LYMPHOMA_UNIVERSE.md`; sweep reports: `docs/universe/SWEEP_*.md`; code: `core/lymphoma_universe.py`,
+`tests/test_lymphoma_universe.py`.
+
+- **The goal is NOT met.** With the audit's 9 added escapes (23 in all) and the sweeps' added agents, at sound grades and every
+  escape required closed: the brain does not close for B-cell or T-cell disease at any availability tier, including buildable agents.
+  The body closes only with trial-stage agents plus a weak vaccine credit, or with agents that do not exist (a persistence-engineered
+  CAR-T; a CD7 CAR-T). Every body set tested fails when potencies are halved or any agent is removed.
+- **Why:** E5 (a quiescent, pump-high lymphoid progenitor, measured as a hierarchy in dogs) is missed by every division-gated agent and
+  every pump substrate; E2 (dCK loss) removes the cytarabine arm that closed the brain. A closing brain agent must be non-gated,
+  non-pump, CD20/CD19-independent and kill at >= 0.10 /day (0.19 at half access); none in the sound pool does.
+- **Vaccine:** in the model (OUTCOME 0.055 /day) but gives no persister or brain credit and its benefit disappears at half credit;
+  dog data show a flat tail (3-year survival 10% vs 8%). dTERT, CD40-B, GM-CSF cell and DC vaccines were evaluated and excluded
+  (PFS null, or no response).
+- **Stem cell:** autologous TBI + transplant is in the model; allogeneic DLA-identical transplant (8/9 >4 y) has the best dog
+  durability tail but no kill rate, no CNS or T-cell data, and a donor and mortality cost. "Cancer stem cell" is escape E5.
+- **Corrections found:** Gareau 2021 (T cells did not add benefit; docs fixed); anti-PD-1 has no responses in 15 lymphoma dogs
+  (regraded MEASURED-NEGATIVE, potency 0); the anti-CD52 antibody (Tactress) is licensed but its RCT was null and it lacks target
+  specificity (PMID 36329876); the "testis-to-brain" case is spermatic cord with no chemotherapy.
+- **Still open:** exposures for HDAC inhibitors, bortezomib, flavopiridol and PI3K-delta (sweep resumed; partial in
+  `docs/universe/SWEEP_pk_partial.md`; panobinostat is a P-gp substrate, so it would not reach E5 anyway); E12 unattributed
+  resistance, eye/testis, second cancers sit outside the model; no 10-year dog data.

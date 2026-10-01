@@ -5,8 +5,8 @@
 > not systematically enumerated. It has no vaccine and no separate stem-cell / transplant mechanism, and the
 > escape list had not been independently audited. The user's objection: "I don't get how you can claim the goal
 > is completed when even I know vaccine should be part of the equation, and maybe even stem cell. Go back and
-> be thorough." The goal is therefore **not** met as stated; the programs below are an interim result. A
-> full-universe sweep and independent escape audit are in progress (`LYMPHOMA_UNIVERSE.md` when written).
+> be thorough." The goal is therefore **not** met as stated; the programs below are an interim result. The
+> full-universe sweep and independent escape audit are done: see `LYMPHOMA_UNIVERSE.md` section C. **Under the widened set none of the programs below closes**; read this file as the first-pass result only.
 
 **Goal, in the user's words:** "We started with a goal of finding combo therapy that closes every
 possibility. Go find it." Standard: "make sure every mechanism and every escape is closed by either real

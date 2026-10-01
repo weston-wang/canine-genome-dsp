@@ -105,6 +105,8 @@ does not clear (+0.036, +0.022, +0.009), so closure there rests on a credit that
 dog data (3-year survival 10% vs 8%) do not support. The vaccine gives nothing against persisters or the brain
 by construction.
 
+**Radiation sensitivity.** The model treats radiation as division-gated (conservative). Re-running with radiation not division-gated (lymphoid cells die by interphase apoptosis, so this is physically defensible) changes nothing: the brain still does not close for B- or T-cell disease at any tier. This was checked after seeing the result, so it is reported as a sensitivity and was not used to choose the headline.
+
 **Fault tolerance.** None of the body sets tested clears with all potencies halved, and none clears after removing any one agent
 (the same weakness as before, now across the widened set).
 

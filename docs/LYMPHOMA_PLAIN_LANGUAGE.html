@@ -205,49 +205,66 @@
 
 <section>
   <div class="wrap">
-    <p class="kicker">Latest update, September 30, 2026</p>
-    <h2>A combination that closes every escape route we had listed. Not yet a complete search.</h2>
-    <div class="concept"><p class="kicker">Correction</p><p>An earlier version of this update said the goal was met. It was not. The search left out vaccines and stem-cell transplant, and the list of escape routes had not been independently re-checked. Everything below holds only for the treatments and escape routes we had listed. A full re-sweep is under way.</p></div>
-    <p class="lede">The question was whether any set of treatments closes every route, in the body and in the
-      brain, at the strength of evidence we agreed to accept: measured, worked out from measurements, or
-      borrowed from a closely related setting with the reasoning written down. Guesses were not allowed
-      to be adjusted to make it work. <strong>The answer in the model is yes, for B-cell lymphoma, and yes but
-      fragile for T-cell.</strong> None of this has been tried in a dog.</p>
+    <p class="kicker">Latest update, October 1, 2026</p>
+    <h2>We went back and checked everything. The goal is not met.</h2>
+    <p class="lede">An earlier version of this page said a combination closing every escape route had been found. That was
+      premature. It had left out vaccines and stem-cell transplant, and nobody had independently re-checked the list of
+      escape routes. We then searched the dog and human literature for every kind of treatment and every way the cancer can
+      come back. <strong>Everything below is a model result; nothing has been tried in a dog.</strong></p>
     <div class="ledger">
       <div class="route">
-        <div class="num">B</div>
-        <div class="head"><span class="title">B-cell: four parts</span>
-          <span class="tag closed">Closes, survives halving</span></div>
-        <div class="body">Hydroxychloroquine, verdinexor, a continuous drip of cytarabine into the spinal
-          fluid, and the dog anti-CD20 antibody. In the model, every escape route in the body is cleared
-          by about day 34 and every one in the brain by about day 15, and it still clears if every
-          drug is only half as strong as we think. Without the antibody it still closes but no longer
-          survives halving in the body (brain still does).</div>
+        <div class="num">1</div>
+        <div class="head"><span class="title">The brain is still not closed</span>
+          <span class="tag open">Not closed</span></div>
+        <div class="body">For both B-cell and T-cell lymphoma, no combination of up to four treatments clears every escape
+          route in the brain, even allowing treatments that do not exist yet. The reason is a cell type the earlier list
+          missed: dormant, pump-armoured progenitor cells that most drugs cannot reach. A treatment that could close the
+          brain would have to work on non-dividing cells, not be pumped out, not depend on CD20 or CD19, and kill at least
+          about 0.10 per day. Nothing we can currently justify does.</div>
       </div>
       <div class="route">
-        <div class="num">T</div>
-        <div class="head"><span class="title">T-cell: two versions</span>
-          <span class="tag open">Closes, but fragile</span></div>
-        <div class="body">With existing drugs (hydroxychloroquine, verdinexor, venetoclax, plus the
-          spinal drip) it closes on paper but fails if drugs are half as strong, and at a
-          clinically obvious tumor size it responds and then relapses. With a T-cell-targeting CAR-T
-          that does not yet exist, the body is robust, but the brain fails at half strength.</div>
+        <div class="num">2</div>
+        <div class="head"><span class="title">The body closes only on shaky ground</span>
+          <span class="tag open">Fragile</span></div>
+        <div class="body">B-cell: a trial-stage antibody plus a vaccine and one more drug closes on paper, but only if the
+          vaccine's benefit is as large as an uncontrolled study suggests. A four-drug set with prednisolone also closes. Every
+          set we tested fails if all drug strengths are half what we assumed, or if any one drug is dropped. T-cell: closes
+          only with a T-cell CAR-T that has not been built.</div>
+      </div>
+      <div class="route">
+        <div class="num">V</div>
+        <div class="head"><span class="title">Vaccines</span>
+          <span class="tag open">Weak evidence</span></div>
+        <div class="body">Dog lymphoma vaccines exist (telomerase DNA vaccine, a vaccine made from the dog's own tumor, others).
+          They delay relapse a little, but the dogs treated with the tumor vaccine were no more likely to be alive at 3 years
+          (10% vs 8%), the telomerase vaccine did not lengthen time to relapse, and a randomized trial of another vaccine found no benefit.
+          A vaccine uses a different target than CD20, which helps against one escape, but it does not touch dormant cells,
+          the brain, or tumors that hide their markers from the immune system.</div>
+      </div>
+      <div class="route">
+        <div class="num">S</div>
+        <div class="head"><span class="title">Stem-cell transplant</span>
+          <span class="tag closed">Best long-term dog data</span></div>
+        <div class="body">Transplant from a donor dog with an identical tissue match gave the longest remissions we found:
+          8 of 9 dogs in first remission lived more than 4 years without dying of lymphoma, the longest about 8 years. That is a
+          small study, needs a perfectly matched donor, and between 7% and over 50% of dogs died of the transplant depending on the era.
+          There is no brain data and no T-cell lymphoma data. It is the one real-data route that behaves like the kind of treatment
+          the brain needs, but it has not been shown to do that. "Cancer stem cells" in dogs turn out to be the same dormant
+          progenitor cells described above.</div>
       </div>
       <div class="route">
         <div class="num">!</div>
-        <div class="head"><span class="title">The honest weak spots</span>
-          <span class="tag open">Read these</span></div>
-        <div class="body"><strong>Every part is needed:</strong> remove any one drug and closure is lost,
-          so there is no spare. Hydroxychloroquine's strength is borrowed from human cells and its brain
-          access is assumed. Hydroxychloroquine is also pumped out by the same pump that sets the bar.
-          The spinal drip pump, the T-cell CAR-T and the dog antibody are not approved products, and the
-          long-term safety of a spinal pump is unknown. For T-cell, the brain result collapses if the
-          spinal drug level is a third of what we assumed. The model also treats cell clearing as
-          smoother than real leftover-disease tests suggest.</div>
+        <div class="head"><span class="title">What the search overturned</span>
+          <span class="tag open">Corrections</span></div>
+        <div class="body">Checkpoint-blocker immunotherapy gave no responses in 15 dogs with lymphoma. The antibody against CD52 for
+          T-cell lymphoma was licensed but failed its randomized trial. Resistance to steroids appears in nearly every dog within
+          weeks to months. The study I said showed immune cells make transplant work did not show that. The cytarabine that closed the
+          brain can be disabled by the cancer losing the enzyme that activates it.</div>
       </div>
     </div>
-    <p>Everything above is a model result. It says these combinations are worth testing, not that they
-      work. Full tables: <span class="mono">docs/LYMPHOMA_CLOSING_COMBINATION.md</span>.</p>
+    <p>Still open: drug-exposure data for several promising pills (a lookup is still running), things the model cannot represent
+      (unexplained drug resistance, the eye and testis, late second cancers), and any 10-year dog data, which does not exist.
+      Full tables: <span class="mono">docs/LYMPHOMA_UNIVERSE.md</span>.</p>
   </div>
 </section>
 
