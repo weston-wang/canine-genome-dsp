@@ -200,3 +200,9 @@ tests `tests/test_lymphoma_universe.py`.
   if it is accepted as acting on dormant cells and not pumped out, which the data do not show.
 - **Measurements that would settle it:** CAR-T persistence in dog CSF; in-vivo CAR-T kill; parenchymal access; chronic reservoir safety in dogs; thiotepa
   transporter status and dormant-cell kill.
+
+## /goal (2026-10-01): "keep going by more research or modeling to fully close every mechanism and escape then. I know car t has human results for CNS"
+
+Accepted. The CAR-T brain inputs in the model were ASSUMED (CNS access 0.5, 0.12 /day, CSF persistence swept) although human CNS CAR-T data exist.
+Two sweeps launched to replace them with transferred human numbers: `docs/universe/SWEEP_cart_human.md` (CNS lymphoma/leukaemia outcomes, CSF CAR-T
+levels, durability, antigen escape) and `docs/universe/SWEEP_cart_kill.md` (in-vivo kill-rate derivation, dog translation, dosing duty).
