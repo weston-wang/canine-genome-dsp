@@ -196,3 +196,74 @@ def test_the_verdict_names_the_failure_that_prompted_the_rule():
     assert "to-build" in v["the_contrast_that_prompted_the_audit"]
     assert "six" in v["classes_excluded_and_why"]
     assert "two" in v["classes_left_unassessed_and_named_as_such"]
+
+
+# =================================================================================================
+# RULE 14 -- the proxy search.
+# =================================================================================================
+
+def test_the_proxy_is_written_down_before_the_search():
+    """Rule 14's method: name the measurable proxy, then search THAT. The proxy has to be an
+    operational definition, not a restatement of the concept."""
+    d = at.RULE_14_PROXY_SEARCH
+    proxy = d["the_proxy_written_down_first"]
+    assert "microdialysis" in proxy
+    assert "PERITUMORAL" in proxy
+    assert "not in" in proxy and "enhancing core" in proxy   # where the barrier is already broken
+    assert "not a rodent brain:plasma ratio" in proxy
+
+
+def test_the_exposure_is_measured_in_the_compartment_at_issue():
+    found = at.RULE_14_PROXY_SEARCH["what_the_proxy_search_found_for_temozolomide"]
+    assert "PMID 19861433" in found["citation"]
+    assert "PERITUMORAL" in found["design"]
+    assert found["grade"].startswith("MEASURED")
+    assert "not an inference INTO the compartment" in found["grade"]
+
+
+def test_the_unit_conversion_is_derived_not_asserted():
+    e = at.tmz_brain_interstitium_exposure()
+    # 0.6 ug/mL of a 194.15 g/mol compound is ~3.09 uM.
+    assert 3.0 < e["peak_uM"] < 3.2
+    lo, hi = e["peak_uM_range_1sd"]
+    assert lo < e["peak_uM"] < hi
+    assert 1.5 < lo < 1.6 and 4.6 < hi < 4.7
+    assert at.ug_per_ml_to_micromolar(0.0) == 0.0
+
+
+def test_both_ratio_definitions_are_carried_and_they_differ():
+    """The paper's 17.8% is a mean of per-patient ratios; the ratio of the mean AUCs is 15.8%.
+    Quoting one while computing the other would be an inconsistency hiding in a rounding."""
+    e = at.tmz_brain_interstitium_exposure()
+    assert abs(e["ratio_of_mean_AUCs"] - 0.158) < 0.002
+    assert e["reported_mean_of_per_patient_ratios"] == 0.178
+    assert e["ratio_of_mean_AUCs"] != e["reported_mean_of_per_patient_ratios"]
+    assert "mean of ratios is not the ratio of means" in at.RULE_14_PROXY_SEARCH[
+        "what_the_proxy_search_found_for_temozolomide"]["the_numbers"]
+
+
+def test_the_criterion_is_reported_as_half_settled_not_cleared():
+    """The exposure half is measured; the effect concentration is unpublished. Calling the criterion
+    cleared would be the overstatement failure 4 names."""
+    d = at.RULE_14_PROXY_SEARCH
+    note = d["what_this_settles_and_what_it_does_not"]
+    assert "does NOT complete the criterion" in note
+    assert "not published" in note
+    assert "PMID 34085099" in note          # including in the paper that reports the synergy
+
+
+def test_the_in_vitro_comparison_is_explicitly_rejected_as_the_wrong_test():
+    note = at.RULE_14_PROXY_SEARCH["and_an_in_vitro_comparison_would_be_the_wrong_test_anyway"]
+    assert "schedule-dependent" in note
+    assert "MGMT" in note
+    assert "not a replacement for it" in note
+
+
+def test_the_failed_half_of_the_proxy_search_is_reported():
+    """Rule 14 is a method, not a guarantee. Lomustine's proxy search found nothing, and reporting
+    that is what keeps the method honest rather than decorative."""
+    note = at.RULE_14_PROXY_SEARCH["where_the_proxy_search_FAILED"]
+    assert note.startswith("lomustine")
+    assert "returns nothing" in note
+    assert "reach, not exposure" in note
+    assert "Lomustine does not" in at.RULE_14_PROXY_SEARCH["the_net_effect_on_the_ledger"]

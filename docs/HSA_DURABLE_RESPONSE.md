@@ -2171,8 +2171,56 @@ and cytokine agents (never assessed alone; the named path is an IL-15 or IL-2 ex
 transfer that would have to clear the same two criteria every other lever clears). Saying "unassessed"
 rather than "closed" is rule 9; saying it rather than "excluded for want of canine data" is rule 13.
 
+### Rule 14: the alkylator's CNS exposure was not unmeasured, it was indexed under another name
+
+This analysis recorded the CNS alkylator closure as **reach TRANSFERRED, logs unmeasured**. Rule 14
+says that before calling a quantity unmeasured, write down its *measurable proxy* and search for that.
+
+The proxy here is not "CNS reach". It is **a drug concentration measured in brain interstitium behind
+an intact barrier** — which operationally means intracerebral microdialysis with the catheter in
+**peritumoral** brain, not in the enhancing core where the barrier is already broken, and not a rodent
+brain:plasma ratio. Searching the concept returned nothing gradable. Searching the proxy returned a
+human trial.
+
+**Portnow et al. 2009** (*Clin Cancer Res* 15(22):7092–8, PMID 19861433) placed microdialysis
+catheters in peritumoral brain tissue at debulking, CT-confirmed the position, gave a single oral
+temozolomide 150 mg/m² on the first postoperative day, and measured paired plasma and dialysate over
+24 hours by tandem mass spectrometry — 9 patients enrolled, 7 yielding paired samples:
+
+| quantity | measured |
+|---|---|
+| brain interstitial AUC | 2.7 µg/mL·h |
+| plasma AUC | 17.1 µg/mL·h |
+| brain:plasma AUC | **17.8%** as the mean of per-patient ratios; **15.8%** as the ratio of the mean AUCs — both carried, because a mean of ratios is not the ratio of means |
+| mean peak brain concentration | 0.6 ± 0.3 µg/mL = **3.1 µM** (1.5–4.6 µM at ±1 SD) |
+| brain Tmax | 2.0 ± 0.8 h |
+
+The authors note the values agree with preclinical microdialysis *and* with clinical CSF studies, so
+three independent routes into the compartment concur. This is a **measurement in the compartment at
+issue**, graded MEASURED in humans; the transfer to the dog is the species step and nothing more.
+
+**What it settles, and what it does not.** It settles the **exposure** half of the criterion — the
+achievable concentration behind an intact barrier is now a measured ~3.1 µM rather than an inference.
+It does **not** complete the criterion, because the matching **effect** concentration for angiosarcoma
+is unpublished: a search for a temozolomide concentration–response in angiosarcoma lines returns
+nothing, *including in the paper that reports olaparib + temozolomide synergy in those very lines*
+(PMID 34085099).
+
+**And an in-vitro comparison would be the wrong test in any case.** Temozolomide's in-vitro IC50s are
+high and strongly schedule-dependent — a short assay cannot reproduce a multi-day alkylation schedule,
+and the response is MGMT- and mismatch-repair-dependent. So the stronger evidence for this agent stays
+what it already was: documented CNS responses in angiosarcoma, in the right tumour type and the right
+compartment. The exposure figure is a floor under that, not a replacement for it.
+
+**Where the proxy search failed.** Lomustine. A search for a measured brain-tissue or CSF lomustine
+concentration returns nothing, so its CNS credit still rests on clinical use in canine intracranial
+disease plus the same-species, same-disease deliverability trial — **reach, not exposure**. Rule 14 is
+a method, not a guarantee, and reporting the half that failed is the point of running it. Net: of the
+two CNS agents, one is now anchored on a right-compartment measurement and one is not.
+
 *Module: `hsa_agent_tiers`. `program_is_built_from_existing_agents()` returns True;
-`classes_excluded_for_absent_canine_data()` returns `[]`, and a test asserts it.*
+`classes_excluded_for_absent_canine_data()` returns `[]`, and a test asserts it.
+`tmz_brain_interstitium_exposure()` derives the µM figures from the published µg/mL.*
 
 ---
 

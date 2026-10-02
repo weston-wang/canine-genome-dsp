@@ -362,6 +362,109 @@ INTRACRANIAL_HSA_IS_NOW_DOCUMENTED_IN_DOGS = {
 
 
 # -------------------------------------------------------------------------------------------------
+# RULE 14. Before calling a quantity unmeasured, name its measurable proxy and search for THAT.
+#
+# The quantity this ledger called unmeasured was "how much alkylator reaches the antigen-null cells
+# behind the blood-brain barrier". The proxy is a drug concentration measured in brain interstitium
+# BEHIND AN INTACT BARRIER -- which for a microdialysis study means a catheter in peritumoral brain
+# rather than in the enhancing core, where the barrier is already broken. Searching the concept
+# ("CNS reach") found nothing gradable. Searching the proxy found a human trial.
+# -------------------------------------------------------------------------------------------------
+
+TEMOZOLOMIDE_MW_G_PER_MOL = 194.15
+
+# Portnow et al. 2009, intracerebral microdialysis, catheter in PERITUMORAL brain tissue, single
+# oral 150 mg/m2, 7 of 9 patients yielding paired dialysate and plasma.
+TMZ_BRAIN_PEAK_UG_PER_ML = 0.6
+TMZ_BRAIN_PEAK_SD_UG_PER_ML = 0.3
+TMZ_BRAIN_AUC_UG_H_PER_ML = 2.7
+TMZ_PLASMA_AUC_UG_H_PER_ML = 17.1
+TMZ_BRAIN_TMAX_HOURS = 2.0
+# The paper reports 17.8% as the mean of the per-patient brain:plasma AUC ratios. Dividing the two
+# reported MEAN AUCs gives 15.8%. Both are kept: a mean of ratios is not the ratio of means, and
+# quoting one while computing the other would be an inconsistency hiding in a rounding.
+TMZ_REPORTED_MEAN_OF_RATIOS = 0.178
+
+
+def ug_per_ml_to_micromolar(ug_per_ml: float,
+                            mw_g_per_mol: float = TEMOZOLOMIDE_MW_G_PER_MOL) -> float:
+    """1 ug/mL = 1 mg/L; divide by g/mol to get mmol/L, then x1000 for umol/L."""
+    return float(ug_per_ml / mw_g_per_mol * 1000.0)
+
+
+def tmz_brain_interstitium_exposure() -> dict:
+    """The measured half of the exposure criterion, in the compartment at issue."""
+    peak = TMZ_BRAIN_PEAK_UG_PER_ML
+    lo = peak - TMZ_BRAIN_PEAK_SD_UG_PER_ML
+    hi = peak + TMZ_BRAIN_PEAK_SD_UG_PER_ML
+    return {
+        "peak_uM": ug_per_ml_to_micromolar(peak),
+        "peak_uM_range_1sd": (ug_per_ml_to_micromolar(lo), ug_per_ml_to_micromolar(hi)),
+        "brain_AUC_uM_h": ug_per_ml_to_micromolar(TMZ_BRAIN_AUC_UG_H_PER_ML),
+        "ratio_of_mean_AUCs": TMZ_BRAIN_AUC_UG_H_PER_ML / TMZ_PLASMA_AUC_UG_H_PER_ML,
+        "reported_mean_of_per_patient_ratios": TMZ_REPORTED_MEAN_OF_RATIOS,
+        "tmax_hours": TMZ_BRAIN_TMAX_HOURS,
+    }
+
+
+RULE_14_PROXY_SEARCH = {
+    "the_quantity_called_unmeasured": "how much alkylator reaches antigen-null hemangiosarcoma "
+                                      "cells seeded behind the blood-brain barrier -- recorded in "
+                                      "the conjunction as 'reach TRANSFERRED, logs UNMEASURED'.",
+    "the_proxy_written_down_first": "a drug concentration measured in brain interstitium behind an "
+                                    "INTACT barrier. Operationally that is intracerebral "
+                                    "microdialysis with the catheter in PERITUMORAL brain, not in "
+                                    "the enhancing core where the barrier is already broken, and "
+                                    "not a rodent brain:plasma ratio.",
+    "what_the_proxy_search_found_for_temozolomide": {
+        "citation": "Portnow J, Badie B, Chen M, Liu A, Blanchard S, Synold TW. 2009. The "
+                    "neuropharmacokinetics of temozolomide in patients with resectable brain "
+                    "tumors. Clin Cancer Res 15(22):7092-8. PMID 19861433, "
+                    "doi 10.1158/1078-0432.CCR-09-1349",
+        "design": "intracerebral microdialysis catheter placed in PERITUMORAL brain tissue at "
+                  "debulking, CT-confirmed position, single oral temozolomide 150 mg/m2 on "
+                  "postoperative day 1, serial paired plasma and dialysate over 24 h by tandem "
+                  "mass spectrometry. 9 enrolled, 7 yielding paired samples.",
+        "the_numbers": "brain interstitial AUC 2.7 vs plasma 17.1 ug/mL*h; mean peak brain "
+                       "concentration 0.6 +/- 0.3 ug/mL; brain Tmax 2.0 +/- 0.8 h. The paper's "
+                       "headline brain:plasma AUC ratio is 17.8%, which is the mean of the "
+                       "per-patient ratios; dividing the two mean AUCs gives 15.8%. Both are "
+                       "carried, because a mean of ratios is not the ratio of means.",
+        "why_it_is_the_right_compartment": "the catheter is in brain parenchyma adjacent to the "
+                                           "tumour, which is what 'behind an intact barrier' means "
+                                           "operationally. The authors also note the values agree "
+                                           "with preclinical microdialysis and with clinical CSF "
+                                           "studies, so three independent routes to the same "
+                                           "compartment concur.",
+        "grade": "MEASURED, in humans. The transfer to the dog is the species step and nothing "
+                 "more -- it is not an inference INTO the compartment.",
+    },
+    "what_this_settles_and_what_it_does_not": "it settles the EXPOSURE half of the criterion: the "
+        "achievable concentration in the compartment at issue is ~3.1 uM at peak (1.5-4.6 uM at "
+        "+/-1 SD) with 16-18% of plasma AUC, and that number is measured rather than inferred. It "
+        "does NOT complete the criterion, because the matching EFFECT concentration for "
+        "angiosarcoma is not published: a search for a temozolomide concentration-response in "
+        "angiosarcoma cell lines returns nothing, including in the paper that reports "
+        "olaparib + temozolomide synergy in those lines (PMID 34085099).",
+    "and_an_in_vitro_comparison_would_be_the_wrong_test_anyway": "temozolomide's in-vitro IC50s "
+        "are high and strongly schedule-dependent, because a short assay cannot reproduce a "
+        "multi-day alkylation schedule and the response is MGMT- and mismatch-repair-dependent. So "
+        "the stronger evidence for this agent stays what it already was: documented CNS responses "
+        "in angiosarcoma, in the right tumour type and the right compartment (PMID 37811120, "
+        "PMID 42125685). The exposure figure is now a floor under that, not a replacement for it.",
+    "where_the_proxy_search_FAILED": "lomustine. A search for a measured brain-tissue or CSF "
+        "lomustine concentration returns nothing in PubMed. Its CNS credit therefore still rests "
+        "on clinical use in canine intracranial disease plus the same-species, same-disease "
+        "deliverability trial (PMID 28828962) -- reach, not exposure. Rule 14 is a method, not a "
+        "guarantee, and reporting the half that failed is the point of running it.",
+    "the_net_effect_on_the_ledger": "temozolomide moves from 'reach only' to 'reach plus a MEASURED "
+        "right-compartment exposure, effect concentration still unpublished'. Lomustine does not "
+        "move. The CNS closure for routes 8 and 12b is unchanged in status and better anchored on "
+        "one of its two agents.",
+}
+
+
+# -------------------------------------------------------------------------------------------------
 # VERDICT.
 # -------------------------------------------------------------------------------------------------
 

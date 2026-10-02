@@ -280,6 +280,28 @@ way, and it passes.** Module `hsa_agent_tiers`; doc §6c.
   case in a different primary site, bone; named path = a human angiosarcoma intratumoural transfer)
   and cytokine agents (named path = an IL-15/IL-2 exposure-response transfer).
 
+### Rule 14 applied (2026-10-02) — the CNS exposure was indexed under another name
+
+Rule 14 arrived mid-session (origin `e2ecb1b`). Applied to this branch's one "unmeasured" CNS figure:
+
+- **Proxy written down first:** not "CNS reach" but *a concentration measured in brain interstitium
+  behind an intact barrier* = intracerebral microdialysis with the catheter in **peritumoral** brain,
+  not the enhancing core, and not a rodent Kp.
+- **Found:** Portnow et al. 2009, *Clin Cancer Res* 15(22):7092–8, **PMID 19861433**. Catheter in
+  peritumoral brain, CT-confirmed, single oral TMZ 150 mg/m², paired plasma/dialysate by LC-MS/MS,
+  9 enrolled / 7 paired. Brain AUC **2.7** vs plasma **17.1** µg/mL·h; brain:plasma **17.8%** (mean of
+  per-patient ratios) or **15.8%** (ratio of mean AUCs) — *carry both*; peak brain **0.6 ± 0.3 µg/mL
+  = 3.1 µM** (1.5–4.6 µM at ±1 SD); brain Tmax **2.0 h**. Agrees with preclinical microdialysis and
+  with CSF studies.
+- **What it settles:** the **exposure** half of the criterion, MEASURED in the compartment at issue.
+  **Not** the criterion itself — the angiosarcoma **effect** concentration is unpublished, including in
+  PMID 34085099 which reports olaparib+TMZ synergy in AS lines. Do not re-raise the effect
+  concentration as newly discovered; it has been searched.
+- **An in-vitro IC50 comparison is the wrong test** — TMZ in-vitro IC50s are high and
+  schedule-dependent, MGMT/MMR-dependent. The CNS response reports stay the stronger evidence.
+- **The proxy search FAILED for lomustine** — no measured brain-tissue or CSF concentration in PubMed.
+  Lomustine remains reach, not exposure. Do not re-search this without a new query.
+
 ## Open gaps, ranked (the honest list)
 
 1. **What any lever adds to vaccine height in this tumour.** Unmeasured for all four. The single
