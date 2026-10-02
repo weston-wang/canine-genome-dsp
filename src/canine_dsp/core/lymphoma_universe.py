@@ -215,6 +215,10 @@ IT_CAR_T_DUTY_HIGH = 0.7
 CAR_T_KILL_LOW, CAR_T_KILL_CENTRAL, CAR_T_KILL_HIGH = 0.12, 0.35, 1.1
 THIOTEPA_PROGRAM_DAYS = 115.0
 THIOTEPA_PROGRAM_KILL = 0.13        # low end of the 0.13-0.21 /day outcome-implied range (SWEEP_cnsregimens s9)
+#: Thiotepa is NOT a P-gp substrate on the evidence: the MDR1-overexpressing P388/ADR line has a GI50 1.07x that of the parent line
+#: (NCI-60/ChEMBL, SWEEP_nongated); the only transporter link is MRP efflux of its glutathione conjugate (PMID 9788613).
+#: Division-gating stays at the conservative default (dormant-cell kill is assumed, not shown).
+THIOTEPA_PUMP_SUBSTRATE = False
 
 
 def brain_agents(compartment: str, immunophenotype: str, *, car_duty: float = IT_CAR_T_DUTY_CONSERVATIVE,
@@ -223,15 +227,16 @@ def brain_agents(compartment: str, immunophenotype: str, *, car_duty: float = IT
     out = [Agent(
         "high-dose thiotepa-based consolidation with autologous stem-cell rescue [human regimen]", Axis.CYTOTOXIC,
         Layer.RECEPTOR, THIOTEPA_PROGRAM_KILL, 1.0, THIOTEPA_PROGRAM_DAYS / 365.0, True,
-        division_gated=not thiotepa_nongated, efflux_substrate=not thiotepa_nongated,
+        division_gated=not thiotepa_nongated, efflux_substrate=THIOTEPA_PUMP_SUBSTRATE and not thiotepa_nongated,
         evidence="HUMAN primary and secondary CNS lymphoma: 3-year PFS 78% (carmustine-thiotepa ASCT, n=114, PMID "
                  "42486133); 8-year event-free survival 67% (thiotepa-busulfan-cyclophosphamide ASCT, PMID 35834762); "
                  "treatment-related mortality 3-8%. Late relapses to 21 years show quiescent clones survive in some.",
         potency_evidence=("OUTCOME: whole-program effective brain kill 0.13-0.21 /day over ~115 days (Poisson cure model "
                           "from three randomised comparisons, residual burden 1e6-1e10 assumed; brain access is inside "
                           "the figure). It is a program average, not a per-agent potency, and says nothing about "
-                          "division-gating, so the default is conservative: division-gated and a pump substrate "
-                          "(thiotepa transporter status NOT FOUND). Canine thiotepa PK or transplant use NOT FOUND."),
+                          "division-gating, so the default is conservative: division-gated. NOT a pump substrate: no P-gp "
+                          "cross-resistance (P388/ADR GI50 1.07x parent; MRP efflux of the glutathione conjugate only, PMID "
+                          "9788613). Canine thiotepa PK or transplant use NOT FOUND."),
         note="A human regimen carried to the dog by transfer only; busulfan-autologous rescue is measured in 4 dogs "
              "(PMID 10534062) and autologous HCT is routine at specialist centres. Obligatory marrow aplasia needs a graft.")]
     if compartment == CNS and immunophenotype == "B":      # CD20 is a B-lineage antigen

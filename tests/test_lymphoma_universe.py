@@ -140,9 +140,11 @@ def test_brain_closes_in_the_model_only_if_the_spinal_fluid_cart_lasts_long_enou
         assert not G.clears(G.discounted(_brain_set(ip, names, 1.0), 0.5), esc, compartment=CNS)
 
 
-def test_thiotepa_is_conservative_by_default():
+def test_thiotepa_is_gated_but_not_a_pump_substrate_by_default():
+    """Division-gating stays conservative (dormant-cell kill not shown); the pump-substrate default was dropped because the
+    MDR1-overexpressing line shows no cross-resistance (GI50 1.07x parent)."""
     t = next(a for a in G.grounded_agents(CNS, "B") if a.name.startswith("high-dose thiotepa"))
-    assert t.division_gated and t.efflux_substrate and G.potency_grade(t) == "OUTCOME"
+    assert t.division_gated and not t.efflux_substrate and G.potency_grade(t) == "OUTCOME"
     assert "high-dose thiotepa-based consolidation with autologous stem-cell rescue [human regimen]" in G.COURSE_AGENTS
 
 
