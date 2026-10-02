@@ -32,6 +32,7 @@ from dataclasses import dataclass
 from enum import Enum
 
 CLOSED = "CLOSED"
+PARTIALLY_CLOSED = "PARTIALLY CLOSED"
 OPEN = "OPEN"
 NOT_APPLICABLE = "N/A"
 
@@ -185,13 +186,29 @@ ROUTES: tuple[Route, ...] = (
 )
 
 
+ROUTE_5_CNS_PARTIAL_BASIS = (
+    "The mechanism that closes route 5 at the spleen is 'image the vascular mass and remove it "
+    "before it bleeds'. That mechanism is now documented in the canine brain: two dogs with "
+    "solitary intracranial hemangiosarcoma were diagnosed ante-mortem by MRI and resected, with "
+    "histopathological confirmation, and the authors conclude resection 'is doable and may be "
+    "associated with good quality of life in the short to intermediate term' (Biundo, Marino & "
+    "Roynard 2026, Front Vet Sci 13:1778366, PMID 42038052). Same species, same tumour, same "
+    "compartment -- the strongest transfer grade available. It is PARTIAL and not CLOSED for two "
+    "reasons that are not negotiable: both dogs died within 11 months with no survival benefit "
+    "shown and no haemorrhage endpoint measured, and resection reaches only a SOLITARY IMAGED "
+    "deposit. An occult or multifocal deposit stays open, which is the same objection that keeps "
+    "brain radiotherapy uncredited against routes 8 and 12b."
+)
+
+
 def route_status(route: Route, site: Site) -> str:
     """CLOSED at this site iff at least one closing mechanism reaches it.
 
     Two special cases, both about route 5. Splenic rupture is a property of the primary organ, so
     it is NOT APPLICABLE at a distant deposit rather than open there -- scoring it OPEN at the lung
     would be counting one hazard five times. The CNS is the exception: a vascular brain metastasis
-    can haemorrhage, and nothing in this plan treats that, so it is genuinely OPEN there.
+    can haemorrhage. That cell was OPEN until canine intracranial hemangiosarcoma was documented as
+    resectable; it is now PARTIALLY CLOSED, on the terms in ROUTE_5_CNS_PARTIAL_BASIS.
     """
     if route.site_independent:
         return CLOSED
@@ -199,32 +216,47 @@ def route_status(route: Route, site: Site) -> str:
         if site is Site.SPLEEN:
             return CLOSED                 # screening converts emergency rupture to elective surgery
         if site is Site.CNS:
-            return OPEN                   # intracranial haemorrhage: no treating component
+            return PARTIALLY_CLOSED       # resectable if imaged and solitary; see the basis above
         return NOT_APPLICABLE
     return CLOSED if any(reaches(m, site) for m in route.closed_by) else OPEN
 
 
 def conjunction() -> dict:
-    """THE HEADLINE. Every route, at every site, CLOSED or OPEN -- and what is open.
+    """THE HEADLINE. Every route, at every site, CLOSED, PARTIALLY CLOSED or OPEN.
 
-    This is the output to quote. It is decidable: no probability appears in it.
+    This is the output to quote. It is decidable: no probability appears in it. A partially closed
+    cell is reported as its own category rather than rounded either way -- rounding it up would be
+    the overstatement failure 4 names, and rounding it down would discard same-species evidence.
     """
     matrix = {r.number: {s.value: route_status(r, s) for s in Site} for r in ROUTES}
     open_cells = [(r.number, r.name, s.value)
                   for r in ROUTES for s in Site if route_status(r, s) == OPEN]
+    partial_cells = [(r.number, r.name, s.value)
+                     for r in ROUTES for s in Site
+                     if route_status(r, s) == PARTIALLY_CLOSED]
+    if open_cells:
+        verdict = (
+            f"{len(open_cells)} route-site cell{'s' if len(open_cells) != 1 else ''} OPEN: "
+            + ", ".join(f"route {n} at {s}" for n, _, s in open_cells)
+        )
+    elif partial_cells:
+        verdict = (
+            "no route-site cell is OPEN. "
+            f"{len(partial_cells)} {'is' if len(partial_cells) == 1 else 'are'} PARTIALLY CLOSED: "
+            + ", ".join(f"route {n} at {s}" for n, _, s in partial_cells)
+            + " -- conditional, and the condition is listed"
+        )
+    else:
+        verdict = "every route CLOSED at every site"
     return {
         "matrix": matrix,
         "sites": [s.value for s in Site],
         "routes": len(ROUTES),
         "open_cells": open_cells,
-        "all_closed": not open_cells,
-        "verdict": (
-            "every route CLOSED at every site"
-            if not open_cells else
-            f"{len(open_cells)} route-site cell{'s' if len(open_cells) != 1 else ''} OPEN, "
-            f"all in the {Site.CNS.value}: "
-            + ", ".join(f"route {n}" for n, _, _ in open_cells)
-        ),
+        "partially_closed_cells": partial_cells,
+        "all_closed": not open_cells and not partial_cells,
+        "nothing_open": not open_cells,
+        "verdict": verdict,
     }
 
 
@@ -269,9 +301,21 @@ CONDITIONS: tuple[Condition, ...] = (
     Condition("the post-remission rupture hazard must be bounded", ("5",),
               "FAILS the stated bar -- swept with no anchor",
               "follow a screened cohort; this is the one number screening policy turns on"),
-    Condition("intracranial haemorrhage has no treating component", ("5",),
-              "OPEN and unaddressed -- a competing event, not a cancer-control failure",
-              "nothing in this plan; it belongs with the rupture hazard"),
+    Condition("intracranial haemorrhage must have a treating component", ("5",),
+              "PARTIAL at TRANSFERRED -- resection of a solitary IMAGED intracranial "
+              "hemangiosarcoma is documented in dogs (PMID 42038052, n=2), and SRS was "
+              "deliverable. No survival benefit and no haemorrhage endpoint were shown, and an "
+              "occult or multifocal deposit is still untreated",
+              "a canine series with a haemorrhage endpoint. Until then this stays a competing "
+              "event, not a cancer-control failure"),
+    Condition("surveillance imaging must include the brain", ("5", "8", "9", "12b"),
+              "OPEN -- newly exposed by the regrade above. The plan assumes early detection, but "
+              "the surveillance it assumes is abdominal and thoracic; no canine HSA surveillance "
+              "protocol in this record images the CNS. Every CNS closure here is conditional on a "
+              "deposit being imaged, so without brain imaging the detection assumption does not "
+              "reach the compartment the closures were written for",
+              "add brain MRI to the surveillance schedule and cost it; this is a protocol "
+              "decision, not a missing measurement"),
 )
 
 
@@ -296,9 +340,10 @@ def odds_are_secondary() -> dict:
         "what_the_number_hid_in_this_analysis": "a single durability figure averages over anatomical "
                                                "compartments. 0.830 for the route-8 closure is an "
                                                "average over sites in which doxorubicin and eBAT are "
-                                               "present. In the CNS they are absent and the cell is "
-                                               "OPEN. The conjunction shows that; the average does "
-                                               "not.",
+                                               "present. In the CNS they are absent, and until two "
+                                               "penetrant alkylators were evidenced those cells "
+                                               "were OPEN. The conjunction shows that; the average "
+                                               "does not.",
         "what_the_numbers_are_still_good_for": "sensitivity. 'The requirement is a ramp not a cliff', "
                                                "'the bar moves 7% from full dose to no drug', and "
                                                "'0.966-1.000 across four orders of magnitude of "
@@ -309,9 +354,19 @@ def odds_are_secondary() -> dict:
 
 
 VERDICT = {
-    "headline": "Of 15 routes across 6 anatomical sites, ONE cell is OPEN: route 5 in its CNS form "
-                "-- intracranial haemorrhage from a vascular brain metastasis, which no component "
-                "of this plan treats. Every other route is CLOSED at every site.",
+    "headline": "Of 15 routes across 6 anatomical sites, NO cell is OPEN and one is PARTIALLY "
+                "CLOSED: route 5 in its CNS form -- intracranial haemorrhage from a vascular brain "
+                "deposit. Every other route is CLOSED at every site.",
+    "why_that_cell_is_partial_and_not_closed": ROUTE_5_CNS_PARTIAL_BASIS,
+    "the_cost_of_that_regrade": "it exposed a new OPEN condition. Every CNS closure in this ledger "
+                                "-- the alkylators for routes 8 and 12b, resection and SRS for "
+                                "route 5 -- is conditional on a deposit being imaged, and the "
+                                "surveillance this project assumes is abdominal and thoracic. No "
+                                "canine HSA surveillance protocol in this record images the brain. "
+                                "So the condition list went from 8 to 9 and the failing count "
+                                "stayed at 3: the haemorrhage condition improved to PARTIAL and a "
+                                "brain-imaging condition opened. The ledger did not simply get "
+                                "better.",
     "how_the_cns_cells_closed": "routes 8 and 12b were open in the CNS because doxorubicin, eBAT "
                                 "and the MEK + TORC1/2 combination do not cross the blood-brain "
                                 "barrier. Two CNS-penetrant alkylators close them, and between "

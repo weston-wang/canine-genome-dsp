@@ -170,7 +170,7 @@ def test_the_conjunction_contains_no_probability():
     c = dc.conjunction()
     assert not any(isinstance(v, float) for v in c.values())
     for row in c["matrix"].values():
-        assert set(row.values()) <= {dc.CLOSED, dc.OPEN, dc.NOT_APPLICABLE}
+        assert set(row.values()) <= {dc.CLOSED, dc.PARTIALLY_CLOSED, dc.OPEN, dc.NOT_APPLICABLE}
 
 
 def test_brain_SRT_is_not_credited_because_it_cannot_find_an_occult_deposit():
@@ -206,17 +206,43 @@ def test_the_two_alkylators_cover_each_others_weakness():
     assert "lomustine lacks" in dc.REACH_BASIS["temozolomide"]
 
 
-def test_exactly_one_cell_is_open_and_it_is_a_competing_event():
-    """Routes 8 and 12b closed once two CNS-penetrant alkylators were evidenced. What is left is
-    intracranial haemorrhage, which is a competing event rather than a cancer-control failure."""
+def test_nothing_is_open_and_the_one_partial_cell_is_a_competing_event():
+    """Routes 8 and 12b closed once two CNS-penetrant alkylators were evidenced. Route 5's CNS form
+    then moved OPEN -> PARTIALLY CLOSED on a canine intracranial resection series. 'Partial' is
+    reported as its own category: rounding it up would overstate, rounding it down would discard
+    same-species evidence."""
     from canine_dsp import hsa_deterministic_closure as dc
     c = dc.conjunction()
-    assert c["all_closed"] is False
-    assert len(c["open_cells"]) == 1
-    (number, _, site), = c["open_cells"]
+    assert c["open_cells"] == []
+    assert c["nothing_open"] is True
+    assert c["all_closed"] is False          # partial is not closed
+    assert len(c["partially_closed_cells"]) == 1
+    (number, _, site), = c["partially_closed_cells"]
     assert number == "5" and site == dc.Site.CNS.value
     assert "COMPETING EVENT" in dc.VERDICT[
         "what_remains_open_and_why_it_is_not_a_cancer_control_failure"]
+
+
+def test_the_partial_cell_states_both_reasons_it_is_not_closed():
+    """A partial grade is only honest if it names what is missing: no survival benefit shown, and
+    reach limited to a solitary imaged deposit."""
+    from canine_dsp import hsa_deterministic_closure as dc
+    basis = dc.ROUTE_5_CNS_PARTIAL_BASIS
+    assert "PMID 42038052" in basis
+    assert "no survival benefit" in basis
+    assert "SOLITARY IMAGED" in basis
+    assert "occult or multifocal" in basis
+    assert dc.VERDICT["why_that_cell_is_partial_and_not_closed"] == basis
+
+
+def test_the_regrade_is_reported_with_the_condition_it_exposed():
+    """The CNS regrade is only admissible alongside the new open condition it creates: every CNS
+    closure here needs the deposit imaged, and the assumed surveillance is abdominal and thoracic."""
+    from canine_dsp import hsa_deterministic_closure as dc
+    cond = next(c for c in dc.CONDITIONS if "brain" in c.what)
+    assert cond.status.startswith("OPEN")
+    assert cond in dc.failing_conditions()
+    assert "did not simply get better" in dc.VERDICT["the_cost_of_that_regrade"]
 
 
 def test_routes_8_and_12b_close_in_the_cns_only_via_an_alkylator():
@@ -239,7 +265,7 @@ def test_splenic_rupture_is_not_counted_five_times():
     r5 = next(r for r in dc.ROUTES if r.number == "5")
     assert dc.route_status(r5, dc.Site.SPLEEN) == dc.CLOSED
     assert dc.route_status(r5, dc.Site.LUNG) == dc.NOT_APPLICABLE
-    assert dc.route_status(r5, dc.Site.CNS) == dc.OPEN      # intracranial haemorrhage is real
+    assert dc.route_status(r5, dc.Site.CNS) == dc.PARTIALLY_CLOSED   # resectable if imaged
 
 
 def test_the_t_cell_arm_is_what_reaches_the_cns_and_the_antibody_arm_is_not():
@@ -252,7 +278,7 @@ def test_the_t_cell_arm_is_what_reaches_the_cns_and_the_antibody_arm_is_not():
 
 def test_the_verdict_corrects_the_earlier_overclaim():
     from canine_dsp import hsa_deterministic_closure as dc
-    assert "ONE cell is OPEN" in dc.VERDICT["headline"]
+    assert "NO cell is OPEN and one is PARTIALLY" in dc.VERDICT["headline"]
     assert "intracranial haemorrhage" in dc.VERDICT["headline"]
 
 
@@ -272,7 +298,12 @@ def test_the_condition_list_is_finite_and_names_what_fails():
     joined = " ".join(c.what for c in failing)
     assert "CNS-penetrant" not in joined, "that condition is now met"
     assert "half-life" in joined and "rupture hazard" in joined
-    assert "haemorrhage" in joined
+    # The haemorrhage condition is no longer failing -- it went to PARTIAL on PMID 42038052 -- and a
+    # brain-imaging condition opened in the same move. The count did not improve.
+    assert "haemorrhage" not in joined
+    assert "include the brain" in joined
+    haem = next(c for c in dc.CONDITIONS if "haemorrhage" in c.what)
+    assert haem.status.startswith("PARTIAL")
     for c in dc.CONDITIONS:
         assert c.how_to_settle, c.what
 

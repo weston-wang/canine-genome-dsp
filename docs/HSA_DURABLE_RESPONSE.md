@@ -2007,7 +2007,11 @@ durability number averages over anatomical compartments. Split by site:
 | route | spleen | peritoneum | liver | lung | heart | **CNS** |
 |---|---|---|---|---|---|---|
 | 1–4, 6–15 (all but route 5) | ✓ | ✓ | ✓ | ✓ | ✓ | **✓** |
-| **5** rupture / haemorrhage | ✓ | n/a | n/a | n/a | n/a | **OPEN** |
+| **5** rupture / haemorrhage | ✓ | n/a | n/a | n/a | n/a | **partial** |
+
+**No cell is open.** One is *partially* closed, and it is reported as its own category rather than
+rounded either way — rounding up would be the overstatement failure 4 names, rounding down would
+discard same-species evidence.
 
 **Three cells were open when the matrix was first built, and all three were in the CNS.** The reason
 was mechanical: route 8's closure is doxorubicin plus eBAT, route 12b's is the MEK + TORC1/2
@@ -2019,7 +2023,10 @@ tumorgraft. In the CNS the vaccine would have had to hold a ceiling-rate clone a
 
 **That corrected an overclaim in this document** — §4a and §7 said every escape path has a closure,
 which was true systemically and false in the CNS, and the single averaged number is what concealed
-it, since 0.830 averages over sites where doxorubicin and eBAT are present.
+it, since 0.830 averages over sites where doxorubicin and eBAT are present. All three cells have
+since been worked: routes 8 and 12b closed on two CNS-penetrant alkylators, and route 5's CNS form
+moved to *partial* on a canine intracranial resection series. The correction stands as the record of
+how the overclaim arose.
 
 ### Two CNS-penetrant alkylators close both cells, and they cover each other's weakness
 
@@ -2049,16 +2056,51 @@ and is fully mechanism-independent, but it can only treat a deposit that has bee
 and 12b describe *occult* seeding, so crediting SRT against them would be crediting a mechanism
 against a target it cannot find. It covers detected deposits only.
 
+### And the last open cell became partial — on the canine brain's own data
+
+Route 5's CNS form was the one cell nothing in the plan treated: haemorrhage from a vascular brain
+deposit. The mechanism that closes route 5 at the spleen is not a drug at all — it is *image the
+vascular mass and remove it before it bleeds*, which is why splenectomy plus screening closes it
+there. That mechanism is now documented **in the canine brain**.
+
+Biundo, Marino & Roynard 2026 (*Front Vet Sci* 13:1778366, PMID 42038052) report the first canine
+series of ante-mortem diagnosed, surgically treated intracranial hemangiosarcoma: two dogs presenting
+with seizures, MRI-diagnosed solitary intracranial masses, **resected**, histopathology confirming
+hemangiosarcoma in both. The authors' conclusion is that resection of such a solitary mass "is doable
+and may be associated with good quality of life in the short to intermediate term." One dog received
+adjuvant doxorubicin, had MRI-confirmed regrowth at day 280, and received **CyberKnife stereotactic
+radiosurgery** at day 310 — so SRS is deliverable to this indication in this species.
+
+Same species, same tumour, same compartment. That is the strongest transfer grade available anywhere
+in this document — stronger than lomustine's and stronger than temozolomide's.
+
+**Why it is partial and not closed, on two counts that are not negotiable.** The dogs were euthanased
+at 87 and 314 days post-operatively: **no survival benefit was shown**, and no haemorrhage endpoint
+was measured in either (neither death was attributed to bleeding, but n=2 and neither had a necropsy,
+so primary intracranial status was suspected rather than confirmed). And resection reaches only a
+**solitary imaged** deposit — an occult or multifocal one is still untreated, which is the very
+objection that keeps brain radiotherapy uncredited against routes 8 and 12b.
+
+**What the regrade costs.** It exposed a new open condition. *Every* CNS closure in this ledger — the
+two alkylators for routes 8 and 12b, resection and SRS for route 5 — is conditional on the deposit
+being imaged. This project assumes early detection, but the surveillance it assumes is **abdominal
+and thoracic**; no canine HSA surveillance protocol in this record images the brain. So the condition
+list went from eight to nine and the failing count stayed at **three**: the haemorrhage condition
+improved to PARTIAL and a brain-imaging condition opened in the same move. The ledger did not simply
+get better.
+
 ### The finite condition list
 
-Rule 12 asks for the conditions and each one's status rather than a number. Three fail:
+Rule 12 asks for the conditions and each one's status rather than a number. There are nine, and
+three fail:
 
 | condition | status |
 |---|---|
 | a CNS-penetrant, antigen- and pathway-independent agent must be added | **MET** at TRANSFERRED — lomustine and temozolomide; unquantified on logs delivered |
+| intracranial haemorrhage must have a treating component | **PARTIAL** at TRANSFERRED — resection of a solitary *imaged* intracranial HSA is documented in dogs (PMID 42038052, n=2) and SRS was deliverable; no survival benefit and no haemorrhage endpoint shown |
 | immunity half-life must support the booster interval | **FAILS** the stated bar — bare assumption, and the answer swings on it |
 | the post-remission rupture hazard must be bounded | **FAILS** the stated bar — swept with no anchor |
-| intracranial haemorrhage has no treating component | **OPEN** — a competing event, not a cancer-control failure |
+| **surveillance imaging must include the brain** | **OPEN** — newly exposed by the regrade above; the assumed surveillance is abdominal and thoracic |
 
 The other four pass: the vaccine platform must have a T-cell arm (**selectable now** — ERstrePs
 qualifies, eVim does not); vaccine height must reach ~1.40× (**TRANSFERRED**); the route-8 compartment
@@ -2067,6 +2109,70 @@ must be anthracycline-sensitive (**unexamined, not contradicted**); and it must 
 
 *Module: `hsa_deterministic_closure`. Quote `conjunction()`; never quote a durability figure as the
 verdict.*
+
+---
+
+## 6c. Does this program rest on agents that exist? — the rule 13 audit
+
+`CLAUDE.md` rule 13 was added from a failure on the **lymphoma** branch: its closing programs rested
+on a CAR-T for dogs, a spinal-fluid CAR-T and a spinal pump — all *to build* — while vaccines,
+engagers, inhibitors and stem-cell transplant were set aside for having "no canine kill rate". The
+user: *"I needed scientifically sound, not totally theoretical. And I think you are dismissing
+vaccines, ebats, inhibitors, stem cells too easily."* The rule now requires every agent tiered
+exists-today or to-build, and permits a class to be excluded **only** because its kill is
+contradicted, it is defeated by a named escape, or its toxicity cannot be afforded — never because
+canine data are absent.
+
+This HSA program had never been audited that way. It passes.
+
+### Every component exists today. There is no to-build agent in it.
+
+Thirteen components, zero to-build: **six** licensed or standard of care, **four** given to dogs
+off-label, **three** administered in a published canine trial. No molecule has to be invented, no
+construct engineered, no hardware implanted.
+
+| agent | tier | why it is not hypothetical |
+|---|---|---|
+| splenectomy | licensed | the standard of care; every trial here enrols post-splenectomy dogs |
+| ERstrePs vaccine | **canine trial** | PMID 37686485 — 28 vaccinated vs 32 control dogs *with this disease* |
+| doxorubicin | licensed | standard of care; DFI 133 d, PMID 17708397 |
+| eBAT | **canine trial** | 23 dogs, this disease, this setting, positive at a tolerated dose — *and* the informative negative SRCBST-2 (PMID 32187827, 25 dogs: repeat cycles gave greater toxicity and reduced efficacy) |
+| losartan | off-label | an ARB dogs already take indefinitely; exposure set by dose-escalation to a measured PD endpoint in 28 dogs |
+| caninized anti-PD-1 / PD-L1 | **canine trial** | 51 dogs on a booster-like schedule; a veterinary checkpoint inhibitor is now commercially available |
+| trametinib | off-label | target engagement in canine tumour tissue at the tolerated dose |
+| dual TORC1/2 inhibitor | off-label | 17-day beagle tolerability — a *duration* shortfall, not an existence problem |
+| lomustine | licensed | PMID 28828962 — 30 dogs, stage II splenic HSA, alternating with an anthracycline |
+| temozolomide | off-label | given to dogs; the angiosarcoma CNS evidence is human (PMID 37811120, 42125685) |
+| brain SRS | licensed | delivered to a dog with intracranial HSA (PMID 42038052) |
+| craniotomy + resection | licensed | PMID 42038052 — two dogs, MRI diagnosis, resection performed |
+| meloxicam | licensed | a canine NSAID given indefinitely |
+
+**What the program does carry is one unmeasured combination, not a missing agent.** The ~1.40× vaccine
+height is assembled from existing levers — anti-PD-1, losartan, eBAT, recurrent immunisation — whose
+*joint* contribution nobody has measured. That is a **quantification** gap. A missing molecule would
+be a coverage gap and fatal to a program of this kind; merging the two is the overstatement failure 4
+names.
+
+### Six classes excluded, each on an admissible reason — and none for want of dog data
+
+| class | disposition | the reason |
+|---|---|---|
+| antibody–drug conjugates | **excluded** | *kill contradicted.* ADC bystander killing **increases** with the antigen-positive fraction and dissipates as it falls, so it is weakest exactly where route 8 needs it. The mechanism runs backwards for this geometry |
+| NK augmentation | **excluded** | *kill contradicted.* Given to dogs; outcomes were **worse**, with a measured mechanism |
+| bispecific T-cell engagers | **excluded** | *defeated by a named escape.* Antigen-directed, so void against the antigen-null fraction route 8 names, and redundant against the fraction the vaccine's T-cell arm already covers permanently. **No canine engager trial exists** — that absence is recorded and is explicitly *not* the reason |
+| CAR-T | **excluded** | *defeated by a named escape.* Same antigen dependence. The canine platform is real (PMID 27401141 — CD20 CAR-T in a dog, tolerated, "modest, but transient") but an HSA construct is to-build, so leaning on it would repeat the lymphoma failure exactly |
+| body radiation | **excluded** | *defeated by a named escape.* Route 7 is disseminated micrometastatic disease, which a field cannot cover. Note also that the one canine curative-intent SBRT series in soft-tissue sarcoma **explicitly excluded hemangiosarcoma from enrolment** (PMID 31841095) |
+| stem-cell / marrow transplant | **excluded** | *toxicity unaffordable, and the wrong shape.* It acts only on the log-removal term, and §3h established log removal alone cannot close route 8 — only a permanent negative-growth floor can. It is the most toxic possible finite-course log-remover added to a stack that already has three, in a dog with minimal residual disease. Its dose-intensification rationale is void here because the binding toxicities are cardiac, hepatic and renal, **not marrow**. The class is *not* excluded for lacking dog data: nonmyeloablative DLA-identical marrow allografts give stable mixed chimerism in dogs (PMID 11215693) |
+
+**Two classes are labelled unassessed rather than excluded** — oncolytic virus (the only canine HSA
+datum is one case in a *different* primary site, bone, which yields no gradable kill rate; the named
+path is a human angiosarcoma intratumoural transfer, the same kind already accepted for temozolomide)
+and cytokine agents (never assessed alone; the named path is an IL-15 or IL-2 exposure-response
+transfer that would have to clear the same two criteria every other lever clears). Saying "unassessed"
+rather than "closed" is rule 9; saying it rather than "excluded for want of canine data" is rule 13.
+
+*Module: `hsa_agent_tiers`. `program_is_built_from_existing_agents()` returns True;
+`classes_excluded_for_absent_canine_data()` returns `[]`, and a test asserts it.*
 
 ---
 
@@ -2202,6 +2308,20 @@ at HR 0.510 for recurrence-free and 0.384 for distant-metastasis-free survival. 
 the DMFS endpoint. The increment moves **ASSUMED → TRANSFERRED** for direction and partial magnitude.
 What stays open is whether canine HSA behaves like human melanoma, and whether four mechanistically
 coupled levers stack or overlap.
+
+**Stated as a conjunction, nothing is open** (§6b). Of fifteen routes across six anatomical sites, no
+cell is OPEN and one is PARTIALLY CLOSED — route 5 in its CNS form, haemorrhage from a vascular brain
+deposit, now carrying a documented canine mechanism (resection of a solitary imaged intracranial
+hemangiosarcoma, PMID 42038052) but no survival benefit and no haemorrhage endpoint. **Three of nine
+conditions still fail**: immunity half-life, the post-remission rupture hazard, and — newly exposed by
+that regrade — the fact that the surveillance this plan assumes is abdominal and thoracic and does not
+image the brain, while every CNS closure here needs the deposit imaged.
+
+**And the whole program is built from agents that exist today** (§6c). Thirteen components, zero
+to-build. Six classes are excluded, each on a contradicted kill, a named escape, or unaffordable
+toxicity — and none for lacking canine data; two more are honestly labelled unassessed with a named
+path. What this program lacks is not an agent. It is one measurement: what the four microenvironment
+levers add to vaccine height when given together.
 
 ### What would change the answer
 

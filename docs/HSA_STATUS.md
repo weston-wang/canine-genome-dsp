@@ -199,8 +199,8 @@ The user: *"I don't want odds of achieving 10 years, the whole point about looki
 and escapes is to not leave it to odds."* Every durability figure here (0.888 / 0.830 / 0.966 / 0.992)
 is a **sensitivity statement**. The verdict is `hsa_deterministic_closure.conjunction()`.
 
-**One of 15 routes × 6 sites is OPEN: route 5 in its CNS form** — intracranial haemorrhage from a
-vascular brain metastasis, which no component treats. Every other route is CLOSED at every site.
+**No cell of 15 routes × 6 sites is OPEN. One is PARTIALLY CLOSED: route 5 in its CNS form** —
+haemorrhage from a vascular brain deposit. Every other route is CLOSED at every site.
 
 **Three cells were open when the matrix was first built**, all in the CNS: routes 8 and 12b, because
 doxorubicin, eBAT and the MEK+TORC1/2 combination do not cross the blood–brain barrier. That
@@ -223,10 +223,62 @@ it is a *finite-course log-remover*, never a chronic floor-holder — the same s
 closure. **Brain SRT is deliberately not credited:** maximal reach but only against an imaged
 deposit, and routes 8/12b are occult seeding.
 
-**Conditions failing (4 of 8):** the CNS agent; the immunity half-life; the rupture hazard;
-intracranial haemorrhage. **Passing:** T-cell vaccine platform (selectable now — ERstrePs yes, eVim
-no); vaccine height ~1.40× (TRANSFERRED); route-8 anthracycline sensitivity (unexamined); route-8
-existence (unverified).
+### The last open cell became partial — 2026-10-02
+
+Route 5's CNS form was the one cell nothing treated. The mechanism that closes route 5 at the spleen
+is not a drug: it is *image the vascular mass and remove it before it bleeds*. **That mechanism is now
+documented in the canine brain.** Biundo, Marino & Roynard 2026, *Front Vet Sci* 13:1778366,
+**PMID 42038052** — the first canine series of ante-mortem diagnosed, surgically treated intracranial
+hemangiosarcoma: two dogs, seizure onset, MRI-diagnosed solitary masses, **resected**, histopathology
+confirmed; the authors conclude resection "is doable and may be associated with good quality of life
+in the short to intermediate term". One dog had MRI-confirmed regrowth at day 280 and received
+**CyberKnife SRS** at day 310. Same species, same tumour, same compartment — the strongest transfer
+grade anywhere in this analysis.
+
+**Partial, not closed, on two counts:** euthanased at 87 and 314 days, so **no survival benefit** and
+no haemorrhage endpoint (n=2, no necropsy, primary status suspected not confirmed); and resection
+reaches only a **solitary imaged** deposit, the same objection that keeps brain SRT uncredited against
+routes 8 and 12b.
+
+**The regrade cost a new condition.** Every CNS closure here needs the deposit imaged, and the
+surveillance this project assumes is **abdominal and thoracic** — no canine HSA protocol in this
+record images the brain. Conditions went 8 → 9 and failing stayed at 3. The ledger did not simply get
+better.
+
+**Conditions failing (3 of 9):** the immunity half-life; the rupture hazard; **brain-inclusive
+surveillance imaging** (new). **Partial:** intracranial haemorrhage (TRANSFERRED, PMID 42038052).
+**Passing:** the CNS agent (MET at TRANSFERRED — lomustine + temozolomide); T-cell vaccine platform
+(selectable now — ERstrePs yes, eVim no); vaccine height ~1.40× (TRANSFERRED); route-8 anthracycline
+sensitivity (unexamined); route-8 existence (unverified).
+
+## The rule 13 audit (2026-10-02) — tiers and class dispositions
+
+Rule 13 arrived on this branch mid-session from the lymphoma failure (failure 8): programs built on
+to-build agents, classes dismissed for lacking canine data. **This program had never been audited that
+way, and it passes.** Module `hsa_agent_tiers`; doc §6c.
+
+- **Thirteen components, zero to-build** — 6 licensed/standard of care, 4 off-label in dogs, 3 in a
+  published canine trial. `program_is_built_from_existing_agents()` returns True. No molecule to
+  invent, no construct to engineer, no hardware to implant.
+- **What the program carries is one unmeasured combination, not a missing agent.** The ~1.40× vaccine
+  height is assembled from existing levers whose joint contribution is unmeasured — a *quantification*
+  gap, not a coverage gap. Do not merge the two (failure 4).
+- **Six classes excluded, each on an admissible reason, none for absent dog data.** ADCs and NK
+  augmentation on a *contradicted kill* (ADC bystander killing runs backwards at low antigen-positive
+  fraction; NK augmentation made canine outcomes worse). T-cell engagers, CAR-T and body radiation on
+  a *named escape* (antigen dependence ×2; micrometastatic dissemination). Marrow transplant on
+  *unaffordable toxicity* and wrong shape — it acts only on the log-removal term and route 8 needs a
+  permanent floor; the binding toxicities here are cardiac/hepatic/renal, not marrow.
+  `classes_excluded_for_absent_canine_data()` returns `[]`, and a test asserts it.
+- **New citations to not re-discover:** PMID 27401141 (canine CD20 CAR-T exists — tolerated, "modest,
+  but transient"); PMID 11215693 (nonmyeloablative DLA-identical marrow allografts give stable mixed
+  chimerism in dogs — so "no canine transplant data" would have been false); PMID 31841095 (the one
+  canine curative-intent SBRT series in STS **explicitly excluded hemangiosarcoma from enrolment**);
+  PMID 33934609 (a search for canine T-cell engagers returns only a human cardio-oncology review —
+  the absence is real and is *not* the exclusion reason).
+- **Two classes labelled unassessed, not excluded:** oncolytic virus (the only canine HSA datum is one
+  case in a different primary site, bone; named path = a human angiosarcoma intratumoural transfer)
+  and cytokine agents (named path = an IL-15/IL-2 exposure-response transfer).
 
 ## Open gaps, ranked (the honest list)
 
@@ -294,11 +346,13 @@ existence (unverified).
 | The Three-Move Plan | plain language — clear it, hold it, catch it early | https://claude.ai/code/artifact/3e895f36-2140-4bd3-a533-5545e987c8d8 |
 | The Potency Gap | researchers — what is additive here, and the experiments ranked | https://claude.ai/code/artifact/c70ccea7-571f-406f-bcec-bd0c29671e33 |
 
-All three were revised on 2026-10-01 to carry the sweep above; *The Potency Gap* §06 is the changelog.
+All three were revised on 2026-10-02 to carry the CNS closure; *The Potency Gap* §06 is the changelog.
+The 2026-10-02 regrade of route 5's CNS cell and the rule 13 audit are in the docs and modules; the
+three reports carry the alkylator closure but **not yet** the partial regrade or the tier ledger.
 
 ## Test status
 
-`743 passed` (2026-10-01). Five test modules require `torch` and were not run in that container:
+`832 passed` (2026-10-02; 830 at the CNS-closure commit, plus the rule 13 module). Five test modules require `torch` and were not run in that container:
 `test_hybrid_rnn`, `test_alphafold`, `test_hsa_cli`, `test_mapk_cli`, `test_vaccine_eval`. The HSA
 analysis modules themselves have no such dependency. Run with
 `PYTHONPATH=src python3 -m pytest tests/ -q` (needs numpy, scipy, pandas, scikit-learn, matplotlib).
