@@ -52,9 +52,13 @@ def test_load_bearing_is_decided_from_fields_not_from_prose():
     assert unc["paxalisib"] == ["access"], "duvelisib covers the potency, not the access"
     # Ribociclib's measured Gd-non-enhancing concentrations substitute for RGN3067's ACCESS and
     # DUTY. What no licensed agent substitutes for is its non-division-gated kill.
-    assert unc["RGN3067"] == ["position-independent kill"]
+    assert unc["RGN3067"] == ["a computed cytotoxic margin at the invading edge"]
     assert "access" not in unc["RGN3067"]
     assert "duty" not in unc["RGN3067"]
+    # dordaviprone supplies the non-division-gated kill, so that is no longer uncovered either
+    assert "position-independent kill" not in unc["RGN3067"]
+    # and the PRMT5 arm is now wanted only for the Rb-INDEPENDENT form of the anchor
+    assert unc["MTA-cooperative PRMT5 inhibitor"] == ["an Rb-independent anchor"]
 
 
 def test_abemaciclib_is_scored_on_its_own_numbers_not_the_generic_access():
@@ -98,20 +102,26 @@ def test_program_a_does_not_overstate_that_into_full_closure():
     as the good news, or it is the same overstatement the project has been corrected for before.
     """
     v = at.program_a()["verdict"]
-    assert "ACCESS CLOSES" in v
-    assert "NOT CLOSED" in v
-    assert "persister" in v
-    assert "division-gated" in v
-    assert at.program_a()["persister_cover"].startswith("PARTIAL")
+    assert "CLOSES WITH LICENSED AGENTS" in v
+    # the good news must arrive with the weaker form of closure stated in the same breath
+    assert "WEAKER" in v.upper()
+    assert "STRUCTURALLY" in v
+    assert "Programme B" in v
+    assert at.program_a()["persister_cover"].startswith("CLOSED STRUCTURALLY")
 
 
-def test_the_persister_at_the_invading_edge_has_no_exists_today_kill():
-    """The honest residual, stated as a computation over the candidate list rather than a claim."""
+def test_the_persister_cover_is_computed_over_the_candidate_list_not_asserted():
+    """The candidate list must still show its working, including what is NOT the carrier."""
     cover = at.persister_cover_at_the_invading_edge()
-    # DMAPT is the agent measured in canine HS for this job, and it is to-build.
+    # DMAPT remains the best-evidenced candidate IN THIS DISEASE, and remains to-build.
     assert "parthenolide / DMAPT (NF-kB)" in cover["not_division_gated_and_reaches_the_site"]
     assert "parthenolide / DMAPT (NF-kB)" not in cover["of_those_that_exist_today"]
-    assert cover["of_those_that_exist_today"] == ["hydroxychloroquine"]
+    # hydroxychloroquine exists today but is cover, not kill, so it must not count as the carrier.
+    assert "hydroxychloroquine" in cover["of_those_that_exist_today"]
+    assert "hydroxychloroquine" not in cover[
+        "licensed_agents_supplying_a_real_non_division_gated_kill"]
+    # radiation reaches the site but is division-gated, so it must not count either.
+    assert cover["candidates"]["radiation"]["division_gated"] is True
 
 
 def test_the_parallel_pathway_residual_is_a_measured_negative_not_a_missing_number():
@@ -189,3 +199,89 @@ def test_the_statement_reports_both_programs_and_the_counts_agree():
     assert "PROGRAM A" in s and "PROGRAM B" in s
     assert str(len(at.exists_today())) in s
     assert str(len(at.to_build())) in s
+
+
+# --- the licensed-only programme, route by route (rule 12 form) -----------------------------------
+
+def test_the_route_ledger_accounts_for_every_audited_route():
+    """A per-route claim over a subset of the routes is the rule-9 failure in a new costume."""
+    from canine_dsp import escape_audit as ea
+
+    led = at.program_a_route_ledger()
+    assert led["routes_total"] == ea.audited_escape_count()
+    assert led["accounts_for_every_audited_route"]
+
+
+def test_no_route_is_left_open_in_the_licensed_programme():
+    assert at.program_a_route_ledger()["open"] == []
+
+
+def test_the_ledger_distinguishes_margin_from_structural_closure():
+    """CLAUDE.md rule 5: 'the lesion cannot apply' is a weaker claim than 'we out-kill it', and the
+    ledger must keep them apart rather than reporting 16 closures as if they were equivalent."""
+    led = at.program_a_route_ledger()
+    kinds = led["by_kind"]
+    assert kinds["MARGIN"] >= 1 and kinds["STRUCTURAL"] >= 1
+    # and the verdict must say out loud that structural closure is the weaker form
+    assert "weaker form" in led["verdict"]
+    assert "Programme B" in led["verdict"]
+
+
+def test_every_route_names_a_carrier_and_a_basis():
+    for route, (kind, carrier, basis) in at.PROGRAM_A_ROUTES.items():
+        assert kind in {"MARGIN", "STRUCTURAL", "GATED", "OPEN"}, route
+        assert carrier.strip(), route
+        assert len(basis) > 60, route
+
+
+def test_the_weakest_row_is_named_rather_than_averaged_away():
+    """The PI3K row closes on a transferred access with a measured negative on the same axis."""
+    led = at.program_a_route_ledger()
+    assert "RTK bypass" in led["weakest_row"]
+    assert at.PROGRAM_A_ROUTES["4 RTK bypass into PI3K/AKT"][0] == "MARGIN"
+    assert "TRANSFERRED" in at.PROGRAM_A_ROUTES["4 RTK bypass into PI3K/AKT"][2]
+
+
+def test_the_persister_route_is_carried_by_a_licensed_agent_now():
+    kind, carrier, _ = at.PROGRAM_A_ROUTES["10 Drug-tolerant persister"]
+    assert "dordaviprone" in carrier
+    assert kind == "STRUCTURAL", "no unbound tumour concentration is published, so not MARGIN"
+    cover = at.persister_cover_at_the_invading_edge()
+    assert cover["licensed_agents_supplying_a_real_non_division_gated_kill"]
+    assert cover["verdict"].startswith("CLOSED STRUCTURALLY")
+
+
+def test_the_genotype_anchor_exists_today_for_the_cdkn2a_half():
+    a = at.is_cdk46_a_genotype_anchor()
+    assert a["licensed"] is True
+    assert "ribociclib" in a["agents"]
+    assert a["verdict"].startswith("CLOSED")
+    # and the Rb caveat must be stated, not buried
+    assert "RB1" in a["why_the_mtap_arm_is_still_wanted"]
+
+
+def test_rb1_loss_has_a_named_rb_independent_successor():
+    """A15 defeats the licensed anchor, so it needs a successor or the anchor claim is hollow."""
+    kind, carrier, basis = at.PROGRAM_A_ROUTES[
+        "A15 RB1 loss / CDK2-cyclin E bypass of the CDK4/6 arm"]
+    assert "dordaviprone" in carrier
+    assert "Rb-INDEPENDENT" in basis
+
+
+def test_clpp_transfer_rests_on_the_catalytic_region_not_the_average():
+    """The raw 92.65% understates it; the claim must rest on the partition and the active sites."""
+    from canine_dsp import sequence_conservation as sc
+
+    part = sc.clpp_domain_partition()
+    assert part["active_sites"]["both_identical"]
+    assert part["mature_ordered_57_245"]["identity_percent"] > 98
+    assert part["transit_peptide_1_56_cleaved"]["n"] > part["mature_ordered_57_245"]["n"]
+
+
+def test_dordaviprone_closes_structurally_and_says_why_not_by_margin():
+    """Overstating a structural closure as a computed one is CLAUDE.md failure 4."""
+    agent = next(a for a in at.PROGRAM if "dordaviprone" in a.name)
+    assert agent.availability is Availability.EXISTS_TODAY
+    assert agent.pkpd_key is None, "no unbound tumour concentration is published to derive a rate"
+    for phrase in ("no canine-HS", "ONCE-WEEKLY", "CLASS-MECHANISM"):
+        assert phrase in agent.basis, phrase

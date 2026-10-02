@@ -23,10 +23,21 @@ patient. The trial enrolled patients selected for *CDKN2A/B deletion with wild-t
 lesion 62.8% of these dogs carry — and confirmed the drug was working in that tissue. All three
 sites this tumour occupies now close with drugs obtainable today and no procedure (§6a).
 
-**What is still missing is mechanism, not delivery, and it is three things** — a cytotoxic that kills
-cells that are not dividing, brain penetration on the PI3K axis, and a drug aimed at the inherited
-deletion itself. Two of those three are compounds that exist in human trials. Only one is a genuine
-scientific gap.
+**And every escape route closes with licensed drugs too, not just every site.** All 16 audited
+routes have a named carrier obtainable today: 3 by a computed kill margin, 12 structurally (the
+lesion cannot apply to these drugs), 1 gated on a pre-treatment stain, **none open** (§6b). Two
+routes that had no licensed answer now have one:
+
+- **cells that are not dividing** — dordaviprone (ONC201), FDA accelerated approval 2025, kills by
+  collapsing a cell's oxidative phosphorylation, which a dormant cell needs as much as a dividing
+  one;
+- **the inherited deletion itself** — the same deletion removes CDKN2A, and p16's only job is to
+  inhibit CDK4/6, so a licensed CDK4/6 inhibitor *replaces the deleted gene's function*.
+
+**What remains is three quantities, not three mechanisms**: a computed cytotoxic margin at the
+invading edge, a measured brain concentration on the PI3K axis, and an anchor that survives loss of
+the Rb gene. Two are compounds already in human trials; the third is a measurement nobody has taken.
+None is a molecule that has to be discovered.
 
 ---
 
@@ -41,7 +52,8 @@ toxicity budget, with an all-oral regimen and no procedure.
 | Leptomeninges, CSF | **10 / 10** computed | **+0.61 / day** | 0.055 / day |
 
 The remaining 6 of the 16 routes close structurally — by drug choice or schedule, not by a kill rate
-(see §4).
+(see §4). **With licensed drugs only**, all 16 also close, but with the balance shifted: 3 by margin,
+12 structurally, 1 gated, 0 open (§6b).
 
 **Closed within a stated catalogue:** 25 therapy-modality classes (15 in the model, 10 excluded with
 recorded reasons, **0 unassessed**) and 16 escape routes derived independently of the list in hand.
@@ -72,6 +84,8 @@ radiation in the closing set.**
 | Role | Agent | Why it is in the set | Available for a dog? |
 |---|---|---|---|
 | Induction / position-independent kill | **RGN3067** (oral colchicine-site tubulin destabiliser) | Carries 6 of the 16 routes. Not an efflux-pump substrate (ratio 0.61) | **No — preclinical, rodent-only** |
+| Brain maintenance, genotype anchor | **ribociclib** | Measured unbound concentration in non-enhancing brain tumour, 1.6–16× its target. Replaces the function of the deleted CDKN2A | Yes — licensed |
+| Kill that needs no cell division | **dordaviprone (ONC201)** | ClpP agonist: collapses oxidative phosphorylation, so it reaches dormant cells. Target 98.4% conserved in dogs at the catalytic site | Yes — licensed 2025 |
 | Parallel-pathway cover | **paxalisib** (PI3K/AKT) | Kp,uu 0.31, confirmed non-substrate of both efflux pumps | **No — investigational** |
 | Lineage removal | **liposomal clodronate** | Kills by being eaten, so it reaches non-dividing cells | Yes — already given to dogs with this lineage of tumour |
 | Persister / autophagy cover | **hydroxychloroquine** | The only agent here with a canine phase I | Yes |
@@ -160,10 +174,11 @@ The decade holds if and only if all eight hold. **Five hold today. No engineerin
 | **C5** | **Tumour carries a targetable lesion** | **one immunostain, decidable before treatment** |
 | C6 | Radiation and CNS cytotoxic sequenced, not stacked | **met** |
 | **C7** | Sponsor access to the investigational genotype-anchored agent | **not met; closure under C1–C6 does not require it** |
-| **C8** | **The three mechanisms no licensed agent supplies are obtained** | **not met; access at the invading edge is no longer part of this condition — it closed (§6a)** |
+| **C8** | **Three remaining quantities: a computed margin at the invading edge, measured PI3K brain access, an Rb-independent anchor** | **not met; access, the non-dividing-cell kill and the genotype anchor have each since closed on a licensed drug (§6a, §6b)** |
 
 None of the three outstanding conditions is an engineering problem. C5 is a test. C7 and C8 are
-mechanism and supply, and two of the three agents behind C8 already exist in human trials.
+supply and measurement: two of the three items behind C8 are compounds already in human trials, and
+the third is a measurement nobody has taken.
 
 ---
 
@@ -177,7 +192,7 @@ Searched from obtainable agents first, the two programmes separate cleanly.
 | Extra-axial, meninges-based bulk (23/23 dogs) | **closes, +0.94/day** | closes |
 | Leptomeninges / CSF | **closes by mouth, +0.72/day** | closes, +0.61/day |
 | Invaded brain tissue, intact barrier | **closes, +0.27/day at the worst measured value** | closes, +0.59/day |
-| Every escape route, both sites | access yes; two mechanisms no | **yes** |
+| All 16 audited routes | **yes — 3 by margin, 12 structurally, 1 gated, 0 open** | **yes — with more computed margin** |
 
 **Programme A** is surgical debulking plus radiation for induction, then continuous genotype-matched
 maintenance: **ribociclib** (or abemaciclib) where CDKN2A is deleted and Rb intact, trametinib or
@@ -218,20 +233,59 @@ Four things make this the strongest single input in the project:
 The same trial supplies its own control: everolimus, given alongside, was **undetectable** in the
 same tumours. The method is capable of returning a negative, and did.
 
-### What this does *not* close, said plainly
+---
 
-1. **Cells that are not dividing.** CDK4/6 inhibition only acts on a dividing cell. The
-   drug-tolerant persister at the invading edge is therefore held by *schedule* — the drug is always
-   present, so the cell is hit when it re-enters cycle — rather than by a second killing mechanism.
-   The one drug measured to kill canine HS cells regardless of division (DMAPT) is research-stage.
-   **This is the only remaining gap that is science rather than supply.**
-2. **The PI3K axis in brain, and here the evidence is worse than silence.** Ribociclib alone had
-   limited effect in human glioblastoma *despite* working on its target, and the escape route was
-   PI3K/mTOR. The drug meant to block that route could not be detected in the tumour at all. So
-   this arm has to be chosen on measured penetration: duvelisib is licensed with the canine potency
-   and unmeasured brain access; paxalisib has the measured penetration and no veterinary access.
-3. **The inherited deletion itself** (C7) — so a *second* tumour is met by detect-and-switch rather
-   than by a drug standing guard on the original fault.
+## 6b. Every route, against licensed drugs only
+
+Site access is not the same as route closure — a site can be reachable and a route through it still
+open. So the 16 audited routes are checked individually against drugs obtainable today.
+
+**3 close by a computed kill margin. 12 close structurally. 1 is gated on a stain. None is open.**
+
+Two of them had no licensed answer before this pass:
+
+**Cells that are not dividing (route 10).** Every licensed drug that reaches the invading edge acts
+on a dividing cell — CDK4/6 inhibition, radiation, PARP, Wee1, all of them. **Dordaviprone (ONC201)**
+does not. It is a ClpP agonist: it forces a mitochondrial protease to chew up the cell's
+electron-transport and TCA-cycle proteins, so it kills by collapsing energy metabolism — which a
+dormant cell needs just as much as a dividing one. It received FDA accelerated approval in 2025, it
+is oral, and its approved indication is itself the access evidence: diffuse midline glioma is
+unresectable, infiltrative and largely non-enhancing, so clinical activity there *is* activity
+behind an intact barrier.
+
+Does the target exist in a dog? Computed from the real sequences: ClpP is 92.65% identical overall,
+and that overall figure understates the transfer rather than flattering it — 10 of the 20 differences
+sit in a 56-residue tag that is **cut off** when the protein enters the mitochondrion, and 7 more in
+a disordered tail. The working catalytic core is **98.41% identical, and both active-site residues
+are identical**.
+
+**The inherited deletion (route 12).** This had been treated as requiring an MTAP-directed drug, all
+of which are still in trials. That conflated the goal with one route to it. The CFA11q16 deletion
+removes **CDKN2A as well as MTAP**, and the CDKN2A product p16 has exactly one job — inhibiting
+CDK4/6. So a CDK4/6 inhibitor *replaces the function the deletion removed*. It is matched to the
+inherited fault, not to a somatic driver, which means a second tumour from the same deletion is met
+by the same drug. And it is licensed.
+
+### What is genuinely weaker here than in the full programme
+
+**12 of the 16 routes close structurally**, which is a weaker claim than out-killing the lesion. "This
+drug class cannot be escaped that way" is sound reasoning, but it is not the same as the +0.59/day
+margin Programme B gets from a derived 1.17/day cytotoxic. Programme A has no equivalent cytotoxic.
+
+### What remains, in full
+
+1. **A computed cytotoxic margin at the invading edge.** Access is measured there and the mechanism
+   is covered, but no licensed drug delivers a derived kill rate at that site.
+2. **A measured brain concentration on the PI3K axis — and here the evidence is worse than
+   silence.** Ribociclib alone had limited effect in human glioblastoma *despite* working on its
+   target, and the escape was PI3K/mTOR. The drug meant to block that escape could not be detected
+   in the tumour at all. The licensed option (duvelisib) has the canine potency measured and its own
+   brain access unmeasured; the drug with measured penetration (paxalisib) has no veterinary access.
+   **This is the weakest row in the table and it is named as such, not averaged away.**
+3. **An anchor that survives loss of the Rb gene.** CDK4/6 inhibition needs Rb intact, so acquired
+   RB1 loss defeats the licensed anchor. Other arms still carry that route — dordaviprone's kill
+   does not care about Rb — but nothing licensed stands guard on the *inherited* fault once Rb is
+   gone. That is what the MTAP arm would do, and it is still in trials.
 
 ---
 

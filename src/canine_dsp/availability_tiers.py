@@ -175,8 +175,14 @@ PROGRAM: tuple[TieredAgent, ...] = (
         # and DUTY this agent was carrying (measured, oral, continuous, licensed). What no licensed
         # agent substitutes for is its POSITION-INDEPENDENT kill: RGN3067 is a cytotoxic that does
         # not depend on division, and CDK4/6 inhibition is division-gated and cytostatic.
-        substitute_covers=("potency", "access", "duty"),
-        properties_used=("potency", "access", "duty", "position-independent kill"),
+        # Ribociclib's measured Gd-non-enhancing concentrations substitute for ACCESS and DUTY.
+        # Dordaviprone -- licensed 2025 -- supplies the POSITION-INDEPENDENT KILL, structurally
+        # rather than by a computed margin (no unbound tumour concentration is published for it).
+        # What remains uncovered is the derived cytotoxic MARGIN this agent contributes: nothing
+        # licensed reproduces a 1.17/day kill rate at the invading edge.
+        substitute_covers=("potency", "access", "duty", "position-independent kill"),
+        properties_used=("potency", "access", "duty", "position-independent kill",
+                         "a computed cytotoxic margin at the invading edge"),
         flagged_obtainable_as="brain-penetrant microtubule agent",
     ),
     TieredAgent(
@@ -190,8 +196,42 @@ PROGRAM: tuple[TieredAgent, ...] = (
         "restriction, which candidate_universe excludes on sustained-restriction toxicity. So the "
         "genotype-ANCHORED tier has no exists-today form; its work falls back to the reroutable "
         "tiers plus ctDNA detect-and-switch, which are exists-today.",
-        substitute_covers=(),
-        properties_used=("genotype anchoring",),
+        # A licensed CDK4/6 inhibitor anchors on the SAME germline deletion, via its CDKN2A half
+        # (see is_cdk46_a_genotype_anchor()). What no licensed agent supplies is an anchor that
+        # survives acquired RB1 loss, which is what makes the MTAP arm the robust one.
+        substitute_covers=("genotype anchoring",),
+        properties_used=("genotype anchoring", "an Rb-independent anchor"),
+    ),
+    TieredAgent(
+        "dordaviprone (ONC201)",
+        "the one kill that does NOT require the cell to be dividing -- the persister at the "
+        "invading edge",
+        Availability.EXISTS_TODAY,
+        None,
+        "FDA ACCELERATED APPROVAL 2025 for H3K27M-altered diffuse midline glioma (PMID 42232453). "
+        "Oral, once weekly, well tolerated (fatigue, nausea, headache). Dual mechanism: ClpP "
+        "agonism plus DRD2 antagonism, driving proteolysis of ELECTRON TRANSPORT CHAIN and TCA "
+        "CYCLE proteins (PMID 37195023) -- i.e. it kills by collapsing oxidative phosphorylation, "
+        "which a quiescent cell needs just as much as a dividing one. That is why it answers a gap "
+        "no CDK4/6 inhibitor, PARP inhibitor, Wee1 inhibitor or radiation course can: every one of "
+        "those is coupled to division or replication. "
+        "ACCESS: the indication is itself the evidence. DMG is unresectable, diffusely infiltrative "
+        "and largely NON-enhancing, so clinical activity there is activity in tumour behind an "
+        "intact barrier -- the same compartment argument as ribociclib's, made by outcome instead "
+        "of by assay. "
+        "TARGET TRANSFER, computed not asserted: ClpP is 92.65% human-dog identical overall, but "
+        "the mature catalytic region (57-245) is 98.41% and BOTH active-site residues (Ser153 "
+        "nucleophile, His178) are IDENTICAL -- 10 of the 20 differences sit in the transit peptide "
+        "that is cleaved off during mitochondrial import. DRD2 is 96.39% identical and D2 "
+        "antagonists are given to dogs routinely. See sequence_conservation.clpp_domain_partition(). "
+        "HONEST LIMITS, and they are why this closes STRUCTURALLY and not by a margin: no canine-HS "
+        "or histiocytic data of any kind, so the kill is a CLASS-MECHANISM transfer; no published "
+        "unbound non-enhancing-tumour concentration, so no derived kill rate is claimed; and "
+        "ONCE-WEEKLY dosing is in tension with the continuous-duty condition C3, mitigated only by "
+        "the argument that a degraded mitochondrial proteome has to be resynthesised rather than "
+        "merely washed out -- an argument, not a measurement. Finally, PI3K/Akt signalling drives "
+        "metabolic adaptation AWAY from it (PMID 37195023), which couples this gap to the "
+        "parallel-pathway one.",
     ),
     TieredAgent(
         "ribociclib",
@@ -422,29 +462,102 @@ def persister_cover_at_the_invading_edge() -> dict:
         "parthenolide / DMAPT (NF-kB)": {
             "division_gated": False,
             "reaches_invaded_parenchyma": True,
-            "why": "The catalogue's one small molecule that is neither division-gated nor "
-                   "antigen-directed, and it is MEASURED in canine HS (kills lines and primary "
-                   "cells, extends survival in a canine-HS mouse model). BUT IT IS TO-BUILD: "
-                   "research-stage, no canine formulation. The cleanest statement of the residual.",
+            "why": "Neither division-gated nor antigen-directed, and MEASURED in canine HS (kills "
+                   "lines and primary cells, extends survival in a canine-HS mouse model) -- the "
+                   "best canine evidence of any candidate here. But it is TO-BUILD: research-stage, "
+                   "no canine formulation.",
+        },
+        "dordaviprone (ONC201)": {
+            "division_gated": False,
+            "reaches_invaded_parenchyma": True,
+            "why": "THE ANSWER TO THIS GAP, and it is licensed. ClpP agonism degrades electron "
+                   "transport chain and TCA cycle proteins (PMID 37195023), so the kill is a "
+                   "collapse of oxidative phosphorylation -- which a quiescent cell needs as much "
+                   "as a dividing one. FDA accelerated approval 2025 for H3K27M-altered diffuse "
+                   "midline glioma (PMID 42232453), a diffusely infiltrative, largely NON-enhancing "
+                   "tumour, so the indication itself evidences reach behind an intact barrier. "
+                   "Target conserved: ClpP catalytic region 98.41% human-dog identical with both "
+                   "active-site residues identical. Closes STRUCTURALLY, not by a margin: no "
+                   "canine-HS data, no published unbound tumour concentration, and once-weekly "
+                   "dosing sits awkwardly against continuous duty (C3).",
         },
     }
     covers = [n for n, r in rows.items()
               if not r["division_gated"] and r["reaches_invaded_parenchyma"]]
     exists_today_names = {a.name for a in exists_today()}
     covers_today = [n for n in covers if n in exists_today_names]
+    # A licensed agent that is neither division-gated nor mere cover is what this gap needed.
+    real_kill_today = [n for n in covers_today if n not in ("hydroxychloroquine",)]
     return {
         "candidates": rows,
         "not_division_gated_and_reaches_the_site": covers,
         "of_those_that_exist_today": covers_today,
+        "licensed_agents_supplying_a_real_non_division_gated_kill": real_kill_today,
         "verdict": (
-            "PARTIAL. Ribociclib closes access at the invading edge on a measured concentration, "
-            "and hydroxychloroquine is the only exists-today agent there that is not "
-            "division-gated -- but its margin contribution is ~2e-5/day, so it is cover rather "
-            "than kill. The agent that would actually clear a persister in that compartment "
-            "(DMAPT, the one measured in canine HS) is TO-BUILD. So the invading edge closes "
-            "against the 10 margin-computed routes and leaves the persister route carried by "
-            "schedule (continuous dosing, condition C3) rather than by a second kill mechanism."
+            f"CLOSED STRUCTURALLY, by {', '.join(real_kill_today)}. ClpP agonism kills by "
+            f"collapsing oxidative phosphorylation, which does not require the cell to be "
+            f"dividing, and the agent is licensed (2025) and clinically active in a diffusely "
+            f"infiltrative, largely non-enhancing brain tumour. STRUCTURALLY and not by a margin: "
+            f"there is no canine-HS data and no published unbound tumour concentration, so no kill "
+            f"rate is derived, and once-weekly dosing is in tension with condition C3. The "
+            f"better-evidenced candidate for this job in THIS disease -- DMAPT, measured in canine "
+            f"HS -- remains to-build, so what a licensed agent supplies is the MECHANISM, while "
+            f"the canine evidence for that mechanism sits on a different molecule."
+            if real_kill_today else
+            "OPEN. No licensed agent supplies a non-division-gated kill at this site; "
+            "hydroxychloroquine is cover (~2e-5/day), not kill, and DMAPT is to-build."
         ),
+    }
+
+
+def is_cdk46_a_genotype_anchor() -> dict:
+    """Whether a LICENSED drug already anchors on the germline lesion. It does, for half of it.
+
+    The project had treated "genotype anchoring" as synonymous with MTAP-directed synthetic
+    lethality (PRMT5 / MAT2A), and concluded that no licensed agent could anchor. That conflated
+    the property with one way of getting it. The germline lesion is a deletion at CFA11q16 that
+    removes BOTH MTAP AND CDKN2A/B, and CDKN2A's gene product p16 has exactly one job: inhibiting
+    CDK4/6. So a CDK4/6 inhibitor does not merely treat a tumour that happens to carry the
+    deletion -- it pharmacologically REPLACES THE FUNCTION THE DELETION REMOVED.
+
+    That is the anchoring property as the project defined it: an agent matched to the germline
+    lesion rather than to a somatic driver, so a SECOND primary arising from the same inherited
+    deletion is met by the same drug without re-stratification. And unlike the MTAP arm it is
+    licensed, with measured unbound concentrations in non-enhancing tumour (ribociclib) and
+    measured dependency in canine histiocytic cells (palbociclib).
+
+    The MTAP arm is not thereby redundant. It is the more ROBUST anchor, for one specific reason
+    recorded below, and it remains to-build.
+    """
+    return {
+        "germline_lesion": "CFA11q16 deletion removing MTAP and CDKN2A/B, measured in 62.8% of "
+                           "canine HS (PMID 21341759)",
+        "why_cdk46_anchors": "p16 (CDKN2A) is an inhibitor of CDK4/6 and nothing else. A CDK4/6 "
+                             "inhibitor substitutes for the deleted gene product's function, so it "
+                             "is matched to the INHERITED lesion, not to a somatic driver. Any "
+                             "second primary from the same germline deletion is CDKN2A-null too, "
+                             "and the same drug applies without re-stratifying.",
+        "licensed": True,
+        "agents": ["ribociclib", "abemaciclib", "palbociclib"],
+        "canine_evidence": "MEASURED dependency in canine histiocytic lines -- CDKN2A down, Rb "
+                           "preserved, growth inhibited in ALL lines including localized-HS lines, "
+                           "plus a xenograft (PMID 35278028)",
+        "human_evidence_in_the_matching_genotype": "the Phase 0/1 that supplies the non-enhancing "
+                                                   "tumour concentrations enrolled on CDKN2A/B "
+                                                   "deletion with wild-type Rb (PMID 41206763)",
+        "why_the_mtap_arm_is_still_wanted": "ONE REASON, AND IT IS A REAL ONE: CDK4/6 inhibition "
+                                            "requires RB1 to be intact, so acquired RB1 loss "
+                                            "(escape_audit.A15) defeats this anchor outright. The "
+                                            "MTAP/PRMT5 anchor is Rb-INDEPENDENT, which makes it "
+                                            "the more robust of the two. The ctDNA detect-and-switch "
+                                            "loop exists partly to catch that event, and with the "
+                                            "MTAP arm unavailable there is no standing successor "
+                                            "to switch TO on the germline axis.",
+        "verdict": "CLOSED, with a licensed agent, for the CDKN2A half of the germline deletion -- "
+                   "which is the same deletion. The MTAP half remains to-build and is the "
+                   "Rb-independent backup, so the honest statement is: the genotype IS anchored "
+                   "today, by a drug whose anchor can be lost to one named escape (RB1 loss) "
+                   "against which no licensed successor stands ready.",
     }
 
 
@@ -578,20 +691,27 @@ def program_a() -> dict:
         "closes_everywhere": not not_closed,
         "verdict": (
             (
-                f"ACCESS CLOSES AT EVERY SITE WITH LICENSED AGENTS. All {len(sites)} occupied "
+                f"CLOSES WITH LICENSED AGENTS, AT EVERY SITE AND ON EVERY ROUTE. All {len(sites)} occupied "
                 f"sites clear the growth bar with no procedure on the critical path, each on a "
                 f"MEASURED unbound drug concentration in the matching compartment: the extra-axial "
                 f"bulk, the CSF, and -- the site that was open until ribociclib's Gd-non-enhancing "
                 f"tumour measurements were brought in -- the invading edge behind an intact "
                 f"barrier, at every reported value including the lowest single patient. "
-                f"WHAT IS STILL NOT CLOSED BY A LICENSED AGENT: the drug-tolerant persister at the "
-                f"invading edge, because CDK4/6 inhibition is division-gated. That route is carried "
-                f"by SCHEDULE (continuous dosing, condition C3) rather than by a second kill "
-                f"mechanism, and the agent that would carry it by kill -- DMAPT, the one measured "
-                f"in canine HS -- is to-build. And the genotype-anchored arm remains to-build "
-                f"(C7), so a second primary is met by reroute-and-switch rather than by a standing "
-                f"anchor. So: the ACCESS problem that defined this project is closed with "
-                f"obtainable drugs; two MECHANISM gaps remain, both named."
+                f"AND EVERY ROUTE CLOSES TOO, not just every site: program_a_route_ledger() puts "
+                f"all 16 audited routes on licensed agents -- 3 by computed margin, 12 "
+                f"structurally, 1 gated on the immunostain, 0 open. The drug-tolerant persister, "
+                f"which had no licensed carrier because CDK4/6 inhibition is division-gated, is "
+                f"carried by dordaviprone (licensed 2025), whose ClpP-agonist kill collapses "
+                f"oxidative phosphorylation and so does not need the cell to divide. The genotype "
+                f"anchor is carried by the CDK4/6 inhibitor itself, because the same CFA11q16 "
+                f"deletion removes CDKN2A and p16's only job is inhibiting CDK4/6. "
+                f"WHAT IS WEAKER HERE THAN IN PROGRAMME B, and it is a real difference: 12 of the "
+                f"16 routes close STRUCTURALLY -- 'the lesion cannot apply to these drugs' -- "
+                f"rather than by out-killing the lesion. Programme B carries +0.59/+0.61 per day "
+                f"from a derived 1.17/day cytotoxic; Programme A has no equivalent cytotoxic "
+                f"margin. Three quantities remain to-build, each named in uncovered_properties(): "
+                f"a computed cytotoxic margin at the invading edge, MEASURED brain access on the "
+                f"PI3K axis, and an Rb-independent germline anchor."
             ) if not not_closed else (
                 f"PARTIAL -- {len(closed)} of {len(sites)} sites close with licensed agents and no "
                 f"procedure on the critical path ({'; '.join(closed)}), and {len(not_closed)} do "
@@ -644,6 +764,21 @@ def the_gap() -> str:
     unc = uncovered_properties()
     props = sorted({p for ps in unc.values() for p in ps})
     notes = {
+        "a computed cytotoxic margin at the invading edge": (
+            "a DERIVED kill rate at that site, not merely a mechanism. Ribociclib supplies the "
+            "access there on a measured concentration and dordaviprone supplies a non-division-"
+            "gated mechanism, but neither yields the 1.17/day cytotoxic margin RGN3067 does, and "
+            "dordaviprone has no published unbound tumour concentration to derive one from. So the "
+            "site is closed structurally and by access, with less computed headroom than the full "
+            "programme has"
+        ),
+        "an Rb-independent anchor": (
+            "a germline-lesion anchor that survives acquired RB1 loss. A licensed CDK4/6 inhibitor "
+            "anchors on the same CFA11q16 deletion through its CDKN2A half, but CDK4/6 inhibition "
+            "needs Rb intact, so escape_audit.A15 defeats it and no licensed successor stands "
+            "ready on that axis. The MTAP/PRMT5 arm is Rb-independent and to-build. See "
+            "is_cdk46_a_genotype_anchor()"
+        ),
         "position-independent kill": (
             "a cytotoxic that kills WITHOUT depending on division, so it reaches the drug-tolerant "
             "persister at the invading edge. Every licensed agent that reaches that compartment is "
@@ -719,3 +854,147 @@ def statement() -> str:
         f"and it requires {len(b['load_bearing_to_build'])} to-build agents. "
         f"THE GAP IS {the_gap()}"
     )
+
+
+# ---- PROGRAMME A, ROUTE BY ROUTE --------------------------------------------------------------
+#
+# CLAUDE.md rule 12 requires closure as a decidable conjunction rather than odds, and the goal is
+# "every mechanism and every escape". Programme A's site-level closure (access at all three sites)
+# does not by itself answer that: a site can be reachable and a route through it still open. So this
+# is the per-route ledger for the LICENSED-ONLY programme, over the same 16 routes the audit
+# produced (disease.ESCAPES, 12, plus the four load-bearing gaps A13-A16).
+#
+# Closure kind matters as much as closure:
+#   MARGIN      a computed kill rate beats the growth bar (the strongest form)
+#   STRUCTURAL  the lesion cannot apply, by drug choice or schedule -- no kill rate involved
+#   GATED       closed conditional on a stated, testable genotype gate
+# Anything that is none of these is OPEN and is reported as such.
+
+#: route -> (closure kind, licensed agent or mechanism carrying it, basis)
+PROGRAM_A_ROUTES: dict[str, tuple[str, str, str]] = {
+    "1 MAPK reactivation above the block": (
+        "MARGIN", "cobimetinib / trametinib",
+        "Both licensed-or-dog-trialled; cobimetinib's IC50 and canine Cmax are both MEASURED in "
+        "canine HS (PMID 39202410), and trametinib has a completed canine Phase I (PMID 38889903). "
+        "Reroutable, which is what the ctDNA detect-and-switch loop is for."),
+    "2 MEK target-site mutation": (
+        "STRUCTURAL", "ribociclib + dordaviprone",
+        "Neither acts on MEK, so a MEK-site mutation cannot confer escape from them. The route is "
+        "closed by not depending on that target, not by out-dosing it."),
+    "3 Activating ERK lesion": (
+        "STRUCTURAL", "ribociclib + dordaviprone",
+        "Same argument one step downstream: CDK4/6 inhibition acts below the MAPK cascade's output "
+        "on the cell cycle, and ClpP agonism is outside signalling altogether."),
+    "4 RTK bypass into PI3K/AKT": (
+        "MARGIN", "duvelisib",
+        "TRANSFERRED access, and this is the weakest row in the table. Potency is MEASURED in "
+        "canine HS (median IC50 287 nM in the responsive subgroup, PMID 42129963) and the required "
+        "access is 0.0143 against the project's measured generic small-molecule figure of 0.021 -- "
+        "so it closes on a transfer. The named risk is that a DIFFERENT agent on this axis "
+        "(everolimus) was MEASURED undetectable in both enhancing and non-enhancing tumour. Graded "
+        "TRANSFERRED with a flagged risk, per rule 11; see the_parallel_pathway_problem()."),
+    "5 CSF1R / lineage independence": (
+        "STRUCTURAL", "liposomal clodronate + dordaviprone",
+        "Closed by lineage REMOVAL rather than lineage-signal inhibition, so receptor-independence "
+        "is irrelevant. Clodronate is taken up by phagocytosis (blood-side and meningeal); "
+        "dordaviprone's kill is metabolic and lineage-indifferent."),
+    "6 Antigen loss (MHC-I intact)": (
+        "STRUCTURAL", "ribociclib + dordaviprone + clodronate",
+        "Every agent carrying this route is antigen-INDIFFERENT. The immune arm is explicitly NOT "
+        "relied on here -- antigen loss with MHC-I intact defeats it and the NK missing-self "
+        "backstop never fires."),
+    "7 NF-kB independence": (
+        "STRUCTURAL", "ribociclib + dordaviprone",
+        "Neither depends on NF-kB signalling. The agent the project had been using for this route "
+        "(DMAPT) is to-build, and is no longer required for the route to close."),
+    "8 Ferroptosis resistance": (
+        "STRUCTURAL", "ribociclib + dordaviprone",
+        "The ferroptosis arm was DROPPED as counter-indicated in a macrophage-lineage tumour, so "
+        "resistance to it is inapplicable. The route is carried by agents with unrelated "
+        "mechanisms."),
+    "9 Autophagy independence": (
+        "STRUCTURAL", "ribociclib + dordaviprone",
+        "Hydroxychloroquine is cover, not the carrier (~2e-5/day), so autophagy-independence costs "
+        "nothing. Note the interaction: ClpP agonism attacks mitochondrial protein homeostasis, "
+        "which autophagy-independence does not relieve."),
+    "10 Drug-tolerant persister": (
+        "STRUCTURAL", "dordaviprone (ONC201), licensed 2025",
+        "THE ROUTE THAT HAD NO LICENSED ANSWER UNTIL THIS PASS. ClpP agonism degrades electron "
+        "transport chain and TCA cycle proteins (PMID 37195023), collapsing oxidative "
+        "phosphorylation -- which a quiescent cell requires as much as a dividing one. Every other "
+        "licensed agent reaching this site is division-coupled. STRUCTURAL and not MARGIN: no "
+        "canine-HS data and no published unbound tumour concentration, so no kill rate is derived, "
+        "and once-weekly dosing is in tension with continuous duty (C3)."),
+    "11 MGMT repair": (
+        "STRUCTURAL", "no alkylator in the programme",
+        "MGMT has no substrate to repair. The alkylator class is excluded on MEASURED resistance in "
+        "canine HS (134-670x), which makes this route inapplicable rather than merely survivable."),
+    "12 Germline second primary": (
+        "GATED", "ribociclib / abemaciclib / palbociclib",
+        "Closed by a LICENSED genotype anchor, which is the finding of this pass: the CFA11q16 "
+        "deletion removes CDKN2A as well as MTAP, and p16's only function is to inhibit CDK4/6, so "
+        "a CDK4/6 inhibitor replaces the deleted gene product and is matched to the INHERITED "
+        "lesion. Any second primary from the same deletion is met by the same drug. GATED on the "
+        "MTAP/p16/Rb immunostain (condition C5). See is_cdk46_a_genotype_anchor()."),
+    "A13 tubulin-side resistance to the induction backbone": (
+        "STRUCTURAL", "no microtubule agent in the licensed programme",
+        "Programme A has no tubulin-binding agent at all -- induction is surgery plus radiation, "
+        "maintenance is ribociclib and dordaviprone -- so ABCB1/ABCG2 efflux and tubulin mutation "
+        "have nothing to act on. The audit's main structural finding (six of twelve closures "
+        "resting on one agent class) is DISSOLVED in this programme rather than mitigated."),
+    "A14 mitotic slippage / apoptotic-threshold resistance": (
+        "STRUCTURAL", "dordaviprone (ONC201)",
+        "Mitotic slippage is an escape from agents that kill IN mitosis. Collapsing oxidative "
+        "phosphorylation does not require the cell to enter mitosis, so there is no mitosis to slip "
+        "out of. The same property that answers route 10 answers this one."),
+    "A15 RB1 loss / CDK2-cyclin E bypass of the CDK4/6 arm": (
+        "MARGIN", "dordaviprone + cobimetinib/duvelisib by genotype",
+        "This is the escape that defeats the licensed genotype anchor outright, so it needs a named "
+        "successor and has one: dordaviprone's kill is Rb-INDEPENDENT, as are the MAPK and PI3K "
+        "arms. What is lost on RB1 loss is the anchor on the GERMLINE axis specifically -- the "
+        "Rb-independent germline anchor (PRMT5/MAT2A) is to-build. Detection is the ctDNA loop, "
+        "whose canine PTPN11 assay is measured but whose broad-panel form is to-build."),
+    "A16 MTA-mediated immune suppression": (
+        "STRUCTURAL", "ribociclib + dordaviprone + clodronate",
+        "The MTAP-null tumour exports MTA and suppresses its own immune microenvironment. Closed by "
+        "not depending on the immune arm: every carrier here is a direct-kill or lineage-removal "
+        "mechanism. This is also why the vaccine and engager classes are excluded for this case."),
+}
+
+
+def program_a_route_ledger() -> dict:
+    """Route-by-route CLOSED/OPEN for the LICENSED-ONLY programme. Rule 12 form: no odds.
+
+    Site-level closure is not route-level closure, so this is computed separately from
+    `program_a()`. A route counts as closed only if it has a named licensed carrier AND a closure
+    kind; anything else is OPEN.
+    """
+    kinds: dict[str, int] = {}
+    rows = {}
+    for route, (kind, carrier, basis) in PROGRAM_A_ROUTES.items():
+        kinds[kind] = kinds.get(kind, 0) + 1
+        rows[route] = {"kind": kind, "carried_by": carrier, "basis": basis}
+    expected = 16
+    return {
+        "routes_total": len(PROGRAM_A_ROUTES),
+        "expected_from_the_audit": expected,
+        "accounts_for_every_audited_route": len(PROGRAM_A_ROUTES) == expected,
+        "by_kind": kinds,
+        "open": [r for r, v in rows.items() if v["kind"] == "OPEN"],
+        "routes": rows,
+        "weakest_row": "4 RTK bypass into PI3K/AKT -- closes on a TRANSFERRED access figure with a "
+                       "measured negative for a different agent on the same axis",
+        "verdict": (
+            f"All {len(PROGRAM_A_ROUTES)} audited routes are closed by agents obtainable today, "
+            f"with {kinds.get('MARGIN', 0)} carrying a computed kill margin, "
+            f"{kinds.get('STRUCTURAL', 0)} closed structurally (the lesion cannot apply) and "
+            f"{kinds.get('GATED', 0)} gated on the pre-treatment immunostain. "
+            f"WHAT THIS IS NOT: it is not the full programme's margin. Programme B carries "
+            f"+0.59/+0.61 per day from a derived 1.17/day cytotoxic; Programme A leans much harder "
+            f"on structural closure, which is a weaker form of the same claim -- 'the lesion cannot "
+            f"apply to these drugs' rather than 'these drugs out-kill it'. Three things remain "
+            f"to-build and each is named in uncovered_properties(): a computed cytotoxic margin at "
+            f"the invading edge, measured brain access on the PI3K axis, and an Rb-independent "
+            f"germline anchor."
+        ),
+    }

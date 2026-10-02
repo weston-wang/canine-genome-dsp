@@ -268,10 +268,11 @@ CONDITIONS: tuple[Condition, ...] = (
         "genotype-anchored form of it.",
     ),
     Condition(
-        "C8", "The MECHANISMS no licensed agent supplies are obtained: a position-independent "
-              "(non-division-gated) kill at the invading edge, brain access on the PI3K axis, and "
-              "the genotype anchor. ACCESS AT THE INVADING EDGE IS NO LONGER PART OF THIS "
-              "CONDITION -- it closed on a licensed drug",
+        "C8", "The three remaining to-build items are obtained: a COMPUTED cytotoxic margin at the "
+              "invading edge, MEASURED brain access on the PI3K axis, and an Rb-INDEPENDENT "
+              "germline anchor. Neither access at the invading edge, nor a non-division-gated "
+              "kill, nor the genotype anchor itself is part of this condition any more -- each "
+              "closed on a licensed drug",
         Status.TO_BUILD,
         "THIS CONDITION WAS HIDDEN, AND THAT WAS THE LAPSE CLAUDE.MD RULE 13 NAMES. "
         "`core.microtubule_route.build()` flags every agent `obtainable=True`, so the induction "
@@ -289,20 +290,33 @@ CONDITIONS: tuple[Condition, ...] = (
         "reported value clears the growth bar, including the lowest single patient (65 nM, 5.8x the "
         "bar), and the 2026 trial enrolled on CDKN2A/B deletion with wild-type Rb -- this tumour's "
         "own lesion. So all three occupied sites now close with licensed agents and no procedure. "
-        "WHAT REMAINS ARE MECHANISM GAPS, NOT DELIVERY GAPS: (a) CDK4/6 inhibition is "
-        "division-gated, so the drug-tolerant persister at the invading edge is held by SCHEDULE "
-        "(C3) rather than by a second kill mechanism -- the agent measured in canine HS for that "
-        "job, DMAPT, is research-stage; (b) brain access on the PI3K axis, where the same trial "
-        "reports a measured NEGATIVE (everolimus undetectable, <0.1 nM, in both enhancing and "
-        "non-enhancing tumour) and PI3K/mTOR upregulation is the named reroute that defeated "
-        "ribociclib monotherapy; (c) the genotype anchor, which is C7.",
-        "Two of the three are veterinary access to compounds that exist (the PRMT5 anchor in human "
-        "Phase I/II; paxalisib in human trials with a measured Kp,uu of 0.31). The third -- a "
-        "non-division-gated kill that reaches the invading edge -- is the only one that is a real "
-        "scientific gap rather than a supply problem, and the nearest candidate (DMAPT) is already "
-        "measured in canine HS. The exists-today substitutes and the exact properties they fail to "
-        "cover are enumerated in availability_tiers.uncovered_properties(); the parallel-pathway "
-        "residual is set out in availability_tiers.the_parallel_pathway_problem().",
+        "THEN TWO MORE OF ITS PARTS CLOSED ON LICENSED DRUGS, and what is left is narrower again. "
+        "(a) THE NON-DIVIDING CELL. CDK4/6 inhibition is division-gated, so route 10 had no "
+        "licensed carrier. Dordaviprone (ONC201) -- FDA accelerated approval 2025, PMID 42232453 -- "
+        "is a ClpP agonist that degrades electron transport chain and TCA cycle proteins "
+        "(PMID 37195023), so it kills by collapsing oxidative phosphorylation, which a quiescent "
+        "cell needs as much as a dividing one. Its indication is itself the access evidence: H3K27M "
+        "diffuse midline glioma is unresectable, infiltrative and largely NON-enhancing. Target "
+        "transfer computed, not asserted: ClpP's mature catalytic region is 98.41% human-dog "
+        "identical with BOTH active-site residues identical (sequence_conservation."
+        "clpp_domain_partition()). (b) THE GENOTYPE ANCHOR. The project had equated anchoring with "
+        "MTAP-directed synthetic lethality; but the CFA11q16 deletion removes CDKN2A too, and "
+        "p16's only function is inhibiting CDK4/6, so a LICENSED CDK4/6 inhibitor replaces the "
+        "deleted gene product and is matched to the inherited lesion "
+        "(availability_tiers.is_cdk46_a_genotype_anchor()). "
+        "ROUTE BY ROUTE, the licensed-only programme now closes ALL 16 audited routes -- 3 by "
+        "computed margin, 12 structurally, 1 gated on the immunostain, 0 open "
+        "(availability_tiers.program_a_route_ledger()).",
+        "WHAT IS ACTUALLY LEFT, and it is three quantities rather than three mechanisms: a COMPUTED "
+        "cytotoxic margin at the invading edge (Programme A leans on structural closure for 12 of "
+        "16 routes, which is a weaker form of the claim than out-killing the lesion); MEASURED "
+        "brain access on the PI3K axis, where a different agent on that axis was measured "
+        "UNDETECTABLE and the licensed option's own access is a transfer "
+        "(availability_tiers.the_parallel_pathway_problem()); and an Rb-INDEPENDENT germline anchor, "
+        "because acquired RB1 loss (escape_audit.A15) defeats the licensed anchor and the "
+        "Rb-independent successor on that axis is the to-build PRMT5 arm. Two are veterinary access "
+        "to compounds in human trials; the third is a measurement nobody has taken. None is a "
+        "molecule that has to be discovered.",
     ),
 )
 

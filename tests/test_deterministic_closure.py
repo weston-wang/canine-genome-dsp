@@ -57,9 +57,15 @@ def test_c8_records_the_availability_lapse_rather_than_quietly_fixing_the_flag()
     assert at.mislabelled_as_obtainable(), "C8's premise is that the flag is still optimistic"
     # C8 narrowed once ribociclib closed the access half of it: it is now about MECHANISMS, and the
     # requirement must say that access at the invading edge is no longer part of it.
-    assert "NO LONGER PART OF THIS CONDITION" in c8.requirement
-    assert "non-division-gated" in c8.what_would_establish_it.lower()
-    assert at.program_a()["closes_everywhere"], "C8's scope rests on Program A closing access"
+    assert "closed on a licensed drug" in c8.requirement
+    # C8 narrowed twice: access at the invading edge, the non-division-gated kill and the genotype
+    # anchor have each since closed on a licensed drug, so what it gates is three QUANTITIES.
+    for phrase in ("COMPUTED", "MEASURED", "Rb-INDEPENDENT"):
+        assert phrase in c8.requirement, phrase
+    assert "has to be discovered" in c8.what_would_establish_it
+    assert at.program_a()["closes_everywhere"], "C8's scope rests on Programme A closing access"
+    led = at.program_a_route_ledger()
+    assert led["open"] == [], "C8 must not be hiding an open route"
 
 
 def test_access_is_closed_by_molecules_rather_than_a_procedure():

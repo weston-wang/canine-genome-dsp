@@ -217,7 +217,91 @@ CONSERVATION: dict[str, OrthologConservation] = {
              "why the immune arm must use a CANINIZED antibody (gilvetmab), not a human one. Here "
              "conservation actively WARNS against transfer, rather than licensing it.",
     ),
+    # Computed 2026-10-02 by recompute("CLPP"). The target of dordaviprone (ONC201), the licensed
+    # ClpP agonist brought in to supply the one kill mechanism that does not require the cell to be
+    # dividing. The raw figure UNDERSTATES the transfer and the domain partition is the whole point.
+    "CLPP": OrthologConservation(
+        gene="CLPP",
+        protein="ClpP -- mitochondrial ATP-dependent protease, the agonist target of dordaviprone "
+                "(ONC201); the non-division-gated kill mechanism",
+        human_accession="Q16740",
+        dog_accession="A0A8I3N7L4",
+        human_length=277,
+        dog_length=273,
+        aligned_positions=272,
+        identical_positions=252,
+        differing_positions=((14, "S", "V"), (15, "C", "G"), (17, "Y", "S"), (27, "H", "R"),
+                             (30, "A", "P"), (31, "Q", "R"), (33, "P", "T"), (47, "C", "S"),
+                             (50, "A", "V"), (53, "T", "A"), (125, "V", "M"), (128, "A", "S"),
+                             (207, "N", "G"), (257, "T", "E"), (265, "E", "M"), (267, "A", "V"),
+                             (268, "P", "V"), (273, "V", "A"), (275, "A", "T"), (277, "T", "I")),
+        note="92.65% identical overall (252/272), AND THE RAW NUMBER IS THE WRONG ONE TO QUOTE. "
+             "UniProt Q16740 annotates residues 1-56 as a MITOCHONDRIAL TRANSIT PEPTIDE, cleaved "
+             "during import and absent from the mature protein, and 246-277 as DISORDERED. Of the "
+             "20 differences, 10 fall in the cleaved transit peptide and 7 in the disordered "
+             "C-terminal tail. The mature, ordered, catalytic region 57-245 carries only THREE "
+             "(V125M, A128S, N207G) -- 186/189 = 98.41% identical -- and BOTH ANNOTATED ACTIVE-SITE "
+             "RESIDUES, the Ser153 nucleophile and His178, ARE IDENTICAL. So the protease dordaviprone "
+             "agonises is effectively the same enzyme in the dog. See clpp_domain_partition().",
+    ),
+    # Computed 2026-10-02 by recompute("DRD2"). Dordaviprone's second mechanism.
+    "DRD2": OrthologConservation(
+        gene="DRD2",
+        protein="DRD2 -- dopamine D2 receptor, the antagonist half of dordaviprone's dual mechanism",
+        human_accession="P14416",
+        dog_accession="Q9GJU1",
+        human_length=443,
+        dog_length=443,
+        aligned_positions=443,
+        identical_positions=427,
+        differing_positions=((15, "R", "S"), (26, "D", "E"), (29, "A", "P"), (30, "D", "G"),
+                             (31, "R", "K"), (39, "T", "M"), (46, "A", "F"), (47, "V", "I"),
+                             (157, "S", "A"), (177, "A", "T"), (226, "K", "E"), (235, "H", "N"),
+                             (237, "R", "K"), (319, "P", "A"), (345, "T", "S"), (400, "D", "E")),
+        note="96.39% identical (427/443) over equal-length orthologs, with the differences "
+             "concentrated in the N-terminus and the loops rather than spread through the "
+             "transmembrane bundle. Independently corroborated by practice rather than by sequence "
+             "alone: D2 antagonists are given to dogs routinely, so this half of dordaviprone's "
+             "mechanism has species precedent as well as a conserved target.",
+    ),
 }
+
+
+def clpp_domain_partition() -> dict:
+    """Where the human-dog ClpP differences actually fall, computed from the UniProt annotation.
+
+    The overall 92.65% identity is the least informative way to state this transfer, because more
+    than half the differences are in a 56-residue peptide that is CUT OFF during mitochondrial
+    import. This function partitions them against the annotated boundaries so the claim that
+    dordaviprone's target is conserved rests on the catalytic region rather than on the average.
+
+    Boundaries are UniProt Q16740 features: transit peptide 1-56 (mitochondrion), mature chain
+    57-277, disordered region 246-277, active sites Ser153 (nucleophile) and His178.
+    """
+    c = CONSERVATION["CLPP"]
+    transit_end, ordered_start, ordered_end = 56, 57, 245
+    active_sites = (153, 178)
+    pos = [p for p, _, _ in c.differing_positions]
+    transit = [p for p in pos if p <= transit_end]
+    ordered = [p for p in pos if ordered_start <= p <= ordered_end]
+    disordered = [p for p in pos if p > ordered_end]
+    n_ordered = ordered_end - ordered_start + 1
+    return {
+        "overall_identity_percent": round(c.identity_percent, 2),
+        "transit_peptide_1_56_cleaved": {"differences": transit, "n": len(transit)},
+        "mature_ordered_57_245": {
+            "differences": ordered, "n": len(ordered),
+            "identity_percent": round(100.0 * (n_ordered - len(ordered)) / n_ordered, 2),
+        },
+        "disordered_tail_246_277": {"differences": disordered, "n": len(disordered)},
+        "active_sites": {"positions": list(active_sites),
+                         "any_differ": [p for p in pos if p in active_sites],
+                         "both_identical": not any(p in active_sites for p in pos)},
+        "reading": "the differences are concentrated in the cleaved transit peptide and the "
+                   "disordered tail; the catalytic region is 98.41% identical and both active-site "
+                   "residues are conserved, so a ClpP agonist's target is effectively the same "
+                   "enzyme in the dog. The overall figure understates the transfer.",
+    }
 
 
 def fetch_uniprot_sequence(accession: str) -> str:

@@ -607,3 +607,120 @@ is now `True`, and `program_a()["verdict"]` states the persister caveat in the s
   grid; the "brain-penetrant is not brain-effective" limit now cites ribociclib itself as the case
   in point, which is stronger than the sagopilone example it used before.
 - Unchanged: the 16 routes, the 25-class universe, `standard_audit.failing()` still empty.
+
+---
+
+## All 16 routes close with licensed drugs (2026-10-02)
+
+The previous pass closed ACCESS at every site with licensed agents but left three mechanism gaps, and
+reported them as "two of three are supply, one is science". Site closure is not route closure, so the
+goal ("all mechanisms and escapes") was not met. Searching continued, with rule 14 applied to each gap
+in turn. Two of the three closed, and the third narrowed.
+
+### Gap 1 — cells that are not dividing: CLOSED, structurally, by a licensed drug
+
+Every licensed agent reaching the invading edge is division-coupled. The Phase 0 literature confirmed
+that rather than refuting it: Wee1 inhibition (AZD1775, median unbound tumour:plasma 3.2, PMID 29798906)
+and PARP inhibition (niraparib, PMID 38657366) both penetrate but both act through replication.
+
+**Dordaviprone (ONC201)** does not. It is a ClpP agonist that drives proteolysis of **electron
+transport chain and TCA cycle proteins** (PMID 37195023), so the kill is a collapse of oxidative
+phosphorylation — which a quiescent cell requires as much as a dividing one. **FDA accelerated
+approval 2025** for H3K27M-altered diffuse midline glioma (PMID 42232453); oral, once weekly, well
+tolerated. The indication is itself the access argument: DMG is unresectable, diffusely infiltrative
+and largely non-enhancing.
+
+Target transfer **computed, not asserted** — `sequence_conservation.clpp_domain_partition()`:
+
+| Region | Differences | Note |
+|---|---|---|
+| Transit peptide 1–56 | **10** | **cleaved on mitochondrial import — absent from the mature protein** |
+| Mature ordered 57–245 | **3** | **98.41% identical** |
+| Disordered tail 246–277 | 7 | |
+| Active sites Ser153, His178 | **0** | **both identical** |
+
+So the raw 92.65% understates it. DRD2, the second mechanism, is 96.39% identical, and D2 antagonists
+are routine in dogs.
+
+Graded **STRUCTURAL, not MARGIN**, and deliberately: no canine-HS data of any kind (class-mechanism
+transfer), no published unbound tumour concentration so no kill rate is derived, and **once-weekly
+dosing sits awkwardly against continuous duty (C3)** — mitigated only by the argument that a degraded
+mitochondrial proteome must be resynthesised rather than washed out. An argument, not a measurement.
+
+### Gap 3 — the genotype anchor: CLOSED by a licensed drug, for the same deletion
+
+This gap was an error of conflation on my part, not a missing drug. The project had equated "genotype
+anchoring" with MTAP-directed synthetic lethality, and concluded nothing licensed could anchor. But the
+CFA11q16 deletion removes **CDKN2A/B as well as MTAP**, and the CDKN2A product p16 has exactly one
+function: inhibiting CDK4/6. **A CDK4/6 inhibitor pharmacologically replaces the deleted gene
+product** — it is matched to the inherited lesion, not a somatic driver, so a second primary from the
+same deletion is met by the same drug without re-stratifying. Licensed, with canine-HS dependency
+measured (PMID 35278028) and the human trial enrolled on exactly this genotype (PMID 41206763).
+
+`availability_tiers.is_cdk46_a_genotype_anchor()`. The MTAP arm is **not** redundant: CDK4/6 inhibition
+requires Rb intact, so acquired RB1 loss (A15) defeats this anchor, and the MTAP/PRMT5 anchor is
+Rb-independent. That is now the precise statement of what the MTAP arm uniquely adds.
+
+### Gap 2 — PI3K axis brain access: still the weakest row, and graded as such
+
+Searched, not closed. The Phase 0 record supplies two measured negatives on this axis and one
+calibration point:
+
+| Agent | Unbound in non-enhancing tumour | Verdict in source |
+|---|---|---|
+| **ribociclib** | **170–634 nM** (40 nM target) | active; RB phosphorylation and Ki-67 down |
+| ceritinib | **6 nM** | "insufficient for target modulation" (PMID 34702773) |
+| everolimus | **undetectable (<0.1 nM)** | undetectable at every dose (PMID 41206763) |
+
+The ceritinib row matters as a control: same group, same assay, same compartment, and it returns a
+clean negative. That is what makes ribociclib's number a signal rather than an artefact.
+
+Duvelisib closes the RTK-bypass route on the project's **TRANSFERRED** generic small-molecule access
+(0.021 vs a required 0.0143), with its own brain access unmeasured. Under rule 11 that is CLOSED at
+TRANSFERRED grade, not open — but with a named risk, since a different agent on the same axis was
+measured undetectable. Recorded in `the_parallel_pathway_problem()` and flagged as
+`program_a_route_ledger()["weakest_row"]`.
+
+### The route ledger
+
+`availability_tiers.program_a_route_ledger()` — all 16 audited routes (the 12 disease escapes plus
+A13–A16), each with a named licensed carrier and a closure kind:
+
+| Kind | Count |
+|---|---|
+| MARGIN (computed kill rate beats the growth bar) | **3** |
+| STRUCTURAL (the lesion cannot apply to these drugs) | **12** |
+| GATED (on the pre-treatment immunostain) | **1** |
+| **OPEN** | **0** |
+
+A13 is worth noting: the audit's main structural finding was that six of twelve closures rested on the
+microtubule class alone. Programme A has **no tubulin-binding agent at all**, so that single point of
+failure is dissolved rather than mitigated.
+
+### What is honestly weaker than Programme B
+
+**12 of 16 close STRUCTURALLY.** "The lesion cannot apply to these drugs" is sound but weaker than
+"these drugs out-kill it". Programme B carries +0.59/+0.61 per day from a derived 1.17/day cytotoxic;
+Programme A has no equivalent cytotoxic margin. `program_a_route_ledger()["verdict"]` says this, and
+`test_the_ledger_distinguishes_margin_from_structural_closure` fails if it stops.
+
+### Remaining to-build — three quantities, not three mechanisms
+
+1. a **computed cytotoxic margin** at the invading edge;
+2. a **measured brain concentration** on the PI3K axis;
+3. an **Rb-independent germline anchor**.
+
+Two are compounds in human trials; the third is a measurement nobody has taken. C8's requirement text
+was narrowed twice to track this, and `test_c8_...` asserts all three terms appear in it.
+
+### Consequences recorded
+
+- `sequence_conservation.CONSERVATION` gains CLPP and DRD2 (computed live from UniProt via
+  `recompute()`), plus `clpp_domain_partition()`.
+- `availability_tiers` gains `dordaviprone (ONC201)` as an exists-today agent, `PROGRAM_A_ROUTES`,
+  `program_a_route_ledger()`, `is_cdk46_a_genotype_anchor()`; `persister_cover_at_the_invading_edge()`
+  now reports CLOSED STRUCTURALLY.
+- `program_a()["verdict"]` rewritten — it had become factually stale (still saying the persister was
+  uncarried) and a test caught it.
+- Unchanged: the 25-class universe, `standard_audit.failing()` still empty, 8 conditions / 5 met /
+  0 engineering blockers.

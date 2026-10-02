@@ -74,11 +74,15 @@ def test_csf1r_is_the_lowest_small_molecule_kinase_target():
 def test_transfer_set_covers_the_kinase_targets_but_not_the_low_ones():
     # everything at/above 0.90 -- all targets except CSF1R (0.853) and PD-1 (0.677)
     supported = orthologs_supporting_transfer(threshold=0.90)
-    assert set(supported) == {"MAPK1", "PIK3CA", "ABCB1", "MAP2K1", "PRMT5", "CDK4", "CDK6", "TUBB"}
+    assert set(supported) == {"MAPK1", "PIK3CA", "ABCB1", "MAP2K1", "PRMT5", "CDK4", "CDK6",
+                              "TUBB", "CLPP", "DRD2"}
     assert "CSF1R" not in supported and "PDCD1" not in supported
     # raise the bar to 0.95: the near-identical inhibitor targets remain; P-gp drops out
     strict = set(orthologs_supporting_transfer(threshold=0.95))
-    assert strict == {"MAPK1", "PIK3CA", "MAP2K1", "PRMT5", "CDK4", "CDK6", "TUBB"}
+    # DRD2 (96.39%) clears the strict bar; CLPP (92.65% overall) does not, and that is the point
+    # of clpp_domain_partition() -- its catalytic region is 98.41% and both active sites identical.
+    assert strict == {"MAPK1", "PIK3CA", "MAP2K1", "PRMT5", "CDK4", "CDK6", "TUBB", "DRD2"}
+    assert "CLPP" not in strict
     assert "ABCB1" not in strict
 
 
