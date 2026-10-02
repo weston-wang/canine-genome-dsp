@@ -227,6 +227,35 @@ PARAMS: dict[str, DrugPKPD] = {
              "a colchicine-site, non-efflux-substrate congener, and this entry stands for the "
              "measured class potency, not for the agent of choice in the brain.",
     ),
+    # THE AGENT THAT RETIRES THE LAST ASSUMED NUMBER. Every margin in the brain-native regimen rested
+    # on a REFERENCE POTENCY of 0.15/day (core.microtubule_route.REFERENCE_POTENCY) -- a bare
+    # constant, and the closure needed >= ~0.10/day, i.e. only a 1.5x cushion on a guess. This entry
+    # replaces that guess with a derived kill rate from two measured numbers.
+    "rgn3067": DrugPKPD(
+        name="RGN3067 (oral colchicine-site tubulin destabiliser; the brain-native induction agent)",
+        ic50_nM=616.0,            # the WORST of four patient-derived GB lines (148-616 nM)
+        cmax_nM=20000.0,          # MEASURED rodent BRAIN Cmax after ORAL dosing (7807 ng/ml = 20 uM)
+        ic50_provenance=Provenance.MEASURED,
+        cmax_provenance=Provenance.MEASURED,
+        source="Biomedicines 2024;12(2):406, PMID 38398008. Oral dosing in rodent gives BRAIN Cmax "
+               "7807 ng/ml (20 uM) at Tmax 2 h, with EQUAL LEVELS IN PLASMA AND BRAIN and minimal "
+               "in vivo toxicity. Binds the colchicine site and inhibits tubulin polymerisation; "
+               "efflux ratio 0.61, so NOT an MDR1 substrate. IC50 117 nM (U87), 560 nM (LN-18), and "
+               "148-616 nM across four patient-derived GB lines; PDX growth reduction in vivo.",
+        note="The exposure here is a BRAIN concentration, not a plasma one, so access is already "
+             "inside the number and must NOT be multiplied by a Kp,uu again -- this entry is used "
+             "with access 1.0 by construction. Both inputs are measured but in the wrong species "
+             "(rodent brain) and the wrong tumour (human GB lines), so the per-day kill rate derived "
+             "from them is graded TRANSFERRED; the transfer is justified by beta-tubulin at 98.42% "
+             "human-dog identity (sequence_conservation) and by canine HS cells being MEASURED "
+             "microtubule-sensitive (PMID 25715778). The derived rate is ~1.17/day at the worst "
+             "measured IC50 and full measured exposure, and still 0.167/day at 2% of that exposure "
+             "-- against a closure threshold of ~0.10/day, a ~50x cushion on exposure. That is what "
+             "retires REFERENCE_POTENCY as the load-bearing assumption. Honest limits: 'minimal "
+             "toxicity' is rodent, no canine PK exists, and the class carries the record's own "
+             "warning that sagopilone FAILED in human GBM -- though RGN3067 is a different "
+             "chemotype with equal plasma:brain levels rather than sagopilone's exposure profile.",
+    ),
 }
 
 

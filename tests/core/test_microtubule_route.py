@@ -181,3 +181,34 @@ def test_an_unpriced_agent_raises_rather_than_being_silently_free():
     import canine_dsp.core.toxicity as t
     for agent in mt.build(PARENCHYMA).agents:
         assert agent.name in t.PROFILES, f"{agent.name} would be silently free"
+
+
+def test_closure_no_longer_rests_on_the_reference_potency():
+    """REFERENCE_POTENCY was a bare 0.15/day constant and closure needed >= ~0.10/day -- a 1.5x
+    cushion on a guess. The kill rate must now be DERIVED from measured inputs."""
+    from canine_dsp.core import microtubule_route as m
+
+    derived = m.derived_potency()
+    assert derived > m.REFERENCE_POTENCY
+    assert m.closes_on_derived_potency() is True
+
+
+def test_the_species_transfer_has_a_large_cushion():
+    """How much of the measured rodent brain exposure must survive the transfer to the dog for every
+    route to stay closed. A thin cushion would mean the closure leans on the transfer."""
+    from canine_dsp.core import microtubule_route as m
+
+    frac = m.minimum_exposure_fraction_for_closure()
+    assert frac < 0.05, frac          # under 5% of measured exposure suffices
+    assert m.closes_on_derived_potency(frac * 1.2) is True
+    assert m.closes_on_derived_potency(frac * 0.5) is False
+
+
+def test_the_brain_exposure_is_not_double_discounted():
+    """pkpd.PARAMS['rgn3067'].cmax_nM is already a BRAIN concentration, so it must not be multiplied
+    by a Kp,uu again. The note has to say so, or a later thread will derate it twice."""
+    from canine_dsp import pkpd
+
+    note = pkpd.PARAMS["rgn3067"].note
+    assert "BRAIN concentration" in note
+    assert "access 1.0" in note

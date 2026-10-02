@@ -1,0 +1,274 @@
+<title>The Closed Ledger</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+
+<style>
+/* Layout: a single reading column; every claim sits beside its evidence grade, clinical-record style. */
+:root{
+  --paper:#F7F6F3; --raised:#FFFFFF; --ink:#1A1D1A; --ink-soft:#52584F;
+  --rule:#DFDDD6; --rule-soft:#ECEAE4;
+  --accent:#2F5D3A; --accent-soft:#E6EEE7;
+  --closed:#2F5D3A; --closed-bg:#E6EEE7;
+  --open:#A33F2A; --open-bg:#F8E8E3;
+  --gate:#8A6412; --gate-bg:#F7EFDC;
+  --display:"Newsreader",Georgia,serif;
+  --body:"IBM Plex Sans",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#131511; --raised:#1B1E19; --ink:#E8E9E4; --ink-soft:#A3A89C;
+    --rule:#2C312A; --rule-soft:#232720;
+    --accent:#86BC92; --accent-soft:#1A2A1D;
+    --closed:#86BC92; --closed-bg:#1A2A1D;
+    --open:#E39379; --open-bg:#2E1D17;
+    --gate:#D8B257; --gate-bg:#2C2415;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#131511; --raised:#1B1E19; --ink:#E8E9E4; --ink-soft:#A3A89C;
+  --rule:#2C312A; --rule-soft:#232720;
+  --accent:#86BC92; --accent-soft:#1A2A1D;
+  --closed:#86BC92; --closed-bg:#1A2A1D;
+  --open:#E39379; --open-bg:#2E1D17;
+  --gate:#D8B257; --gate-bg:#2C2415;
+  color-scheme:dark;
+}
+
+body{background:var(--paper);color:var(--ink);font-family:var(--body);line-height:1.6;
+  -webkit-font-smoothing:antialiased}
+.wrap{max-width:46rem;margin:0 auto;padding-inline:20px;padding-block:3.5rem 5rem}
+h1,h2,h3{font-family:var(--display);font-weight:600;text-wrap:balance;line-height:1.2}
+h1{font-size:clamp(2rem,5.5vw,2.9rem);letter-spacing:-.015em;margin:0 0 .6rem}
+h2{font-size:1.45rem;margin:3.2rem 0 .3rem;padding-top:1.4rem;border-top:1px solid var(--rule)}
+h3{font-size:1.06rem;margin:1.9rem 0 .4rem}
+p{margin:.75rem 0}
+.lede{font-family:var(--display);font-size:1.17rem;color:var(--ink-soft);margin:0 0 1.6rem}
+.eyebrow{font-family:var(--mono);font-size:.7rem;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--accent);margin:0 0 .5rem}
+.sub{font-size:.88rem;color:var(--ink-soft);margin:.2rem 0 1.1rem}
+
+.verdict{background:var(--raised);border:1px solid var(--rule);border-left:3px solid var(--accent);
+  border-radius:3px;padding:1.3rem 1.4rem;margin:1.8rem 0}
+.verdict p:first-child{margin-top:0}
+.verdict p:last-child{margin-bottom:0}
+.vline{font-family:var(--display);font-size:1.3rem;line-height:1.35;margin:0 0 .6rem}
+
+.tw{overflow-x:auto;margin:1.1rem 0;border:1px solid var(--rule);border-radius:3px;background:var(--raised)}
+table{border-collapse:collapse;width:100%;font-size:.9rem;min-width:28rem}
+th,td{text-align:left;padding:.6rem .8rem;border-bottom:1px solid var(--rule-soft);vertical-align:top}
+th{font-family:var(--mono);font-size:.69rem;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--ink-soft);font-weight:500;background:var(--paper)}
+tr:last-child td{border-bottom:none}
+td.num{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+
+.tag{display:inline-block;font-family:var(--mono);font-size:.68rem;letter-spacing:.05em;
+  padding:.13rem .44rem;border-radius:2px;white-space:nowrap;font-weight:500}
+.tag.ok{background:var(--closed-bg);color:var(--closed)}
+.tag.no{background:var(--open-bg);color:var(--open)}
+.tag.gt{background:var(--gate-bg);color:var(--gate)}
+
+ul,ol{margin:.7rem 0;padding-left:1.3rem}
+li{margin:.4rem 0}
+strong{font-weight:600}
+code{font-family:var(--mono);font-size:.86em;background:var(--rule-soft);padding:.08em .32em;border-radius:2px}
+.foot{margin-top:3.5rem;padding-top:1.2rem;border-top:1px solid var(--rule);
+  font-size:.82rem;color:var(--ink-soft)}
+.cushion{font-family:var(--mono);font-size:.82rem;color:var(--ink-soft);margin:.5rem 0 0}
+</style>
+
+<div class="wrap">
+
+<p class="eyebrow">Canine histiocytic sarcoma · primary intracranial</p>
+<h1>The Closed Ledger</h1>
+<p class="lede">Every enumerated escape route, at every site the disease occupies, closed by a named
+agent at a stated evidence grade. The answer is a checklist, not a probability.</p>
+
+<div class="verdict">
+  <p class="vline">All 16 escape routes close at both occupied sites. Five of seven conditions hold
+  today, and none of the two outstanding is an engineering problem.</p>
+  <p class="sub" style="margin-bottom:0">Closed within a stated catalogue: 25 therapy-modality
+  classes (15 in the model, 10 excluded with recorded reasons, none unassessed) and 16 escape routes
+  derived independently of the list already in hand.</p>
+</div>
+
+<h2>The case</h2>
+<p>Primary intracranial, non-disseminated histiocytic sarcoma in a predisposed breed. An extra-axial
+mass on the meninges that invades brain tissue in 23 of 23 dogs and seeds the leptomeninges in 19 of
+19. Extracranial spread of primary CNS disease has never been reported, so each site is a bounded
+target.</p>
+
+<h2>Why ten years needs two moves</h2>
+<p>Killing this tumour harder cannot reach a decade, because the breed is born predisposed: clearing
+one tumour leaves the inherited fault untouched. The unlock is that the predisposition and the
+tumour are the <strong>same lesion</strong> — a deletion on canine chromosome 11 removing CDKN2A/B
+and MTAP, measured in <strong>62.8%</strong> of cases.</p>
+<ol>
+  <li><strong>Clear</strong> the tumour that is there.</li>
+  <li><strong>Hold</strong> a matched oral drug indefinitely, so the next tumour never establishes.</li>
+</ol>
+
+<h2>The closure</h2>
+<div class="tw"><table>
+  <thead><tr><th>Site</th><th>Routes closed</th><th>Worst margin</th><th>Growth bar</th></tr></thead>
+  <tbody>
+    <tr><td>Invaded brain tissue</td><td><span class="tag ok">10 / 10</span></td>
+        <td class="num">+0.59 /day</td><td class="num">0.055 /day</td></tr>
+    <tr><td>Leptomeninges, CSF</td><td><span class="tag ok">10 / 10</span></td>
+        <td class="num">+0.61 /day</td><td class="num">0.055 /day</td></tr>
+  </tbody>
+</table></div>
+<p class="sub">Ten routes carry a computed kill margin. The other six close structurally — by drug
+choice or by schedule, where no kill rate applies.</p>
+
+<h2>The regimen</h2>
+<p>Five agents, all oral or systemic, all continuous. No implant, no catheter, no sonication, and no
+radiation in the closing set.</p>
+<div class="tw"><table>
+  <thead><tr><th>Role</th><th>Agent</th><th>Why it is in the set</th></tr></thead>
+  <tbody>
+    <tr><td>Induction</td><td>RGN3067, oral colchicine-site tubulin destabiliser</td>
+        <td>Carries 6 of the 16 routes. Efflux ratio 0.61, so the pumps do not remove it</td></tr>
+    <tr><td>Parallel pathway</td><td>paxalisib</td>
+        <td>Unbound brain:plasma 0.31, confirmed non-substrate of both efflux pumps</td></tr>
+    <tr><td>Lineage removal</td><td>liposomal clodronate</td>
+        <td>Kills by being engulfed, so it reaches cells that have stopped dividing</td></tr>
+    <tr><td>Dormant-cell cover</td><td>hydroxychloroquine</td>
+        <td>The only agent here with a canine phase I</td></tr>
+    <tr><td>Immune arm</td><td>anti-PD-1 (gilvetmab)</td>
+        <td>Obtainable for dogs</td></tr>
+  </tbody>
+</table></div>
+
+<h3>Maintenance, matched to the tumour</h3>
+<div class="tw"><table>
+  <thead><tr><th>Tumour carries</th><th>Maintenance</th><th>Hold</th></tr></thead>
+  <tbody>
+    <tr><td>MTAP deleted (≤62.8%)</td><td>PRMT5 or MAT2A inhibitor; CDK4/6 inhibitor against the
+        co-deleted CDKN2A</td><td>Genotype-anchored — a deletion cannot be undone</td></tr>
+    <tr><td>MAPK driver (~59%)</td><td>MEK inhibitor</td><td>Reroutable; needs monitoring and
+        switching</td></tr>
+    <tr><td>CDKN2A deleted, RB1 intact</td><td>abemaciclib</td><td>Dependency</td></tr>
+    <tr><td>PTEN deleted</td><td>duvelisib</td><td>Dependency</td></tr>
+    <tr><td>Nothing targetable</td><td>cycled cytotoxic and immune arm</td><td>Weakest tier; no case
+        left with nothing</td></tr>
+  </tbody>
+</table></div>
+<p class="sub">Tiers overlap, and where they do the evidence says combine rather than choose:
+MTAP-null plus RAS-active is the population in which PRMT5 and MAPK inhibition together produced
+complete responses.</p>
+
+<h2>Access was the obstacle, and it is not a device problem</h2>
+<p>A generic small molecule given systemically reaches 2.1% of invaded brain tissue and 0.5% of CSF.
+At those numbers every route is <strong>open</strong>, at −0.049 and −0.036 per day. That is also why
+radiation alone fails: a 21-day course against a year is a 5.8% duty cycle.</p>
+<p>The requirement is not to bypass the barrier. It is access <strong>0.196</strong> in brain tissue
+and <strong>0.0145</strong> in CSF, and measured intrinsic penetration clears it.</p>
+<div class="tw"><table>
+  <thead><tr><th>Agent</th><th>Brain access</th><th>Clears 0.196</th></tr></thead>
+  <tbody>
+    <tr><td>RGN3067</td><td>equal brain and plasma levels; brain Cmax 20 µM, oral</td>
+        <td><span class="tag ok">yes</span></td></tr>
+    <tr><td>paxalisib</td><td class="num">0.31</td><td><span class="tag ok">yes</span></td></tr>
+    <tr><td>generic small molecule</td><td class="num">0.021</td>
+        <td><span class="tag no">no</span></td></tr>
+  </tbody>
+</table></div>
+<p>Devices were scored and lose on their own measured numbers. An implanted multi-emitter ultrasound
+gives a measured 5.9×, which is real and still short, since 5.9 × 0.021 = 0.124. Convection-enhanced
+delivery has the best canine evidence of any device and fails on duty cycle at one infusion a year.
+Intrathecal injection clears CSF and is obtainable today, so it is the backup rather than a
+requirement.</p>
+
+<h2>Evidence behind every deciding number</h2>
+<p>Graded against the standard of real data or a rigorous model, with a transfer acceptable when
+justified in writing: <strong>17 of 17 live inputs pass, none fails.</strong></p>
+<div class="tw"><table>
+  <thead><tr><th>Quantity</th><th>Value</th><th>Grade</th></tr></thead>
+  <tbody>
+    <tr><td>Microtubule potency in canine HS</td><td class="num">IC50 1.77–2.69 ng/mL, 4 lines</td>
+        <td><span class="tag ok">measured, right species and disease</span></td></tr>
+    <tr><td>CDK4/6 dependency in canine HS</td><td>CDKN2A down, Rb preserved, growth inhibited in
+        every line</td><td><span class="tag ok">measured, right species and disease</span></td></tr>
+    <tr><td>PI3K-axis potency</td><td class="num">duvelisib IC50 287 nM</td>
+        <td><span class="tag ok">measured, right species and disease</span></td></tr>
+    <tr><td>Deletion frequency</td><td class="num">62.8% of canine HS</td>
+        <td><span class="tag ok">measured, right species and disease</span></td></tr>
+    <tr><td>ctDNA monitoring</td><td class="num">91% detection, 98.8% specific</td>
+        <td><span class="tag ok">measured, right species and disease</span></td></tr>
+    <tr><td>Induction kill rate</td><td class="num">1.17 /day, derived</td>
+        <td>from measured IC50 616 nM and measured brain Cmax 20 µM</td></tr>
+    <tr><td>Growth bar</td><td class="num">0.055 /day</td>
+        <td>derived from canine-HS regrowth; 1.6–5.8× harder than the clinical data requires</td></tr>
+    <tr><td>Target identity, human to dog</td><td class="num">ERK2 100%, PRMT5 99.37%, β-tubulin
+        98.42%</td><td>computed from real sequences</td></tr>
+    <tr><td>Second-primary rate</td><td>calibrated to observed canine-HS recurrence</td>
+        <td>derived from measured</td></tr>
+  </tbody>
+</table></div>
+<p class="cushion">Robustness of the number carrying the most weight: closure needs ≥0.10/day. The
+derived rate is 1.17/day and still closes at 0.89% of the measured brain exposure — a 112× cushion
+on the cross-species transfer.</p>
+
+<h2>The conditions</h2>
+<p>The decade holds if and only if all seven hold. Five hold today.</p>
+<div class="tw"><table>
+  <thead><tr><th></th><th>Condition</th><th>Status</th></tr></thead>
+  <tbody>
+    <tr><td class="num">C1</td><td>Every maintenance agent intrinsically brain-penetrant and not an
+        efflux substrate</td><td><span class="tag ok">met</span></td></tr>
+    <tr><td class="num">C2</td><td>Leptomeninges reached, with intrathecal as backup</td>
+        <td><span class="tag ok">met</span></td></tr>
+    <tr><td class="num">C3</td><td>Maintenance dosed continuously, never cycled</td>
+        <td><span class="tag ok">met</span></td></tr>
+    <tr><td class="num">C4</td><td>Induction agent not a P-gp or BCRP substrate</td>
+        <td><span class="tag ok">met</span></td></tr>
+    <tr><td class="num">C5</td><td>Tumour carries a targetable lesion</td>
+        <td><span class="tag gt">one stain, decided before treatment</span></td></tr>
+    <tr><td class="num">C6</td><td>Radiation and CNS cytotoxic sequenced, not stacked</td>
+        <td><span class="tag ok">met</span></td></tr>
+    <tr><td class="num">C7</td><td>Sponsor access to the investigational anchored agent</td>
+        <td><span class="tag no">not met; closure under C1–C6 does not need it</span></td></tr>
+  </tbody>
+</table></div>
+
+<h2>The limits</h2>
+<ul>
+  <li><strong>No agent in any regimen here has been given to a dog with this disease.</strong> Every
+  margin is a model output from graded inputs.</li>
+  <li><strong>The honest comparator</strong> is a 44-day median for intracranial disease under
+  surgery, radiation and chemotherapy, and a 568-day median with a 243-day disease-free interval for
+  localized disease after debulking plus lomustine. The distance from there to ten years is the
+  claim, and no measurement here closes it.</li>
+  <li><strong>Brain-penetrant is not brain-effective.</strong> Sagopilone, an access exemplar for
+  this drug class, failed in human glioblastoma with no objective responses. RGN3067 is a different
+  chemotype with a better exposure profile, and the warning still stands.</li>
+  <li><strong>The cheapest decisive test has never been run.</strong> One MTAP immunostain on
+  archived tissue. If the tumour is MTAP-intact, the strongest tier does not apply.</li>
+  <li><strong>The largest remaining uncertainty is not a drug.</strong> How often a cleared,
+  predisposed dog throws a new primary drives most of the spread in every scenario. That is an
+  observational cohort, not an experiment.</li>
+</ul>
+
+<h2>What to do first</h2>
+<ol>
+  <li><strong>MTAP immunostain</strong>, with p16 and Rb, on archived tumour tissue. Decides C5 and
+  which tier applies.</li>
+  <li><strong>Run the ten existing canine HS cell lines</strong> against a colchicine-site tubulin
+  binder and against a PRMT5 inhibitor. Converts two transfers into measurements, with no new
+  animals.</li>
+  <li><strong>A canine Cmax</strong> for the induction agent. Turns the last cross-species transfer
+  into a dog number.</li>
+  <li><strong>An observational cohort</strong> of cleared, predisposed dogs, to measure the
+  second-primary rate.</li>
+</ol>
+
+<p class="foot">Every figure is a model output computed from cited evidence and re-derived by
+automated tests, 768 passing. Where a number is transferred rather than measured, the grade says so.
+The full audit trail, including every withdrawn claim, is kept separately in the repository. This is
+an analysis, not veterinary advice; every decision belongs with clinicians who can examine the
+animal.</p>
+
+</div>

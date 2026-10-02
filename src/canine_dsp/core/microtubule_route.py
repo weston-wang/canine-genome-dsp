@@ -124,6 +124,49 @@ def build(compartment: str, duty: float = REFERENCE_DUTY, potency: float = REFER
     ])
 
 
+def derived_potency(exposure_fraction: float = 1.0) -> float:
+    """The induction agent's per-day kill rate DERIVED from measured inputs, replacing
+    REFERENCE_POTENCY as the load-bearing number.
+
+    `REFERENCE_POTENCY = 0.15` was a bare constant, and the regimen's closure needs >= ~0.10/day --
+    a 1.5x cushion on a guess, which is not a closure. `pkpd.PARAMS['rgn3067']` carries two measured
+    numbers instead: the worst of four patient-derived GB-line IC50s (616 nM) and a rodent BRAIN Cmax
+    after ORAL dosing (20 uM, PMID 38398008). Because that exposure is already a brain concentration,
+    access is 1.0 by construction and must not be multiplied by a Kp,uu again.
+
+    `exposure_fraction` derates the measured brain exposure, so the caller can ask how much of it has
+    to survive the species transfer for closure to hold. At the worst IC50 the answer is ~2%.
+    """
+    from .. import pkpd as _pk
+
+    d = _pk.PARAMS["rgn3067"]
+    return _pk.emax_kill_rate(d.ic50_nM, d.cmax_nM * exposure_fraction)
+
+
+def closes_on_derived_potency(exposure_fraction: float = 1.0,
+                              growth: float = GROWTH_PER_DAY) -> bool:
+    """Closure with the kill rate derived from measurement rather than assumed."""
+    p = derived_potency(exposure_fraction)
+    return all(worst_margin(c, growth, potency=p) > 0 for c in (PARENCHYMA, LEPTOMENINGEAL))
+
+
+def minimum_exposure_fraction_for_closure(growth: float = GROWTH_PER_DAY) -> float:
+    """The smallest fraction of the MEASURED brain exposure at which every route still closes.
+
+    This is the honest statement of how much the result depends on the species transfer: the answer
+    is the cushion, and the smaller it is the more the closure leans on rodent exposure carrying to
+    the dog.
+    """
+    lo, hi = 0.0, 1.0
+    for _ in range(40):
+        mid = (lo + hi) / 2
+        if closes_on_derived_potency(mid, growth):
+            hi = mid
+        else:
+            lo = mid
+    return hi
+
+
 def margins(compartment: str, growth: float = GROWTH_PER_DAY, **kw) -> dict:
     r = build(compartment, **kw)
     d = DormancyModel()

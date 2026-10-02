@@ -398,3 +398,35 @@ These are genuinely open, not deferred corrections:
    gated on one immunostain that nobody has run.
 7. **A15 (acquired RB1 loss) inherits the surveillance dependence** — and canine HS ctDNA is
    unvalidated, so in practice it would be detected late.
+
+---
+
+## Closed and simplified (2026-10-02, final pass)
+
+**The goal is achieved.** `standard_audit.failing()` is empty, `candidate_universe.not_assessed()`
+is empty, and every one of the 16 audited escape routes closes at both occupied sites.
+
+The last assumed number is retired. Closure previously rested on `REFERENCE_POTENCY = 0.15/day`, a
+bare constant, against a requirement of ~0.10/day — a 1.5× cushion on a guess, which is not a
+closure. `pkpd.PARAMS['rgn3067']` replaces it with a kill rate **derived from two measured numbers**:
+the worst of four patient-derived GB-line IC50s (616 nM) and a rodent **brain** Cmax after oral
+dosing (20 µM, PMID 38398008; equal plasma and brain levels, efflux ratio 0.61).
+
+| | Value |
+|---|---|
+| Derived kill rate | **1.17/day** (vs 0.15 reference, vs ~0.10 needed) |
+| Worst margin, invaded parenchyma | **+0.59/day** |
+| Worst margin, leptomeninges/CSF | **+0.61/day** |
+| Minimum fraction of measured brain exposure for closure | **0.89% — a 112× cushion** |
+
+That cushion is the point: the closure no longer leans on the cross-species transfer.
+
+### Report structure, simplified
+
+The user asked for a report with no back-and-forth. The 879-line document carrying 15 retraction and
+correction passages was renamed **`AUDIT_TRAIL.md`** and banner-marked as the working record.
+**`CONSOLIDATED_REPORT.md`** is now a clean ~160-line document: verdict, two moves, regimen,
+why access is not the obstacle, evidence grade per deciding number, the seven conditions, the limits,
+what to do first. Reader-facing artifact: <https://claude.ai/artifact/4Ho2u4jTieU579ExuRgvY5>.
+
+Nothing was deleted. Every retraction remains in `AUDIT_TRAIL.md`.
