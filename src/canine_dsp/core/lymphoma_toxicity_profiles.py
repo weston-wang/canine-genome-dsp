@@ -361,3 +361,26 @@ for _n in ("tandem CD19/CD20 CAR-T, intraventricular/intrathecal [buildable]",
         "for CNS tumours (n=3-65 per trial); cytokine release",
         source="HUMAN solid-CNS trials (docs/universe/SWEEP_regional.md s11); lymphoma intrathecal CAR-T: NOT FOUND; dogs: NOT FOUND.",
         secondary_axis=O.IMMUNE_MEDIATED, secondary_fraction=0.30, sustainable_days=270.0, hard_cap_days=None, reversible=True)
+
+PROFILES["allogeneic DLA-identical HCT (graft-versus-lymphoma)"] = P(
+    O.IMMUNE_MEDIATED, 0.30, True,
+    "procedure mortality 2/15 (13%, both dogs not in remission), acute grade 2 skin GVHD 3/13, no chronic GVHD, universal marrow aplasia "
+    "with ANC >1000 by day 9-18; cyclosporine diabetes 1/15",
+    source="DOG: PMID 35789057 (15 dogs). HUMAN comparator NRM 31% vs 3% allo vs auto in T-cell lymphoma (PMID 39270145). "
+           "docs/universe/SWEEP_hct_model.md s5, s7.",
+    secondary_axis=O.MARROW, secondary_fraction=0.60, sustainable_days=166.0, hard_cap_days=166.0, reversible=False)
+PROFILES["dTERT genetic vaccine (Tel-eVax-type)"] = P(
+    O.IMMUNE_MEDIATED, 0.05, True,
+    "no adverse effects in 52 vaccinated dogs; electroporation under anaesthesia at each cycle",
+    source="DOG: PMIDs 20531395, 23902422, 30537967. Long-term autoimmunity: NOT FOUND.",
+    sustainable_days=365.0, hard_cap_days=None, reversible=True)
+PROFILES["cytarabine ocfosfate, oral continuous"] = P(
+    O.GI, 0.50, True,
+    "GI toxicity 65% (grade 3-4 19%) and neutropenia 35% on cytarabine infusion in 26 dogs; oral prodrug tolerability in dogs: 4 dogs, no events reported",
+    source="DOG: PMIDs 31769013, 37670479.", secondary_axis=O.MARROW, secondary_fraction=0.35,
+    sustainable_days=84.0, hard_cap_days=None, reversible=True)
+PROFILES["CD3xCD20 bispecific T-cell engager (canine-specific) [needs development]"] = P(
+    O.IMMUNE_MEDIATED, 0.35, False,
+    "cytokine release 31-63% (grade >=3 3-5%), ICANS 8% (25% with CNS involvement), grade 3 infections 24%, B-cell aplasia",
+    source="HUMAN: PMIDs 39322711, 42622258, 42579821. No canine engager safety data.",
+    sustainable_days=365.0, hard_cap_days=None, reversible=True)

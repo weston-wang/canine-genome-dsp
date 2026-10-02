@@ -271,3 +271,67 @@ def brain_agents(compartment: str, immunophenotype: str, *, car_duty: float = IT
                              "reaches CSF (PMID 38454126). No dog product.",
                     potency_evidence="TRANSFER-OUTCOME: 0.12 /day (low end of the human-model range) at CSF access 1.0; duty low 0.15."))
     return tuple(out)
+
+
+# --------------------------------------------------------------------------------------------------------
+# Classes re-assessed after the user's objection ("I think you are dismissing vaccines, ebats, inhibitors, stem cells too
+# easily"; docs/universe/SWEEP_hct_model.md, SWEEP_bispecific.md, SWEEP_exists.md, SWEEP_vaccines.md). Each is entered with
+# an OUTCOME-calibrated or TRANSFERRED input, never excluded for lacking canine data (CLAUDE.md rule 13).
+# --------------------------------------------------------------------------------------------------------
+HCT_WINDOW_DAYS = 166.0           # day 14 to day 180
+HCT_GRAFT_KILL_GROSS = 0.106      # central: 2.6 net e-folds over 166 d = 0.0157 /day net, plus the 0.0903 growth bar the clock subtracts
+VACCINE_DTERT_PFS_K = 0.0         # PFS 11.4 vs 11.3 weeks (PMID 23902422)
+VACCINE_DTERT_OS_K = outcome_kill(2.6)   # OS 76.1 vs 29.3 weeks, owner-selected controls
+VACCINE_DTERT_KILL = 0.5 * (VACCINE_DTERT_PFS_K + VACCINE_DTERT_OS_K)   # midpoint of the two endpoint calibrations
+
+
+def reassessed_agents(compartment: str, immunophenotype: str) -> tuple:
+    from .lymphoma_catalogue import SYSTEMIC
+    from .. import lymphoma_grounded_inputs as gi
+    sys_ = compartment == SYSTEMIC
+    out = [
+        Agent("allogeneic DLA-identical HCT (graft-versus-lymphoma)", Axis.IMMUNE_EFFECTOR, Layer.RECEPTOR,
+              HCT_GRAFT_KILL_GROSS, 1.0 if sys_ else 0.5, HCT_WINDOW_DAYS / 365.0, True, division_gated=False,
+              antigen_targets=(), efflux_substrate=False, vulnerable_to=frozenset({"antigen_presentation"}),
+              evidence="DOG: 15 B-cell dogs, 8 of 9 evaluable first-remission dogs alive >4 y (longest 2920 d), 2x4 Gy TBI + "
+                       "cyclosporine, TRM 2/15 (PMID 35789057). HUMAN: allo vs auto relapse 8% vs 55% in T-cell lymphoma "
+                       "(PMID 39270145); GVL responses to DLI in DLBCL, PTCL, follicular lymphoma (PMIDs 18684698, 21904377, 20606089).",
+              potency_evidence=("OUTCOME: Poisson cure model on the dog plateau fractions gives a graft effect of 2.6 e-folds "
+                                "(range 0.65-4.2) over a 166-day window, 0.0157 /day net, entered as gross 0.106 /day because the "
+                                "clock subtracts growth; human AATT gives 2.26 e-folds. CNS access 0.5 from human secondary-CNS-lymphoma "
+                                "allo (relapse 25% vs 8% systemic, PMID 34293518). Not division-gated and not a pump substrate by mechanism "
+                                "(TRANSFER). T-cell disease: no dog series; human AATT transferred."),
+              note="Needs a DLA-identical littermate (25% per sibling) and a transplant centre. MHC loss is its open escape. "
+                   "Includes the 2x4 Gy TBI conditioning, so it replaces the autologous TBI+transplant entry."),
+        Agent("dTERT genetic vaccine (Tel-eVax-type)", Axis.IMMUNE_EFFECTOR, Layer.RECEPTOR, VACCINE_DTERT_KILL,
+              1.0 if sys_ else 0.0, 1.0, True, division_gated=True, antigen_targets=(),
+              vulnerable_to=frozenset({"antigen_presentation"}),
+              evidence="DOG: immune response in 13/14 and 19/21 dogs; OS 76.1 vs 29.3 weeks with COP (PMID 23902422); OS "
+                       ">97.8 vs 37 weeks (PMID 20531395); OS 64.5 weeks with CHOP, n=17 (PMID 30537967); no adverse effects in 52 dogs.",
+              potency_evidence=("OUTCOME: k = g(1 - 1/ratio) from two endpoints, PFS ratio 1.01 (k 0.0) and OS ratio 2.6 (k %.3f); the "
+                                "midpoint %.3f /day is used. Controls are historical or owner-selected. Acts on dividing cells only "
+                                "(assumed); no brain credit." % (VACCINE_DTERT_OS_K, VACCINE_DTERT_KILL))),
+    ]
+    # Existing continuous cytarabine delivery: oral cytarabine ocfosfate (CSF 1.0-3.6 uM, CSF:serum 0.54-1.2, half-life 23-29 h in dogs,
+    # PMID 37670479) at the LOW end of its CSF range. It does the job of the spinal pump with no device.
+    ara = gi.continuous_it_cytarabine(immunophenotype, csf_setpoint_nM=1000.0)
+    out.append(Agent(
+        "cytarabine ocfosfate, oral continuous", Axis.CYTOTOXIC, Layer.RECEPTOR, ara["kill_per_day"], 1.0, 1.0, True,
+        division_gated=True, efflux_substrate=False, vulnerable_to=frozenset({"nucleoside_activation"}),
+        evidence="DOG: oral cytarabine ocfosfate serum Cmax 1.88-2.98 uM, half-life 23-29 h, CSF:serum 0.54-1.2 (PMID 37670479, 4 dogs); "
+                 "IV cytarabine CSF 8.3 uM at CSF:plasma 0.62 (PMID 1742843).",
+        potency_evidence=("DERIVED: kill at a CSF/tissue level of 1.0 uM (the low end of the measured 1.0-3.6 uM range) against the "
+                          "canine lymphoma-line IC50 (48 h); continuous. Dog availability of the prodrug is unverified (human-licensed in Japan)."),
+        note="Division-gated; defeated by loss of the activating enzyme (E2)."))
+    if immunophenotype == "B":
+        out.append(Agent(
+            "CD3xCD20 bispecific T-cell engager (canine-specific) [needs development]", Axis.IMMUNE_EFFECTOR, Layer.RECEPTOR,
+            0.16, 1.0 if sys_ else 0.5, 1.0, False, division_gated=False, antigen_targets=("CD20",),
+            vulnerable_to=frozenset({"antigen_density"}),
+            evidence="HUMAN: epcoritamab relapsed LBCL CR 40%, 64% of CRs ongoing at 24 months (PMID 39322711); epcoritamab + R-CHOP "
+                     "CR 85%, 2-year PFS 80% (PMID 42622258); glofitamab PCNSL ORR 88% (PMID 42579821). Human CD3 arms do not bind canine "
+                     "CD3 (43% identity), so a canine engager must be made; canine CD20 and CD3 binders exist.",
+            potency_evidence="TRANSFER-OUTCOME: net tumour kill 0.08/0.16/0.30 per day derived from human time to CR (docs/universe/SWEEP_bispecific.md); "
+                             "central used as gross. Brain multiplier 0.5 (range 0.2-0.85) from human CNS responses. Not division-gated, not MHC "
+                             "dependent, not a pump substrate by mechanism."))
+    return tuple(out)

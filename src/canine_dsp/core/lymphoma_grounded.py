@@ -83,6 +83,10 @@ AVAILABILITY = {
     "panobinostat (HDAC inhibitor)": OFF_LABEL, "vorinostat (HDAC inhibitor)": OFF_LABEL,
     "bortezomib (proteasome inhibitor)": OFF_LABEL,
     "high-dose thiotepa-based consolidation with autologous stem-cell rescue [human regimen]": PRECLINICAL,
+    "allogeneic DLA-identical HCT (graft-versus-lymphoma)": TRIAL,
+    "dTERT genetic vaccine (Tel-eVax-type)": TRIAL,
+    "cytarabine ocfosfate, oral continuous": TRIAL,
+    "CD3xCD20 bispecific T-cell engager (canine-specific) [needs development]": NONE,
     "anti-CD20 monoclonal antibody, intraventricular/intrathecal [buildable route]": NONE,
     "tandem CD19/CD20 CAR-T, intraventricular/intrathecal [buildable]": NONE,
     "CD7-directed CAR-T, intraventricular/intrathecal [buildable]": NONE,
@@ -331,7 +335,8 @@ def _apply_rt(a: Agent) -> Agent:
 def grounded_agents(compartment: str, immunophenotype: str = "B") -> tuple:
     base = [_ground(a, immunophenotype) for a in agents_for(compartment, immunophenotype)]
     new = tuple(U.apply_tags(a) for a in _new_agents(compartment, immunophenotype))
-    uni = U.universe_agents(compartment, immunophenotype) + U.brain_agents(compartment, immunophenotype)
+    uni = (U.universe_agents(compartment, immunophenotype) + U.brain_agents(compartment, immunophenotype)
+           + U.reassessed_agents(compartment, immunophenotype))
     return tuple(_apply_rt(a) for a in tuple(base) + new + uni)
 
 
@@ -379,6 +384,7 @@ def potency_grade(a: Agent) -> str:
 #: The time-resolved clock uses full in-course strength and lets the course END, which is how a
 #: consolidation can leave a lineage extinct even though its annual average looks small.
 COURSE_AGENTS = frozenset({"craniospinal radiotherapy", "total body irradiation + transplant",
+                           "allogeneic DLA-identical HCT (graft-versus-lymphoma)",
                            "high-dose thiotepa-based consolidation with autologous stem-cell rescue [human regimen]",
                            "half-body irradiation (low-dose-rate)"})
 
@@ -556,6 +562,8 @@ FAMILY = {
     "CD5 + CD7 dual-target CAR-T (canine binder) [buildable]": "T CAR",
     "CD5/CD52-directed cellular effector (T-lineage)": "T CAR",
     "total body irradiation + transplant": "whole/half-body RT",
+    "allogeneic DLA-identical HCT (graft-versus-lymphoma)": "whole/half-body RT",
+    "cytarabine ocfosfate, oral continuous": "cytarabine CRI",
     "half-body irradiation (low-dose-rate)": "whole/half-body RT",
 }
 
