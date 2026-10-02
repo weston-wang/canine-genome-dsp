@@ -509,3 +509,101 @@ discovered. **The outstanding work is veterinary formulation and access, not che
   the regimen table, and an explicit note that its earlier "obtainable for dogs" was wrong.
 - Does **not** change: the 16 routes, the 25-class universe, the derived 1.17/day kill rate, the 112×
   exposure cushion, or `standard_audit.failing()` (still empty).
+
+---
+
+## The invading edge closes on a licensed drug (2026-10-02)
+
+The rule-13 pass above left **one** site open: invaded parenchyma behind an intact barrier, where
+the obtainable programme was MARGINAL on abemaciclib's own measured rodent range (−0.034 to
++0.017/day). The active goal says keep searching if the decade does not hold, so the search
+continued. It found the answer, and the answer is a measurement rather than a molecule.
+
+### The question had been asked in the wrong units
+
+"Does a drug get into brain" and "does a drug get into tumour that still has an **intact** barrier
+around it" are different questions. The project had been answering the second by inference, three
+different ways: a rodent brain:plasma ratio (abemaciclib), a generic compartment access figure
+(0.021, measured for chlorambucil in normal brain), or a concentration from an **enhancing** lesion,
+where the barrier is already broken.
+
+**Gadolinium-non-enhancing tumour *is* tissue behind an intact barrier** — that is what
+non-enhancement means. So a drug concentration measured there answers the question directly. Two
+human Phase 0 trials did that for ribociclib, by dosing and then assaying resected tumour.
+
+| Source | Dose | Unbound in **non-enhancing** tumour | × 40 nM IC50 | Margin |
+|---|---|---|---|---|
+| PMID 41206763 | 400 mg, lowest patient | 65 nM | 1.6× | **+0.267/day** |
+| PMID 41206763 | 400 mg, median | 170 nM | 4.2× | +0.498/day |
+| PMID 41206763 | 600 mg, median | 634 nM | 15.8× | +0.887/day |
+| PMID 31285369 | 900 mg, mean | 560 nM | 14× | +0.848/day |
+| PMID 31285369 | 900 mg, mean **CSF** | 374 nM | 9.4× | +0.724/day |
+| PMID 31285369 | 900 mg, mean **enhancing** | 2152 nM | 54× | +1.280/day |
+
+Citations: Tien/Li/Sanai, *Clin Cancer Res* 2019;25(19):5777-5786, PMID 31285369,
+doi:10.1158/1078-0432.CCR-19-0133. Johnson/Tien/Sanai, *Neuro Oncol* 2026;28(3):659-671,
+PMID 41206763, doi:10.1093/neuonc/noaf257.
+
+### Why this is the strongest single input in the project
+
+1. **Measured in the compartment at issue**, not transferred across compartments.
+2. **The genotype matches, unusually closely.** The 2026 trial enrolled on *CDKN2A/B deletion or
+   CDK4/6 amplification, PTEN loss or PIK3CA mutation, wild-type Rb* — which is the CFA11q16 lesion
+   in 62.8% of canine HS plus this project's own PTEN tier, and CDK4/6 dependency is already
+   MEASURED in canine histiocytic lines (PMID 35278028).
+3. **Pharmacodynamics confirmed in the same tissue**: RB phosphorylation and Ki-67 both significantly
+   reduced.
+4. **Licensed** (Kisqali), oral, daily — so access and duty come from ONE schedule. This is the
+   schedule-coherence requirement met without a procedure, by a drug a vet can obtain.
+5. **The assay returns negatives.** Everolimus, dosed in the same patients, was undetectable
+   (<0.1 nM) in both enhancing and non-enhancing tumour. The method is not flattering the brain.
+
+Priced on the toxicity ledger as `"ribociclib (CDK4/6)"`: marrow 0.45 primary, and a **new
+`Organ.CARDIAC` axis** at 0.50 for QT prolongation. The axis was added rather than noted, because
+recording a cardiac-toxic agent's burden only in prose would let it read as free. Nothing else in
+the catalogue loads that axis, so the QT burden collides with nothing; the marrow does collide with
+the induction cytotoxic. Whole profile is a human-label TRANSFER; no canine PK exists.
+
+### What it does not close, and this is the part that must not be softened
+
+- **Cells that are not dividing.** CDK4/6 inhibition is division-gated and cytostatic. The
+  drug-tolerant persister at the invading edge is therefore held by SCHEDULE (continuous dosing,
+  C3), not by a second kill mechanism. `persister_cover_at_the_invading_edge()` enumerates the
+  candidates: of the agents that are neither division-gated nor antigen-directed and reach that
+  compartment, the only exists-today one is hydroxychloroquine, worth ~2e-5/day — cover, not kill.
+  The agent measured in canine HS for that job, DMAPT, is research-stage. **This is now the only
+  remaining gap that is science rather than supply.**
+- **The PI3K axis in brain, where the evidence is worse than silence.** Ribociclib monotherapy had
+  limited efficacy in recurrent glioblastoma (median PFS 9.7 weeks) *despite confirmed target
+  engagement*, and the recurrences showed PI3K/mTOR upregulation. The agent paired to block that
+  reroute was undetectable in tumour. `the_parallel_pathway_problem()` records this as a MEASURED
+  NEGATIVE, which is stronger evidence than a missing number: duvelisib is licensed with the
+  canine-HS IC50 and unmeasured brain access, paxalisib has the measured Kp,uu 0.31 and no
+  veterinary access.
+- **The genotype anchor** (C7) — a second primary is met by detect-and-switch, not a standing guard.
+
+### Where the two programmes now stand
+
+| Site | Programme A (licensed only) | Programme B (full) |
+|---|---|---|
+| Extra-axial, meninges-based bulk | **CLOSES +0.94/day** | closes |
+| Leptomeninges / CSF | **CLOSES BY MOUTH +0.72/day** | +0.61/day |
+| Invaded parenchyma, intact barrier | **CLOSES +0.27/day at the worst measured value** | +0.59/day |
+
+Intrathecal bolus is demoted from a required route to a backup. `program_a()["closes_everywhere"]`
+is now `True`, and `program_a()["verdict"]` states the persister caveat in the same breath — a test
+(`test_program_a_does_not_overstate_that_into_full_closure`) fails if it ever stops doing so.
+
+### Consequences recorded
+
+- **C8 narrowed.** It was "the penetrant agents are not obtainable"; it is now "the three MECHANISMS
+  no licensed agent supplies", with access at the invading edge explicitly removed from its scope.
+  Conjunction remains 8 conditions, 5 met, outstanding C5 / C7 / C8, engineering blockers 0.
+- `uncovered_properties()` changed from `{RGN3067: [access, duty], ...}` to
+  `{RGN3067: [position-independent kill], PRMT5: [genotype anchoring], paxalisib: [access]}`.
+  `the_gap()` is now GENERATED from those fields — it had been written as prose and gone stale twice,
+  first calling the gap "one property" and then headlining the access gap ribociclib had closed.
+- `CONSOLIDATED_REPORT.md` §6a rewritten around the measured table; a new row in the §5 evidence
+  grid; the "brain-penetrant is not brain-effective" limit now cites ribociclib itself as the case
+  in point, which is stronger than the sagopilone example it used before.
+- Unchanged: the 16 routes, the 25-class universe, `standard_audit.failing()` still empty.

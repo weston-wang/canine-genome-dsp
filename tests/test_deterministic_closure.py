@@ -55,7 +55,11 @@ def test_c8_records_the_availability_lapse_rather_than_quietly_fixing_the_flag()
     c8 = next(c for c in dc.CONDITIONS if c.tag == "C8")
     assert c8.status is dc.Status.TO_BUILD
     assert at.mislabelled_as_obtainable(), "C8's premise is that the flag is still optimistic"
-    assert "chemistry" in c8.what_would_establish_it.lower()
+    # C8 narrowed once ribociclib closed the access half of it: it is now about MECHANISMS, and the
+    # requirement must say that access at the invading edge is no longer part of it.
+    assert "NO LONGER PART OF THIS CONDITION" in c8.requirement
+    assert "non-division-gated" in c8.what_would_establish_it.lower()
+    assert at.program_a()["closes_everywhere"], "C8's scope rests on Program A closing access"
 
 
 def test_access_is_closed_by_molecules_rather_than_a_procedure():

@@ -13,12 +13,20 @@ route, at every site the disease occupies?
 not.** The result is a checklist, not a probability. Full audit trail, including every withdrawn
 claim, is in `AUDIT_TRAIL.md`.
 
-**What the three outstanding conditions cost, stated up front:** one is a pre-treatment immunostain.
-The other two are *availability*, not science — three of the agents in the closing regimen cannot be
-dispensed to a dog today, and none of them is a molecule that has to be discovered. Searched from
-licensed agents only, the obtainable programme closes two of the three sites outright, including the
-one this tumour is actually based in, and is marginal only at the invading edge. §6a gives both
-programmes side by side.
+**The single most important result, stated up front: the delivery problem is solved with a licensed
+drug.** Getting a drug past an intact blood-brain barrier was the binding constraint at every stage
+of this project. It is now closed by *measurement*, not inference: in human brain-tumour trials,
+ribociclib — a licensed CDK4/6 inhibitor — reaches **170–634 nM unbound in gadolinium-non-enhancing
+tumour**, which is tissue behind an intact barrier by definition, against a 40 nM target
+concentration. Every reported value clears this tumour's growth bar, including the lowest single
+patient. The trial enrolled patients selected for *CDKN2A/B deletion with wild-type Rb* — the same
+lesion 62.8% of these dogs carry — and confirmed the drug was working in that tissue. All three
+sites this tumour occupies now close with drugs obtainable today and no procedure (§6a).
+
+**What is still missing is mechanism, not delivery, and it is three things** — a cytotoxic that kills
+cells that are not dividing, brain penetration on the PI3K axis, and a drug aimed at the inherited
+deletion itself. Two of those three are compounds that exist in human trials. Only one is a genuine
+scientific gap.
 
 ---
 
@@ -128,6 +136,7 @@ with a transfer acceptable when justified in writing*: **17 of 17 live inputs pa
 | Induction kill rate | **1.17/day derived** from measured IC50 (616 nM, worst line) and measured brain Cmax (20 µM) | derived from measured |
 | Growth bar | 0.055/day | derived from canine-HS regrowth; **1.6–5.8× harder than the clinical data requires** |
 | Brain access | paxalisib 0.31; RGN3067 brain ≈ plasma | measured, cross-species transfer |
+| **Access behind an intact barrier** | **ribociclib 65–634 nM unbound in Gd-non-enhancing tumour vs a 40 nM target** | **measured in the compartment at issue, in the matching genotype** |
 | Target identity human→dog | ERK2 100%, PI3Kα 99.81%, PRMT5 99.37%, β-tubulin 98.42% | **computed from real sequences** |
 | Second-primary rate | calibrated to observed canine-HS recurrence | derived from measured |
 | ctDNA monitoring | canine PTPN11 plasma assay, 91% detection, 98.8% specific | **measured, right species and disease** |
@@ -151,10 +160,10 @@ The decade holds if and only if all eight hold. **Five hold today. No engineerin
 | **C5** | **Tumour carries a targetable lesion** | **one immunostain, decidable before treatment** |
 | C6 | Radiation and CNS cytotoxic sequenced, not stacked | **met** |
 | **C7** | Sponsor access to the investigational genotype-anchored agent | **not met; closure under C1–C6 does not require it** |
-| **C8** | **The penetrant agents C1 and C4 need are obtainable for a dog** | **not met; see §6a for what the obtainable programme closes without them** |
+| **C8** | **The three mechanisms no licensed agent supplies are obtained** | **not met; access at the invading edge is no longer part of this condition — it closed (§6a)** |
 
 None of the three outstanding conditions is an engineering problem. C5 is a test. C7 and C8 are
-availability.
+mechanism and supply, and two of the three agents behind C8 already exist in human trials.
 
 ---
 
@@ -166,38 +175,63 @@ Searched from obtainable agents first, the two programmes separate cleanly.
 |---|---|---|
 | Needs a compound released for dogs? | no | yes, three of them |
 | Extra-axial, meninges-based bulk (23/23 dogs) | **closes, +0.94/day** | closes |
-| Leptomeninges / CSF | **closes by mouth, +0.031/day** | closes, +0.61/day |
-| Invaded brain tissue, intact barrier | **marginal: −0.034 to +0.017/day** | closes, +0.59/day |
-| All 16 routes at both sites | no | **yes** |
+| Leptomeninges / CSF | **closes by mouth, +0.72/day** | closes, +0.61/day |
+| Invaded brain tissue, intact barrier | **closes, +0.27/day at the worst measured value** | closes, +0.59/day |
+| Every escape route, both sites | access yes; two mechanisms no | **yes** |
 
 **Programme A** is surgical debulking plus radiation for induction, then continuous genotype-matched
-maintenance: abemaciclib where CDKN2A is deleted and Rb intact, trametinib or cobimetinib on a MAPK
-driver, duvelisib on the responsive expression subgroup, with liposomal clodronate,
-hydroxychloroquine, gilvetmab and ctDNA detect-and-switch. Every one of those is licensed, dog-trialled
-or already given to dogs.
+maintenance: **ribociclib** (or abemaciclib) where CDKN2A is deleted and Rb intact, trametinib or
+cobimetinib on a MAPK driver, duvelisib on the responsive expression subgroup, with liposomal
+clodronate, hydroxychloroquine, gilvetmab and ctDNA detect-and-switch. Every one of those is
+licensed, dog-trialled, or already given to dogs.
 
-The reason Programme A gets as far as it does is **abemaciclib**, and the reason is anatomical. This
-tumour is extra-axial in 23 of 23 dogs — the bulk of it sits on the blood side of an
-already-disrupted barrier. Abemaciclib's concentration in resected human brain lesions is a measured
-19× the CDK6 IC50, which is a decisive margin there. Behind an *intact* barrier its own measured
-rodent unbound ratios give 0.65–2.4 nM against a bar of 1.8 nM: it closes at the rat ratio and fails
-at the mouse ratio. That is the honest span, computed from abemaciclib's own numbers rather than from
-the generic small-molecule figure, which would have flattered it fivefold.
+### Why the invading edge closed, after being the one open site
 
-**What separates the two programmes is two properties on different agents, not a programme:**
+The quantity that was missing was never "does a drug get into brain" — it was "does a drug get into
+tumour that still has an *intact* barrier around it." Those are different questions, and the project
+had been answering the second by inference: a rodent brain:plasma ratio, or a generic penetration
+figure, or a concentration measured in an *enhancing* lesion, where the barrier is already broken.
 
-1. **Access and duty from one schedule** at the invading edge — an oral, non-efflux-substrate agent
-   that carries its own penetration past an intact barrier. Every obtainable alternative buys that
-   access with a procedure, and a monthly catheter cannot also supply a continuous duty cycle.
-2. **Genotype anchoring** — an agent aimed at the germline MTAP deletion itself, the only kind
-   automatically matched to a *second* primary in a breed born predisposed.
+Gadolinium-non-enhancing tumour **is** tissue behind an intact barrier — that is what non-enhancement
+means. So a drug concentration measured there answers the question directly. Two human Phase 0
+trials did exactly that for ribociclib, by giving the drug and then measuring it in the resected
+tumour:
 
-Everything else the decade needs — the stratification, the continuous schedule, the toxicity budget,
-the leptomeningeal route, the surveillance loop, and the kill where this tumour is actually based —
-is satisfiable today. And none of the three missing agents has to be invented: the PRMT5 anchor is in
-human Phase I/II, paxalisib is in human trials with a measured Kp,uu of 0.31, and RGN3067 is a
-published compound with a measured oral brain Cmax of 20 µM. **The outstanding work is veterinary
-formulation and access, not chemistry.**
+| Dose | Unbound ribociclib in **non-enhancing** tumour | × the 40 nM target | Margin vs growth |
+|---|---|---|---|
+| 400 mg, lowest single patient | 65 nM | 1.6× | **+0.27 / day** |
+| 400 mg, median | 170 nM | 4.2× | +0.50 / day |
+| 600 mg, median | 634 nM | 15.8× | +0.89 / day |
+| 900 mg, mean | 560 nM | 14× | +0.85 / day |
+| 900 mg, mean in **CSF** | 374 nM | 9.4× | +0.72 / day |
+
+Four things make this the strongest single input in the project:
+
+- **It is a measurement in the exact compartment at issue**, not a transfer across compartments.
+- **The genotype matches.** The trial enrolled on CDKN2A/B deletion with wild-type Rb. That is the
+  CFA11q16 lesion in 62.8% of these dogs, and CDK4/6 dependency is already measured in canine
+  histiocytic cells.
+- **The drug was shown to be working in that tissue** — Rb phosphorylation and Ki-67 both fell.
+- **It is licensed**, oral, and taken daily, so penetration and continuous presence come from one
+  schedule. No catheter, no implant.
+
+The same trial supplies its own control: everolimus, given alongside, was **undetectable** in the
+same tumours. The method is capable of returning a negative, and did.
+
+### What this does *not* close, said plainly
+
+1. **Cells that are not dividing.** CDK4/6 inhibition only acts on a dividing cell. The
+   drug-tolerant persister at the invading edge is therefore held by *schedule* — the drug is always
+   present, so the cell is hit when it re-enters cycle — rather than by a second killing mechanism.
+   The one drug measured to kill canine HS cells regardless of division (DMAPT) is research-stage.
+   **This is the only remaining gap that is science rather than supply.**
+2. **The PI3K axis in brain, and here the evidence is worse than silence.** Ribociclib alone had
+   limited effect in human glioblastoma *despite* working on its target, and the escape route was
+   PI3K/mTOR. The drug meant to block that route could not be detected in the tumour at all. So
+   this arm has to be chosen on measured penetration: duvelisib is licensed with the canine potency
+   and unmeasured brain access; paxalisib has the measured penetration and no veterinary access.
+3. **The inherited deletion itself** (C7) — so a *second* tumour is met by detect-and-switch rather
+   than by a drug standing guard on the original fault.
 
 ---
 
@@ -205,15 +239,18 @@ formulation and access, not chemistry.**
 
 - **No agent in any regimen here has been given to a dog with this disease.** Every margin is a model
   output from graded inputs.
-- **Three of the agents in the closing regimen cannot be dispensed to a dog today** (§6a). The
-  obtainable programme does not close the invading edge on a coherent schedule.
+- **Three of the agents in the full regimen cannot be dispensed to a dog today** (§6a). The
+  obtainable programme does close every site, but leaves the non-dividing cell held by schedule
+  rather than by a second killing mechanism.
 - **The honest comparator:** 44-day median for intracranial disease under surgery, radiation and
   chemotherapy; 568-day median with a 243-day disease-free interval for *localized* HS after
   debulking plus lomustine. The gap between that and ten years is the claim, and nothing here
   narrows it by measurement.
-- **Brain-penetrant is not brain-effective.** Sagopilone, an access exemplar for this class, failed
-  in human glioblastoma — no objective responses, PFS6 6.7%. RGN3067 is a different chemotype with a
-  better exposure profile, but the warning stands.
+- **Brain-penetrant is not brain-effective, and ribociclib is the case in point.** It reached its
+  target and suppressed it, and human glioblastoma still progressed in about ten weeks — by
+  rerouting through PI3K/mTOR. Reaching the cell is necessary, not sufficient. Sagopilone makes the
+  same point harder: an access exemplar for the microtubule class, it produced no objective
+  responses in glioblastoma at all.
 - **The single cheapest decisive test has never been run:** one MTAP immunostain on archived tissue.
   If the tumour is MTAP-intact, the strongest tier does not apply.
 - **The largest remaining uncertainty is not a drug.** How often a cleared, predisposed dog throws a
@@ -224,9 +261,10 @@ formulation and access, not chemistry.**
 
 ## 8. What to do first, cheapest decisive step first
 
-0. **Before any of it:** Programme A (§6a) is prescribable now. If a dog needs treating rather than
-   studying, that is the plan, with its limit stated — it holds the bulk and the meninges and is
-   marginal at the invading edge.
+0. **Before any of it:** Programme A (§6a) is prescribable now, with licensed drugs. If a dog needs
+   treating rather than studying, that is the plan, with its limit stated — it reaches every site
+   the tumour occupies and holds the non-dividing cell by continuous dosing rather than by a second
+   drug.
 1. **MTAP immunostain** (plus p16 and Rb) on archived tumour tissue. Decides C5 and which tier applies.
 2. **Run the 10 existing canine HS cell lines** against a colchicine-site tubulin binder and against
    a PRMT5 inhibitor. Converts two transfers into measurements, with no new animals.

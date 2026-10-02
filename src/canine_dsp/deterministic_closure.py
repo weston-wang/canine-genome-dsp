@@ -268,9 +268,10 @@ CONDITIONS: tuple[Condition, ...] = (
         "genotype-anchored form of it.",
     ),
     Condition(
-        "C8", "The agents C1 and C4 depend on are OBTAINABLE FOR A DOG -- an oral, "
-              "non-efflux-substrate induction agent that carries its own access past an intact "
-              "barrier, plus the PI3K-axis member that supplies the same property",
+        "C8", "The MECHANISMS no licensed agent supplies are obtained: a position-independent "
+              "(non-division-gated) kill at the invading edge, brain access on the PI3K axis, and "
+              "the genotype anchor. ACCESS AT THE INVADING EDGE IS NO LONGER PART OF THIS "
+              "CONDITION -- it closed on a licensed drug",
         Status.TO_BUILD,
         "THIS CONDITION WAS HIDDEN, AND THAT WAS THE LAPSE CLAUDE.MD RULE 13 NAMES. "
         "`core.microtubule_route.build()` flags every agent `obtainable=True`, so the induction "
@@ -278,17 +279,30 @@ CONDITIONS: tuple[Condition, ...] = (
         "the ledger as though a vet could dispense them -- "
         "`availability_tiers.mislabelled_as_obtainable()` names both. The closure itself is "
         "unaffected: the margins are real and the inputs are measured. What was wrong was the "
-        "implied availability. Searched exists-today-first per rule 13, the obtainable program "
-        "closes 2 of 3 sites outright -- the extra-axial, meninges-based bulk this tumour occupies "
-        "in 23/23 dogs (+0.94/day on abemaciclib's measured human brain-lesion tissue exposure) "
-        "and the leptomeninges by mouth (+0.031/day) -- and is MARGINAL only at the invading edge "
-        "behind an intact barrier, where abemaciclib's own measured rodent range spans "
-        "-0.034 to +0.017/day. So what this condition gates is one compartment, not the plan.",
-        "Veterinary formulation and access, NOT chemistry. None of the three to-build agents has to "
-        "be discovered: the PRMT5 anchor is in human Phase I/II, paxalisib is in human trials with "
-        "a measured Kp,uu of 0.31, and RGN3067 is a published compound with a measured oral brain "
-        "Cmax of 20 uM. The exists-today substitutes and the exact properties they fail to cover "
-        "are enumerated in availability_tiers.uncovered_properties().",
+        "implied availability. "
+        "SEARCHED EXISTS-TODAY-FIRST PER RULE 13, THE CONDITION THEN NARROWED SHARPLY, because the "
+        "access half of it turned out to be closeable with a licensed drug. Ribociclib's MEASURED "
+        "unbound concentrations in gadolinium-NON-ENHANCING tumour -- tissue behind an intact "
+        "barrier, by definition -- are 170 nM at 400 mg and 634 nM at 600 mg against a 40 nM "
+        "CDK4/6 IC50 (PMID 41206763), and 560 nM with 374 nM in CSF at 900 mg (PMID 31285369), "
+        "with RB phosphorylation and Ki-67 both significantly reduced in the same tissue. Every "
+        "reported value clears the growth bar, including the lowest single patient (65 nM, 5.8x the "
+        "bar), and the 2026 trial enrolled on CDKN2A/B deletion with wild-type Rb -- this tumour's "
+        "own lesion. So all three occupied sites now close with licensed agents and no procedure. "
+        "WHAT REMAINS ARE MECHANISM GAPS, NOT DELIVERY GAPS: (a) CDK4/6 inhibition is "
+        "division-gated, so the drug-tolerant persister at the invading edge is held by SCHEDULE "
+        "(C3) rather than by a second kill mechanism -- the agent measured in canine HS for that "
+        "job, DMAPT, is research-stage; (b) brain access on the PI3K axis, where the same trial "
+        "reports a measured NEGATIVE (everolimus undetectable, <0.1 nM, in both enhancing and "
+        "non-enhancing tumour) and PI3K/mTOR upregulation is the named reroute that defeated "
+        "ribociclib monotherapy; (c) the genotype anchor, which is C7.",
+        "Two of the three are veterinary access to compounds that exist (the PRMT5 anchor in human "
+        "Phase I/II; paxalisib in human trials with a measured Kp,uu of 0.31). The third -- a "
+        "non-division-gated kill that reaches the invading edge -- is the only one that is a real "
+        "scientific gap rather than a supply problem, and the nearest candidate (DMAPT) is already "
+        "measured in canine HS. The exists-today substitutes and the exact properties they fail to "
+        "cover are enumerated in availability_tiers.uncovered_properties(); the parallel-pathway "
+        "residual is set out in availability_tiers.the_parallel_pathway_problem().",
     ),
 )
 

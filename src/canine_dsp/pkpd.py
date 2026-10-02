@@ -227,6 +227,55 @@ PARAMS: dict[str, DrugPKPD] = {
              "a colchicine-site, non-efflux-substrate congener, and this entry stands for the "
              "measured class potency, not for the agent of choice in the brain.",
     ),
+    # THE AGENT THAT CLOSES THE INVADING EDGE WITH A LICENSED DRUG. This is the only entry in PARAMS
+    # whose exposure is a MEASURED DRUG CONCENTRATION IN GADOLINIUM-NON-ENHANCING TUMOUR -- i.e. in
+    # tumour sitting behind a barrier that is still intact. Every other brain figure in this project
+    # is either a rodent Kp,uu, a generic compartment access, or a concentration from an ENHANCING
+    # lesion (where the barrier is already broken). Those are the three ways of inferring access.
+    # This one measures it directly, in the exact compartment that was the project's last open site.
+    "ribociclib": DrugPKPD(
+        name="ribociclib (CDK4/6 inhibitor; licensed, and the exists-today answer at the invading edge)",
+        ic50_nM=40.0,             # biochemical IC50 for CDK4/6 inhibition, the reference the trials quote against
+        cmax_nM=170.0,            # MEASURED median unbound conc in Gd-NON-ENHANCING tumour, 400 mg QD
+        ic50_provenance=Provenance.MEASURED,
+        cmax_provenance=Provenance.MEASURED,
+        source="Tien/Li/Sanai, Clin Cancer Res 2019;25(19):5777-5786, PMID 31285369 "
+               "(doi:10.1158/1078-0432.CCR-19-0133): Phase 0, recurrent glioblastoma, 900 mg QD x5d "
+               "pre-resection; MEAN UNBOUND concentrations CSF 374 nM, NON-ENHANCING tumour 560 nM, "
+               "enhancing tumour 2152 nM, all >5x the 40 nM CDK4/6 IC50, with RB phosphorylation and "
+               "proliferation both significantly reduced. Johnson/Tien/Sanai, Neuro Oncol "
+               "2026;28(3):659-671, PMID 41206763 (doi:10.1093/neuonc/noaf257): Phase 0/1 in "
+               "recurrent high-grade glioma SELECTED FOR CDKN2A/B deletion or CDK4/6 amplification, "
+               "PTEN loss or PIK3CA mutation, and WILD-TYPE Rb; median unbound ribociclib in Gd-NON-"
+               "ENHANCING tumour 170 nM (range 65-1770) at 400 mg and 634 nM (range 68-2345) at "
+               "600 mg, significantly above the IC50, with Ki-67-positive cells significantly "
+               "decreased. Everolimus in the same tumours was UNDETECTABLE (<0.1 nM), which is the "
+               "negative control that shows the assay is not flattering the brain.",
+        note="WHY THIS ENTRY MATTERS MORE THAN ITS SIZE. The project's last open site was invaded "
+             "parenchyma behind an INTACT barrier, and every candidate for it was either a to-build "
+             "molecule (rgn3067) or an inference from a rodent ratio (abemaciclib, whose own "
+             "measured mouse-to-rat range spans failure to a thin pass). This is a MEASURED human "
+             "concentration in Gd-non-enhancing tumour, which is that compartment by definition, "
+             "for a drug that is LICENSED (Kisqali) and therefore obtainable off-label today. "
+             "Because the number is already a tumour concentration, access is 1.0 BY CONSTRUCTION "
+             "and must NOT be multiplied by a Kp,uu again -- same convention as rgn3067. "
+             "The conservative 400 mg median is used rather than the 900 mg mean (560 nM) or the "
+             "600 mg median (634 nM); see ribociclib_nonenhancing_range() for the whole measured "
+             "span, whose WORST single value (65 nM) still gives 0.32/day against a 0.055/day bar. "
+             "GENOTYPE MATCH, and it is unusually close: the 2026 trial enrolled on CDKN2A/B "
+             "deletion with wild-type Rb, which is the CFA11q16 lesion carried by 62.8% of canine "
+             "HS, and CDK4/6 dependency is MEASURED in canine histiocytic lines (palbociclib: "
+             "CDKN2A down, Rb preserved, growth inhibited in all lines, PMID 35278028). "
+             "HONEST LIMITS, three of them. (1) Ribociclib MONOTHERAPY had limited efficacy in "
+             "recurrent glioblastoma (median PFS 9.7 weeks) -- but the pharmacodynamics WORKED (RB "
+             "phosphorylation and Ki-67 both down), and the 2026 trial traced the escape to PI3K/"
+             "mTOR upregulation, which is a named route this regimen already covers. So the failure "
+             "is a reroute the ledger answers, not a delivery failure. (2) CDK4/6 inhibition is "
+             "division-gated and cytoSTATIC, so it does NOT reach the drug-tolerant persister and "
+             "cannot carry the position-independent routes; it closes ACCESS at this site, not "
+             "every escape at it. (3) No canine PK exists, so the human-to-dog step is a TRANSFER, "
+             "justified by CDK6 ortholog conservation and the measured canine-HS dependency.",
+    ),
     # THE AGENT THAT RETIRES THE LAST ASSUMED NUMBER. Every margin in the brain-native regimen rested
     # on a REFERENCE POTENCY of 0.15/day (core.microtubule_route.REFERENCE_POTENCY) -- a bare
     # constant, and the closure needed >= ~0.10/day, i.e. only a 1.5x cushion on a guess. This entry
@@ -467,3 +516,84 @@ if __name__ == "__main__":
     c = w["lever_3_synergistic_combination"]
     print(f"  lever 3 -- 90% dose {c['dose_multiple_for_90pct_alone']}x MTD alone -> "
           f"{c['dose_multiple_for_90pct_with_partner']}x with a synergistic partner")
+
+
+# ---- The measured non-enhancing-tumour span, and what it means for the last open site -----------
+#
+# This is kept as a function rather than a constant because the POINT is the range, not a point
+# estimate: the question "does the invading edge close with a licensed drug" is answered by the
+# WORST measured value, not the mean.
+
+#: Measured unbound ribociclib concentrations in Gd-NON-ENHANCING tumour, i.e. behind an intact
+#: barrier. label -> (nM, source). The 65 nM entry is the lowest single patient value reported.
+RIBOCICLIB_NONENHANCING_NM: dict[str, tuple[float, str]] = {
+    "400 mg QD, median": (170.0, "PMID 41206763 (Phase 0/1, CDKN2A/B-deleted, Rb-wildtype)"),
+    "400 mg QD, lowest patient": (65.0, "PMID 41206763, bottom of the 65-1770 nM range"),
+    "600 mg QD, median": (634.0, "PMID 41206763"),
+    "900 mg QD, mean": (560.0, "PMID 31285369 (Phase 0, recurrent glioblastoma)"),
+}
+
+#: Measured unbound ribociclib in CSF, same Phase 0. The leptomeningeal compartment, directly.
+RIBOCICLIB_CSF_NM = 374.0
+#: Measured unbound ribociclib in ENHANCING tumour -- the extra-axial/blood-side analogue.
+RIBOCICLIB_ENHANCING_NM = 2152.0
+
+
+def ribociclib_nonenhancing_range(growth: float = GROWTH_PER_DAY) -> dict:
+    """Derived kill rate across the WHOLE measured non-enhancing-tumour span, worst value included.
+
+    Answers the project's last open question -- does anything LICENSED beat the growth bar behind an
+    INTACT barrier -- without a rodent ratio, a generic compartment access, or an enhancing-lesion
+    concentration standing in for the real one. Access is 1.0 by construction because each value is
+    already a tumour concentration.
+    """
+    d = PARAMS["ribociclib"]
+    rows = {}
+    for label, (conc, src) in RIBOCICLIB_NONENHANCING_NM.items():
+        k = emax_kill_rate(d.ic50_nM, conc)
+        rows[label] = {
+            "unbound_nM": conc,
+            "multiple_of_ic50": round(conc / d.ic50_nM, 1),
+            "kill_per_day": round(k, 4),
+            "margin": round(k - growth, 4),
+            "closes": k > growth,
+            "source": src,
+        }
+    worst = min(rows.values(), key=lambda r: r["margin"])
+    return {
+        "compartment": "invaded parenchyma behind an INTACT barrier (Gd-non-enhancing tumour)",
+        "ic50_nM": d.ic50_nM,
+        "growth_bar": growth,
+        "by_dose": rows,
+        "closes_at_every_measured_value": all(r["closes"] for r in rows.values()),
+        "worst_measured_margin": worst["margin"],
+        "fold_over_bar_at_worst": round(worst["kill_per_day"] / growth, 1),
+        "provenance": Provenance.MEASURED.value,
+        "reading": (
+            "every measured value closes, including the single lowest patient in the reported range, "
+            "so the last open site closes on a LICENSED drug and a measured human concentration "
+            "rather than on a rodent ratio or a to-build molecule"
+            if all(r["closes"] for r in rows.values()) else
+            "at least one measured value fails the bar; the site does not close on this agent"
+        ),
+    }
+
+
+def ribociclib_by_compartment(growth: float = GROWTH_PER_DAY) -> dict:
+    """All three occupied sites, each from a MEASURED unbound concentration in that compartment.
+
+    This is the first time in the project that one agent's access at all three sites comes from
+    direct measurement in the matching compartment rather than from three different inferences.
+    """
+    d = PARAMS["ribociclib"]
+    sites = {
+        "extra-axial / blood-side bulk": RIBOCICLIB_ENHANCING_NM,
+        "leptomeningeal / CSF": RIBOCICLIB_CSF_NM,
+        "invaded parenchyma, intact barrier": RIBOCICLIB_NONENHANCING_NM["400 mg QD, median"][0],
+    }
+    out = {}
+    for site, conc in sites.items():
+        k = emax_kill_rate(d.ic50_nM, conc)
+        out[site] = {"unbound_nM": conc, "kill_per_day": round(k, 4),
+                     "margin": round(k - growth, 4), "closes": k > growth}
+    return out

@@ -64,6 +64,11 @@ class Organ(Enum):
     PROCEDURAL = "vascular access, anaesthesia, catheter and vessel injury"
     SEIZURE = "seizure threshold in an already-irritable brain"
     PERIPHERAL_NERVE = "peripheral neuropathy (microtubule-class)"
+    #: Added for ribociclib, whose QT prolongation is a label-level dose-limiting toxicity with its
+    #: own ECG monitoring requirement. It gets a real axis rather than a footnote: recording it only
+    #: in a note would have let a cardiac-toxic agent read as free, which is the failure this module
+    #: exists to prevent. Nothing else in the catalogue loads this axis, which is itself the result.
+    CARDIAC = "QT prolongation / cardiac conduction"
     NONE = "no dose-limiting toxicity identified"
 
 
@@ -198,6 +203,18 @@ PROFILES = {
     "anti-PD-1 (gilvetmab)": ToxicityProfile(
         Organ.IMMUNE_MEDIATED, 0.30, True, "immune-mediated adverse events",
         source="JVIM 2026 PMID 42247661"),
+    "ribociclib (CDK4/6)": ToxicityProfile(
+        Organ.MARROW, 0.45, False,
+        "neutropenia is the commonest grade 3/4 event; QT prolongation carries an ECG monitoring "
+        "requirement and is the reason this agent gets a CARDIAC axis of its own",
+        source="KISQALI US label (human): grade 3/4 neutropenia the leading dose-limiting event, "
+               "QTcF prolongation dose-dependent with mandated ECG monitoring, and transaminase "
+               "elevation. NOT measured in dogs -- the whole profile is a human-label TRANSFER, and "
+               "a canine dose-finding study would be required before use. THE ONE FAVOURABLE "
+               "ARITHMETIC: the CARDIAC axis is unloaded by every other agent in this project, so "
+               "ribociclib's QT burden collides with nothing; what it does collide with is the "
+               "marrow, against the induction cytotoxic.",
+        secondary_axis=Organ.CARDIAC, secondary_fraction=0.50),
     "liposomal clodronate": ToxicityProfile(
         Organ.HEPATIC, 0.20, False, "reticuloendothelial depletion; liver and spleen take the load",
         source="Mechanism-based. No canine dose-limiting toxicity established."),
