@@ -561,10 +561,11 @@ FAMILY = {
     "CD7-directed CAR-T (canine binder, fratricide-resistant) [buildable]": "T CAR",
     "CD5 + CD7 dual-target CAR-T (canine binder) [buildable]": "T CAR",
     "CD5/CD52-directed cellular effector (T-lineage)": "T CAR",
-    "total body irradiation + transplant": "whole/half-body RT",
-    "allogeneic DLA-identical HCT (graft-versus-lymphoma)": "whole/half-body RT",
+    "total body irradiation + transplant": "transplant/TBI",
+    "allogeneic DLA-identical HCT (graft-versus-lymphoma)": "transplant/TBI",
+    "high-dose thiotepa-based consolidation with autologous stem-cell rescue [human regimen]": "transplant/TBI",
     "cytarabine ocfosfate, oral continuous": "cytarabine CRI",
-    "half-body irradiation (low-dose-rate)": "whole/half-body RT",
+    "half-body irradiation (low-dose-rate)": "transplant/TBI",
 }
 
 
