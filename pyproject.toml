@@ -4,27 +4,26 @@ build-backend = "hatchling.build"
 
 [project]
 name = "canine-genome-dsp"
-version = "0.1.0"
-description = "Reproducible DSP analyses of canine genomes and variant tracks"
+version = "0.3.0"
+description = "Canine histiocytic sarcoma durable-therapy analysis: conversation-sourced reference modules (therapies, disease biology, breed presentation) plus the scientific/DSP models and quantitative therapy engine behind the analysis."
 readme = "README.md"
 requires-python = ">=3.10"
 license = {text = "MIT"}
+# The three top-level reference modules (therapies/disease/presentation) are pure standard library.
+# The scientific models (alphafold, pharmacology, volterra, spectral/wavelets, mutational_supply,
+# structural_invariance, hybrid_rnn, ...) and the core/ therapy engine need the scientific stack.
 dependencies = [
-  "matplotlib>=3.8",
   "numpy>=1.26",
+  "scipy>=1.11",
   "pandas>=2.1",
+  "matplotlib>=3.8",
   "PyWavelets>=1.5",
   "scikit-learn>=1.4",
-  "scipy>=1.11",
-  "xlrd>=2.0",
   "torch>=2.3",
 ]
 
 [project.optional-dependencies]
 dev = ["pytest>=8", "ruff>=0.6"]
-
-[project.scripts]
-canine-dsp = "canine_dsp.cli:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/canine_dsp"]

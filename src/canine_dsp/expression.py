@@ -1,7 +1,6 @@
 """Adapters for public expression matrices and longitudinal module construction."""
 
 import gzip
-import re
 from pathlib import Path
 
 import numpy as np
