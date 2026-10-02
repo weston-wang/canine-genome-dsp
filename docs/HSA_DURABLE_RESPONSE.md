@@ -1991,6 +1991,70 @@ listing absences.*
 
 ---
 
+## 6b. The closure as a conjunction, not as odds — and what that exposed
+
+`CLAUDE.md` rule 12 records the user's instruction: *"I don't want odds of achieving 10 years, the
+whole point about looking at all mechanisms and escapes is to not leave it to odds."* A probability is
+the right output only when the failure modes are unenumerated. Enumerating them is what makes the
+question decidable, so producing a number afterwards throws the work away.
+
+Every durability figure in this document — 0.888, 0.830, 0.966, 0.992 — is therefore a **sensitivity
+statement**, never the verdict. The verdict is the conjunction below.
+
+**And re-stating it as a conjunction immediately exposed something the averages hid.** A single
+durability number averages over anatomical compartments. Split by site:
+
+| route | spleen | peritoneum | liver | lung | heart | **CNS** |
+|---|---|---|---|---|---|---|
+| 1–4, 6, 7, 9, 10, 12a, 13–15 | ✓ | ✓ | ✓ | ✓ | ✓ | **✓** |
+| **5** rupture / haemorrhage | ✓ | n/a | n/a | n/a | n/a | **OPEN** |
+| **8** antigen-null **and** drug-resistant | ✓ | ✓ | ✓ | ✓ | ✓ | **OPEN** |
+| **12b** clone at the intrinsic-growth ceiling | ✓ | ✓ | ✓ | ✓ | ✓ | **OPEN** |
+
+**Three cells are open, and all three are in the central nervous system.** The reason is mechanical:
+route 8's closure is doxorubicin plus eBAT, and route 12b's is the MEK + TORC1/2 combination
+arresting the clone while the vaccine clears it. **None of those three agents crosses the blood–brain
+barrier** — doxorubicin is a P-glycoprotein substrate, eBAT is a ~55 kDa protein toxin, trametinib is
+a P-gp/BCRP substrate, and the combination's measured arrest was in a subcutaneous tumorgraft. In the
+CNS the vaccine would have to hold a ceiling-rate clone alone, which needs 3.0–3.9×.
+
+**This corrects an overclaim in this document.** §4a and §7 said every escape path has a closure.
+That is true systemically and false in the CNS, and the odds-based headline is what concealed it —
+0.830 is an average over sites where doxorubicin and eBAT are present.
+
+### The candidate closure, deliberately not yet credited
+
+A CNS-penetrant agent that is neither antigen- nor kinase-directed would close both cells.
+**Lomustine** is a lipophilic nitrosourea used in canine intracranial disease, and is already the
+backbone agent on this project's histiocytic-sarcoma branch; **brain-directed stereotactic
+radiotherapy** is the non-pharmacological alternative. Neither needs a new molecule.
+
+It is **present in the module's reach table so its coverage can be reasoned about, and deliberately
+absent from every route's `closed_by` list** — crediting an agent the plan has not adopted would be
+forcing a closure, which the standing standards forbid. Graded TRANSFERRED on reach, **unquantified**
+on how many logs it delivers against these compartments.
+
+### The finite condition list
+
+Rule 12 asks for the conditions and each one's status rather than a number. Four fail:
+
+| condition | status |
+|---|---|
+| a CNS-penetrant, antigen- and pathway-independent agent must be added | **OPEN** — the gap the site dimension exposed |
+| immunity half-life must support the booster interval | **FAILS** the stated bar — bare assumption, and the answer swings on it |
+| the post-remission rupture hazard must be bounded | **FAILS** the stated bar — swept with no anchor |
+| intracranial haemorrhage has no treating component | **OPEN** — a competing event, not a cancer-control failure |
+
+The other four pass: the vaccine platform must have a T-cell arm (**selectable now** — ERstrePs
+qualifies, eVim does not); vaccine height must reach ~1.40× (**TRANSFERRED**); the route-8 compartment
+must be anthracycline-sensitive (**unexamined, not contradicted**); and it must exist at all
+(**unverified — nobody has looked**).
+
+*Module: `hsa_deterministic_closure`. Quote `conjunction()`; never quote a durability figure as the
+verdict.*
+
+---
+
 ## 7. The answer
 
 A lasting remission runs through the **vaccine**, not the targeted drug. The drug makes tumours

@@ -158,3 +158,93 @@ def test_the_verdict_distinguishes_failing_inputs_from_open_escape_routes():
     assert "not escape routes" in v["the_answer"]
     assert "case (a)" in v["why_those_two_are_different_from_the_rest"]
     assert "rule 11" in v["why_those_two_are_different_from_the_rest"]
+
+
+# =================================================================================================
+# The deterministic conjunction (rule 12). Kept in this file so the two audits are run together.
+# =================================================================================================
+
+def test_the_conjunction_contains_no_probability():
+    """Rule 12: the headline must be decidable. No float may appear in the verdict."""
+    from canine_dsp import hsa_deterministic_closure as dc
+    c = dc.conjunction()
+    assert not any(isinstance(v, float) for v in c.values())
+    for row in c["matrix"].values():
+        assert set(row.values()) <= {dc.CLOSED, dc.OPEN, dc.NOT_APPLICABLE}
+
+
+def test_the_candidate_cns_agent_is_not_credited_as_a_closure():
+    """Crediting an unadopted agent would force a closure -- the thing the standards forbid."""
+    from canine_dsp import hsa_deterministic_closure as dc
+    assert "lomustine_or_brain_SRT" in dc.REACH          # reasoned about
+    for r in dc.ROUTES:                                   # but never counted
+        assert "lomustine_or_brain_SRT" not in r.closed_by, r.number
+
+
+def test_exactly_three_cells_are_open_and_all_are_in_the_cns():
+    from canine_dsp import hsa_deterministic_closure as dc
+    c = dc.conjunction()
+    assert c["all_closed"] is False
+    assert len(c["open_cells"]) == 3
+    assert {site for _, _, site in c["open_cells"]} == {dc.Site.CNS.value}
+    assert {n for n, _, _ in c["open_cells"]} == {"5", "8", "12b"}
+
+
+def test_routes_8_and_12b_are_open_in_the_cns_because_their_agents_do_not_cross():
+    from canine_dsp import hsa_deterministic_closure as dc
+    for number in ("8", "12b"):
+        route = next(r for r in dc.ROUTES if r.number == number)
+        assert dc.route_status(route, dc.Site.CNS) == dc.OPEN
+        assert not any(dc.reaches(m, dc.Site.CNS) for m in route.closed_by)
+        # and closed everywhere the agents do reach
+        assert dc.route_status(route, dc.Site.LIVER) == dc.CLOSED
+
+
+def test_splenic_rupture_is_not_counted_five_times():
+    """Scoring route 5 OPEN at every distant site would count one hazard once per compartment."""
+    from canine_dsp import hsa_deterministic_closure as dc
+    r5 = next(r for r in dc.ROUTES if r.number == "5")
+    assert dc.route_status(r5, dc.Site.SPLEEN) == dc.CLOSED
+    assert dc.route_status(r5, dc.Site.LUNG) == dc.NOT_APPLICABLE
+    assert dc.route_status(r5, dc.Site.CNS) == dc.OPEN      # intracranial haemorrhage is real
+
+
+def test_the_t_cell_arm_is_what_reaches_the_cns_and_the_antibody_arm_is_not():
+    from canine_dsp import hsa_deterministic_closure as dc
+    assert dc.reaches("vaccine_T_cell_arm", dc.Site.CNS) is True
+    assert dc.reaches("vaccine_antibody_arm", dc.Site.CNS) is False
+    for agent in ("doxorubicin", "eBAT", "losartan", "MEK_plus_TORC1_2"):
+        assert dc.reaches(agent, dc.Site.CNS) is False, agent
+
+
+def test_the_verdict_corrects_the_earlier_overclaim():
+    from canine_dsp import hsa_deterministic_closure as dc
+    assert dc.VERDICT["headline"].startswith("NOT every route is closed at every site")
+    assert "THREE cells are OPEN" in dc.VERDICT["headline"]
+    assert "concealed it" in dc.VERDICT["what_this_corrects"]
+
+
+def test_the_odds_are_explicitly_demoted_to_sensitivity():
+    from canine_dsp import hsa_deterministic_closure as dc
+    o = dc.odds_are_secondary()
+    assert "Never quote a durability figure as the verdict" in o["the_rule"]
+    assert "averages over anatomical compartments" in o["what_the_number_hid_in_this_analysis"]
+    assert "sensitivity" in o["what_the_numbers_are_still_good_for"].lower()
+
+
+def test_the_condition_list_is_finite_and_names_what_fails():
+    from canine_dsp import hsa_deterministic_closure as dc
+    assert 5 <= len(dc.CONDITIONS) <= 20
+    failing = dc.failing_conditions()
+    assert len(failing) == 4
+    joined = " ".join(c.what for c in failing)
+    assert "CNS-penetrant" in joined
+    assert "half-life" in joined and "rupture hazard" in joined
+    for c in dc.CONDITIONS:
+        assert c.how_to_settle, c.what
+
+
+def test_reaches_rejects_an_unknown_mechanism():
+    from canine_dsp import hsa_deterministic_closure as dc
+    with pytest.raises(ValueError):
+        dc.reaches("stem cell transplant", dc.Site.CNS)

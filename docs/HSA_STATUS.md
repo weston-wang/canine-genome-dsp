@@ -193,6 +193,34 @@ demonstration — the bar the user explicitly disclaimed:
 - **the Treg lever's magnitude** — the closure is mechanism-level and no durability figure is
   computed from a Treg effect size. Inert placeholder.
 
+## The conjunction (rule 12) — the headline, and it is not odds
+
+The user: *"I don't want odds of achieving 10 years, the whole point about looking at all mechanisms
+and escapes is to not leave it to odds."* Every durability figure here (0.888 / 0.830 / 0.966 / 0.992)
+is a **sensitivity statement**. The verdict is `hsa_deterministic_closure.conjunction()`.
+
+**Three of 15 routes × 6 sites are OPEN, and all three are in the CNS:**
+
+| route | why it is open in the CNS |
+|---|---|
+| **8** antigen-null **and** drug-resistant | closed by doxorubicin + eBAT; **neither crosses the BBB** |
+| **12b** clone at the intrinsic-growth ceiling | closed by MEK + TORC1/2 arresting it; **the combination does not cross**, and the vaccine alone would need 3.0–3.9× |
+| **5** in its CNS form | intracranial haemorrhage from a vascular brain metastasis — no component treats it |
+
+**This corrects an overclaim made earlier in this session.** "Every escape path has a closure" was
+true systemically and false in the CNS; the odds-based headline concealed it, because 0.830 averages
+over sites where doxorubicin and eBAT are present.
+
+**Candidate closure, deliberately NOT credited:** lomustine (lipophilic nitrosourea, used in canine
+intracranial disease, already the HS branch's backbone) or brain-directed SRT. Present in the module's
+reach table so it can be reasoned about; **absent from every route's `closed_by`**, because crediting
+an unadopted agent would force a closure. TRANSFERRED on reach, unquantified on logs delivered.
+
+**Conditions failing (4 of 8):** the CNS agent; the immunity half-life; the rupture hazard;
+intracranial haemorrhage. **Passing:** T-cell vaccine platform (selectable now — ERstrePs yes, eVim
+no); vaccine height ~1.40× (TRANSFERRED); route-8 anthracycline sensitivity (unexamined); route-8
+existence (unverified).
+
 ## Open gaps, ranked (the honest list)
 
 1. **What any lever adds to vaccine height in this tumour.** Unmeasured for all four. The single
