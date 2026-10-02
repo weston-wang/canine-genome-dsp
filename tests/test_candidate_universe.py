@@ -72,9 +72,15 @@ def test_every_ground_is_actually_used():
 
 
 def test_availability_is_independent_of_status():
-    """The point of the rule-13 split: obtainable classes get excluded, and model classes are to-build."""
+    """The point of the rule-13 split: obtainable classes get excluded, and model classes can be
+    near-future."""
     assert any(m.availability is cu.Availability.EXISTS_TODAY for m in cu.excluded())
-    assert any(m.availability is cu.Availability.TO_BUILD for m in cu.in_model())
+    assert any(m.availability is cu.Availability.NEAR_FUTURE for m in cu.in_model())
+
+
+def test_no_modality_class_in_the_model_is_theoretical():
+    """Rule 13 after the user's clarification: near-future counts, theoretical never does."""
+    assert cu.theoretical_in_model() == []
 
 
 def test_transplant_is_the_exists_today_exclusion_that_proves_the_point():

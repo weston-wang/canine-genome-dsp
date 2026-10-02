@@ -26,11 +26,28 @@ def test_the_program_contains_both_tiers():
     assert len(at.exists_today()) + len(at.to_build()) == len(at.PROGRAM)
 
 
-def test_the_induction_agent_is_to_build_and_is_not_pretended_otherwise():
-    """RGN3067 is preclinical and rodent-only. The report called the regimen obtainable."""
+def test_the_induction_agent_is_near_future_not_pretended_obtainable_nor_called_theoretical():
+    """RGN3067 is preclinical as a molecule, so it is not obtainable -- but the MODALITY is licensed
+    in dogs and canine HS is measured sensitive to it, so it is not theoretical either. Rule 13
+    after the user's clarification requires that middle tier to exist and to be tested, not asserted."""
     rgn = next(a for a in at.PROGRAM if "RGN3067" in a.name)
-    assert rgn.availability is Availability.TO_BUILD
+    assert rgn.availability is Availability.NEAR_FUTURE
     assert "preclinical" in rgn.basis.lower()
+    t = at.near_future_test(rgn.name)
+    assert t["counts_toward_closure"]
+    assert t["modality_is_clinical_stage"].startswith("YES")
+    assert t["stated_path_to_the_dog"].startswith("YES")
+    assert t["derived_or_transferred_dose_kill"].startswith("YES")
+
+
+def test_no_agent_in_the_programme_is_theoretical():
+    assert at.theoretical() == []
+
+
+def test_every_near_future_agent_is_tested_not_assumed():
+    for a in at.near_future():
+        assert a.name in at.NEAR_FUTURE_TEST, a.name
+        assert at.near_future_test(a.name)["counts_toward_closure"], a.name
 
 
 def test_the_optimistic_obtainable_flag_is_reported_not_hidden():

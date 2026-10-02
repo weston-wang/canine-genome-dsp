@@ -121,10 +121,20 @@ class ExclusionGround(Enum):
 
 
 class Availability(Enum):
-    """Rule-13 tier. Orthogonal to Status: a class can be in the model and not yet exist for dogs."""
+    """Rule-13 tier. Orthogonal to Status: a class can be in the model and not yet exist for dogs.
+
+    The user corrected this scale on 2026-10-02: *"I don't mean you can only use therapies that
+    exist today, I meant to include near future ones that are scientifically sound. Just nothing
+    that's pure theoretical."* So TO_BUILD was too coarse -- it lumped a compound in human Phase III
+    together with a mechanism nobody has ever dosed. NEAR_FUTURE splits them, and closure may use it.
+    The three-part test for NEAR_FUTURE is applied explicitly per agent in
+    `availability_tiers.near_future_test()`, not asserted.
+    """
 
     EXISTS_TODAY = "licensed (veterinary or human, off-label), or available through a dog trial"
-    TO_BUILD = "no agent of this class is obtainable for a dog today"
+    NEAR_FUTURE = ("clinical-stage evidence of the modality in humans or dogs, a stated path to the "
+                   "dog, and a derived or transferred dose/kill. Counts toward closure.")
+    THEORETICAL = ("no clinical evidence of the mechanism anywhere. NEVER counts toward closure.")
 
 
 @dataclass(frozen=True)
@@ -152,7 +162,7 @@ UNIVERSE: tuple[Modality, ...] = (
         "the escape audit flags as a single point of failure (escape_audit.A13).",
         "MEASURED: 4 canine HS lines, vincristine IC50 1.77-2.69, vinblastine 1.75-2.78, paclitaxel "
         "23.8-58.4 ng/ml (PMID 25715778). Same paper: ABCB1/ABCG2 elevated.",
-        Availability.TO_BUILD,
+        Availability.NEAR_FUTURE,
         "THE CLASS EXISTS TODAY; THE AGENT THE CLOSURE USES DOES NOT. Vincristine and vinblastine "
         "are licensed for dogs and carry the measured canine-HS potency, but both are canonical "
         "P-gp substrates against the elevated ABCB1/ABCG2 the same paper reports, so they supply "
@@ -231,7 +241,7 @@ UNIVERSE: tuple[Modality, ...] = (
         "NONE IN THIS DISEASE. Zero records for PRMT5 inhibitors in canine cells. The gate is one "
         "MTAP immunostain; the region containing MTAP is deleted in 62.8% of canine HS "
         "(PMID 21341759).",
-        Availability.TO_BUILD,
+        Availability.NEAR_FUTURE,
         "Human Phase I/II only; no veterinary access and no canine PK for either chemotype. This is "
         "condition C7 in deterministic_closure -- a sponsor decision, not a scientific gap. The "
         "exists-today stand-in for the same axis is dietary methionine restriction, which lowers SAM "
@@ -253,7 +263,7 @@ UNIVERSE: tuple[Modality, ...] = (
         "None in canine HS. The ground is the human-histiocytosis resistance observation, which "
         "transfers as a CLASS mechanism (receptor-independence of a myeloid-lineage tumour), not as "
         "a species-specific efficacy claim.",
-        Availability.TO_BUILD,
+        Availability.NEAR_FUTURE,
         "Pexidartinib is human-licensed but carries a hepatotoxicity REMS; BLZ945 is "
         "investigational; neither is dosed in dogs. RECORDED, NOT USED AS THE REASON.",
         ExclusionGround.DEFEATED_BY_ESCAPE,
@@ -304,7 +314,7 @@ UNIVERSE: tuple[Modality, ...] = (
         "0.01 -- still an order of magnitude below the liposome that is already there.",
         "None in canine HS. The exclusion does not rest on that: it rests on the compartment access "
         "figures, which are measured and already in the model.",
-        Availability.TO_BUILD,
+        Availability.NEAR_FUTURE,
         "No canine ADC against a histiocytic antigen exists. RECORDED, NOT USED AS THE REASON -- the "
         "access arithmetic would exclude it even if one were licensed tomorrow.",
         ExclusionGround.KILL_CONTRADICTED,
@@ -323,7 +333,7 @@ UNIVERSE: tuple[Modality, ...] = (
         "parenchymal site compounds all of that.",
         "None. The grounds are the escape ledger's own routes plus the compartment access model, "
         "both already in the project.",
-        Availability.TO_BUILD,
+        Availability.NEAR_FUTURE,
         "No canine bispecific construct exists. RECORDED, NOT USED AS THE REASON.",
         ExclusionGround.DEFEATED_BY_ESCAPE,
     ),
@@ -338,7 +348,7 @@ UNIVERSE: tuple[Modality, ...] = (
         "adoptive T-cell therapy after chemotherapy all exist in dogs.",
         "None in HS specifically. Canine cell-therapy platforms exist in other canine tumours "
         "(PMID 40944715, PMID 38631708, PMID 22355761).",
-        Availability.TO_BUILD,
+        Availability.NEAR_FUTURE,
         "The PLATFORM exists in dogs (canine CAR-CIK, expanded NK, adoptive T cells, all published) "
         "but no CD204- or histiocyte-directed canine construct does, so the specific agent is "
         "to-build. It is kept in the model as a structural benchmark and is not load-bearing for any "
@@ -415,7 +425,7 @@ UNIVERSE: tuple[Modality, ...] = (
         "the maintenance claim that is excluded.",
         "MEASURED in vitro: infects and kills canine HS lines with apoptosis and raised GSDM-D, "
         "sparing fibroblasts (PMID 42517970). The best canine-HS data of any excluded class.",
-        Availability.TO_BUILD,
+        Availability.NEAR_FUTURE,
         "A research construct, not a product. RECORDED, NOT USED AS THE REASON -- the second-primary "
         "route would exclude it from maintenance even if it were licensed.",
         ExclusionGround.DEFEATED_BY_ESCAPE,
@@ -521,7 +531,7 @@ UNIVERSE: tuple[Modality, ...] = (
         "is contested by an 11-line finding that ERK/Akt activation does not predict response.",
         "MEASURED in canine HS: kills cell lines and primary cells dose-dependently; extends "
         "survival in a disseminated canine-HS mouse model.",
-        Availability.TO_BUILD,
+        Availability.NEAR_FUTURE,
         "Research-stage: parthenolide is a natural product with poor bioavailability and DMAPT has "
         "not been carried past early human study, with no canine formulation. Note the asymmetry "
         "with the PRMT5 arm -- this class has GOOD canine-HS data and no product, which is the "
@@ -613,9 +623,24 @@ def exists_today_in_model() -> list[Modality]:
     return [m for m in in_model() if m.availability is Availability.EXISTS_TODAY]
 
 
+def near_future_in_model() -> list[Modality]:
+    """Classes in the model whose agent is clinical-stage but not yet obtainable for a dog.
+
+    Under the user's 2026-10-02 clarification these COUNT toward closure, so they are no longer
+    lumped with the theoretical.
+    """
+    return [m for m in in_model() if m.availability is Availability.NEAR_FUTURE]
+
+
+def theoretical_in_model() -> list[Modality]:
+    """Must be empty: a theoretical agent never counts toward closure (rule 13)."""
+    return [m for m in in_model() if m.availability is Availability.THEORETICAL]
+
+
 def to_build_in_model() -> list[Modality]:
-    """Classes in the model that need an agent that does not exist for dogs yet (rule 13)."""
-    return [m for m in in_model() if m.availability is Availability.TO_BUILD]
+    """Back-compatible name: classes in the model not obtainable for a dog TODAY, at any tier."""
+    return [m for m in in_model()
+            if m.availability in (Availability.NEAR_FUTURE, Availability.THEORETICAL)]
 
 
 def excluded_by_ground() -> dict[str, list[str]]:

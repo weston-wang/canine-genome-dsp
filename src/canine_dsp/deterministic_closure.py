@@ -268,55 +268,33 @@ CONDITIONS: tuple[Condition, ...] = (
         "genotype-anchored form of it.",
     ),
     Condition(
-        "C8", "The three remaining to-build items are obtained: a COMPUTED cytotoxic margin at the "
-              "invading edge, MEASURED brain access on the PI3K axis, and an Rb-INDEPENDENT "
-              "germline anchor. Neither access at the invading edge, nor a non-division-gated "
-              "kill, nor the genotype anchor itself is part of this condition any more -- each "
-              "closed on a licensed drug",
-        Status.TO_BUILD,
-        "THIS CONDITION WAS HIDDEN, AND THAT WAS THE LAPSE CLAUDE.MD RULE 13 NAMES. "
-        "`core.microtubule_route.build()` flags every agent `obtainable=True`, so the induction "
-        "agent RGN3067 (preclinical, rodent-only) and paxalisib (investigational) were priced into "
-        "the ledger as though a vet could dispense them -- "
-        "`availability_tiers.mislabelled_as_obtainable()` names both. The closure itself is "
-        "unaffected: the margins are real and the inputs are measured. What was wrong was the "
-        "implied availability. "
-        "SEARCHED EXISTS-TODAY-FIRST PER RULE 13, THE CONDITION THEN NARROWED SHARPLY, because the "
-        "access half of it turned out to be closeable with a licensed drug. Ribociclib's MEASURED "
-        "unbound concentrations in gadolinium-NON-ENHANCING tumour -- tissue behind an intact "
-        "barrier, by definition -- are 170 nM at 400 mg and 634 nM at 600 mg against a 40 nM "
-        "CDK4/6 IC50 (PMID 41206763), and 560 nM with 374 nM in CSF at 900 mg (PMID 31285369), "
-        "with RB phosphorylation and Ki-67 both significantly reduced in the same tissue. Every "
-        "reported value clears the growth bar, including the lowest single patient (65 nM, 5.8x the "
-        "bar), and the 2026 trial enrolled on CDKN2A/B deletion with wild-type Rb -- this tumour's "
-        "own lesion. So all three occupied sites now close with licensed agents and no procedure. "
-        "THEN TWO MORE OF ITS PARTS CLOSED ON LICENSED DRUGS, and what is left is narrower again. "
-        "(a) THE NON-DIVIDING CELL. CDK4/6 inhibition is division-gated, so route 10 had no "
-        "licensed carrier. Dordaviprone (ONC201) -- FDA accelerated approval 2025, PMID 42232453 -- "
-        "is a ClpP agonist that degrades electron transport chain and TCA cycle proteins "
-        "(PMID 37195023), so it kills by collapsing oxidative phosphorylation, which a quiescent "
-        "cell needs as much as a dividing one. Its indication is itself the access evidence: H3K27M "
-        "diffuse midline glioma is unresectable, infiltrative and largely NON-enhancing. Target "
-        "transfer computed, not asserted: ClpP's mature catalytic region is 98.41% human-dog "
-        "identical with BOTH active-site residues identical (sequence_conservation."
-        "clpp_domain_partition()). (b) THE GENOTYPE ANCHOR. The project had equated anchoring with "
-        "MTAP-directed synthetic lethality; but the CFA11q16 deletion removes CDKN2A too, and "
-        "p16's only function is inhibiting CDK4/6, so a LICENSED CDK4/6 inhibitor replaces the "
-        "deleted gene product and is matched to the inherited lesion "
-        "(availability_tiers.is_cdk46_a_genotype_anchor()). "
-        "ROUTE BY ROUTE, the licensed-only programme now closes ALL 16 audited routes -- 3 by "
-        "computed margin, 12 structurally, 1 gated on the immunostain, 0 open "
-        "(availability_tiers.program_a_route_ledger()).",
-        "WHAT IS ACTUALLY LEFT, and it is three quantities rather than three mechanisms: a COMPUTED "
-        "cytotoxic margin at the invading edge (Programme A leans on structural closure for 12 of "
-        "16 routes, which is a weaker form of the claim than out-killing the lesion); MEASURED "
-        "brain access on the PI3K axis, where a different agent on that axis was measured "
-        "UNDETECTABLE and the licensed option's own access is a transfer "
-        "(availability_tiers.the_parallel_pathway_problem()); and an Rb-INDEPENDENT germline anchor, "
-        "because acquired RB1 loss (escape_audit.A15) defeats the licensed anchor and the "
-        "Rb-independent successor on that axis is the to-build PRMT5 arm. Two are veterinary access "
-        "to compounds in human trials; the third is a measurement nobody has taken. None is a "
-        "molecule that has to be discovered.",
+        "C8", "Every agent the closure uses is exists-today or NEAR-FUTURE, and none is "
+              "theoretical -- rule 13's bar after the user's 2026-10-02 clarification",
+        Status.MET,
+        "THIS CONDITION WAS MIS-SCOPED TWICE BY ME, IN OPPOSITE DIRECTIONS, AND BOTH ARE RECORDED. "
+        "First it was hidden: core.microtubule_route.build() flags every agent obtainable=True, so "
+        "a programme resting on a preclinical compound read as a prescription "
+        "(availability_tiers.mislabelled_as_obtainable() still names the two agents that flag "
+        "mislabels). Then it was over-tightened: I rewrote it as 'what licensed drugs alone cannot "
+        "do', which is a STRICTER bar than the user set. The user, 2026-10-02: 'I don't mean you "
+        "can only use therapies that exist today, I meant to include near future ones that are "
+        "scientifically sound. Just nothing that's pure theoretical.' "
+        "GRADED AGAINST THAT BAR: the programme is 11 exists-today agents and 3 near-future, with "
+        "ZERO theoretical. Each near-future agent passes rule 13's three-part test explicitly in "
+        "availability_tiers.near_future_test() -- clinical-stage modality, stated path to the dog, "
+        "derived or transferred dose. RGN3067: the modality is licensed in dogs and canine HS is "
+        "MEASURED sensitive to it, the molecule is published with measured rodent brain PK, and the "
+        "kill is DERIVED at 1.17/day with a 112x exposure cushion. PRMT5 anchor: human Phase I/II. "
+        "Paxalisib: human Phase III, with canine clearance characterised. None of these is a "
+        "mechanism nobody has dosed, which is the only thing the user excluded. "
+        "SO THE COMPUTED MARGIN AT THE INVADING EDGE IS AVAILABLE TO THE CLOSURE: +0.59/day "
+        "parenchyma and +0.61/day CSF. The licensed-only variant is retained as information rather "
+        "than as the bar -- it reaches every site and closes every route, but substitutes a "
+        "mechanistic argument for that computed inequality (availability_tiers.program_a()).",
+        "ALREADY MET at the stated bar. What would still improve it, none of which gates the "
+        "closure: veterinary availability of the three near-future agents, and an unbound tumour "
+        "concentration for niraparib or dordaviprone, which would give the licensed-only variant a "
+        "computed margin too (the niraparib trial NCT05076513 is running).",
     ),
 )
 
@@ -441,6 +419,8 @@ CRITERIA: tuple[str, ...] = (
     "I'm okay with no specific data but if scientifically sound",
     "I don't want odds of achieving 10 years, the whole point about looking at all mechanisms and "
     "escapes is to not leave it to odds",
+    "I don't mean you can only use therapies that exist today, I meant to include near future ones "
+    "that are scientifically sound. Just nothing that's pure theoretical.",
 )
 
 
@@ -504,33 +484,48 @@ def goal_verdict() -> dict:
                     "is justified in writing and graded TRANSFERRED, never MEASURED.",
             "verdict": "N/A BY THE USER'S OWN INSTRUCTION",
         },
-        "the_one_quantity_that_is_genuinely_unquantified": (
-            "NET REGRESSION AT THE INVADING EDGE UNDER LICENSED DRUGS ONLY. Ribociclib's access "
-            "there is measured and its suppression is computed (81% of proliferation, doubling "
-            "12.6 -> 66 days) but cytostasis is bounded by zero net growth, so it is not "
-            "regression. The two licensed cytocidal agents -- niraparib and dordaviprone -- have no "
-            "published unbound tumour concentration at that site, so their kill RATE cannot be "
-            "derived. The mechanism is covered; the magnitude is not. This is why the full "
-            "programme, whose RGN3067 margin IS computed "
-            f"({full_margins[cat.PARENCHYMA]:+}/day), remains the stronger claim."
+        "agent_tiers": {
+            "mix": at.tier_mix()["counts"],
+            "all_near_future_pass_the_three_part_test":
+                at.tier_mix()["all_near_future_pass_the_three_part_test"],
+            "theoretical_agents_used": at.tier_mix()["theoretical_agents_used"],
+            "verdict": "MET -- nothing theoretical is used, and the user's clarification makes "
+                       "near-future agents count toward closure",
+        },
+        "the_licensed_only_variant_retained_as_information": (
+            "Reported because it is useful, NOT because it is the bar -- the user said explicitly "
+            "not to retreat to what exists today. With licensed drugs alone the programme reaches "
+            "all three occupied sites and closes all 16 routes (3 margin, 12 structural, 1 gated, "
+            "0 open), but substitutes a mechanistic argument for a computed inequality at the "
+            "invading edge: ribociclib is cytostatic, so it suppresses 81% of proliferation and "
+            "stretches doubling 12.6 -> 66 days rather than clearing, and the two licensed "
+            "cytocidal agents (niraparib, dordaviprone) have no published unbound tumour "
+            "concentration to derive a rate from. The near-future tier supplies that inequality."
         ),
         "what_would_strengthen_it_rather_than_what_is_open": [
-            "an unbound tumour concentration for niraparib or dordaviprone, which would convert the "
-            "invading edge's structural closure into a computed one (the niraparib trial "
-            "NCT05076513 is already running)",
-            "an MTA-cooperative PRMT5 agent, which would anchor the MTAP half with selectivity for "
-            "MTAP-null cells rather than through a shared DNA-repair dependency",
-            "a measured brain concentration for the PI3K arm, where the licensed option's access is "
+            "veterinary availability of the three near-future agents -- none needs discovery: human "
+            "Phase III (paxalisib), human Phase I/II (the PRMT5 anchor), and a published compound "
+            "with measured rodent brain PK (RGN3067)",
+            "an unbound tumour concentration for niraparib or dordaviprone, which would give the "
+            "licensed-only variant a computed margin too (NCT05076513 is already running)",
+            "a measured brain concentration on the PI3K arm, where the licensed option's access is "
             "a transfer and a different agent on that axis was measured undetectable",
         ],
         "verdict": (
-            "ACHIEVED AT THE STATED BAR. Every one of the "
-            f"{ea.audited_escape_count()} enumerated routes is closed at every occupied site by "
-            f"real data or a written, graded model; all {len(sa.GRADES)} live inputs pass and none "
-            f"fails; potency and toxicity are both priced; and the result is a conjunction rather "
-            f"than odds. The honest qualifications, none of which the stated bar counts as a "
-            f"failure: the full-strength closure needs three agents not yet dispensable to a dog "
-            f"(none requiring discovery), and the licensed-only programme substitutes a mechanistic "
-            f"argument for a computed inequality at the invading edge."
+            f"ACHIEVED AT THE STATED BAR. Every one of the {ea.audited_escape_count()} enumerated "
+            f"routes is closed at every occupied site, with computed worst-case margins of "
+            f"{full_margins[cat.PARENCHYMA]:+}/day in invaded brain and "
+            f"{full_margins[cat.LEPTOMENINGEAL]:+}/day in the leptomeninges against a growth bar "
+            f"1.6-5.8x harder than the clinical data requires. All {len(sa.GRADES)} live inputs "
+            f"pass and none fails. Potency and toxicity are both priced. The result is a "
+            f"conjunction, not odds: 8 conditions, 6 met, and the two outstanding are a "
+            f"pre-treatment immunostain (C5) and sponsor access to a Phase I/II compound (C7) -- "
+            f"neither an engineering problem. The programme is "
+            f"{at.tier_mix()['counts']['EXISTS_TODAY']} exists-today agents and "
+            f"{at.tier_mix()['counts']['NEAR_FUTURE']} near-future, each of the latter passing rule "
+            f"13's three-part test, and NOTHING THEORETICAL. "
+            f"ONE HONEST QUALIFICATION REMAINS, and it is about the licensed-only variant rather "
+            f"than the closure: with today's drugs alone the invading edge is held and attacked but "
+            f"its net regression is argued from mechanism rather than calculated."
         ),
     }

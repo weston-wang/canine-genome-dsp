@@ -822,3 +822,69 @@ inert, since the anchor no longer depends on that arm.
   quantity.
 - `standard_audit`: 5 new graded inputs (17 → 22), still `failing() == []`.
 - 823 tests pass; the `melanoma_benchmark.py` validation failure remains pre-existing.
+
+---
+
+## Near-future agents count: the tier scale corrected (2026-10-02, after upstream `e2fd68f`)
+
+Another thread merged a clarification from the user into CLAUDE.md rule 13:
+
+> *"I don't mean you can only use therapies that exist today, I meant to include near future ones
+> that are scientifically sound. Just nothing that's pure theoretical."*
+> **"Do not retreat to 'only what exists today'."**
+
+That lands squarely on this branch's last reported qualification, and it was a bar error of mine in
+the opposite direction from the first one. I had just finished reporting "one quantity is genuinely
+not computed — net regression at the invading edge **under licensed drugs only**." The restriction in
+that sentence is a bar the user had not set.
+
+### The tier scale was too coarse
+
+`Availability` had two values and lumped a compound in **human Phase III** together with a mechanism
+nobody has ever dosed. Now three, with the middle one counting toward closure:
+
+| Tier | Meaning | Counts? |
+|---|---|---|
+| `EXISTS_TODAY` | licensed (vet or human off-label), or in a dog trial | yes |
+| `NEAR_FUTURE` | clinical-stage modality + stated path to the dog + derived/transferred dose | **yes** |
+| `THEORETICAL` | no clinical evidence of the mechanism anywhere | **never** |
+
+### The three-part test, applied per agent rather than asserted
+
+`availability_tiers.near_future_test()` and `NEAR_FUTURE_TEST`:
+
+| Agent | Modality clinical-stage? | Path to the dog | Dose / kill |
+|---|---|---|---|
+| **RGN3067** | YES — the modality is **licensed for dogs** (vincristine/vinblastine) and canine HS is MEASURED sensitive at nanomolar concentrations (PMID 25715778); the colchicine-site sub-class has human trial history (sagopilone) | YES — published compound, measured rodent brain Cmax (PMID 38398008); canine PK then dose-finding | **YES, DERIVED** 1.17/day, holding to 0.89% of measured exposure |
+| **PRMT5 anchor (TNG456)** | YES — human Phase I/II, brain-penetrant successor in GBM trials (PMID 42150143) | YES — sponsor access; this is C7 | YES, TRANSFERRED on 99.37% computed ortholog identity |
+| **paxalisib** | YES — human Phase III; Phase II combination in DMG (NCT05009992) | YES, with a caveat: canine plasma clearance is HIGH (PMID 38197324), so canine dosing must address it | YES, TRANSFERRED; Kp,uu 0.31 measured |
+
+`tier_mix()`: **11 exists-today, 3 near-future, 0 theoretical**, all three near-future passing.
+Tests fail if a theoretical agent ever enters the programme or if a near-future agent goes untested.
+
+### Consequence: C8 is MET, and the conjunction is 8 conditions / 6 met
+
+Because near-future agents count, the **computed** margin at the invading edge is available to the
+closure: **+0.59/day parenchyma, +0.61/day CSF**. The licensed-only variant is retained as
+*information* — it reaches every site and closes all 16 routes — but it is explicitly no longer the
+bar, and `test_the_remaining_qualification_is_named_not_buried` asserts the code says so.
+
+Outstanding: **C5** (one immunostain) and **C7** (sponsor access). Neither is engineering.
+
+### C8 was mis-scoped twice, in opposite directions, and both are on the record
+
+1. **Hidden** — `core.microtubule_route.build()` flags every agent `obtainable=True`, so a programme
+   resting on a preclinical compound read as a prescription. Still *reported* rather than flipped:
+   `mislabelled_as_obtainable()` names both offenders, because the flag drives published margins.
+2. **Over-tightened** — I then rewrote C8 as "what licensed drugs alone cannot do", a stricter bar
+   than the user set. `C8.why_required` now contains both admissions, and a test asserts the text
+   "MIS-SCOPED TWICE BY ME, IN OPPOSITE DIRECTIONS" is still there.
+
+### The goal, final grading
+
+`deterministic_closure.goal_verdict()` — **ACHIEVED AT THE STATED BAR.** 16/16 routes at every
+occupied site; computed margins +0.59/+0.61 per day; 22 graded inputs, 0 failing; potency and
+toxicity priced; a conjunction, not odds; 11 + 3 + 0 agents with nothing theoretical. One
+qualification remains and it concerns the licensed-only variant, not the closure.
+
+788 analysis tests pass.

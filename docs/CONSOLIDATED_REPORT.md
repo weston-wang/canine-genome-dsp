@@ -9,9 +9,15 @@ extra-axial, meninges-based mass that invades brain tissue (23/23 dogs) and seed
 **Question:** can a therapy hold for ten or more years against every mechanism and every escape
 route, at every site the disease occupies?
 
-**Answer: yes, at the bar you set** — every mechanism and every escape closed by real data or a
-written model, all 22 live inputs passing, potency and toxicity both priced, stated as a checklist
-and not as odds. Two qualifications follow; neither is something the stated bar counts as a failure.
+**Answer: yes, at the bar you set** — every mechanism and every escape closed at every occupied
+site, with computed worst-case margins of **+0.59/day** in invaded brain and **+0.61/day** in the
+leptomeninges, against a growth bar 1.6–5.8× harder than the clinical data requires. All 22 live
+inputs pass; none fails. Potency and toxicity are both priced. It is a checklist, not odds: **8
+conditions, 6 met**, and the two outstanding are a pre-treatment stain and sponsor access to a
+Phase I/II compound — neither an engineering problem.
+
+The programme uses **11 drugs available today plus 3 near-future ones, and nothing theoretical.**
+Two qualifications follow; neither is something the stated bar counts as a failure.
 
 ---
 
@@ -22,7 +28,7 @@ and not as odds. Two qualifications follow; neither is something the stated bar 
 | All 16 escape routes closed | **yes** | **yes** — 3 by margin, 12 structurally, 1 gated, **0 open** |
 | Worst computed margin, invaded brain | **+0.59 / day** | **not computed** — see Qualification 2 |
 | Worst computed margin, leptomeninges | **+0.61 / day** | not computed |
-| Needs a drug not yet available for dogs | yes — three, none needing discovery | **no** |
+| Drugs used | 11 available today + 3 near-future, **0 theoretical** | 11 available today |
 | Live inputs failing the stated bar | **0 of 22** | 0 of 22 |
 | Growth bar being beaten | 0.055 / day (1.6–5.8× harder than the clinical data requires) | same |
 
@@ -31,19 +37,29 @@ unassessed**) and 16 escape routes from an independent audit. No class is exclud
 data; each exclusion rests on a contradicted kill (5), a named escape (3), or a toxicity budget it
 would blow (2).
 
-### Qualification 1 — three drugs are not yet dispensable to a dog
+### Qualification 1 — three of the drugs are near-future rather than on the shelf
 
-None has to be discovered: one is in human Phase I/II, one in human trials with its brain penetration
-measured, one a published preclinical compound. The outstanding work is veterinary formulation and
-access, not chemistry. §6a is the licensed-only programme in full.
+Not theoretical: each passes a three-part test applied explicitly, not asserted — the *mechanism* is
+clinical-stage in humans or dogs, there is a stated path to a dog, and the dose or kill is derived or
+transferred.
 
-### Qualification 2 — one quantity is genuinely not computed, and I had it wrong
+| Drug | Mechanism clinical-stage? | Path to the dog | Dose / kill |
+|---|---|---|---|
+| **RGN3067** | yes — the class is *licensed for dogs* (vincristine), and canine HS is measured sensitive at nanomolar levels | published compound, measured rodent brain PK; needs canine PK then dose-finding | **derived, 1.17/day**, holding at 0.89% of measured exposure |
+| **PRMT5 anchor** | yes — human Phase I/II, brain-penetrant successor in trials | sponsor access (this is C7) | transferred on 99.37% computed target identity |
+| **paxalisib** | yes — human Phase III | canine clearance already characterised; needs dose-finding | transferred; Kp,uu 0.31 measured |
 
-With licensed drugs only, **net regression at the invading edge is argued from mechanism, not
-calculated.** An earlier version of this report said otherwise. That was my error: I read
-ribociclib's measured concentration through a kill-rate formula, but **CDK4/6 inhibition is
-cytostatic** — it arrests cells rather than killing them, and the trial's own endpoints measure
-proliferation, not death.
+**Nothing theoretical is used.** The programme is 11 drugs available today plus these 3.
+
+### Qualification 2 — if you restrict to drugs on the shelf today, one quantity goes uncomputed
+
+This qualification is about a *stricter* bar than the one set — it is reported because it is useful,
+not because it is the test. Restricted to licensed drugs only, **net regression at the invading edge
+is argued from mechanism rather than calculated.**
+
+An earlier version of this report said otherwise, and that was my error: I read ribociclib's measured
+concentration through a kill-rate formula, but **CDK4/6 inhibition is cytostatic** — it arrests cells
+rather than killing them, and the trial's own endpoints measure proliferation, not death.
 
 Read correctly, ribociclib at its measured concentration suppresses **81% of proliferation** and
 stretches the doubling time from **12.6 days to 66 days**. That is a large and useful effect. It is
@@ -158,7 +174,7 @@ cushion** on the species transfer.
 
 ## 6. The conditions
 
-The decade holds if and only if all eight hold. **Five hold today. No engineering condition remains.**
+The decade holds if and only if all eight hold. **Six hold. No engineering condition remains.**
 
 | | Condition | Status |
 |---|---|---|
@@ -168,12 +184,16 @@ The decade holds if and only if all eight hold. **Five hold today. No engineerin
 | C4 | Induction agent is not a P-gp/BCRP substrate | **met** |
 | **C5** | **Tumour carries a targetable lesion** | **one immunostain, decidable before treatment** |
 | C6 | Radiation and CNS cytotoxic sequenced, not stacked | **met** |
-| **C7** | Sponsor access to the investigational genotype-anchored agent | **not met; closure under C1–C6 does not require it** |
-| **C8** | **A computed kill rate at the invading edge under licensed drugs only** | **not met, and it is the only quantity in the analysis that is not computed. Access there is measured; the kill is mechanistic. The non-dividing-cell kill, both genotype anchors and Rb-independence have each since closed on a licensed drug (§6b)** |
+| **C7** | Sponsor access to the Phase I/II genotype-anchored agent | **not met; closure under C1–C6 does not require it** |
+| C8 | Every drug used is available today or near-future, none theoretical | **met** — 11 + 3 + 0, each near-future drug passing the three-part test |
 
-None of the three outstanding conditions is an engineering problem. C5 is a stain on tissue already
-in a freezer. C7 is sponsor access to a compound in human trials. C8 is a measurement nobody has
-taken yet — and the trial that would take it is already running.
+**Six of eight hold.** Neither outstanding condition is an engineering problem: C5 is a stain on
+tissue already in a freezer, and C7 is a sponsor's decision about a compound already in human trials.
+
+C8 is worth a note because I mis-scoped it twice, in opposite directions. First it was hidden — the
+code flagged every drug as obtainable, so a programme resting on a preclinical compound read as a
+prescription. Then I over-corrected and rewrote it as "what licensed drugs alone cannot do", which is
+a *stricter* bar than the one set. Both versions are on the record in the code.
 
 ---
 

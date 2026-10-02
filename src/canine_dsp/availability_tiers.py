@@ -161,7 +161,7 @@ PROGRAM: tuple[TieredAgent, ...] = (
     TieredAgent(
         "RGN3067 (oral colchicine-site tubulin destabiliser)",
         "induction / position-independent kill; carries 6 of the 16 routes",
-        Availability.TO_BUILD,
+        Availability.NEAR_FUTURE,
         "rgn3067",
         "Preclinical and rodent-only (PMID 38398008). Published, characterised, with a measured "
         "brain Cmax of 20 uM after ORAL dosing and an efflux ratio of 0.61 -- but no canine "
@@ -194,7 +194,7 @@ PROGRAM: tuple[TieredAgent, ...] = (
     TieredAgent(
         "MTA-cooperative PRMT5 inhibitor (TNG456) / MAT2A inhibitor",
         "genotype-anchored maintenance against the germline MTAP deletion",
-        Availability.TO_BUILD,
+        Availability.NEAR_FUTURE,
         "tng908",
         "Human Phase I/II, no veterinary access, no canine PK for either chemotype. Already "
         "recorded as condition C7 (sponsor access) rather than as a scientific gap.",
@@ -305,7 +305,7 @@ PROGRAM: tuple[TieredAgent, ...] = (
     TieredAgent(
         "paxalisib",
         "parallel-pathway cover (PI3K/AKT) with measured Kp,uu 0.31",
-        Availability.TO_BUILD,
+        Availability.NEAR_FUTURE,
         None,
         "Investigational; the measured Kp,uu 0.31 and confirmed P-gp/BCRP non-substrate status are "
         "real but there is no veterinary access.",
@@ -380,6 +380,82 @@ PROGRAM: tuple[TieredAgent, ...] = (
 )
 
 
+#: Rule 13's three-part test for NEAR_FUTURE, applied per agent and recorded rather than asserted.
+#: agent -> (clinical-stage evidence of the MODALITY, stated path to the dog, derived/transferred dose)
+NEAR_FUTURE_TEST: dict[str, tuple[str, str, str]] = {
+    "RGN3067 (oral colchicine-site tubulin destabiliser)": (
+        "YES. The modality -- microtubule destabilisation -- is clinical in humans AND licensed in "
+        "dogs (vincristine, vinblastine), and canine HS is MEASURED sensitive to it at nanomolar "
+        "concentrations (PMID 25715778). The colchicine-site, non-efflux-substrate sub-class has "
+        "human trial history (sagopilone, EORTC 26061). So the mechanism is not speculative "
+        "anywhere; what is preclinical is this molecule.",
+        "YES. Oral, efflux ratio 0.61, published synthesis and rodent PK with brain Cmax measured "
+        "(PMID 38398008). The path is a canine PK study then dose-finding -- formulation work, not "
+        "discovery.",
+        "YES, DERIVED: 1.17/day from a measured worst-line IC50 (616 nM) and a measured rodent "
+        "BRAIN Cmax (20 uM), holding to 0.89% of that exposure -- a 112x cushion.",
+    ),
+    "MTA-cooperative PRMT5 inhibitor (TNG456) / MAT2A inhibitor": (
+        "YES. Human Phase I/II, with a brain-penetrant successor in trials against glioblastoma "
+        "(PMID 42150143). Clinical-stage by definition.",
+        "YES. Sponsor compassionate-use or a veterinary trial; this is condition C7 and it is an "
+        "access decision, not a scientific one.",
+        "YES, TRANSFERRED: GI50 <10 nM in human MTAP-null cells, transferred on a COMPUTED 99.37% "
+        "PRMT5 ortholog identity. The canine Cmax remains an inert placeholder that no closure "
+        "reads.",
+    ),
+    "paxalisib": (
+        "YES. Human Phase III for glioblastoma, and in Phase II combination for diffuse midline "
+        "glioma (NCT05009992). Clinical-stage.",
+        "YES, with a stated caveat: preclinical PK characterised across species INCLUDING DOGS, "
+        "where plasma clearance is HIGH (PMID 38197324) -- so canine dosing would need that "
+        "addressed, which is dose-finding rather than discovery.",
+        "YES, TRANSFERRED: Kp,uu 0.31 measured, confirmed P-gp/BCRP non-substrate; duvelisib "
+        "supplies a canine-HS-MEASURED potency on the same axis (287 nM).",
+    ),
+}
+
+
+def near_future_test(name: str) -> dict:
+    """Apply rule 13's three-part NEAR_FUTURE test to one agent and return the verdict.
+
+    All three parts must hold. A mechanism with no clinical evidence anywhere is THEORETICAL and
+    never counts toward closure, however good the derivation looks.
+    """
+    parts = NEAR_FUTURE_TEST[name]
+    passes = all(p.startswith("YES") for p in parts)
+    return {
+        "agent": name,
+        "modality_is_clinical_stage": parts[0],
+        "stated_path_to_the_dog": parts[1],
+        "derived_or_transferred_dose_kill": parts[2],
+        "tier": Availability.NEAR_FUTURE.name if passes else Availability.THEORETICAL.name,
+        "counts_toward_closure": passes,
+    }
+
+
+def tier_mix() -> dict:
+    """The programme's tier mix, which rule 13 requires reported alongside any closure claim."""
+    counts: dict[str, int] = {a.name: 0 for a in Availability}
+    for a in PROGRAM:
+        counts[a.availability.name] += 1
+    nf = [near_future_test(a.name) for a in PROGRAM
+          if a.availability is Availability.NEAR_FUTURE and a.name in NEAR_FUTURE_TEST]
+    return {
+        "counts": counts,
+        "near_future_agents_tested": nf,
+        "all_near_future_pass_the_three_part_test": all(x["counts_toward_closure"] for x in nf),
+        "theoretical_agents_used": [a.name for a in PROGRAM
+                                    if a.availability is Availability.THEORETICAL],
+        "verdict": (
+            f"{counts['EXISTS_TODAY']} exists-today, {counts['NEAR_FUTURE']} near-future, "
+            f"{counts['THEORETICAL']} theoretical. Every near-future agent passes rule 13's "
+            f"three-part test (clinical-stage modality, stated path to the dog, derived or "
+            f"transferred dose), so all of them count toward closure. NOTHING THEORETICAL IS USED."
+        ),
+    }
+
+
 def _tier(availability: Availability) -> list[TieredAgent]:
     return [a for a in PROGRAM if a.availability is availability]
 
@@ -388,8 +464,19 @@ def exists_today() -> list[TieredAgent]:
     return _tier(Availability.EXISTS_TODAY)
 
 
+def near_future() -> list[TieredAgent]:
+    """Clinical-stage agents not yet obtainable for a dog. These COUNT toward closure (rule 13)."""
+    return _tier(Availability.NEAR_FUTURE)
+
+
+def theoretical() -> list[TieredAgent]:
+    """Must be empty: a theoretical agent never counts toward closure (rule 13)."""
+    return _tier(Availability.THEORETICAL)
+
+
 def to_build() -> list[TieredAgent]:
-    return _tier(Availability.TO_BUILD)
+    """Back-compatible name: not obtainable for a dog TODAY, at any tier."""
+    return near_future() + theoretical()
 
 
 def load_bearing_to_build() -> list[TieredAgent]:

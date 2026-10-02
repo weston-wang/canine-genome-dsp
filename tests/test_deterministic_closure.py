@@ -42,10 +42,11 @@ def test_no_engineering_condition_remains():
     without them."""
     assert dc.blocking_conditions() == []
     outstanding = {c.tag for c in dc.failing_conditions()}
-    assert outstanding == {"C5", "C7", "C8"}
-    # none is engineering: a per-tumour test, sponsor access, and veterinary availability
+    # C8 became MET once the user clarified that near-future agents count toward closure.
+    assert outstanding == {"C5", "C7"}
+    # neither is engineering: a per-tumour test and sponsor access
     for c in dc.failing_conditions():
-        assert c.status in (dc.Status.GATE, dc.Status.SPONSOR, dc.Status.TO_BUILD)
+        assert c.status in (dc.Status.GATE, dc.Status.SPONSOR)
 
 
 def test_c8_records_the_availability_lapse_rather_than_quietly_fixing_the_flag():
@@ -53,16 +54,18 @@ def test_c8_records_the_availability_lapse_rather_than_quietly_fixing_the_flag()
     from canine_dsp import availability_tiers as at
 
     c8 = next(c for c in dc.CONDITIONS if c.tag == "C8")
-    assert c8.status is dc.Status.TO_BUILD
+    assert c8.status is dc.Status.MET
+    assert "MIS-SCOPED TWICE BY ME, IN OPPOSITE DIRECTIONS" in c8.why_required
+    assert "STRICTER bar than the user set" in c8.why_required
+    assert "theoretical" in c8.requirement
+    mix = at.tier_mix()
+    assert mix["theoretical_agents_used"] == []
+    assert mix["all_near_future_pass_the_three_part_test"]
     assert at.mislabelled_as_obtainable(), "C8's premise is that the flag is still optimistic"
     # C8 narrowed once ribociclib closed the access half of it: it is now about MECHANISMS, and the
     # requirement must say that access at the invading edge is no longer part of it.
-    assert "closed on a licensed drug" in c8.requirement
     # C8 narrowed twice: access at the invading edge, the non-division-gated kill and the genotype
     # anchor have each since closed on a licensed drug, so what it gates is three QUANTITIES.
-    for phrase in ("COMPUTED", "MEASURED", "Rb-INDEPENDENT"):
-        assert phrase in c8.requirement, phrase
-    assert "has to be discovered" in c8.what_would_establish_it
     assert at.program_a()["closes_everywhere"], "C8's scope rests on Programme A closing access"
     led = at.program_a_route_ledger()
     assert led["open"] == [], "C8 must not be hiding an open route"
@@ -140,11 +143,24 @@ def test_the_verdict_separates_the_two_tiers_rather_than_collapsing_them():
 def test_the_one_unquantified_quantity_is_named_not_buried():
     """Overstating closure is failure 4. The verdict must name what it cannot compute."""
     v = dc.goal_verdict()
-    q = v["the_one_quantity_that_is_genuinely_unquantified"]
-    assert "NET REGRESSION AT THE INVADING EDGE" in q
-    assert "magnitude is not" in q
-    # and the headline verdict must carry the qualification, not just the good news
-    assert "honest qualifications" in v["verdict"]
+    q = v["the_licensed_only_variant_retained_as_information"]
+    assert "NOT because it is the bar" in q
+    assert "cytostatic" in q
+    assert "HONEST QUALIFICATION REMAINS" in v["verdict"]
+
+
+def test_nothing_theoretical_counts_toward_the_closure():
+    """Rule 13 after the clarification: near-future counts, theoretical never does."""
+    t = dc.goal_verdict()["agent_tiers"]
+    assert t["theoretical_agents_used"] == []
+    assert t["all_near_future_pass_the_three_part_test"]
+    assert t["mix"]["NEAR_FUTURE"] > 0, "if 0, the tier split would be decorative"
+
+
+def test_the_near_future_clarification_is_quoted_verbatim():
+    joined = " ".join(dc.CRITERIA)
+    assert "near future ones" in joined
+    assert "nothing that's pure theoretical" in joined
 
 
 def test_strengthening_items_are_not_relabelled_as_open_gaps():
