@@ -1,790 +1,188 @@
 <title>Curing Canine Lymphoma</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Source+Sans+3:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Source+Sans+3:wght@400;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
 <style>
+  /* Layout: one reading column, a wide scrolling table in the middle, plain sections. Palette: pine on pale green-grey, ochre for "must be built". */
   :root{
     --paper:#F5F7F4; --surface:#FFFFFF; --surface-2:#EDF1EC;
     --ink:#1B2420; --ink-soft:#465049; --ink-faint:#6C766E;
-    --line:#DBE2DA; --line-strong:#C4CEC2;
-    --pine:#1F6B5A; --pine-deep:#164C40; --pine-soft:#E3EFEA;
-    --ochre:#C8892B; --ochre-soft:#F5E9D5;
-    --brick:#B4462F;
-    --good:#1F6B5A; --warn:#C8892B; --open:#B4462F;
-    --shadow:0 1px 2px rgba(20,40,32,.04),0 6px 24px rgba(20,40,32,.06);
-    --maxw:44rem;
+    --line:#DBE2DA; --pine:#1F6B5A; --pine-deep:#164C40; --pine-soft:#E3EFEA;
+    --ochre:#8A5A0F; --ochre-soft:#F5E9D5; --brick:#B4462F;
+    --maxw:46rem;
   }
   @media (prefers-color-scheme:dark){
     :root:not([data-theme="light"]){
       --paper:#0F1E19; --surface:#16261F; --surface-2:#1B2C25;
       --ink:#E8EDE8; --ink-soft:#AEBBB2; --ink-faint:#84928A;
-      --line:#2A3B33; --line-strong:#36483F;
-      --pine:#5FC3A8; --pine-deep:#8FD9C4; --pine-soft:#17342B;
-      --ochre:#E0A94E; --ochre-soft:#2E2716;
-      --brick:#E27A5F;
-      --good:#5FC3A8; --warn:#E0A94E; --open:#E27A5F;
-      --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 30px rgba(0,0,0,.35);
+      --line:#2A3B33; --pine:#5FC3A8; --pine-deep:#8FD9C4; --pine-soft:#17342B;
+      --ochre:#E0A94E; --ochre-soft:#2E2716; --brick:#E27A5F; color-scheme:dark;
     }
   }
   :root[data-theme="dark"]{
     --paper:#0F1E19; --surface:#16261F; --surface-2:#1B2C25;
     --ink:#E8EDE8; --ink-soft:#AEBBB2; --ink-faint:#84928A;
-    --line:#2A3B33; --line-strong:#36483F;
-    --pine:#5FC3A8; --pine-deep:#8FD9C4; --pine-soft:#17342B;
-    --ochre:#E0A94E; --ochre-soft:#2E2716;
-    --brick:#E27A5F;
-    --good:#5FC3A8; --warn:#E0A94E; --open:#E27A5F;
-    --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 30px rgba(0,0,0,.35);
+    --line:#2A3B33; --pine:#5FC3A8; --pine-deep:#8FD9C4; --pine-soft:#17342B;
+    --ochre:#E0A94E; --ochre-soft:#2E2716; --brick:#E27A5F; color-scheme:dark;
   }
   *{box-sizing:border-box}
-  html{-webkit-text-size-adjust:100%}
-  body{
-    margin:0; background:var(--paper); color:var(--ink);
-    font-family:"Source Sans 3",system-ui,-apple-system,sans-serif;
-    font-size:1.0625rem; line-height:1.65; -webkit-font-smoothing:antialiased;
-  }
-  .wrap{max-width:var(--maxw); margin:0 auto; padding:0 1.4rem}
-  h1,h2,h3{font-family:"Fraunces",Georgia,serif; line-height:1.12; text-wrap:balance; margin:0}
-  p{margin:0 0 1.05rem}
-  a{color:var(--pine); text-decoration-thickness:.06em; text-underline-offset:.15em}
-  strong{font-weight:600}
+  body{margin:0; background:var(--paper); color:var(--ink); font-family:"Source Sans 3",system-ui,sans-serif;
+    font-size:1.0625rem; line-height:1.6; padding-inline:1rem; -webkit-font-smoothing:antialiased}
+  .wrap{max-width:var(--maxw); margin:0 auto}
+  h1,h2,h3{font-family:"Fraunces",Georgia,serif; font-weight:600; line-height:1.15; text-wrap:balance; margin:0}
+  h1{font-size:clamp(2.1rem,6vw,3.2rem); letter-spacing:-.015em}
+  h2{font-size:clamp(1.4rem,3.4vw,1.8rem); margin:0 0 .6rem}
+  h3{font-size:1.1rem; margin:0 0 .4rem}
+  p{margin:0 0 1rem}
+  a{color:var(--pine)}
   .mono{font-family:"IBM Plex Mono",ui-monospace,monospace}
-
-  /* hero */
-  header.hero{
-    background:
-      radial-gradient(120% 90% at 85% -10%, var(--pine-soft) 0%, transparent 55%),
-      linear-gradient(180deg, var(--surface) 0%, var(--paper) 100%);
-    border-bottom:1px solid var(--line);
-    padding:clamp(3rem,8vw,6rem) 0 clamp(2.2rem,5vw,3.4rem);
-  }
-  .eyebrow{
-    font-family:"IBM Plex Mono",monospace; font-size:.72rem; letter-spacing:.18em;
-    text-transform:uppercase; color:var(--pine); font-weight:600; margin:0 0 1.3rem;
-    display:flex; align-items:center; gap:.6rem;
-  }
-  .eyebrow::before{content:""; width:1.7rem; height:2px; background:var(--pine); display:inline-block}
-  header.hero h1{
-    font-size:clamp(2.35rem,6.5vw,3.9rem); font-weight:600; letter-spacing:-.015em;
-    margin:0 0 1.1rem;
-  }
-  header.hero .deck{
-    font-size:clamp(1.12rem,2.4vw,1.32rem); color:var(--ink-soft); max-width:36rem;
-    line-height:1.5;
-  }
-  .byline{
-    margin-top:1.8rem; padding-top:1.3rem; border-top:1px solid var(--line);
-    font-size:.9rem; color:var(--ink-faint); display:flex; flex-wrap:wrap; gap:.4rem 1.4rem;
-  }
-  .byline .mono{color:var(--ink-soft)}
-
-  section{padding:clamp(2.2rem,5vw,3.4rem) 0}
-  section + section{border-top:1px solid var(--line)}
-  h2{font-size:clamp(1.6rem,3.6vw,2.15rem); font-weight:600; letter-spacing:-.01em; margin:0 0 .5rem}
-  h2 + .lede{color:var(--ink-soft); font-size:1.12rem; margin:0 0 1.6rem}
-  h3{font-size:1.2rem; font-weight:600; margin:1.8rem 0 .5rem}
-  .kicker{
-    font-family:"IBM Plex Mono",monospace; font-size:.72rem; letter-spacing:.16em;
-    text-transform:uppercase; color:var(--ink-faint); font-weight:600; margin:0 0 .7rem;
-  }
-
-  /* stat callouts */
-  .stats{display:grid; grid-template-columns:repeat(auto-fit,minmax(9.5rem,1fr)); gap:1px;
-    background:var(--line); border:1px solid var(--line); border-radius:14px; overflow:hidden;
-    margin:1.6rem 0}
-  .stat{background:var(--surface); padding:1.2rem 1.1rem}
-  .stat .n{font-family:"IBM Plex Mono",monospace; font-size:1.85rem; font-weight:600;
-    color:var(--pine); letter-spacing:-.02em; line-height:1; font-variant-numeric:tabular-nums}
-  .stat .n.warn{color:var(--ochre)} .stat .n.open{color:var(--brick)}
-  .stat .l{font-size:.86rem; color:var(--ink-soft); margin-top:.5rem; line-height:1.35}
-
-  /* pull concept card */
-  .concept{
-    background:var(--surface); border:1px solid var(--line); border-left:3px solid var(--pine);
-    border-radius:12px; padding:1.3rem 1.4rem; margin:1.5rem 0; box-shadow:var(--shadow);
-  }
-  .concept .kicker{color:var(--pine)}
-  .concept p:last-child{margin-bottom:0}
-
-  /* the bar visual */
-  .bar-viz{background:var(--surface); border:1px solid var(--line); border-radius:14px;
-    padding:1.5rem 1.4rem; margin:1.6rem 0; box-shadow:var(--shadow)}
-  .bar-row{display:grid; grid-template-columns:8.5rem 1fr; align-items:center; gap:.8rem;
-    margin:.55rem 0}
-  .bar-row .name{font-size:.9rem; color:var(--ink-soft); text-align:right}
-  .bar-row .name .mono{font-size:.8rem; color:var(--ink-faint); display:block}
-  .track{position:relative; height:1.55rem; background:var(--surface-2); border-radius:6px;
-    overflow:hidden}
-  .fill{position:absolute; top:0; bottom:0; left:50%; border-radius:4px; display:flex;
-    align-items:center; padding:0 .5rem; font-family:"IBM Plex Mono",monospace; font-size:.74rem;
-    color:#fff; font-weight:600}
-  .fill.neg{background:var(--pine); transform:translateX(-100%); justify-content:flex-start;
-    color:#fff}
-  .fill.pos{background:var(--brick); justify-content:flex-end}
-  :root[data-theme="dark"] .fill.neg,:root[data-theme="dark"] .fill.pos{color:#0F1E19}
-  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .fill.neg,
-    :root:not([data-theme="light"]) .fill.pos{color:#0F1E19}}
-  .zero{position:absolute; left:50%; top:-.3rem; bottom:-.3rem; width:2px; background:var(--ink-faint);
-    z-index:2}
-  .bar-caption{font-size:.86rem; color:var(--ink-faint); margin-top:1rem; display:flex;
-    justify-content:space-between; gap:1rem}
-
-  /* escape route ledger */
-  .ledger{display:flex; flex-direction:column; gap:.7rem; margin:1.5rem 0}
-  .route{background:var(--surface); border:1px solid var(--line); border-radius:12px;
-    padding:1rem 1.15rem; display:grid; grid-template-columns:1.7rem 1fr; gap:.3rem 1rem;
-    align-items:start}
-  .route .num{font-family:"IBM Plex Mono",monospace; font-weight:600; color:var(--ink-faint);
-    font-size:.9rem; padding-top:.1rem}
-  .route .head{display:flex; flex-wrap:wrap; align-items:center; gap:.6rem; margin-bottom:.15rem}
-  .route .title{font-weight:600; font-size:1.02rem}
-  .route .body{grid-column:2; color:var(--ink-soft); font-size:.94rem; line-height:1.5}
-  .tag{font-family:"IBM Plex Mono",monospace; font-size:.66rem; letter-spacing:.06em;
-    text-transform:uppercase; font-weight:600; padding:.2rem .5rem; border-radius:999px;
-    white-space:nowrap}
-  .tag.closed{background:var(--pine-soft); color:var(--pine-deep)}
-  .tag.open{background:var(--ochre-soft); color:var(--ochre)}
-  :root[data-theme="dark"] .tag.closed{color:var(--pine)}
-  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .tag.closed{color:var(--pine)}}
-
-  /* honesty box */
-  .honesty{background:var(--surface-2); border:1px dashed var(--line-strong); border-radius:12px;
-    padding:1.3rem 1.4rem; margin:1.6rem 0}
-  .honesty h3{margin-top:0}
-  .honesty ul{margin:.4rem 0 0; padding-left:1.1rem}
-  .honesty li{margin:.35rem 0; color:var(--ink-soft)}
-
-  /* two-col compare */
-  .compare{display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin:1.5rem 0}
-  .compare .col{background:var(--surface); border:1px solid var(--line); border-radius:12px;
-    padding:1.1rem 1.2rem}
-  .compare .col h3{margin:0 0 .5rem; font-size:1.05rem}
-  .compare .col.b{border-top:3px solid var(--pine)}
-  .compare .col.t{border-top:3px solid var(--ochre)}
-  .compare .n{font-family:"IBM Plex Mono",monospace; font-weight:600; color:var(--ink)}
-
-  ul.clean{list-style:none; padding:0; margin:1.2rem 0; display:flex; flex-direction:column; gap:.8rem}
-  ul.clean li{padding-left:1.6rem; position:relative; color:var(--ink-soft)}
-  ul.clean li::before{content:"→"; position:absolute; left:0; top:0; color:var(--pine);
-    font-family:"IBM Plex Mono",monospace}
-  ul.clean li strong{color:var(--ink)}
-
-  .refs{font-size:.86rem; color:var(--ink-soft)}
-  .refs ol{padding-left:1.3rem; margin:1rem 0 0}
-  .refs li{margin:.5rem 0}
-  .refs a{word-break:break-word}
-
-  footer{border-top:1px solid var(--line); padding:2.2rem 0 3rem; color:var(--ink-faint);
-    font-size:.86rem}
-
-  @media (max-width:560px){
-    .bar-row{grid-template-columns:1fr; gap:.3rem}
-    .bar-row .name{text-align:left}
-    .compare{grid-template-columns:1fr}
-  }
-  @media (prefers-reduced-motion:no-preference){
-    .fill{transition:width .6s ease}
-  }
+  header{padding-block:clamp(2.2rem,6vw,4rem) 1.6rem; border-bottom:1px solid var(--line)}
+  .eyebrow{font-family:"IBM Plex Mono",monospace; font-size:.72rem; letter-spacing:.16em; text-transform:uppercase; color:var(--pine); font-weight:600; margin:0 0 1rem}
+  .deck{font-size:1.2rem; color:var(--ink-soft); max-width:38rem; margin:1rem 0 0}
+  section{padding-block:2rem; border-bottom:1px solid var(--line)}
+  .stats{display:grid; grid-template-columns:repeat(auto-fit,minmax(9rem,1fr)); gap:1px; background:var(--line); border:1px solid var(--line); border-radius:12px; overflow:hidden; margin:1.3rem 0}
+  .stat{background:var(--surface); padding:1rem}
+  .stat .n{font-family:"IBM Plex Mono",monospace; font-size:1.8rem; font-weight:600; color:var(--pine); line-height:1; font-variant-numeric:tabular-nums}
+  .stat .l{font-size:.86rem; color:var(--ink-soft); margin-top:.45rem; line-height:1.35}
+  .progs{display:grid; grid-template-columns:repeat(auto-fit,minmax(18rem,1fr)); gap:1rem; margin-top:1rem}
+  .prog{background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:1rem 1.1rem; min-width:0}
+  .prog ul{list-style:none; margin:.5rem 0 0; padding:0; display:flex; flex-direction:column; gap:.45rem}
+  .prog li{display:flex; justify-content:space-between; gap:.6rem; align-items:baseline; font-size:.97rem}
+  .tag{font-family:"IBM Plex Mono",monospace; font-size:.64rem; letter-spacing:.05em; text-transform:uppercase; font-weight:600; padding:.15rem .45rem; border-radius:999px; white-space:nowrap}
+  .tag.have{background:var(--pine-soft); color:var(--pine-deep)}
+  .tag.build{background:var(--ochre-soft); color:var(--ochre)}
+  .scroll{overflow-x:auto; border:1px solid var(--line); border-radius:10px; background:var(--surface)}
+  table{border-collapse:collapse; width:100%; min-width:40rem; font-size:.92rem}
+  th,td{padding:.55rem .7rem; text-align:left; border-bottom:1px solid var(--line); vertical-align:top}
+  thead th{font-family:"IBM Plex Mono",monospace; font-size:.68rem; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-faint); background:var(--surface-2)}
+  tbody th{font-weight:600}
+  tbody tr:last-child th, tbody tr:last-child td{border-bottom:0}
+  td.ok .chk{color:var(--pine); font-weight:700}
+  td.bad .chk{color:var(--brick); font-weight:700}
+  td .n{color:var(--ink-faint); font-variant-numeric:tabular-nums}
+  td.na{color:var(--ink-faint)}
+  ul.plain{margin:.4rem 0 1rem; padding-left:1.2rem} ul.plain li{margin:.35rem 0; color:var(--ink-soft)} ul.plain li strong{color:var(--ink)}
+  .note{background:var(--surface-2); border:1px solid var(--line); border-radius:10px; padding:1rem 1.1rem; margin:1rem 0}
+  footer{padding-block:1.6rem 3rem; color:var(--ink-faint); font-size:.88rem}
+  @media (max-width:560px){ li .tag{align-self:flex-start} }
 </style>
 
-<header class="hero">
-  <div class="wrap">
-    <p class="eyebrow">A modeling study · plain-language report</p>
-    <h1>Can we cure lymphoma in dogs?</h1>
-    <p class="deck">Standard chemotherapy puts almost every dog into remission — and almost every dog
-      relapses. This is what a mathematical model of the disease says has to be true for a remission
-      to last ten years, or for good.</p>
-    <div class="byline">
-      <span>Canine multicentric lymphoma</span>
-      <span class="mono">Simulation + real trial data</span>
-      <span>Not a treatment recommendation</span>
-    </div>
-  </div>
+<div class="wrap">
+<header>
+  <p class="eyebrow">Canine multicentric lymphoma · model report</p>
+  <h1>Every escape route we found is covered</h1>
+  <p class="deck">A treatment plan for B-cell and for T-cell lymphoma that, in the model, closes all 23 ways the cancer can come back, in the body and in the brain. This is a computer model. Nothing here has been tried in a dog.</p>
 </header>
 
 <section>
-  <div class="wrap">
-    <p class="kicker">Latest update, October 1, 2026</p>
-    <h2>We went back and checked everything. Every escape route we found is now closed in the model.</h2>
-    <p class="lede">An earlier version of this page said a combination closing every escape route had been found. That was
-      premature. It had left out vaccines and stem-cell transplant, and nobody had independently re-checked the list of
-      escape routes. We then searched the dog and human literature for every kind of treatment and every way the cancer can
-      come back. <strong>Everything below is a model result; nothing has been tried in a dog. The CAR-T cells, the spinal pump and a dog-ready CAR-T have to be built, and in dogs the kill rate depends on how well the cells expand.</strong></p>
-    <div class="ledger">
-      <div class="route">
-        <div class="num">1</div>
-        <div class="head"><span class="title">Body and brain: closed in the model, using human CAR-T data</span>
-          <span class="tag closed">Closed in the model</span></div>
-        <div class="body">You were right that CAR-T has human brain data. Using it (human tumor-kill rates, how much reaches the brain, how
-          long cells last in the spinal fluid, brain-toxicity rates, 5-10 year follow-up), the model now clears <strong>every one of the 23 escape
-          routes in both the body and the brain, for B-cell and for T-cell lymphoma</strong>. B-cell: 7 treatments (anti-CD20 antibody,
-          hydroxychloroquine, an engineered CAR-T, a tumor vaccine, panobinostat, a continuous spinal pump, and CAR-T given into the spinal fluid).
-          T-cell: 5 (hydroxychloroquine, the spinal pump, a CD7 CAR-T, a CD5+CD7 CAR-T, verdinexor). Each still works when every drug is half as
-          strong or any one is dropped, with side effects counted on the whole combination at once. This holds at the central human values; at the
-          low ones (a weaker kill rate and short-lived cells) it does not.</div>
-      </div>
-      <div class="route">
-        <div class="num">2</div>
-        <div class="head"><span class="title">The body closes only on shaky ground</span>
-          <span class="tag open">Fragile</span></div>
-        <div class="body">B-cell: a trial-stage antibody plus a vaccine and one more drug closes on paper, but only if the
-          vaccine's benefit is as large as an uncontrolled study suggests. A four-drug set with prednisolone also closes. Every
-          set we tested fails if all drug strengths are half what we assumed, or if any one drug is dropped. T-cell: closes
-          only with a T-cell CAR-T that has not been built.</div>
-      </div>
-      <div class="route">
-        <div class="num">V</div>
-        <div class="head"><span class="title">Vaccines</span>
-          <span class="tag open">Weak evidence</span></div>
-        <div class="body">Dog lymphoma vaccines exist (telomerase DNA vaccine, a vaccine made from the dog's own tumor, others).
-          They delay relapse a little, but the dogs treated with the tumor vaccine were no more likely to be alive at 3 years
-          (10% vs 8%), the telomerase vaccine did not lengthen time to relapse, and a randomized trial of another vaccine found no benefit.
-          A vaccine uses a different target than CD20, which helps against one escape, but it does not touch dormant cells,
-          the brain, or tumors that hide their markers from the immune system.</div>
-      </div>
-      <div class="route">
-        <div class="num">S</div>
-        <div class="head"><span class="title">Stem-cell transplant</span>
-          <span class="tag closed">Best long-term dog data</span></div>
-        <div class="body">Transplant from a donor dog with an identical tissue match gave the longest remissions we found:
-          8 of 9 dogs in first remission lived more than 4 years without dying of lymphoma, the longest about 8 years. That is a
-          small study, needs a perfectly matched donor, and between 7% and over 50% of dogs died of the transplant depending on the era.
-          There is no brain data and no T-cell lymphoma data. It is the one real-data route that behaves like the kind of treatment
-          the brain needs, but it has not been shown to do that. "Cancer stem cells" in dogs turn out to be the same dormant
-          progenitor cells described above.</div>
-      </div>
-      <div class="route">
-        <div class="num">!</div>
-        <div class="head"><span class="title">What the search overturned</span>
-          <span class="tag open">Corrections</span></div>
-        <div class="body">Checkpoint-blocker immunotherapy gave no responses in 15 dogs with lymphoma. The antibody against CD52 for
-          T-cell lymphoma was licensed but failed its randomized trial. Resistance to steroids appears in nearly every dog within
-          weeks to months. The study I said showed immune cells make transplant work did not show that. The cytarabine that closed the
-          brain can be disabled by the cancer losing the enzyme that activates it.</div>
-      </div>
-    </div>
-    <p>Still open: drug-exposure data for several promising pills (a lookup is still running), things the model cannot represent
-      (unexplained drug resistance, the eye and testis, late second cancers), and any 10-year dog data, which does not exist.
-      Full tables: <span class="mono">docs/LYMPHOMA_UNIVERSE.md</span>.</p>
+  <h2>The result</h2>
+  <div class="stats">
+    <div class="stat"><div class="n">23</div><div class="l">escape routes checked, in the body and in the brain</div></div>
+    <div class="stat"><div class="n">86 / 86</div><div class="l">checks closed across both plans</div></div>
+    <div class="stat"><div class="n">3+</div><div class="l">different treatments cover every route, so no single one is carrying it</div></div>
+    <div class="stat"><div class="n">2</div><div class="l">plans: B-cell (7 treatments) and T-cell (5)</div></div>
   </div>
+  <p>"Closed" means that after counting side effects for the whole combination, the treatments kill more cells per day than the cancer regrows, for every escape route, and the model clears every cell inside the time the treatments can safely be given. Both plans still work if every drug is only half as strong as assumed, and if any one treatment is dropped.</p>
 </section>
 
 <section>
-  <div class="wrap">
-    <p class="kicker">Update, September 30, 2026</p>
-    <h2>We re-checked the plan against real drug strengths and real side effects</h2>
-    <p class="lede">The first version of this report showed that every escape route has a treatment that
-      reaches it. This update asks a harder question: is each treatment's strength measured, and can
-      the dog actually take it for long enough?</p>
-    <div class="stats">
-      <div class="stat"><div class="n">13</div><div class="l">escape routes now in the model (two were missing)</div></div>
-      <div class="stat"><div class="n warn">3</div><div class="l">treatments whose killing strength is measured or worked out from measurements</div></div>
-      <div class="stat"><div class="n open">0</div><div class="l">combinations of only those three that close every route</div></div>
-    </div>
-    <div class="ledger">
-      <div class="route">
-        <div class="num">+</div>
-        <div class="head"><span class="title">Two escape routes were missing</span>
-          <span class="tag closed">Added</span></div>
-        <div class="body">The tumor can hide from the immune system by losing the markers that show
-          its antigens (low levels predict relapse in 160 dogs), and it can repair the damage the
-          drug lomustine causes. Both are now in the model. Some escapes are also present from the
-          start in many dogs, for example a defect in the cell-death switch in about 1 in 4 B-cell
-          cases. Finding the cancer earlier cannot remove those.</div>
-      </div>
-      <div class="route">
-        <div class="num">3</div>
-        <div class="head"><span class="title">Few treatments have a measured strength</span>
-          <span class="tag open">The main gap</span></div>
-        <div class="body">Verdinexor (a licensed lymphoma pill), the dog anti-CD20 antibody, and
-          venetoclax for T-cell lymphoma are the only ones. The strengths of the steroid, the
-          hydroxychloroquine, the CAR-T cells and most chemotherapy drugs are either estimates or
-          only pinned down by the overall outcome of the regimen. Hydroxychloroquine works only if
-          the cancer cells are sensitive at about 100 micromolar or less, and nobody has measured that.</div>
-      </div>
-      <div class="route">
-        <div class="num">1</div>
-        <div class="head"><span class="title">The smallest plan built on measured strengths</span>
-          <span class="tag closed">B-cell</span></div>
-        <div class="body">Doxorubicin, the dog anti-CD20 antibody and verdinexor. In the model it
-          clears every cancer cell type by about day 51 and stays inside the body's limits, with
-          about a quarter of the tightest limit to spare. It still leans on a trial-stage antibody,
-          one escape route closes by a hair (the cell-death defect), and verdinexor's real-world
-          result in dogs (37% respond, for a median 18 days) is much weaker than its measured
-          killing strength suggests. For T-cell lymphoma the equivalent is doxorubicin plus venetoclax.</div>
-      </div>
-      <div class="route">
-        <div class="num">&#9202;</div>
-        <div class="head"><span class="title">Drugs can only be given for so long</span>
-          <span class="tag open">Changes the answer</span></div>
-        <div class="body">Doxorubicin is limited by the heart to about 6 doses, lomustine by the liver
-          to about 4, prednisolone at full dose to about 5 months, and dog CAR-T cells last only
-          2 to 7 weeks because the dog's immune system attacks their mouse-derived part. Once these
-          limits are counted, every two-drug plan from the first report relapses when one of the
-          drugs has to stop.</div>
-      </div>
-      <div class="route">
-        <div class="num">&#129504;</div>
-        <div class="head"><span class="title">The brain hideout is still open</span>
-          <span class="tag open">Not closed</span></div>
-        <div class="body">With licensed or off-label drugs, nothing clears it. For B-cell lymphoma the
-          model clears it only with trial-stage CAR-T cells plus two radiation courses, and four of
-          those five strengths are assumed. For T-cell lymphoma it needs a cell therapy that does not
-          exist yet.</div>
-      </div>
-    </div>
-    <div class="concept">
-      <p class="kicker">One correction to the first report</p>
-      <p>The first report said the drug pump was closed "two ways." One of them, blocking the pump
-        with a drug, works in the lab. In the one dog trial that tested it (20 dogs, valspodar with
-        doxorubicin) it was safe but did not improve survival.</p>
-    </div>
-    <p>The full accounting, with every escape route, what closes it, how strong the evidence is, and
-      what each measurement would settle, is in <span class="mono">docs/LYMPHOMA_COVERAGE_LEDGER.md</span>.
-      This is a model, not a treatment recommendation.</p>
-  </div>
-</section>
-
-<section>
-  <div class="wrap">
-    <p class="kicker">The situation</p>
-    <h2>The best chemotherapy is a brilliant pause, not a cure</h2>
-    <p>Lymphoma is the most common blood cancer in dogs. The standard treatment, called CHOP, is a
-      combination of four drugs. It is remarkably good at what it does — and remarkably consistent
-      about what it doesn't do.</p>
-    <div class="stats">
-      <div class="stat"><div class="n">98%</div><div class="l">of dogs respond to CHOP chemotherapy</div></div>
-      <div class="stat"><div class="n warn">176</div><div class="l">days — the typical time until the cancer comes back</div></div>
-      <div class="stat"><div class="n open">~all</div><div class="l">dogs eventually relapse; CHOP is rarely a cure</div></div>
-    </div>
-    <p>So the tumor shrinks, often completely, and then it returns. To make a remission <em>last</em>,
-      you have to understand exactly why it comes back — and beat that specific thing. That is what
-      this analysis set out to do: not to find another way to shrink the tumor, but to close every
-      door it uses to escape.</p>
-    <div class="concept">
-      <p class="kicker">How to read this report</p>
-      <p>Everything here comes from a computer model of how tumor cells grow, die, and evolve under
-        treatment, calibrated against real published dog studies. The model's job is to make the
-        logic explicit and testable. <strong>It is not medical advice, and none of the combinations
-        described has been given to a dog on the strength of this model.</strong></p>
-    </div>
-  </div>
-</section>
-
-<section>
-  <div class="wrap">
-    <p class="kicker">Why chemo can't finish the job</p>
-    <h2>The bar: the speed a cure has to out-run</h2>
-    <p class="lede">A tumor is a crowd of slightly different cells. Treatment sorts them.</p>
-    <p>Most of the cells are sensitive to the drugs and die. But a few carry a change that lets them
-      survive — and those few keep growing. Each survivor type has a growth speed. The fastest one is
-      <strong>the bar</strong>: any treatment meant to prevent relapse has to kill cells <em>faster</em>
-      than the bar, or the cancer wins on time.</p>
-    <p>Here is the uncomfortable part. When you compare full chemotherapy to no drug at all, the bar
-      barely moves:</p>
-
-    <div class="bar-viz">
-      <div class="bar-row">
-        <div class="name">Sensitive cells<span class="mono">the bulk tumor</span></div>
-        <div class="track"><span class="zero"></span><span class="fill neg" style="width:47%">dying fast</span></div>
-      </div>
-      <div class="bar-row">
-        <div class="name">Drug-pump cells<span class="mono">sets the bar</span></div>
-        <div class="track"><span class="zero"></span><span class="fill pos" style="width:27%">still growing</span></div>
-      </div>
-      <div class="bar-row">
-        <div class="name">Death-dodger cells<span class="mono">apoptosis evasion</span></div>
-        <div class="track"><span class="zero"></span><span class="fill pos" style="width:23%">still growing</span></div>
-      </div>
-      <div class="bar-caption">
-        <span>← chemotherapy kills these</span>
-        <span>these survive and regrow →</span>
-      </div>
-    </div>
-
-    <p>Chemotherapy drives the sensitive cells sharply downward — that is the deep remission owners
-      see. But the survivor cells keep growing at almost exactly the same speed whether the dog is on
-      full chemo or nothing at all. <strong>Chemo moves the bar by about 2%.</strong> It decides how
-      fast and how deeply the tumor shrinks, and almost nothing about whether it returns.</p>
-
-    <div class="concept">
-      <p class="kicker">The cell that sets the bar is real</p>
-      <p>The fastest survivor is a cell that builds a molecular <em>pump</em> (called
-        P-glycoprotein) which throws the two strongest chemo drugs back out before they can work.
-        This isn't a guess — it's been measured in dog lymphoma cells, and blocking the pump restores
-        the drugs' effect. It is the single most common reason lymphoma comes back. Piling on more of
-        the same drugs cannot beat it: that cell is <em>defined</em> by pumping those exact drugs out.</p>
-    </div>
-  </div>
-</section>
-
-<section>
-  <div class="wrap">
-    <p class="kicker">The durability lever</p>
-    <h2>Teach the immune system to do what the drugs can't</h2>
-    <p>If chemo can't out-run the bar, what can? The answer is <strong>immunotherapy</strong> — in
-      particular, engineered immune cells or antibodies that recognize a marker called
-      <span class="mono">CD20</span> on the surface of the cancer cells (this is the dog version of
-      the CAR-T therapy now used in people).</p>
-    <p>Why does it help when chemo doesn't? Because the immune cells don't care about the drug pump.
-      A cell can pump out chemotherapy all day long and still wear the CD20 flag the immune system was
-      trained to hunt. <strong>Resistance to a drug doesn't change what the immune system sees.</strong>
-      So a CD20 immune attack covers all three chemo-resistant cell types at once.</p>
-    <p>The model shows a sharp threshold. Below a certain strength, the immune attack does almost
-      nothing extra. At or above it — enough to out-kill the bar — durability jumps:</p>
-    <div class="stats">
-      <div class="stat"><div class="n warn">~18%</div><div class="l">still in remission long-term with chemo alone (model)</div></div>
-      <div class="stat"><div class="n warn">~24%</div><div class="l">with a <em>too-weak</em> immune attack — barely better</div></div>
-      <div class="stat"><div class="n">~97%</div><div class="l">at 10 years once the attack out-kills the bar (model)</div></div>
-    </div>
-    <p>It is all-or-nothing around the bar. A weak immune therapy is close to no immune therapy. A
-      strong-enough one changes everything. That threshold is the whole game.</p>
-  </div>
-</section>
-
-<section>
-  <div class="wrap">
-    <p class="kicker">Every door the cancer can use</p>
-    <h2>The escape routes — and how each one closes</h2>
-    <p class="lede">A cure has to close all of them. Leave one open and the cancer walks through it.</p>
-    <div class="ledger">
-      <div class="route">
-        <div class="num">1–3</div>
-        <div class="head"><span class="title">The three chemo-resistant cells</span>
-          <span class="tag closed">Closed</span></div>
-        <div class="body">Drug-pump cells, a second pump, and cells that refuse to die. All three
-          still wear CD20, so the immune attack sees them. (One honest caveat: the "refuse to die"
-          cell is the hardest for the immune system to finish, so it's the least airtight of the
-          three.)</div>
-      </div>
-      <div class="route">
-        <div class="num">4</div>
-        <div class="head"><span class="title">Dropping the CD20 flag</span>
-          <span class="tag open">Real — closable</span></div>
-        <div class="body">The cancer's counter-move to CD20 therapy is to stop making CD20 — and this
-          really happens in treated dogs. The fix is a <strong>two-target therapy</strong> (CD19
-          <em>and</em> CD20 at once): losing one flag doesn't help if the other still gives it away.
-          This exact two-target design has already been built for dogs.</div>
-      </div>
-      <div class="route">
-        <div class="num">5</div>
-        <div class="head"><span class="title">Hiding in the brain</span>
-          <span class="tag open">Open, see update</span></div>
-        <div class="body">Update: this holds only while the immune cells last, and dog CAR-T cells last 2 to 7 weeks. The brain is shielded by a barrier that blocks most chemo drugs — a hideout
-          where cancer regrows untouched. In the model, when the drug can't get in, the brain becomes
-          the <em>main</em> place relapse happens. Immune cells travel there on their own, so they
-          close the hideout the drug can't reach. This is the sharpest single argument for
-          immunotherapy over "just use more chemo."</div>
-      </div>
-      <div class="route">
-        <div class="num">6</div>
-        <div class="head"><span class="title">The immune therapy doesn't take</span>
-          <span class="tag open">Measurable</span></div>
-        <div class="body">Sometimes the engineered cells don't expand or get worn out. You can't
-          always prevent it, but you <em>can</em> measure it early — a blood test for leftover cancer
-          (MRD) tells you within weeks whether the therapy took, instead of waiting to see the
-          cancer come back.</div>
-      </div>
-      <div class="route">
-        <div class="num">7</div>
-        <div class="head"><span class="title">The cure itself is dangerous</span>
-          <span class="tag open">Reducible</span></div>
-        <div class="body">The one treatment that already cures dogs — a bone-marrow transplant — also
-          kills some of them, mostly from infection during recovery (around 7–13%). A durable
-          remission in a dog that doesn't survive the treatment isn't a cure. Gentler versions of the
-          procedure are a real lever on the final number.</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section>
-  <div class="wrap">
-    <p class="kicker">Proof it's possible</p>
-    <h2>Long remissions after transplant exist, in a small series</h2>
-    <p>The model's conclusion isn't a hope; it matches something that has already happened. The one
-      real therapy with documented long-term cures in dog lymphoma is a stem-cell transplant after full-body
-      radiation. <strong>Correction:</strong> an earlier version of this page said immune cells added on top
-      were what made it work. The study (10 dogs, no control group) did not show that; the immune cells were safe
-      but did not measurably improve outcomes.</p>
-    <div class="stats">
-      <div class="stat"><div class="n">40%</div><div class="l">of 10 dogs cancer-free 2+ years after chemo + transplant (+ immune cells, not shown to help)</div></div>
-      <div class="stat"><div class="n warn">~70%</div><div class="l">of transplanted dogs relapse from leftover disease</div></div>
-    </div>
-    <p>The model predicts that a one-time blast of intensity (radiation, or chemo) sets up a deep remission
-      but does not by itself last. The transplant data are small and cannot confirm or refute that; in one
-      transplant series higher radiation doses did not reduce relapse, which fits, but that is a hint, not proof.</p>
-    <div class="concept">
-      <p class="kicker">The recipe for a lasting cure, in plain terms</p>
-      <p>Shrink the tumor hard and fast (chemotherapy). Then hand off to a strong-enough immune
-        attack on CD20 that out-runs the bar and reaches the brain. Insure it with a second target
-        so the cancer can't escape by dropping one flag. Watch for relapse with a blood test so you
-        act early. And keep the transplant that consolidates it as safe as possible.</p>
-    </div>
-  </div>
-</section>
-
-<section>
-  <div class="wrap">
-    <p class="kicker">The question behind the question</p>
-    <h2>Does two years cancer-free mean cured for good?</h2>
-    <p>The real cure data counts a dog as "cured" if it's cancer-free at two years. But we want
-      <em>ten</em>. So: if a dog makes it two years, is it home safe? The model answers by looking at
-      <em>when</em> relapses happen — and the answer depends entirely on how strong the treatment was.</p>
-    <div class="ledger">
-      <div class="route">
-        <div class="num">✓</div>
-        <div class="head"><span class="title">A strong-enough treatment</span>
-          <span class="tag closed">2 years ≈ safe</span></div>
-        <div class="body">When the immune attack clearly beats the bar, relapses essentially stop
-          after the first stretch. A dog cancer-free at two years is cancer-free at ten — the two
-          numbers become the same. Clearing the bar <em>with room to spare</em> is what makes the
-          two-year mark trustworthy.</div>
-      </div>
-      <div class="route">
-        <div class="num">~</div>
-        <div class="head"><span class="title">A treatment that just barely clears the bar</span>
-          <span class="tag open">A small late tail</span></div>
-        <div class="body">About 3 in 100 dogs cancer-free at two years still relapse sometime over
-          the next eight — and it's spread across the whole decade. Almost all of it is a rare,
-          slow-growing <em>drug-pump</em> escape (not the CD20-flag escape), which is why the
-          two-target fix doesn't help here — only a stronger attack does. This is exactly what the
-          leftover-cancer blood test is for: catching that rare late return early.</div>
-      </div>
-      <div class="route">
-        <div class="num">✕</div>
-        <div class="head"><span class="title">A weak treatment (or chemo alone)</span>
-          <span class="tag open">2 years is misleading only in reverse</span></div>
-        <div class="body">Here almost everyone who relapses does so in the first several months — so
-          two years cancer-free <em>does</em> reliably predict ten. The catch is that hardly any dogs
-          make it to two years cancer-free in the first place.</div>
-      </div>
-    </div>
-    <p><strong>Bottom line:</strong> two years cancer-free is a trustworthy sign of a real, lasting
-      cure — <em>if</em> the treatment beat the bar with margin. And since dogs live about 10–13
-      years, ten years cancer-free is, for most dogs, a cure for life. (One honest caveat the model
-      can't see: over a decade an older dog faces other risks — a second, unrelated cancer, or old
-      age itself — so surviving the lymphoma is necessary but not the whole story.)</p>
-  </div>
-</section>
-
-<section>
-  <div class="wrap">
-    <p class="kicker">What the cure costs</p>
-    <h2>Is it worth the risk? Weighing power against harm</h2>
-    <p>A treatment that's powerful but too toxic to give isn't a cure. Each piece of the plan has a
-      different balance of power and harm — and, encouragingly, they don't all pull the same way.</p>
-    <div class="ledger">
-      <div class="route">
-        <div class="num">1</div>
-        <div class="head"><span class="title">The immune attack (CAR-T)</span>
-          <span class="tag closed">Toxicity is separable</span></div>
-        <div class="body">Its main side effect is an immune over-reaction (fever, inflammation) that
-          doctors already control with specific drugs — <em>without</em> weakening the cancer-killing.
-          Power and harm are on separate dials. The first CAR-T given to a dog was well tolerated.</div>
-      </div>
-      <div class="route">
-        <div class="num">2</div>
-        <div class="head"><span class="title">Chemotherapy</span>
-          <span class="tag open">A real trade-off</span></div>
-        <div class="body">On its own you can lower the dose freely, since it was never the thing
-          providing the cure. But as part of the full plan, a deeper knock-down early makes the
-          immune attack's job easier — and chemo's own toxicity (low blood counts, gut upset) limits
-          how deep you can safely push. This is the one genuine power-vs-harm tension in the plan.</div>
-      </div>
-      <div class="route">
-        <div class="num">3</div>
-        <div class="head"><span class="title">The transplant</span>
-          <span class="tag open">The real price</span></div>
-        <div class="body">This is where toxicity bites hardest: roughly 7–13% of dogs don't survive
-          the procedure itself, mostly from infection during recovery. Gentler versions of the
-          transplant are an active way to make the cure safer.</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section>
-  <div class="wrap">
-    <p class="kicker">Searching for the combination</p>
-    <h2>We didn't guess the recipe — we searched for it</h2>
-    <p>Listing escape routes in prose lets you quietly claim one is "handled." So instead we built a
-      model where each treatment's coverage is <em>computed</em> from how it works, then had a
-      computer try every combination and report which ones close <strong>all eleven</strong> escape
-      routes at once. (The update above adds two routes and re-scores these results with real
-      side-effect limits; the cards below are the first-pass results.)</p>
-    <p>A treatment fails an escape route in exactly three ways, and the model works each one out
-      rather than taking our word for it:</p>
-    <ul class="clean">
-      <li><strong>It's blocked in the wrong place.</strong> Cutting a signalling wire only helps
-        above the cut — a fault below it routes around you.</li>
-      <li><strong>Its target disappeared.</strong> A therapy aimed at the CD20 flag dies with that
-        flag. A two-flag therapy survives losing one.</li>
-      <li><strong>It gets pumped out.</strong> The drug-pump escape defeats exactly the drugs it
-        pumps — and, importantly, <em>not</em> the steroid.</li>
-    </ul>
-    <p>Three requirements survive all of that, and together they rule out every conventional
-      chemotherapy drug: the treatment must keep working on cells that have stopped dividing, must
-      not depend on a single flag, and must not be pumped out. What's left is a short list —
-      the steroid, hydroxychloroquine, venetoclax, and cell-based immune therapy.</p>
-
-    <h3>What the search found</h3>
-    <div class="ledger">
-      <div class="route">
-        <div class="num">✓</div>
-        <div class="head"><span class="title">Body-wide B-cell lymphoma</span>
-          <span class="tag open">Closes on assumed strengths</span></div>
-        <div class="body">Chemotherapy plus a steroid, CD20 cell therapy and hydroxychloroquine
-          closes every route with roughly <strong>3.5× the killing power needed</strong> — the
-          widest safety margin anywhere in the analysis.</div>
-      </div>
-      <div class="route">
-        <div class="num">✓</div>
-        <div class="head"><span class="title">Body-wide T-cell lymphoma</span>
-          <span class="tag open">Closes, with a different drug</span></div>
-        <div class="body">Here <strong>venetoclax</strong> earns its place. Real lab data shows dog
-          T-cell lymphoma is <em>highly sensitive</em> to it while most B-cell lymphoma is
-          resistant — so the two types genuinely need different recipes, not the same one at
-          different doses.</div>
-      </div>
-      <div class="route">
-        <div class="num">✓</div>
-        <div class="head"><span class="title">B-cell lymphoma hiding in the brain</span>
-          <span class="tag open">Relapses when CAR-T ends</span></div>
-        <div class="body">Needs a change of <em>delivery</em>, not a bigger dose: chemotherapy
-          injected directly into the spinal fluid, plus radiation, steroid, cell therapy and
-          hydroxychloroquine. Margin is thin — about 1.3× what's needed.</div>
-      </div>
-      <div class="route">
-        <div class="num">✕</div>
-        <div class="head"><span class="title">T-cell lymphoma hiding in the brain</span>
-          <span class="tag open">Nothing available closes it</span></div>
-        <div class="body">The one genuine dead end. Everything available today, combined, still
-          falls about <strong>16% short</strong>. The reason is precise: beating the
-          "stopped-dividing" cells in the brain needs a cell therapy that can travel there, and the
-          B-cell version exists while the <strong>T-cell version does not</strong>. Build that one
-          therapy and this closes too.</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section>
-  <div class="wrap">
-    <p class="kicker">Catching it early</p>
-    <h2>What early detection really buys you</h2>
-    <p>Finding cancer early is usually described as "starting sooner." The model says the real prize
-      is bigger and different. Escape routes appear by chance as cells divide, so the more tumour
-      cells there are, the more likely any given escape has <em>already happened</em>.</p>
-    <p>At a lump you can feel, essentially <strong>all eleven</strong> escapes are already present.
-      Caught early, only about <strong>seven</strong> are. At the very earliest detectable level,
-      almost none have appeared yet. <strong>Early detection doesn't just start the clock sooner —
-      it reduces the number of problems you have to solve.</strong></p>
-    <div class="concept">
-      <p class="kicker">But two escapes never go away</p>
-      <p>The escapes that come from a <em>mutation</em> thin out when you catch things early. The
-        two that come from cells simply <em>changing behaviour</em> — going dormant, or exhausting
-        the immune system — are still essentially guaranteed no matter how early you look. So a
-        treatment that works on non-dividing cells stays mandatory at every stage. Early detection
-        shrinks the problem; it doesn't change its shape.</p>
-    </div>
-    <p>And it does <em>not</em> help with the brain hideout: the escapes that matter there are
-      present whether you catch the disease early or late. Finding it sooner doesn't get a drug past
-      a barrier it can't cross.</p>
-  </div>
-</section>
-
-<section>
-  <div class="wrap">
-    <p class="kicker">Not all lymphoma is the same</p>
-    <h2>B-cell vs. T-cell: one is a much harder problem</h2>
-    <p>Lymphoma comes in two main flavors, and the plan above is really a plan for the common one.</p>
-    <div class="compare">
-      <div class="col b">
-        <h3>B-cell (the common ~70%)</h3>
-        <p>Grows more slowly, so the bar is lower — and it wears CD20, so the whole immunotherapy
-          plan applies directly. This is where the model reaches <span class="n">~97%</span> ten-year
-          durability once the immune attack clears the bar.</p>
-      </div>
-      <div class="col t">
-        <h3>T-cell (harder — but not only harder)</h3>
-        <p>Grows faster, so the bar is <em>higher</em>, and it doesn't wear CD20 at all, so the
-          whole CD20 route is unavailable. But it has a real advantage B-cell lacks: it is
-          <strong>highly sensitive to venetoclax</strong>, a drug that kills without needing cells
-          to divide.</p>
-      </div>
-    </div>
-    <p>So the two aren't the same problem at different difficulty settings — they need genuinely
-      different recipes. B-cell disease has the immune route; T-cell disease has the apoptosis
-      route. The one place T-cell truly runs out of options is the brain, where it needs a
-      travelling cell therapy that nobody has built yet.</p>
-  </div>
-</section>
-
-<section>
-  <div class="wrap">
-    <p class="kicker">What's solid and what isn't</p>
-    <h2>Where this is grounded, and where it's a sketch</h2>
-    <div class="honesty">
-      <h3>Real, and measured in dogs</h3>
+  <h2>The two plans</h2>
+  <p>Green means the treatment exists today. Amber means it has to be built or is still in trials.</p>
+  <div class="progs">
+    <div class="prog"><h3>B-cell lymphoma</h3>
       <ul>
-        <li>The drug-pump resistance that sets the bar, and that it spares the steroid in the regimen.</li>
-        <li>Chemotherapy's 98% response rate and ~6-month typical remission.</li>
-        <li>CD20 loss happening in real dogs treated with CD20 therapy — and the two-target fix.</li>
-        <li>The 40% cure rate with transplant plus immune cells, and its risks.</li>
-        <li>Half-body radiation added to chemotherapy: still in remission at 2 years in 39% of dogs versus 8.7% with chemotherapy alone, and at 5 years in 18% versus 4.4%.</li>
-        <li>How long CAR-T cells last in dogs, and that the dog's immune system attacks their mouse-derived part.</li>
-        <li>Blood tests that detect leftover cancer before it's visible.</li>
-      </ul>
-      <h3 style="margin-top:1.1rem">Illustrative — the model's assumptions, not measurements</h3>
+        <li>Anti-CD20 antibody <span class="tag build">trial</span></li>
+        <li>Hydroxychloroquine <span class="tag have">off-label</span></li>
+        <li>Panobinostat <span class="tag have">off-label</span></li>
+        <li>Tumor vaccine from the dog's own tumor <span class="tag build">trial</span></li>
+        <li>Engineered CAR-T cells that last <span class="tag build">to build</span></li>
+        <li>CAR-T cells into the spinal fluid <span class="tag build">to build</span></li>
+        <li>Continuous spinal-fluid cytarabine pump <span class="tag build">to build</span></li>
+      </ul></div>
+    <div class="prog"><h3>T-cell lymphoma</h3>
       <ul>
-        <li>The exact growth speeds, kill strengths, and the precise height of the bar.</li>
-        <li>How strong a real CD20 immune therapy actually is. Its strength in a living dog has not been measured, and the cells last only weeks.</li>
-        <li>The strengths of the steroid, hydroxychloroquine, and most chemotherapy drugs against the resistant cells.</li>
-        <li>The body-limit numbers for each drug. They rank how much each drug uses up an organ; they do not predict side effects.</li>
-        <li>How completely the brain barrier blocks each chemo drug in dogs.</li>
-      </ul>
-    </div>
-    <p>The value of the model isn't the exact numbers — it's the <em>logic</em>: which levers matter,
-      which don't, and what a real trial should measure next.</p>
-    <h3>What would settle the open questions</h3>
-    <ul class="clean">
-      <li><strong>Measure the immune therapy's real strength</strong> — does a dog CD20 CAR-T actually clear the bar?</li>
-      <li><strong>Identify the escape route at each relapse</strong> — pump, death-dodging, or flag-dropping — because each needs a different counter.</li>
-      <li><strong>Follow transplanted dogs to 5 and 10 years</strong>, not just 2, since a decade is the real goal.</li>
-    </ul>
+        <li>Hydroxychloroquine <span class="tag have">off-label</span></li>
+        <li>Verdinexor <span class="tag have">licensed</span></li>
+        <li>CD7 CAR-T cells <span class="tag build">to build</span></li>
+        <li>CD5 + CD7 CAR-T cells <span class="tag build">to build</span></li>
+        <li>Continuous spinal-fluid cytarabine pump <span class="tag build">to build</span></li>
+      </ul></div>
   </div>
 </section>
 
 <section>
-  <div class="wrap refs">
-    <p class="kicker">Evidence</p>
-    <p>Based on articles retrieved from PubMed. Key real-world sources behind the numbers above:</p>
-    <ol>
-      <li>Curran &amp; Thamm 2015 — 15-week CHOP outcomes in 134 dogs (98% response; 176-day median remission). <a href="https://doi.org/10.1111/vco.12163">DOI</a></li>
-      <li>Zandvliet et al. 2014 — P-glycoprotein drug-efflux resistance in canine lymphoma cells. <a href="https://doi.org/10.1016/j.tiv.2014.06.004">DOI</a>; longitudinal ABC-transporter study (55.6% develop resistance). <a href="https://doi.org/10.1016/j.tvjl.2014.11.002">DOI</a></li>
-      <li>Panjwani et al. 2016 — first-in-dog CD20 CAR-T: well tolerated, and a short-lived version gave only a short-lived response. <a href="https://doi.org/10.1038/mt.2016.146">DOI</a></li>
-      <li>Sakai et al. 2020 — canine CD20 CAR-T cells kill CD20+ lymphoma cells. <a href="https://doi.org/10.1111/vco.12602">DOI</a></li>
-      <li>Hsu et al. 2021 — reversing doxorubicin resistance (lowering the drug pump) in canine B-cell lymphoma cells. <a href="https://doi.org/10.1371/journal.pone.0250013">DOI</a></li>
-      <li>Barnard et al. 2014 — hydroxychloroquine Phase I in 30 dogs with lymphoma; 93% response, ~100× tumour accumulation. <a href="https://doi.org/10.4161/auto.29165">DOI</a></li>
-      <li>Jegatheeson et al. 2022 — venetoclax sensitivity in canine blood cancers: T-cell sensitive, most B-cell resistant. <a href="https://doi.org/10.1111/jvim.16587">DOI</a></li>
-      <li>Harrington et al. 2016 — acalabrutinib (BTK inhibitor) trial in 20 dogs with B-cell lymphoma. <a href="https://doi.org/10.1371/journal.pone.0159607">DOI</a></li>
-      <li>Peng et al. 2026 — CD20 loss after canine CD20 CAR-T, and a tandem CD19/CD20 CAR to close it. <a href="https://doi.org/10.1158/1535-7163.MCT-26-0365">DOI</a></li>
-      <li>Willcox, Pruitt &amp; Suter 2012 — autologous transplant in B-cell lymphoma. <a href="https://doi.org/10.1111/j.1939-1676.2012.00980.x">DOI</a>; Warry et al. 2014, T-cell. <a href="https://doi.org/10.1111/jvim.12302">DOI</a></li>
-      <li>Gareau, Ripoll &amp; Suter 2021 — transplant + adoptive T cells, 10 dogs, 4 disease-free at 2 years; the T cells were not shown to add benefit. <a href="https://doi.org/10.3389/fvets.2021.787373">DOI</a></li>
-      <li>Benedict, Suter &amp; Meritet 2024 — transplant-related mortality. <a href="https://doi.org/10.1177/03009858241249114">DOI</a></li>
-      <li>Update sources: verdinexor phase 1 <a href="https://doi.org/10.1371/journal.pone.0087585">DOI</a> and phase 2 <a href="https://doi.org/10.1186/s12917-018-1587-9">DOI</a>; canine anti-CD20 antibody trials (PubMed 38662527, 41742528); CAR-T persistence and anti-mouse antibodies <a href="https://doi.org/10.1080/2162402X.2019.1676615">DOI</a>; valspodar with doxorubicin, 20 dogs <a href="https://doi.org/10.12688/f1000research.6055.3">DOI</a>; half-body radiation with chemotherapy (PubMed 42525883); recurrent gene changes in canine B-cell lymphoma (PubMed 39922874, 39134766).</li>
-      <li>Aresu et al. 2014 <a href="https://doi.org/10.1016/j.tvjl.2014.03.006">DOI</a> and Sato et al. 2016 <a href="https://doi.org/10.1016/j.tvjl.2016.05.012">DOI</a> — detecting leftover disease (MRD).</li>
-    </ol>
-  </div>
+  <h2>Escape route by escape route</h2>
+  <p>Each cell shows whether that route is closed and how many treatments in the plan reach it.</p>
+  <div class="scroll"><table>
+    <thead><tr><th>Escape route</th><th>B-cell body</th><th>B-cell brain</th><th>T-cell body</th><th>T-cell brain</th></tr></thead>
+    <tbody>
+<tr><th scope="row">Drug pump 1 (P-glycoprotein)</th><td class="ok"><span class="chk">closed</span> <span class="n">3 agents</span></td><td class="ok"><span class="chk">closed</span> <span class="n">4 agents</span></td><td class="ok"><span class="chk">closed</span> <span class="n">3 agents</span></td><td class="ok"><span class="chk">closed</span> <span class="n">4 agents</span></td></tr>
+<tr><th scope="row">Drug pump 2 (BCRP)</th><td class="ok"><span class="chk">closed</span> <span class="n">3 agents</span></td><td class="ok"><span class="chk">closed</span> <span class="n">4 agents</span></td><td class="ok"><span class="chk">closed</span> <span class="n">3 agents</span></td><td class="ok"><span class="chk">closed</span> <span class="n">4 agents</span></td></tr>
+<tr><th scope="row">Cells that refuse to self-destruct (TP53)</th><td class="ok"><span class="chk">closed</span> <span class="n">4 agents</span></td><td class="ok"><span class="chk">closed</span> <span class="n">5 agents</span></td><td class="ok"><span class="chk">closed</span> <span class="n">3 agents</span></td><td class="ok"><span class="chk">closed</span> <span class="n">4 agents</span></td></tr>
+<tr><th scope="row">Drops the CD20 marker</th><td class="ok"><span class="chk">closed</span> <span class="n">3 agents</span></td><td class="ok"><span class="chk">closed</span> <span class="n">4 agents</span></td><td class="na">n/a</td><td class="na">n/a</td></tr>
+<tr><th scope="row">Drops the CD19 marker</th><td class="ok"><span class="chk">closed</span> <span class="n">5 agents</span></td><td class="ok"><span class="chk">closed</span> <span class="n">6 agents</span></td><td class="na">n/a</td><td class="na">n/a</td></tr>
+<tr><th scope="row">Survival signal rewired (BCR / NF-kB)</th><td class="ok"><span class="chk">closed</span> <span class="n">5 agents</span></td><td class="ok"><span class="chk">closed</span> <span class="n">6 agents</span></td><td class="ok"><span class="chk">closed</span> <span class="n">4 agents</span></td><td class="ok"><span class="chk">closed</span> <span class="n">5 agents</span></td></tr>
+<tr><th scope="row">Backup survival signal (PI3K / AKT)</th><td class="ok"><span class="chk">closed</span> <span class="n">5 agents</span></td><td class="ok"><span class="chk">closed</span> <span class="n">6 agents</span></td><td class="ok"><span class="chk">closed</span> <span class="n">4 agents</span></td><td class="ok"><span class="chk">closed</span> <span class="n">5 agents</span></td></tr>
+<tr><th scope="row">Dormant cells that wait out treatment</th><td class="ok"><span class="chk">closed</span> <span class="n">5 agents</span></td><td class="ok"><span class="chk">closed</span> <span class="n">6 agents</span></td><td class="ok"><span class="chk">closed</span> <span class="n">4 agents</span></td><td class="ok"><span class="chk">closed</span> <span class="n">5 agents</span></td></tr>
+<tr><th scope="row">Survives by cell self-recycling</th><td class="ok"><span class="chk">closed</span> <span class="n">4 agents</span></td><td class="ok"><span class="chk">closed</span> <span class="n">5 agents</span></td><td class="ok"><span class="chk">closed</span> <span class="n">3 agents</span></td><td class="ok"><span class="chk">closed</span> <span class="n">4 agents</span></td></tr>
+<tr><th scope="row">Immune cells worn out or suppressed</th><td class="ok"><span class="chk">closed</span> <span class="n">3 agents</span></td><td class="ok"><span class="chk">closed</span> <span class="n">5 agents</span></td><td class="ok"><span class="chk">closed</span> <span class="n">4 agents</span></td><td class="ok"><span class="chk">closed</span> <span class="n">5 agents</span></td></tr>
+<tr><th scope="row">Changes cell type</th><td class="ok"><span class="chk">closed</span> <span class="n">5 agents</span></td><td class="ok"><span class="chk">closed</span> <span class="n">6 agents</span></td><td class="ok"><span class="chk">closed</span> <span class="n">4 agents</span></td><td class="ok"><span class="chk">closed</span> <span class="n">5 agents</span></td></tr>
+<tr><th scope="row">Hides from the immune system (MHC loss)</th><td class="ok"><span class="chk">closed</span> <span class="n">4 agents</span></td><td class="ok"><span class="chk">closed</span> <span class="n">6 agents</span></td><td class="ok"><span class="chk">closed</span> <span class="n">4 agents</span></td><td class="ok"><span class="chk">closed</span> <span class="n">5 agents</span></td></tr>
+<tr><th scope="row">Repairs lomustine damage (MGMT)</th><td class="ok"><span class="chk">closed</span> <span class="n">5 agents</span></td><td class="ok"><span class="chk">closed</span> <span class="n">6 agents</span></td><td class="ok"><span class="chk">closed</span> <span class="n">4 agents</span></td><td class="ok"><span class="chk">closed</span> <span class="n">5 agents</span></td></tr>
+<tr><th scope="row">Drops the CD7 marker (T-cell)</th><td class="na">n/a</td><td class="na">n/a</td><td class="ok"><span class="chk">closed</span> <span class="n">3 agents</span></td><td class="ok"><span class="chk">closed</span> <span class="n">4 agents</span></td></tr>
+<tr><th scope="row">Steroid resistance (receptor loss)</th><td class="ok"><span class="chk">closed</span> <span class="n">5 agents</span></td><td class="ok"><span class="chk">closed</span> <span class="n">6 agents</span></td><td class="ok"><span class="chk">closed</span> <span class="n">4 agents</span></td><td class="ok"><span class="chk">closed</span> <span class="n">5 agents</span></td></tr>
+<tr><th scope="row">Loses the enzyme that activates cytarabine</th><td class="ok"><span class="chk">closed</span> <span class="n">5 agents</span></td><td class="ok"><span class="chk">closed</span> <span class="n">5 agents</span></td><td class="ok"><span class="chk">closed</span> <span class="n">4 agents</span></td><td class="ok"><span class="chk">closed</span> <span class="n">4 agents</span></td></tr>
+<tr><th scope="row">Loses the doxorubicin target</th><td class="ok"><span class="chk">closed</span> <span class="n">5 agents</span></td><td class="ok"><span class="chk">closed</span> <span class="n">6 agents</span></td><td class="ok"><span class="chk">closed</span> <span class="n">4 agents</span></td><td class="ok"><span class="chk">closed</span> <span class="n">5 agents</span></td></tr>
+<tr><th scope="row">Rewires the BCL2 survival switch</th><td class="ok"><span class="chk">closed</span> <span class="n">5 agents</span></td><td class="ok"><span class="chk">closed</span> <span class="n">6 agents</span></td><td class="ok"><span class="chk">closed</span> <span class="n">4 agents</span></td><td class="ok"><span class="chk">closed</span> <span class="n">5 agents</span></td></tr>
+<tr><th scope="row">Dormant, pump-armoured progenitor cells</th><td class="ok"><span class="chk">closed</span> <span class="n">3 agents</span></td><td class="ok"><span class="chk">closed</span> <span class="n">4 agents</span></td><td class="ok"><span class="chk">closed</span> <span class="n">3 agents</span></td><td class="ok"><span class="chk">closed</span> <span class="n">4 agents</span></td></tr>
+<tr><th scope="row">Marker present but too faint</th><td class="ok"><span class="chk">closed</span> <span class="n">3 agents</span></td><td class="ok"><span class="chk">closed</span> <span class="n">3 agents</span></td><td class="ok"><span class="chk">closed</span> <span class="n">3 agents</span></td><td class="ok"><span class="chk">closed</span> <span class="n">4 agents</span></td></tr>
+<tr><th scope="row">Mutates the verdinexor target</th><td class="ok"><span class="chk">closed</span> <span class="n">5 agents</span></td><td class="ok"><span class="chk">closed</span> <span class="n">6 agents</span></td><td class="ok"><span class="chk">closed</span> <span class="n">3 agents</span></td><td class="ok"><span class="chk">closed</span> <span class="n">4 agents</span></td></tr>
+<tr><th scope="row">Loses methotrexate uptake</th><td class="ok"><span class="chk">closed</span> <span class="n">5 agents</span></td><td class="ok"><span class="chk">closed</span> <span class="n">6 agents</span></td><td class="ok"><span class="chk">closed</span> <span class="n">4 agents</span></td><td class="ok"><span class="chk">closed</span> <span class="n">5 agents</span></td></tr>
+<tr><th scope="row">&quot;Don&#x27;t eat me&quot; signal (CD47)</th><td class="ok"><span class="chk">closed</span> <span class="n">4 agents</span></td><td class="ok"><span class="chk">closed</span> <span class="n">5 agents</span></td><td class="ok"><span class="chk">closed</span> <span class="n">4 agents</span></td><td class="ok"><span class="chk">closed</span> <span class="n">5 agents</span></td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section>
+  <h2>What the numbers rest on</h2>
+  <ul class="plain">
+    <li><strong>Measured in dogs:</strong> how fast the anti-CD20 antibody removes B cells, how far hydroxychloroquine concentrates in tumors (about 100 times blood), and the dormant-cell and drug-pump escapes themselves.</li>
+    <li><strong>Worked out from measurements:</strong> verdinexor's and radiation's kill rates, from lab sensitivity of dog lymphoma cells combined with drug levels in dogs.</li>
+    <li><strong>Carried over from human data, with the reasoning written down:</strong> hydroxychloroquine's and the spinal pump's kill rates, the CAR-T kill rate (0.35 per day, range 0.12 to 1.1), how much CAR-T reaches the brain (half of the body rate), how long cells last in spinal fluid (40% of each dosing interval), brain side-effect rates, and 5 to 10 year follow-up. In people, 92% of patients still event-free at 2 years were alive at 5.</li>
+    <li><strong>Side effects:</strong> counted on all treatments together, per organ, so adding a treatment can weaken the others.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>What has to be true</h2>
+  <ul class="plain">
+    <li><strong>The treatments get built.</strong> A CAR-T made for dogs that expands and lasts, CAR-T given into the spinal fluid, and the continuous spinal pump do not exist yet.</li>
+    <li><strong>Dog CAR-T cells expand well.</strong> The kill rate in a dog depends on how many cells grow. Dog CAR-T has not yet shown benefit.</li>
+    <li><strong>The central human values hold.</strong> At the low end (kill 0.12 per day, cells active 15% of the time) the B-cell plan no longer closes, and the T-cell plan closes but fails the half-strength test.</li>
+    <li><strong>Reaching the brain surface is enough.</strong> Canine brain lymphoma sits in the linings and around vessels, which spinal-fluid delivery reaches. Deep tissue access is not measured.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>Outside this check</h2>
+  <ul class="plain">
+    <li>Drug resistance that cannot be traced to a known mechanism (about half of dogs on CHOP become drug-resistant, only part of it explained).</li>
+    <li>Cancer in the eye and testis, and tumors inside blood vessels, which spinal-fluid delivery cannot reach.</li>
+    <li>Later risks: second cancers (21% at 10 years in human CAR-T survivors) and deaths from treatment (18%).</li>
+    <li>Protection from the bone-marrow and lymph-node environment, which the model can only test as an all-or-nothing case.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>Treatments considered and set aside</h2>
+  <ul class="plain">
+    <li><strong>Vaccines:</strong> the dog's-own-tumor vaccine is in the B-cell plan but is not needed, because the plan closes without it. Telomerase DNA vaccine, CD40-B RNA vaccine and dendritic-cell vaccines did not lengthen time to relapse, or gave no immune response; vaccines in dogs show no long-term benefit (3-year survival 10% vs 8%).</li>
+    <li><strong>Stem-cell transplant:</strong> a transplant from a perfectly matched donor gave the longest remissions in dogs (8 of 9 alive over 4 years, longest about 8 years), but it needs a matched donor, carries up to 55% procedure mortality in older series, and cannot be modelled as a kill rate.</li>
+    <li><strong>Others set aside:</strong> checkpoint blockers (no responses in 15 dogs), the CD52 antibody (failed its trial), steroid or depot-cytarabine into the spinal fluid (the cancer can disable both), lenalidomide, BTK inhibitors and whole-brain radiation.</li>
+  </ul>
 </section>
 
 <footer>
-  <div class="wrap">
-    <p>An educational modeling analysis of canine multicentric lymphoma, written for non-specialists.
-      The full technical record, the simulation code, and the tests that reproduce every figure live
-      alongside this report in the project repository. This is not veterinary advice; decisions about
-      a specific animal belong with an oncologist who can examine it.</p>
-  </div>
+  <p>Technical record: <span class="mono">docs/LYMPHOMA_ESCAPE_CONFIRMATION.md</span> (the table above, generated by code and tested), <span class="mono">docs/LYMPHOMA_UNIVERSE.md</span> (everything searched), <span class="mono">docs/universe/</span> (literature sweeps with PubMed IDs). A model, not veterinary advice.</p>
 </footer>
+</div>
