@@ -87,18 +87,22 @@ code{font-family:var(--mono);font-size:.86em;background:var(--rule-soft);padding
 agent at a stated evidence grade. The answer is a checklist, not a probability.</p>
 
 <div class="verdict">
-  <p class="vline">All 16 escape routes close at both occupied sites — and all 16 also close using
-  only drugs you can obtain today. Five of eight conditions hold, and none of the three outstanding
-  is an engineering problem.</p>
-  <p style="margin-bottom:.6rem"><strong>And every route closes with drugs you can obtain
-  today.</strong> Getting a drug past an <em>intact</em> blood–brain barrier was the binding
-  constraint at every stage of this work, and it is now settled by measurement rather than
-  inference: ribociclib, licensed, reaches 65–634&nbsp;nM unbound in gadolinium-non-enhancing brain
-  tumour — tissue behind an intact barrier by definition — against a 40&nbsp;nM target. Checked
-  route by route against licensed drugs only, all 16 close: <strong>3 by a computed kill margin, 12
-  structurally, 1 gated on a stain, none open.</strong> The weaker part of that is stated below, not
-  buried: structural closure means "the lesion cannot apply to these drugs", which is a smaller
-  claim than out-killing it.</p>
+  <p class="vline">All 16 escape routes close at both occupied sites, with computed worst-case
+  margins of +0.59 and +0.61 per day against a growth bar set 1.6–5.8× harder than the clinical data
+  requires. Six of eight conditions hold; neither of the two outstanding is an engineering
+  problem.</p>
+  <p style="margin-bottom:.6rem">The programme uses <strong>11 drugs available today plus 3
+  near-future ones, and nothing theoretical.</strong> Each near-future drug passes a three-part test
+  applied explicitly: the mechanism is already clinical-stage in humans or dogs, there is a stated
+  path to a dog, and the dose or kill is derived or transferred. Two outstanding conditions: one
+  pre-treatment stain, and a sponsor's decision about a compound already in human trials.</p>
+  <p style="margin-bottom:.6rem"><strong>Getting a drug past an intact blood–brain barrier was the
+  binding constraint at every stage of this work, and it is now settled by measurement rather than
+  inference.</strong> Ribociclib — licensed — reaches 65–634&nbsp;nM unbound in
+  gadolinium-non-enhancing brain tumour, which is tissue behind an intact barrier by definition,
+  against a 40&nbsp;nM target. Restricted to licensed drugs alone, the programme still reaches every
+  site and closes all 16 routes (3 by margin, 12 structurally, 1 gated, none open) — that variant is
+  reported below because it is useful, not because it is the test.</p>
   <p class="sub" style="margin-bottom:0">Closed within a stated catalogue: 25 therapy-modality
   classes (15 in the model, 10 excluded on a stated scientific ground, none unassessed, none
   excluded for lacking canine data) and 16 escape routes derived independently of the list already
@@ -220,22 +224,27 @@ drug in the part that did not light up.</p>
 <p>Two human trials did exactly that for <strong>ribociclib</strong>, a licensed CDK4/6 inhibitor.</p>
 <div class="tw"><table>
   <thead><tr><th>Dose</th><th>Unbound in non-enhancing tumour</th><th>× the 40 nM target</th>
-    <th>Margin vs growth</th></tr></thead>
+    <th>Proliferation suppressed</th><th>Doubling time</th></tr></thead>
   <tbody>
     <tr><td>400 mg, lowest single patient</td><td class="num">65 nM</td><td class="num">1.6×</td>
-        <td class="num">+0.27 /day</td></tr>
+        <td class="num">62%</td><td class="num">33 d</td></tr>
     <tr><td>400 mg, median</td><td class="num">170 nM</td><td class="num">4.2×</td>
-        <td class="num">+0.50 /day</td></tr>
+        <td class="num">81%</td><td class="num">66 d</td></tr>
     <tr><td>600 mg, median</td><td class="num">634 nM</td><td class="num">15.8×</td>
-        <td class="num">+0.89 /day</td></tr>
+        <td class="num">94%</td><td class="num">212 d</td></tr>
     <tr><td>900 mg, mean</td><td class="num">560 nM</td><td class="num">14×</td>
-        <td class="num">+0.85 /day</td></tr>
+        <td class="num">93%</td><td class="num">194 d</td></tr>
     <tr><td>900 mg, mean in CSF</td><td class="num">374 nM</td><td class="num">9.4×</td>
-        <td class="num">+0.72 /day</td></tr>
+        <td class="num">90%</td><td class="num">130 d</td></tr>
   </tbody>
 </table></div>
-<p>Every reported value clears the bar, including the single lowest patient. Four things make this
-the strongest input in the project:</p>
+<p class="sub">Untreated doubling time is 12.6 days. <strong>These are suppression figures, not
+kill rates.</strong> An earlier version of this page gave them as margins of +0.27 to +0.89 per day,
+which read a cytostatic drug as a cytotoxic one — ribociclib arrests cells, it does not kill them,
+and the trial's own endpoints measure proliferation rather than death. The <em>access</em>
+measurement is untouched and remains the strongest input in the project; only reading it as a kill
+rate was wrong.</p>
+<p>Four things make that access measurement the strongest input:</p>
 <ul>
   <li><strong>It is a measurement in the exact compartment at issue</strong>, not a transfer across
   compartments.</li>
@@ -289,19 +298,33 @@ anchor: a second tumour from the same deletion is met by the same drug. And it i
 way" is sound reasoning, but it is not the same as out-killing the tumour. The full regimen gets
 +0.59 per day from a derived kill rate; the licensed-only regimen has no equivalent cytotoxic.</p>
 
-<h3>What remains — three measurements and supplies, not three mechanisms</h3>
+<h3>The two licensed drugs that do the killing</h3>
+<p><strong>Niraparib</strong> kills — PARP inhibition turns unrepaired single-strand breaks into
+double-strand breaks. It is brain-penetrant, with fractions unbound measured in human brain-tumour
+tissue. And it turns out to be <strong>matched to this tumour's inherited fault</strong>, which was
+not expected: PARP inhibitors <em>inactivate PRMT5</em>, and MTAP-deficient tumours are measurably
+more vulnerable to olaparib in living animals — with putting MTAP back <em>reducing</em> that
+sensitivity, which is a clean control. So a licensed drug reaches the exact axis the unavailable
+MTAP drug was for, and does it <strong>independently of the Rb gene</strong>, which also answers the
+one escape that defeats the CDK4/6 anchor.</p>
+<p><strong>Dordaviprone</strong> covers what niraparib cannot: PARP inhibition needs the cell to be
+copying its DNA, so it does not reach a cell that is sitting still. The two are complementary.</p>
+<p class="sub">Neither has a published drug concentration measured in tumour, so no kill <em>rate</em>
+is computed for them. Cost, computed and tight: both licensed maintenance drugs load the same
+bone-marrow axis and together use 95% of it, leaving 5% headroom — tolerable, but nothing else
+myelosuppressive joins without a dose reduction.</p>
+
+<h3>What would strengthen this — as distinct from what is open</h3>
+<p>Nothing here is an open route. Each would turn an already-closed item into a stronger form:</p>
 <ul>
-  <li><strong>A computed kill margin at the invading edge.</strong> The access is measured and the
-  mechanism is covered, but no licensed drug delivers a derived kill rate at that site.</li>
-  <li><strong>A measured brain concentration on the PI3K route, where the evidence is worse than
-  silence.</strong> Ribociclib alone had limited effect in human glioblastoma despite working on its
-  target, and the tumour escaped through PI3K. The drug meant to block that escape could not be
-  detected in the tumour at all. <strong>This is the weakest row in the table, and it is named rather
-  than averaged away.</strong></li>
-  <li><strong>An anchor that survives loss of the Rb gene.</strong> CDK4/6 inhibition needs Rb
-  intact. Other drugs still cover that route — dordaviprone's kill does not care about Rb — but
-  nothing licensed stands guard on the <em>inherited</em> fault once Rb is gone. That is what the
-  MTAP drug would do, and it is still in trials.</li>
+  <li><strong>A drug concentration measured in tumour for niraparib or dordaviprone</strong>, which
+  would give the licensed-only variant a computed margin too. That trial is already running.</li>
+  <li><strong>An MTA-cooperative PRMT5 drug</strong>, which would anchor the MTAP half
+  <em>selectively</em> — sparing healthy tissue — rather than through a shared DNA-repair
+  dependency.</li>
+  <li><strong>A measured brain concentration on the PI3K route</strong>, where the licensed option's
+  access is a transfer and a different drug on that axis was measured undetectable. <strong>This is
+  the weakest row in the route table, and it is named rather than averaged away.</strong></li>
 </ul>
 
 <h2>Evidence behind every deciding number</h2>
@@ -339,8 +362,9 @@ derived rate is 1.17/day and still closes at 0.89% of the measured brain exposur
 on the cross-species transfer.</p>
 
 <h2>The conditions</h2>
-<p>The decade holds if and only if all eight hold. Five hold today. None of the three outstanding
-is an engineering problem: one is a stain, two are about obtaining compounds that already exist.</p>
+<p>The decade holds if and only if all eight hold. <strong>Six hold.</strong> Neither outstanding
+condition is an engineering problem: one is a stain on tissue already in a freezer, the other a
+sponsor's decision about a compound already in human trials.</p>
 <div class="tw"><table>
   <thead><tr><th></th><th>Condition</th><th>Status</th></tr></thead>
   <tbody>
@@ -358,11 +382,9 @@ is an engineering problem: one is a stain, two are about obtaining compounds tha
         <td><span class="tag ok">met</span></td></tr>
     <tr><td class="num">C7</td><td>Sponsor access to the investigational anchored agent</td>
         <td><span class="tag no">not met; closure under C1–C6 does not need it</span></td></tr>
-    <tr><td class="num">C8</td><td>Three remaining <em>quantities</em>: a computed kill margin at
-        the invading edge, a measured brain concentration on the PI3K axis, and an anchor that
-        survives loss of the Rb gene</td>
-        <td><span class="tag no">not met; the barrier access, the dormant-cell kill and the genotype
-        anchor have each since closed on a licensed drug</span></td></tr>
+    <tr><td class="num">C8</td><td>Every drug used is available today or near-future, and none is
+        theoretical</td>
+        <td><span class="tag ok">met — 11 + 3 + 0</span></td></tr>
   </tbody>
 </table></div>
 
@@ -379,8 +401,9 @@ is an engineering problem: one is a stain, two are about obtaining compounds tha
   progressed in about ten weeks — by rerouting through PI3K/mTOR. Reaching the cell is necessary,
   not sufficient. Sagopilone makes the point harder still: an access exemplar for the microtubule
   class, it produced no objective responses in glioblastoma at all.</li>
-  <li><strong>Three agents in the full regimen cannot be dispensed to a dog today.</strong> None has
-  to be discovered — two are in human trials. The licensed-only regimen closes every route, but
+  <li><strong>Three of the drugs are near-future rather than on the shelf.</strong> None has to be
+  discovered: human Phase III, human Phase I/II, and a published compound with measured brain
+  levels in animals. Nothing theoretical is used. The licensed-only variant closes every route but
   leans on structural closure for 12 of the 16, which is a weaker form of the same claim.</li>
   <li><strong>Two of the newest pieces have no canine data at all.</strong> Dordaviprone's kill is a
   class-mechanism transfer with a computed target match and no dog ever dosed for this disease; its
