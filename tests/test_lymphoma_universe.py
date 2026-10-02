@@ -162,3 +162,26 @@ def test_escape_confirmation_matrix_every_row_closed_with_three_covering_agents(
         assert len(rows) == n_rows          # 22 or 21 escapes x 2 compartments (the antigen set differs by lineage)
         assert all(r["closed"] for r in rows), [r["escape"] for r in rows if not r["closed"]]
         assert min(r["n_cover"] for r in rows) >= 3
+
+
+def test_existing_agent_programs_close_the_b_cell_body_and_leave_exactly_the_named_gaps():
+    """Programs built only from agents that exist today (docs/LYMPHOMA_UNIVERSE.md section F)."""
+    from canine_dsp.core.lymphoma_catalogue import CNS as _CNS, SYSTEMIC as _SYS
+    from canine_dsp.lymphoma_joint import EXISTING_PROGRAMS, clock_table
+    b = clock_table("B", EXISTING_PROGRAMS["B"])
+    assert b[_SYS]["clears"]
+    open_b = [k for k, v in b[_CNS]["lineages"].items() if v[0] != "cleared"]
+    assert open_b == ["E5 quiescent efflux-high lymphoid progenitor"]
+    t = clock_table("T", EXISTING_PROGRAMS["T"])
+    open_t = [k for k, v in t[_SYS]["lineages"].items() if v[0] != "cleared"]
+    assert open_t == ["E5 quiescent efflux-high lymphoid progenitor"]
+    assert not t[_CNS]["clears"]
+
+
+def test_reassessed_classes_are_in_the_model_at_outcome_or_transfer_grade():
+    ag = _ag(SYSTEMIC, "B")
+    assert G.potency_grade(ag["allogeneic DLA-identical HCT (graft-versus-lymphoma)"]) == "OUTCOME"
+    assert G.potency_grade(ag["dTERT genetic vaccine (Tel-eVax-type)"]) == "OUTCOME"
+    assert G.potency_grade(ag["CD3xCD20 bispecific T-cell engager (canine-specific) [needs development]"]) == "TRANSFER-OUTCOME"
+    assert G.AVAILABILITY["allogeneic DLA-identical HCT (graft-versus-lymphoma)"] != G.NONE
+    assert G.AVAILABILITY["CD3xCD20 bispecific T-cell engager (canine-specific) [needs development]"] == G.NONE

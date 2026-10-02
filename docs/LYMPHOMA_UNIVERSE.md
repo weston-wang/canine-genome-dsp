@@ -202,3 +202,43 @@ fraction of persister tolerance retained (0 to 0.9), and the share of burden tha
 survives removing any agent across all of them. The B-cell 7-agent program clears and survives halving across all of them, and loses only the any-one-removed test when retained
 tolerance is 0.5 or more or the brain seed fraction is 0.5 or more. Per `CLAUDE.md` rule 11 these are not reported as gaps: no closure depends on a particular value of any of them.
 Which assumed numbers still carry weight: hydroxychloroquine brain access 0.3 has no source, but removing hydroxychloroquine does not break any program above.
+
+## F. Re-assessment of vaccines, engagers (eBAT, BiTE, armed T cells), inhibitors and stem cells; programs from agents that exist today (2026-10-02)
+
+The user: "I needed scientifically sound, not totally theoretical. And I think you are dismissing vaccines, ebats, inhibitors, stem cells too easily."
+Accepted (`CLAUDE.md` failure 8, rule 13). Sweeps: `docs/universe/SWEEP_hct_model.md`, `SWEEP_bispecific.md`, `SWEEP_exists.md`, `SWEEP_inhibitors_partial.md`
+(the inhibitor sweep was cut off by a rate limit twice; its finished classes are used, the rest are listed). "ebats" is read as the eBAT (EGF/uPA bispecific
+angiotoxin) of the hemangiosarcoma branch, and also covers CD3 bispecific engagers and bispecific-antibody-armed T cells.
+
+**Verdict per class, each with a scientific reason, none for lacking canine data.**
+
+| class | in model now | reason it is or is not decisive |
+|---|---|---|
+| Stem-cell transplant, allogeneic DLA-identical | **YES, OUTCOME** (2.6 e-folds, gross 0.106 /day over 166 d; brain access 0.5) | Calibrated from the dog plateau (8 of 9 first-remission dogs alive >4 y, PMID 35789057) and corroborated by human T-cell lymphoma (relapse 8% vs 55%, PMID 39270145). Exists today at referral centres. It is what lets the B-cell body close from existing agents. Needs a DLA-identical littermate (25% per sibling); MHC loss is its open escape |
+| Stem-cell transplant, autologous / thiotepa rescue | YES (TBI-autologous OUTCOME; thiotepa OUTCOME, human) | conservative gating default; adds little beyond allo and shares its toxicity budget, so only one transplant-class option per program |
+| Vaccines (APAVAC, dTERT) | **YES, OUTCOME** | credited at k 0.03-0.055 /day; they act on dividing cells and need MHC-I, so they add margin but cannot reach the dormant progenitor. Their tails are flat (3-year survival 10% vs 8%) |
+| Inhibitors | **YES, TRANSFER** (zanubrutinib B; romidepsin, belinostat T; panobinostat, vorinostat, bortezomib, verdinexor, venetoclax, HCQ earlier) | each is entered with a human IC50 x label exposure derivation; they cover specific escapes (BCR, apoptosis) but are pump substrates or division-gated, so none reaches the dormant progenitor |
+| CD3 bispecific engagers | YES, TRANSFER-OUTCOME, **needs development** | strong human data (epcoritamab+R-CHOP CR 85%, 2-year PFS 80%); human CD3 arms do not bind canine CD3 (43% identity), so a canine engager must be made; canine binders exist. Non-gated, non-pump, MHC-independent, CNS 0.5 |
+| Armed T cells (BATs) | NO kill rate | no lymphoma trial in any species; canine T-cell expansion is commercial, the arming step is not found. Not credited |
+| eBAT | EXCLUDED, scientific reason | targets EGFR and uPAR are lower in 29 canine lymphomas than in sarcomas (mRNA) and a human T-cell line lacking them was not killed (PMID 28193671); dog toxicity: hypotension 4/23, liver 2/23 |
+| Spinal pump | REPLACED | oral cytarabine ocfosfate does the job without a device (CSF 1.0-3.6 uM; PMID 37670479, 4 dogs); IV infusion CSF 8.3 uM measured (PMID 1742843) |
+
+**Result with agents that exist today** (licensed, off-label, or in dog trials; thiotepa counted off-label; one transplant-class option per program; every one of the
+23 escapes required closed; every combination of up to 4 agents scanned exhaustively, up to 5 for B-cell body):
+
+| | closes? | what is left |
+|---|---|---|
+| **B-cell body** | **YES.** 268-362 sets of 4 or fewer agents clear every lineage inside the documented windows, for example anti-CD20 antibody + verdinexor + allogeneic transplant + oral cytarabine, margin +0.15 /day, last lineage gone by day 74 | none. None of the 2,328 clearing sets of up to 5 agents also survives halved potencies and dropping any one agent |
+| B-cell brain | every escape clears (by day 15 at the latest) **except one**: E5, the dormant pump-armoured progenitor, which regrows after day 84 when the documented exposure of verdinexor (56 d) and oral cytarabine (84 d) ends | E5, margin +0.03 /day |
+| T-cell body | every escape clears except E5, which regrows after day 166 when the transplant window ends | E5 |
+| T-cell brain | E2 (loss of the cytarabine-activating enzyme), E5 and the bulk regrow | E2, E5, bulk |
+
+**What closes the remaining escape, specified from the model.** One more agent that is not division-gated, not a pump substrate, reaches the compartment, and has an
+effective kill (kill x access) of at least about 0.06 /day in the brain (0.03 /day in the T-cell body) without overloading the organ budgets. Candidates with human data
+that meet it: the canine CD3xCD20 engager (0.16 x brain access 0.5 = 0.08; B-cell, needs development), CAR-T (needs development), thiotepa consolidation if it is accepted
+as acting on dormant cells (not shown; with the conservative default it does not close the brain). Candidates that exist today do not reach it: every existing
+agent that reaches the brain is division-gated, a pump substrate, or defeated by loss of the cytarabine-activating enzyme.
+
+**Extending the documented windows would also close the B-cell brain.** E5 clears slowly (+0.03 /day) and the model stops it when documented dosing ends: verdinexor 56 days
+(the longest dog is 17 months, PMID 39235783) and oral cytarabine 84 days (an assumption, 4 dogs). With dosing evidence for 6 months or more the existing B-cell program
+would clear the brain. That is a documented-exposure question, not an absent mechanism.

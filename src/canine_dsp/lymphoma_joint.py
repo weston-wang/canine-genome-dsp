@@ -141,3 +141,31 @@ def escape_matrix(ip: str, prefixes, *, kill: float = CENTRAL["kill"], duty: flo
                          "n_cover": len(cover), "best_grade": best, "margin": margin,
                          "closed": bool(cover) and margin > 0.0})
     return rows
+
+
+def clock_table(ip: str, prefixes, *, kill: float = CENTRAL["kill"], duty: float = CENTRAL["duty"]) -> dict:
+    """Per escape and compartment, the treatment-clock outcome for the whole program on the union of its agents: the day the
+    lineage is cleared, or 'relapses' (response then regrowth when the documented exposure windows end), or 'never'."""
+    pools = _pools(ip, kill, duty)
+    esc = _escapes(ip)
+    names = list(dict.fromkeys(_resolve(p, pools) for p in prefixes))
+    out = {}
+    for comp in (SYSTEMIC, CNS):
+        reg = []
+        for n in names:
+            if n in pools[comp]:
+                reg.append(pools[comp][n])
+            else:
+                reg.append(replace(pools[CNS if comp == SYSTEMIC else SYSTEMIC][n], access=0.0))
+        ev = G.evaluate_best_schedule(reg, esc, compartment=comp)
+        out[comp] = {"verdict": ev.horizon_strict.verdict(), "clears": ev.horizon_strict.cure_inside_window,
+                     "lineages": {o.name: (o.outcome, o.day) for o in ev.horizon_strict.outcomes}}
+    return out
+
+
+#: Programs built only from agents that exist today (licensed, off-label, or in dog trials; docs/LYMPHOMA_UNIVERSE.md section F).
+EXISTING_PROGRAMS = {
+    "B": ("anti-CD20 monoclonal antibody", "hydroxychloroquine", "verdinexor", "allogeneic DLA", "cytarabine ocfosfate"),
+    "T": ("prednisolone (glucocorticoid)", "hydroxychloroquine", "verdinexor", "allogeneic DLA", "cytarabine ocfosfate",
+          "romidepsin"),
+}
