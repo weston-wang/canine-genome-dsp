@@ -14,6 +14,74 @@ keyword.
 
 ---
 
+## The delivery mechanism that closes everything (2026-10-02) — and a correction
+
+**It is not a device. It is molecular selection, and the record already said so.**
+
+My previous answer said local delivery was the binding engineering blocker (C1/C2). That was wrong
+in two specific ways, and `core.schedule_coherence` exists precisely to catch the first:
+
+1. **It set access AND duty to 1.0 simultaneously.** A cavity implant or a single CED infusion buys
+   access *from a procedure* and then cannot also supply a continuous duty cycle. Access and duty
+   must come from the same schedule.
+2. **It overstated the requirement.** The bar is not access 1.0. It is **0.196** in invaded
+   parenchyma (0.021 × 9.35) and **0.0145** in CSF (0.005 × 2.89).
+
+At that real bar, **measured intrinsic penetration already clears it, orally**:
+
+| Agent | Brain access | Provenance | Clears 0.196? |
+|---|---|---|---|
+| **paxalisib** | Kp,uu **0.31** | MEASURED, **confirmed P-gp/BCRP non-substrate** (PMID 27638506) | **yes** |
+| **sagopilone-class microtubule agent** | brain:plasma **0.80** | MEASURED (PMID 18780814); paclitaxel **0.0** in the same experiment | **yes** |
+| RGN3067 | efflux ratio 0.61 (not MDR1 substrate), oral | MEASURED | yes |
+| generic small molecule | 0.021 | — | no (the 9.35× shortfall) |
+
+**The all-oral regimen closes every route at both compartments and is tolerable:**
+
+| Compartment | Routes closed | Worst margin | Worst route |
+|---|---|---|---|
+| Invaded parenchyma | **10 / 10** | **+0.0416/day** | autophagy-independence |
+| Leptomeninges / CSF | **10 / 10** | **+0.0592/day** | autophagy-independence |
+
+Five agents — liposomal clodronate, hydroxychloroquine, anti-PD-1, paxalisib, brain-penetrant
+microtubule agent. **No implant, no catheter, no sonication, no radiation in the closing set.**
+Access and duty come from one schedule by construction, so nothing needs reconciling.
+
+### Why the devices lose on their own measured numbers
+
+| Option | Measured gain | Duty | Geometry | Verdict |
+|---|---|---|---|---|
+| **Implanted multi-emitter US** (SonoCloud-9) | **5.9×** brain carboplatin, 9 emitters, 64 mm depth, 6 monthly cycles, 33 patients, **no DLTs** (Nat Commun 2024) | **1.0** — uniquely fixes duty | diffuse | 5.9 × 0.021 = **0.124 < 0.196** — short for a generic molecule; **rescues any agent with Kp,uu ≥ 0.033** |
+| Transcranial MRgFUS, volumetric | 64 subspots on 3-mm grid, 20.5 ± 4.6 cc, "near-subtotal brain coverage" | 1.0 | **diffuse** | **retires the FOCAL objection** in our old model entry; magnitude still binding; does not defeat efflux |
+| Intrathecal bolus | 200×, diffuse, ~1/112 complications in dogs | 0.07 | diffuse | effective **14× vs 2.89× needed — clears CSF, obtainable today.** Backup, not a requirement |
+| CED | 50×, best canine evidence of any device (17 dogs, no DLT) | **1/365** | focal | **fails on duration**: effective 0.14× |
+| P-gp/BCRP co-dose | 20× | 1.0 | diffuse | would clear, but canine PK/safety unestablished and not brain-selective |
+
+Two corrections to our own model fall out: the old FUS entry's **10× was too high** (measured is
+5.9×) and its **FOCAL geometry is obsolete** (coverage is volumetric).
+
+### Where a device is still the right answer
+
+- **As a rescue for a non-penetrant agent.** Abemaciclib at the rat ratio (0.11) is rescued by the
+  implanted device (→0.65); at the mouse ratio (0.03) it is not (→0.177). That is the honest range
+  for the CDK4/6 brain arm, and it is also the one place "choose a non-substrate" is unavailable —
+  abemaciclib *is* a P-gp/BCRP substrate, so ultrasound's tight-junction opening only partly helps.
+- **CSF**, where intrathecal bolus is obtainable today and clears comfortably.
+
+### Net effect on the conjunction
+
+**No engineering condition remains.** C1 and C2 are now MET by drug selection; 5 of 7 conditions
+hold today. Outstanding: **C5** (one immunostain, decidable before treatment) and **C7** (sponsor
+access, which closure under C1–C6 does not require).
+
+**The binding constraint has moved off access entirely and onto the per-day kill rate**, which is
+still a reference constant (0.15/day) standing behind a measured IC50 (1.77–2.69 ng/mL, PMID
+25715778) — a concentration, not a rate. And the access exemplar carries a real warning the record
+already states: **sagopilone failed in human glioblastoma** (EORTC 26061, PFS6 6.7%, no objective
+responses). Brain-penetrant is not brain-effective.
+
+---
+
 ## The headline is now deterministic, not odds (2026-10-01, third pass)
 
 The user's objection: *"I don't want odds of achieving 10 years, the whole point about looking at all

@@ -28,12 +28,27 @@ def test_with_local_delivery_every_route_closes_on_obtainable_agents():
         assert led["worst_margin"] > 0, comp
 
 
-def test_delivery_is_the_binding_constraint_not_drug_discovery():
-    """If swapping the route of administration closes everything, the gap is engineering."""
-    blockers = dc.blocking_conditions()
-    assert [c.tag for c in blockers] == ["C1", "C2"]
-    for c in blockers:
-        assert c.status is dc.Status.ENGINEERING
+def test_no_engineering_condition_remains():
+    """This test previously asserted that C1 and C2 were engineering blockers -- i.e. that surgical
+    local delivery was required. That was wrong twice over: it set access AND duty to 1.0 at once
+    (the defect core.schedule_coherence exists to catch), and it overstated the requirement, which
+    is access 0.196 rather than 1.0. Measured intrinsic penetration meets it orally, so nothing here
+    is an engineering blocker. See delivery_answer."""
+    assert dc.blocking_conditions() == []
+    outstanding = {c.tag for c in dc.failing_conditions()}
+    assert outstanding == {"C5", "C7"}
+    # and neither is engineering: one is a per-tumour test, one is sponsor access
+    for c in dc.failing_conditions():
+        assert c.status in (dc.Status.GATE, dc.Status.SPONSOR)
+
+
+def test_access_is_closed_by_molecules_rather_than_a_procedure():
+    """The positive form of the same claim, cross-checked against the delivery module."""
+    from canine_dsp import delivery_answer as da
+
+    c = da.closes_with_molecular_selection()
+    assert c["tolerable"] is True
+    assert all(c[comp]["all_routes_closed"] for comp in cat.COMPARTMENTS)
 
 
 def test_every_condition_states_what_opens_if_it_fails():

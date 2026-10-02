@@ -178,27 +178,38 @@ def access_shortfall() -> dict:
 #: The conjunction. Each entry's `why_required` is backed by a computation in this module.
 CONDITIONS: tuple[Condition, ...] = (
     Condition(
-        "C1", "Drug delivered LOCALLY into the resection cavity (implant / convection-enhanced "
-              "delivery) so that access in invaded parenchyma is ~1.0 rather than ~0.021",
-        Status.ENGINEERING,
-        "WITHOUT IT NOTHING CLOSES. With obtainable agents at systemic exposure the best tolerable "
-        "regimen's margin against every route in invaded parenchyma is NEGATIVE (worst -0.049/day): "
-        "all ten margin routes are OPEN, not merely unlikely. The shortfall is ~9.4x on kill rate. "
-        "This is the single load-bearing condition in the whole analysis.",
-        "A canine cavity-implant or CED protocol with a measured intratumoural concentration. The "
-        "geometry is favourable by construction: the breed's tumour is extra-axial and surgery "
-        "already creates the cavity.",
+        "C1", "Every maintenance agent is an INTRINSICALLY brain-penetrant, non-efflux-substrate "
+              "molecule -- access >= 0.196 in invaded parenchyma, carried by the molecule itself "
+              "rather than by a procedure",
+        Status.MET,
+        "WITHOUT IT NOTHING CLOSES: with a GENERIC small molecule at systemic exposure (access "
+        "0.021) the best tolerable regimen's margin against every parenchymal route is NEGATIVE "
+        "(worst -0.049/day) -- all ten margin routes OPEN, a ~9.4x shortfall. But the requirement is "
+        "access 0.196, NOT 1.0, and measured intrinsic penetration already clears it: paxalisib "
+        "Kp,uu 0.31, a CONFIRMED P-gp/BCRP non-substrate (PMID 27638506), and the sagopilone-class "
+        "microtubule agent at brain:plasma 0.80 (PMID 18780814, with paclitaxel at 0.0 in the same "
+        "experiment). The all-oral regimen closes EVERY route at BOTH compartments, tolerable "
+        "(+0.0416/day parenchyma, +0.0592/day CSF) -- see delivery_answer.",
+        "ALREADY MET, by drug selection rather than engineering. THIS CONDITION WAS PREVIOUSLY "
+        "MIS-STATED as surgical local delivery with access 1.0 and duty 1.0 simultaneously, which is "
+        "exactly the defect core.schedule_coherence exists to catch -- a procedure buys access and "
+        "then cannot also supply a continuous duty cycle. An oral penetrant molecule buys both from "
+        "ONE schedule. core.microtubule_route had already made this argument; the surgical framing "
+        "was a regression against the record.",
     ),
     Condition(
-        "C2", "Intrathecal delivery (or craniospinal radiation) for the leptomeningeal compartment",
-        Status.ENGINEERING,
-        "Same computation at the CSF site: obtainable systemic agents give a worst margin of "
-        "-0.036/day, every route OPEN, shortfall ~2.9x. Lower than parenchyma because liposomal "
-        "clodronate reaches blood-side meningeal macrophages, but still short.",
-        "A sustained-release intrathecal formulation. The required concentration is COMPUTED "
-        "(1.79 nM for the PRMT5i class, 66.73 nM for the measured MEK drug) and a sustained ~1600 "
-        "nM for >=14 d from one dose is measured for an encapsulated small molecule -- so the "
-        "pharmacology is settled and the PRODUCT is the gap (DepoCyt withdrawn 2017).",
+        "C2", "The leptomeningeal compartment is reached -- by the same penetrant molecules, with "
+              "intrathecal bolus as the obtainable backup",
+        Status.MET,
+        "At the CSF site a generic small molecule (access 0.005) leaves every route OPEN at "
+        "-0.036/day, a ~2.9x shortfall against a required access of just 0.0145. The penetrant "
+        "molecules clear it outright (+0.0592/day). And unlike the parenchyma there is also an "
+        "OBTAINABLE procedural route: intrathecal bolus is DIFFUSE -- matching meningeal enhancement "
+        "in 19/19 dogs -- safe in dogs at about 1 complication in 112, and delivers an effective 14x "
+        "against the 2.89x needed.",
+        "MET two independent ways. The sustained-release intrathecal product (DepoCyt, withdrawn "
+        "2017) is NOT required: it was only needed under the duty-0.07 framing, and the computed "
+        "requirement is low enough that the bolus schedule clears it.",
     ),
     Condition(
         "C3", "Maintenance dosed CONTINUOUSLY, not cycled (duty -> 1.0)",
@@ -264,7 +275,13 @@ def failing_conditions() -> list[Condition]:
 
 
 def blocking_conditions() -> list[Condition]:
-    """The subset that must be ENGINEERED -- the ones that are nobody's decision to simply make."""
+    """The subset that must be ENGINEERED -- the ones that are nobody's decision to simply make.
+
+    As of the delivery analysis (delivery_answer.py) this is EMPTY: C1 and C2 were mis-stated as
+    surgical local delivery, and the requirement they encode (access 0.196 / 0.0145, not 1.0) is met
+    by intrinsic molecular penetration that is measured and oral. The remaining outstanding
+    conditions are a per-tumour test (C5) and sponsor access (C7), neither of which is engineering.
+    """
     return [c for c in CONDITIONS if c.status is Status.ENGINEERING]
 
 
@@ -315,22 +332,37 @@ def emergence_is_secondary() -> str:
 
 def conjunction() -> str:
     """The headline, as a conjunction of conditions."""
+    from . import delivery_answer as da
+
     v = verdict()
-    eng = ", ".join(c.tag for c in blocking_conditions())
-    outstanding = ", ".join(c.tag for c in failing_conditions())
+    eng = blocking_conditions()
+    outstanding = ", ".join(c.tag for c in failing_conditions()) or "none"
     r = v["routes"]
+    need = da.required_access()
+    closed = da.closes_with_molecular_selection()
+    gating = (
+        f"NO ENGINEERING CONDITION REMAINS. What is outstanding is {outstanding}: C5 is one "
+        f"immunostain, decidable before treatment, and C7 is sponsor access to an investigational "
+        f"agent that closure under C1-C6 does not require."
+        if not eng else
+        f"The decade is gated on {', '.join(c.tag for c in eng)}, engineering conditions that are "
+        f"either met or not."
+    )
     return (
         f"DETERMINISTIC VERDICT, no odds. Every one of the {r['routes_after_independent_audit']} "
         f"enumerated escape routes ({r['margin_routes_in_catalogue']} of them carrying a computed "
         f"kill margin) closes at both occupied brain sites IF AND ONLY IF all "
         f"{v['conditions_total']} conditions in CONDITIONS hold. "
-        f"{v['conditions_met_today']} hold with what exists today; outstanding: {outstanding}. "
-        f"The binding constraint is DELIVERY, not drug discovery: with obtainable agents at systemic "
-        f"exposure the best tolerable regimen's margin is NEGATIVE at both brain sites "
+        f"{v['conditions_met_today']} hold with what exists today. "
+        f"ACCESS WAS THE BINDING CONSTRAINT AND IT IS NOW CLOSED: with a GENERIC small molecule at "
+        f"systemic exposure every route at both sites is OPEN "
         f"(parenchyma {v['answer_without_local_delivery'][cat.PARENCHYMA]['worst_margin']}/day, "
-        f"CSF {v['answer_without_local_delivery'][cat.LEPTOMENINGEAL]['worst_margin']}/day) and "
-        f"EVERY route is open -- a ~9.4x and ~2.9x shortfall in kill rate respectively. Supply "
-        f"local delivery and continuous dosing and every route closes with the same obtainable "
-        f"agents. So the decade is gated on {eng}, which are engineering conditions that are either "
-        f"met or not, and on C5, which is one stain. That is a checklist, not a probability."
+        f"CSF {v['answer_without_local_delivery'][cat.LEPTOMENINGEAL]['worst_margin']}/day), but the "
+        f"requirement is access {need[cat.PARENCHYMA]} / {need[cat.LEPTOMENINGEAL]} -- NOT 1.0 -- "
+        f"and measured intrinsic penetration clears it with no procedure at all: the all-oral "
+        f"regimen closes every route at both compartments "
+        f"({closed[cat.PARENCHYMA]['worst_margin']:+}/day and "
+        f"{closed[cat.LEPTOMENINGEAL]['worst_margin']:+}/day, tolerable={closed['tolerable']}). "
+        f"{gating} The residual is no longer access but the per-day KILL RATE, which is still a "
+        f"reference constant behind a measured IC50. That is a checklist, not a probability."
     )
