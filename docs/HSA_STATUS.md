@@ -302,6 +302,43 @@ Rule 14 arrived mid-session (origin `e2ecb1b`). Applied to this branch's one "un
 - **The proxy search FAILED for lomustine** — no measured brain-tissue or CSF concentration in PubMed.
   Lomustine remains reach, not exposure. Do not re-search this without a new query.
 
+## The answer to "is the decade covered" — and the item that must stop being re-raised (2026-10-02)
+
+The user asked whether 10+ years is covered for every mechanism and escape, rejected a lifespan-based
+reframe of the goal, and then caught the answer re-listing the vaccine-height increment as failing:
+*"I don't mind 1 and 3 being open but 2 is something we went over and over again."* They were right.
+Recorded here because it has now happened **three times** in this analysis.
+
+**The settled form of the answer. Do not re-derive it; quote it.**
+
+- **Mechanism and escape coverage: COMPLETE** at the stated bar. 15 routes x 6 anatomical sites —
+  14 routes CLOSED at every site, 1 PARTIALLY CLOSED (route 5 in the CNS, intracranial haemorrhage,
+  a competing event). `hsa_deterministic_closure.conjunction()`.
+- **The increment the plan turns on: TRANSFERRED / PASSES.** Not open, in any phrasing. KEYNOTE-942,
+  randomised, matched adjuvant resected setting, RFS HR 0.510 / DMFS HR 0.384; one lever gives 39–56%
+  of the needed log-hazard and clears the 1.35x rung outright on DMFS. §4a.
+- **Whether the four levers stack: TESTED AND NOT LOAD-BEARING.** Winner-takes-all needs 25% transfer
+  against 10% for full addition; both inside what the anchors support.
+  `hsa_escape_audit.DOES_THE_PLAN_DEPEND_ON_THE_LEVERS_STACKING`.
+- **The growth bar it must beat: DERIVED**, conservative by 1.06–4.26x. §6a.
+- **Genuinely failing: exactly two**, per `hsa_standard_audit.failing()` — immunity half-life and the
+  post-remission rupture hazard. Plus one protocol gap, brain-inclusive surveillance imaging (§6b),
+  which is a scheduling decision rather than a missing measurement.
+- **Therefore:** every mechanism and escape route is closed by real data or a justified transfer, and
+  the *ten-year horizon specifically* rests on one unmeasured number — immunity half-life — and on
+  nothing else. The vaccine is the only permanently present mechanism, so its duration is what turns
+  "cleared" into "stayed cleared". The user has accepted that item and the rupture hazard as open.
+
+**The phrasings that are re-grades in disguise, and are therefore banned for the increment:** "has
+never been measured in this tumour"; "rests on an unmeasured combination"; "is a requirement derived
+from the model rather than an effect size taken from data"; "no real vaccine in dogs has hit that
+height". Each is true as a statement about demonstration and each violates rule 11. The permitted move
+is to name the code path that would have to change.
+
+**Procedure, now in rule 11:** before answering any "is it covered / what is open" question, execute
+`failing()` and `wrongly_reported_as_gaps()` and quote them. The guard existed before this lapse and
+was not run; writing the guard is not running the guard.
+
 ## Open gaps, ranked (the honest list)
 
 1. **What any lever adds to vaccine height in this tumour.** Unmeasured for all four. The single

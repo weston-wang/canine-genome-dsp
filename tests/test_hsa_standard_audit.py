@@ -312,3 +312,49 @@ def test_reaches_rejects_an_unknown_mechanism():
     from canine_dsp import hsa_deterministic_closure as dc
     with pytest.raises(ValueError):
         dc.reaches("stem cell transplant", dc.Site.CNS)
+
+
+def test_the_increment_is_never_in_the_failing_list():
+    """Failure 10: the increment was presented as a failing item for a third time, in softened words
+    ("has never been measured in this tumour"). It is graded PASSES on KEYNOTE-942 plus four transfer
+    derivations. This test makes the grading machine-checkable in both directions: present in
+    wrongly_reported_as_gaps(), and absent from failing()."""
+    from canine_dsp import hsa_standard_audit as sa
+    inc = next(g for g in sa.GRADES if "increment" in g.name)
+    assert inc.verdict is sa.Verdict.PASSES
+    assert inc.provenance == sa.TRANSFERRED
+    assert inc.previously_reported_as_gap is True
+    assert inc.load_bearing is True              # load-bearing AND closed are not in tension
+    assert inc not in sa.failing()
+    assert inc in sa.wrongly_reported_as_gaps()
+    assert "KEYNOTE-942" in inc.why
+    assert "grading against demonstration" in inc.why
+
+
+def test_failing_is_exactly_the_two_bare_numbers():
+    """The answer to "what is still open" is this list and nothing else. If a third item belongs here
+    it has to be added deliberately, not narrated into an answer."""
+    from canine_dsp import hsa_standard_audit as sa
+    failing = sa.failing()
+    assert len(failing) == 2
+    names = " ".join(g.name for g in failing)
+    assert "immunity half-life" in names
+    assert "rupture hazard" in names
+    for g in failing:
+        assert g.verdict is sa.Verdict.FAILS_NO_BASIS, g.name
+        assert g.provenance == sa.ASSUMED, g.name
+        assert g.load_bearing is True, g.name
+
+
+def test_the_stacking_worry_is_closed_and_not_a_live_gap():
+    """"Do the four levers stack?" is the increment objection in another costume. It was tested
+    against the existing grid: the plan does not depend on stacking."""
+    from canine_dsp import hsa_escape_audit as ea
+    d = ea.DOES_THE_PLAN_DEPEND_ON_THE_LEVERS_STACKING
+    assert d["grade"] == "TRANSFERRED"
+    needed = d["transfer_needed_to_beat_the_drug_forever_reference"]
+    assert needed["winner_takes_all_best_lever_only"] == 0.25
+    assert needed["full_addition_all_four"] == 0.10
+    assert "does NOT depend" in d["what_this_closes"]
+    # and the caveat that genuinely survives is antagonism, not overlap
+    assert "ANTAGONISTIC" in d["the_caveat_that_survives"]

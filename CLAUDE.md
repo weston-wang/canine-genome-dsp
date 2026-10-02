@@ -56,6 +56,18 @@ Concrete failures (so the rules have a reason):
    tumour's own lesion, with the pharmacodynamics confirmed in the same tissue. The site had been "open" only
    because it was being inferred from rodent ratios instead of looked up.
 
+10. **Re-raising the increment as an open gap for the third time, with the function that forbids it sitting
+   unrun in the repo.** Asked whether the ten-year goal was covered, the answer listed "the vaccine has to be
+   ~1.4x stronger than any real trial has produced, and what the four levers add together has never been
+   measured" as one of three failing items. That item is graded **PASSES / TRANSFERRED** in
+   `hsa_standard_audit.wrongly_reported_as_gaps()`, whose stored reason already says "This analysis listed it as
+   an open gap as recently as this session; under rule 11 that was grading against demonstration." The stacking
+   half was also already tested and closed (`DOES_THE_PLAN_DEPEND_ON_THE_LEVERS_STACKING`, grade TRANSFERRED:
+   winner-takes-all needs 25% transfer against 10% for full addition, both inside what the anchors support --
+   "the plan does NOT depend on the four levers stacking"). The user: *"I don't mind 1 and 3 being open but 2 is
+   something we went over and over again."* The machinery to prevent this existed and was not executed; writing
+   the guard is not running the guard.
+
 ## Rules
 
 1. **Search the record before answering any "what did we cover / what's missing / did we discuss X"
@@ -93,7 +105,15 @@ Concrete failures (so the rules have a reason):
    (non-disseminated) histiocytic sarcoma in a predisposed breed. Label evidence from another presentation
    (disseminated disease, another tumour, another species) as indirect. When checking whether a finding is
    already in the record, search by its DOI or PMID as well as by keyword.
-11. **Never report "no measurement exists" as an open gap.** The bar is real data **or** a rigorous
+11. **Never report "no measurement exists" as an open gap. Run the audit functions before answering, and
+   quote them.** Any question of the form "is it covered / what is still open / is the goal met" is answered by
+   executing `standard_audit.failing()` **and** `standard_audit.wrongly_reported_as_gaps()` first, and the answer
+   lists exactly what `failing()` returns. An item appearing in `wrongly_reported_as_gaps()` may not be presented
+   as open under any phrasing -- including softened ones like "has never been measured in this tumour", "rests on
+   an unmeasured combination", or "is a requirement derived from the model rather than an effect size from data".
+   Those are re-grades against demonstration wearing different words. If a graded-PASSES item seems open, the
+   move is to say which code path would have to change and why, not to re-list it.
+   The bar is real data **or** a rigorous The bar is real data **or** a rigorous
    model, with a cross-species/disease/class transfer acceptable when justified in writing. So before
    calling anything open, ask: does a written transfer or a derivation stand behind this number? If
    yes it is CLOSED (graded TRANSFERRED or DERIVED) and saying otherwise re-grades against a bar the
