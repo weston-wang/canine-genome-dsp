@@ -118,6 +118,11 @@ Concrete failures (so the rules have a reason):
    engager, inhibitor, transplant, cell therapy) is excluded only because its kill is contradicted, it is defeated by a
    named escape, or its toxicity cannot be afforded, never because canine data are absent; when canine data are absent,
    derive a graded TRANSFER or OUTCOME-calibrated input and test with it.
+   **Near-future agents count.** The user (2026-10-02): "I don't mean you can only use therapies that exist today, I meant to
+   include near future ones that are scientifically sound. Just nothing that's pure theoretical." So the tiers are:
+   exists-today, NEAR-FUTURE (clinical-stage evidence of the modality in humans or dogs, a stated path to the dog, a derived or
+   transferred dose/kill) and THEORETICAL (no clinical evidence of the mechanism anywhere). Closure may use the first two; a
+   program is reported with its tier mix; a theoretical agent never counts. Do not retreat to "only what exists today".
 
 14. **Before calling a quantity unmeasured, name its measurable proxy and search for THAT.** A compartment, an
    access figure or a mechanism usually has an operational definition that someone has already assayed under a
