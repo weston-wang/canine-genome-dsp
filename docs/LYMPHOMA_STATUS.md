@@ -226,3 +226,24 @@ human-grounded central CAR-T inputs; the items outside the matrix are listed in 
 
 `docs/LYMPHOMA_PLAIN_LANGUAGE.html` rewritten as a short report: the result, the two plans with availability, a per-escape table generated from `lymphoma_joint.escape_matrix`
 (so it cannot drift from the tested result), what the numbers rest on, what has to be true, what is outside the check, and what was set aside. The earlier long report is in git history.
+
+## Re-assessment (2026-10-02; user: "I needed scientifically sound, not totally theoretical. And I think you are dismissing vaccines, ebats, inhibitors, stem cells too easily.")
+
+Details: `LYMPHOMA_UNIVERSE.md` section F; `docs/universe/SWEEP_{vaccines,stemcell,bispecific,inhibitors_partial,exists,hct_model}.md`; code `core/lymphoma_universe.reassessed_agents`, `inhibitor_agents`;
+`lymphoma_joint.EXISTING_PROGRAMS`, `clock_table`. CLAUDE.md rule 13 (programs from agents that exist; a class is excluded only for a stated scientific reason).
+
+Result, **within the 23-escape sound-grade catalogue, programs built only from agents that exist today** (licensed, off-label or in dog trials):
+- **B-cell body: closes** (e.g. anti-CD20 + verdinexor + matched-donor transplant + oral cytarabine ocfosfate; margin +0.15 /day, last lineage gone by day 74). Closes at central inputs; sets of 5 clear but none survives halving or removing one agent.
+- **B-cell brain: one escape open**, E5 (dormant, pump-armoured lymphoid progenitor; regrows after ~day 84).
+- **T-cell body: one escape open**, E5 (regrows after ~day 166).
+- **T-cell brain: three open**, E2 (dCK loss), E5, and bulk.
+- Longer dosing does not close the B-cell brain (tested 120-730 d windows).
+
+Class handling: allogeneic DLA-identical HCT credited (OUTCOME); autologous add-back and thiotepa credited (OUTCOME); vaccines credited (APAVAC 0.055, dTERT ~0.028 /day; gated, MHC-dependent, small); inhibitors credited by TRANSFER (HDAC and BTK classes; none reaches E5);
+canine CD3xCD20 engager credited at 0.16 /day (TRANSFER-OUTCOME, tier NONE: needs development); bispecific-armed T cells have no kill rate in any lymphoma trial; eBAT excluded for a stated reason (EGFR/uPAR lower in 29 canine lymphomas than in sarcomas; target-negative human T-cell line not killed; dog hypotension 4/23).
+
+Gap specification: one more non-gated, non-pump, compartment-reaching agent, effective kill >= ~0.06 /day in brain (>= ~0.03 /day T body), within organ budgets. Candidates with human data that need development: CAR-T (CSF, CD7/CD5+CD7) and the canine CD3xCD20 engager (B only; 0.16 x 0.5 = 0.08).
+With one such agent at central human-grounded inputs the 7-agent B and 5-agent T programs close body and brain (previous section).
+
+Still unresolved: unfinished inhibitor sweep (PI3Kdelta, flavopiridol have no canine IC50; carfilzomib); HCQ brain access 0.3 unsourced (not load-bearing); dog CAR-T expansion; MHC-loss escape for allo/vaccine/engager; E12, eye/testis, second cancers (outside model).
+Report: `docs/LYMPHOMA_PLAIN_LANGUAGE.html` (artifact Version 14).
