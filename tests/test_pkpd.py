@@ -134,3 +134,49 @@ def test_abemaciclib_records_the_metastasis_versus_intact_barrier_distinction():
     note = pk.PARAMS["abemaciclib"].note
     assert "METASTAS" in note.upper()
     assert "intact" in note.lower()
+
+
+# --- the cytostatic correction ---------------------------------------------------------------------
+
+def test_a_pure_cytostatic_never_reaches_zero_net_growth():
+    """The error this correction fixes: arrest is bounded below by zero, so no concentration of a
+    cytostatic agent clears a tumour. Reading its exposure as a kill rate overstated it."""
+    from canine_dsp import pkpd as pk
+
+    for conc in (10.0, 100.0, 1_000.0, 1_000_000.0):
+        net = pk.cytostatic_net_growth(40.0, conc)
+        assert net > 0.0, conc
+    # monotonically decreasing, approaching but never reaching zero
+    assert pk.cytostatic_net_growth(40.0, 1e6) < pk.cytostatic_net_growth(40.0, 10.0)
+
+
+def test_the_cytostatic_reading_is_less_favourable_than_the_kill_reading():
+    """If the correction were not in the conservative direction it would be suspect."""
+    from canine_dsp import pkpd as pk
+
+    conc = pk.RIBOCICLIB_NONENHANCING_NM["400 mg QD, median"][0]
+    kill_margin = pk.emax_kill_rate(40.0, conc) - pk.GROWTH_PER_DAY
+    net = pk.cytostatic_net_growth(40.0, conc)
+    assert kill_margin > 0 > -net, "the kill reading claims regression; the correct one does not"
+
+
+def test_ribociclib_effect_is_reported_as_suppression_not_clearance():
+    from canine_dsp import pkpd as pk
+
+    eff = pk.ribociclib_cytostatic_effect()
+    assert all(not r["clears_the_tumour"] for r in eff["by_site"].values())
+    for row in eff["by_site"].values():
+        assert row["doubling_time_days"] > eff["untreated_doubling_days"]
+    assert "NOT clear" in eff["reading"]
+
+
+def test_the_correction_itself_is_recorded_rather_than_silently_applied():
+    """CLAUDE.md rule 5 and rule 8: a withdrawn number stays in the record with what replaced it."""
+    from canine_dsp import pkpd as pk
+
+    c = pk.ribociclib_margin_correction()
+    assert "artifact" in c["what_was_published"]
+    assert "cytotoxic reading" in c["why_it_was_wrong"]
+    assert "does NOT close the invading edge by itself" in c["consequence"]
+    # the measured access result must be explicitly preserved, since only the reading was wrong
+    assert "stands untouched" in c["consequence"]

@@ -101,3 +101,54 @@ def test_the_probabilistic_module_is_explicitly_demoted():
 def test_route_inventory_matches_the_independent_audit():
     r = dc.route_count()
     assert r["routes_after_independent_audit"] > r["routes_in_disease_enumeration"]
+
+
+# --- the goal, graded against the user's verbatim criteria (rule 2) --------------------------------
+
+def test_the_criteria_are_quoted_verbatim_not_paraphrased():
+    """Rule 2. The bar drifted in my own reporting three times; pinning the words stops that."""
+    joined = " ".join(dc.CRITERIA)
+    for phrase in ("every mechanism and every escape",
+                   "10+ years of durability",
+                   "I'm not asking if it's been demonstrated",
+                   "I'm okay with no specific data but if scientifically sound",
+                   "I don't want odds"):
+        assert phrase in joined, phrase
+
+
+def test_the_goal_verdict_grades_every_criterion():
+    v = dc.goal_verdict()
+    for term in ("every_mechanism_and_escape_closed", "by_real_data_or_rigorous_model",
+                 "potency_and_toxicity_both_considered", "not_odds_but_a_conjunction"):
+        assert term in v, term
+    assert v["by_real_data_or_rigorous_model"]["inputs_failing_the_bar"] == []
+
+
+def test_absence_of_canine_demonstration_is_not_graded_as_a_failure():
+    """Rule 11 / failure 7: the user disclaimed this bar twice, so it must not reappear as a gap."""
+    v = dc.goal_verdict()
+    assert v["demonstration_not_required"]["verdict"].startswith("N/A")
+
+
+def test_the_verdict_separates_the_two_tiers_rather_than_collapsing_them():
+    """Rule 13: a programme needing a to-build agent is reported separately and as such."""
+    e = dc.goal_verdict()["every_mechanism_and_escape_closed"]
+    assert e["full_programme"]["verdict"] == "MET"
+    assert "WEAKER" in e["licensed_only_programme"]["verdict"]
+
+
+def test_the_one_unquantified_quantity_is_named_not_buried():
+    """Overstating closure is failure 4. The verdict must name what it cannot compute."""
+    v = dc.goal_verdict()
+    q = v["the_one_quantity_that_is_genuinely_unquantified"]
+    assert "NET REGRESSION AT THE INVADING EDGE" in q
+    assert "magnitude is not" in q
+    # and the headline verdict must carry the qualification, not just the good news
+    assert "honest qualifications" in v["verdict"]
+
+
+def test_strengthening_items_are_not_relabelled_as_open_gaps():
+    """Rule 11: a transferred or structurally-closed item is not open. But it must still be listed
+    as something that would strengthen the result, or the report hides its own soft spots."""
+    v = dc.goal_verdict()
+    assert len(v["what_would_strengthen_it_rather_than_what_is_open"]) == 3

@@ -151,6 +151,76 @@ def growth_sensitivity(rates: tuple[float, ...] = (0.030, 0.055, 0.080)) -> dict
 
 GRADES: tuple[InputGrade, ...] = (
     InputGrade(
+        "access behind an INTACT barrier (the project's last open quantity)",
+        "pkpd.RIBOCICLIB_NONENHANCING_NM",
+        Provenance.MEASURED, Verdict.PASSES,
+        "THE STRONGEST INPUT IN THE PROJECT, and it replaced three inferences. Gadolinium-NON-"
+        "ENHANCING tumour is tissue behind an intact barrier by definition, so a drug concentration "
+        "measured there answers the access question directly instead of inferring it from a rodent "
+        "Kp, a generic compartment figure, or an enhancing-lesion concentration. Unbound ribociclib "
+        "there is 170 nM median (65-1770) at 400 mg and 634 nM at 600 mg (PMID 41206763), 560 nM at "
+        "900 mg with 374 nM in CSF (PMID 31285369), against a 40 nM IC50 -- in a trial enrolled on "
+        "CDKN2A/B deletion with wild-type Rb, this tumour's own lesion, with RB phosphorylation and "
+        "Ki-67 reduced in the same tissue. The assay returns negatives: everolimus undetectable, "
+        "ceritinib 6 nM and declared insufficient (PMID 34702773). Human-to-dog is the only "
+        "transfer step.",
+        previously_reported_as_gap=True,
+    ),
+    InputGrade(
+        "CDK4/6 effect read as CYTOSTASIS, not kill",
+        "pkpd.cytostatic_net_growth / ribociclib_margin_correction",
+        Provenance.DERIVED, Verdict.PASSES,
+        "A CORRECTION, recorded rather than silently applied. The measured concentrations above were "
+        "read through emax_kill_rate, which treats an assay's surviving fraction as exponential "
+        "DEATH -- a cytotoxic reading. CDK4/6 inhibition arrests; the trial's own endpoints are "
+        "proliferation readouts. Corrected to f = C/(C+IC50) with residual net growth "
+        "growth*(1-f), which is bounded below by ZERO: no concentration of a pure cytostatic clears "
+        "a tumour. Effect at the invading edge: 81% of proliferation suppressed, doubling time 12.6 "
+        "-> 66 days. Large, useful, and NOT regression. Passes because the model is explicit and "
+        "the direction of the correction is against the project's own earlier claim.",
+        previously_reported_as_gap=True,
+    ),
+    InputGrade(
+        "a non-division-gated kill mechanism at the invading edge",
+        "availability_tiers.persister_cover_at_the_invading_edge",
+        Provenance.TRANSFERRED, Verdict.PASSES,
+        "Dordaviprone (ONC201), FDA accelerated approval 2025 (PMID 42232453). ClpP agonism degrades "
+        "electron transport chain and TCA cycle proteins (PMID 37195023), so the kill collapses "
+        "oxidative phosphorylation -- which a quiescent cell needs as much as a dividing one. "
+        "Access argued from the indication: H3K27M diffuse midline glioma is unresectable, "
+        "infiltrative and largely non-enhancing. Target transfer COMPUTED: ClpP's mature catalytic "
+        "region is 98.41% human-dog identical with both active-site residues identical "
+        "(sequence_conservation.clpp_domain_partition()). Graded TRANSFERRED and closed "
+        "STRUCTURALLY, not by a margin -- no canine-HS data and no published unbound tumour "
+        "concentration, and once-weekly dosing is in tension with continuous duty (C3).",
+    ),
+    InputGrade(
+        "a licensed CYTOCIDAL agent matched to the germline deletion",
+        "availability_tiers.PROGRAM['niraparib']",
+        Provenance.TRANSFERRED, Verdict.PASSES,
+        "Niraparib (licensed). Cytocidal via DNA double-strand breaks, so it supplies what CDK4/6 "
+        "inhibition cannot. Brain penetration measured in the right patients: validated LC-MS/MS in "
+        "human brain-tumour tissue and CSF, fractions unbound 0.05 brain / 0.16 plasma, authors "
+        "report significant brain penetration in glioblastoma patients (PMID 38657366) -- but the "
+        "trial is ongoing and NO unbound tumour CONCENTRATION is published, which is why no kill "
+        "rate is derived. GENOTYPE MATCH, and it is the unexpected part: PARP inhibitors INACTIVATE "
+        "PRMT5 and MTAP-deficient tumours are measurably more vulnerable to olaparib in vivo "
+        "(PMID 42122132), with MTAP re-introduction REDUCING sensitivity as a clean control and "
+        "raised gamma-H2AX confirming the mechanism (PMID 33691794). So a licensed drug reaches the "
+        "axis the to-build PRMT5 arm was for, and does so Rb-INDEPENDENTLY, which also answers "
+        "escape A15.",
+    ),
+    InputGrade(
+        "marrow budget of the licensed-only pair",
+        "core.toxicity: niraparib 0.50 + ribociclib 0.45",
+        Provenance.TRANSFERRED, Verdict.PASSES,
+        "COMPUTED AND TIGHT, and reported because it is tight rather than despite it: the two "
+        "licensed maintenance agents sit on the SAME marrow axis and sum to 0.95, leaving 0.05 "
+        "headroom. Tolerable, but it means nothing else myelosuppressive can join the "
+        "licensed-only programme without dose reduction. Both figures are human-label transfers; "
+        "neither is measured in dogs, and a canine dose-finding study would be required.",
+    ),
+    InputGrade(
         "tumour net growth rate (the pass/fail bar)", "pkpd.GROWTH_PER_DAY",
         Provenance.DERIVED, Verdict.PASSES,
         "WAS the one genuine failure -- a bare 0.055 literal, an assumed ~13-day doubling with no "

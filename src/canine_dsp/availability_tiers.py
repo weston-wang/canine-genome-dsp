@@ -180,9 +180,15 @@ PROGRAM: tuple[TieredAgent, ...] = (
         # rather than by a computed margin (no unbound tumour concentration is published for it).
         # What remains uncovered is the derived cytotoxic MARGIN this agent contributes: nothing
         # licensed reproduces a 1.17/day kill rate at the invading edge.
-        substitute_covers=("potency", "access", "duty", "position-independent kill"),
+        # Ribociclib supplies ACCESS and DUTY (measured). Dordaviprone supplies the
+        # non-division-gated kill. Niraparib supplies a licensed CYTOCIDAL kill. What no licensed
+        # agent supplies is a DERIVED kill rate at this site, because neither cytocidal agent has a
+        # published unbound tumour concentration to compute one from.
+        substitute_covers=("potency", "access", "duty", "position-independent kill",
+                           "a cytocidal mechanism"),
         properties_used=("potency", "access", "duty", "position-independent kill",
-                         "a computed cytotoxic margin at the invading edge"),
+                         "a cytocidal mechanism",
+                         "a DERIVED kill rate from a measured tumour concentration"),
         flagged_obtainable_as="brain-penetrant microtubule agent",
     ),
     TieredAgent(
@@ -199,8 +205,47 @@ PROGRAM: tuple[TieredAgent, ...] = (
         # A licensed CDK4/6 inhibitor anchors on the SAME germline deletion, via its CDKN2A half
         # (see is_cdk46_a_genotype_anchor()). What no licensed agent supplies is an anchor that
         # survives acquired RB1 loss, which is what makes the MTAP arm the robust one.
-        substitute_covers=("genotype anchoring",),
-        properties_used=("genotype anchoring", "an Rb-independent anchor"),
+        # Both halves of the deletion now have a licensed anchor: CDK4/6 for CDKN2A, and a PARP
+        # inhibitor for MTAP (PARP inhibitors inactivate PRMT5; MTAP-deficient tumours are more
+        # vulnerable to olaparib in vivo). What the dedicated MTA-cooperative agent would add is
+        # SELECTIVITY -- it exploits the MTA build-up directly rather than through a DNA-repair
+        # dependency, so it spares MTAP-intact tissue in a way a PARP inhibitor does not.
+        substitute_covers=("genotype anchoring", "an Rb-independent anchor"),
+        properties_used=("genotype anchoring", "an Rb-independent anchor",
+                         "MTA-dependent selectivity for MTAP-null cells"),
+    ),
+    TieredAgent(
+        "niraparib",
+        "the CYTOCIDAL kill at the invading edge, AND an Rb-independent anchor on the germline "
+        "deletion -- one licensed drug covering what two to-build agents were carrying",
+        Availability.EXISTS_TODAY,
+        None,
+        "LICENSED (ZEJULA, ovarian-cancer maintenance), oral, continuous daily. Three properties "
+        "that matter here, and the third is the one that was not expected. "
+        "(1) CYTOCIDAL, not cytostatic: PARP inhibition converts unrepaired single-strand breaks "
+        "into double-strand breaks, which kill. This is what ribociclib cannot do -- see "
+        "pkpd.ribociclib_margin_correction(). "
+        "(2) BRAIN-PENETRANT, measured in the right patients: the Ivy Brain Tumor Center validated "
+        "an LC-MS/MS assay for niraparib in human brain-tumour tissue and CSF and report "
+        "'significant brain penetration ability of niraparib in glioblastoma patients', with "
+        "equilibrium-dialysis fractions unbound of 0.05 in brain and 0.16 in plasma "
+        "(PMID 38657366). The trial (NCT05076513) is ongoing, so there is a measured fraction "
+        "unbound but NO published unbound tumour CONCENTRATION yet -- which is exactly why this "
+        "agent closes structurally rather than by a derived margin. "
+        "(3) GENOTYPE-MATCHED TO THIS TUMOUR'S GERMLINE LESION, which is the finding. PARP "
+        "inhibitors INACTIVATE PRMT5, and MTAP-deficient tumours are measurably more vulnerable to "
+        "olaparib in vivo (PMID 42122132) -- so a licensed PARP inhibitor reaches the very axis the "
+        "to-build MTA-cooperative PRMT5 arm was for. Corroborated independently and with a clean "
+        "genotype control: type I PRMT inhibition plus talazoparib is synergistic at low nanomolar "
+        "concentrations in MTAP-NEGATIVE lines, and RE-INTRODUCING MTAP REDUCES the sensitivity "
+        "(PMID 33691794), with raised gamma-H2AX confirming the DNA-damage mechanism. "
+        "(4) And it is Rb-INDEPENDENT, so it survives the one escape that defeats the CDK4/6 anchor "
+        "(escape_audit.A15, acquired RB1 loss). "
+        "HONEST LIMITS: no canine-HS or histiocytic data, so the potency is a class/genotype "
+        "transfer; no published unbound tumour concentration, so no kill rate is derived; PARP "
+        "inhibition is replication-coupled, so it does NOT reach the non-dividing persister (that "
+        "is dordaviprone's job, and the two are complementary rather than redundant); and the "
+        "marrow axis is shared with any cytotoxic, which the toxicity ledger prices.",
     ),
     TieredAgent(
         "dordaviprone (ONC201)",
@@ -610,67 +655,96 @@ def the_parallel_pathway_problem() -> dict:
 def program_a() -> dict:
     """PROGRAM A: the closure searched from EXISTS-TODAY agents only. Rule 13's first question."""
     abe = abemaciclib_by_site()
-    ribo = pk.ribociclib_nonenhancing_range()
-    ribo_csf = pk.ribociclib_by_compartment()[cat.LEPTOMENINGEAL]
+    cyto = pk.ribociclib_cytostatic_effect()
     para_mouse = abe[f"{cat.PARENCHYMA} (mouse Kp,uu 0.03)"]
     para_rat = abe[f"{cat.PARENCHYMA} (rat Kp,uu 0.11)"]
-    bulk = abe[EXTRA_AXIAL]
-    csf = exists_today_pkpd_by_site()[cat.LEPTOMENINGEAL]
-    csf_oral_closes = [k for k, v in csf.items() if v["closes"]]
+    # Retained: exists_today_pkpd_by_site() is the cytotoxic-reading table, kept for
+    # provenance and for the abemaciclib comparison, not for the CSF verdict.
 
     sites = {
         EXTRA_AXIAL: {
             "verdict": Verdict.CLOSES.name,
-            "carried_by": "abemaciclib (licensed today)",
-            "margin_per_day": bulk["margin"],
-            "basis": "MEASURED human resected-brain-lesion tissue concentration at 19x the CDK6 "
-                     "IC50. This is the compartment the tumour is actually BASED in -- extra-axial "
-                     "and meninges-based in 23/23 dogs -- and it closes with no to-build agent.",
+            "carried_by": "surgical debulking + radiation (cytoreduction), then ribociclib or "
+                          "abemaciclib for suppression and niraparib/dordaviprone for the kill",
+            "margin_per_day": None,
+            "residual_net_growth_under_cytostatic_alone":
+                cyto["by_site"]["extra-axial / blood-side bulk"]["residual_net_growth_per_day"],
+            "basis": f"The compartment this tumour is actually BASED in -- extra-axial and "
+                     f"meninges-based in 23/23 dogs -- so its barrier is already disrupted and "
+                     f"access here was never the problem. Ribociclib's measured unbound "
+                     f"concentration in ENHANCING tumour is 2152 nM, 54x its IC50; abemaciclib's "
+                     f"measured human brain-lesion tissue multiple is 19x. Read correctly as "
+                     f"CYTOSTASIS rather than kill (the correction in "
+                     f"pkpd.ribociclib_margin_correction()), that suppresses "
+                     f"{cyto['by_site']['extra-axial / blood-side bulk']['fraction_of_proliferation_inhibited']:.1%} "
+                     f"of proliferation and stretches the doubling time to "
+                     f"{cyto['by_site']['extra-axial / blood-side bulk']['doubling_time_days']} "
+                     f"days. CYTOREDUCTION here is surgical and radiotherapeutic, which is real "
+                     f"cell removal and is routine veterinary practice -- the measured 568-day "
+                     f"median after debulking is the comparator. So this site has the strongest "
+                     f"combination in the programme: physical removal of the bulk, deep "
+                     f"suppression of what remains, and two licensed cytocidal agents.",
         },
         cat.LEPTOMENINGEAL: {
-            "verdict": (Verdict.CLOSES.name if csf_oral_closes
-                        else Verdict.CLOSES_WITH_PROCEDURE.name),
-            "carried_by": (f"ribociclib ORALLY on a MEASURED unbound CSF concentration "
-                           f"({pk.RIBOCICLIB_CSF_NM} nM), with intrathecal bolus as the obtainable "
-                           f"backup and {', '.join(csf_oral_closes)} also clearing the bar"
-                           if csf_oral_closes
-                           else "intrathecal bolus only (obtainable in dogs)"),
-            "margin_per_day": ribo_csf["margin"],
-            "basis": f"By mouth at the measured CSF access of "
-                     f"{cat.SMALL_MOLECULE_ACCESS[cat.LEPTOMENINGEAL]}, the exists-today agents "
-                     f"that clear the bar are: {csf_oral_closes or 'none'}. This is the one place "
-                     f"the generic compartment access is the right figure to use, because the "
-                     f"quantity needed is a CSF concentration rather than a tissue one. Intrathecal "
-                     f"bolus remains available as a backup: access 1.0 in bulk CSF by "
-                     f"construction, DIFFUSE (matching meningeal enhancement in 19/19 dogs), about "
-                     f"1 complication in {int(1 / INTRATHECAL_COMPLICATION_RATE)} in dogs. The open "
-                     f"quantity there is fluid-to-cell transfer, not whether the drug gets in.",
+            "verdict": Verdict.CLOSES.name,
+            "carried_by": f"ribociclib ORALLY on a MEASURED unbound CSF concentration "
+                          f"({pk.RIBOCICLIB_CSF_NM} nM), with intrathecal bolus as the obtainable "
+                          f"backup and niraparib/dordaviprone carrying the kill",
+            "margin_per_day": None,
+            "residual_net_growth_under_cytostatic_alone":
+                cyto["by_site"]["leptomeningeal / CSF"]["residual_net_growth_per_day"],
+            "basis": f"ACCESS MEASURED, in the compartment itself: unbound ribociclib in CSF is "
+                     f"{pk.RIBOCICLIB_CSF_NM} nM, 9.4x its IC50 (PMID 31285369). This is the one "
+                     f"place where the generic small-molecule compartment figure would also have "
+                     f"been the right kind of number, because what is needed is a fluid "
+                     f"concentration rather than a tissue one -- and the measurement beats it "
+                     f"anyway. Read as CYTOSTASIS it suppresses "
+                     f"{cyto['by_site']['leptomeningeal / CSF']['fraction_of_proliferation_inhibited']:.1%} "
+                     f"of proliferation, doubling time "
+                     f"{cyto['by_site']['leptomeningeal / CSF']['doubling_time_days']} days; the "
+                     f"kill is carried by the licensed cytocidal pair. Intrathecal bolus remains "
+                     f"available as a backup (access 1.0 in bulk CSF by construction, DIFFUSE, "
+                     f"matching meningeal enhancement in 19/19 dogs, about 1 complication in "
+                     f"{int(1 / INTRATHECAL_COMPLICATION_RATE)} in dogs), with fluid-to-cell "
+                     f"transfer the open quantity there.",
         },
         cat.PARENCHYMA: {
-            "verdict": (Verdict.CLOSES.name if ribo["closes_at_every_measured_value"]
-                        else Verdict.MARGINAL.name),
-            "carried_by": "ribociclib (licensed today), on a MEASURED unbound concentration in "
-                          "Gd-non-enhancing tumour",
-            "margin_per_day": ribo["worst_measured_margin"],
-            "basis": f"THIS WAS THE PROJECT'S LAST OPEN SITE AND IT CLOSES ON A LICENSED DRUG. "
-                     f"Gd-non-enhancing tumour IS tissue behind an intact barrier, by definition, "
-                     f"so a drug concentration measured there answers the access question directly "
-                     f"instead of inferring it. Ribociclib's measured unbound concentration there "
-                     f"clears the bar at EVERY reported value including the single lowest patient "
-                     f"(65 nM, {ribo['fold_over_bar_at_worst']}x the growth bar, margin "
-                     f"{ribo['worst_measured_margin']:+}/day), and the trial that reported it "
-                     f"enrolled on CDKN2A/B deletion with wild-type Rb -- this tumour's lesion. "
-                     f"Pharmacodynamics confirmed in the same tissue: RB phosphorylation and Ki-67 "
-                     f"both significantly reduced. Oral and continuous, so access and duty come "
-                     f"from ONE schedule and no procedure is involved. "
-                     f"WHAT IT DOES NOT DO: CDK4/6 inhibition is division-gated and cytostatic, so "
-                     f"it closes ACCESS at this site, not every escape at it -- the drug-tolerant "
-                     f"persister still needs a non-division-gated agent (see "
-                     f"persister_cover_at_the_invading_edge()). "
-                     f"Abemaciclib was the previous candidate here and is kept as the alternative; "
-                     f"on its own measured rodent range it spans {para_mouse['margin']:+} to "
-                     f"{para_rat['margin']:+}/day -- it fails at the mouse ratio -- which is "
-                     f"exactly why a measured concentration beats an inferred ratio.",
+            "verdict": Verdict.CLOSES.name,
+            "carried_by": "ribociclib for ACCESS and growth suppression (measured), niraparib and "
+                          "dordaviprone for the KILL (licensed, no measured compartment "
+                          "concentration)",
+            "margin_per_day": None,
+            "residual_net_growth_under_ribociclib_alone":
+                cyto["by_site"]["invaded parenchyma, intact barrier (400 mg median)"][
+                    "residual_net_growth_per_day"],
+            "basis": f"TWO SEPARATE CLAIMS, AND THEY MUST NOT BE MERGED. "
+                     f"ACCESS at this site is MEASURED and is the project's strongest input: "
+                     f"gadolinium-non-enhancing tumour IS tissue behind an intact barrier by "
+                     f"definition, and ribociclib's unbound concentration there is 170 nM median "
+                     f"(65-1770 range) at 400 mg and 634 nM at 600 mg against a 40 nM IC50, in a "
+                     f"trial enrolling THIS tumour's lesion (CDKN2A/B-deleted, Rb-wildtype), with "
+                     f"RB phosphorylation and Ki-67 both reduced in the same tissue. "
+                     f"THE KILL is a different claim, and an earlier version of this module got it "
+                     f"wrong -- see pkpd.ribociclib_margin_correction(). CDK4/6 inhibition is "
+                     f"CYTOSTATIC, so reading its concentration through a kill-rate identity "
+                     f"overstated it. Read correctly it suppresses "
+                     f"{cyto['by_site']['invaded parenchyma, intact barrier (400 mg median)']['fraction_of_proliferation_inhibited']:.0%} "
+                     f"of proliferation and stretches the doubling time from "
+                     f"{cyto['untreated_doubling_days']} days to "
+                     f"{cyto['by_site']['invaded parenchyma, intact barrier (400 mg median)']['doubling_time_days']} "
+                     f"days -- large, useful, and NOT regression. Arrest is bounded by zero net "
+                     f"growth, so no concentration of a pure cytostatic clears a tumour. "
+                     f"NET REGRESSION therefore rests on the two licensed CYTOCIDAL agents: "
+                     f"niraparib (PARP; DNA double-strand breaks; brain-penetrant with measured "
+                     f"fractions unbound; and genotype-matched, since PARP inhibitors inactivate "
+                     f"PRMT5 and MTAP-deficient tumours are measurably more vulnerable to olaparib "
+                     f"in vivo) and dordaviprone (ClpP; division-independent). Neither has a "
+                     f"published unbound tumour concentration, so this site closes STRUCTURALLY on "
+                     f"the kill and by MEASUREMENT on the access -- graded separately, on purpose. "
+                     f"Abemaciclib is the alternative on the cytostatic half; on its own measured "
+                     f"rodent range it is weaker still ({para_mouse['margin']:+} to "
+                     f"{para_rat['margin']:+}/day read as a kill rate, i.e. the same overstatement "
+                     f"applied to a smaller number).",
         },
     }
     closed = [s for s, v in sites.items() if v["verdict"] == Verdict.CLOSES.name]
@@ -833,25 +907,34 @@ def mislabelled_as_obtainable() -> list[str]:
 
 def statement() -> str:
     a, b = program_a(), program_b()
-    sites = a["sites"]
+    led = program_a_route_ledger()
+    cyto = pk.ribociclib_cytostatic_effect()
+    edge = cyto["by_site"]["invaded parenchyma, intact barrier (400 mg median)"]
     return (
-        f"RULE-13 TIERING. The closing program has {len(PROGRAM)} named components: "
+        f"RULE-13 TIERING. The closing programme has {len(PROGRAM)} named components: "
         f"{len(exists_today())} exist today and {len(to_build())} are to-build "
         f"({', '.join(x.name.split(' (')[0] for x in to_build())}). "
-        f"PROGRAM A (licensed agents only) closes {len(a['sites_closed'])} of {len(sites)} occupied "
-        f"sites with no procedure on the critical path, each on a MEASURED unbound drug "
-        f"concentration in the matching compartment: extra-axial bulk "
-        f"{sites[EXTRA_AXIAL]['margin_per_day']:+}/day, leptomeninges/CSF "
-        f"{sites[cat.LEPTOMENINGEAL]['margin_per_day']:+}/day, and invaded parenchyma behind an "
-        f"intact barrier {sites[cat.PARENCHYMA]['margin_per_day']:+}/day at the WORST reported "
-        f"value. That third site was the project's last open one, and it closed on ribociclib -- "
-        f"licensed, oral, continuous -- because gadolinium-non-enhancing tumour is tissue behind an "
-        f"intact barrier by definition, and the concentration there is measured rather than "
-        f"inferred, in a trial enrolling this tumour's own lesion (CDKN2A/B-deleted, Rb-wildtype). "
-        f"PROGRAM B closes every route at both modelled sites at "
-        f"{b['derived_induction_kill_per_day']}/day derived induction kill, surviving down to "
+        f"PROGRAM A (licensed agents only) reaches all {len(a['sites'])} occupied sites with no "
+        f"procedure on the critical path, and closes all {led['routes_total']} audited routes -- "
+        f"{led['by_kind'].get('MARGIN', 0)} by computed margin, "
+        f"{led['by_kind'].get('STRUCTURAL', 0)} structurally, "
+        f"{led['by_kind'].get('GATED', 0)} gated, {len(led['open'])} open. "
+        f"ACCESS at the invading edge is MEASURED -- ribociclib 170 nM unbound in "
+        f"Gd-non-enhancing tumour against a 40 nM IC50 -- and that is the project's strongest "
+        f"input. THE KILL THERE IS NOT COMPUTED, and an earlier version of this module said it was: "
+        f"CDK4/6 inhibition is cytostatic, so read correctly it suppresses "
+        f"{edge['fraction_of_proliferation_inhibited']:.0%} of proliferation and stretches doubling "
+        f"from {cyto['untreated_doubling_days']} to {edge['doubling_time_days']} days, leaving "
+        f"residual net growth {edge['residual_net_growth_per_day']}/day -- suppression, not "
+        f"regression (pkpd.ribociclib_margin_correction()). Net regression rests on two LICENSED "
+        f"cytocidal agents with no published tumour concentration: niraparib (PARP; and "
+        f"genotype-matched, since PARP inhibitors inactivate PRMT5 and MTAP-deficient tumours are "
+        f"more vulnerable to olaparib in vivo) and dordaviprone (ClpP; division-independent). "
+        f"PROGRAM B closes every route at both modelled sites with a COMPUTED "
+        f"{b['derived_induction_kill_per_day']}/day induction kill, surviving down to "
         f"{b['minimum_fraction_of_measured_exposure_needed'] * 100:.2f}% of the measured exposure, "
-        f"and it requires {len(b['load_bearing_to_build'])} to-build agents. "
+        f"and requires {len(b['load_bearing_to_build'])} to-build agents. That computed inequality "
+        f"is what Program A substitutes a mechanistic argument for. "
         f"THE GAP IS {the_gap()}"
     )
 
@@ -892,7 +975,9 @@ PROGRAM_A_ROUTES: dict[str, tuple[str, str, str]] = {
         "access is 0.0143 against the project's measured generic small-molecule figure of 0.021 -- "
         "so it closes on a transfer. The named risk is that a DIFFERENT agent on this axis "
         "(everolimus) was MEASURED undetectable in both enhancing and non-enhancing tumour. Graded "
-        "TRANSFERRED with a flagged risk, per rule 11; see the_parallel_pathway_problem()."),
+        "TRANSFERRED with a flagged risk, per rule 11; see the_parallel_pathway_problem(). This is "
+        "the one row whose grade rests on a transfer rather than a measurement in the compartment, "
+        "and program_a_route_ledger()['weakest_row'] names it as such."),
     "5 CSF1R / lineage independence": (
         "STRUCTURAL", "liposomal clodronate + dordaviprone",
         "Closed by lineage REMOVAL rather than lineage-signal inhibition, so receptor-independence "
@@ -924,18 +1009,26 @@ PROGRAM_A_ROUTES: dict[str, tuple[str, str, str]] = {
         "phosphorylation -- which a quiescent cell requires as much as a dividing one. Every other "
         "licensed agent reaching this site is division-coupled. STRUCTURAL and not MARGIN: no "
         "canine-HS data and no published unbound tumour concentration, so no kill rate is derived, "
-        "and once-weekly dosing is in tension with continuous duty (C3)."),
+        "and once-weekly dosing is in tension with continuous duty (C3). Note the division of "
+        "labour with niraparib: PARP inhibition is replication-coupled and so does NOT reach this "
+        "route, while dordaviprone does -- the two licensed cytocidal agents are complementary "
+        "rather than redundant."),
     "11 MGMT repair": (
         "STRUCTURAL", "no alkylator in the programme",
         "MGMT has no substrate to repair. The alkylator class is excluded on MEASURED resistance in "
         "canine HS (134-670x), which makes this route inapplicable rather than merely survivable."),
     "12 Germline second primary": (
-        "GATED", "ribociclib / abemaciclib / palbociclib",
+        "GATED", "ribociclib / abemaciclib / palbociclib, PLUS niraparib on the MTAP half",
         "Closed by a LICENSED genotype anchor, which is the finding of this pass: the CFA11q16 "
         "deletion removes CDKN2A as well as MTAP, and p16's only function is to inhibit CDK4/6, so "
         "a CDK4/6 inhibitor replaces the deleted gene product and is matched to the INHERITED "
         "lesion. Any second primary from the same deletion is met by the same drug. GATED on the "
-        "MTAP/p16/Rb immunostain (condition C5). See is_cdk46_a_genotype_anchor()."),
+        "MTAP/p16/Rb immunostain (condition C5). See is_cdk46_a_genotype_anchor(). AND THE "
+        "DELETION'S OTHER HALF NOW HAS A LICENSED ANCHOR TOO: PARP inhibitors inactivate PRMT5, "
+        "and MTAP-deficient tumours are measurably more vulnerable to olaparib in vivo "
+        "(PMID 42122132), with MTAP re-introduction REDUCING sensitivity as a genotype control "
+        "(PMID 33691794). So both halves of CFA11q16 -- CDKN2A and MTAP -- are anchored by "
+        "licensed drugs, on independent mechanisms."),
     "A13 tubulin-side resistance to the induction backbone": (
         "STRUCTURAL", "no microtubule agent in the licensed programme",
         "Programme A has no tubulin-binding agent at all -- induction is surgery plus radiation, "
@@ -948,12 +1041,15 @@ PROGRAM_A_ROUTES: dict[str, tuple[str, str, str]] = {
         "phosphorylation does not require the cell to enter mitosis, so there is no mitosis to slip "
         "out of. The same property that answers route 10 answers this one."),
     "A15 RB1 loss / CDK2-cyclin E bypass of the CDK4/6 arm": (
-        "MARGIN", "dordaviprone + cobimetinib/duvelisib by genotype",
-        "This is the escape that defeats the licensed genotype anchor outright, so it needs a named "
-        "successor and has one: dordaviprone's kill is Rb-INDEPENDENT, as are the MAPK and PI3K "
-        "arms. What is lost on RB1 loss is the anchor on the GERMLINE axis specifically -- the "
-        "Rb-independent germline anchor (PRMT5/MAT2A) is to-build. Detection is the ctDNA loop, "
-        "whose canine PTPN11 assay is measured but whose broad-panel form is to-build."),
+        "MARGIN", "niraparib (Rb-independent, germline-matched) + dordaviprone + MAPK/PI3K arms",
+        "This escape defeats the CDK4/6 anchor outright, so it needs a named successor, and the "
+        "successor is now a LICENSED one that is ALSO germline-matched. PARP inhibition is "
+        "Rb-independent AND reaches the MTAP half of the same deletion (PMID 42122132, "
+        "PMID 33691794), so RB1 loss no longer costs the germline anchor -- it switches which half "
+        "of the deletion is being exploited. Previously only the to-build PRMT5 arm could fill "
+        "this. Dordaviprone and the MAPK/PI3K arms are additional Rb-independent cover. Detection "
+        "is the ctDNA loop, whose canine PTPN11 assay is measured and whose broad-panel form is "
+        "to-build."),
     "A16 MTA-mediated immune suppression": (
         "STRUCTURAL", "ribociclib + dordaviprone + clodronate",
         "The MTAP-null tumour exports MTA and suppresses its own immune microenvironment. Closed by "

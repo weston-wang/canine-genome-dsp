@@ -597,3 +597,118 @@ def ribociclib_by_compartment(growth: float = GROWTH_PER_DAY) -> dict:
         out[site] = {"unbound_nM": conc, "kill_per_day": round(k, 4),
                      "margin": round(k - growth, 4), "closes": k > growth}
     return out
+
+
+# ---- CYTOSTATIC vs CYTOCIDAL: a correction to how CDK4/6 exposure was read -----------------------
+#
+# WHAT WAS WRONG. `emax_kill_rate` reads an assay's surviving fraction as exponential DECAY and
+# returns a per-day KILL rate. That reading is right for a cytotoxic, whose assay signal is dead
+# cells. It is WRONG for a cytoSTATIC agent, whose assay signal is cells that never divided. Applied
+# to ribociclib it produced +0.27 to +0.89/day "kill margins" at the invading edge, and those numbers
+# were reported in the consolidated report and the published artifact. CDK4/6 inhibition arrests;
+# it does not lyse. The trial that supplies the concentrations says so in its own endpoints --
+# G1-to-S suppression, reduced Rb phosphorylation, reduced Ki-67 -- all proliferation readouts.
+#
+# THE CORRECT READING. A cytostatic agent inhibits a FRACTION of proliferation,
+#     f = C / (C + IC50)      (Hill, n = 1)
+# so the tumour's residual net growth is growth x (1 - f). That is bounded below by ZERO and never
+# negative: at any finite concentration the population still grows, just more slowly. There is no
+# concentration at which a pure cytostatic clears a tumour.
+#
+# WHAT IT COSTS THE ANALYSIS, STATED PLAINLY. Ribociclib at its MEASURED non-enhancing-tumour
+# concentrations does not close the invading edge on its own. It stretches the doubling time from
+# 12.6 days to between 33 and 212 days, which is a large and genuinely useful effect, and it is not
+# regression. Net regression at that site needs a CYTOCIDAL partner. That is what `niraparib`
+# (licensed, cytocidal, brain-penetrant, genotype-matched) and dordaviprone are in the programme for.
+
+def cytostatic_fraction_inhibited(ic50_nM: float, concentration_nM: float) -> float:
+    """Fraction of proliferation inhibited at a concentration (Hill, n=1). Bounded in [0, 1)."""
+    if ic50_nM <= 0:
+        raise ValueError("ic50_nM must be positive")
+    if concentration_nM < 0:
+        raise ValueError("concentration_nM must be >= 0")
+    return concentration_nM / (concentration_nM + ic50_nM)
+
+
+def cytostatic_net_growth(ic50_nM: float, concentration_nM: float,
+                          growth: float = GROWTH_PER_DAY) -> float:
+    """Residual net growth under pure cytostasis. Always > 0 at finite concentration."""
+    return growth * (1.0 - cytostatic_fraction_inhibited(ic50_nM, concentration_nM))
+
+
+def cytostatic_doubling_days(ic50_nM: float, concentration_nM: float,
+                             growth: float = GROWTH_PER_DAY) -> float:
+    """Doubling time of the residual growth -- the honest way to state a cytostatic's effect."""
+    net = cytostatic_net_growth(ic50_nM, concentration_nM, growth)
+    return math.inf if net <= 0 else math.log(2.0) / net
+
+
+def ribociclib_cytostatic_effect(growth: float = GROWTH_PER_DAY) -> dict:
+    """Ribociclib's MEASURED compartment concentrations read correctly, as growth suppression.
+
+    Replaces `ribociclib_nonenhancing_range()` as the figure to quote for this agent. That function
+    is kept because its concentrations and provenance are right and still needed, but its margins
+    are a cytotoxic reading of a cytostatic agent and must not be quoted as kill rates -- see
+    `ribociclib_margin_correction()`.
+    """
+    d = PARAMS["ribociclib"]
+    sites = {
+        "extra-axial / blood-side bulk": RIBOCICLIB_ENHANCING_NM,
+        "leptomeningeal / CSF": RIBOCICLIB_CSF_NM,
+        "invaded parenchyma, intact barrier (400 mg median)":
+            RIBOCICLIB_NONENHANCING_NM["400 mg QD, median"][0],
+        "invaded parenchyma, intact barrier (lowest patient)":
+            RIBOCICLIB_NONENHANCING_NM["400 mg QD, lowest patient"][0],
+    }
+    rows = {}
+    for site, conc in sites.items():
+        f = cytostatic_fraction_inhibited(d.ic50_nM, conc)
+        net = cytostatic_net_growth(d.ic50_nM, conc, growth)
+        rows[site] = {
+            "unbound_nM": conc,
+            "fraction_of_proliferation_inhibited": round(f, 3),
+            "residual_net_growth_per_day": round(net, 5),
+            "doubling_time_days": round(cytostatic_doubling_days(d.ic50_nM, conc, growth), 1),
+            "clears_the_tumour": False,
+        }
+    return {
+        "agent": "ribociclib (CDK4/6) -- CYTOSTATIC",
+        "untreated_doubling_days": round(math.log(2.0) / growth, 1),
+        "by_site": rows,
+        "reading": "at its measured concentrations ribociclib suppresses 62-98% of proliferation and "
+                   "stretches the doubling time from "
+                   f"{round(math.log(2.0) / growth, 1)} days to between "
+                   f"{min(r['doubling_time_days'] for r in rows.values())} and "
+                   f"{max(r['doubling_time_days'] for r in rows.values())} days. It does NOT clear "
+                   "the tumour at any concentration, because arrest is bounded by zero net growth. "
+                   "Net regression needs a cytocidal partner.",
+    }
+
+
+def ribociclib_margin_correction() -> dict:
+    """The correction itself, recorded rather than silently applied (CLAUDE.md rules 5 and 8)."""
+    d = PARAMS["ribociclib"]
+    conc = RIBOCICLIB_NONENHANCING_NM["400 mg QD, median"][0]
+    wrong = emax_kill_rate(d.ic50_nM, conc) - GROWTH_PER_DAY
+    right_net = cytostatic_net_growth(d.ic50_nM, conc)
+    return {
+        "what_was_published": f"a kill margin of +{wrong:.4f}/day at the invading edge (and +0.27 to "
+                              f"+0.89/day across the measured range), in docs/CONSOLIDATED_REPORT.md "
+                              f"and in the published artifact",
+        "why_it_was_wrong": "emax_kill_rate reads an assay's surviving fraction as exponential "
+                            "death, which is a cytotoxic reading. CDK4/6 inhibition arrests the "
+                            "cycle; the trial's own endpoints are proliferation readouts (G1-to-S "
+                            "suppression, Rb phosphorylation, Ki-67), not death.",
+        "what_is_correct": f"{round(right_net, 5)}/day residual net growth -- still POSITIVE -- i.e. "
+                           f"the doubling time stretches from "
+                           f"{round(math.log(2.0) / GROWTH_PER_DAY, 1)} days to "
+                           f"{round(cytostatic_doubling_days(d.ic50_nM, conc), 1)} days",
+        "consequence": "ribociclib does NOT close the invading edge by itself. The measured ACCESS "
+                       "result stands untouched -- 170-634 nM unbound in Gd-non-enhancing tumour is "
+                       "a measurement and remains the project's best access figure. What does not "
+                       "stand is reading that concentration as a kill rate.",
+        "what_carries_the_kill_instead": "niraparib (licensed PARP inhibitor: cytocidal via DNA "
+                                         "double-strand breaks, brain-penetrant, and genotype-"
+                                         "matched to the MTAP deletion) and dordaviprone (licensed "
+                                         "ClpP agonist: division-independent metabolic kill).",
+    }

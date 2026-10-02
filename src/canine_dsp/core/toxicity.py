@@ -203,6 +203,17 @@ PROFILES = {
     "anti-PD-1 (gilvetmab)": ToxicityProfile(
         Organ.IMMUNE_MEDIATED, 0.30, True, "immune-mediated adverse events",
         source="JVIM 2026 PMID 42247661"),
+    "niraparib (PARP)": ToxicityProfile(
+        Organ.MARROW, 0.50, False,
+        "thrombocytopenia and anaemia are the dose-limiting events; hypertension is the secondary "
+        "axis and shares a vessel with the MEK class",
+        source="ZEJULA US label (human): grade 3/4 thrombocytopenia and anaemia lead the dose "
+               "reductions, with a weight/platelet-based starting dose for that reason. NOT "
+               "measured in dogs -- a human-label TRANSFER, and a canine dose-finding study would "
+               "be required. THE COLLISION THAT MATTERS: this sits on the SAME marrow axis as "
+               "ribociclib (0.45), so the pair sums to 0.95 and leaves almost no marrow headroom -- "
+               "which is a real constraint on the licensed-only programme, not a free addition.",
+        secondary_axis=Organ.SKIN_VASCULAR, secondary_fraction=0.20),
     "ribociclib (CDK4/6)": ToxicityProfile(
         Organ.MARROW, 0.45, False,
         "neutropenia is the commonest grade 3/4 event; QT prolongation carries an ECG monitoring "

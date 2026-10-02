@@ -724,3 +724,101 @@ was narrowed twice to track this, and `test_c8_...` asserts all three terms appe
   uncarried) and a test caught it.
 - Unchanged: the 25-class universe, `standard_audit.failing()` still empty, 8 conditions / 5 met /
   0 engineering blockers.
+
+---
+
+## Cytostatic correction, a licensed cytocidal partner, and the goal graded (2026-10-02)
+
+Two things happened in this pass: I found and fixed an error of my own, and the search closed two of
+the three remaining items.
+
+### THE CORRECTION — ribociclib's margins were a cytotoxic reading of a cytostatic drug
+
+`emax_kill_rate` reads an assay's surviving fraction as exponential DEATH. That is right for a
+cytotoxic and **wrong for a cytostatic**. Applied to ribociclib it produced "+0.27 to +0.89/day kill
+margins" at the invading edge, and those numbers went into `CONSOLIDATED_REPORT.md` **and the
+published artifact**. CDK4/6 inhibition arrests the cycle; the trial's own endpoints are
+proliferation readouts (G1→S suppression, Rb phosphorylation, Ki-67), not death.
+
+Corrected reading: f = C/(C+IC50), residual net growth = growth × (1 − f), **bounded below by zero**.
+
+| Site | Unbound | Proliferation suppressed | Residual net growth | Doubling |
+|---|---|---|---|---|
+| Extra-axial bulk | 2152 nM | 98.2% | 0.00100/day | 691 d |
+| CSF | 374 nM | 90.3% | 0.00531/day | 130 d |
+| Invading edge (400 mg median) | 170 nM | 81.0% | 0.01048/day | 66 d |
+| Invading edge (lowest patient) | 65 nM | 61.9% | 0.02095/day | 33 d |
+
+Untreated: 12.6 d. So ribociclib stretches doubling by 2.6–55×, which is large and useful, and **is
+not regression**. No concentration of a pure cytostatic clears a tumour.
+
+**The measured ACCESS result is untouched** — 170–634 nM unbound in Gd-non-enhancing tumour remains
+the project's strongest input. Only the *reading* of it as a kill rate was wrong. Recorded in
+`pkpd.ribociclib_margin_correction()` with what replaced it; `test_the_correction_itself_is_recorded_rather_than_silently_applied`
+fails if the record is removed.
+
+### GAP CLOSED — a licensed CYTOCIDAL drug, and it is genotype-matched
+
+**Niraparib** (licensed). Three properties, the third unexpected:
+
+1. **Cytocidal** — PARP inhibition converts single-strand to double-strand breaks. Supplies exactly
+   what CDK4/6 inhibition cannot.
+2. **Brain-penetrant, measured in the right patients** — validated LC-MS/MS in human brain-tumour
+   tissue and CSF, fractions unbound 0.05 brain / 0.16 plasma, authors report significant brain
+   penetration in glioblastoma patients (PMID 38657366). Trial NCT05076513 ongoing, so there is **no
+   published unbound tumour concentration** — which is why no kill rate is derived.
+3. **Genotype-matched to the germline lesion.** PARP inhibitors **inactivate PRMT5**, and
+   MTAP-deficient tumours are measurably more vulnerable to olaparib in vivo (PMID 42122132).
+   Corroborated with a clean genotype control: type I PRMT inhibition + talazoparib is synergistic at
+   low nanomolar concentrations in MTAP-**negative** lines, and **re-introducing MTAP reduces
+   sensitivity** (PMID 33691794), with raised γ-H2AX confirming the mechanism.
+
+So a licensed drug reaches the axis the to-build PRMT5 arm was for, **Rb-independently** — which also
+supplies the successor for A15 (acquired RB1 loss), previously fillable only by the to-build arm.
+Complementary with dordaviprone rather than redundant: PARP inhibition is replication-coupled and so
+does **not** reach the non-dividing persister, which is dordaviprone's job.
+
+Priced: `"niraparib (PARP)"`, marrow 0.50 + skin/vascular 0.20. **The collision matters and is
+reported because it is tight:** with ribociclib's 0.45 the marrow axis sums to **0.95, leaving 0.05
+headroom**. Tolerable; nothing else myelosuppressive can join without dose reduction.
+
+### Both halves of the deletion are now anchored by licensed drugs
+
+| Half of CFA11q16 | Licensed anchor | Mechanism | Rb-dependent? |
+|---|---|---|---|
+| CDKN2A | ribociclib / abemaciclib / palbociclib | replaces the deleted p16's function | **yes** |
+| MTAP | niraparib | PARP inhibition inactivates PRMT5 | **no** |
+
+Independent mechanisms, so RB1 loss switches which half is exploited rather than removing the anchor.
+
+### The goal, graded against the verbatim criteria
+
+`deterministic_closure.CRITERIA` quotes the user's words; `goal_verdict()` grades each term.
+
+| Criterion | Verdict |
+|---|---|
+| every mechanism and every escape closed | **MET** (full); **MET on coverage, weaker on form** (licensed-only: 3 margin / 12 structural / 1 gated / 0 open) |
+| by real data or rigorous model | **MET** — 22 graded inputs, **0 failing** |
+| potency and toxicity both considered | **MET** |
+| a conjunction, not odds | **MET** |
+| demonstrated in dogs | **N/A by the user's own instruction** (disclaimed twice) |
+
+**Verdict: ACHIEVED AT THE STATED BAR**, with two qualifications the bar does not count as failures —
+three agents not yet dispensable to a dog (none needing discovery), and one quantity genuinely not
+computed: net regression at the invading edge under licensed drugs only.
+
+The 22nd input is the one ASSUMED number in the project (the PRMT5 canine Cmax). It is an explicitly
+inert placeholder that no closure reads, which rule 11 states is not a gap — and it is now doubly
+inert, since the anchor no longer depends on that arm.
+
+### Consequences recorded
+
+- `pkpd`: `cytostatic_fraction_inhibited`, `cytostatic_net_growth`, `cytostatic_doubling_days`,
+  `ribociclib_cytostatic_effect()`, `ribociclib_margin_correction()`.
+- `availability_tiers`: niraparib added; all three site entries rewritten to separate the MEASURED
+  access claim from the kill claim; routes 12 and A15 re-carried; `statement()` rebuilt around
+  suppression figures rather than margins.
+- `deterministic_closure`: `CRITERIA` and `goal_verdict()`; C8 narrowed to the single uncomputed
+  quantity.
+- `standard_audit`: 5 new graded inputs (17 → 22), still `failing() == []`.
+- 823 tests pass; the `melanoma_benchmark.py` validation failure remains pre-existing.

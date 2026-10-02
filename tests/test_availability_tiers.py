@@ -52,13 +52,15 @@ def test_load_bearing_is_decided_from_fields_not_from_prose():
     assert unc["paxalisib"] == ["access"], "duvelisib covers the potency, not the access"
     # Ribociclib's measured Gd-non-enhancing concentrations substitute for RGN3067's ACCESS and
     # DUTY. What no licensed agent substitutes for is its non-division-gated kill.
-    assert unc["RGN3067"] == ["a computed cytotoxic margin at the invading edge"]
-    assert "access" not in unc["RGN3067"]
-    assert "duty" not in unc["RGN3067"]
-    # dordaviprone supplies the non-division-gated kill, so that is no longer uncovered either
-    assert "position-independent kill" not in unc["RGN3067"]
-    # and the PRMT5 arm is now wanted only for the Rb-INDEPENDENT form of the anchor
-    assert unc["MTA-cooperative PRMT5 inhibitor"] == ["an Rb-independent anchor"]
+    assert unc["RGN3067"] == ["a DERIVED kill rate from a measured tumour concentration"]
+    # access, duty, the non-division-gated kill and a cytocidal mechanism are all now supplied by
+    # licensed agents (ribociclib, dordaviprone, niraparib). Only the derived RATE is uncovered.
+    for supplied in ("access", "duty", "position-independent kill", "a cytocidal mechanism"):
+        assert supplied not in unc["RGN3067"], supplied
+    # and the PRMT5 arm is now wanted only for MTA-dependent selectivity: a licensed PARP inhibitor
+    # anchors the MTAP half through PRMT5 inactivation, Rb-independently.
+    assert unc["MTA-cooperative PRMT5 inhibitor"] == [
+        "MTA-dependent selectivity for MTAP-null cells"]
 
 
 def test_abemaciclib_is_scored_on_its_own_numbers_not_the_generic_access():
@@ -201,6 +203,25 @@ def test_the_statement_reports_both_programs_and_the_counts_agree():
     assert str(len(at.to_build())) in s
 
 
+def test_the_licensed_pair_is_marrow_limited_and_that_is_reported():
+    """Both licensed maintenance agents sit on the marrow axis; the collision must not be hidden."""
+    from canine_dsp.core import toxicity as tox
+
+    pair = [tox.profile_for("niraparib (PARP)"), tox.profile_for("ribociclib (CDK4/6)")]
+    loads = tox.axis_loads(pair)
+    assert loads[tox.Organ.MARROW] > 0.9, "the collision is the point"
+    assert tox.tolerable(pair), "tight, but it must still fit or the programme is not prescribable"
+    assert tox.headroom(pair) < 0.1
+
+
+def test_niraparib_is_tiered_and_its_limits_are_stated():
+    agent = next(a for a in at.PROGRAM if a.name == "niraparib")
+    assert agent.availability is Availability.EXISTS_TODAY
+    assert agent.pkpd_key is None, "no published unbound tumour concentration to derive a rate from"
+    for phrase in ("CYTOCIDAL", "no canine-HS", "replication-coupled", "PRMT5"):
+        assert phrase in agent.basis, phrase
+
+
 # --- the licensed-only programme, route by route (rule 12 form) -----------------------------------
 
 def test_the_route_ledger_accounts_for_every_audited_route():
@@ -264,8 +285,11 @@ def test_rb1_loss_has_a_named_rb_independent_successor():
     """A15 defeats the licensed anchor, so it needs a successor or the anchor claim is hollow."""
     kind, carrier, basis = at.PROGRAM_A_ROUTES[
         "A15 RB1 loss / CDK2-cyclin E bypass of the CDK4/6 arm"]
+    # the successor is now LICENSED and also germline-matched, which it was not before
+    assert "niraparib" in carrier
     assert "dordaviprone" in carrier
-    assert "Rb-INDEPENDENT" in basis
+    assert "Rb-independent" in basis
+    assert "LICENSED" in basis
 
 
 def test_clpp_transfer_rests_on_the_catalytic_region_not_the_average():
