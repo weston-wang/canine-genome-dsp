@@ -239,6 +239,7 @@ that meet it: the canine CD3xCD20 engager (0.16 x brain access 0.5 = 0.08; B-cel
 as acting on dormant cells (not shown; with the conservative default it does not close the brain). Candidates that exist today do not reach it: every existing
 agent that reaches the brain is division-gated, a pump substrate, or defeated by loss of the cytarabine-activating enzyme.
 
-**Extending the documented windows would also close the B-cell brain.** E5 clears slowly (+0.03 /day) and the model stops it when documented dosing ends: verdinexor 56 days
-(the longest dog is 17 months, PMID 39235783) and oral cytarabine 84 days (an assumption, 4 dogs). With dosing evidence for 6 months or more the existing B-cell program
-would clear the brain. That is a documented-exposure question, not an absent mechanism.
+**Longer dosing does not close it (checked).** Extending the documented windows of verdinexor, oral cytarabine and hydroxychloroquine to 120, 180, 365, 540 and 730 days leaves
+the B-cell brain and the T-cell brain open: after the transplant window ends (166 days) nothing still being given reaches the dormant progenitor in the brain, because the
+remaining agents are division-gated or pump substrates and the antibody's brain access is 0.002. In the body, 365 days of dosing closes the T-cell body as well. So the brain
+needs a sustained, non-gated, non-pump, brain-reaching agent, not longer exposure to the ones that exist.
