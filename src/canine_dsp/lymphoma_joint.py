@@ -169,3 +169,47 @@ EXISTING_PROGRAMS = {
     "T": ("prednisolone (glucocorticoid)", "hydroxychloroquine", "verdinexor", "allogeneic DLA", "cytarabine ocfosfate",
           "romidepsin"),
 }
+
+
+# --- near-future programs (user, 2026-10-02: "include near future ones that are scientifically sound; nothing pure theoretical") ----
+#: Readiness of each agent a closing program uses. A = exists today for dogs (licensed or off-label); B = clinical-stage in dogs;
+#: C = clinical-stage in humans with a stated path to the dog (the canine construct or route still has to be built); D = preclinical
+#: only; E = no clinical evidence of the mechanism anywhere. A program may use A-C; D and E are THEORETICAL and never count
+#: (CLAUDE.md rule 13). docs/universe/SWEEP_near_future.md has the citations.
+READINESS = {
+    "anti-CD20 monoclonal antibody": ("B", "canine anti-CD20 antibody in dogs; B-cell depletion rate measured (PMID 38662527)"),
+    "anti-CD20 monoclonal antibody, intra": ("C", "human intraventricular rituximab clears CSF lymphoma cells (PMID 24190981); Ommaya routine"),
+    "hydroxychloroquine": ("A", "off-label"),
+    "verdinexor": ("A", "licensed for canine lymphoma"),
+    "prednisolone": ("A", "licensed"),
+    "allogeneic DLA": ("A", "performed at referral centres; first-remission dogs 8 of 9 alive >4 y (PMID 35789057)"),
+    "cytarabine ocfosfate": ("B", "oral continuous in dogs, CSF 1.0-3.6 uM (PMID 37670479)"),
+    "romidepsin": ("A", "human-licensed for PTCL; off-label"),
+    "CD3xCD20": ("C", "human CD3xCD20 engagers licensed or late-stage (epcoritamab, glofitamab); anti-canine CD3 and canine CD20 binders "
+                      "exist, no canine engager yet; dog cytokine storm to a T-cell agonist antibody (PMID 25988188) => step-up dosing"),
+    "persistence-engineered": ("C", "canine CD20 CAR-T given to 7 dogs (PMIDs 32002286, 35898541) but did not expand or persist; in-vivo "
+                                    "CAR-T (human first-in-human, PMID 41882404) removes ex-vivo expansion"),
+    "tandem CD19/CD20 CAR-T, intra": ("C", "human intrathecal CD19/CD22 CAR-T in B-ALL with CNS disease, CR 21/22 (ASH 2024); peer-reviewed "
+                                           "intrathecal CAR-T in humans PMIDs 41495049, 42207176, 41798119"),
+    "CD7-directed CAR-T (canine": ("C", "human CD7 CAR-T in T-ALL/lymphoma incl. CNS-involved (PMIDs 37020231, 37740926)"),
+    "CD5 + CD7 dual-target CAR-T (c": ("C", "dual-target CD7/CD5 CAR-T prevents CD7-loss relapse (PMID 37020231)"),
+    "CD7-directed CAR-T, intra": ("C", "intrathecal CAR-T in humans (above) with a CD7 binder"),
+    "continuous intrathecal": ("C", "Ommaya/intrathecal cytarabine infusion in humans"),
+}
+
+#: The programs that close body AND brain at the LOW (pessimistic) human-grounded inputs, found by direct evaluation and by the
+#: exhaustive brain search (docs/LYMPHOMA_UNIVERSE.md section G). The redundancy is deliberate: two independent antigen-directed
+#: routes (antibody + CAR-T + engager for B) so that no single agent is load-bearing.
+NEAR_FUTURE_PROGRAMS = {
+    "B": ("anti-CD20 monoclonal antibody", "anti-CD20 monoclonal antibody, intra", "hydroxychloroquine", "verdinexor",
+          "allogeneic DLA", "cytarabine ocfosfate", "CD3xCD20", "persistence-engineered", "tandem CD19/CD20 CAR-T, intra"),
+    "T": ("hydroxychloroquine", "continuous intrathecal", "CD7-directed CAR-T (canine", "CD5 + CD7 dual-target CAR-T (c",
+          "verdinexor", "allogeneic DLA", "CD7-directed CAR-T, intra", "cytarabine ocfosfate"),
+}
+
+
+def tier_mix(prefixes) -> dict:
+    """Readiness level of every agent in a program; any D or E (theoretical) makes the program inadmissible."""
+    levels = {p: READINESS[p][0] for p in prefixes}
+    return {"levels": levels, "admissible": all(v in ("A", "B", "C") for v in levels.values()),
+            "to_build": [p for p, v in levels.items() if v == "C"]}

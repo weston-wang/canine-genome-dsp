@@ -187,3 +187,43 @@ def test_reassessed_classes_are_in_the_model_at_outcome_or_transfer_grade():
     assert G.potency_grade(ag["CD3xCD20 bispecific T-cell engager (canine-specific) [needs development]"]) == "TRANSFER-OUTCOME"
     assert G.AVAILABILITY["allogeneic DLA-identical HCT (graft-versus-lymphoma)"] != G.NONE
     assert G.AVAILABILITY["CD3xCD20 bispecific T-cell engager (canine-specific) [needs development]"] == G.NONE
+
+
+# --- near-future programs (/goal 2026-10-02) ---------------------------------------------------------------------------------
+
+def test_near_future_programs_close_body_and_brain_even_at_the_pessimistic_inputs():
+    """B- and T-cell programs built from exists-today and clinical-stage agents clear every escape in both compartments at the LOW
+    CAR-T inputs, and no single agent is load-bearing; at the central inputs they also survive halving every potency."""
+    from canine_dsp.lymphoma_joint import CENTRAL, LOW, NEAR_FUTURE_PROGRAMS, escape_matrix, joint_report, tier_mix
+    for ip, n_rows, n_cover in (("B", 44, 4), ("T", 42, 5)):
+        prog = NEAR_FUTURE_PROGRAMS[ip]
+        assert tier_mix(prog)["admissible"]
+        low = joint_report(ip, prog, **LOW)
+        assert low["clears"] and low["any_one_removed_clears"], (ip, low["removal_breaks"])
+        cen = joint_report(ip, prog, **CENTRAL)
+        assert cen["clears"] and cen["halved_clears"] and cen["any_one_removed_clears"]
+        for kw in (LOW, CENTRAL):
+            rows = escape_matrix(ip, prog, **kw)
+            assert len(rows) == n_rows and all(r["closed"] for r in rows)
+            assert min(r["n_cover"] for r in rows) >= n_cover
+
+
+def test_near_future_b_program_without_the_engager_needs_car_t_kill_of_about_0_08_to_0_2():
+    """The exact input the closure turns on. Without the engager the B program clears at CAR-T kill >= 0.08 /day (duty 0.15) and
+    is fault tolerant (halving + drop-one) from 0.2 /day; at 0.06 it does not clear."""
+    from canine_dsp.lymphoma_joint import NEAR_FUTURE_PROGRAMS, joint_report
+    prog = tuple(p for p in NEAR_FUTURE_PROGRAMS["B"] if p != "CD3xCD20")
+    assert not joint_report("B", prog, kill=0.06, duty=0.15)["clears"]
+    assert joint_report("B", prog, kill=0.08, duty=0.15)["clears"]
+    rob = joint_report("B", prog, kill=0.2, duty=0.4)
+    assert rob["clears"] and rob["halved_clears"] and rob["any_one_removed_clears"]
+
+
+def test_theoretical_agents_are_inadmissible():
+    from canine_dsp.lymphoma_joint import READINESS, tier_mix
+    assert tier_mix(("hydroxychloroquine",))["admissible"]
+    READINESS["__theory__"] = ("E", "no evidence")
+    try:
+        assert not tier_mix(("hydroxychloroquine", "__theory__"))["admissible"]
+    finally:
+        del READINESS["__theory__"]

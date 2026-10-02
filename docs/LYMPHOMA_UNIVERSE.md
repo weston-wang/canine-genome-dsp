@@ -243,3 +243,69 @@ agent that reaches the brain is division-gated, a pump substrate, or defeated by
 the B-cell brain and the T-cell brain open: after the transplant window ends (166 days) nothing still being given reaches the dormant progenitor in the brain, because the
 remaining agents are division-gated or pump substrates and the antibody's brain access is 0.002. In the body, 365 days of dosing closes the T-cell body as well. So the brain
 needs a sustained, non-gated, non-pump, brain-reaching agent, not longer exposure to the ones that exist.
+
+## G. Near-future agents (2026-10-02; /goal: "keep going until you truly close all. I don't mean you can only use therapies that exist today, I meant to include near future ones this are scientifically sound. Just nothing that's pure theoretical")
+
+**The standard (now in `CLAUDE.md` rule 13).** Tiers: **A** exists today for dogs (licensed or off-label); **B** clinical-stage in dogs; **C** clinical-stage in humans with a stated path to the dog
+(the canine construct or route still has to be built); **D** preclinical only; **E** no clinical evidence of the mechanism anywhere. A closing program may use A-C. D and E are theoretical and
+never count. Section F had retreated to "exists today" only; that was the wrong bar. Sweeps: `docs/universe/SWEEP_near_future_cell.md` (readiness of each to-build agent, with PMIDs),
+`SWEEP_outside_model.md` (items that were outside the model, searched by measurable proxy per rule 14), `SWEEP_nongated.md` (the agent search for the open escape E5).
+
+**Readiness of what the programs use** (`lymphoma_joint.READINESS`; the code refuses a program containing any D or E agent):
+
+| agent | tier | basis |
+|---|---|---|
+| anti-CD20 antibody (systemic) | B | canine antibody in dogs, B-cell depletion rate measured (PMID 38662527) |
+| hydroxychloroquine, verdinexor, prednisolone, romidepsin | A | off-label / licensed |
+| allogeneic DLA-identical transplant | A (referral centres) | 8 of 9 first-remission dogs alive >4 y (PMID 35789057) |
+| oral cytarabine ocfosfate | B | CSF 1.0-3.6 uM in dogs (PMID 37670479) |
+| intrathecal anti-CD20 antibody; continuous intrathecal cytarabine | C | human intraventricular rituximab clears CSF lymphoma cells (PMID 24190981) |
+| CD3xCD20 bispecific engager (B-cell) | C | human class is licensed or late-stage; anti-canine CD3 and canine CD20 binders exist, no canine engager yet; a dog had a cytokine storm to a T-cell agonist antibody (PMID 25988188), so step-up dosing is a condition |
+| CAR-T, canine binder (B: CD19/CD20; T: CD7, CD5+CD7) | C | canine CD20 CAR-T in 7 dogs did not expand or persist (PMIDs 32002286, 35898541); human CD7 CAR-T in T-ALL/lymphoma incl. CNS (PMIDs 37020231, 37740926); in-vivo CAR-T made in the patient, first-in-human 2025-26, removes ex-vivo expansion (PMID 41882404; lymphoma result is a conference/press report) |
+| CSF-delivered CAR-T | C | human intrathecal CD19/CD22 CAR-T in B-ALL with CNS disease, CR 21/22 (ASH 2024 abstract); peer-reviewed intrathecal CAR-T (PMIDs 41495049, 42207176, 41798119) |
+
+Not credited, each for a stated reason: bispecific-armed T cells (no lymphoma trial in any species: tier D); canine CAR-NK (none exist: D); mRNA-LNP CAR-T (expression 7-10 days, so it is a repeat-dosing
+agent with no lymphoma data: D); eBAT (targets low in canine lymphoma, section F); anti-PD-1 (measured negative).
+
+**Result: both immunophenotypes close body and brain with A-C agents, 23 escapes, toxicity charged on the union of the program** (`lymphoma_joint.NEAR_FUTURE_PROGRAMS`, tests in `tests/test_lymphoma_universe.py`):
+
+| program | agents | at the LOW human-grounded inputs (CAR-T kill 0.12/day, CSF duty 0.15) | at the CENTRAL inputs (0.35/day, 0.4) |
+|---|---|---|---|
+| **B-cell, 9 agents** | anti-CD20 antibody, intrathecal anti-CD20 antibody, hydroxychloroquine, verdinexor, allogeneic transplant, oral cytarabine ocfosfate, CD3xCD20 engager, CAR-T, CSF tandem CD19/CD20 CAR-T | clears; no single agent load-bearing; margins body +0.26 / brain +0.13; last lineage gone day 49 (body), 72 (brain); 44 of 44 escape-by-compartment rows closed, at least 4 covering agents each; **not** robust to halving every potency | clears, halved clears, any-one-removed clears; last lineage day 33 / 38 |
+| **T-cell, 8 agents** | hydroxychloroquine, intrathecal cytarabine, CD7 CAR-T, CD5+CD7 CAR-T, CSF CD7 CAR-T, verdinexor, allogeneic transplant, oral cytarabine ocfosfate | clears; no single agent load-bearing; margins body +0.15 / brain +0.045; last lineage gone day 80 (body), 158 (brain, inside the 166-day transplant window); 42 of 42 rows closed, at least 5 covering agents each; not robust to halving | clears, halved clears, any-one-removed clears; last lineage day 28 / 31 |
+
+So the earlier statement "at the low inputs the B-cell programs do not clear" is superseded: it was true only for programs that had no engager and no oral cytarabine. The B-cell program closes at the low inputs because it has an
+independent CAR-T-free route (antibody + engager + transplant + cytarabine); with the engager alone added to the existing-agent program (anti-CD20 + HCQ + verdinexor + transplant + ocfosfate + engager) both compartments clear at low AND central inputs,
+but that 6-agent set is not fault tolerant (the transplant, cytarabine and the engager are each load-bearing in the brain).
+
+**The exact input the closure turns on** (`joint_report` sweep, B program without the engager, so the CAR-T route alone): it clears at CAR-T kill >= 0.08/day at the low duty (0.06 at duty 0.4) and is robust to halving and to removing any
+agent from **0.2/day**; the T-cell program clears from 0.12/day and is robust from 0.2/day. The central human-grounded value is 0.35/day (1.75 x the robust threshold); the low value 0.12 is at the T clearing threshold. Dog CAR-T has so far
+not reached either (7 dogs; no expansion beyond ~day 14-28), which is why the programs also carry the CAR-T-free route for the B-cell case and why in-vivo generation of CAR-T is named as the route for T-cell disease.
+This is a stated condition, not a gap in the sense of CLAUDE.md rule 11: a transfer stands behind the number and the threshold is explicit.
+
+**Search note.** Exhaustive brain searches of up to 6 agents at the low inputs (every combination covering all 23 escapes; `tier any`, sound grades): B-cell 361,087 covering sets, 3,594 clear the brain clock, 3,352 of those also clear the body
+(run with the earlier thiotepa pump default); T-cell 346,763 covering sets, 242 clear the brain clock (after the thiotepa change; 96 before it; all 96 also clear the body). No automatically found set is also robust to halving and drop-one, because the search forbids
+two agents of the same family (a second CAR-T). The fault-tolerant programs above were assembled from the agents the search keeps selecting and verified by direct evaluation, as in section E.
+
+**Agent search for E5 (the dormant pump-armoured progenitor), `SWEEP_nongated.md`.** No agent shown to kill a dormant, pump-high lymphoid progenitor in the brain was found beyond the immune and cellular routes. Best candidates: thiotepa with stem-cell rescue
+(outcome-derived k 0.13-0.37; **no P-gp cross-resistance** in the MDR1-overexpressing line, GI50 1.07 x parent, so the pump-substrate default was removed; still division-gated by default and it ends with its 115-day window, so it does not close the existing-agent brain),
+CDK9 inhibitors (kill quiescent cells; durable CRs in 2 of 7 high-grade B-cell lymphomas; k not derivable from pulse dosing; brain and pump status not found), artesunate (canine IC50 0.22-0.54 uM, dog Cmax 9.3 uM; k ~0.1 rests on assumed PK; ungraded).
+Excluded for stated reasons: cladribine (BCRP, dCK), ONC201 (k 0.006-0.017), arsenic trioxide (CSF 15% of plasma), IACS-010759 (neurotoxicity), PBD ADC payloads (efflux), magrolimab (deaths), 90Y-ibritumomab in CNS (PFS 6.8 weeks), busulfan (k ~0.015).
+Premise correction: canine B-cell lymphoma rarely expresses BCL6 (PMIDs 23783577, 32038991), so BCL6 degraders are not a canine-driver-matched class.
+
+**Items that were outside the model, searched by measurable proxy (`SWEEP_outside_model.md`), graded per rule 11:**
+
+| item | finding | grade |
+|---|---|---|
+| MHC/HLA loss as escape from transplant, vaccine, engager | HLA loss is a mismatch mechanism: 15.6% of 533 post-HCT relapses overall, 28.7% haploidentical, 7.2% unrelated adult (PMID 42348822); none to lose with a DLA-identical littermate. Matched grafts relapse by MHC-II down-regulation (17/34 AML, PMIDs 30380364, 30911134), which only weakens T-cell arms; antibody, CAR-T and engager are MHC-independent and already in the programs (the model's antigen-presentation-loss escape is covered by them) | CLOSED by derivation for a DLA-identical donor; **condition**: a DLA-identical donor (about 25% per sibling); a haploidentical donor would reopen it (7-29%) |
+| unattributed multidrug resistance (E12) | named canine mechanisms are partial (ABCB1 up in 4/10 resistant dogs, TP53 16%, ABCG2 in T-cell, NR3C1 down); axi-cel gives 31% ongoing response at about 5 y in chemo-refractory large B-cell lymphoma (PMID 36821768), so the chemo-resistant state does not defeat immune effectors | CLOSED by transfer for the immune-effector routes in the programs; residual unattributed share stays named |
+| eye | 61% of 100 dogs with intraocular lymphoma were solitary and did not progress after enucleation (PMID 28714087); human isolated ocular relapse after systemic therapy is common (29/59, PMID 33864703); no antibody or cytarabine eye concentration found | CLOSED by a local agent (ocular radiation or enucleation) added to the program when ocular disease appears; systemic access to the eye is not shown |
+| testis | contralateral-testis radiation: no testis relapse in IELSG-10 (PMID 21646602); orchiectomy lowered CNS relapse (HR 0.11, PMID 39352469); neutered dogs have none | CLOSED (derivation) |
+| second cancers, non-relapse mortality | allo-HCT secondary solid tumours ~9-10% at 10 y (PMID 38517548); CAR-T second cancers 21% and non-relapse mortality 18% at 10 y in humans (PMID 42341302); dog GVHD with DLA-identical littermates low (16/17 and 12/19 long-term chimeras) but 6 of 13 died of GVHD with DLA-identical unrelated donors | not escapes: **costs** charged against the 10-year goal; reported as costs, not as odds |
+| brain parenchyma access | IV rituximab adds nothing in primary CNS lymphoma (HR 1.00, PMID 30630772), consistent with the 0.002 access; thiotepa CSF:plasma AUC ~1; zanubrutinib CSF/plasma ~0.4; venetoclax 0.74%; **no level has been measured in gadolinium-non-enhancing lymphoma for any agent** (the rule-14 proxy was searched) | CLOSED as transferred access factors; the non-enhancing-tumour measurement does not exist for any agent |
+| late extranodal relapse | IELSG30 shows relapses beyond 6 years (PMID 38181782) | a reason the 10-year window needs the persistent routes (CAR-T persistence, transplant graft-versus-lymphoma) |
+
+**What "closed" means after this section** (the decidable conjunction, rule 12): within a catalogue of 28 sound-grade agents per immunophenotype and 23 escapes plus the items above, the B-cell and T-cell programs clear every escape-by-compartment row at the pessimistic inputs with
+no single agent load-bearing, using only A-C agents. It holds **if** (1) the C-tier agents are built for dogs (canine engager and CAR-T construct; the CSF route), (2) the CAR-T effective kill reaches 0.2/day for full fault tolerance (0.12 for the T-cell program to clear;
+the B-cell program also has the CAR-T-free route), (3) a DLA-identical donor exists, (4) the engager is introduced with step-up dosing, (5) ocular disease, if it appears, is treated locally. These are the conditions, each stated with its number. It is a model result
+(TRANSFERRED and OUTCOME-calibrated inputs, mean-field clock), not a demonstration in a dog.
