@@ -368,13 +368,13 @@ Rule 14 arrived mid-session (origin `e2ecb1b`). Applied to this branch's one "un
 | The Three-Move Plan | plain language — clear it, hold it, catch it early | https://claude.ai/code/artifact/3e895f36-2140-4bd3-a533-5545e987c8d8 |
 | The Potency Gap | researchers — what is additive here, and the experiments ranked | https://claude.ai/code/artifact/c70ccea7-571f-406f-bcec-bd0c29671e33 |
 
-All three were revised on 2026-10-02 to carry the CNS closure; *The Potency Gap* §06 is the changelog.
-The 2026-10-02 regrade of route 5's CNS cell and the rule 13 audit are in the docs and modules; the
-three reports carry the alkylator closure but **not yet** the partial regrade or the tier ledger.
+All three were revised on 2026-10-02 and carry the full current state: the alkylator CNS closure, the
+route-5 CNS regrade to partial with the new brain-imaging condition, the rule 13 tier ledger, and the
+rule 14 temozolomide exposure. *The Potency Gap* §06 is the changelog.
 
 ## Test status
 
-`832 passed` (2026-10-02; 830 at the CNS-closure commit, plus the rule 13 module). Five test modules require `torch` and were not run in that container:
+`858 passed` (2026-10-02, exit 0, 26m26s). Five test modules require `torch` and were not run in that container:
 `test_hybrid_rnn`, `test_alphafold`, `test_hsa_cli`, `test_mapk_cli`, `test_vaccine_eval`. The HSA
 analysis modules themselves have no such dependency. Run with
 `PYTHONPATH=src python3 -m pytest tests/ -q` (needs numpy, scipy, pandas, scikit-learn, matplotlib).

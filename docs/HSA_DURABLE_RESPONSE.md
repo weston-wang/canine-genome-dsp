@@ -1851,6 +1851,22 @@ growth margin, which makes it the most dangerous of the three despite being the 
   is not a screening schedule, and 98.5% specificity in a low-prevalence population still produces
   false positives whose cost is not modelled.
 
+- **5d — the intracranial form of the same hazard, and the same answer: remove it before it bleeds.**
+  5b and 5c between them close the *splenic and right-atrial* form of this route — treat the bleeding
+  site locally, or find the mass early enough to make surgery elective. The CNS form had neither until
+  **Biundo, Marino & Roynard 2026** (*Front Vet Sci* 13:1778366, PMID 42038052) reported the first
+  canine series of ante-mortem diagnosed, surgically treated intracranial hemangiosarcoma: two dogs,
+  seizure onset, MRI-diagnosed **solitary** masses, resected, histopathology confirming HSA in both,
+  with the authors concluding resection "is doable and may be associated with good quality of life in
+  the short to intermediate term". One had MRI-confirmed regrowth at day 280 and received **CyberKnife
+  SRS** at day 310. Same species, same tumour, same compartment. **Limits, and they are the reason this
+  is partial rather than closed:** euthanasia at 87 and 314 days, so no survival benefit and no
+  haemorrhage endpoint, n=2, no necropsy, primary status suspected rather than confirmed; and it
+  reaches only a *solitary imaged* deposit. **And it does not compose with 5c as written** — the CANDiD
+  liquid biopsy detects a cancer *signal*, it does not localise to the brain, so an early-detection
+  programme built on it does not by itself produce the image this closure needs. That is the open
+  brain-imaging condition in §6b.
+
 ### Route 6 — vaccine failure without antigen loss → CLOSABLE
 
 Modelled as a **take rate**: the fraction of dogs mounting any response, with non-takers receiving
