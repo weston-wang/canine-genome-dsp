@@ -47,6 +47,15 @@ Concrete failures (so the rules have a reason):
    think you are dismissing vaccines, ebats, inhibitors, stem cells too easily." Under the stated bar a human-data transfer
    or an outcome calibration is a sound input, so absence of canine data is not a reason to exclude a class.
 
+9. **Stopping the search at a conceptual label instead of its measurable proxy.** The HS analysis reported the
+   invading edge as unreachable by any obtainable drug and stopped there, concluding "the biology closes, the
+   pharmacy doesn't". The quantity was in fact measured, in two human trials, under a different name: "access
+   behind an intact barrier" is "drug concentration in gadolinium-NON-ENHANCING tumour", because non-enhancement
+   is what an intact barrier means. Searching the concept found nothing; searching the proxy found a LICENSED drug
+   (ribociclib) with 65-634 nM unbound in that compartment against a 40 nM target, in patients enrolled on this
+   tumour's own lesion, with the pharmacodynamics confirmed in the same tissue. The site had been "open" only
+   because it was being inferred from rodent ratios instead of looked up.
+
 ## Rules
 
 1. **Search the record before answering any "what did we cover / what's missing / did we discuss X"
@@ -109,6 +118,16 @@ Concrete failures (so the rules have a reason):
    engager, inhibitor, transplant, cell therapy) is excluded only because its kill is contradicted, it is defeated by a
    named escape, or its toxicity cannot be afforded, never because canine data are absent; when canine data are absent,
    derive a graded TRANSFER or OUTCOME-calibrated input and test with it.
+
+14. **Before calling a quantity unmeasured, name its measurable proxy and search for THAT.** A compartment, an
+   access figure or a mechanism usually has an operational definition that someone has already assayed under a
+   different name -- "behind an intact barrier" is "Gd-non-enhancing tumour"; "reaches the cell" is a resected-tissue
+   concentration; "engages the target" is a phosphorylation or Ki-67 readout. Write the proxy down, search it, and
+   prefer a MEASUREMENT IN THE COMPARTMENT AT ISSUE over any inference into it -- a rodent Kp, a generic
+   compartment access, or a concentration from a site where the barrier is already broken. Two consequences:
+   a measured value in the right compartment outranks a more flattering inferred one (use the agent's own numbers
+   even when they are worse), and a trial that reports a NEGATIVE for one arm (everolimus undetectable) is
+   evidence about that arm, not a missing number.
 
 ## Standing standards for the cancer durable-response work (the user's words)
 
