@@ -384,3 +384,19 @@ PROFILES["CD3xCD20 bispecific T-cell engager (canine-specific) [needs developmen
     "cytokine release 31-63% (grade >=3 3-5%), ICANS 8% (25% with CNS involvement), grade 3 infections 24%, B-cell aplasia",
     source="HUMAN: PMIDs 39322711, 42622258, 42579821. No canine engager safety data.",
     sustainable_days=365.0, hard_cap_days=None, reversible=True)
+
+PROFILES["romidepsin (HDAC inhibitor, human-licensed for PTCL)"] = P(
+    O.MARROW, 0.50, False,
+    "thrombocytopenia 24%, neutropenia 20%, infections 19% (grade >=3, human PTCL); GI nausea/vomiting; QT effects",
+    source="HUMAN PMID 22271479. Canine tolerability: NOT FOUND.", secondary_axis=O.GI, secondary_fraction=0.30,
+    sustainable_days=84.0, hard_cap_days=None, reversible=True)
+PROFILES["belinostat (HDAC inhibitor, human-licensed for PTCL)"] = P(
+    O.MARROW, 0.30, False,
+    "anaemia 10.8%, thrombocytopenia 7% (grade 3-4, human PTCL); GI; hepatic",
+    source="HUMAN PMID 26101246. Canine tolerability: NOT FOUND.", secondary_axis=O.GI, secondary_fraction=0.25,
+    sustainable_days=105.0, hard_cap_days=None, reversible=True)
+PROFILES["zanubrutinib (BTK inhibitor, human-licensed)"] = P(
+    O.MARROW, 0.20, False,
+    "neutropenia, bleeding, atrial fibrillation (lower than ibrutinib), infections (human)",
+    source="HUMAN labels and PMID 40931981. Canine acalabrutinib: grade 1-2 GI only, no DLT to 15 mg/kg twice daily (PMID 27434128).",
+    secondary_axis=O.CARDIAC, secondary_fraction=0.10, sustainable_days=365.0, hard_cap_days=None, reversible=True)

@@ -87,6 +87,9 @@ AVAILABILITY = {
     "dTERT genetic vaccine (Tel-eVax-type)": TRIAL,
     "cytarabine ocfosfate, oral continuous": TRIAL,
     "CD3xCD20 bispecific T-cell engager (canine-specific) [needs development]": NONE,
+    "romidepsin (HDAC inhibitor, human-licensed for PTCL)": OFF_LABEL,
+    "belinostat (HDAC inhibitor, human-licensed for PTCL)": OFF_LABEL,
+    "zanubrutinib (BTK inhibitor, human-licensed)": OFF_LABEL,
     "anti-CD20 monoclonal antibody, intraventricular/intrathecal [buildable route]": NONE,
     "tandem CD19/CD20 CAR-T, intraventricular/intrathecal [buildable]": NONE,
     "CD7-directed CAR-T, intraventricular/intrathecal [buildable]": NONE,
@@ -336,7 +339,7 @@ def grounded_agents(compartment: str, immunophenotype: str = "B") -> tuple:
     base = [_ground(a, immunophenotype) for a in agents_for(compartment, immunophenotype)]
     new = tuple(U.apply_tags(a) for a in _new_agents(compartment, immunophenotype))
     uni = (U.universe_agents(compartment, immunophenotype) + U.brain_agents(compartment, immunophenotype)
-           + U.reassessed_agents(compartment, immunophenotype))
+           + U.reassessed_agents(compartment, immunophenotype) + U.inhibitor_agents(compartment, immunophenotype))
     return tuple(_apply_rt(a) for a in tuple(base) + new + uni)
 
 

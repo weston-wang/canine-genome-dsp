@@ -335,3 +335,38 @@ def reassessed_agents(compartment: str, immunophenotype: str) -> tuple:
                              "central used as gross. Brain multiplier 0.5 (range 0.2-0.85) from human CNS responses. Not division-gated, not MHC "
                              "dependent, not a pump substrate by mechanism."))
     return tuple(out)
+
+
+# --------------------------------------------------------------------------------------------------------
+# Human-licensed inhibitors entered by TRANSFER (docs/universe/SWEEP_inhibitors_partial.md): lymphoma-line IC50 x label exposure with
+# free-fraction and medium-binding correction, k = ln(1 + C_free/IC50_free)/assay_days. Division-gating is assumed True and the pump
+# status follows the label unless noted, both conservative. Brain access is the human CSF/plasma figure where one exists, else 0.
+# --------------------------------------------------------------------------------------------------------
+def inhibitor_agents(compartment: str, immunophenotype: str) -> tuple:
+    from .lymphoma_catalogue import SYSTEMIC
+    sys_ = compartment == SYSTEMIC
+    out = []
+    if immunophenotype == "T":
+        out += [
+            Agent("romidepsin (HDAC inhibitor, human-licensed for PTCL)", Axis.APOPTOSIS, Layer.RECEPTOR, 0.23,
+                  1.0 if sys_ else 0.02, 1.0, True, division_gated=True, efflux_substrate=True,
+                  evidence="HUMAN PTCL: ORR 25%, CR/CRu 15%, 89% of CR/CRu progression-free at 13.4 months (PMID 22271479, n=130). Dog: not studied.",
+                  potency_evidence="TRANSFER: 0.23 /day (range 0.14-0.31) = label exposure (28-day mean 12.8 nM total, fu 0.07) against human "
+                                   "T-cell line MOLT-4 GI50 2.06 nM at 72 h (PMID 26331334); brain access 0.02 (rhesus CSF:plasma AUC, PMID 15042312). "
+                                   "P-gp substrate by label.",
+                  note="Human-licensed; usable off-label in dogs."),
+            Agent("belinostat (HDAC inhibitor, human-licensed for PTCL)", Axis.APOPTOSIS, Layer.RECEPTOR, 0.47,
+                  1.0 if sys_ else 0.0, 1.0, True, division_gated=True, efflux_substrate=True,
+                  evidence="HUMAN PTCL: ORR 25.8%, CR 10.8%, median duration of response 13.6 months, longest >=36 months (PMID 26101246, n=129).",
+                  potency_evidence="TRANSFER: 0.47 /day (range 0.17-0.60) from a label clearance 74.4 L/h and an assumed 1.8 m2 body surface "
+                                   "(ASSUMED for the AUC), fu 0.05, against Jurkat IC50 70 nM at 48 h (PMID 29533873). P-gp substrate; brain access not found (0)."),
+        ]
+    else:
+        out.append(Agent(
+            "zanubrutinib (BTK inhibitor, human-licensed)", Axis.BCR_SIGNAL, Layer.BTK, 0.087, 1.0 if sys_ else 0.43, 1.0, True,
+            division_gated=False, efflux_substrate=True,
+            evidence="HUMAN: PCNSL pooled ORR 85%, CR 54% (PMID 40931981); CSF/plasma 42.7% (PMID 35004280); canine acalabrutinib dogs: BTK "
+                     "occupancy >90% but ORR 25%, PFS 22.5 d (PMID 27434128).",
+            potency_evidence="TRANSFER: lineage-averaged 0.087 /day (range 0.03-0.23) = 25% BCR-dependent lineages at 0.34 /day plus 75% independent at "
+                             "0.002 /day; the 25% responsive fraction is the measured dog acalabrutinib response rate. Acts at the BCR axis only."))
+    return tuple(out)
