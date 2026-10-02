@@ -40,6 +40,13 @@ Concrete failures (so the rules have a reason):
    margin in the project, was buried in the same list as the non-gaps. `standard_audit.py` now
    grades every live input against the stated bar and names what actually fails.
 
+8. **Dismissing candidate classes for lacking canine data, and building the answer on agents that do not exist.**
+   The lymphoma closing programs rested on a CAR-T for dogs, a spinal-fluid CAR-T and a spinal pump, all "to build",
+   while vaccines, bispecific T-cell engagers / armed T cells, inhibitors and stem-cell transplant were set aside as
+   "no canine kill rate" or "cannot be modelled". The user: "I needed scientifically sound, not totally theoretical. And I
+   think you are dismissing vaccines, ebats, inhibitors, stem cells too easily." Under the stated bar a human-data transfer
+   or an outcome calibration is a sound input, so absence of canine data is not a reason to exclude a class.
+
 ## Rules
 
 1. **Search the record before answering any "what did we cover / what's missing / did we discuss X"
@@ -95,6 +102,13 @@ Concrete failures (so the rules have a reason):
    and must never be quoted as the verdict (`deterministic_closure.emergence_is_secondary()` says
    why: it charges a reroute as terminal although the ledger names a successor for every reroute,
    and it converts "every route open, margin −0.049/day" into a number that reads like a good bet).
+
+13. **A closure program is built from agents that exist, and a class may be excluded only for a stated scientific
+   reason.** Tier every agent as exists-today (licensed, off-label, or in dog trials) or to-build. Search for the program
+   from exists-today agents first; a program that needs a to-build agent is reported separately and as such. A class (vaccine,
+   engager, inhibitor, transplant, cell therapy) is excluded only because its kill is contradicted, it is defeated by a
+   named escape, or its toxicity cannot be afforded, never because canine data are absent; when canine data are absent,
+   derive a graded TRANSFER or OUTCOME-calibrated input and test with it.
 
 ## Standing standards for the cancer durable-response work (the user's words)
 
