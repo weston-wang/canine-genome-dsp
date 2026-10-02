@@ -886,3 +886,66 @@ specific dog before a single new treatment is tried.
 and independently audited by four review agents who re-ran the code. Where a number is
 assumed rather than measured, this report says so. This is an analysis, not veterinary
 advice; every decision belongs with clinicians who can examine the animal.*
+
+---
+
+# Corrections removed from CONSOLIDATED_REPORT.md (2026-10-02)
+
+The consolidated report was rewritten as a single, result-only document with no account of how it was
+arrived at. The self-correction passages it had accumulated are preserved here verbatim in substance,
+because the standing rule is that a withdrawn claim stays on the record with what replaced it.
+
+## Correction 1 — a cytostatic drug's exposure was read as a kill rate
+
+**Published and then withdrawn:** "kill margins" for ribociclib at the invading edge of +0.27 to
++0.89/day, which appeared in `CONSOLIDATED_REPORT.md` and in published artifact versions 2 and 3.
+
+**Why it was wrong:** `pkpd.emax_kill_rate` reads an assay's surviving fraction as exponential death,
+which is a cytotoxic reading. CDK4/6 inhibition arrests the cycle. The trial supplying the
+concentrations reports proliferation endpoints — G1→S suppression, Rb phosphorylation, Ki-67 — not
+death.
+
+**What replaced it:** f = C/(C+IC50) with residual net growth = growth × (1 − f), bounded below by
+zero. At the invading edge ribociclib suppresses 81% of proliferation and stretches doubling from
+12.6 to 66 days. Suppression, not regression; and no concentration of a pure cytostatic clears a
+tumour.
+
+**What was NOT affected:** the measured access result. 170–634 nM unbound in gadolinium-non-enhancing
+tumour is a measurement and remains the project's strongest input. Only the reading of it as a kill
+rate was withdrawn. Live in `pkpd.ribociclib_margin_correction()`, with a test that fails if the
+record is deleted.
+
+## Correction 2 — availability was mis-scoped twice, in opposite directions
+
+**First, hidden.** `core/microtubule_route.py` flags every agent `obtainable=True`, so a programme
+resting on a preclinical compound read as a prescription, and the report's regimen table said
+"obtainable for dogs" against the induction agent. The margins were never affected — their inputs are
+measured — but the availability claim was false. The flag is still *reported* rather than flipped:
+`availability_tiers.mislabelled_as_obtainable()` names both offenders, because the flag drives
+published margins and changing it silently would move them.
+
+**Then, over-tightened.** Condition C8 was rewritten as "what licensed drugs alone cannot do", which
+is a stricter bar than the user set. The user, 2026-10-02: *"I don't mean you can only use therapies
+that exist today, I meant to include near future ones that are scientifically sound. Just nothing
+that's pure theoretical."*
+
+**What replaced it:** a three-tier scale — exists-today, near-future, theoretical — with near-future
+counting toward closure and a three-part test applied per agent in
+`availability_tiers.near_future_test()`. Both admissions are in `C8.why_required` with a test pinning
+them.
+
+## Superseded reader-facing documents
+
+The repository previously carried four HTML reports for this disease. They are superseded by
+`the_closed_ledger.html`, which is the single reader-facing version, and were removed from `docs/` in
+the same pass. Their published pages remain live at the URLs below and are **out of date**; they
+predate the growth-bar derivation, the escape audit, the modality-universe enumeration, the
+deterministic conjunction, the access measurement and both corrections above.
+
+| Removed file | Title | Published page (stale) |
+|---|---|---|
+| `consolidated_report.html` | Primary Intracranial Histiocytic Sarcoma — Consolidated Analysis | `claude.ai/artifact/MiEzRRPL5JPDs9MuFKMQpX` |
+| `plain_language_report.html` | The Two-Move Plan | `claude.ai/artifact/HUudwjgNWstpG5KS7HrXm2`, `claude.ai/artifact/7Vgtir7sBYTKAvuikfyd68` |
+| `researcher_brief.html` | The Durability Gap | `claude.ai/artifact/GTEwrabdtdXQEfa5aWxjJH` |
+
+`docs/preprint/hypothesis_note.html` is retained: it is the preprint submission text, not a report.

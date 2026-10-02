@@ -239,12 +239,10 @@ drug in the part that did not light up.</p>
   </tbody>
 </table></div>
 <p class="sub">Untreated doubling time is 12.6 days. <strong>These are suppression figures, not
-kill rates.</strong> An earlier version of this page gave them as margins of +0.27 to +0.89 per day,
-which read a cytostatic drug as a cytotoxic one — ribociclib arrests cells, it does not kill them,
-and the trial's own endpoints measure proliferation rather than death. The <em>access</em>
-measurement is untouched and remains the strongest input in the project; only reading it as a kill
-rate was wrong.</p>
-<p>Four things make that access measurement the strongest input:</p>
+kill rates.</strong> Ribociclib arrests cells rather than killing them, and arrest is bounded by zero
+net growth — so it holds the tumour and stretches its doubling time, but no concentration of it
+clears the tumour. The killing is carried by the two drugs below.</p>
+<p>Four things make this access measurement the strongest input in the analysis:</p>
 <ul>
   <li><strong>It is a measurement in the exact compartment at issue</strong>, not a transfer across
   compartments.</li>
@@ -428,8 +426,12 @@ sponsor's decision about a compound already in human trials.</p>
   second-primary rate.</li>
 </ol>
 
+<p class="foot"><strong>This is the single reader-facing version of this analysis.</strong> Earlier
+pages for this disease &mdash; <em>Consolidated Analysis</em>, <em>The Two-Move Plan</em>, <em>The
+Durability Gap</em> &mdash; are superseded and out of date: they predate the access measurement, the
+escape audit, the modality-universe enumeration and the deterministic conjunction.</p>
 <p class="foot">Every figure is a model output computed from cited evidence and re-derived by
-automated tests, 801 passing. Where a number is transferred rather than measured, the grade says so.
+automated tests, 823 passing. Where a number is transferred rather than measured, the grade says so.
 The full audit trail, including every withdrawn claim, is kept separately in the repository. This is
 an analysis, not veterinary advice; every decision belongs with clinicians who can examine the
 animal.</p>
