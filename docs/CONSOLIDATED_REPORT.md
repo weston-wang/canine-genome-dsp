@@ -9,9 +9,16 @@ extra-axial, meninges-based mass that invades brain tissue (23/23 dogs) and seed
 **Question:** can a therapy hold for ten or more years against every mechanism and every escape
 route, at every site the disease occupies?
 
-**Answer: yes, within a stated catalogue and under five conditions that are met plus two that are
+**Answer: yes, within a stated catalogue and under five conditions that are met plus three that are
 not.** The result is a checklist, not a probability. Full audit trail, including every withdrawn
 claim, is in `AUDIT_TRAIL.md`.
+
+**What the three outstanding conditions cost, stated up front:** one is a pre-treatment immunostain.
+The other two are *availability*, not science — three of the agents in the closing regimen cannot be
+dispensed to a dog today, and none of them is a molecule that has to be discovered. Searched from
+licensed agents only, the obtainable programme closes two of the three sites outright, including the
+one this tumour is actually based in, and is marginal only at the invading edge. §6a gives both
+programmes side by side.
 
 ---
 
@@ -30,6 +37,9 @@ The remaining 6 of the 16 routes close structurally — by drug choice or schedu
 
 **Closed within a stated catalogue:** 25 therapy-modality classes (15 in the model, 10 excluded with
 recorded reasons, **0 unassessed**) and 16 escape routes derived independently of the list in hand.
+Of the 15 classes in the model, **11 are obtainable for a dog today and 4 need an agent that does not
+exist yet.** No class is excluded for lacking canine data; each of the 10 exclusions rests on a
+contradicted kill (5), a named escape that defeats it (3), or a toxicity budget it would blow (2).
 
 ---
 
@@ -51,13 +61,20 @@ present in **62.8%** of cases.
 Five agents, all oral or systemic, all continuous. **No implant, no catheter, no sonication, no
 radiation in the closing set.**
 
-| Role | Agent | Why it is in the set |
-|---|---|---|
-| Induction / position-independent kill | **RGN3067** (oral colchicine-site tubulin destabiliser) | Carries 6 of the 16 routes. Not an efflux-pump substrate (ratio 0.61) |
-| Parallel-pathway cover | **paxalisib** (PI3K/AKT) | Kp,uu 0.31, confirmed non-substrate of both efflux pumps |
-| Lineage removal | **liposomal clodronate** | Kills by being eaten, so it reaches non-dividing cells |
-| Persister / autophagy cover | **hydroxychloroquine** | The only agent here with a canine phase I |
-| Antigen-directed arm | **anti-PD-1 (gilvetmab)** | Obtainable for dogs |
+| Role | Agent | Why it is in the set | Available for a dog? |
+|---|---|---|---|
+| Induction / position-independent kill | **RGN3067** (oral colchicine-site tubulin destabiliser) | Carries 6 of the 16 routes. Not an efflux-pump substrate (ratio 0.61) | **No — preclinical, rodent-only** |
+| Parallel-pathway cover | **paxalisib** (PI3K/AKT) | Kp,uu 0.31, confirmed non-substrate of both efflux pumps | **No — investigational** |
+| Lineage removal | **liposomal clodronate** | Kills by being eaten, so it reaches non-dividing cells | Yes — already given to dogs with this lineage of tumour |
+| Persister / autophagy cover | **hydroxychloroquine** | The only agent here with a canine phase I | Yes |
+| Antigen-directed arm | **anti-PD-1 (gilvetmab)** | Caninized, conditionally licensed | Yes |
+
+An earlier version of this table said "obtainable for dogs" against the induction agent. That was
+wrong, and it was wrong in the code too: `core/microtubule_route.py` flags every agent
+`obtainable=True`, so a programme resting on a preclinical compound read as a prescription. The
+margins are unaffected — the inputs behind them are measured — but the availability claim was not.
+`availability_tiers.mislabelled_as_obtainable()` now names both offenders rather than silently
+flipping the flag, because the flag drives published margins.
 
 **Genotype-matched maintenance, by tumour type:**
 
@@ -123,7 +140,7 @@ cushion** on the species transfer.
 
 ## 6. The conditions
 
-The decade holds if and only if all seven hold. **Five hold today. No engineering condition remains.**
+The decade holds if and only if all eight hold. **Five hold today. No engineering condition remains.**
 
 | | Condition | Status |
 |---|---|---|
@@ -134,6 +151,53 @@ The decade holds if and only if all seven hold. **Five hold today. No engineerin
 | **C5** | **Tumour carries a targetable lesion** | **one immunostain, decidable before treatment** |
 | C6 | Radiation and CNS cytotoxic sequenced, not stacked | **met** |
 | **C7** | Sponsor access to the investigational genotype-anchored agent | **not met; closure under C1–C6 does not require it** |
+| **C8** | **The penetrant agents C1 and C4 need are obtainable for a dog** | **not met; see §6a for what the obtainable programme closes without them** |
+
+None of the three outstanding conditions is an engineering problem. C5 is a test. C7 and C8 are
+availability.
+
+---
+
+## 6a. What is achievable with licensed agents today, and what needs a compound released for dogs
+
+Searched from obtainable agents first, the two programmes separate cleanly.
+
+| | **Programme A — licensed today** | **Programme B — the full closure** |
+|---|---|---|
+| Needs a compound released for dogs? | no | yes, three of them |
+| Extra-axial, meninges-based bulk (23/23 dogs) | **closes, +0.94/day** | closes |
+| Leptomeninges / CSF | **closes by mouth, +0.031/day** | closes, +0.61/day |
+| Invaded brain tissue, intact barrier | **marginal: −0.034 to +0.017/day** | closes, +0.59/day |
+| All 16 routes at both sites | no | **yes** |
+
+**Programme A** is surgical debulking plus radiation for induction, then continuous genotype-matched
+maintenance: abemaciclib where CDKN2A is deleted and Rb intact, trametinib or cobimetinib on a MAPK
+driver, duvelisib on the responsive expression subgroup, with liposomal clodronate,
+hydroxychloroquine, gilvetmab and ctDNA detect-and-switch. Every one of those is licensed, dog-trialled
+or already given to dogs.
+
+The reason Programme A gets as far as it does is **abemaciclib**, and the reason is anatomical. This
+tumour is extra-axial in 23 of 23 dogs — the bulk of it sits on the blood side of an
+already-disrupted barrier. Abemaciclib's concentration in resected human brain lesions is a measured
+19× the CDK6 IC50, which is a decisive margin there. Behind an *intact* barrier its own measured
+rodent unbound ratios give 0.65–2.4 nM against a bar of 1.8 nM: it closes at the rat ratio and fails
+at the mouse ratio. That is the honest span, computed from abemaciclib's own numbers rather than from
+the generic small-molecule figure, which would have flattered it fivefold.
+
+**What separates the two programmes is two properties on different agents, not a programme:**
+
+1. **Access and duty from one schedule** at the invading edge — an oral, non-efflux-substrate agent
+   that carries its own penetration past an intact barrier. Every obtainable alternative buys that
+   access with a procedure, and a monthly catheter cannot also supply a continuous duty cycle.
+2. **Genotype anchoring** — an agent aimed at the germline MTAP deletion itself, the only kind
+   automatically matched to a *second* primary in a breed born predisposed.
+
+Everything else the decade needs — the stratification, the continuous schedule, the toxicity budget,
+the leptomeningeal route, the surveillance loop, and the kill where this tumour is actually based —
+is satisfiable today. And none of the three missing agents has to be invented: the PRMT5 anchor is in
+human Phase I/II, paxalisib is in human trials with a measured Kp,uu of 0.31, and RGN3067 is a
+published compound with a measured oral brain Cmax of 20 µM. **The outstanding work is veterinary
+formulation and access, not chemistry.**
 
 ---
 
@@ -141,6 +205,8 @@ The decade holds if and only if all seven hold. **Five hold today. No engineerin
 
 - **No agent in any regimen here has been given to a dog with this disease.** Every margin is a model
   output from graded inputs.
+- **Three of the agents in the closing regimen cannot be dispensed to a dog today** (§6a). The
+  obtainable programme does not close the invading edge on a coherent schedule.
 - **The honest comparator:** 44-day median for intracranial disease under surgery, radiation and
   chemotherapy; 568-day median with a 243-day disease-free interval for *localized* HS after
   debulking plus lomustine. The gap between that and ten years is the claim, and nothing here
@@ -158,6 +224,9 @@ The decade holds if and only if all seven hold. **Five hold today. No engineerin
 
 ## 8. What to do first, cheapest decisive step first
 
+0. **Before any of it:** Programme A (§6a) is prescribable now. If a dog needs treating rather than
+   studying, that is the plan, with its limit stated — it holds the bulk and the meninges and is
+   marginal at the invading edge.
 1. **MTAP immunostain** (plus p16 and Rb) on archived tumour tissue. Decides C5 and which tier applies.
 2. **Run the 10 existing canine HS cell lines** against a colchicine-site tubulin binder and against
    a PRMT5 inhibitor. Converts two transfers into measurements, with no new animals.

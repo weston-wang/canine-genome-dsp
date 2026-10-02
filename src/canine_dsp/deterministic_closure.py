@@ -82,6 +82,8 @@ class Status(Enum):
     ENGINEERING = "condition is an engineering/formulation requirement not yet met"
     GATE = "condition is a per-tumour test, decidable before treatment"
     SPONSOR = "condition requires access to an investigational agent"
+    TO_BUILD = ("condition requires an agent that does not exist for dogs today; the exists-today "
+                "substitute and what it fails to cover are named (CLAUDE.md rule 13)")
 
 
 @dataclass(frozen=True)
@@ -265,6 +267,29 @@ CONDITIONS: tuple[Condition, ...] = (
         "Sponsor compassionate-use. Not required for closure under C1-C6; required for the "
         "genotype-anchored form of it.",
     ),
+    Condition(
+        "C8", "The agents C1 and C4 depend on are OBTAINABLE FOR A DOG -- an oral, "
+              "non-efflux-substrate induction agent that carries its own access past an intact "
+              "barrier, plus the PI3K-axis member that supplies the same property",
+        Status.TO_BUILD,
+        "THIS CONDITION WAS HIDDEN, AND THAT WAS THE LAPSE CLAUDE.MD RULE 13 NAMES. "
+        "`core.microtubule_route.build()` flags every agent `obtainable=True`, so the induction "
+        "agent RGN3067 (preclinical, rodent-only) and paxalisib (investigational) were priced into "
+        "the ledger as though a vet could dispense them -- "
+        "`availability_tiers.mislabelled_as_obtainable()` names both. The closure itself is "
+        "unaffected: the margins are real and the inputs are measured. What was wrong was the "
+        "implied availability. Searched exists-today-first per rule 13, the obtainable program "
+        "closes 2 of 3 sites outright -- the extra-axial, meninges-based bulk this tumour occupies "
+        "in 23/23 dogs (+0.94/day on abemaciclib's measured human brain-lesion tissue exposure) "
+        "and the leptomeninges by mouth (+0.031/day) -- and is MARGINAL only at the invading edge "
+        "behind an intact barrier, where abemaciclib's own measured rodent range spans "
+        "-0.034 to +0.017/day. So what this condition gates is one compartment, not the plan.",
+        "Veterinary formulation and access, NOT chemistry. None of the three to-build agents has to "
+        "be discovered: the PRMT5 anchor is in human Phase I/II, paxalisib is in human trials with "
+        "a measured Kp,uu of 0.31, and RGN3067 is a published compound with a measured oral brain "
+        "Cmax of 20 uM. The exists-today substitutes and the exact properties they fail to cover "
+        "are enumerated in availability_tiers.uncovered_properties().",
+    ),
 )
 
 
@@ -342,8 +367,11 @@ def conjunction() -> str:
     closed = da.closes_with_molecular_selection()
     gating = (
         f"NO ENGINEERING CONDITION REMAINS. What is outstanding is {outstanding}: C5 is one "
-        f"immunostain, decidable before treatment, and C7 is sponsor access to an investigational "
-        f"agent that closure under C1-C6 does not require."
+        f"immunostain, decidable before treatment; C7 is sponsor access to an investigational "
+        f"agent that closure under C1-C6 does not require; and C8 is veterinary availability of "
+        f"the penetrant induction agent -- searched exists-today-first per rule 13, the obtainable "
+        f"program closes the extra-axial bulk and the leptomeninges and is marginal only at the "
+        f"invading edge (availability_tiers.program_a())."
         if not eng else
         f"The decade is gated on {', '.join(c.tag for c in eng)}, engineering conditions that are "
         f"either met or not."

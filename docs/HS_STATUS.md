@@ -430,3 +430,82 @@ why access is not the obstacle, evidence grade per deciding number, the seven co
 what to do first. Reader-facing artifact: <https://claude.ai/artifact/4Ho2u4jTieU579ExuRgvY5>.
 
 Nothing was deleted. Every retraction remains in `AUDIT_TRAIL.md`.
+
+---
+
+## Rule-13 pass (2026-10-02): availability tiered, exclusions re-grounded
+
+Upstream commit `3afc850` added CLAUDE.md **failure 8 and rule 13**. Audited against it, two defects
+in this branch's own work. Both are now fixed in code, not just in prose.
+
+### Defect 1 — five exclusions rested on absent canine data
+
+Rule 13 admits exactly three grounds: kill contradicted, defeated by a named escape, toxicity
+unaffordable. Five of `candidate_universe`'s ten exclusions were argued on the literature instead
+("not obtainable for a dog", "no canine-HS activity data", "no canine product exists", "in-vitro
+only", "unmeasured in dogs"). Under the user's own standard — *"I'm okay with no specific data but if
+scientifically sound"* — those are not grounds at all.
+
+Every exclusion now carries an `ExclusionGround`, `_validate()` rejects an EXCLUDED class without
+one, and `excluded_citing_absent_canine_data()` is a lint that must stay empty.
+
+| Class | Was | Now |
+|---|---|---|
+| CSF1R | "not obtainable for a dog" | DEFEATED_BY_ESCAPE — CSF1R-independence is *observed* as acquired resistance in human histiocytosis |
+| Epigenetic (HDAC/BET) | "no canine-HS activity data" | TOXICITY_UNAFFORDABLE — and **computed**: `epigenetic_toxicity_arithmetic()` reads live marrow load 0.70 from `core.toxicity`, adds the class's transferred 0.45 burden, total 1.15, oversubscribed |
+| Bispecific engagers | "no canine product exists" | DEFEATED_BY_ESCAPE — the tumour *is* the antigen-presenting lineage, and exports MTA (A16) |
+| Oncolytic virotherapy | "in-vitro only" | DEFEATED_BY_ESCAPE — must be injected into a known lesion, so the second-primary route is untouched |
+| Metabolic / dietary | "unmeasured in dogs" | TOXICITY_UNAFFORDABLE — years of methionine restriction costs lean mass in an older large-breed dog |
+
+Final grounds: **5 kill contradicted, 3 defeated by a named escape, 2 toxicity unaffordable, 0 for
+absent canine data.** Availability is now a separate axis (`Availability`), because conflating it
+with the ground was the lapse: marrow transplant is *established in dogs* and excluded anyway, which
+is what makes that exclusion informative.
+
+### Defect 2 — the closing programme was built from agents that do not exist, and said otherwise
+
+`core/microtubule_route.build()` flags every agent `obtainable=True`. Three of the regimen's agents
+cannot be dispensed to a dog: RGN3067 (preclinical, rodent-only), paxalisib (investigational), and
+the PRMT5 anchor (human Phase I/II). The report's own table said "obtainable for dogs". The margins
+were never affected — the inputs behind them are measured — but the availability claim was false.
+
+`availability_tiers.py` now tiers all 11 components (**8 exist today, 3 to-build**) and, per rule 13,
+searches the programme **from exists-today agents first**. The flag itself is *reported* rather than
+flipped — `mislabelled_as_obtainable()` names both offenders — because it drives `obtainable_only`
+in the deterministic ledger and changing it would move published margins silently.
+
+| Site | Programme A (licensed today) | Programme B (full) |
+|---|---|---|
+| Extra-axial, meninges-based bulk (23/23 dogs) | **CLOSES, +0.94/day** | closes |
+| Leptomeninges / CSF | **CLOSES by mouth, +0.031/day** | +0.61/day |
+| Invaded parenchyma, intact barrier | **MARGINAL, −0.034 to +0.017/day** | +0.59/day |
+
+**Programme A closes 2 of 3 sites with licensed agents and no procedure on the critical path.** It
+gets there on abemaciclib, and the reason is anatomical: this tumour is extra-axial in 23/23 dogs, so
+its bulk sits on the blood side of an already-disrupted barrier, where abemaciclib's concentration in
+resected human brain lesions is a measured 19× the CDK6 IC50. Behind an *intact* barrier its own
+measured rodent unbound ratios give 0.65–2.4 nM against a 1.8 nM bar — closes at the rat ratio, fails
+at the mouse ratio. Scored on its own numbers, not on the generic small-molecule access of 0.021,
+which would have flattered it ~5×.
+
+### The gap, stated from the computation
+
+`the_gap()` reads it off `uncovered_properties()` rather than asserting it. An earlier draft of that
+docstring called the gap "one property"; the field data says **two, on different agents** —
+
+1. **access and duty from one schedule** at the invading edge (RGN3067's role; paxalisib is the same
+   property on the PI3K axis, where duvelisib covers the potency but not the access);
+2. **genotype anchoring** — the only kind of agent automatically matched to a *second* primary.
+
+Everything else the decade needs is satisfiable today. None of the three missing agents has to be
+discovered. **The outstanding work is veterinary formulation and access, not chemistry.**
+
+### Consequences recorded
+
+- `deterministic_closure.CONDITIONS` gains **C8** (`Status.TO_BUILD`): the conjunction is now
+  **8 conditions, 5 met**, outstanding C5 / C7 / C8. Engineering blockers remain **0** — C5 is a
+  test, C7 and C8 are availability.
+- `CONSOLIDATED_REPORT.md` gains **§6a** (the two programmes side by side), an availability column on
+  the regimen table, and an explicit note that its earlier "obtainable for dogs" was wrong.
+- Does **not** change: the 16 routes, the 25-class universe, the derived 1.17/day kill rate, the 112×
+  exposure cushion, or `standard_audit.failing()` (still empty).

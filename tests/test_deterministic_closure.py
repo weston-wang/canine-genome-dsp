@@ -33,13 +33,29 @@ def test_no_engineering_condition_remains():
     local delivery was required. That was wrong twice over: it set access AND duty to 1.0 at once
     (the defect core.schedule_coherence exists to catch), and it overstated the requirement, which
     is access 0.196 rather than 1.0. Measured intrinsic penetration meets it orally, so nothing here
-    is an engineering blocker. See delivery_answer."""
+    is an engineering blocker. See delivery_answer.
+
+    C8 was added later, under CLAUDE.md rule 13: the agents C1 and C4 depend on are not obtainable
+    for a dog, which `core.microtubule_route.build()` had hidden behind `obtainable=True`. It is
+    outstanding but it is NOT engineering either -- it is veterinary availability of compounds that
+    already exist, and availability_tiers.program_a() reports what the obtainable program closes
+    without them."""
     assert dc.blocking_conditions() == []
     outstanding = {c.tag for c in dc.failing_conditions()}
-    assert outstanding == {"C5", "C7"}
-    # and neither is engineering: one is a per-tumour test, one is sponsor access
+    assert outstanding == {"C5", "C7", "C8"}
+    # none is engineering: a per-tumour test, sponsor access, and veterinary availability
     for c in dc.failing_conditions():
-        assert c.status in (dc.Status.GATE, dc.Status.SPONSOR)
+        assert c.status in (dc.Status.GATE, dc.Status.SPONSOR, dc.Status.TO_BUILD)
+
+
+def test_c8_records_the_availability_lapse_rather_than_quietly_fixing_the_flag():
+    """Rule 13. The margins are real; what was wrong was the implied availability, so it is named."""
+    from canine_dsp import availability_tiers as at
+
+    c8 = next(c for c in dc.CONDITIONS if c.tag == "C8")
+    assert c8.status is dc.Status.TO_BUILD
+    assert at.mislabelled_as_obtainable(), "C8's premise is that the flag is still optimistic"
+    assert "chemistry" in c8.what_would_establish_it.lower()
 
 
 def test_access_is_closed_by_molecules_rather_than_a_procedure():
