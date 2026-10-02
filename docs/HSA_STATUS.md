@@ -199,22 +199,29 @@ The user: *"I don't want odds of achieving 10 years, the whole point about looki
 and escapes is to not leave it to odds."* Every durability figure here (0.888 / 0.830 / 0.966 / 0.992)
 is a **sensitivity statement**. The verdict is `hsa_deterministic_closure.conjunction()`.
 
-**Three of 15 routes × 6 sites are OPEN, and all three are in the CNS:**
+**One of 15 routes × 6 sites is OPEN: route 5 in its CNS form** — intracranial haemorrhage from a
+vascular brain metastasis, which no component treats. Every other route is CLOSED at every site.
 
-| route | why it is open in the CNS |
-|---|---|
-| **8** antigen-null **and** drug-resistant | closed by doxorubicin + eBAT; **neither crosses the BBB** |
-| **12b** clone at the intrinsic-growth ceiling | closed by MEK + TORC1/2 arresting it; **the combination does not cross**, and the vaccine alone would need 3.0–3.9× |
-| **5** in its CNS form | intracranial haemorrhage from a vascular brain metastasis — no component treats it |
+**Three cells were open when the matrix was first built**, all in the CNS: routes 8 and 12b, because
+doxorubicin, eBAT and the MEK+TORC1/2 combination do not cross the blood–brain barrier. That
+corrected an overclaim made earlier in the same session — "every escape path has a closure" was true
+systemically and false in the CNS, and the averaged number concealed it.
 
-**This corrects an overclaim made earlier in this session.** "Every escape path has a closure" was
-true systemically and false in the CNS; the odds-based headline concealed it, because 0.830 averages
-over sites where doxorubicin and eBAT are present.
+**They closed on two CNS-penetrant alkylators whose evidence is complementary:**
 
-**Candidate closure, deliberately NOT credited:** lomustine (lipophilic nitrosourea, used in canine
-intracranial disease, already the HS branch's backbone) or brain-directed SRT. Present in the module's
-reach table so it can be reasoned about; **absent from every route's `closed_by`**, because crediting
-an unadopted agent would force a closure. TRANSFERRED on reach, unquantified on logs delivered.
+| agent | transfer | basis |
+|---|---|---|
+| **lomustine** | same species/disease/setting, **different compartment** | already given to dogs with stage II splenic HSA post-splenectomy **alternating with an anthracycline** — Moore, Rassnick & Frimberger 2017, *JAVMA* 251(5):559–565, PMID 28828962: 30 dogs, median 158 d; low-mitotic subgroup n=9 median 292 d, 1-yr 42% |
+| **temozolomide** | same tumour type/compartment, **different species** | primary cerebral angiosarcoma resolved on chemoradiotherapy with TMZ (PMID 37811120); breast AS with skull-base/dural metastasis durable on anlotinib+TMZ (PMID 42125685); PARP1 46/47 AS samples, SLFN11 80%, olaparib+TMZ synergy (PMID 34085099) |
+
+**Not claimed:** that lomustine improves survival here — the 30-dog median (158 d) was **not better
+than the anthracycline alone**. It establishes **deliverability and reach**, as the eBAT trial does
+systemically. Logs removed from the antigen-null fraction: **unmeasured**.
+
+**Duration shapes it:** cumulative hepatotoxicity caps lomustine near **350 mg/m²** ≈ 3–5 cycles, so
+it is a *finite-course log-remover*, never a chronic floor-holder — the same shape as the eBAT
+closure. **Brain SRT is deliberately not credited:** maximal reach but only against an imaged
+deposit, and routes 8/12b are occult seeding.
 
 **Conditions failing (4 of 8):** the CNS agent; the immunity half-life; the rupture hazard;
 intracranial haemorrhage. **Passing:** T-cell vaccine platform (selectable now — ERstrePs yes, eVim

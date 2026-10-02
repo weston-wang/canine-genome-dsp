@@ -67,9 +67,17 @@ REACH: dict[str, dict[Site, bool]] = {
     "losartan": {**{s: True for s in Site}, Site.CNS: False},
     "anti_PD_1": {s: True for s in Site},          # acts on T cells systemically; CNS activity shown
     "MEK_plus_TORC1_2": {**{s: True for s in Site}, Site.CNS: False},
-    # CANDIDATE ONLY -- present in REACH so its coverage can be reasoned about, but deliberately
-    # NOT listed in any Route.closed_by, because crediting an unadopted agent would force a closure.
-    "lomustine_or_brain_SRT": {**{s: False for s in Site}, Site.CNS: True},
+    # CNS-penetrant alkylators. Promoted from candidate to credited once evidence was found that
+    # (a) lomustine has already been given to dogs with stage II splenic HSA in this exact adjuvant
+    # setting, alternating with the anthracycline, and (b) temozolomide has angiosarcoma-specific
+    # CNS response evidence. Both are alkylating agents, so they are independent of the vaccine
+    # antigen and of the PI3K/MAPK axis by mechanism -- which is what these cells require.
+    "lomustine": {**{s: True for s in Site}, Site.CNS: True},
+    "temozolomide": {**{s: True for s in Site}, Site.CNS: True},
+    # Brain-directed stereotactic radiotherapy: maximal reach, but only to a deposit you can SEE.
+    # Useless against occult CNS seeding, which is what routes 8 and 12b describe, so it is kept
+    # out of closed_by and recorded as covering detected deposits only.
+    "brain_SRT": {**{s: False for s in Site}, Site.CNS: True},
 }
 
 REACH_BASIS = {
@@ -87,12 +95,33 @@ REACH_BASIS = {
                  "do the crossing.",
     "MEK_plus_TORC1_2": "trametinib is a P-gp/BCRP substrate with limited CNS exposure; the "
                         "combination's measured arrest was in a subcutaneous tumorgraft.",
-    "lomustine_or_brain_SRT": "lomustine is a lipophilic nitrosourea specifically used in canine "
-                              "intracranial disease, and is already the backbone agent on the "
-                              "histiocytic-sarcoma branch of this project. Brain-directed "
-                              "stereotactic radiotherapy is the non-pharmacological alternative. "
-                              "Both are antigen- and kinase-pathway independent, which is what the "
-                              "route-8 and route-12 cells require.",
+    "lomustine": "a lipophilic nitrosourea that crosses the blood-brain barrier and is used for "
+                 "canine intracranial disease. Critically for this plan, it has ALREADY been given "
+                 "to dogs with stage II splenic hemangiosarcoma after splenectomy, ALTERNATING "
+                 "WITH AN ANTHRACYCLINE -- the exact setting, sequence and backbone proposed here "
+                 "(Moore, Rassnick & Frimberger 2017, JAVMA 251(5):559-565, PMID 28828962, "
+                 "doi 10.2460/javma.251.5.559; 30 dogs, median survival 158 d, 1-year 16%; in the "
+                 "low-mitotic-rate subgroup n=9, median 292 d and 1-year 42%). It is an alkylating "
+                 "agent, so it is independent of the vaccine antigen and of the PI3K/MAPK axis by "
+                 "mechanism. Duration: cumulative hepatotoxicity caps total exposure near "
+                 "350 mg/m2, so at 50-110 mg/m2 per cycle this is strictly a FINITE-COURSE "
+                 "log-remover (~3-5 cycles) and NOT a chronic floor-holder -- which is exactly the "
+                 "shape routes 8 and 12b need.",
+    "temozolomide": "an oral blood-brain-barrier-penetrant alkylating agent with "
+                    "ANGIOSARCOMA-SPECIFIC CNS evidence, which lomustine lacks: a primary cerebral "
+                    "angiosarcoma resolved on concurrent chemoradiotherapy with temozolomide "
+                    "(PMID 37811120, doi 10.1097/MS9.0000000000001158), and a breast angiosarcoma "
+                    "with skull-base and dural metastasis achieved a durable response on "
+                    "anlotinib + temozolomide after multimodal failure, a report that explicitly "
+                    "frames the strategy as leveraging CNS-penetrating agents against "
+                    "sanctuary-site angiosarcoma (PMID 42125685, doi 10.3389/fonc.2026.1619754). "
+                    "Mechanistic support: PARP1 is expressed in 46/47 angiosarcoma samples and "
+                    "SLFN11 in 80%, and olaparib + temozolomide is synergistic in angiosarcoma "
+                    "cell lines (PMID 34085099, doi 10.1007/s00432-021-03678-4).",
+    "brain_SRT": "maximal CNS reach and fully mechanism-independent, but it can only treat a "
+                 "deposit that has been imaged. Routes 8 and 12b describe OCCULT seeding, so SRT "
+                 "is deliberately excluded from closed_by and recorded as covering detected "
+                 "deposits only.",
 }
 
 
@@ -133,7 +162,7 @@ ROUTES: tuple[Route, ...] = (
           ("vaccine_T_cell_arm", "vaccine_antibody_arm"), MEASURED,
           "22% of liver lesions found at surgery were missed on pre-op ultrasound"),
     Route("8", "antigen inadequacy on day zero (antigen-null AND drug-resistant)",
-          ("doxorubicin", "eBAT"), TRANSFERRED,
+          ("doxorubicin", "eBAT", "lomustine", "temozolomide"), TRANSFERRED,
           "~1,300 cells needing 7.2 logs; doxorubicin 3.1-5.1 plus one early eBAT cycle 5.2-7.8"),
     Route("9", "anatomical sanctuary", ("vaccine_T_cell_arm", "anti_PD_1"), TRANSFERRED,
           "HSA is the largest single source of secondary brain tumours in dogs, 51/177"),
@@ -144,7 +173,7 @@ ROUTES: tuple[Route, ...] = (
           ("vaccine_T_cell_arm", "vaccine_antibody_arm"), DERIVED,
           "bounded by the no-drug ceiling: at most +6.8% on the bar, costing one rung"),
     Route("12b", "a clone at the intrinsic-growth ceiling",
-          ("MEK_plus_TORC1_2",), TRANSFERRED,
+          ("MEK_plus_TORC1_2", "lomustine", "temozolomide"), TRANSFERRED,
           "the drug arrests it at net zero and the vaccine clears it; needs an agent PRESENT at the "
           "site, because the vaccine alone would need 3.0-3.9x"),
     Route("13", "dormancy / quiescence", ("vaccine_T_cell_arm", "vaccine_antibody_arm"), TRANSFERRED,
@@ -192,8 +221,9 @@ def conjunction() -> dict:
         "verdict": (
             "every route CLOSED at every site"
             if not open_cells else
-            f"{len(open_cells)} route-site cells OPEN, all of them in the "
-            f"{Site.CNS.value}: " + ", ".join(f"route {n}" for n, _, _ in open_cells)
+            f"{len(open_cells)} route-site cell{'s' if len(open_cells) != 1 else ''} OPEN, "
+            f"all in the {Site.CNS.value}: "
+            + ", ".join(f"route {n}" for n, _, _ in open_cells)
         ),
     }
 
@@ -226,9 +256,13 @@ CONDITIONS: tuple[Condition, ...] = (
               "stain HSA for the vaccine antigen before and after PI3K/mTOR inhibition"),
     Condition("a CNS-penetrant, antigen- and pathway-independent agent must be added",
               ("8", "12b"),
-              "OPEN -- this is the gap the site dimension exposed",
-              "lomustine, or brain-directed stereotactic radiotherapy; both already exist in "
-              "canine practice and neither needs a new molecule"),
+              "MET at TRANSFERRED -- lomustine (already given in canine stage II splenic HSA "
+              "alternating with the anthracycline) and temozolomide (angiosarcoma-specific CNS "
+              "response evidence). Neither needs a new molecule. UNQUANTIFIED on logs delivered "
+              "against these compartments",
+              "measure alkylator log-kill against the antigen-null drug-tolerant fraction; and "
+              "note the lomustine trial's OVERALL survival was not better than the anthracycline "
+              "alone, so this buys REACH, not potency"),
     Condition("immunity half-life must support the booster interval", ("1", "2", "3", "7"),
               "FAILS the stated bar -- a bare assumption, and the answer swings on it",
               "serial immune monitoring on an existing vaccinated cohort"),
@@ -275,23 +309,44 @@ def odds_are_secondary() -> dict:
 
 
 VERDICT = {
-    "headline": "NOT every route is closed at every site. Of 15 routes across 6 anatomical sites, "
-                "THREE cells are OPEN and all three are in the central nervous system: route 8 "
-                "(antigen-null and drug-resistant), route 12b (a clone at the intrinsic-growth "
-                "ceiling), and route 5 in its CNS form (intracranial haemorrhage). For 8 and 12b "
-                "the closing agents -- doxorubicin, eBAT, and the MEK + TORC1/2 combination -- do "
-                "not cross the blood-brain barrier. Everything else is CLOSED at every site.",
-    "what_this_corrects": "this analysis stated that every escape path has a closure. That was true "
-                          "systemically and false in the CNS, and the odds-based headline is what "
-                          "concealed it. Rule 12 exists for exactly this failure.",
-    "the_candidate_closure": "a CNS-penetrant agent that is neither antigen- nor kinase-directed. "
-                             "Lomustine is a lipophilic nitrosourea used in canine intracranial "
-                             "disease and is already the backbone agent on this project's "
-                             "histiocytic-sarcoma branch; brain-directed stereotactic radiotherapy "
-                             "is the non-pharmacological alternative. Neither needs a new molecule. "
-                             "Graded TRANSFERRED on reach, and UNQUANTIFIED on how many logs it "
-                             "delivers against these compartments.",
-    "and_one_thing_no_component_treats": "intracranial haemorrhage from a vascular brain metastasis. "
-                                         "It belongs with splenic rupture as a competing event, not "
-                                         "with the cancer-control ledger.",
+    "headline": "Of 15 routes across 6 anatomical sites, ONE cell is OPEN: route 5 in its CNS form "
+                "-- intracranial haemorrhage from a vascular brain metastasis, which no component "
+                "of this plan treats. Every other route is CLOSED at every site.",
+    "how_the_cns_cells_closed": "routes 8 and 12b were open in the CNS because doxorubicin, eBAT "
+                                "and the MEK + TORC1/2 combination do not cross the blood-brain "
+                                "barrier. Two CNS-penetrant alkylators close them, and between "
+                                "them they cover each other's weakness: LOMUSTINE has been given "
+                                "to dogs with stage II splenic hemangiosarcoma after splenectomy "
+                                "alternating with an anthracycline -- same species, same disease, "
+                                "same setting, different compartment -- and TEMOZOLOMIDE has "
+                                "angiosarcoma-specific CNS response evidence -- same tumour type, "
+                                "same compartment, different species. Both are alkylating agents, "
+                                "so antigen- and pathway-independence follows from mechanism.",
+    "what_this_does_NOT_claim": "that lomustine improves survival in this disease. The 30-dog "
+                                "trial's overall median (158 days) was not better than the "
+                                "anthracycline alone. What it establishes is DELIVERABILITY and "
+                                "REACH in the right setting -- the same thing the eBAT trial "
+                                "establishes for the systemic compartment. The number of logs "
+                                "either alkylator removes from the antigen-null drug-tolerant "
+                                "fraction is UNMEASURED.",
+    "the_duration_constraint_that_shapes_the_regimen": "lomustine's cumulative hepatotoxicity caps "
+                                                       "total exposure near 350 mg/m2, which at "
+                                                       "50-110 mg/m2 per cycle is roughly 3-5 "
+                                                       "cycles. So it is strictly a finite-course "
+                                                       "log-remover and cannot be a chronic "
+                                                       "floor-holder. That is the shape routes 8 "
+                                                       "and 12b need, and it is the same shape the "
+                                                       "eBAT closure takes -- one short early "
+                                                       "course, not maintenance.",
+    "what_remains_open_and_why_it_is_not_a_cancer_control_failure": "intracranial haemorrhage. It "
+        "belongs with splenic rupture as a COMPETING EVENT: the cancer-control ledger can be "
+        "complete while a dog still dies of bleeding into a vascular brain deposit. Nothing in "
+        "this plan treats it, and the honest counterpart to the splenic screening answer would be "
+        "CNS imaging in the surveillance protocol -- which is a detection measure, not a drug.",
+    "brain_SRT_is_deliberately_not_credited": "it has maximal CNS reach and is fully "
+                                              "mechanism-independent, but it can only treat an "
+                                              "imaged deposit. Routes 8 and 12b describe OCCULT "
+                                              "seeding, so crediting SRT against them would be "
+                                              "crediting a mechanism against a target it cannot "
+                                              "find. It covers detected deposits only.",
 }

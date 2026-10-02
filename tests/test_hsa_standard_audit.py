@@ -173,31 +173,64 @@ def test_the_conjunction_contains_no_probability():
         assert set(row.values()) <= {dc.CLOSED, dc.OPEN, dc.NOT_APPLICABLE}
 
 
-def test_the_candidate_cns_agent_is_not_credited_as_a_closure():
-    """Crediting an unadopted agent would force a closure -- the thing the standards forbid."""
+def test_brain_SRT_is_not_credited_because_it_cannot_find_an_occult_deposit():
+    """SRT has maximal CNS reach but only against an imaged target. Crediting it against occult
+    seeding would be crediting a mechanism against a target it cannot locate."""
     from canine_dsp import hsa_deterministic_closure as dc
-    assert "lomustine_or_brain_SRT" in dc.REACH          # reasoned about
-    for r in dc.ROUTES:                                   # but never counted
-        assert "lomustine_or_brain_SRT" not in r.closed_by, r.number
+    assert dc.reaches("brain_SRT", dc.Site.CNS) is True   # reasoned about
+    for r in dc.ROUTES:                                    # but never counted
+        assert "brain_SRT" not in r.closed_by, r.number
+    assert "occult" in dc.VERDICT["brain_SRT_is_deliberately_not_credited"].lower()
 
 
-def test_exactly_three_cells_are_open_and_all_are_in_the_cns():
+def test_the_alkylator_closure_does_not_claim_a_survival_benefit():
+    """The 30-dog lomustine trial's overall median was NOT better than the anthracycline alone."""
+    from canine_dsp import hsa_deterministic_closure as dc
+    note = dc.VERDICT["what_this_does_NOT_claim"]
+    assert "not better than" in note
+    assert "UNMEASURED" in note
+    assert "DELIVERABILITY and REACH" in note
+
+
+def test_lomustine_is_recorded_as_a_finite_course_agent_not_a_floor_holder():
+    from canine_dsp import hsa_deterministic_closure as dc
+    assert "350 mg/m2" in dc.REACH_BASIS["lomustine"]
+    assert "FINITE-COURSE" in dc.REACH_BASIS["lomustine"]
+    assert "NOT a chronic floor-holder" in dc.REACH_BASIS["lomustine"]
+
+
+def test_the_two_alkylators_cover_each_others_weakness():
+    from canine_dsp import hsa_deterministic_closure as dc
+    assert "stage II splenic hemangiosarcoma" in dc.REACH_BASIS["lomustine"]
+    assert "ANGIOSARCOMA-SPECIFIC CNS evidence" in dc.REACH_BASIS["temozolomide"]
+    assert "lomustine lacks" in dc.REACH_BASIS["temozolomide"]
+
+
+def test_exactly_one_cell_is_open_and_it_is_a_competing_event():
+    """Routes 8 and 12b closed once two CNS-penetrant alkylators were evidenced. What is left is
+    intracranial haemorrhage, which is a competing event rather than a cancer-control failure."""
     from canine_dsp import hsa_deterministic_closure as dc
     c = dc.conjunction()
     assert c["all_closed"] is False
-    assert len(c["open_cells"]) == 3
-    assert {site for _, _, site in c["open_cells"]} == {dc.Site.CNS.value}
-    assert {n for n, _, _ in c["open_cells"]} == {"5", "8", "12b"}
+    assert len(c["open_cells"]) == 1
+    (number, _, site), = c["open_cells"]
+    assert number == "5" and site == dc.Site.CNS.value
+    assert "COMPETING EVENT" in dc.VERDICT[
+        "what_remains_open_and_why_it_is_not_a_cancer_control_failure"]
 
 
-def test_routes_8_and_12b_are_open_in_the_cns_because_their_agents_do_not_cross():
+def test_routes_8_and_12b_close_in_the_cns_only_via_an_alkylator():
+    """The systemic closers still do not cross; what closes these cells is the alkylator."""
     from canine_dsp import hsa_deterministic_closure as dc
     for number in ("8", "12b"):
         route = next(r for r in dc.ROUTES if r.number == number)
-        assert dc.route_status(route, dc.Site.CNS) == dc.OPEN
-        assert not any(dc.reaches(m, dc.Site.CNS) for m in route.closed_by)
-        # and closed everywhere the agents do reach
-        assert dc.route_status(route, dc.Site.LIVER) == dc.CLOSED
+        assert dc.route_status(route, dc.Site.CNS) == dc.CLOSED
+        crossers = [m for m in route.closed_by if dc.reaches(m, dc.Site.CNS)]
+        assert set(crossers) == {"lomustine", "temozolomide"}, number
+        # and the original systemic closers genuinely still do not reach
+        for blocked in ("doxorubicin", "eBAT", "MEK_plus_TORC1_2"):
+            if blocked in route.closed_by:
+                assert not dc.reaches(blocked, dc.Site.CNS)
 
 
 def test_splenic_rupture_is_not_counted_five_times():
@@ -219,9 +252,8 @@ def test_the_t_cell_arm_is_what_reaches_the_cns_and_the_antibody_arm_is_not():
 
 def test_the_verdict_corrects_the_earlier_overclaim():
     from canine_dsp import hsa_deterministic_closure as dc
-    assert dc.VERDICT["headline"].startswith("NOT every route is closed at every site")
-    assert "THREE cells are OPEN" in dc.VERDICT["headline"]
-    assert "concealed it" in dc.VERDICT["what_this_corrects"]
+    assert "ONE cell is OPEN" in dc.VERDICT["headline"]
+    assert "intracranial haemorrhage" in dc.VERDICT["headline"]
 
 
 def test_the_odds_are_explicitly_demoted_to_sensitivity():
@@ -236,10 +268,11 @@ def test_the_condition_list_is_finite_and_names_what_fails():
     from canine_dsp import hsa_deterministic_closure as dc
     assert 5 <= len(dc.CONDITIONS) <= 20
     failing = dc.failing_conditions()
-    assert len(failing) == 4
+    assert len(failing) == 3
     joined = " ".join(c.what for c in failing)
-    assert "CNS-penetrant" in joined
+    assert "CNS-penetrant" not in joined, "that condition is now met"
     assert "half-life" in joined and "rupture hazard" in joined
+    assert "haemorrhage" in joined
     for c in dc.CONDITIONS:
         assert c.how_to_settle, c.what
 

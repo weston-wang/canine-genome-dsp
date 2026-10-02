@@ -2006,41 +2006,56 @@ durability number averages over anatomical compartments. Split by site:
 
 | route | spleen | peritoneum | liver | lung | heart | **CNS** |
 |---|---|---|---|---|---|---|
-| 1–4, 6, 7, 9, 10, 12a, 13–15 | ✓ | ✓ | ✓ | ✓ | ✓ | **✓** |
+| 1–4, 6–15 (all but route 5) | ✓ | ✓ | ✓ | ✓ | ✓ | **✓** |
 | **5** rupture / haemorrhage | ✓ | n/a | n/a | n/a | n/a | **OPEN** |
-| **8** antigen-null **and** drug-resistant | ✓ | ✓ | ✓ | ✓ | ✓ | **OPEN** |
-| **12b** clone at the intrinsic-growth ceiling | ✓ | ✓ | ✓ | ✓ | ✓ | **OPEN** |
 
-**Three cells are open, and all three are in the central nervous system.** The reason is mechanical:
-route 8's closure is doxorubicin plus eBAT, and route 12b's is the MEK + TORC1/2 combination
-arresting the clone while the vaccine clears it. **None of those three agents crosses the blood–brain
-barrier** — doxorubicin is a P-glycoprotein substrate, eBAT is a ~55 kDa protein toxin, trametinib is
-a P-gp/BCRP substrate, and the combination's measured arrest was in a subcutaneous tumorgraft. In the
-CNS the vaccine would have to hold a ceiling-rate clone alone, which needs 3.0–3.9×.
+**Three cells were open when the matrix was first built, and all three were in the CNS.** The reason
+was mechanical: route 8's closure is doxorubicin plus eBAT, route 12b's is the MEK + TORC1/2
+combination arresting the clone while the vaccine clears it, and **none of those three agents crosses
+the blood–brain barrier** — doxorubicin is a P-glycoprotein substrate, eBAT is a ~55 kDa protein
+toxin, and trametinib is a P-gp/BCRP substrate whose measured arrest was in a subcutaneous
+tumorgraft. In the CNS the vaccine would have had to hold a ceiling-rate clone alone, needing
+3.0–3.9×.
 
-**This corrects an overclaim in this document.** §4a and §7 said every escape path has a closure.
-That is true systemically and false in the CNS, and the odds-based headline is what concealed it —
-0.830 is an average over sites where doxorubicin and eBAT are present.
+**That corrected an overclaim in this document** — §4a and §7 said every escape path has a closure,
+which was true systemically and false in the CNS, and the single averaged number is what concealed
+it, since 0.830 averages over sites where doxorubicin and eBAT are present.
 
-### The candidate closure, deliberately not yet credited
+### Two CNS-penetrant alkylators close both cells, and they cover each other's weakness
 
-A CNS-penetrant agent that is neither antigen- nor kinase-directed would close both cells.
-**Lomustine** is a lipophilic nitrosourea used in canine intracranial disease, and is already the
-backbone agent on this project's histiocytic-sarcoma branch; **brain-directed stereotactic
-radiotherapy** is the non-pharmacological alternative. Neither needs a new molecule.
+What those cells require is an agent that is CNS-penetrant **and** independent of both the vaccine
+antigen and the PI3K/MAPK axis. An alkylating agent satisfies the independence by mechanism. Two
+have the reach, and their evidence is complementary in exactly the right way:
 
-It is **present in the module's reach table so its coverage can be reasoned about, and deliberately
-absent from every route's `closed_by` list** — crediting an agent the plan has not adopted would be
-forcing a closure, which the standing standards forbid. Graded TRANSFERRED on reach, **unquantified**
-on how many logs it delivers against these compartments.
+| agent | the transfer being made | basis |
+|---|---|---|
+| **lomustine** | same species, same disease, same setting — **different compartment** | lipophilic nitrosourea used for canine intracranial disease, and **already given to dogs with stage II splenic HSA after splenectomy, alternating with an anthracycline** (Moore, Rassnick & Frimberger 2017, *JAVMA* 251(5):559–565, PMID 28828962): 30 dogs, median 158 d, 1-yr 16%; low-mitotic-rate subgroup n=9, median **292 d**, 1-yr **42%** |
+| **temozolomide** | same tumour type, same compartment — **different species** | BBB-penetrant alkylator with **angiosarcoma-specific CNS evidence**: a primary cerebral angiosarcoma resolved on concurrent chemoradiotherapy with temozolomide (PMID 37811120), and a breast angiosarcoma with skull-base and dural metastasis achieved durable response on anlotinib + temozolomide after multimodal failure (PMID 42125685). Mechanistic support: PARP1 in 46/47 AS samples, SLFN11 in 80%, olaparib + TMZ synergistic in AS lines (PMID 34085099) |
+
+**What this does not claim.** Lomustine does not improve survival in this disease — the 30-dog
+trial's overall median (158 days) was **not better than the anthracycline alone**. What the trial
+establishes is **deliverability and reach in the right setting**, which is precisely what the eBAT
+trial establishes for the systemic compartment. The number of logs either alkylator removes from the
+antigen-null drug-tolerant fraction is **unmeasured**.
+
+**And the duration constraint shapes the regimen rather than breaking it.** Lomustine's cumulative
+hepatotoxicity caps total exposure near **350 mg/m²**, which at 50–110 mg/m² per cycle is roughly
+**three to five cycles**. So it is strictly a *finite-course log-remover* and cannot be a chronic
+floor-holder — which is exactly the shape routes 8 and 12b need, and the same shape the eBAT closure
+takes: one short early course, not maintenance.
+
+**Brain-directed stereotactic radiotherapy is deliberately *not* credited.** It has maximal CNS reach
+and is fully mechanism-independent, but it can only treat a deposit that has been imaged. Routes 8
+and 12b describe *occult* seeding, so crediting SRT against them would be crediting a mechanism
+against a target it cannot find. It covers detected deposits only.
 
 ### The finite condition list
 
-Rule 12 asks for the conditions and each one's status rather than a number. Four fail:
+Rule 12 asks for the conditions and each one's status rather than a number. Three fail:
 
 | condition | status |
 |---|---|
-| a CNS-penetrant, antigen- and pathway-independent agent must be added | **OPEN** — the gap the site dimension exposed |
+| a CNS-penetrant, antigen- and pathway-independent agent must be added | **MET** at TRANSFERRED — lomustine and temozolomide; unquantified on logs delivered |
 | immunity half-life must support the booster interval | **FAILS** the stated bar — bare assumption, and the answer swings on it |
 | the post-remission rupture hazard must be bounded | **FAILS** the stated bar — swept with no anchor |
 | intracranial haemorrhage has no treating component | **OPEN** — a competing event, not a cancer-control failure |
