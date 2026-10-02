@@ -139,6 +139,60 @@ reported.) The scale-free comparison is the fair one: the plan needs HR **0.178*
 the 1.35× rung outright on DMFS**. Still open: whether canine HSA behaves like human melanoma, and
 whether four mechanistically coupled levers stack or overlap.
 
+## The standard audit (2026-10-01) — grading the inputs, not listing absences
+
+`CLAUDE.md` rule 11: never report "no measurement exists" as an open gap, because the bar is real
+data **or** a rigorous model with a justified transfer. Only two things are genuinely open — a number
+with **no** basis at all, and a number whose basis is circular, tuned or contradicted. Module
+`hsa_standard_audit`, tests `test_hsa_standard_audit.py`. Mirrors the HS branch's
+`src/canine_dsp/standard_audit.py`.
+
+### The input that had never been graded, and it was the most load-bearing one
+
+`hsa_scenarios._SHARED_GROWTH = [.055, .05, .05, .052]` — a bare literal, self-labelled
+*"illustrative, not fitted"*, with the module header stating the growth rates are *"not fit to any
+HSA-specific measurement."* **That array sets the bar (0.0515–0.0550/day) that every escape closure
+and every durability margin in this analysis is graded against.** It had the weakest basis of any
+number here and had never itself been graded.
+
+**Now DERIVED**, from regrowth measured in canine splenic HSA — Lana 2007 (PMID 17708397): 133-day
+median disease-free interval on doxorubicin, 178 days on metronomic, after splenectomy. Over a
+1e6–1e8 residual burden to a 1e9 detectable threshold:
+
+| | |
+|---|---|
+| implied net regrowth | **0.0129 – 0.0519/day** |
+| bar in use | **0.0550/day** (12.6-day doubling) |
+| verdict | **conservative by 1.06× – 4.26×** |
+
+Those are net rates *under chemotherapy*, so untreated growth is faster and the bar belongs above the
+range — which is where 0.055 sits. **A conservative bar cannot manufacture a closure; it can only
+suppress one.** Every kill margin in this analysis is clearing a bar harder than the clinical
+disease-free intervals demand. It also independently reinforces the route-12 closure: the tumorgraft
+rate of 0.110–0.143/day is **2.1×–11× the clinically derived range**.
+
+*Sensitivity:* the vaccine requirement scales with the bar — 1.40× at 0.0515, **1.50× at 0.055**
+(still inside the measured ramp), 2.17× at 0.080 (outside it).
+
+### What actually fails — `failing()` returns two
+
+| Input | Where | Why it fails |
+|---|---|---|
+| **immunity half-life** | `hsa_vaccine_maintenance` | 180 days is bare; the ten-year answer swings 0.268 ↔ 1.000 across 90 vs 365 days. Load-bearing *and* baseless — case (a). This is experiment E3, and the one input where "nobody has measured it" is the right thing to say |
+| **post-remission rupture hazard** | §5 joint-durability table | swept across 2/5/10% with no anchor, and the ~0.53-vs-~0.85 headline is asserted from it. Screening *sensitivity* is measured and Ruffoni 2025 measures how dogs *present*, but neither bounds the hazard in a dog already in remission — case (a) |
+
+### Three things this analysis called gaps that actually pass
+
+Recorded rather than quietly dropped, because listing them as gaps was grading against
+demonstration — the bar the user explicitly disclaimed:
+
+- **the 0.012/day increment** — four transfer-fraction derivations plus a randomised trial in the
+  matched setting. TRANSFERRED, passes.
+- **route 9's per-dog brain-metastasis rate** — the ~14% is recorded as unverified and *no closure
+  asserts anything from it*; route 9's closure holds at any weight. Inert placeholder.
+- **the Treg lever's magnitude** — the closure is mechanism-level and no durability figure is
+  computed from a Treg effect size. Inert placeholder.
+
 ## Open gaps, ranked (the honest list)
 
 1. **What any lever adds to vaccine height in this tumour.** Unmeasured for all four. The single

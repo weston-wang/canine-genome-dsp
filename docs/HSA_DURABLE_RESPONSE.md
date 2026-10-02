@@ -1930,6 +1930,67 @@ real 48-day surgery-alone median (Wendelburg et al. 2015, *JAVMA* 247(4):393-403
 
 ---
 
+## 6a. The standard audit — grading the inputs, not listing absences
+
+Everything above grades closures against **the bar**. The bar itself had never been graded, and it
+turned out to be the weakest number in the analysis: `hsa_scenarios._SHARED_GROWTH` is a bare literal
+carrying the comment *"illustrative, not fitted"*, in a module whose header says the growth rates are
+*"not fit to any HSA-specific measurement."* That array sets 0.0515–0.0550/day — the threshold every
+escape closure and every durability margin in this document is measured against.
+
+**It is now derived.** Regrowth measured in canine splenic HSA itself — Lana 2007 (PMID 17708397):
+133-day median disease-free interval on doxorubicin, 178 days on metronomic, after splenectomy —
+over a 1e6–1e8 post-surgical residual to a 1e9 detectable threshold:
+
+| residual burden | doxorubicin DFI (133 d) | metronomic DFI (178 d) |
+|---|---|---|
+| 1e6 | 0.0519/day | 0.0388/day |
+| 1e7 | 0.0346 | 0.0259 |
+| 1e8 | 0.0173 | 0.0129 |
+
+Implied range **0.0129–0.0519/day** against a bar in use of **0.0550** — the bar is **conservative by
+1.06× to 4.26×**. And these are net rates *under chemotherapy*, so untreated growth is faster still:
+the bar belongs above the range, which is where it sits.
+
+**Why this matters more than it sounds.** A conservative bar cannot manufacture a closure — it can
+only suppress one. Every kill margin in this document is clearing a threshold harder than the
+clinical disease-free intervals demand. It also independently reinforces §4a's route-12 closure: the
+tumorgraft ceiling of 0.110–0.143/day is **2.1×–11× the clinically derived range**, which is a second
+reason to reject it as a whole-animal rate on top of the survival-median test.
+
+*Sensitivity:* the requirement scales linearly with the bar — 1.40× of measured vaccine height at
+0.0515, **1.50× at 0.055** (the top of the measured ramp), 2.17× at 0.080 (outside it). So the
+conclusion survives the bar being the conservative 0.055 rather than 0.0515, and would not survive
+0.080.
+
+### What actually fails
+
+`CLAUDE.md` rule 11 forbids reporting "no measurement exists" as a gap: the bar is real data *or* a
+rigorous model with a justified transfer, so only a number with **no** basis — or one whose basis is
+circular, tuned or contradicted — is genuinely open. Graded that way, **two of eleven load-bearing
+inputs fail**, and neither is an escape route:
+
+- **the immunity half-life.** 180 days is bare, and the ten-year answer swings between 0.268 and
+  1.000 across 90 vs 365 days. Load-bearing and baseless. This is the one input where "nobody has
+  measured it" is the correct thing to say.
+- **the post-remission rupture hazard.** Swept across 2/5/10% with no anchor, and the ~0.53-vs-~0.85
+  headline is asserted from it. The screening *sensitivity* is measured and Ruffoni 2025 measures how
+  dogs *present* — neither bounds the hazard in a dog already in remission.
+
+### Three things this document called gaps that pass
+
+Kept visible rather than quietly dropped, because calling them gaps graded against demonstration —
+the bar explicitly disclaimed: **the 0.012/day increment** (four transfer derivations plus a
+randomised trial in the matched setting), **route 9's per-dog brain-metastasis rate** (unverified, and
+no closure asserts anything from it), and **the Treg lever's magnitude** (the closure is
+mechanism-level; no durability figure is computed from it). The last two are inert placeholders, and
+an input nothing asserts a closure from is not a gap.
+
+*Module: `hsa_standard_audit`. Tests: `test_hsa_standard_audit.py`. Run `failing()` rather than
+listing absences.*
+
+---
+
 ## 7. The answer
 
 A lasting remission runs through the **vaccine**, not the targeted drug. The drug makes tumours
