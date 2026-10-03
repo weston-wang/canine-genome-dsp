@@ -113,7 +113,7 @@ Concrete failures (so the rules have a reason):
    an unmeasured combination", or "is a requirement derived from the model rather than an effect size from data".
    Those are re-grades against demonstration wearing different words. If a graded-PASSES item seems open, the
    move is to say which code path would have to change and why, not to re-list it.
-   The bar is real data **or** a rigorous The bar is real data **or** a rigorous
+   The bar is real data **or** a rigorous
    model, with a cross-species/disease/class transfer acceptable when justified in writing. So before
    calling anything open, ask: does a written transfer or a derivation stand behind this number? If
    yes it is CLOSED (graded TRANSFERRED or DERIVED) and saying otherwise re-grades against a bar the
