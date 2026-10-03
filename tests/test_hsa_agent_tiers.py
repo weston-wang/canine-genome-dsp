@@ -267,3 +267,17 @@ def test_the_failed_half_of_the_proxy_search_is_reported():
     assert "returns nothing" in note
     assert "reach, not exposure" in note
     assert "Lomustine does not" in at.RULE_14_PROXY_SEARCH["the_net_effect_on_the_ledger"]
+
+
+def test_the_near_future_tier_exists_and_is_recorded_as_unused():
+    """Rule 13 was extended: near-future agents count for closure, only theoretical ones do not.
+    This program uses none of that allowance, which is a fact to report rather than an absence."""
+    assert at.tier_mix() == {"exists_today": 13, "near_future": 0, "theoretical": 0}
+    assert at.near_future_agents() == []
+    assert at.NEAR_FUTURE in at.USABLE_FOR_CLOSURE
+    assert at.TO_BUILD not in at.USABLE_FOR_CLOSURE
+    # the allowance is recorded in the module, not merely implied
+    import inspect
+    src = inspect.getsource(at)
+    assert "nothing that's pure theoretical" in src    # the user's own wording, kept verbatim
+    assert "Do not retreat" in src

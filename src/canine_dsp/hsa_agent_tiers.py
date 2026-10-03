@@ -33,9 +33,17 @@ from enum import Enum
 LICENSED = "exists today -- licensed or standard of care in this species"
 OFF_LABEL = "exists today -- given to dogs off-label"
 DOG_TRIALS = "exists today -- administered in a published canine trial"
-TO_BUILD = "to build -- the molecule or construct does not exist for this target"
+NEAR_FUTURE = ("near-future -- clinical-stage evidence of the modality in humans or dogs, a stated "
+               "path to the dog, and a derived or transferred dose/kill")
+TO_BUILD = "theoretical -- no clinical evidence of the mechanism anywhere, or the construct does not exist"
 
 EXISTS_TODAY = (LICENSED, OFF_LABEL, DOG_TRIALS)
+# Rule 13 admits the first two groups for closure; a theoretical agent never counts. The user
+# (2026-10-02): "I don't mean you can only use therapies that exist today, I meant to include near
+# future ones that are scientifically sound. Just nothing that's pure theoretical." This program
+# happens to use none of the near-future tier -- its mix is 13 / 0 / 0 -- so the allowance is
+# recorded and unused rather than absent. Do not retreat to "only what exists today".
+USABLE_FOR_CLOSURE = EXISTS_TODAY + (NEAR_FUTURE,)
 
 
 @dataclass(frozen=True)
@@ -113,8 +121,23 @@ PROGRAM_AGENTS: tuple[Agent, ...] = (
 
 
 def to_build_dependencies() -> list[Agent]:
-    """Rule 13: a program that needs a to-build agent is reported separately and as such."""
+    """Rule 13: a program needing a theoretical agent is reported separately and as such."""
     return [a for a in PROGRAM_AGENTS if a.tier == TO_BUILD]
+
+
+def near_future_agents() -> list[Agent]:
+    """Rule 13 admits these for closure. Empty for this program, which is a fact worth reporting:
+    the allowance exists and this program did not need it."""
+    return [a for a in PROGRAM_AGENTS if a.tier == NEAR_FUTURE]
+
+
+def tier_mix() -> dict[str, int]:
+    """The three-way mix rule 13 asks a program to be reported with."""
+    return {
+        "exists_today": sum(1 for a in PROGRAM_AGENTS if a.tier in EXISTS_TODAY),
+        "near_future": len(near_future_agents()),
+        "theoretical": len(to_build_dependencies()),
+    }
 
 
 def program_is_built_from_existing_agents() -> bool:

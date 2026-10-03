@@ -399,15 +399,27 @@ was not run; writing the guard is not running the guard.
 
 ## Published reports
 
-| Report | Audience | Link |
-|---|---|---|
-| Splenic Hemangiosarcoma Consolidated Analysis | technical reader wanting the whole argument | https://claude.ai/code/artifact/12202c48-d95e-4ca1-abde-b51369d64181 |
-| The Three-Move Plan | plain language — clear it, hold it, catch it early | https://claude.ai/code/artifact/3e895f36-2140-4bd3-a533-5545e987c8d8 |
-| The Potency Gap | researchers — what is additive here, and the experiments ranked | https://claude.ai/code/artifact/c70ccea7-571f-406f-bcec-bd0c29671e33 |
+**One report. `https://claude.ai/artifact/UwM7n4AnygB5d9wPKr5efx` — "The Splenic Ledger".**
 
-All three were revised on 2026-10-02 and carry the full current state: the alkylator CNS closure, the
-route-5 CNS regrade to partial with the new brain-imaging condition, the rule 13 tier ledger, and the
-rule 14 temozolomide exposure. *The Potency Gap* §06 is the changelog.
+Consolidated 2026-10-03 at the user's instruction: *"Are there multiple final artifacts? If so
+consolidate and simplify, remember I don't want back and forth discussions in the report."* The three
+pages that preceded it (*Consolidated Analysis* `3EpReVYXcQCFNUvyeciNwS`, *The Three-Move Plan*
+`8itmt26MXKkkxaqn7LtXBu`, *The Potency Gap* `RacbPzWWofZxkVGXiMvBRt`) and the stale August/September
+pages (*Hemangiosarcoma Escape Routes*, *The Two-Move Plan* ×2, *The Durability Gap*, *Four Cells Ten
+Years*, *Antigen-Independent Immunity Ledger*, *Four Persistence Mechanisms*, *Cobimetinib Escape
+Audit*) are **superseded**. They were left published, not deleted; deleting is the user's call.
+
+**Do not add a second reader-facing page for this disease.** Update the one above. The sibling HS
+branch reached the same arrangement independently with *The Closed Ledger*
+(`4Ho2u4jTieU579ExuRgvY5`) — that page is **histiocytic sarcoma**, not this disease, and is not ours
+to edit from here.
+
+**The report carries no process history**, per the same instruction: no corrections, no changelog, no
+"this was listed as a gap earlier", no "three attempts and why each failed". Scientific exclusions
+stay (propranolol 200× short on exposure, toceranib maintenance failed, NK augmentation made outcomes
+worse, Yunnan Baiyao failed in trial, eBAT's compressed schedule was worse, platform swap ruled out in
+118 dogs) because those are results. The working record — including every withdrawn claim — lives in
+`docs/HSA_DURABLE_RESPONSE.md` and this file, which is where it belongs.
 
 ## Test status
 
