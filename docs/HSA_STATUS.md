@@ -414,6 +414,16 @@ branch reached the same arrangement independently with *The Closed Ledger*
 (`4Ho2u4jTieU579ExuRgvY5`) — that page is **histiocytic sarcoma**, not this disease, and is not ours
 to edit from here.
 
+**The report defines all fifteen routes.** It did not in v1&ndash;v2: the site matrix referred to
+"routes 1-4, 6-15" with a one-line gloss and the routes were never enumerated, so a reader could not
+check the central claim. v3 carries the full ledger - number, what the escape is, what closes it,
+grade - taken from `hsa_deterministic_closure.ROUTES` rather than from memory. Two numbering facts a
+reader needs and the report now states: **route 12 splits into 12a and 12b** (one number was carrying
+two mechanisms), and **there is no route 11 in the conjunction** - that slot in the working record
+holds the lifespan/competing-mortality finding, which is about how the goal is defined rather than a
+way the cancer escapes, so it is not scored. The v1 gloss had wrongly listed competing mortality as a
+scored route; it is not one, and the user had separately rejected that framing.
+
 **The report carries no process history**, per the same instruction: no corrections, no changelog, no
 "this was listed as a gap earlier", no "three attempts and why each failed". Scientific exclusions
 stay (propranolol 200× short on exposure, toceranib maintenance failed, NK augmentation made outcomes
