@@ -1,0 +1,197 @@
+<title>Curing Canine Lymphoma</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Source+Sans+3:wght@400;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+  /* Layout: one reading column, a wide scrolling table in the middle, plain sections. Palette: pine on pale green-grey, ochre for "must be built". */
+  :root{
+    --paper:#F5F7F4; --surface:#FFFFFF; --surface-2:#EDF1EC;
+    --ink:#1B2420; --ink-soft:#465049; --ink-faint:#6C766E;
+    --line:#DBE2DA; --pine:#1F6B5A; --pine-deep:#164C40; --pine-soft:#E3EFEA;
+    --ochre:#8A5A0F; --ochre-soft:#F5E9D5; --brick:#B4462F;
+    --maxw:46rem;
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --paper:#0F1E19; --surface:#16261F; --surface-2:#1B2C25;
+      --ink:#E8EDE8; --ink-soft:#AEBBB2; --ink-faint:#84928A;
+      --line:#2A3B33; --pine:#5FC3A8; --pine-deep:#8FD9C4; --pine-soft:#17342B;
+      --ochre:#E0A94E; --ochre-soft:#2E2716; --brick:#E27A5F; color-scheme:dark;
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#0F1E19; --surface:#16261F; --surface-2:#1B2C25;
+    --ink:#E8EDE8; --ink-soft:#AEBBB2; --ink-faint:#84928A;
+    --line:#2A3B33; --pine:#5FC3A8; --pine-deep:#8FD9C4; --pine-soft:#17342B;
+    --ochre:#E0A94E; --ochre-soft:#2E2716; --brick:#E27A5F; color-scheme:dark;
+  }
+  *{box-sizing:border-box}
+  body{margin:0; background:var(--paper); color:var(--ink); font-family:"Source Sans 3",system-ui,sans-serif;
+    font-size:1.0625rem; line-height:1.6; padding-inline:1rem; -webkit-font-smoothing:antialiased}
+  .wrap{max-width:var(--maxw); margin:0 auto}
+  h1,h2,h3{font-family:"Fraunces",Georgia,serif; font-weight:600; line-height:1.15; text-wrap:balance; margin:0}
+  h1{font-size:clamp(2.1rem,6vw,3.2rem); letter-spacing:-.015em}
+  h2{font-size:clamp(1.4rem,3.4vw,1.8rem); margin:0 0 .6rem}
+  h3{font-size:1.1rem; margin:0 0 .4rem}
+  p{margin:0 0 1rem}
+  a{color:var(--pine)}
+  .mono{font-family:"IBM Plex Mono",ui-monospace,monospace}
+  header{padding-block:clamp(2.2rem,6vw,4rem) 1.6rem; border-bottom:1px solid var(--line)}
+  .eyebrow{font-family:"IBM Plex Mono",monospace; font-size:.72rem; letter-spacing:.16em; text-transform:uppercase; color:var(--pine); font-weight:600; margin:0 0 1rem}
+  .deck{font-size:1.2rem; color:var(--ink-soft); max-width:38rem; margin:1rem 0 0}
+  section{padding-block:2rem; border-bottom:1px solid var(--line)}
+  .stats{display:grid; grid-template-columns:repeat(auto-fit,minmax(9rem,1fr)); gap:1px; background:var(--line); border:1px solid var(--line); border-radius:12px; overflow:hidden; margin:1.3rem 0}
+  .stat{background:var(--surface); padding:1rem}
+  .stat .n{font-family:"IBM Plex Mono",monospace; font-size:1.8rem; font-weight:600; color:var(--pine); line-height:1; font-variant-numeric:tabular-nums}
+  .stat .l{font-size:.86rem; color:var(--ink-soft); margin-top:.45rem; line-height:1.35}
+  .progs{display:grid; grid-template-columns:repeat(auto-fit,minmax(18rem,1fr)); gap:1rem; margin-top:1rem}
+  .prog{background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:1rem 1.1rem; min-width:0}
+  .prog ul{list-style:none; margin:.5rem 0 0; padding:0; display:flex; flex-direction:column; gap:.45rem}
+  .prog li{display:flex; justify-content:space-between; gap:.6rem; align-items:baseline; font-size:.97rem}
+  .tag{font-family:"IBM Plex Mono",monospace; font-size:.64rem; letter-spacing:.05em; text-transform:uppercase; font-weight:600; padding:.15rem .45rem; border-radius:999px; white-space:nowrap}
+  .tag.have{background:var(--pine-soft); color:var(--pine-deep)}
+  .tag.build{background:var(--ochre-soft); color:var(--ochre)}
+  .scroll{overflow-x:auto; border:1px solid var(--line); border-radius:10px; background:var(--surface)}
+  table{border-collapse:collapse; width:100%; min-width:40rem; font-size:.92rem}
+  th,td{padding:.55rem .7rem; text-align:left; border-bottom:1px solid var(--line); vertical-align:top}
+  thead th{font-family:"IBM Plex Mono",monospace; font-size:.68rem; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-faint); background:var(--surface-2)}
+  tbody th{font-weight:600}
+  tbody tr:last-child th, tbody tr:last-child td{border-bottom:0}
+  td.ok .chk{color:var(--pine); font-weight:700}
+  td.bad .chk{color:var(--brick); font-weight:700}
+  td .n{color:var(--ink-faint); font-variant-numeric:tabular-nums}
+  td.na{color:var(--ink-faint)}
+  ul.plain{margin:.4rem 0 1rem; padding-left:1.2rem} ul.plain li{margin:.35rem 0; color:var(--ink-soft)} ul.plain li strong{color:var(--ink)}
+  .note{background:var(--surface-2); border:1px solid var(--line); border-radius:10px; padding:1rem 1.1rem; margin:1rem 0}
+  footer{padding-block:1.6rem 3rem; color:var(--ink-faint); font-size:.88rem}
+  @media (max-width:560px){ li .tag{align-self:flex-start} }
+</style>
+
+<div class="wrap">
+<header>
+  <p class="eyebrow">Canine multicentric lymphoma · model report</p>
+  <h1>Every escape route is closed in the model, using treatments that exist or are in clinical trials</h1>
+  <p class="deck">Counting treatments that exist today for dogs plus ones already in human trials that have to be adapted for dogs, B-cell and T-cell lymphoma both close in the body and the brain, even at the cautious end of every number. This is a model result. Nothing here has been tried in a dog.</p>
+</header>
+
+<section>
+  <h2>The result</h2>
+  <div class="scroll"><table>
+    <thead><tr><th></th><th>Only treatments that exist today</th><th>With near-future treatments</th></tr></thead>
+    <tbody>
+      <tr><th scope="row">B-cell lymphoma, body</th><td class="ok"><span class="chk">closed</span> <span class="n">every route</span></td><td class="ok"><span class="chk">closed</span> <span class="n">day 49</span></td></tr>
+      <tr><th scope="row">B-cell lymphoma, brain</th><td class="bad"><span class="chk">1 open</span> <span class="n">dormant pump-armoured cells</span></td><td class="ok"><span class="chk">closed</span> <span class="n">day 72</span></td></tr>
+      <tr><th scope="row">T-cell lymphoma, body</th><td class="bad"><span class="chk">1 open</span> <span class="n">dormant pump-armoured cells</span></td><td class="ok"><span class="chk">closed</span> <span class="n">day 80</span></td></tr>
+      <tr><th scope="row">T-cell lymphoma, brain</th><td class="bad"><span class="chk">3 open</span> <span class="n">+ the cytarabine enzyme loss</span></td><td class="ok"><span class="chk">closed</span> <span class="n">day 158</span></td></tr>
+    </tbody>
+  </table></div>
+  <p>"Closed" means that after counting side effects for the whole combination, the treatments kill the cells of that escape route faster than they regrow, and every one of those cells is cleared inside the time the treatments have been given safely in the dogs or people studied. The 23 escape routes were checked in the body and the brain: 44 of 44 checks pass for B-cell and 42 of 42 for T-cell, each with at least four independent treatments covering it. The day shown is the last escape route to be cleared, at the cautious end of the numbers.</p>
+  <p>"Near-future" means the treatment type is in human clinical trials (or in dog trials) and has a stated route to dogs. Treatments with no clinical evidence anywhere were not used.</p>
+</section>
+
+<section>
+  <h2>The two plans</h2>
+  <div class="progs">
+    <div class="prog"><h3>B-cell lymphoma (9 treatments)</h3>
+      <ul>
+        <li>Anti-CD20 antibody <span class="tag have">in dogs</span></li>
+        <li>Anti-CD20 antibody into the spinal fluid <span class="tag build">human data</span></li>
+        <li>Hydroxychloroquine <span class="tag have">off-label</span></li>
+        <li>Verdinexor <span class="tag have">licensed</span></li>
+        <li>Matched-donor stem-cell transplant <span class="tag have">referral centres</span></li>
+        <li>Oral cytarabine prodrug <span class="tag have">dog trial</span></li>
+        <li>CD3xCD20 T-cell engager <span class="tag build">human data; dog version to build</span></li>
+        <li>CAR-T cells, canine <span class="tag build">human data; dog version to build</span></li>
+        <li>CAR-T into the spinal fluid <span class="tag build">human data; dog version to build</span></li>
+      </ul></div>
+    <div class="prog"><h3>T-cell lymphoma (8 treatments)</h3>
+      <ul>
+        <li>Hydroxychloroquine <span class="tag have">off-label</span></li>
+        <li>Verdinexor <span class="tag have">licensed</span></li>
+        <li>Matched-donor stem-cell transplant <span class="tag have">referral centres</span></li>
+        <li>Oral cytarabine prodrug <span class="tag have">dog trial</span></li>
+        <li>Cytarabine into the spinal fluid <span class="tag build">human practice</span></li>
+        <li>CD7 CAR-T <span class="tag build">human data; dog version to build</span></li>
+        <li>CD5+CD7 CAR-T <span class="tag build">human data; dog version to build</span></li>
+        <li>CD7 CAR-T into the spinal fluid <span class="tag build">human data; dog version to build</span></li>
+      </ul></div>
+  </div>
+  <p>Each plan has overlapping coverage so that no single treatment is the only thing holding a route closed: dropping any one of them still closes everything, at the cautious numbers. At the central human numbers the plans also survive every treatment being only half as strong. At the cautious numbers they do not survive that halving: the dormant cells in the brain regrow (B-cell) or the enzyme-loss route reopens (T-cell).</p>
+</section>
+
+<section>
+  <h2>Escape route by escape route, at the cautious end</h2>
+  <p>Each cell shows the day the model clears that route.</p>
+  <div class="scroll"><table>
+    <thead><tr><th>Escape route</th><th>B-cell body</th><th>B-cell brain</th><th>T-cell body</th><th>T-cell brain</th></tr></thead>
+    <tbody>
+<tr><th scope="row">Bulk tumor (drug-sensitive cells)</th><td class="ok"><span class="chk">closed</span> <span class="n">day 16</span></td><td class="ok"><span class="chk">closed</span> <span class="n">day 24</span></td><td class="ok"><span class="chk">closed</span> <span class="n">day 36</span></td><td class="ok"><span class="chk">closed</span> <span class="n">day 31</span></td></tr>
+<tr><th scope="row">Drug pump 1 (P-glycoprotein)</th><td class="ok"><span class="chk">closed</span> <span class="n">day 1</span></td><td class="ok"><span class="chk">closed</span> <span class="n">day 1</span></td><td class="ok"><span class="chk">closed</span> <span class="n">day 2</span></td><td class="ok"><span class="chk">closed</span> <span class="n">day 1</span></td></tr>
+<tr><th scope="row">Drug pump 2 (BCRP)</th><td class="ok"><span class="chk">closed</span> <span class="n">day 1</span></td><td class="ok"><span class="chk">closed</span> <span class="n">day 1</span></td><td class="ok"><span class="chk">closed</span> <span class="n">day 2</span></td><td class="ok"><span class="chk">closed</span> <span class="n">day 1</span></td></tr>
+<tr><th scope="row">Cells that refuse to self-destruct (TP53)</th><td class="ok"><span class="chk">closed</span> <span class="n">day 1</span></td><td class="ok"><span class="chk">closed</span> <span class="n">day 1</span></td><td class="ok"><span class="chk">closed</span> <span class="n">day 1</span></td><td class="ok"><span class="chk">closed</span> <span class="n">day 1</span></td></tr>
+<tr><th scope="row">Drops the CD20 marker</th><td class="ok"><span class="chk">closed</span> <span class="n">day 1</span></td><td class="ok"><span class="chk">closed</span> <span class="n">day 1</span></td><td class="na">n/a</td><td class="na">n/a</td></tr>
+<tr><th scope="row">Drops the CD19 marker</th><td class="ok"><span class="chk">closed</span> <span class="n">day 0</span></td><td class="ok"><span class="chk">closed</span> <span class="n">day 1</span></td><td class="na">n/a</td><td class="na">n/a</td></tr>
+<tr><th scope="row">Survival signal rewired (BCR / NF-kB)</th><td class="ok"><span class="chk">closed</span> <span class="n">day 0</span></td><td class="ok"><span class="chk">closed</span> <span class="n">day 1</span></td><td class="ok"><span class="chk">closed</span> <span class="n">day 1</span></td><td class="ok"><span class="chk">closed</span> <span class="n">day 1</span></td></tr>
+<tr><th scope="row">Backup survival signal (PI3K / AKT)</th><td class="ok"><span class="chk">closed</span> <span class="n">day 0</span></td><td class="ok"><span class="chk">closed</span> <span class="n">day 1</span></td><td class="ok"><span class="chk">closed</span> <span class="n">day 1</span></td><td class="ok"><span class="chk">closed</span> <span class="n">day 1</span></td></tr>
+<tr><th scope="row">Dormant cells that wait out treatment</th><td class="ok"><span class="chk">closed</span> <span class="n">day 5</span></td><td class="ok"><span class="chk">closed</span> <span class="n">day 3</span></td><td class="ok"><span class="chk">closed</span> <span class="n">day 7</span></td><td class="ok"><span class="chk">closed</span> <span class="n">day 3</span></td></tr>
+<tr><th scope="row">Survives by cell self-recycling</th><td class="ok"><span class="chk">closed</span> <span class="n">not expected at early detection</span></td><td class="ok"><span class="chk">closed</span> <span class="n">not expected at early detection</span></td><td class="ok"><span class="chk">closed</span> <span class="n">not expected at early detection</span></td><td class="ok"><span class="chk">closed</span> <span class="n">not expected at early detection</span></td></tr>
+<tr><th scope="row">Immune cells worn out or suppressed</th><td class="ok"><span class="chk">closed</span> <span class="n">day 3</span></td><td class="ok"><span class="chk">closed</span> <span class="n">day 1</span></td><td class="ok"><span class="chk">closed</span> <span class="n">day 5</span></td><td class="ok"><span class="chk">closed</span> <span class="n">day 1</span></td></tr>
+<tr><th scope="row">Changes cell type</th><td class="ok"><span class="chk">closed</span> <span class="n">not expected at early detection</span></td><td class="ok"><span class="chk">closed</span> <span class="n">not expected at early detection</span></td><td class="ok"><span class="chk">closed</span> <span class="n">not expected at early detection</span></td><td class="ok"><span class="chk">closed</span> <span class="n">not expected at early detection</span></td></tr>
+<tr><th scope="row">Hides from the immune system (MHC loss)</th><td class="ok"><span class="chk">closed</span> <span class="n">day 1</span></td><td class="ok"><span class="chk">closed</span> <span class="n">day 1</span></td><td class="ok"><span class="chk">closed</span> <span class="n">day 1</span></td><td class="ok"><span class="chk">closed</span> <span class="n">day 1</span></td></tr>
+<tr><th scope="row">Repairs lomustine damage (MGMT)</th><td class="ok"><span class="chk">closed</span> <span class="n">day 0</span></td><td class="ok"><span class="chk">closed</span> <span class="n">day 1</span></td><td class="ok"><span class="chk">closed</span> <span class="n">day 1</span></td><td class="ok"><span class="chk">closed</span> <span class="n">day 1</span></td></tr>
+<tr><th scope="row">Drops the CD7 marker (T-cell)</th><td class="na">n/a</td><td class="na">n/a</td><td class="ok"><span class="chk">closed</span> <span class="n">day 1</span></td><td class="ok"><span class="chk">closed</span> <span class="n">day 1</span></td></tr>
+<tr><th scope="row">Steroid resistance (receptor loss)</th><td class="ok"><span class="chk">closed</span> <span class="n">day 6</span></td><td class="ok"><span class="chk">closed</span> <span class="n">day 7</span></td><td class="ok"><span class="chk">closed</span> <span class="n">day 14</span></td><td class="ok"><span class="chk">closed</span> <span class="n">day 8</span></td></tr>
+<tr><th scope="row">Loses the enzyme that activates cytarabine</th><td class="ok"><span class="chk">closed</span> <span class="n">day 4</span></td><td class="ok"><span class="chk">closed</span> <span class="n">day 4</span></td><td class="ok"><span class="chk">closed</span> <span class="n">day 7</span></td><td class="ok"><span class="chk">closed</span> <span class="n">day 7</span></td></tr>
+<tr><th scope="row">Loses the doxorubicin target</th><td class="ok"><span class="chk">closed</span> <span class="n">day 0</span></td><td class="ok"><span class="chk">closed</span> <span class="n">day 1</span></td><td class="ok"><span class="chk">closed</span> <span class="n">day 1</span></td><td class="ok"><span class="chk">closed</span> <span class="n">day 1</span></td></tr>
+<tr><th scope="row">Rewires the BCL2 survival switch</th><td class="ok"><span class="chk">closed</span> <span class="n">day 2</span></td><td class="ok"><span class="chk">closed</span> <span class="n">day 1</span></td><td class="ok"><span class="chk">closed</span> <span class="n">day 5</span></td><td class="ok"><span class="chk">closed</span> <span class="n">day 1</span></td></tr>
+<tr><th scope="row">Dormant, pump-armoured progenitor cells</th><td class="ok"><span class="chk">closed</span> <span class="n">day 49</span></td><td class="ok"><span class="chk">closed</span> <span class="n">day 72</span></td><td class="ok"><span class="chk">closed</span> <span class="n">day 80</span></td><td class="ok"><span class="chk">closed</span> <span class="n">day 158</span></td></tr>
+<tr><th scope="row">Marker present but too faint</th><td class="ok"><span class="chk">closed</span> <span class="n">day 3</span></td><td class="ok"><span class="chk">closed</span> <span class="n">day 1</span></td><td class="ok"><span class="chk">closed</span> <span class="n">day 6</span></td><td class="ok"><span class="chk">closed</span> <span class="n">day 1</span></td></tr>
+<tr><th scope="row">Mutates the verdinexor target</th><td class="ok"><span class="chk">closed</span> <span class="n">not expected at early detection</span></td><td class="ok"><span class="chk">closed</span> <span class="n">not expected at early detection</span></td><td class="ok"><span class="chk">closed</span> <span class="n">not expected at early detection</span></td><td class="ok"><span class="chk">closed</span> <span class="n">not expected at early detection</span></td></tr>
+<tr><th scope="row">Loses methotrexate uptake</th><td class="ok"><span class="chk">closed</span> <span class="n">day 2</span></td><td class="ok"><span class="chk">closed</span> <span class="n">day 1</span></td><td class="ok"><span class="chk">closed</span> <span class="n">day 5</span></td><td class="ok"><span class="chk">closed</span> <span class="n">day 1</span></td></tr>
+<tr><th scope="row">&quot;Don&#x27;t eat me&quot; signal (CD47)</th><td class="ok"><span class="chk">closed</span> <span class="n">day 3</span></td><td class="ok"><span class="chk">closed</span> <span class="n">day 1</span></td><td class="ok"><span class="chk">closed</span> <span class="n">day 5</span></td><td class="ok"><span class="chk">closed</span> <span class="n">day 1</span></td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section>
+  <h2>The number the closure turns on</h2>
+  <p>The brain and the dormant cells are covered by CAR-T cells (and, for B-cell, the engager). The B-cell plan without the engager clears once the CAR-T cells kill at 0.08 per day or more, and survives any one treatment dropping and every treatment halving from 0.2 per day. The T-cell plan clears from 0.12 per day and is robust from 0.2 per day. The central value carried over from human data is 0.35 per day. In dogs, CAR-T cells made so far (seven dogs) did not expand or last, so this is the live number. Two near-future routes address it: CAR-T cells made inside the patient rather than in a lab (first human results 2025 to 2026), and, for B-cell lymphoma, the engager, which does not depend on CAR-T cells at all.</p>
+</section>
+
+<section>
+  <h2>Items that were outside the check, now checked</h2>
+  <ul class="plain">
+    <li><strong>Loss of immune markers (MHC):</strong> in people it is a mismatched-donor problem (29% of relapses after half-matched donors, 7% after unrelated adult donors). With a perfectly matched littermate there is nothing to lose. Antibody, CAR-T and engager do not need the markers. <strong>Condition:</strong> a matched donor.</li>
+    <li><strong>Drug resistance with no traced mechanism:</strong> in people, CAR-T gives 31% lasting responses at about 5 years in lymphoma that resisted chemotherapy, so it does not defeat the immune treatments in the plans.</li>
+    <li><strong>Eye:</strong> most dogs with eye lymphoma had it alone and did not progress after the eye was removed; treat locally (eye radiation or removal) if it appears. <strong>Testis:</strong> radiation of the other testis prevented testis relapse in people, and neutered dogs have none.</li>
+    <li><strong>Brain tissue reach:</strong> measured only as fluid and blood ratios; nobody has measured drug levels in the brain lymphoma that has not broken the barrier. The plans use the measured ratios and clear with several treatments covering each brain route.</li>
+    <li><strong>Later risks</strong> (second cancers about 9 to 21% at 10 years in people after transplant or CAR-T, treatment deaths about 18% at 10 years after CAR-T) are costs of treatment, not escape routes, so they are not part of this check.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>How each class was handled</h2>
+  <ul class="plain">
+    <li><strong>Stem-cell transplant:</strong> credited from dog data (8 of 9 first-remission dogs alive past 4 years). It is in both plans.</li>
+    <li><strong>Vaccines:</strong> credited from dog survival data, small and needing dividing cells; they are not needed for closure.</li>
+    <li><strong>Inhibitors:</strong> credited from human lab and drug-level data; the useful ones are in the plans (verdinexor, hydroxychloroquine). None reaches the dormant cells in the brain. A search for new ones that do found only candidates without a derivable kill rate (CDK9 inhibitors) or an ungraded estimate (artesunate). Thiotepa was credited from human outcome data; it ends with its treatment window and so does not close the brain alone.</li>
+    <li><strong>T-cell engagers:</strong> credited from human data; dog version to build (and given gradually, because a dog went into a cytokine storm on a T-cell activating antibody). <strong>Armed T cells:</strong> no lymphoma data in any species, no credit. <strong>eBAT toxin:</strong> its targets are low in dog lymphoma, so it is set aside.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>Conditions, and where each one stands</h2>
+  <ul class="plain">
+    <li><strong>The near-future treatments are built for dogs</strong> (dog engager, dog CAR-T, spinal-fluid route). <strong>Status: not yet; each has human data and a path.</strong></li>
+    <li><strong>CAR-T kills at 0.2 per day or more in dogs</strong> (0.12 for the T-cell plan to close at all; the B-cell plan has the engager route as well). <strong>Status: not shown in dogs.</strong></li>
+    <li><strong>A perfectly matched donor</strong> exists. <strong>Status: depends on the dog (25% per littermate).</strong></li>
+    <li><strong>The engager is given gradually.</strong> <strong>Status: standard practice in people.</strong></li>
+    <li><strong>Eye disease, if it appears, is treated locally.</strong></li>
+  </ul>
+  <p>This is a model result: the numbers are measured in dogs, worked out from measurements, calibrated from outcomes, or carried over from human data with the reasoning written down. It is not a demonstration in a dog.</p>
+</section>
+
+<footer>
+  <p>Technical record: <span class="mono">docs/LYMPHOMA_UNIVERSE.md</span> section G (this page's table is generated by <span class="mono">lymphoma_joint.clock_table</span> and tested), <span class="mono">docs/universe/</span> (literature sweeps with PubMed IDs). A model, not veterinary advice.</p>
+</footer>
+</div>

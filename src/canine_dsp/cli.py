@@ -6,20 +6,60 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from .io import read_first_fasta, read_vcf_positions
-from .signals import eiip, variant_density, windowed_gc
-from .spectral import coherence, multitaper_psd, spectral_entropy, welch_psd
-from .wavelets import cwt_power
-from .volterra_cli import run_volterra, synthetic_table
+from .alphafold_cli import analyze_structure, fetch_structure
+from .hsa_cli import (
+    hsa_combination_control_demo,
+    hsa_combination_search_demo,
+    hsa_combination_toxicity_demo,
+    hsa_durability_horizon_demo,
+    hsa_receptor_conservation_demo,
+    hsa_resistance_demo,
+    hsa_vaccine_antigen_design_demo,
+    hsa_vaccine_followon_demo,
+)
+from .antigen_convergence_cli import antigen_convergence_demo
+from .endurance_answer_cli import endurance_answer_demo
+from .histiocytic_cli import driver_hypothesis_demo
+from .hsa_scenarios import HSA_EBAT_EXPOSURE_DURATION_DAYS
+from .hsa_scenarios import _PREEXISTING_PROB_CENTRAL as HSA_PREEXISTING_PROB_CENTRAL
 from .hybrid_cli import inverse_demo, prepare_dog10k_aging, prepare_gse9794
-from .vaccine_eval import run_gse102459, run_gse190001
 from .immunotherapy_cli import immunotherapy_demo
-from .stochastic_cli import stochastic_immunotherapy_demo
-from .superiority_cli import policy_superiority_benchmark
-from .off_policy_cli import evaluate_logged_policy_file
+from .io import read_first_fasta, read_vcf_positions
+from .mapk_cli import (
+    combination_control_demo,
+    combination_toxicity_demo,
+    compare_orthologs,
+    durability_horizon_demo,
+    localized_control_demo,
+    mapk_cns_demo,
+    mapk_resistance_demo,
+    pulmonary_two_compartment_demo,
+    single_patient_feasibility_demo,
+    vaccine_epitope_binding_demo,
+    vaccine_followon_demo,
+)
+from .lymphoma_cli import (
+    lymphoma_durability_horizon_demo,
+    lymphoma_immunotherapy_demo,
+    lymphoma_resistance_demo,
+    lymphoma_sanctuary_demo,
+)
+from .mapk_scenarios import DEBULKING_FRACTION
+from .mapk_scenarios import _PREEXISTING_PROB_CENTRAL as MAPK_PREEXISTING_PROB_CENTRAL
 from .melanoma_benchmark import run_melanoma_benchmark
+from .mutational_supply_cli import mutational_supply_demo
+from .off_policy_cli import evaluate_logged_policy_file
 from .osteosarcoma_benchmark import run_osteosarcoma_benchmark
 from .osteosarcoma_data import prepare_gse76127
+from .pharmacology_cli import cdk46_achievability_demo
+from .signals import eiip, variant_density, windowed_gc
+from .single_patient_cli import single_patient_demo
+from .spectral import coherence, multitaper_psd, spectral_entropy, welch_psd
+from .stochastic_cli import stochastic_immunotherapy_demo
+from .superiority_cli import policy_superiority_benchmark
+from .vaccine_eval import run_gse102459, run_gse190001
+from .volterra_cli import run_volterra, synthetic_table
+from .wavelets import cwt_power
 
 
 def _save_spectrum(x: np.ndarray, out: Path, title: str, sample_spacing: float = 1.0) -> dict:
@@ -179,6 +219,285 @@ def main() -> None:
     external.add_argument("--matrix", type=Path, required=True)
     external.add_argument("--modules", type=int, default=3)
     external.add_argument("--out", type=Path, required=True)
+    af_fetch = sub.add_parser("alphafold-fetch", help="download an AlphaFold DB model by UniProt accession")
+    af_fetch.add_argument("--uniprot", required=True)
+    af_fetch.add_argument("--out", type=Path, required=True)
+    af_analyze = sub.add_parser("alphafold-analyze", help="spectral analysis of an AlphaFold confidence track")
+    af_analyze.add_argument("--struct", type=Path, required=True)
+    af_analyze.add_argument("--variants", type=Path)
+    af_analyze.add_argument("--flank", type=int, default=5)
+    af_analyze.add_argument("--out", type=Path, required=True)
+    mapk_demo = sub.add_parser("mapk-resistance-demo",
+                               help="Monte Carlo MAPK-inhibitor escape simulation for histiocytic sarcoma")
+    mapk_demo.add_argument("--species", choices=["dog", "human"], default="dog")
+    mapk_demo.add_argument("--trials", type=int, default=300)
+    mapk_demo.add_argument("--horizon-days", type=int, default=730)
+    mapk_demo.add_argument("--seed", type=int, default=7)
+    mapk_demo.add_argument("--out", type=Path, required=True)
+    hsa_demo = sub.add_parser("hsa-resistance-demo",
+                              help="Monte Carlo PI3K/mTOR-inhibitor escape simulation for the "
+                                   "PIK3CA/PTEN-driven subtype of canine hemangiosarcoma")
+    hsa_demo.add_argument("--trials", type=int, default=300)
+    hsa_demo.add_argument("--horizon-days", type=int, default=730)
+    hsa_demo.add_argument("--seed", type=int, default=7)
+    hsa_demo.add_argument("--out", type=Path, required=True)
+    hsa_combo_demo = sub.add_parser("hsa-combination-control-demo",
+                                    help="PI3K/mTOR inhibitor vs. eBAT vs. their combination "
+                                         "for canine hemangiosarcoma")
+    hsa_combo_demo.add_argument("--trials", type=int, default=300)
+    hsa_combo_demo.add_argument("--horizon-days", type=int, default=730)
+    hsa_combo_demo.add_argument("--preexisting-prob", type=float, default=HSA_PREEXISTING_PROB_CENTRAL)
+    hsa_combo_demo.add_argument("--ebat-exposure-duration-days", type=int,
+                                default=HSA_EBAT_EXPOSURE_DURATION_DAYS)
+    hsa_combo_demo.add_argument("--seed", type=int, default=7)
+    hsa_combo_demo.add_argument("--out", type=Path, required=True)
+    hsa_vaccine_demo = sub.add_parser("hsa-vaccine-followon-demo",
+                                      help="PI3K/mTOR inhibitor (+/- eBAT) plus a "
+                                           "real-vaccine-inspired follow-on for canine "
+                                           "hemangiosarcoma")
+    hsa_vaccine_demo.add_argument("--ebat-max-kill", type=float, default=0.0)
+    hsa_vaccine_demo.add_argument("--no-inhibitor", action="store_true",
+                                  help="test vaccine (+/- eBAT) with no PI3K/mTOR inhibitor at all")
+    hsa_vaccine_demo.add_argument("--trials", type=int, default=300)
+    hsa_vaccine_demo.add_argument("--horizon-days", type=int, default=730)
+    hsa_vaccine_demo.add_argument("--preexisting-prob", type=float, default=HSA_PREEXISTING_PROB_CENTRAL)
+    hsa_vaccine_demo.add_argument("--ebat-exposure-duration-days", type=int,
+                                  default=HSA_EBAT_EXPOSURE_DURATION_DAYS)
+    hsa_vaccine_demo.add_argument("--seed", type=int, default=7)
+    hsa_vaccine_demo.add_argument("--out", type=Path, required=True)
+    hsa_search_demo = sub.add_parser("hsa-combination-search-demo",
+                                     help="grid search over eBAT x vaccine potency for canine "
+                                          "hemangiosarcoma, to find which combination(s) reach "
+                                          "durable response rather than assuming one")
+    hsa_search_demo.add_argument("--trials", type=int, default=300)
+    hsa_search_demo.add_argument("--horizon-days", type=int, default=730)
+    hsa_search_demo.add_argument("--preexisting-prob", type=float, default=HSA_PREEXISTING_PROB_CENTRAL)
+    hsa_search_demo.add_argument("--ebat-exposure-duration-days", type=int,
+                                 default=HSA_EBAT_EXPOSURE_DURATION_DAYS)
+    hsa_search_demo.add_argument("--seed", type=int, default=7)
+    hsa_search_demo.add_argument("--out", type=Path, required=True)
+    hsa_receptor_demo = sub.add_parser("hsa-receptor-conservation-demo",
+                                       help="human-vs-dog whole-protein conservation for eBAT's "
+                                            "and eVim's real molecular targets (EGFR, PLAUR, VIM)")
+    hsa_receptor_demo.add_argument("--genes", nargs="+", default=None)
+    hsa_receptor_demo.add_argument("--out", type=Path, required=True)
+    hsa_antigen_demo = sub.add_parser("hsa-vaccine-antigen-design-demo",
+                                      help="structure-based candidate B-cell epitope selection "
+                                           "on a real HSA vaccine antigen (default: VIM/eVim)")
+    hsa_antigen_demo.add_argument("--gene", default="VIM")
+    hsa_antigen_demo.add_argument("--window", type=int, default=9)
+    hsa_antigen_demo.add_argument("--top-n", type=int, default=3)
+    hsa_antigen_demo.add_argument("--out", type=Path, required=True)
+    hsa_tox_demo = sub.add_parser("hsa-combination-toxicity-demo",
+                                  help="does the inhibitor+eBAT combination for canine "
+                                       "hemangiosarcoma survive realistic combined-dose de-rating")
+    hsa_tox_demo.add_argument("--ebat-max-kill", type=float, default=0.05)
+    hsa_tox_demo.add_argument("--trials", type=int, default=300)
+    hsa_tox_demo.add_argument("--horizon-days", type=int, default=730)
+    hsa_tox_demo.add_argument("--preexisting-prob", type=float, default=HSA_PREEXISTING_PROB_CENTRAL)
+    hsa_tox_demo.add_argument("--ebat-exposure-duration-days", type=int,
+                              default=HSA_EBAT_EXPOSURE_DURATION_DAYS)
+    hsa_tox_demo.add_argument("--seed", type=int, default=7)
+    hsa_tox_demo.add_argument("--out", type=Path, required=True)
+    hsa_durability_demo = sub.add_parser("hsa-durability-horizon-demo",
+                                         help="how long does \"durable response\" mean for a given "
+                                              "HSA combination -- sweeps 1/2/5/10-year horizons")
+    hsa_durability_demo.add_argument("--ebat-max-kill", type=float, default=0.05)
+    hsa_durability_demo.add_argument("--vaccine-max-kill", type=float, default=0.0)
+    hsa_durability_demo.add_argument("--no-inhibitor", action="store_true",
+                                     help="test vaccine (+/- eBAT) with no PI3K/mTOR inhibitor at all")
+    hsa_durability_demo.add_argument("--trials", type=int, default=300)
+    hsa_durability_demo.add_argument("--preexisting-prob", type=float, default=HSA_PREEXISTING_PROB_CENTRAL)
+    hsa_durability_demo.add_argument("--ebat-exposure-duration-days", type=int,
+                                     default=HSA_EBAT_EXPOSURE_DURATION_DAYS)
+    hsa_durability_demo.add_argument("--seed", type=int, default=7)
+    hsa_durability_demo.add_argument("--out", type=Path, required=True)
+    cdk46_feas = sub.add_parser("cdk46-achievability-demo",
+                                help="is the second-drug potency the resistance model needs "
+                                     "pharmacologically reachable by a real CDK4/6 inhibitor?")
+    cdk46_feas.add_argument("--breed", choices=["bmd", "flat_coated_retriever"], default="bmd")
+    cdk46_feas.add_argument("--target-max-kill", type=float, default=0.08)
+    cdk46_feas.add_argument("--location-penetration-multiplier", type=float, default=1.0)
+    cdk46_feas.add_argument("--out", type=Path, required=True)
+    endurance_answer = sub.add_parser("endurance-answer-demo",
+                                  help="the culminating question: is a durable response achievable "
+                                       "for one dog, with everything this repo established")
+    endurance_answer.add_argument("--debulking-fraction", type=float, default=DEBULKING_FRACTION)
+    endurance_answer.add_argument("--ccnu-max-kill", type=float, default=0.08)
+    endurance_answer.add_argument("--trials", type=int, default=250)
+    endurance_answer.add_argument("--seed", type=int, default=7)
+    endurance_answer.add_argument("--out", type=Path, required=True)
+    antigen_conv = sub.add_parser("antigen-convergence-demo",
+                                  help="re-runs the three-component regimen with the vaccine ON: "
+                                       "every drug-resistance route keeps the driver antigen, so a "
+                                       "hotspot vaccine covers all of them")
+    antigen_conv.add_argument("--breed", choices=["bmd", "flat_coated_retriever"], default="bmd")
+    antigen_conv.add_argument("--debulking-fraction", type=float, default=DEBULKING_FRACTION)
+    antigen_conv.add_argument("--ccnu-max-kill", type=float, default=0.08)
+    antigen_conv.add_argument("--trials", type=int, default=400)
+    antigen_conv.add_argument("--preexisting-prob", type=float, default=0.30)
+    antigen_conv.add_argument("--seed", type=int, default=7)
+    antigen_conv.add_argument("--out", type=Path, required=True)
+    mut_supply = sub.add_parser("mutational-supply-demo",
+                                help="does a low-mutation-burden tumor endure better in this model, "
+                                     "and which parameter actually carries the effect?")
+    mut_supply.add_argument("--breed", choices=["bmd", "flat_coated_retriever"], default="bmd")
+    mut_supply.add_argument("--debulking-fraction", type=float, default=DEBULKING_FRACTION)
+    mut_supply.add_argument("--ccnu-max-kill", type=float, default=0.08)
+    mut_supply.add_argument("--horizon-days", type=int, default=730)
+    mut_supply.add_argument("--trials", type=int, default=400)
+    mut_supply.add_argument("--preexisting-prob", type=float, default=0.30)
+    mut_supply.add_argument("--seed", type=int, default=7)
+    mut_supply.add_argument("--out", type=Path, required=True)
+    single_patient = sub.add_parser("single-patient-demo",
+                                    help="N=1 reframing: what sequencing one dog's tumor resolves, "
+                                         "plus lomustine (real, cytotoxic, CNS-penetrant) as the "
+                                         "second agent instead of a CDK4/6 inhibitor")
+    single_patient.add_argument("--breed", choices=["bmd", "flat_coated_retriever"], default="bmd")
+    single_patient.add_argument("--debulking-fraction", type=float, default=DEBULKING_FRACTION)
+    single_patient.add_argument("--horizon-days", type=int, default=730)
+    single_patient.add_argument("--trials", type=int, default=500)
+    single_patient.add_argument("--preexisting-prob", type=float, default=0.30)
+    single_patient.add_argument("--seed", type=int, default=7)
+    single_patient.add_argument("--out", type=Path, required=True)
+    driver_hypothesis = sub.add_parser("driver-hypothesis-demo",
+                                  help="structural/DSP triage of candidate driver genes for "
+                                       "localized primary CNS / pulmonary histiocytic sarcoma")
+    driver_hypothesis.add_argument("--genes", nargs="+", default=None)
+    driver_hypothesis.add_argument("--bicoherence-nperseg", type=int, default=64)
+    driver_hypothesis.add_argument("--permutations", type=int, default=10000)
+    driver_hypothesis.add_argument("--seed", type=int, default=7)
+    driver_hypothesis.add_argument("--out", type=Path, required=True)
+    mapk_structure = sub.add_parser("mapk-structure-compare",
+                                    help="compare human vs. dog AlphaFold confidence at MAPK-gene hotspots")
+    mapk_structure.add_argument("--gene", required=True)
+    mapk_structure.add_argument("--hotspots", type=int, nargs="+", required=True)
+    mapk_structure.add_argument("--out", type=Path, required=True)
+    mapk_cns = sub.add_parser("mapk-cns-demo",
+                              help="extrapolated primary CNS histiocytic sarcoma MAPK-inhibitor scenarios")
+    mapk_cns.add_argument("--breed", choices=["bmd", "flat_coated_retriever"], default="bmd")
+    mapk_cns.add_argument("--trials", type=int, default=300)
+    mapk_cns.add_argument("--horizon-days", type=int, default=730)
+    mapk_cns.add_argument("--preexisting-prob", type=float, default=MAPK_PREEXISTING_PROB_CENTRAL)
+    mapk_cns.add_argument("--location-penetration-multiplier", type=float, default=1.0)
+    mapk_cns.add_argument("--seed", type=int, default=7)
+    mapk_cns.add_argument("--out", type=Path, required=True)
+    mapk_local = sub.add_parser("mapk-localized-control-demo",
+                                help="local debulking x adjuvant trametinib for primary CNS HS")
+    mapk_local.add_argument("--breed", choices=["bmd", "flat_coated_retriever"], default="bmd")
+    mapk_local.add_argument("--debulking-fraction", type=float, default=0.97)
+    mapk_local.add_argument("--trials", type=int, default=300)
+    mapk_local.add_argument("--horizon-days", type=int, default=730)
+    mapk_local.add_argument("--preexisting-prob", type=float, default=MAPK_PREEXISTING_PROB_CENTRAL)
+    mapk_local.add_argument("--location-penetration-multiplier", type=float, default=1.0)
+    mapk_local.add_argument("--seed", type=int, default=7)
+    mapk_local.add_argument("--out", type=Path, required=True)
+    mapk_combo = sub.add_parser("mapk-combination-demo",
+                                help="trametinib +/- swept-potency CDK4/6 inhibitor, debulked CNS context")
+    mapk_combo.add_argument("--breed", choices=["bmd", "flat_coated_retriever"], default="bmd")
+    mapk_combo.add_argument("--debulking-fraction", type=float, default=0.97)
+    mapk_combo.add_argument("--trials", type=int, default=300)
+    mapk_combo.add_argument("--horizon-days", type=int, default=730)
+    mapk_combo.add_argument("--preexisting-prob", type=float, default=MAPK_PREEXISTING_PROB_CENTRAL)
+    mapk_combo.add_argument("--location-penetration-multiplier", type=float, default=1.0)
+    mapk_combo.add_argument("--seed", type=int, default=7)
+    mapk_combo.add_argument("--out", type=Path, required=True)
+    mapk_tox = sub.add_parser("mapk-combination-toxicity-demo",
+                              help="stress-test the combination benefit against combined-dose de-rating")
+    mapk_tox.add_argument("--breed", choices=["bmd", "flat_coated_retriever"], default="bmd")
+    mapk_tox.add_argument("--debulking-fraction", type=float, default=0.97)
+    mapk_tox.add_argument("--max-kill-2", type=float, default=0.05)
+    mapk_tox.add_argument("--trials", type=int, default=300)
+    mapk_tox.add_argument("--horizon-days", type=int, default=730)
+    mapk_tox.add_argument("--preexisting-prob", type=float, default=MAPK_PREEXISTING_PROB_CENTRAL)
+    mapk_tox.add_argument("--location-penetration-multiplier", type=float, default=1.0)
+    mapk_tox.add_argument("--seed", type=int, default=7)
+    mapk_tox.add_argument("--out", type=Path, required=True)
+    mapk_durability = sub.add_parser("mapk-durability-horizon-demo",
+                                     help="how does durable-response probability change with years of follow-up?")
+    mapk_durability.add_argument("--breed", choices=["bmd", "flat_coated_retriever"], default="bmd")
+    mapk_durability.add_argument("--debulking-fraction", type=float, default=0.97)
+    mapk_durability.add_argument("--max-kill-2", type=float, default=0.05)
+    mapk_durability.add_argument("--trials", type=int, default=300)
+    mapk_durability.add_argument("--preexisting-prob", type=float, default=MAPK_PREEXISTING_PROB_CENTRAL)
+    mapk_durability.add_argument("--location-penetration-multiplier", type=float, default=1.0)
+    mapk_durability.add_argument("--seed", type=int, default=7)
+    mapk_durability.add_argument("--out", type=Path, required=True)
+    mapk_vaccine = sub.add_parser("mapk-vaccine-followon-demo",
+                                  help="does a follow-on mRNA vaccine close the long-horizon durability gap?")
+    mapk_vaccine.add_argument("--breed", choices=["bmd", "flat_coated_retriever"], default="bmd")
+    mapk_vaccine.add_argument("--debulking-fraction", type=float, default=0.97)
+    mapk_vaccine.add_argument("--cdk46-max-kill", type=float, default=0.05)
+    mapk_vaccine.add_argument("--trials", type=int, default=300)
+    mapk_vaccine.add_argument("--horizon-days", type=int, default=1825)
+    mapk_vaccine.add_argument("--preexisting-prob", type=float, default=MAPK_PREEXISTING_PROB_CENTRAL)
+    mapk_vaccine.add_argument("--location-penetration-multiplier", type=float, default=1.0)
+    mapk_vaccine.add_argument("--seed", type=int, default=7)
+    mapk_vaccine.add_argument("--out", type=Path, required=True)
+    mapk_single = sub.add_parser("mapk-single-patient-feasibility-demo",
+                                 help="feasibility of curing one specific dog: between-dog vs. "
+                                      "within-dog uncertainty, and a worst/best-case bracket")
+    mapk_single.add_argument("--breed", choices=["bmd", "flat_coated_retriever"], default="bmd")
+    mapk_single.add_argument("--debulking-fraction", type=float, default=0.97)
+    mapk_single.add_argument("--cdk46-max-kill", type=float, default=0.05)
+    mapk_single.add_argument("--horizon-days", type=int, default=1825)
+    mapk_single.add_argument("--n-dogs", type=int, default=40)
+    mapk_single.add_argument("--repeats-per-dog", type=int, default=60)
+    mapk_single.add_argument("--preexisting-prob", type=float, default=MAPK_PREEXISTING_PROB_CENTRAL)
+    mapk_single.add_argument("--location-penetration-multiplier", type=float, default=1.0)
+    mapk_single.add_argument("--seed", type=int, default=7)
+    mapk_single.add_argument("--out", type=Path, required=True)
+    mapk_epitope = sub.add_parser("mapk-vaccine-epitope-binding-demo",
+                                  help="check candidate vaccine peptides against real, "
+                                       "published canine DLA-I alleles via the live IEDB API")
+    mapk_epitope.add_argument("--out", type=Path, required=True)
+    mapk_pulmonary = sub.add_parser("mapk-pulmonary-two-compartment-demo",
+                                    help="localized pulmonary HS: does undetected regional "
+                                         "nodal disease erase the surgery benefit?")
+    mapk_pulmonary.add_argument("--cdk46-max-kill", type=float, default=0.0)
+    mapk_pulmonary.add_argument("--debulking-fraction", type=float, default=0.97)
+    mapk_pulmonary.add_argument("--trials", type=int, default=300)
+    mapk_pulmonary.add_argument("--horizon-days", type=int, default=730)
+    mapk_pulmonary.add_argument("--preexisting-prob", type=float, default=MAPK_PREEXISTING_PROB_CENTRAL)
+    mapk_pulmonary.add_argument("--seed", type=int, default=7)
+    mapk_pulmonary.add_argument("--out", type=Path, required=True)
+    lym_res = sub.add_parser("lymphoma-resistance-demo",
+                             help="CHOP-only chemoresistance model for canine multicentric "
+                                  "lymphoma: the durability bar (set by P-glycoprotein efflux) and "
+                                  "durable-response sensitivity to pre-existing resistance")
+    lym_res.add_argument("--immunophenotype", choices=["B", "T"], default="B")
+    lym_res.add_argument("--trials", type=int, default=300)
+    lym_res.add_argument("--horizon-days", type=int, default=730)
+    lym_res.add_argument("--seed", type=int, default=7)
+    lym_res.add_argument("--out", type=Path, required=True)
+    lym_immuno = sub.add_parser("lymphoma-immunotherapy-demo",
+                                help="CHOP + a swept-potency CD20-directed immune effector for "
+                                     "canine lymphoma; where the durability threshold sits and "
+                                     "how CD20 antigen loss behaves")
+    lym_immuno.add_argument("--immunophenotype", choices=["B", "T"], default="B")
+    lym_immuno.add_argument("--rab-max-kill", type=float, default=0.0,
+                            help="optional mechanism-agnostic rabacfosadine second node")
+    lym_immuno.add_argument("--trials", type=int, default=300)
+    lym_immuno.add_argument("--horizon-days", type=int, default=730)
+    lym_immuno.add_argument("--seed", type=int, default=7)
+    lym_immuno.add_argument("--out", type=Path, required=True)
+    lym_sanct = sub.add_parser("lymphoma-sanctuary-demo",
+                               help="the CNS sanctuary: two-compartment model with swept drug "
+                                    "penetration, chemo-only vs. chemo + a systemic CD20 effector")
+    lym_sanct.add_argument("--immunotherapy-max-kill", type=float, default=0.09)
+    lym_sanct.add_argument("--trials", type=int, default=300)
+    lym_sanct.add_argument("--horizon-days", type=int, default=1825)
+    lym_sanct.add_argument("--nodal-involvement-prob", type=float, default=0.30)
+    lym_sanct.add_argument("--seed", type=int, default=7)
+    lym_sanct.add_argument("--out", type=Path, required=True)
+    lym_horizon = sub.add_parser("lymphoma-durability-horizon-demo",
+                                 help="how long is durable? CHOP + CD20 effector out to 1/2/5/10 "
+                                      "years, the horizon at which cure/10-year durability is tested")
+    lym_horizon.add_argument("--immunotherapy-max-kill", type=float, default=0.09)
+    lym_horizon.add_argument("--immunophenotype", choices=["B", "T"], default="B")
+    lym_horizon.add_argument("--trials", type=int, default=300)
+    lym_horizon.add_argument("--seed", type=int, default=7)
+    lym_horizon.add_argument("--out", type=Path, required=True)
     args = parser.parse_args()
     if args.command == "demo":
         rng = np.random.default_rng(42)
@@ -231,8 +550,114 @@ def main() -> None:
         )
     elif args.command == "evaluate-gse190001":
         run_gse190001(args.prime, args.boost, args.soft, args.out)
-    else:
+    elif args.command == "evaluate-gse102459":
         run_gse102459(args.matrix, args.out, args.modules)
+    elif args.command == "alphafold-fetch":
+        fetch_structure(args.uniprot, args.out)
+    elif args.command == "alphafold-analyze":
+        analyze_structure(args.struct, args.out, args.variants, args.flank)
+    elif args.command == "mapk-resistance-demo":
+        mapk_resistance_demo(args.out, args.species, args.trials, args.horizon_days, args.seed)
+    elif args.command == "hsa-resistance-demo":
+        hsa_resistance_demo(args.out, args.trials, args.horizon_days, args.seed)
+    elif args.command == "hsa-combination-control-demo":
+        hsa_combination_control_demo(args.out, args.trials, args.horizon_days,
+                                     args.preexisting_prob,
+                                     ebat_exposure_duration_days=args.ebat_exposure_duration_days,
+                                     seed=args.seed)
+    elif args.command == "hsa-vaccine-followon-demo":
+        hsa_vaccine_followon_demo(args.out, args.ebat_max_kill, not args.no_inhibitor,
+                                  args.horizon_days, args.trials, args.preexisting_prob,
+                                  ebat_exposure_duration_days=args.ebat_exposure_duration_days,
+                                  seed=args.seed)
+    elif args.command == "hsa-combination-search-demo":
+        hsa_combination_search_demo(args.out, args.trials, args.horizon_days,
+                                    args.preexisting_prob,
+                                    ebat_exposure_duration_days=args.ebat_exposure_duration_days,
+                                    seed=args.seed)
+    elif args.command == "hsa-receptor-conservation-demo":
+        if args.genes is None:
+            hsa_receptor_conservation_demo(args.out)
+        else:
+            hsa_receptor_conservation_demo(args.out, args.genes)
+    elif args.command == "hsa-vaccine-antigen-design-demo":
+        hsa_vaccine_antigen_design_demo(args.out, args.gene, args.window, args.top_n)
+    elif args.command == "hsa-combination-toxicity-demo":
+        hsa_combination_toxicity_demo(args.out, args.ebat_max_kill, args.trials, args.horizon_days,
+                                      args.preexisting_prob,
+                                      ebat_exposure_duration_days=args.ebat_exposure_duration_days,
+                                      seed=args.seed)
+    elif args.command == "hsa-durability-horizon-demo":
+        hsa_durability_horizon_demo(args.out, args.ebat_max_kill, args.vaccine_max_kill,
+                                    not args.no_inhibitor, args.trials, args.preexisting_prob,
+                                    ebat_exposure_duration_days=args.ebat_exposure_duration_days,
+                                    seed=args.seed)
+    elif args.command == "cdk46-achievability-demo":
+        cdk46_achievability_demo(args.out, args.breed, target_max_kill=args.target_max_kill,
+                                 location_penetration_multiplier=args.location_penetration_multiplier)
+    elif args.command == "endurance-answer-demo":
+        endurance_answer_demo(args.out, args.debulking_fraction, args.ccnu_max_kill, args.trials,
+                          args.seed)
+    elif args.command == "antigen-convergence-demo":
+        antigen_convergence_demo(args.out, args.breed, args.debulking_fraction, args.ccnu_max_kill,
+                                 args.trials, args.preexisting_prob, args.seed)
+    elif args.command == "mutational-supply-demo":
+        mutational_supply_demo(args.out, args.breed, args.debulking_fraction, args.ccnu_max_kill,
+                               args.horizon_days, args.trials, args.preexisting_prob, args.seed)
+    elif args.command == "single-patient-demo":
+        single_patient_demo(args.out, args.breed, args.debulking_fraction, args.horizon_days,
+                            args.trials, args.preexisting_prob, args.seed)
+    elif args.command == "driver-hypothesis-demo":
+        driver_hypothesis_demo(args.out, args.genes, args.bicoherence_nperseg,
+                                     args.permutations, args.seed)
+    elif args.command == "mapk-structure-compare":
+        compare_orthologs(args.gene, args.hotspots, args.out)
+    elif args.command == "mapk-cns-demo":
+        mapk_cns_demo(args.out, args.breed, args.trials, args.horizon_days,
+                     args.preexisting_prob, args.location_penetration_multiplier, args.seed)
+    elif args.command == "mapk-localized-control-demo":
+        localized_control_demo(args.out, args.breed, args.debulking_fraction, args.trials,
+                               args.horizon_days, args.preexisting_prob,
+                               args.location_penetration_multiplier, args.seed)
+    elif args.command == "mapk-combination-demo":
+        combination_control_demo(args.out, args.breed, args.debulking_fraction, args.trials,
+                                 args.horizon_days, args.preexisting_prob,
+                                 args.location_penetration_multiplier, args.seed)
+    elif args.command == "mapk-combination-toxicity-demo":
+        combination_toxicity_demo(args.out, args.breed, args.debulking_fraction, args.max_kill_2,
+                                  args.trials, args.horizon_days, args.preexisting_prob,
+                                  args.location_penetration_multiplier, args.seed)
+    elif args.command == "mapk-durability-horizon-demo":
+        durability_horizon_demo(args.out, args.breed, args.debulking_fraction, args.max_kill_2,
+                                args.trials, args.preexisting_prob,
+                                args.location_penetration_multiplier, args.seed)
+    elif args.command == "mapk-vaccine-followon-demo":
+        vaccine_followon_demo(args.out, args.breed, args.debulking_fraction, args.cdk46_max_kill,
+                              args.trials, args.horizon_days, args.preexisting_prob,
+                              args.location_penetration_multiplier, args.seed)
+    elif args.command == "mapk-single-patient-feasibility-demo":
+        single_patient_feasibility_demo(args.out, args.breed, args.debulking_fraction,
+                                        args.cdk46_max_kill, args.horizon_days, args.n_dogs,
+                                        args.repeats_per_dog, args.preexisting_prob,
+                                        args.location_penetration_multiplier, args.seed)
+    elif args.command == "mapk-vaccine-epitope-binding-demo":
+        vaccine_epitope_binding_demo(args.out)
+    elif args.command == "lymphoma-resistance-demo":
+        lymphoma_resistance_demo(args.out, args.immunophenotype, args.trials, args.horizon_days,
+                                 args.seed)
+    elif args.command == "lymphoma-immunotherapy-demo":
+        lymphoma_immunotherapy_demo(args.out, args.immunophenotype, args.rab_max_kill, args.trials,
+                                    args.horizon_days, args.seed)
+    elif args.command == "lymphoma-sanctuary-demo":
+        lymphoma_sanctuary_demo(args.out, args.immunotherapy_max_kill, args.trials,
+                                args.horizon_days, args.nodal_involvement_prob, args.seed)
+    elif args.command == "lymphoma-durability-horizon-demo":
+        lymphoma_durability_horizon_demo(args.out, args.immunotherapy_max_kill,
+                                         args.immunophenotype, args.trials, args.seed)
+    else:
+        pulmonary_two_compartment_demo(args.out, args.cdk46_max_kill, args.debulking_fraction,
+                                       args.trials, args.horizon_days, args.preexisting_prob,
+                                       args.seed)
 
 
 if __name__ == "__main__":
