@@ -16,6 +16,22 @@ from canine_dsp.core.lymphoma_toxicity import (Organ, PROFILES, axis_loads, prof
 B, T = "B", "T"
 
 
+@pytest.fixture(autouse=True)
+def _v1_catalogue(monkeypatch):
+    """These tests protect the ledger's claims, which were derived on the v1 catalogue (before the universe widening of
+    docs/LYMPHOMA_UNIVERSE.md added vaccines, transplant, engagers, inhibitors, oral cytarabine and the brain agents). The
+    widened catalogue has its own tests in test_lymphoma_universe.py, and its results supersede these claims there."""
+    from canine_dsp.core import lymphoma_universe as U
+    orig = G.grounded_agents
+
+    def v1(compartment, immunophenotype="B"):
+        added = {a.name for fn in (U.universe_agents, U.brain_agents, U.reassessed_agents, U.inhibitor_agents)
+                 for a in fn(compartment, immunophenotype)}
+        return tuple(a for a in orig(compartment, immunophenotype) if a.name not in added)
+
+    monkeypatch.setattr(G, "grounded_agents", v1)
+
+
 def _pool(comp, ip, tier, grades=None):
     return [a for a in G.available(G.grounded_agents(comp, ip), tier)
             if grades is None or G.potency_grade(a) in grades]
