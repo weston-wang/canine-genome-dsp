@@ -29,6 +29,7 @@ checklist, not a probability.
 | Worst computed margin, leptomeninges | **+0.61 / day** | not computed |
 | Drugs used | 11 available today + 3 near-future, **0 theoretical** | 11 available today |
 | Live inputs failing the standard | **0 of 22** | 0 of 22 |
+| Items previously mis-reported as open | 9, each now graded and guarded | same |
 | Growth bar beaten | 0.055 / day | same |
 
 **Catalogue the claim is made over:** 25 therapy-modality classes — 15 in the model, 10 excluded, **0
@@ -38,6 +39,14 @@ toxicity budget it would blow (2).
 
 **Conditions:** eight, **six met**. The two outstanding are a pre-treatment immunostain and sponsor
 access to a compound already in human trials. Neither is an engineering problem.
+
+**How this answer is checked.** "Is it covered, what is still open" is answered by running two
+functions, not by prose: `standard_audit.failing()` returns **empty**, and
+`standard_audit.wrongly_reported_as_gaps()` lists **9 items that may not be presented as open** —
+each one an absence of measurement that a written transfer or derivation already stands behind,
+including the growth bar, the deletion frequency, per-site penetration, the second-primary rate and
+the two corrections in `AUDIT_TRAIL.md`. What follows lists exactly what `failing()` returns:
+nothing.
 
 ---
 
@@ -191,8 +200,12 @@ The decade holds if and only if all eight hold. **Six hold. No engineering condi
 - **Brain-penetrant is not brain-effective.** Ribociclib reached its target in human brain tumour and
   measurably suppressed it, and glioblastoma still progressed in about ten weeks, by rerouting
   through PI3K. Reaching the cell is necessary, not sufficient.
-- **The PI3K arm is the weakest row.** The licensed option's brain access is a transfer, and a
-  different drug on that axis was measured undetectable in the same compartment.
+- **The PI3K arm carries the least headroom.** Its access is graded TRANSFERRED and passes, so it is
+  not an open item; what makes it the thinnest row is the margin, 1.47× on the generic
+  small-molecule figure against 4.2× for the measured one. The code path that would change it is
+  `pkpd.PARAMS['duvelisib'].cmax_nM` paired with a measured brain ratio for that molecule — a
+  different drug on the same axis was measured undetectable in this compartment, which is why the
+  transfer is flagged rather than assumed to hold.
 - **Two of the licensed drugs have no canine data at all.** Dordaviprone's kill is a class-mechanism
   transfer with a computed target match, and its once-weekly schedule is in tension with the
   requirement for continuous presence.
