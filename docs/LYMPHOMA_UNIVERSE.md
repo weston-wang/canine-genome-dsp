@@ -309,3 +309,21 @@ Premise correction: canine B-cell lymphoma rarely expresses BCL6 (PMIDs 23783577
 no single agent load-bearing, using only A-C agents. It holds **if** (1) the C-tier agents are built for dogs (canine engager and CAR-T construct; the CSF route), (2) the CAR-T effective kill reaches 0.2/day for full fault tolerance (0.12 for the T-cell program to clear;
 the B-cell program also has the CAR-T-free route), (3) a DLA-identical donor exists, (4) the engager is introduced with step-up dosing, (5) ocular disease, if it appears, is treated locally. These are the conditions, each stated with its number. It is a model result
 (TRANSFERRED and OUTCOME-calibrated inputs, mean-field clock), not a demonstration in a dog.
+
+### G.1 The growth-rate bar was a bare literal; now derived (2026-10-03; `lymphoma_standard_audit`, `docs/universe/SWEEP_growth_bar.md`)
+
+Running the audit the merged rule 11 asks for (`lymphoma_standard_audit.failing()`) found exactly one failing input: the per-day growth bar 0.0903, which gates every margin and was labelled
+"illustrative, not fitted" in `lymphoma_scenarios` (the same failure as CLAUDE.md failure 7 in the HS work). It is now **DERIVED as a bracket from dog data**: net in-vivo growth of a resistant clone is
+0.015-0.12 /day (relapse regrowth after CHOP retreatment, rescue protocols and COAP, PMIDs 21320021, 17338160, 18196747: floors 0.015-0.07; untreated and prednisone-alone survival of 38.5 and 50 days, PMIDs 9839202, 34125606:
+0.05-0.12 with an assumed presenting burden); gross ceiling 0.204 /day (potential doubling time median 3.4 d, 42 dogs, PMID 10598945). The bar sits at the upper end of the net band and is 44% of the gross rate (implied cell-loss
+factor 0.56, plausible but not measured in dogs). It is conservative against observed net regrowth and not an upper bound if cell loss is small, so the closure is reported at higher bars with potencies held fixed (adverse; outcome-calibrated kills would rise with the bar):
+
+| growth bar | B-cell, central inputs | T-cell, central inputs | B-cell, pessimistic inputs | T-cell, pessimistic inputs |
+|---|---|---|---|---|
+| 0.0903 (used) | clears; robust | clears; robust | clears; any-one-removed ok | clears; any-one-removed ok |
+| 0.12 (top of net band) | clears, halved ok; cytarabine ocfosfate becomes load-bearing | clears; robust | clears; not fault tolerant | **does not clear** (brain margin only +0.015 and the time-resolved clock fails) |
+| 0.15 | clears, halved ok | clears; robust | clears | does not clear |
+| 0.204 (gross ceiling, no cell loss) | clears | clears | clears (margin +0.017) | does not clear |
+
+So: the B-cell program clears at every bar up to the gross ceiling at both input sets; the T-cell program clears at the central CAR-T inputs up to the ceiling, and at the pessimistic CAR-T inputs only if the bar is at most about 0.10 /day.
+That is a stated boundary, not a re-tuning. `failing()` now returns nothing; `wrongly_reported_as_gaps()` lists the items that pass (no canine CAR-T efficacy, no non-enhancing-lymphoma measurement, no canine engager, MHC loss under a DLA-identical graft, E12).

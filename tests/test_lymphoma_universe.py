@@ -227,3 +227,26 @@ def test_theoretical_agents_are_inadmissible():
         assert not tier_mix(("hydroxychloroquine", "__theory__"))["admissible"]
     finally:
         del READINESS["__theory__"]
+
+
+def test_audit_nothing_fails_the_stated_bar_and_the_growth_bar_is_derived():
+    from canine_dsp import lymphoma_standard_audit as A
+    assert A.failing() == []
+    assert A.GROWTH_BAR_BASIS["grade"] == "DERIVED" and A.GROWTH_BAR_BASIS["band"][1] >= A.GROWTH_BAR_BASIS["value"]
+    assert all(i.passes for i in A.wrongly_reported_as_gaps())
+
+
+def test_closure_against_a_faster_growth_bar_is_reported_not_retuned():
+    """The bar is the upper end of the dog-derived net band, below the gross ceiling (0.204/day). Raising it, with potencies held fixed:
+    both programs still clear at the central inputs all the way to the gross ceiling; at the pessimistic inputs the B-cell program
+    still clears at the ceiling but the T-cell program needs the bar <= about 0.10/day. Model state is restored afterwards."""
+    from canine_dsp import lymphoma_standard_audit as A
+    from canine_dsp.core import lymphoma_grounded as G
+    before = G.margin_for.__defaults__
+    rows = {(r["growth"], r["ip"], r["inputs"]): r for r in A.growth_sensitivity((0.0903, 0.12, 0.204))}
+    assert G.margin_for.__defaults__ == before
+    for g in (0.0903, 0.12, 0.204):
+        assert rows[(g, "B", "central")]["clears"] and rows[(g, "T", "central")]["clears"]
+    assert rows[(0.204, "B", "low")]["clears"]
+    assert rows[(0.0903, "T", "low")]["clears"] and not rows[(0.12, "T", "low")]["clears"]
+    assert rows[(0.0903, "B", "low")]["drop_one"] and rows[(0.0903, "T", "low")]["drop_one"]

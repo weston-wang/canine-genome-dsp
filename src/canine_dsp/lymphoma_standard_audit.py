@@ -17,11 +17,17 @@ from .core import lymphoma_grounded as G
 from .core.lymphoma_catalogue import CNS, GROWTH_PER_DAY, SYSTEMIC
 from . import lymphoma_joint as J
 
-#: Growth-rate bar. See `growth_bar_basis()`; filled from docs/universe/SWEEP_growth_bar.md.
+#: Growth-rate bar (docs/universe/SWEEP_growth_bar.md). It was a bare illustrative literal (lymphoma_scenarios: "illustrative, not
+#: fitted") gating every margin: the same failure as CLAUDE.md failure 7 in the HS work. It is now DERIVED as a bracket from dog data.
 GROWTH_BAR_BASIS = {
     "value": GROWTH_PER_DAY,
-    "grade": "ASSUMED",          # replaced below once the derivation is in
-    "basis": "lymphoma_scenarios: 'Per-day intrinsic growth rates; illustrative, not fitted'.",
+    "grade": "DERIVED",
+    "basis": ("0.0903/day is the upper end of the net in-vivo band (0.015-0.12/day) implied by dog relapse regrowth (PMIDs 21320021, "
+              "17338160, 18196747) and untreated/prednisone natural history (PMIDs 9839202, 34125606), and 44% of the dog-measured gross "
+              "potential rate (Tpot median 3.4 d, 42 dogs, PMID 10598945; 0.204/day). Conservative against observed net regrowth; NOT an "
+              "upper bound if cell loss is small, so growth_sensitivity() reports the closure at 0.12, 0.15 and 0.204."),
+    "band": (0.015, 0.12),
+    "gross_ceiling": 0.204,
 }
 
 #: Access / duty numbers used by the programs that have no measured source of their own. Each is checked for whether any
@@ -99,3 +105,33 @@ def wrongly_reported_as_gaps() -> list:
         Item("unattributed multidrug resistance (E12)", "TRANSFERRED", True,
              "axi-cel 31% ongoing at ~5 y in chemo-refractory LBCL (PMID 36821768): the resistant state does not defeat the immune routes"),
     ]
+
+
+def growth_sensitivity(growths=(0.0903, 0.12, 0.15, 0.204)) -> list:
+    """Closure of the near-future programs when the growth bar is raised, potencies held fixed (adverse: outcome-calibrated kills would
+    rise with the bar). Returns rows (growth, immunophenotype, input set, clears, halved, drop-one). Restores the model afterwards."""
+    from .core import lymphoma_horizon as H
+    base = GROWTH_PER_DAY
+    saved = (G.GROWTH_PER_DAY, G.margin_for.__defaults__, dict(G.evaluate.__kwdefaults__), H.BULK_GROWTH_PER_DAY)
+
+    def set_g(g):
+        G.GROWTH_PER_DAY = g
+        d = list(saved[1]); d[0] = g
+        G.margin_for.__defaults__ = tuple(d)
+        G.evaluate.__kwdefaults__["growth"] = g
+        H.BULK_GROWTH_PER_DAY = saved[3] * g / base
+
+    rows = []
+    try:
+        for g in growths:
+            set_g(g)
+            for ip in ("B", "T"):
+                for lab, kw in (("low", J.LOW), ("central", J.CENTRAL)):
+                    r = J.joint_report(ip, J.NEAR_FUTURE_PROGRAMS[ip], **kw)
+                    rows.append({"growth": g, "ip": ip, "inputs": lab, "clears": r["clears"], "halved": r["halved_clears"],
+                                 "drop_one": r["any_one_removed_clears"]})
+    finally:
+        G.GROWTH_PER_DAY, G.margin_for.__defaults__ = saved[0], saved[1]
+        G.evaluate.__kwdefaults__.update(saved[2])
+        H.BULK_GROWTH_PER_DAY = saved[3]
+    return rows

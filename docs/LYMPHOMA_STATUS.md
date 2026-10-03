@@ -263,3 +263,8 @@ Details: `LYMPHOMA_UNIVERSE.md` section G; sweeps `docs/universe/SWEEP_near_futu
 - Report regenerated (`docs/LYMPHOMA_PLAIN_LANGUAGE.html`, artifact Version 15) from `lymphoma_joint.clock_table` at the low inputs.
 
 Test-suite note (2026-10-03): six tests in `tests/test_lymphoma_ledger.py` had been failing since the universe widening (they assert the v1-catalogue ledger claims, and the added agents, e.g. oral cytarabine and transplant, change those results). They now run on the v1 catalogue through an explicit fixture; the widened-catalogue claims are tested in `tests/test_lymphoma_universe.py`. All lymphoma suites pass (ledger 53, universe 25, grounded/search/analysis/engine/inference all green).
+
+## Audit and growth bar (2026-10-03)
+
+`src/canine_dsp/lymphoma_standard_audit.py`: `failing()` now returns [] (tested). It had returned one item, the growth-rate bar 0.0903/day, a bare "illustrative, not fitted" literal gating every margin (CLAUDE.md failure 7 again); derived as a dog-data bracket (net 0.015-0.12/day, gross ceiling 0.204; `docs/universe/SWEEP_growth_bar.md`, `LYMPHOMA_UNIVERSE.md` G.1).
+Closure at higher bars (potencies fixed): B-cell clears at every bar to 0.204 at both input sets; T-cell clears at the central CAR-T inputs to 0.204, and at the pessimistic CAR-T inputs only for a bar <= ~0.10/day. `growth_sensitivity()` regenerates the table. Unsourced HCQ brain access 0.3 is inert for closure (programs clear without it).
