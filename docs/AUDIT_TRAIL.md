@@ -949,3 +949,31 @@ deterministic conjunction, the access measurement and both corrections above.
 | `researcher_brief.html` | The Durability Gap | `claude.ai/artifact/GTEwrabdtdXQEfa5aWxjJH` |
 
 `docs/preprint/hypothesis_note.html` is retained: it is the preprint submission text, not a report.
+
+### Their published pages now carry a pointer, not stale numbers
+
+Rather than deleting them (which would break any shared link) or leaving out-of-date figures live, each
+URL was overwritten with a short notice naming what changed and linking to the current analysis. The
+original content of each is recoverable from this repository's git history at the commit before the
+removal.
+
+| Published page | Now | Source of original content |
+|---|---|---|
+| `MiEzRRPL5JPDs9MuFKMQpX` | pointer (v2) | `docs/consolidated_report.html`, removed 2026-10-03 |
+| `HUudwjgNWstpG5KS7HrXm2` | pointer (v6) | `docs/plain_language_report.html`, removed 2026-10-03 |
+| `7Vgtir7sBYTKAvuikfyd68` | pointer (v11) | earlier draft of the same page |
+| `GTEwrabdtdXQEfa5aWxjJH` | pointer (v3) | `docs/researcher_brief.html`, removed 2026-10-03 |
+
+Pointer source: `docs/superseded/*.html`.
+
+### Older pages in the same lineage, not yet pointed
+
+Reading `MiEzRRPL5JPDs9MuFKMQpX` revealed it was itself a merge of three earlier HS pages, which are
+still live with their own stale figures. They were not touched because the instruction covered the
+four above, and because two of them have not been verified as this disease rather than hemangiosarcoma:
+
+- `58K7cEMatKmzyZ7b7PwgXr` "The Corgi Brain Tumour Analysis" — named as a source of the consolidated page
+- `1zM1Agabh7iu8U7AsLeodX` "Antigen-Independent Immunity Ledger" — named as a source
+- `C5X3HgH1yoLtuLKa8KYZxw` "Four Persistence Mechanisms" — named as a source
+- `Tj9PqoWceEqWYMMTbgnGok` "Four Cells, Ten Years" — the four-cell grid is this branch's framing; unverified
+- `XwmUfAtawBZ3yZfFCzcfjH` "Cobimetinib Escape Audit" — cobimetinib appears in both this branch and HSA; unverified
