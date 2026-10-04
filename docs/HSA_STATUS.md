@@ -487,7 +487,7 @@ worse, Yunnan Baiyao failed in trial, eBAT's compressed schedule was worse, plat
 
 ## Test status
 
-`881 passed` (2026-10-04, exit 0, 23m16s). Five test modules require `torch` and were not run in that container:
+`884 passed` (2026-10-04, exit 0, 22m24s). Five test modules require `torch` and were not run in that container:
 `test_hybrid_rnn`, `test_alphafold`, `test_hsa_cli`, `test_mapk_cli`, `test_vaccine_eval`. The HSA
 analysis modules themselves have no such dependency. Run with
 `PYTHONPATH=src python3 -m pytest tests/ -q` (needs numpy, scipy, pandas, scikit-learn, matplotlib).
