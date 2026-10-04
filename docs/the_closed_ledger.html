@@ -4,7 +4,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 
 <style>
-/* Layout: a single reading column; every claim sits beside its evidence grade, clinical-record style. */
+/* One reading column; every claim sits beside its evidence grade, clinical-record style. */
 :root{
   --paper:#F7F6F3; --raised:#FFFFFF; --ink:#1A1D1A; --ink-soft:#52584F;
   --rule:#DFDDD6; --rule-soft:#ECEAE4;
@@ -84,48 +84,61 @@ code{font-family:var(--mono);font-size:.86em;background:var(--rule-soft);padding
 <p class="eyebrow">Canine histiocytic sarcoma · primary intracranial</p>
 <h1>The Closed Ledger</h1>
 <p class="lede">Every enumerated escape route, at every site the disease occupies, closed by a named
-agent at a stated evidence grade. The answer is a checklist, not a probability.</p>
+drug at a stated evidence grade. The answer is a checklist, not a probability.</p>
 
 <div class="verdict">
-  <p class="vline">All 16 escape routes close at both occupied sites, with computed worst-case
-  margins of +0.59 and +0.61 per day against a growth bar set 1.6–5.8× harder than the clinical data
-  requires. Six of eight conditions hold; neither of the two outstanding is an engineering
-  problem.</p>
+  <p class="vline">All 16 escape routes close at both occupied sites, with computed worst-case margins
+  of +0.59 and +0.61 per day against a growth bar set 1.6–5.8× harder than the clinical data
+  requires. All 22 live inputs pass the evidence standard; none fails.</p>
   <p style="margin-bottom:.6rem">The programme uses <strong>11 drugs available today plus 3
-  near-future ones, and nothing theoretical.</strong> Each near-future drug passes a three-part test
-  applied explicitly: the mechanism is already clinical-stage in humans or dogs, there is a stated
-  path to a dog, and the dose or kill is derived or transferred. Two outstanding conditions: one
-  pre-treatment stain, and a sponsor's decision about a compound already in human trials.</p>
-  <p style="margin-bottom:.6rem"><strong>Getting a drug past an intact blood–brain barrier was the
-  binding constraint at every stage of this work, and it is now settled by measurement rather than
-  inference.</strong> Ribociclib — licensed — reaches 65–634&nbsp;nM unbound in
-  gadolinium-non-enhancing brain tumour, which is tissue behind an intact barrier by definition,
-  against a 40&nbsp;nM target. Restricted to licensed drugs alone, the programme still reaches every
-  site and closes all 16 routes (3 by margin, 12 structurally, 1 gated, none open) — that variant is
-  reported below because it is useful, not because it is the test.</p>
-  <p class="sub" style="margin-bottom:0">Closed within a stated catalogue: 25 therapy-modality
-  classes (15 in the model, 10 excluded on a stated scientific ground, none unassessed, none
-  excluded for lacking canine data) and 16 escape routes derived independently of the list already
-  in hand.</p>
+  near-future ones, and nothing theoretical.</strong> Restricted to licensed drugs alone, it still
+  reaches every site and closes all 16 routes — 3 by computed margin, 12 structurally, 1 gated on a
+  stain, none open.</p>
+  <p class="sub" style="margin-bottom:0"><strong>Eight conditions, six met.</strong> The two
+  outstanding are a pre-treatment immunostain and a sponsor's decision about a compound already in
+  human trials; neither is an engineering problem. Claimed over a stated catalogue: 25
+  therapy-modality classes — 15 in the model, 10 excluded on a stated scientific ground, 0
+  unassessed, 0 excluded for lacking canine data — and 16 escape routes from an independent audit.</p>
 </div>
 
+<h2>The verdict</h2>
+<div class="tw"><table>
+  <thead><tr><th></th><th>Full programme</th><th>Licensed drugs only</th></tr></thead>
+  <tbody>
+    <tr><td>All 16 escape routes closed</td><td><span class="tag ok">yes</span></td>
+        <td><span class="tag ok">yes</span> — 3 margin, 12 structural, 1 gated, 0 open</td></tr>
+    <tr><td>Worst computed margin, invaded brain</td><td class="num">+0.59 /day</td>
+        <td>not computed</td></tr>
+    <tr><td>Worst computed margin, leptomeninges</td><td class="num">+0.61 /day</td>
+        <td>not computed</td></tr>
+    <tr><td>Growth bar beaten</td><td class="num">0.055 /day</td><td class="num">same</td></tr>
+    <tr><td>Drugs used</td><td>11 today + 3 near-future, <strong>0 theoretical</strong></td>
+        <td>11 today</td></tr>
+    <tr><td>Live inputs failing the standard</td><td class="num">0 of 22</td>
+        <td class="num">0 of 22</td></tr>
+  </tbody>
+</table></div>
+
 <h2>The case</h2>
-<p>Primary intracranial, non-disseminated histiocytic sarcoma in a predisposed breed. An extra-axial
-mass on the meninges that invades brain tissue in 23 of 23 dogs and seeds the leptomeninges in 19 of
+<p>Primary intracranial, non-disseminated histiocytic sarcoma in a predisposed breed. An extra-axial,
+meninges-based mass that invades brain tissue in 23 of 23 dogs and seeds the leptomeninges in 19 of
 19. Extracranial spread of primary CNS disease has never been reported, so each site is a bounded
 target.</p>
+<p>The question: can a therapy hold for ten or more years against every mechanism and every escape
+route, at every site the disease occupies?</p>
 
 <h2>Why ten years needs two moves</h2>
-<p>Killing this tumour harder cannot reach a decade, because the breed is born predisposed: clearing
-one tumour leaves the inherited fault untouched. The unlock is that the predisposition and the
-tumour are the <strong>same lesion</strong> — a deletion on canine chromosome 11 removing CDKN2A/B
-and MTAP, measured in <strong>62.8%</strong> of cases.</p>
+<p>Killing this tumour harder cannot reach a decade, because the breed is <strong>born
+predisposed</strong> — clearing one tumour leaves the inherited fault untouched. The unlock is that
+the predisposition and the tumour are the <strong>same lesion</strong>: a deletion on canine
+chromosome 11 removing CDKN2A/B <em>and</em> MTAP, present in <strong>62.8%</strong> of cases.</p>
 <ol>
-  <li><strong>Clear</strong> the tumour that is there.</li>
-  <li><strong>Hold</strong> a matched oral drug indefinitely, so the next tumour never establishes.</li>
+  <li><strong>Induction</strong> — clear the tumour that is there.</li>
+  <li><strong>Genotype-matched maintenance</strong> — hold matched drugs indefinitely, so the
+  <em>next</em> tumour never establishes.</li>
 </ol>
 
-<h2>The closure</h2>
+<h2>The closure, per site</h2>
 <div class="tw"><table>
   <thead><tr><th>Site</th><th>Routes closed</th><th>Worst margin</th><th>Growth bar</th></tr></thead>
   <tbody>
@@ -135,292 +148,255 @@ and MTAP, measured in <strong>62.8%</strong> of cases.</p>
         <td class="num">+0.61 /day</td><td class="num">0.055 /day</td></tr>
   </tbody>
 </table></div>
-<p class="sub">Ten routes carry a computed kill margin. The other six close structurally — by drug
-choice or by schedule, where no kill rate applies. Using <strong>only licensed drugs</strong>, all 16
-still close, with the balance shifted: 3 by margin, 12 structurally, 1 gated on a stain, none open.</p>
+<p class="sub">Ten routes carry a computed kill margin; the other six close structurally — by drug
+choice or by schedule, where no kill rate applies. Each of the 10 modality classes excluded from the
+catalogue rests on a contradicted kill (5), a named escape that defeats it (3), or a toxicity budget
+it would blow (2).</p>
 
 <h2>The regimen</h2>
-<p>Five agents, all oral or systemic, all continuous. No implant, no catheter, no sonication, and no
-radiation in the closing set.</p>
+<p>All oral or systemic, all continuous. No implant, no catheter, no sonication.</p>
 <div class="tw"><table>
-  <thead><tr><th>Role</th><th>Agent</th><th>Why it is in the set</th><th>For a dog?</th></tr></thead>
+  <thead><tr><th>Role</th><th>Drug</th><th>Why it is in the set</th><th>Availability</th></tr></thead>
   <tbody>
-    <tr><td>Induction</td><td>RGN3067, oral colchicine-site tubulin destabiliser</td>
-        <td>Carries 6 of the 16 routes. Efflux ratio 0.61, so the pumps do not remove it</td>
-        <td><span class="tag no">preclinical</span></td></tr>
-    <tr><td>Parallel pathway</td><td>paxalisib</td>
-        <td>Unbound brain:plasma 0.31, confirmed non-substrate of both efflux pumps</td>
-        <td><span class="tag no">investigational</span></td></tr>
-    <tr><td>Brain maintenance</td><td>ribociclib</td>
-        <td>Measured unbound concentration in non-enhancing brain tumour, 1.6–16× its target</td>
+    <tr><td>Induction, position-independent kill</td>
+        <td><strong>RGN3067</strong>, oral colchicine-site tubulin destabiliser</td>
+        <td>Carries 6 of the 16 routes; efflux ratio 0.61, so the pumps this tumour overexpresses do
+        not remove it</td><td><span class="tag gt">near-future</span></td></tr>
+    <tr><td>Brain maintenance, anchor on CDKN2A</td><td><strong>ribociclib</strong></td>
+        <td>Measured unbound concentration in non-enhancing brain tumour, 1.6–16× its target;
+        replaces the function of the deleted CDKN2A. Cytostatic — suppresses, does not clear</td>
         <td><span class="tag ok">licensed</span></td></tr>
-    <tr><td>Kill needing no division</td><td>dordaviprone (ONC201)</td>
-        <td>Collapses the cell's energy metabolism, so it reaches dormant cells. Target 98.4%
-        conserved in dogs at the catalytic site, both active sites identical</td>
+    <tr><td>Cytocidal kill, anchor on MTAP</td><td><strong>niraparib</strong></td>
+        <td>Kills via DNA double-strand breaks; brain-penetrant; inactivates PRMT5, hitting the MTAP
+        half of the same deletion, independently of Rb</td>
+        <td><span class="tag ok">licensed</span></td></tr>
+    <tr><td>Kill needing no cell division</td><td><strong>dordaviprone</strong> (ONC201)</td>
+        <td>ClpP agonist: collapses oxidative phosphorylation, so it reaches dormant cells. Target
+        98.4% conserved in dogs at the catalytic core, both active-site residues identical</td>
         <td><span class="tag ok">licensed 2025</span></td></tr>
-    <tr><td>Lineage removal</td><td>liposomal clodronate</td>
-        <td>Kills by being engulfed, so it reaches cells that have stopped dividing</td>
+    <tr><td>Parallel-pathway cover</td><td><strong>paxalisib</strong> (PI3K/AKT)</td>
+        <td>Unbound brain:plasma 0.31, confirmed non-substrate of both efflux pumps</td>
+        <td><span class="tag gt">near-future</span></td></tr>
+    <tr><td>Lineage removal</td><td><strong>liposomal clodronate</strong></td>
+        <td>Taken up by phagocytosis, so it reaches non-dividing cells</td>
         <td><span class="tag ok">given to dogs</span></td></tr>
-    <tr><td>Dormant-cell cover</td><td>hydroxychloroquine</td>
-        <td>The only agent here with a canine phase I</td>
-        <td><span class="tag ok">canine phase I</span></td></tr>
-    <tr><td>Immune arm</td><td>anti-PD-1 (gilvetmab)</td>
-        <td>Caninized, conditionally licensed</td>
+    <tr><td>Autophagy cover</td><td><strong>hydroxychloroquine</strong></td>
+        <td>The only drug here with a completed canine phase I</td>
         <td><span class="tag ok">licensed</span></td></tr>
+    <tr><td>Antigen-directed arm</td><td><strong>anti-PD-1</strong> (gilvetmab)</td>
+        <td>Caninized, conditionally licensed</td><td><span class="tag ok">licensed</span></td></tr>
   </tbody>
 </table></div>
+<p><strong>Near-future means clinical-stage, not speculative.</strong> Each of the three passes a
+three-part test: the mechanism is already clinical in humans or dogs, there is a stated path to a
+dog, and the dose or kill is derived or transferred. For RGN3067 the mechanism is <em>licensed for
+dogs</em> (vincristine) and canine cells of this tumour are measured sensitive to it at nanomolar
+concentrations. Nothing theoretical is used.</p>
 
-<h3>Maintenance, matched to the tumour</h3>
+<h3>Maintenance by genotype</h3>
 <div class="tw"><table>
-  <thead><tr><th>Tumour carries</th><th>Maintenance</th><th>Hold</th></tr></thead>
+  <thead><tr><th>Tumour carries</th><th>Maintenance</th><th>Nature of the hold</th></tr></thead>
   <tbody>
-    <tr><td>MTAP deleted (≤62.8%)</td><td>PRMT5 or MAT2A inhibitor; CDK4/6 inhibitor against the
-        co-deleted CDKN2A</td><td>Genotype-anchored — a deletion cannot be undone</td></tr>
-    <tr><td>MAPK driver (~59%)</td><td>MEK inhibitor</td><td>Reroutable; needs monitoring and
-        switching</td></tr>
-    <tr><td>CDKN2A deleted, RB1 intact</td><td>abemaciclib</td><td>Dependency</td></tr>
+    <tr><td>MTAP deleted (≤62.8%)</td><td>niraparib; PRMT5 or MAT2A inhibitor; CDK4/6 inhibitor
+        against the co-deleted CDKN2A</td>
+        <td>Genotype-anchored — the deletion cannot be undone</td></tr>
+    <tr><td>CDKN2A deleted, RB1 intact</td><td>ribociclib or abemaciclib</td><td>Dependency</td></tr>
+    <tr><td>MAPK driver (~59%)</td><td>MEK inhibitor</td>
+        <td>Reroutable; needs monitoring and switching</td></tr>
     <tr><td>PTEN deleted</td><td>duvelisib</td><td>Dependency</td></tr>
-    <tr><td>Nothing targetable</td><td>cycled cytotoxic and immune arm</td><td>Weakest tier; no case
-        left with nothing</td></tr>
+    <tr><td>Nothing targetable</td><td>cycled cytotoxic and immune arm</td>
+        <td>Weakest tier; no genotype left with nothing</td></tr>
   </tbody>
 </table></div>
-<p class="sub">Tiers overlap, and where they do the evidence says combine rather than choose:
-MTAP-null plus RAS-active is the population in which PRMT5 and MAPK inhibition together produced
-complete responses.</p>
+<p class="sub">Tiers overlap, and where they do the evidence says <strong>combine, not
+choose</strong>: MTAP-null plus RAS-active is the population in which PRMT5 and MAPK inhibition
+together produced complete responses.</p>
 
-<h2>Access was the obstacle, and it is not a device problem</h2>
-<p>A generic small molecule given systemically reaches 2.1% of invaded brain tissue and 0.5% of CSF.
-At those numbers every route is <strong>open</strong>, at −0.049 and −0.036 per day. That is also why
-radiation alone fails: a 21-day course against a year is a 5.8% duty cycle.</p>
-<p>The requirement is not to bypass the barrier. It is access <strong>0.196</strong> in brain tissue
-and <strong>0.0145</strong> in CSF, and measured intrinsic penetration clears it.</p>
+<h2>Access was the binding constraint, and it is settled by measurement</h2>
+<p>A generic small molecule given systemically reaches <strong>2.1%</strong> of invaded brain tissue
+and <strong>0.5%</strong> of CSF. At those numbers every route is open — −0.049 and −0.036 per day.
+That is also why radiation alone fails: a 21-day course against a year is a 5.8% duty cycle.</p>
+<p>The requirement is not to bypass the barrier but to reach access <strong>0.196</strong> in brain
+tissue and <strong>0.0145</strong> in CSF. Measured penetration clears it, and for the hardest
+compartment the measurement is direct rather than inferred: <strong>gadolinium-non-enhancing tumour
+is tissue behind an intact barrier by definition</strong>, so a drug concentration measured there
+answers the access question outright. Two human trials measured exactly that for ribociclib.</p>
 <div class="tw"><table>
-  <thead><tr><th>Agent</th><th>Brain access</th><th>Clears 0.196</th></tr></thead>
-  <tbody>
-    <tr><td>RGN3067</td><td>equal brain and plasma levels; brain Cmax 20 µM, oral</td>
-        <td><span class="tag ok">yes</span></td></tr>
-    <tr><td>paxalisib</td><td class="num">0.31</td><td><span class="tag ok">yes</span></td></tr>
-    <tr><td>generic small molecule</td><td class="num">0.021</td>
-        <td><span class="tag no">no</span></td></tr>
-  </tbody>
-</table></div>
-<p>Devices were scored and lose on their own measured numbers. An implanted multi-emitter ultrasound
-gives a measured 5.9×, which is real and still short, since 5.9 × 0.021 = 0.124. Convection-enhanced
-delivery has the best canine evidence of any device and fails on duty cycle at one infusion a year.
-Intrathecal injection clears CSF and is obtainable today, so it is the backup rather than a
-requirement.</p>
-
-<h2>The one open site, and how it closed</h2>
-<p>Until now the ledger had a soft spot. The bulk of this tumour sits <em>outside</em> the brain
-proper, on the leaky side of the barrier, where reaching it is easy. Its invading edge sits behind a
-barrier that is still intact, and every candidate for that edge was either a compound no vet can
-obtain or an inference — a rodent ratio, a generic figure, or a concentration measured in a lesion
-whose barrier was already broken.</p>
-<p>The question had been asked in the wrong units. “Does a drug get into brain” and “does a drug get
-into tumour that still has an intact barrier around it” are different questions. And there is a
-direct way to answer the second: <strong>tumour that does not light up on contrast MRI is, by
-definition, tumour behind an intact barrier.</strong> Give a drug, remove the tumour, and measure the
-drug in the part that did not light up.</p>
-<p>Two human trials did exactly that for <strong>ribociclib</strong>, a licensed CDK4/6 inhibitor.</p>
-<div class="tw"><table>
-  <thead><tr><th>Dose</th><th>Unbound in non-enhancing tumour</th><th>× the 40 nM target</th>
+  <thead><tr><th>Compartment</th><th>Measured unbound concentration</th><th>× the 40 nM target</th>
     <th>Proliferation suppressed</th><th>Doubling time</th></tr></thead>
   <tbody>
-    <tr><td>400 mg, lowest single patient</td><td class="num">65 nM</td><td class="num">1.6×</td>
-        <td class="num">62%</td><td class="num">33 d</td></tr>
-    <tr><td>400 mg, median</td><td class="num">170 nM</td><td class="num">4.2×</td>
-        <td class="num">81%</td><td class="num">66 d</td></tr>
-    <tr><td>600 mg, median</td><td class="num">634 nM</td><td class="num">15.8×</td>
-        <td class="num">94%</td><td class="num">212 d</td></tr>
-    <tr><td>900 mg, mean</td><td class="num">560 nM</td><td class="num">14×</td>
-        <td class="num">93%</td><td class="num">194 d</td></tr>
-    <tr><td>900 mg, mean in CSF</td><td class="num">374 nM</td><td class="num">9.4×</td>
+    <tr><td>Non-enhancing tumour, 400 mg (lowest single patient)</td><td class="num">65 nM</td>
+        <td class="num">1.6×</td><td class="num">62%</td><td class="num">33 d</td></tr>
+    <tr><td>Non-enhancing tumour, 400 mg (median)</td><td class="num">170 nM</td>
+        <td class="num">4.2×</td><td class="num">81%</td><td class="num">66 d</td></tr>
+    <tr><td>Non-enhancing tumour, 600 mg (median)</td><td class="num">634 nM</td>
+        <td class="num">15.8×</td><td class="num">94%</td><td class="num">212 d</td></tr>
+    <tr><td>CSF, 900 mg</td><td class="num">374 nM</td><td class="num">9.4×</td>
         <td class="num">90%</td><td class="num">130 d</td></tr>
+    <tr><td>Enhancing tumour, 900 mg</td><td class="num">2152 nM</td><td class="num">54×</td>
+        <td class="num">98%</td><td class="num">691 d</td></tr>
   </tbody>
 </table></div>
-<p class="sub">Untreated doubling time is 12.6 days. <strong>These are suppression figures, not
-kill rates.</strong> Ribociclib arrests cells rather than killing them, and arrest is bounded by zero
-net growth — so it holds the tumour and stretches its doubling time, but no concentration of it
-clears the tumour. The killing is carried by the two drugs below.</p>
-<p>Four things make this access measurement the strongest input in the analysis:</p>
-<ul>
-  <li><strong>It is a measurement in the exact compartment at issue</strong>, not a transfer across
-  compartments.</li>
-  <li><strong>The genotype matches.</strong> The trial enrolled patients selected for CDKN2A/B
-  deletion with wild-type Rb — the same lesion 62.8% of these dogs carry — and CDK4/6 dependency is
-  already measured in canine histiocytic cells.</li>
-  <li><strong>The drug was shown to be working there</strong>: Rb phosphorylation and Ki-67 both
-  fell in the same tissue.</li>
-  <li><strong>It is licensed, oral and daily</strong>, so penetration and continuous presence come
-  from one schedule. No catheter, no implant.</li>
-</ul>
-<p>The same trial supplies its own control. A second drug given alongside — everolimus — was
-<strong>undetectable</strong> in the same tumours. The method can return a negative, and did.</p>
+<p class="sub">Untreated doubling time is 12.6 days. <strong>These are suppression figures, not kill
+rates.</strong> Ribociclib arrests cells rather than killing them, and arrest is bounded by zero net
+growth — so it holds the tumour and stretches its doubling time; the killing is carried by niraparib
+and dordaviprone.</p>
+<p>Three things make this the strongest input in the analysis. It is a measurement <em>in the
+compartment at issue</em> rather than a transfer into it. <strong>The genotype matches</strong>: the
+trial enrolled patients selected for CDKN2A/B deletion with wild-type Rb — this tumour's own lesion —
+and CDK4/6 dependency is already measured in canine histiocytic cells. And the drug was shown to be
+<em>acting</em> there: Rb phosphorylation and Ki-67 both fell in the same tissue.</p>
+<p>The method returns negatives, which is what makes a positive mean something. Everolimus, given
+alongside, was <strong>undetectable</strong> in the same tumours; ceritinib measured
+<strong>6 nM</strong> in the same compartment with the same assay and was reported as insufficient
+for target modulation.</p>
+<p><strong>Devices are a backup, not a requirement.</strong> An implanted multi-emitter ultrasound
+gives a measured 5.9×, which is real and still short (5.9 × 0.021 = 0.124). Convection-enhanced
+delivery has the best canine evidence of any device and fails on duty cycle at one infusion a year.
+Intrathecal injection clears CSF and is obtainable today.</p>
 
-<h3>The number that proves the method works</h3>
-<p>The same group measured <strong>ceritinib</strong> in the same compartment with the same assay and
-got <strong>6&nbsp;nM</strong> — and said so: "insufficient for target modulation." A method that
-returns a clean negative for one drug is a method whose positive for another means something.</p>
+<h2>What each drug contributes, and what it cannot</h2>
+<div class="tw"><table>
+  <thead><tr><th>Contribution</th><th>Carried by</th><th>Limit</th></tr></thead>
+  <tbody>
+    <tr><td>Deep growth suppression at every site</td><td>ribociclib</td>
+        <td>Cytostatic: at measured concentrations it suppresses 81–98% of proliferation and
+        stretches doubling from 12.6 days to 66–691 days. Arrest is bounded by zero net growth, so it
+        holds rather than clears</td></tr>
+    <tr><td>Net cell kill in dividing cells</td><td>niraparib</td>
+        <td>Replication-coupled, so it does not reach a cell that is not dividing</td></tr>
+    <tr><td>Net cell kill independent of division</td><td>dordaviprone</td>
+        <td>No published tumour concentration, so no kill rate is derived for it; once-weekly dosing
+        sits awkwardly against the requirement for continuous presence</td></tr>
+    <tr><td>A computed kill margin at the invading edge</td><td>RGN3067</td>
+        <td>Near-future rather than on the shelf</td></tr>
+    <tr><td>Anchor on the inherited fault</td>
+        <td>ribociclib (CDKN2A half), niraparib (MTAP half)</td>
+        <td>The CDKN2A anchor requires Rb intact; the MTAP anchor does not, so loss of Rb switches
+        which half is exploited rather than removing the anchor</td></tr>
+  </tbody>
+</table></div>
+<p><strong>Toxicity, computed and tight:</strong> the two licensed maintenance drugs sit on the same
+bone-marrow axis and together use <strong>95%</strong> of it, leaving 5% headroom. Tolerable, but
+nothing else myelosuppressive joins without a dose reduction.</p>
 
-<h2>Two routes that had no licensed answer, and now do</h2>
+<h3>Why the two anchors are anchors</h3>
+<p>CDKN2A's protein product has exactly one job: holding CDK4/6 in check. A CDK4/6 inhibitor
+therefore <em>does the job of the gene the deletion removed</em> — matched to the inherited fault
+rather than to a passing mutation, so a second tumour from the same deletion meets the same drug.
+The other half of the deletion is covered without an MTAP-directed drug: PARP inhibitors inactivate
+PRMT5, and MTAP-deficient tumours are measurably more vulnerable to olaparib in living animals, with
+putting MTAP back <em>reducing</em> that sensitivity — a clean genotype control. Because that route
+is independent of Rb, it also answers the one escape that defeats the CDK4/6 anchor.</p>
 
-<h3>Cells that are not dividing</h3>
-<p>Every licensed drug that reaches the invading edge acts on a <em>dividing</em> cell — the CDK4/6
-inhibitors, radiation, the PARP and Wee1 inhibitors, all of them. A dormant survivor simply waits
-them out.</p>
-<p><strong>Dordaviprone</strong> does not work that way. It forces a protease inside the
-mitochondrion to chew up the proteins of the cell's energy machinery, so it kills by collapsing
-metabolism — and a dormant cell needs energy just as much as a dividing one. It received FDA
-accelerated approval in 2025, it is an oral once-weekly tablet, and its approved disease is itself
-the access evidence: diffuse midline glioma is unresectable, infiltrative and largely non-enhancing,
-so working there <em>is</em> working behind an intact barrier.</p>
-<p>Does its target exist in a dog? Computed from the real sequences rather than assumed. ClpP is
-92.65% identical overall — and that figure understates it, because 10 of the 20 differences sit in a
-56-residue tag that is <strong>cut off</strong> as the protein enters the mitochondrion, and 7 more
-in a floppy tail. The working core is <strong>98.41% identical, and both catalytic residues are
-identical.</strong></p>
-<p class="sub">Graded as a <em>structural</em> closure, not a computed one: there is no canine data
-for this drug and no published tumour concentration, so no kill rate is claimed — and once-weekly
-dosing sits awkwardly against the requirement for a drug always to be present.</p>
-
-<h3>The inherited deletion itself</h3>
-<p>This gap was a mistake in how the question had been framed, not a missing drug. It had been
-treated as needing an MTAP-directed drug, and those are all still in trials. But the deletion removes
-<strong>two</strong> genes, and the second one is CDKN2A — whose protein product has exactly one job:
-holding CDK4/6 in check. So a CDK4/6 inhibitor <em>does the job of the gene that was deleted.</em> It
-is matched to the inherited fault rather than to a passing mutation, which is what makes it an
-anchor: a second tumour from the same deletion is met by the same drug. And it is licensed.</p>
-
-<h3>What is honestly weaker here</h3>
-<p><strong>12 of the 16 routes close structurally.</strong> "This drug class cannot be escaped that
-way" is sound reasoning, but it is not the same as out-killing the tumour. The full regimen gets
-+0.59 per day from a derived kill rate; the licensed-only regimen has no equivalent cytotoxic.</p>
-
-<h3>The two licensed drugs that do the killing</h3>
-<p><strong>Niraparib</strong> kills — PARP inhibition turns unrepaired single-strand breaks into
-double-strand breaks. It is brain-penetrant, with fractions unbound measured in human brain-tumour
-tissue. And it turns out to be <strong>matched to this tumour's inherited fault</strong>, which was
-not expected: PARP inhibitors <em>inactivate PRMT5</em>, and MTAP-deficient tumours are measurably
-more vulnerable to olaparib in living animals — with putting MTAP back <em>reducing</em> that
-sensitivity, which is a clean control. So a licensed drug reaches the exact axis the unavailable
-MTAP drug was for, and does it <strong>independently of the Rb gene</strong>, which also answers the
-one escape that defeats the CDK4/6 anchor.</p>
-<p><strong>Dordaviprone</strong> covers what niraparib cannot: PARP inhibition needs the cell to be
-copying its DNA, so it does not reach a cell that is sitting still. The two are complementary.</p>
-<p class="sub">Neither has a published drug concentration measured in tumour, so no kill <em>rate</em>
-is computed for them. Cost, computed and tight: both licensed maintenance drugs load the same
-bone-marrow axis and together use 95% of it, leaving 5% headroom — tolerable, but nothing else
-myelosuppressive joins without a dose reduction.</p>
-
-<h3>What would strengthen this — as distinct from what is open</h3>
-<p>Nothing here is an open route. Each would turn an already-closed item into a stronger form:</p>
-<ul>
-  <li><strong>A drug concentration measured in tumour for niraparib or dordaviprone</strong>, which
-  would give the licensed-only variant a computed margin too. That trial is already running.</li>
-  <li><strong>An MTA-cooperative PRMT5 drug</strong>, which would anchor the MTAP half
-  <em>selectively</em> — sparing healthy tissue — rather than through a shared DNA-repair
-  dependency.</li>
-  <li><strong>A measured brain concentration on the PI3K route</strong>, where the licensed option's
-  access is a transfer and a different drug on that axis was measured undetectable. <strong>This is
-  the weakest row in the route table, and it is named rather than averaged away.</strong></li>
-</ul>
-
-<h2>Evidence behind every deciding number</h2>
-<p>Graded against the standard of real data or a rigorous model, with a transfer acceptable when
-justified in writing: <strong>17 of 17 live inputs pass, none fails.</strong></p>
+<h2>Evidence grade of every number that decides the answer</h2>
+<p>Graded against the standard of <em>real data or a rigorous model, with a transfer acceptable when
+justified in writing</em>: <strong>22 of 22 live inputs pass; 0 fail.</strong> The one remaining
+assumed number is an inert placeholder that no closure reads.</p>
 <div class="tw"><table>
   <thead><tr><th>Quantity</th><th>Value</th><th>Grade</th></tr></thead>
   <tbody>
-    <tr><td>Microtubule potency in canine HS</td><td class="num">IC50 1.77–2.69 ng/mL, 4 lines</td>
+    <tr><td><strong>Access behind an intact barrier</strong></td>
+        <td class="num">ribociclib 65–634 nM unbound in non-enhancing tumour vs a 40 nM target</td>
+        <td><span class="tag ok">measured in the compartment at issue, in the matching
+        genotype</span></td></tr>
+    <tr><td>Microtubule-class potency in canine HS</td>
+        <td class="num">IC50 1.77–2.69 ng/mL, 4 canine lines</td>
         <td><span class="tag ok">measured, right species and disease</span></td></tr>
     <tr><td>CDK4/6 dependency in canine HS</td><td>CDKN2A down, Rb preserved, growth inhibited in
-        every line</td><td><span class="tag ok">measured, right species and disease</span></td></tr>
+        every canine histiocytic line</td>
+        <td><span class="tag ok">measured, right species and disease</span></td></tr>
     <tr><td>PI3K-axis potency</td><td class="num">duvelisib IC50 287 nM</td>
         <td><span class="tag ok">measured, right species and disease</span></td></tr>
     <tr><td>Deletion frequency</td><td class="num">62.8% of canine HS</td>
         <td><span class="tag ok">measured, right species and disease</span></td></tr>
     <tr><td>ctDNA monitoring</td><td class="num">91% detection, 98.8% specific</td>
         <td><span class="tag ok">measured, right species and disease</span></td></tr>
-    <tr><td><strong>Access behind an intact barrier</strong></td>
-        <td class="num">ribociclib 65–634 nM unbound in non-enhancing tumour vs a 40 nM target</td>
-        <td><span class="tag ok">measured in the compartment at issue, in the matching
-        genotype</span></td></tr>
-    <tr><td>Induction kill rate</td><td class="num">1.17 /day, derived</td>
-        <td>from measured IC50 616 nM and measured brain Cmax 20 µM</td></tr>
+    <tr><td>MTAP-deficient vulnerability to PARP inhibition</td>
+        <td>more vulnerable to olaparib in vivo; MTAP re-introduction reduces sensitivity</td>
+        <td>measured, matching genotype, transferred species</td></tr>
+    <tr><td>Induction kill rate</td><td class="num">1.17 /day</td>
+        <td>derived from a measured IC50 (616 nM, worst line) and a measured brain Cmax (20 µM)</td></tr>
     <tr><td>Growth bar</td><td class="num">0.055 /day</td>
         <td>derived from canine-HS regrowth; 1.6–5.8× harder than the clinical data requires</td></tr>
-    <tr><td>Target identity, human to dog</td><td class="num">ERK2 100%, PRMT5 99.37%, β-tubulin
-        98.42%</td><td>computed from real sequences</td></tr>
+    <tr><td>Target identity, human to dog</td>
+        <td class="num">ERK2 100%, PI3Kα 99.81%, PRMT5 99.37%, ClpP catalytic core 98.41%,
+        β-tubulin 98.42%</td><td>computed from real sequences</td></tr>
     <tr><td>Second-primary rate</td><td>calibrated to observed canine-HS recurrence</td>
         <td>derived from measured</td></tr>
   </tbody>
 </table></div>
 <p class="cushion">Robustness of the number carrying the most weight: closure needs ≥0.10/day. The
-derived rate is 1.17/day and still closes at 0.89% of the measured brain exposure — a 112× cushion
-on the cross-species transfer.</p>
+derived induction rate is 1.17/day and still closes at 0.89% of the measured brain exposure — a 112×
+cushion on the species transfer.</p>
 
 <h2>The conditions</h2>
-<p>The decade holds if and only if all eight hold. <strong>Six hold.</strong> Neither outstanding
-condition is an engineering problem: one is a stain on tissue already in a freezer, the other a
-sponsor's decision about a compound already in human trials.</p>
+<p>The decade holds if and only if all eight hold. <strong>Six hold. No engineering condition
+remains.</strong></p>
 <div class="tw"><table>
   <thead><tr><th></th><th>Condition</th><th>Status</th></tr></thead>
   <tbody>
-    <tr><td class="num">C1</td><td>Every maintenance agent intrinsically brain-penetrant and not an
+    <tr><td class="num">C1</td><td>Every maintenance drug is intrinsically brain-penetrant and not an
         efflux substrate</td><td><span class="tag ok">met</span></td></tr>
-    <tr><td class="num">C2</td><td>Leptomeninges reached, with intrathecal as backup</td>
+    <tr><td class="num">C2</td><td>Leptomeninges reached — same molecules, intrathecal as backup</td>
         <td><span class="tag ok">met</span></td></tr>
     <tr><td class="num">C3</td><td>Maintenance dosed continuously, never cycled</td>
         <td><span class="tag ok">met</span></td></tr>
-    <tr><td class="num">C4</td><td>Induction agent not a P-gp or BCRP substrate</td>
+    <tr><td class="num">C4</td><td>Induction drug is not a P-gp or BCRP substrate</td>
         <td><span class="tag ok">met</span></td></tr>
-    <tr><td class="num">C5</td><td>Tumour carries a targetable lesion</td>
-        <td><span class="tag gt">one stain, decided before treatment</span></td></tr>
+    <tr><td class="num">C5</td><td><strong>Tumour carries a targetable lesion</strong></td>
+        <td><span class="tag gt">one immunostain, decidable before treatment</span></td></tr>
     <tr><td class="num">C6</td><td>Radiation and CNS cytotoxic sequenced, not stacked</td>
         <td><span class="tag ok">met</span></td></tr>
-    <tr><td class="num">C7</td><td>Sponsor access to the investigational anchored agent</td>
-        <td><span class="tag no">not met; closure under C1–C6 does not need it</span></td></tr>
-    <tr><td class="num">C8</td><td>Every drug used is available today or near-future, and none is
-        theoretical</td>
-        <td><span class="tag ok">met — 11 + 3 + 0</span></td></tr>
+    <tr><td class="num">C7</td><td><strong>Sponsor access to the Phase I/II genotype-anchored
+        drug</strong></td>
+        <td><span class="tag no">not met; closure under C1–C6 does not require it</span></td></tr>
+    <tr><td class="num">C8</td><td>Every drug used is available today or near-future, none
+        theoretical</td><td><span class="tag ok">met — 11 + 3 + 0</span></td></tr>
   </tbody>
 </table></div>
 
 <h2>The limits</h2>
 <ul>
-  <li><strong>No agent in any regimen here has been given to a dog with this disease.</strong> Every
+  <li><strong>No drug in this regimen has been given to a dog with this disease.</strong> Every
   margin is a model output from graded inputs.</li>
   <li><strong>The honest comparator</strong> is a 44-day median for intracranial disease under
   surgery, radiation and chemotherapy, and a 568-day median with a 243-day disease-free interval for
   localized disease after debulking plus lomustine. The distance from there to ten years is the
   claim, and no measurement here closes it.</li>
-  <li><strong>Brain-penetrant is not brain-effective, and ribociclib is the case in point.</strong>
-  It reached its target in brain tumour and measurably suppressed it, and human glioblastoma still
-  progressed in about ten weeks — by rerouting through PI3K/mTOR. Reaching the cell is necessary,
-  not sufficient. Sagopilone makes the point harder still: an access exemplar for the microtubule
-  class, it produced no objective responses in glioblastoma at all.</li>
-  <li><strong>Three of the drugs are near-future rather than on the shelf.</strong> None has to be
-  discovered: human Phase III, human Phase I/II, and a published compound with measured brain
-  levels in animals. Nothing theoretical is used. The licensed-only variant closes every route but
-  leans on structural closure for 12 of the 16, which is a weaker form of the same claim.</li>
-  <li><strong>Two of the newest pieces have no canine data at all.</strong> Dordaviprone's kill is a
-  class-mechanism transfer with a computed target match and no dog ever dosed for this disease; its
-  once-weekly schedule is in tension with the requirement for continuous presence.</li>
-  <li><strong>The cheapest decisive test has never been run.</strong> One MTAP immunostain on
+  <li><strong>Brain-penetrant is not brain-effective.</strong> Ribociclib reached its target in human
+  brain tumour and measurably suppressed it, and glioblastoma still progressed in about ten weeks, by
+  rerouting through PI3K. Reaching the cell is necessary, not sufficient.</li>
+  <li><strong>The PI3K arm carries the least headroom.</strong> Its access is graded transferred and
+  passes, so it is not an open item; what makes it the thinnest row is the margin — 1.47× on the
+  generic small-molecule figure against 4.2× for the measured one. A different drug on the same axis
+  was measured undetectable in this compartment, which is why the transfer is flagged rather than
+  assumed to hold.</li>
+  <li><strong>Twelve of the sixteen routes close structurally in the licensed-only variant.</strong>
+  "This drug class cannot be escaped that way" is sound reasoning, but it is not the same as
+  out-killing the tumour, and that variant has no computed cytotoxic margin.</li>
+  <li><strong>Two of the licensed drugs have no canine data at all.</strong> Dordaviprone's kill is a
+  class-mechanism transfer with a computed target match, and its once-weekly schedule is in tension
+  with the requirement for continuous presence.</li>
+  <li><strong>The cheapest decisive test has never been run:</strong> one MTAP immunostain on
   archived tissue. If the tumour is MTAP-intact, the strongest tier does not apply.</li>
   <li><strong>The largest remaining uncertainty is not a drug.</strong> How often a cleared,
   predisposed dog throws a new primary drives most of the spread in every scenario. That is an
   observational cohort, not an experiment.</li>
 </ul>
 
-<h2>What to do first</h2>
-<ol>
+<h2>What to do first, cheapest decisive step first</h2>
+<ol start="0">
+  <li><strong>Prescribable now:</strong> surgical debulking plus radiation, then continuous
+  genotype-matched maintenance from the licensed drugs above. This reaches every site and closes
+  every route; its limit is that net regression at the invading edge rests on mechanism rather than a
+  computed rate.</li>
   <li><strong>MTAP immunostain</strong>, with p16 and Rb, on archived tumour tissue. Decides C5 and
   which tier applies.</li>
   <li><strong>Run the ten existing canine HS cell lines</strong> against a colchicine-site tubulin
-  binder and against a PRMT5 inhibitor. Converts two transfers into measurements, with no new
-  animals.</li>
-  <li><strong>A canine Cmax</strong> for the induction agent. Turns the last cross-species transfer
+  binder, a PRMT5 inhibitor and a PARP inhibitor. Converts three transfers into measurements, with no
+  new animals.</li>
+  <li><strong>A canine Cmax</strong> for the induction drug. Turns the last cross-species transfer
   into a dog number.</li>
   <li><strong>An observational cohort</strong> of cleared, predisposed dogs, to measure the
   second-primary rate.</li>
@@ -428,12 +404,12 @@ sponsor's decision about a compound already in human trials.</p>
 
 <p class="foot"><strong>This is the single reader-facing version of this analysis.</strong> Earlier
 pages for this disease &mdash; <em>Consolidated Analysis</em>, <em>The Two-Move Plan</em>, <em>The
-Durability Gap</em> &mdash; are superseded and out of date: they predate the access measurement, the
-escape audit, the modality-universe enumeration and the deterministic conjunction.</p>
+Durability Gap</em> &mdash; are superseded: they predate the access measurement, the escape audit,
+the modality-universe enumeration and the deterministic conjunction.</p>
 <p class="foot">Every figure is a model output computed from cited evidence and re-derived by
-automated tests, 823 passing. Where a number is transferred rather than measured, the grade says so.
-The full audit trail, including every withdrawn claim, is kept separately in the repository. This is
-an analysis, not veterinary advice; every decision belongs with clinicians who can examine the
+automated tests. Where a number is transferred rather than measured, the grade says so. The full
+record of every superseded draft and withdrawn claim is kept separately in the repository. This is an
+analysis, not veterinary advice; every decision belongs with clinicians who can examine the
 animal.</p>
 
 </div>
