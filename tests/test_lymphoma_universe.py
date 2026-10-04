@@ -250,3 +250,26 @@ def test_closure_against_a_faster_growth_bar_is_reported_not_retuned():
     assert rows[(0.204, "B", "low")]["clears"]
     assert rows[(0.0903, "T", "low")]["clears"] and not rows[(0.12, "T", "low")]["clears"]
     assert rows[(0.0903, "B", "low")]["drop_one"] and rows[(0.0903, "T", "low")]["drop_one"]
+
+
+# --- dog programs (/goal 2026-10-04) -------------------------------------------------------------------------------------------
+
+def test_near_future_programs_depend_on_agents_with_no_dog_program_found():
+    """Record the finding rather than hide it: the near-future B and T programs include agents whose canine version was searched for
+    and not found (CD3 engager, CD7/CD5 CAR-T, intrathecal routes)."""
+    from canine_dsp.lymphoma_joint import NEAR_FUTURE_PROGRAMS, dog_program_gaps
+    assert "CD3xCD20" in dog_program_gaps(NEAR_FUTURE_PROGRAMS["B"])
+    assert {"CD7-directed CAR-T (canine", "CD5 + CD7 dual-target CAR-T (c"} <= set(dog_program_gaps(NEAR_FUTURE_PROGRAMS["T"]))
+
+
+def test_b_cell_closes_from_agents_with_a_dog_program_if_the_car_t_works():
+    """No engager and no CSF route: anti-CD20, HCQ, verdinexor, matched transplant, oral cytarabine + a systemic CAR-T (Penn program).
+    It clears body and brain from CAR-T kill 0.12/day; it is NOT fault tolerant (the CAR-T is load-bearing); halving holds from 0.35."""
+    from canine_dsp.lymphoma_joint import DOG_PROGRAM_PROGRAMS, dog_program_gaps, joint_report
+    prog = DOG_PROGRAM_PROGRAMS["B"]
+    assert dog_program_gaps(prog) == []
+    assert not joint_report("B", prog, kill=0.10, duty=0.4)["clears"]
+    r12 = joint_report("B", prog, kill=0.12, duty=0.4)
+    assert r12["clears"] and not r12["any_one_removed_clears"]
+    r35 = joint_report("B", prog, kill=0.35, duty=0.4)
+    assert r35["clears"] and r35["halved_clears"] and r35["removal_breaks"] == ["persistence-engineered canine-binder CAR-T (specification)"]

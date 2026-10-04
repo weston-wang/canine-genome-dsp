@@ -213,3 +213,32 @@ def tier_mix(prefixes) -> dict:
     levels = {p: READINESS[p][0] for p in prefixes}
     return {"levels": levels, "admissible": all(v in ("A", "B", "C") for v in levels.values()),
             "to_build": [p for p, v in levels.items() if v == "C"]}
+
+
+# --- what exists FOR DOGS, by registry/pipeline search (docs/universe/SWEEP_dog_programs.md, 2026-10-04) --------------------------
+#: Status of the canine version of every C-tier agent. "program" = a registered or institutional trial or a funded development effort
+#: found; "intent" = authors state a dog trial is next, nothing registered; "NOT FOUND" = searched and absent (not "does not exist").
+DOG_STATUS = {
+    "anti-CD20 monoclonal antibody": ("program", "Elanco 1E4 canine CD20 mAb in dogs (JVIM 2024); Blontress licensed 2015, discontinued 2017"),
+    "persistence-engineered": ("program", "Penn autologous canine CD20 CAR-T trial active; LEAH xenogeneic CAR-T on hold (Missouri, Minnesota pages); "
+                                          "in-vitro/mouse fix for the failed expansion (human 4-1BB-CD3z, PMID 41376156)"),
+    "tandem CD19/CD20 CAR-T, intra": ("intent", "Penn tandem canine CAR preclinical, authors prioritise a dog trial (PMID 42480604); no CSF route in dogs; "
+                                                 "the only canine intracranial CAR-T trial (CSU, glioma) is intratumoral"),
+    "CD3xCD20": ("NOT FOUND", "no canine CD3 engager built; anti-canine CD3 mAb exists (Front Vet Sci 2025); AKC-CHF 03007 BiTE-redirected T cells "
+                              "(2022-25, concept); canine NK-engager TriKE (B7-H3, sarcoma) is in dogs but engages NK cells"),
+    "CD7-directed CAR-T (canine": ("NOT FOUND", "no canine CD7 binder or T-lineage CAR; canine CD5 clones exist but CD5 loss is the commonest aberrancy in canine T lymphoma"),
+    "CD5 + CD7 dual-target CAR-T (c": ("NOT FOUND", "as above"),
+    "CD7-directed CAR-T, intra": ("NOT FOUND", "as above; no canine intrathecal CAR-T or antibody PK found"),
+    "anti-CD20 monoclonal antibody, intra": ("NOT FOUND", "no canine intrathecal antibody PK found"),
+    "continuous intrathecal": ("practice", "intrathecal cytarabine/methotrexate used clinically in dogs; no continuous-infusion data"),
+}
+
+#: B-cell program using only agents that exist for dogs or have a dog program (no engager, no CSF route): see docs/LYMPHOMA_UNIVERSE.md section H.
+DOG_PROGRAM_PROGRAMS = {
+    "B": ("anti-CD20 monoclonal antibody", "hydroxychloroquine", "verdinexor", "allogeneic DLA", "cytarabine ocfosfate", "persistence-engineered"),
+}
+
+
+def dog_program_gaps(prefixes) -> list:
+    """Agents in a program whose dog version has NO program found."""
+    return [p for p in prefixes if DOG_STATUS.get(p, ("exists", ""))[0] == "NOT FOUND"]
