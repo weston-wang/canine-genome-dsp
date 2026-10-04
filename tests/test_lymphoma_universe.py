@@ -273,3 +273,47 @@ def test_b_cell_closes_from_agents_with_a_dog_program_if_the_car_t_works():
     assert r12["clears"] and not r12["any_one_removed_clears"]
     r35 = joint_report("B", prog, kill=0.35, duty=0.4)
     assert r35["clears"] and r35["halved_clears"] and r35["removal_breaks"] == ["persistence-engineered canine-binder CAR-T (specification)"]
+
+
+# --- sustained existing agents (/goal 2026-10-04) ------------------------------------------------------------------------------
+
+def test_b_cell_brain_closes_with_existing_agents_only_if_oral_cytarabine_is_sustained_about_four_years():
+    """Corrects the section-F claim that longer dosing cannot close the brain (it had been tested only to 730 days). The binding agent is
+    oral cytarabine ocfosfate (not a pump substrate, reaches CSF); the others stay at their documented windows. 730 days is not enough,
+    about 1,470 days is (worst swept switching rate)."""
+    from canine_dsp import lymphoma_sustained as S
+    from canine_dsp.core.lymphoma_catalogue import CNS
+    prog = S.EXISTING["B"]
+    assert not S.clock("B", prog, CNS)[0]                                   # as documented (84 d): E5 regrows
+    with S.with_windows({S.OCFOSFATE: 730}):
+        assert not S.clock("B", prog, CNS)[0]
+    with S.with_windows({S.OCFOSFATE: 1825}):
+        assert S.clock("B", prog, CNS)[0]
+    assert 1300 <= S.minimal_window("B", prog, CNS, S.OCFOSFATE, lo=730, hi=1825) <= 1600
+    assert not S.clock("B", prog, CNS)[0]                                   # context manager restored the default
+
+
+def test_t_cell_body_closes_with_existing_agents_if_verdinexor_or_ocfosfate_is_sustained_about_fifteen_months():
+    from canine_dsp import lymphoma_sustained as S
+    from canine_dsp.core.lymphoma_catalogue import SYSTEMIC
+    prog = S.EXISTING["T"]
+    assert not S.clock("T", prog, SYSTEMIC)[0]
+    for profile in (S.VERDINEXOR, S.OCFOSFATE):
+        with S.with_windows({profile: 600}):
+            assert S.clock("T", prog, SYSTEMIC)[0], profile
+
+
+def test_t_cell_brain_is_not_closed_by_sustaining_existing_agents():
+    """Thiotepa closes the dCK-loss lineage (E2) in the window, but the dormant lineage then needs oral cytarabine for about 8 years in T-cell
+    disease (lower CSF kill than B): not a credible duration, so the T-cell brain stays open without a new effector."""
+    from canine_dsp import lymphoma_sustained as S
+    from canine_dsp.core.lymphoma_catalogue import CNS
+    from canine_dsp.core import lymphoma_grounded as G
+    saved = G.AVAILABILITY.get(S.THIOTEPA)
+    G.AVAILABILITY[S.THIOTEPA] = G.OFF_LABEL
+    try:
+        prog = S.EXISTING["T"] + ("high-dose thiotepa",)
+        with S.with_windows({S.OCFOSFATE: 1825}):
+            assert not S.clock("T", prog, CNS)[0]
+    finally:
+        G.AVAILABILITY[S.THIOTEPA] = saved
