@@ -328,3 +328,30 @@ def test_audit_lists_the_routes_that_were_set_aside_with_their_grades():
     from canine_dsp import lymphoma_standard_audit as A
     r = A.routes_not_counted()
     assert len(r) == 3 and not any(i.passes for i in r)
+
+
+# --- radiation as a cycle-independent agent (/goal 2026-10-04, "realistic ways") -------------------------------------------------------
+
+def test_brain_radiation_plus_sustained_oral_cytarabine_closes_the_b_cell_brain_from_existing_agents():
+    """Existing agents only (anti-CD20 antibody, HCQ, verdinexor, matched-donor transplant, oral cytarabine) plus a 23.4 Gy craniospinal /
+    whole-brain course, graded cycle-independent with the in-vivo dose-modifying factor 1.9. The needed sustained window falls as the radiation
+    e-folds rise: 1,560 days with none, about 1,250 / 975 / 250 days at the resistant / median / sensitive canine line."""
+    from canine_dsp import lymphoma_sustained as S
+    from canine_dsp.core.lymphoma_catalogue import CNS
+    prog = S.EXISTING["B"]
+    none = S.minimal_window("B", prog, CNS, S.OCFOSFATE, lo=100, hi=3000)
+    assert 1400 <= none <= 1700
+    got = {ln: S.minimal_window_with_rt("B", prog, CNS, S.rt_efolds_in_vivo(ln)) for ln in S.RT_EFOLDS_IN_VITRO}
+    assert 1100 <= got["CLL1390 (most resistant)"] <= 1400
+    assert 850 <= got["1771 (median)"] <= 1100
+    assert 150 <= got["CLBL1 (most sensitive)"] <= 400
+    assert got["CLBL1 (most sensitive)"] < got["1771 (median)"] < got["CLL1390 (most resistant)"] < none
+
+
+def test_t_cell_body_closes_with_radiation_free_existing_agents_after_about_six_months_and_t_cell_brain_does_not_close():
+    """T-cell brain: even with radiation at the sensitive-line value and two-year windows... the sweep to 3,650 days never clears it."""
+    from canine_dsp import lymphoma_sustained as S
+    from canine_dsp.core.lymphoma_catalogue import CNS, SYSTEMIC
+    assert 100 <= S.minimal_window_with_rt("T", S.EXISTING["T"], SYSTEMIC, S.rt_efolds_in_vivo("1771 (median)")) <= 250
+    for ln in S.RT_EFOLDS_IN_VITRO:
+        assert S.minimal_window_with_rt("T", S.EXISTING["T"], CNS, S.rt_efolds_in_vivo(ln)) is None
