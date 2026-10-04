@@ -183,7 +183,7 @@ READINESS = {
     "verdinexor": ("A", "licensed for canine lymphoma"),
     "prednisolone": ("A", "licensed"),
     "allogeneic DLA": ("A", "performed at referral centres; first-remission dogs 8 of 9 alive >4 y (PMID 35789057)"),
-    "cytarabine ocfosfate": ("B", "oral continuous in dogs, CSF 1.0-3.6 uM (PMID 37670479)"),
+    "cytarabine ocfosfate": ("B", "oral in dogs, serum Cmax 1.9-3.0 uM, CSF troughs 0.04-0.27 uM, derived time-average 0.3-1.4 uM (PMID 37670479); human use is intermittent"),
     "romidepsin": ("A", "human-licensed for PTCL; off-label"),
     "CD3xCD20": ("C", "human CD3xCD20 engagers licensed or late-stage (epcoritamab, glofitamab); anti-canine CD3 and canine CD20 binders "
                       "exist, no canine engager yet; dog cytokine storm to a T-cell agonist antibody (PMID 25988188) => step-up dosing"),

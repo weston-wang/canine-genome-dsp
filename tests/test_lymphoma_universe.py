@@ -199,7 +199,11 @@ def test_near_future_programs_close_body_and_brain_even_at_the_pessimistic_input
         prog = NEAR_FUTURE_PROGRAMS[ip]
         assert tier_mix(prog)["admissible"]
         low = joint_report(ip, prog, **LOW)
-        assert low["clears"] and low["any_one_removed_clears"], (ip, low["removal_breaks"])
+        assert low["clears"], ip
+        if ip == "B":
+            assert low["any_one_removed_clears"], low["removal_breaks"]
+        else:   # T-cell at the pessimistic inputs: the intrathecal cytarabine is load-bearing (oral cytarabine's CSF level was corrected down)
+            assert low["removal_breaks"] == ["continuous intrathecal cytarabine (pump) [buildable]"]
         cen = joint_report(ip, prog, **CENTRAL)
         assert cen["clears"] and cen["halved_clears"] and cen["any_one_removed_clears"]
         for kw in (LOW, CENTRAL):
@@ -249,7 +253,7 @@ def test_closure_against_a_faster_growth_bar_is_reported_not_retuned():
         assert rows[(g, "B", "central")]["clears"] and rows[(g, "T", "central")]["clears"]
     assert rows[(0.204, "B", "low")]["clears"]
     assert rows[(0.0903, "T", "low")]["clears"] and not rows[(0.12, "T", "low")]["clears"]
-    assert rows[(0.0903, "B", "low")]["drop_one"] and rows[(0.0903, "T", "low")]["drop_one"]
+    assert rows[(0.0903, "B", "low")]["drop_one"] and not rows[(0.0903, "T", "low")]["drop_one"]
 
 
 # --- dog programs (/goal 2026-10-04) -------------------------------------------------------------------------------------------
@@ -289,18 +293,19 @@ def test_b_cell_brain_closes_with_existing_agents_only_if_oral_cytarabine_is_sus
         assert not S.clock("B", prog, CNS)[0]
     with S.with_windows({S.OCFOSFATE: 1825}):
         assert S.clock("B", prog, CNS)[0]
-    assert 1300 <= S.minimal_window("B", prog, CNS, S.OCFOSFATE, lo=730, hi=1825) <= 1600
+    assert 1350 <= S.minimal_window("B", prog, CNS, S.OCFOSFATE, lo=730, hi=1825) <= 1650
     assert not S.clock("B", prog, CNS)[0]                                   # context manager restored the default
 
 
-def test_t_cell_body_closes_with_existing_agents_if_verdinexor_or_ocfosfate_is_sustained_about_fifteen_months():
+def test_t_cell_body_closes_with_existing_agents_if_verdinexor_is_sustained_about_six_months():
     from canine_dsp import lymphoma_sustained as S
     from canine_dsp.core.lymphoma_catalogue import SYSTEMIC
     prog = S.EXISTING["T"]
     assert not S.clock("T", prog, SYSTEMIC)[0]
-    for profile in (S.VERDINEXOR, S.OCFOSFATE):
-        with S.with_windows({profile: 600}):
-            assert S.clock("T", prog, SYSTEMIC)[0], profile
+    with S.with_windows({S.VERDINEXOR: 600}):
+        assert S.clock("T", prog, SYSTEMIC)[0]
+    with S.with_windows({S.OCFOSFATE: 600}):       # T-cell cytarabine kill is lower; not enough on its own
+        assert not S.clock("T", prog, SYSTEMIC)[0]
 
 
 def test_t_cell_brain_is_not_closed_by_sustaining_existing_agents():

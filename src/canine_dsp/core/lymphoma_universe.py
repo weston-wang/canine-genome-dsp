@@ -219,6 +219,8 @@ THIOTEPA_PROGRAM_KILL = 0.13        # low end of the 0.13-0.21 /day outcome-impl
 #: (NCI-60/ChEMBL, SWEEP_nongated); the only transporter link is MRP efflux of its glutathione conjugate (PMID 9788613).
 #: Division-gating stays at the conservative default (dormant-cell kill is assumed, not shown).
 THIOTEPA_PUMP_SUBSTRATE = False
+#: Oral cytarabine ocfosfate time-average CSF level (nM) used for the kill rate; see the correction note in reassessed_agents.
+OCFOSFATE_CSF_NM = 300.0
 
 
 def brain_agents(compartment: str, immunophenotype: str, *, car_duty: float = IT_CAR_T_DUTY_CONSERVATIVE,
@@ -317,16 +319,20 @@ def reassessed_agents(compartment: str, immunophenotype: str) -> tuple:
                                 "midpoint %.3f /day is used. Controls are historical or owner-selected. Acts on dividing cells only "
                                 "(assumed); no brain credit." % (VACCINE_DTERT_OS_K, VACCINE_DTERT_KILL))),
     ]
-    # Existing continuous cytarabine delivery: oral cytarabine ocfosfate (CSF 1.0-3.6 uM, CSF:serum 0.54-1.2, half-life 23-29 h in dogs,
-    # PMID 37670479) at the LOW end of its CSF range. It does the job of the spinal pump with no device.
-    ara = gi.continuous_it_cytarabine(immunophenotype, csf_setpoint_nM=1000.0)
+    # Existing continuous cytarabine delivery: oral cytarabine ocfosfate in dogs (serum Cmax 1.88-2.98 uM, half-life 23-29 h, CSF:serum
+    # 0.54-1.2, PMID 37670479, 4 dogs). CORRECTION 2026-10-04: the "CSF 1.0-3.6 uM" earlier recorded as measured was the product of a
+    # trough-sampled CSF:serum ratio and a PEAK serum value. The directly measured CSF values are troughs of 0.04-0.27 uM; the time-average
+    # CSF level is DERIVED at about 0.3-1.4 uM (AUC/24 h x accumulation 2.1 x CSF:serum), so the LOW end, 0.3 uM, is used.
+    ara = gi.continuous_it_cytarabine(immunophenotype, csf_setpoint_nM=OCFOSFATE_CSF_NM)
     out.append(Agent(
         "cytarabine ocfosfate, oral continuous", Axis.CYTOTOXIC, Layer.RECEPTOR, ara["kill_per_day"], 1.0, 1.0, True,
         division_gated=True, efflux_substrate=False, vulnerable_to=frozenset({"nucleoside_activation"}),
-        evidence="DOG: oral cytarabine ocfosfate serum Cmax 1.88-2.98 uM, half-life 23-29 h, CSF:serum 0.54-1.2 (PMID 37670479, 4 dogs); "
+        evidence="DOG: oral cytarabine ocfosfate serum Cmax 1.88-2.98 uM, half-life 23-29 h, CSF:serum 0.54-1.2, measured CSF troughs "
+                 "0.04-0.27 uM after 7 daily doses (PMID 37670479, 4 healthy dogs); "
                  "IV cytarabine CSF 8.3 uM at CSF:plasma 0.62 (PMID 1742843).",
-        potency_evidence=("DERIVED: kill at a CSF/tissue level of 1.0 uM (the low end of the measured 1.0-3.6 uM range) against the "
-                          "canine lymphoma-line IC50 (48 h); continuous. Dog availability of the prodrug is unverified (human-licensed in Japan)."),
+        potency_evidence=("DERIVED: kill at a time-average CSF level of 0.3 uM (low end of the derived 0.3-1.4 uM band; measured troughs are "
+                          "0.04-0.27 uM) against the canine lymphoma-line IC50 (48 h); continuous. Human use is intermittent (10-14 days per 28); "
+                          "continuous dosing for years is not documented. Dog availability of the prodrug is research import only (Japan)."),
         note="Division-gated; defeated by loss of the activating enzyme (E2)."))
     if immunophenotype == "B":
         out.append(Agent(

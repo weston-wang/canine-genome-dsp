@@ -221,7 +221,7 @@ angiotoxin) of the hemangiosarcoma branch, and also covers CD3 bispecific engage
 | CD3 bispecific engagers | YES, TRANSFER-OUTCOME, **needs development** | strong human data (epcoritamab+R-CHOP CR 85%, 2-year PFS 80%); human CD3 arms do not bind canine CD3 (43% identity), so a canine engager must be made; canine binders exist. Non-gated, non-pump, MHC-independent, CNS 0.5 |
 | Armed T cells (BATs) | NO kill rate | no lymphoma trial in any species; canine T-cell expansion is commercial, the arming step is not found. Not credited |
 | eBAT | EXCLUDED, scientific reason | targets EGFR and uPAR are lower in 29 canine lymphomas than in sarcomas (mRNA) and a human T-cell line lacking them was not killed (PMID 28193671); dog toxicity: hypotension 4/23, liver 2/23 |
-| Spinal pump | REPLACED | oral cytarabine ocfosfate does the job without a device (CSF 1.0-3.6 uM; PMID 37670479, 4 dogs); IV infusion CSF 8.3 uM measured (PMID 1742843) |
+| Spinal pump | REPLACED | oral cytarabine ocfosfate does the job without a device (serum Cmax 1.9-3.0 uM, CSF:serum 0.54-1.2; measured CSF troughs 0.04-0.27 uM, derived time-average 0.3-1.4 uM; PMID 37670479, 4 dogs) -- corrected 2026-10-04: the earlier 'CSF 1.0-3.6 uM' multiplied a trough ratio by a peak serum value; IV infusion CSF 8.3 uM measured (PMID 1742843) |
 
 **Result with agents that exist today** (licensed, off-label, or in dog trials; thiotepa counted off-label; one transplant-class option per program; every one of the
 23 escapes required closed; every combination of up to 4 agents scanned exhaustively, up to 5 for B-cell body):
@@ -258,7 +258,7 @@ never count. Section F had retreated to "exists today" only; that was the wrong 
 | anti-CD20 antibody (systemic) | B | canine antibody in dogs, B-cell depletion rate measured (PMID 38662527) |
 | hydroxychloroquine, verdinexor, prednisolone, romidepsin | A | off-label / licensed |
 | allogeneic DLA-identical transplant | A (referral centres) | 8 of 9 first-remission dogs alive >4 y (PMID 35789057) |
-| oral cytarabine ocfosfate | B | CSF 1.0-3.6 uM in dogs (PMID 37670479) |
+| oral cytarabine ocfosfate | B | dogs: serum Cmax 1.9-3.0 uM, CSF troughs 0.04-0.27 uM, derived time-average 0.3-1.4 uM (PMID 37670479, 4 healthy dogs, 7 daily doses); human use is 10-14 days per 28 |
 | intrathecal anti-CD20 antibody; continuous intrathecal cytarabine | C | human intraventricular rituximab clears CSF lymphoma cells (PMID 24190981) |
 | CD3xCD20 bispecific engager (B-cell) | C | human class is licensed or late-stage; anti-canine CD3 and canine CD20 binders exist, no canine engager yet; a dog had a cytokine storm to a T-cell agonist antibody (PMID 25988188), so step-up dosing is a condition |
 | CAR-T, canine binder (B: CD19/CD20; T: CD7, CD5+CD7) | C | canine CD20 CAR-T in 7 dogs did not expand or persist (PMIDs 32002286, 35898541); human CD7 CAR-T in T-ALL/lymphoma incl. CNS (PMIDs 37020231, 37740926); in-vivo CAR-T made in the patient, first-in-human 2025-26, removes ex-vivo expansion (PMID 41882404; lymphoma result is a conference/press report) |
@@ -272,7 +272,7 @@ agent with no lymphoma data: D); eBAT (targets low in canine lymphoma, section F
 | program | agents | at the LOW human-grounded inputs (CAR-T kill 0.12/day, CSF duty 0.15) | at the CENTRAL inputs (0.35/day, 0.4) |
 |---|---|---|---|
 | **B-cell, 9 agents** | anti-CD20 antibody, intrathecal anti-CD20 antibody, hydroxychloroquine, verdinexor, allogeneic transplant, oral cytarabine ocfosfate, CD3xCD20 engager, CAR-T, CSF tandem CD19/CD20 CAR-T | clears; no single agent load-bearing; margins body +0.26 / brain +0.13; last lineage gone day 49 (body), 72 (brain); 44 of 44 escape-by-compartment rows closed, at least 4 covering agents each; **not** robust to halving every potency | clears, halved clears, any-one-removed clears; last lineage day 33 / 38 |
-| **T-cell, 8 agents** | hydroxychloroquine, intrathecal cytarabine, CD7 CAR-T, CD5+CD7 CAR-T, CSF CD7 CAR-T, verdinexor, allogeneic transplant, oral cytarabine ocfosfate | clears; no single agent load-bearing; margins body +0.15 / brain +0.045; last lineage gone day 80 (body), 158 (brain, inside the 166-day transplant window); 42 of 42 rows closed, at least 5 covering agents each; not robust to halving | clears, halved clears, any-one-removed clears; last lineage day 28 / 31 |
+| **T-cell, 8 agents** | hydroxychloroquine, intrathecal cytarabine, CD7 CAR-T, CD5+CD7 CAR-T, CSF CD7 CAR-T, verdinexor, allogeneic transplant, oral cytarabine ocfosfate | clears; **the intrathecal cytarabine is load-bearing** (dropping it breaks the brain; added 2026-10-04 after the oral cytarabine CSF level was corrected down); margins body +0.15 / brain +0.045; last lineage gone day 80 (body), 158 (brain, inside the 166-day transplant window); 42 of 42 rows closed, at least 5 covering agents each; not robust to halving | clears, halved clears, any-one-removed clears; last lineage day 28 / 31 |
 
 So the earlier statement "at the low inputs the B-cell programs do not clear" is superseded: it was true only for programs that had no engager and no oral cytarabine. The B-cell program closes at the low inputs because it has an
 independent CAR-T-free route (antibody + engager + transplant + cytarabine); with the engager alone added to the existing-agent program (anti-CD20 + HCQ + verdinexor + transplant + ocfosfate + engager) both compartments clear at low AND central inputs,
@@ -320,10 +320,10 @@ factor 0.56, plausible but not measured in dogs). It is conservative against obs
 
 | growth bar | B-cell, central inputs | T-cell, central inputs | B-cell, pessimistic inputs | T-cell, pessimistic inputs |
 |---|---|---|---|---|
-| 0.0903 (used) | clears; robust | clears; robust | clears; any-one-removed ok | clears; any-one-removed ok |
-| 0.12 (top of net band) | clears, halved ok; cytarabine ocfosfate becomes load-bearing | clears; robust | clears; not fault tolerant | **does not clear** (brain margin only +0.015 and the time-resolved clock fails) |
-| 0.15 | clears, halved ok | clears; robust | clears | does not clear |
-| 0.204 (gross ceiling, no cell loss) | clears | clears | clears (margin +0.017) | does not clear |
+| 0.0903 (used) | clears; halved ok; any-one-removed ok | clears; halved ok; any-one-removed ok | clears; any-one-removed ok | clears; not fault tolerant (intrathecal cytarabine load-bearing) |
+| 0.12 (top of net band) | clears; halved ok; not fault tolerant | clears; robust | clears; not fault tolerant | **does not clear** |
+| 0.15 | clears; not robust | clears; robust | clears | does not clear |
+| 0.204 (gross ceiling, no cell loss) | clears; not robust | clears; not robust | clears | does not clear |
 
 So: the B-cell program clears at every bar up to the gross ceiling at both input sets; the T-cell program clears at the central CAR-T inputs up to the ceiling, and at the pessimistic CAR-T inputs only if the bar is at most about 0.10 /day.
 That is a stated boundary, not a re-tuning. `failing()` now returns nothing; `wrongly_reported_as_gaps()` lists the items that pass (no canine CAR-T efficacy, no non-enhancing-lymphoma measurement, no canine engager, MHC loss under a DLA-identical graft, E12).
