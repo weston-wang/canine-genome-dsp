@@ -438,12 +438,23 @@ measured sensitivity. Do not describe this margin as comfortable.
 **One report. `https://claude.ai/artifact/UwM7n4AnygB5d9wPKr5efx` — "The Splenic Ledger".**
 
 Consolidated 2026-10-03 at the user's instruction: *"Are there multiple final artifacts? If so
-consolidate and simplify, remember I don't want back and forth discussions in the report."* The three
-pages that preceded it (*Consolidated Analysis* `3EpReVYXcQCFNUvyeciNwS`, *The Three-Move Plan*
-`8itmt26MXKkkxaqn7LtXBu`, *The Potency Gap* `RacbPzWWofZxkVGXiMvBRt`) and the stale August/September
-pages (*Hemangiosarcoma Escape Routes*, *The Two-Move Plan* ×2, *The Durability Gap*, *Four Cells Ten
-Years*, *Antigen-Independent Immunity Ledger*, *Four Persistence Mechanisms*, *Cobimetinib Escape
-Audit*) are **superseded**. They were left published, not deleted; deleting is the user's call.
+consolidate and simplify, remember I don't want back and forth discussions in the report."*
+
+**Superseded by it — and this list is exactly four, verified 2026-10-04:**
+*Splenic Hemangiosarcoma Consolidated Analysis* `3EpReVYXcQCFNUvyeciNwS`, *The Three-Move Plan*
+`8itmt26MXKkkxaqn7LtXBu`, *The Potency Gap* `RacbPzWWofZxkVGXiMvBRt`, *Hemangiosarcoma Escape Routes*
+`RhgKULHsEb3gVtRxsy1Ndv`. Left published, not deleted; deleting is the user's call.
+
+**Correction (2026-10-04).** An earlier version of this section also claimed *The Two-Move Plan* ×2,
+*The Durability Gap*, *Four Cells Ten Years*, *Antigen-Independent Immunity Ledger*, *Four Persistence
+Mechanisms* and *Cobimetinib Escape Audit* as superseded HSA pages. **Six of those are not this
+disease.** *Cobimetinib Escape Audit* `XwmUfAtawBZ3yZfFCzcfjH` was read and is **primary intracranial
+histiocytic sarcoma** — it tests a cobimetinib + duvelisib + missing-self-NK regimen and cites the HS
+engine's own modules (`v2.four_cells`, `the_antigen_axis_is_inert`, `nkg2d_escape_coverage`), which
+also places *Four Cells Ten Years* and *Antigen-Independent Immunity Ledger* on the HS line; and *The
+Closed Ledger* names *The Two-Move Plan* and *The Durability Gap* as **its** superseded pages. They
+belong to the HS branch's cleanup. The original list was built from titles rather than contents, which
+is how the mistake happened. **Do not delete another branch's artifacts from here.**
 
 **Do not add a second reader-facing page for this disease.** Update the one above. The sibling HS
 branch reached the same arrangement independently with *The Closed Ledger*
