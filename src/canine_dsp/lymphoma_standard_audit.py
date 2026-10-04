@@ -135,3 +135,17 @@ def growth_sensitivity(growths=(0.0903, 0.12, 0.15, 0.204)) -> list:
         G.evaluate.__kwdefaults__.update(saved[2])
         H.BULK_GROWTH_PER_DAY = saved[3]
     return rows
+
+
+def routes_not_counted() -> list:
+    """Closure routes found by the drawing-board pass that carry an ASSUMED input and are therefore NOT counted as closing anything
+    (docs/LYMPHOMA_UNIVERSE.md section H). `failing()` covers the inputs of the counted programs; this lists what was set aside and why."""
+    return [
+        Item("B-cell brain by sustaining oral cytarabine ~1,500 days", "ASSUMED", False,
+             "needs a CSF time-average >= ~0.11 uM (measured troughs 0.04-0.27 uM; time-average 0.3-1.4 uM is derived, never measured) and "
+             "multi-year tolerability (no source: human use is 10-14 days per 28; longest dog dosing is 7 days continuous / pulsed IV for 24 months)"),
+        Item("persistent graft-versus-lymphoma past day 166 closing the dormant progenitor", "TRANSFERRED hold, no rate", False,
+             "supports a hold (dog plateau, CML transcripts) but the model needs 0.06-0.12 /day against a 0.0008-0.004 /day bracket"),
+        Item("T-cell brain from existing agents", "OPEN", False,
+             "dormant lineage needs ~8 years of oral cytarabine in T-cell disease; CD7/CD5 CAR-T has no dog program found"),
+    ]

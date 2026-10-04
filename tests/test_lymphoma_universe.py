@@ -322,3 +322,9 @@ def test_t_cell_brain_is_not_closed_by_sustaining_existing_agents():
             assert not S.clock("T", prog, CNS)[0]
     finally:
         G.AVAILABILITY[S.THIOTEPA] = saved
+
+
+def test_audit_lists_the_routes_that_were_set_aside_with_their_grades():
+    from canine_dsp import lymphoma_standard_audit as A
+    r = A.routes_not_counted()
+    assert len(r) == 3 and not any(i.passes for i in r)
