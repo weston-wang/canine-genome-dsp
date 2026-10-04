@@ -5,8 +5,6 @@ names the proxy it used, grades itself, and states what it does not claim. The l
 stops "the condition is met" drifting into "the number is measured".
 """
 
-import math
-
 import pytest
 
 from canine_dsp import hsa_condition_closure as cc
@@ -225,3 +223,22 @@ def test_the_bound_is_stricter_than_the_published_table():
         strict = joint_durability(tc, 0.05 * (1 - 0.784), years=10.0)["joint_durability"]
         published = joint_durability(1.0, 0.05 * (1 - 0.784), years=10.0)["joint_durability"]
         assert strict < published
+
+
+def test_a_met_condition_does_not_promote_a_route_site_cell():
+    """C8 is MET while route 5's CNS cell is still PARTIALLY CLOSED. That looks like a contradiction
+    and is not: the condition asks whether a treating component exists, the cell asks whether the
+    route is closed at that site. Upgrading the cell because a neighbouring condition closed would be
+    a forced closure, so the ledger must keep them apart and say why."""
+    from canine_dsp import hsa_deterministic_closure as dc
+    d = cc.WHY_A_CELL_STAYS_PARTIAL_WHILE_C8_IS_MET
+    # the states this test is about really do coexist
+    conj = dc.conjunction()
+    assert len(conj["partially_closed_cells"]) == 1
+    assert dc.failing_conditions() == []
+    assert cc.C8_INTRACRANIAL_HAEMORRHAGE.status == cc.MET
+    # and the reason is recorded
+    assert "different objects" in d["the_apparent_contradiction"]
+    assert "SOLITARY" in d["what_the_cell_grades"]
+    assert "forced closure" in d["why_the_cell_was_NOT_upgraded"]
+    assert "never promotes" in d["the_rule_this_sets"]

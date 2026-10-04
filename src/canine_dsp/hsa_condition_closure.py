@@ -23,7 +23,6 @@ See docs/HSA_DURABLE_RESPONSE.md section 6d.
 
 from __future__ import annotations
 
-import math
 from dataclasses import dataclass
 
 from canine_dsp.hsa_open_route_closure import joint_durability
@@ -255,6 +254,29 @@ C8_INTRACRANIAL_HAEMORRHAGE = ConditionClosure(
                    "which is what the condition says. Its magnitude is unquantified, exactly as the "
                    "alkylators' log-kill is.",
 )
+
+
+# The distinction a careful reader will challenge, so it is written down rather than left implicit.
+WHY_A_CELL_STAYS_PARTIAL_WHILE_C8_IS_MET = {
+    "the_apparent_contradiction": "the conjunction reports route 5 at the CNS as PARTIALLY CLOSED, "
+        "while condition C8 reports MET. Both are correct, because they are claims about different "
+        "objects and the ledger grades them separately on purpose.",
+    "what_the_condition_asks": "C8 asks whether a treating component EXISTS and is deliverable in "
+        "this species and compartment. It does: resection of a solitary imaged intracranial "
+        "hemangiosarcoma is documented, and C9 puts the imaging that component needs into the "
+        "protocol. So the condition is met.",
+    "what_the_cell_grades": "the route-site cell grades whether the route is CLOSED at that site, "
+        "which is a stronger question. Two things keep it short of closed and neither is fixed by "
+        "adding imaging: no survival benefit was shown (both dogs euthanased within eleven months, "
+        "no haemorrhage endpoint, no post-mortem), and the component reaches a SOLITARY deposit, so "
+        "a multifocal or occult one is still untreated.",
+    "why_the_cell_was_NOT_upgraded": "because C9 closing would have made an upgrade easy to argue "
+        "and wrong. Imaging answers 'is it visible', not 'does removing it help' or 'what about the "
+        "other deposits'. Promoting the cell on the strength of a neighbouring condition is exactly "
+        "the forced closure rule 13 and the no-tuning standard forbid, so the cell stays PARTIAL.",
+    "the_rule_this_sets": "a met condition never promotes a route-site cell. The cell moves only on "
+        "evidence about the route at that site.",
+}
 
 
 CLOSURES: tuple[ConditionClosure, ...] = (

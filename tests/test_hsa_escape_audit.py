@@ -132,7 +132,7 @@ def test_the_scoping_finding_makes_the_goal_easier_and_says_so():
 
 def test_remaining_lifespan_rejects_an_unknown_breed_and_a_negative_lead():
     with pytest.raises(ValueError):
-        audit.remaining_natural_lifespan("Corgi-sized mystery breed")
+        audit.remaining_natural_lifespan("unlisted mystery breed")
     with pytest.raises(ValueError):
         audit.remaining_natural_lifespan("Golden Retriever", lead_time_years=-1.0)
 
