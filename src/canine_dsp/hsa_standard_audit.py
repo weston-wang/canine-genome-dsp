@@ -196,22 +196,38 @@ GRADES: tuple[InputGrade, ...] = (
     InputGrade(
         name="immunity half-life",
         where="hsa_vaccine_maintenance",
-        provenance=ASSUMED,
-        verdict=Verdict.FAILS_NO_BASIS,
-        why="180 days is a bare assumption with no canine anchor for a cancer vaccine, and the "
-            "ten-year answer swings between 0.268 and 1.000 across 90 vs 365 days. Load-bearing "
-            "AND baseless, which is exactly case (a). This is experiment E3 and the one input where "
-            "'nobody has measured it' is the correct thing to say.",
+        provenance=TRANSFERRED,
+        verdict=Verdict.PASSES,
+        why="WAS a bare assumption with no anchor, and the history stays visible: 180 days was a "
+            "literal and the ten-year answer swings between 0.268 and 1.000 across 90 vs 365 days. "
+            "Closed by rule 14, on a proxy the record itself forced to be FUNCTIONAL rather than "
+            "serological -- the randomised ganglioside trial (PMID 36215947) raised titre durably "
+            "in surgically disease-free sarcoma and moved neither RFS nor OS, so titre persistence "
+            "is disqualified. The admissible proxy is persistence of vaccine-induced T-cell memory "
+            "with functional corroboration, and that is measured: Hu et al. 2021 (PMID 33479501) "
+            "found neoantigen-specific T cells at a median of almost four years after NeoVax in "
+            "SURGICALLY RESECTED melanoma, with ex vivo memory phenotype, tumour infiltration by "
+            "the vaccine-induced clones and epitope spreading. The plan boosts q60-180d, 8-24x "
+            "inside that. TRANSFERRED, not measured: n=8, single-arm, human. Experiment E3 stands.",
+        load_bearing=True,
     ),
     InputGrade(
         name="post-remission annual rupture hazard",
-        where="section 5 joint-durability table",
-        provenance=ASSUMED,
-        verdict=Verdict.FAILS_NO_BASIS,
-        why="swept across 2/5/10% with no anchor at all, and the ~0.53-vs-~0.85 headline is "
-            "asserted from it. The screening SENSITIVITY is measured (78.4-90.9% in 1,100 dogs) and "
-            "Ruffoni 2025 measures how dogs PRESENT (56.2% of 345 ruptured splenic masses were "
-            "HSA), but neither bounds the hazard in a dog already in remission. Case (a).",
+        where="section 5 joint-durability table; bound in hsa_condition_closure.c7_bound",
+        provenance=DERIVED,
+        verdict=Verdict.PASSES,
+        why="The POINT VALUE is still unmeasured in any cohort and this grade does not pretend "
+            "otherwise -- searches return how dogs PRESENT (Ruffoni 2025; PMID 36322487, 1,150 "
+            "dogs) or studies in cats. What closed is the claim that depends on it. Under the "
+            "screening the plan already requires, ten-year joint durability holds above 0.50 until "
+            "the UNDERLYING annual hazard reaches 26-73%, against a swept plausible range of "
+            "2-10%: the conclusion survives the entire range, so the point value is not "
+            "load-bearing for it. Independently, a dog in remission has no spleen, so the only "
+            "bleeding sources are metastatic deposits -- smaller and fewer than the intact primary "
+            "whose rupture rate Ruffoni measured, which makes the presenting rate a crude ceiling. "
+            "The 26% worst case (low screening sensitivity, weaker tumour control) is a factor of "
+            "2.6 over the swept top and the thinnest margin in the ledger.",
+        load_bearing=False,
     ),
     InputGrade(
         name="route-8 compartment size, ~1,300 cells",
@@ -283,8 +299,12 @@ def statement() -> str:
     d = growth_bar_derivation()
     return (
         f"{len(GRADES)} load-bearing inputs graded against the stated bar. "
-        f"{len(bad)} genuinely fail, both for want of any basis at all: "
-        f"{', '.join(g.name for g in bad)}. "
+        + (f"{len(bad)} genuinely fail, for want of any basis at all: "
+           f"{', '.join(g.name for g in bad)}. "
+           if bad else
+           "0 genuinely fail. That is not the same as 0 unmeasured: see "
+           "hsa_condition_closure.what_is_still_unmeasured(), which lists five numbers that remain "
+           "unmeasured behind transfers and derivations. ") +
         f"{len(wrongly_reported_as_gaps())} inputs this analysis had called open actually pass. "
         f"The growth bar, previously a bare literal and the most load-bearing number here, is now "
         f"derived and is conservative by "
@@ -295,15 +315,24 @@ def statement() -> str:
 VERDICT = {
     "the_question": "does the HSA therapy hold at the user's stated bar -- real data OR a rigorous "
                     "model, transfers acceptable where justified in writing?",
-    "the_answer": "yes, with two named exceptions, and the exceptions are not escape routes. Every "
-                  "mechanism and every escape path carries a closure graded MEASURED, DERIVED or "
-                  "TRANSFERRED. Two INPUTS fail for want of any basis: the immunity half-life and "
-                  "the post-remission rupture hazard.",
-    "why_those_two_are_different_from_the_rest": "they are not 'unmeasured in the dog', which rule "
-                                                 "11 says is not a gap. They have no basis at all "
-                                                 "-- nothing is transferred, derived or cited -- "
-                                                 "and both are used to assert a headline figure. "
-                                                 "That is case (a).",
+    "the_answer": "yes. Every mechanism and every escape path carries a closure graded MEASURED, "
+                  "DERIVED or TRANSFERRED, and no input now fails. The last two that did -- the "
+                  "immunity half-life and the post-remission rupture hazard -- closed under rule 14, "
+                  "the first on a functional persistence proxy measured in the matched surgical "
+                  "setting, the second on a derived bound that makes its point value "
+                  "non-load-bearing.",
+    "why_those_two_are_different_from_the_rest": "they WERE case (a) under rule 11 -- no basis at "
+                                                 "all, nothing transferred, derived or cited, and "
+                                                 "both used to assert a headline figure. The "
+                                                 "history stays visible because that is what made "
+                                                 "them worth closing rather than re-listing. What "
+                                                 "changed is that each now has a written basis; "
+                                                 "neither became a measurement.",
+    "what_passing_does_NOT_mean": "that everything is measured. Five numbers remain unmeasured "
+                                  "behind transfers and derivations, listed in "
+                                  "hsa_condition_closure.what_is_still_unmeasured(). 'No input "
+                                  "fails the bar' and 'every number is measured' are different "
+                                  "claims and collapsing them is the overstatement failure 4 names.",
     "what_this_module_corrected_in_this_analysis": (
         "the growth bar was never graded, and it sets the threshold every closure is measured "
         "against. It was a bare literal. It is now derived, and conservative.",

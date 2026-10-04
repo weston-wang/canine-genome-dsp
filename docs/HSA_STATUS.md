@@ -245,11 +245,11 @@ surveillance this project assumes is **abdominal and thoracic** — no canine HS
 record images the brain. Conditions went 8 → 9 and failing stayed at 3. The ledger did not simply get
 better.
 
-**Conditions failing (3 of 9):** the immunity half-life; the rupture hazard; **brain-inclusive
-surveillance imaging** (new). **Partial:** intracranial haemorrhage (TRANSFERRED, PMID 42038052).
-**Passing:** the CNS agent (MET at TRANSFERRED — lomustine + temozolomide); T-cell vaccine platform
-(selectable now — ERstrePs yes, eVim no); vaccine height ~1.40× (TRANSFERRED); route-8 anthracycline
-sensitivity (unexamined); route-8 existence (unverified).
+**Conditions failing when this entry was written: 3 of 9** — the immunity half-life, the rupture
+hazard, and brain-inclusive surveillance imaging. **All three were closed on 2026-10-04; see the
+C6–C9 section below.** Kept here because the sequence matters: the brain-imaging condition was
+*created* by the CNS regrade, and a later thread reading only the closure would not know the ledger
+had to get worse before it got better.
 
 ## The rule 13 audit (2026-10-02) — tiers and class dispositions
 
@@ -338,6 +338,42 @@ is to name the code path that would have to change.
 **Procedure, now in rule 11:** before answering any "is it covered / what is open" question, execute
 `failing()` and `wrongly_reported_as_gaps()` and quote them. The guard existed before this lapse and
 was not run; writing the guard is not running the guard.
+
+## C6-C9 closed (2026-10-04) — and the proxy the record disqualifies
+
+The user: *"you need to close C6 - C9. First go a comprehensive sweep of the thread to make sure you
+didn't forget we talked about it again."* The sweep found the constraint that decides C6, already in
+this record, and all four conditions then closed. Module `hsa_condition_closure`; doc §6d.
+
+**The disqualified proxy — do not propose it again.** Rosenbaum et al. 2022, *Eur J Cancer*
+176:155–163, **PMID 36215947**: randomised phase II, trivalent GM2/GD2/GD3 vaccine + OPT-821 versus
+OPT-821 alone, **136 patients in metastatic sarcoma rendered disease-free by complete
+metastasectomy** — this plan's exact setting. Serologic response at week 9 **96.5% vs 32.8%**, and
+the between-arm difference was **durable**. One-year RFS **34.5% vs 34.8%** (P=0.725); one-year OS
+93.1% vs 91.5% (P=0.578). **A durable antibody response was produced and moved nothing.** So antibody
+titre persistence is inadmissible as a proxy for immunity duration here. Any future attempt to close
+C6 must use a functional or clinical proxy.
+
+| | closed how | grade |
+|---|---|---|
+| **C6** immunity half-life | Functional persistence, not serology: **Hu et al. 2021, PMID 33479501** — 8 patients, **surgically resected** stage III/IV melanoma, median almost **4 years** post-NeoVax; neoantigen-specific T cells persisting with memory phenotype, clonal diversification, **tumour infiltration and epitope spreading**. The plan boosts q60–180d, **8–24× inside** that. The condition is that immunity outlasts the dosing interval, not that the half-life equals a value | TRANSFERRED |
+| **C7** rupture hazard | **A bound, not a value.** No cohort measures it (searches return how dogs *present* — Ruffoni 2025, PMID 36322487 n=1,150 — or cats). Breaking point under the screening the plan requires: **26% / 61% / 31% / 73%** for control 0.888–0.992 × sensitivity 78.4–90.9%, against a swept range of **2–10%** → **2.6–7.3× margin**. Independently, a dog in remission **has no spleen**, so only metastatic deposits can bleed, making the presenting rate a crude ceiling | DERIVED |
+| **C8** intracranial haemorrhage | Was PARTIAL only because its component reaches an **imaged** deposit. C9 puts brain imaging in the protocol, so the reach is met by design. PMID 42038052 | TRANSFERRED |
+| **C9** brain imaging | **Forced, not optional**: the verdict is a conjunction over routes **and sites**, and a route open at one site is open. Three CNS closures each need the deposit imaged, and the liquid biopsy gives a signal without localising. Protocol specified: brain MRI at the cadence of the existing thoracic/abdominal imaging. Deliberately asserts **nothing** from the unverified ~14% brain-met rate | DERIVED |
+
+**Consequences recorded in the audit:** `failing()` now returns **`[]`** and `failing_conditions()`
+returns **`[]`**. The immunity half-life is regraded ASSUMED→TRANSFERRED; the rupture hazard
+ASSUMED→DERIVED with `load_bearing=False`, because the bound is what removes its leverage.
+
+**`failing()` empty is NOT "everything is measured".** Those are different claims and collapsing them
+is failure 4. `hsa_condition_closure.what_is_still_unmeasured()` returns **five**: the canine immunity
+half-life, the post-remission rupture hazard, the logs removed by either CNS alkylator, the per-dog
+brain-metastasis rate, and what the four levers add to vaccine height together. A test asserts that
+list stays non-empty while `failing()` is empty.
+
+**The thinnest margin in the whole ledger is C7's 26%** — low screening sensitivity, weaker tumour
+control, a factor of 2.6 over the plausible top. Screening is load-bearing and must run at the
+measured sensitivity. Do not describe this margin as comfortable.
 
 ## Open gaps, ranked (the honest list)
 
@@ -433,7 +469,7 @@ worse, Yunnan Baiyao failed in trial, eBAT's compressed schedule was worse, plat
 
 ## Test status
 
-`862 passed` (2026-10-03, exit 0, 26m58s). Five test modules require `torch` and were not run in that container:
+`881 passed` (2026-10-04, exit 0, 23m16s). Five test modules require `torch` and were not run in that container:
 `test_hybrid_rnn`, `test_alphafold`, `test_hsa_cli`, `test_mapk_cli`, `test_vaccine_eval`. The HSA
 analysis modules themselves have no such dependency. Run with
 `PYTHONPATH=src python3 -m pytest tests/ -q` (needs numpy, scipy, pandas, scikit-learn, matplotlib).

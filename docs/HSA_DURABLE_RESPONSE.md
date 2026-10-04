@@ -2108,15 +2108,15 @@ get better.
 ### The finite condition list
 
 Rule 12 asks for the conditions and each one's status rather than a number. There are nine, and
-three fail:
+**none now fails** — C6 to C9 were the last four and §6d closes them:
 
 | condition | status |
 |---|---|
 | a CNS-penetrant, antigen- and pathway-independent agent must be added | **MET** at TRANSFERRED — lomustine and temozolomide; unquantified on logs delivered |
-| intracranial haemorrhage must have a treating component | **PARTIAL** at TRANSFERRED — resection of a solitary *imaged* intracranial HSA is documented in dogs (PMID 42038052, n=2) and SRS was deliverable; no survival benefit and no haemorrhage endpoint shown |
-| immunity half-life must support the booster interval | **FAILS** the stated bar — bare assumption, and the answer swings on it |
-| the post-remission rupture hazard must be bounded | **FAILS** the stated bar — swept with no anchor |
-| **surveillance imaging must include the brain** | **OPEN** — newly exposed by the regrade above; the assumed surveillance is abdominal and thoracic |
+| intracranial haemorrhage must have a treating component | **MET** at TRANSFERRED (§6d) — documented in dogs (PMID 42038052); reach met by design once brain imaging is in the protocol; magnitude unquantified |
+| immunity half-life must support the booster interval | **MET** at TRANSFERRED (§6d) — four-year functional persistence against a 60–180 day booster interval |
+| the post-remission rupture hazard must be bounded | **MET** at DERIVED (§6d) — breaking point 26–73% against a swept range of 2–10% |
+| **surveillance imaging must include the brain** | **MET** at DERIVED (§6d) — forced by the site dimension; brain MRI specified |
 
 The other four pass: the vaccine platform must have a T-cell arm (**selectable now** — ERstrePs
 qualifies, eVim does not); vaccine height must reach ~1.40× (**TRANSFERRED**); the route-8 compartment
@@ -2237,6 +2237,115 @@ two CNS agents, one is now anchored on a right-compartment measurement and one i
 *Module: `hsa_agent_tiers`. `program_is_built_from_existing_agents()` returns True;
 `classes_excluded_for_absent_canine_data()` returns `[]`, and a test asserts it.
 `tmz_brain_interstitium_exposure()` derives the µM figures from the published µg/mL.*
+
+---
+
+## 6d. Closing C6–C9
+
+The conjunction reached "no route–site cell open" with nine conditions attached, of which **C6 and C7
+failed the stated bar, C8 stood partial and C9 was open.** All four now close. Rule 14 is the method:
+for each, name the measurable proxy and search for *that* rather than for the concept.
+
+### What the record settled first, and what it rules out for C6
+
+A randomised trivalent ganglioside vaccine (GM2/GD2/GD3 + OPT-821) in sarcoma patients **rendered
+disease-free by surgery** — this plan's exact setting — induced a sustained serologic response and
+moved **neither recurrence-free nor overall survival** (PMID 36215947). Titre rose; survival did not.
+
+So **antibody titre persistence is a disqualified proxy for C6.** Whatever closes it has to be
+functional or clinical, never serological. That precedent was already in this document, and the
+closure below respects it rather than working around it.
+
+### C6 — immunity half-life → MET at TRANSFERRED
+
+The admissible proxy is persistence of vaccine-induced tumour-specific **T-cell memory with functional
+corroboration**: ex vivo memory phenotype, tumour infiltration by the vaccine-induced clones, and
+epitope spreading. That has been measured.
+
+**Hu et al. 2021** (*Nat Med* 27(3):515–525, PMID 33479501) evaluated eight patients with
+**surgically resected** stage IIIB/C or IVM1a/b melanoma — the adjuvant minimal-residual setting — at
+a median of almost **four years** after NeoVax. Neoantigen-specific T-cell responses persisted, with
+ex vivo detection of a memory phenotype; clones diversified over time into multiple TCR clonotypes of
+distinct functional avidity; and neoantigen-specific clones were detected **infiltrating tumour**,
+with epitope spreading, which the authors read as on-target vaccine-induced killing. All eight alive,
+six with no evidence of active disease.
+
+Against that, **the plan boosts every 60–180 days — 8–24× inside the measured persistence.** That is
+the form of the argument that matters: the condition is not "the half-life is X", it is that immunity
+outlasts the gap between doses. Stated that way it survives a large discount for the species transfer.
+
+**Not claimed:** that the half-life is four years, or that persistence equals protection. Hu is n=8,
+single-arm, uncontrolled and human, and the ganglioside precedent stands. The canine measurement is
+still experiment E3 and still worth running.
+
+### C7 — post-remission rupture hazard → MET at DERIVED
+
+No cohort measures it. Searches return how dogs **present** (Ruffoni 2025; the double-two-thirds
+systematic review, PMID 36322487, 1,150 dogs) or studies in cats. So this closes by **bounding**,
+which is what the condition asks for — "must be bounded", not "must be measured".
+
+The hazard is not a property of the disease alone; it is set jointly by the disease and the
+surveillance interval. The proxy is therefore the **breaking point**: the underlying hazard at which
+the screened plan's ten-year figure fails a stated threshold.
+
+| tumour control | screening sensitivity | breaking point (10-yr joint = 0.50) |
+|---|---|---|
+| 0.888 | 78.4% | **26%** |
+| 0.888 | 90.9% | 61% |
+| 0.992 | 78.4% | 31% |
+| 0.992 | 90.9% | **73%** |
+
+The swept plausible range is **2–10%**. The breaking point sits **2.6–7.3× above the top of that
+range** and 13–36× above its middle, so the conclusion survives the entire range and the point value
+is not load-bearing for it. Independently, a dog in remission **has no spleen**: the only bleeding
+sources are metastatic deposits, which are smaller and fewer than the intact primary whose rupture
+rate Ruffoni measured — making the presenting rate a crude ceiling on the post-remission hazard.
+
+**Not claimed:** that the hazard has been measured. It has not, in any cohort. And the margin is not
+enormous — at the low end of screening sensitivity with the weaker tumour control the breaking point
+is 26%, a factor of 2.6 over the swept top. **This is the thinnest margin anywhere in the ledger.**
+Two consequences, both already in the record: screening is load-bearing rather than optional, and it
+has to run at the measured sensitivity rather than an assumed one.
+
+### C9 — surveillance must include the brain → MET at DERIVED
+
+No proxy is needed: this is a protocol decision. What has to be shown is that the decision is
+**forced** rather than optional, and the structure of the claim forces it. The verdict is a
+conjunction over routes **and sites**, and a route open at one site is open — that is what the site
+split was built to expose, and what moved routes 8 and 12b before the alkylators were evidenced. Every
+CNS closure in the ledger is conditional on the deposit being imaged, and the blood test underwriting
+early detection returns a cancer *signal* without localising it. So the protocol is specified: **brain
+MRI at the same cadence as the thoracic and abdominal imaging the plan already assumes.**
+
+**Not claimed:** any yield or cost-effectiveness figure. The per-dog brain-metastasis rate is an
+unverified ~14% graded an inert placeholder, and this closure **deliberately asserts nothing from
+it** — doing so would make an ungraded number load-bearing. The condition is met because the
+conjunction requires closure at every site, which holds at any prevalence.
+
+### C8 — intracranial haemorrhage → MET at TRANSFERRED
+
+C8 and C9 are one problem, and C9 had to close first. C8's treating component — image the vascular
+mass and remove it before it bleeds, the same mechanism that closes route 5 at the spleen — is
+documented in this species, tumour and compartment (PMID 42038052, two dogs, resected with
+histopathological confirmation, radiosurgery delivered on regrowth). It stood **partial** only because
+that component reaches a solitary *imaged* deposit. C9 now puts brain imaging in the protocol, so the
+reach the condition asks for is met by design rather than by chance.
+
+**Not claimed:** any survival benefit. Both dogs were euthanased within eleven months, no haemorrhage
+endpoint was measured, neither had a post-mortem, and a multifocal deposit is still untreated. The
+component exists and is deliverable; its magnitude is unquantified, exactly as the alkylators' log-kill
+is.
+
+### What closing all nine does not mean
+
+`standard_audit.failing()` now returns an empty list. That is **not** the claim that everything is
+measured, and the two must not be collapsed. Five numbers remain unmeasured behind transfers and
+derivations, and `hsa_condition_closure.what_is_still_unmeasured()` lists them: the canine immunity
+half-life, the post-remission rupture hazard, the logs removed by either CNS alkylator, the per-dog
+brain-metastasis rate, and — the highest-value of the five — what the four levers add to vaccine height
+together.
+
+*Module: `hsa_condition_closure`. `unmet()` returns `[]`; `what_is_still_unmeasured()` returns five.*
 
 ---
 
@@ -2374,12 +2483,17 @@ What stays open is whether canine HSA behaves like human melanoma, and whether f
 coupled levers stack or overlap.
 
 **Stated as a conjunction, nothing is open** (§6b). Of fifteen routes across six anatomical sites, no
-cell is OPEN and one is PARTIALLY CLOSED — route 5 in its CNS form, haemorrhage from a vascular brain
-deposit, now carrying a documented canine mechanism (resection of a solitary imaged intracranial
-hemangiosarcoma, PMID 42038052) but no survival benefit and no haemorrhage endpoint. **Three of nine
-conditions still fail**: immunity half-life, the post-remission rupture hazard, and — newly exposed by
-that regrade — the fact that the surveillance this plan assumes is abdominal and thoracic and does not
-image the brain, while every CNS closure here needs the deposit imaged.
+cell is OPEN. Route 5's CNS form — haemorrhage from a vascular brain deposit — carries a documented
+canine mechanism (resection of a solitary imaged intracranial hemangiosarcoma, PMID 42038052) and is
+met once brain imaging is in the protocol, though with no survival benefit and no haemorrhage endpoint
+shown.
+
+**And all nine conditions now hold** (§6d). The last four — immunity half-life, the post-remission
+rupture hazard, intracranial haemorrhage and brain-inclusive imaging — closed on a functional
+persistence proxy, a derived bound, a documented component and a forced protocol decision
+respectively. None is graded MEASURED. `standard_audit.failing()` returns an empty list, which is
+**not** the claim that everything is measured: five numbers remain unmeasured behind transfers and
+derivations, and `hsa_condition_closure.what_is_still_unmeasured()` names them.
 
 **And the whole program is built from agents that exist today** (§6c). Thirteen components, zero
 to-build. Six classes are excluded, each on a contradicted kill, a named escape, or unaffordable

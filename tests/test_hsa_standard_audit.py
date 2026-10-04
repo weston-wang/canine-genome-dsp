@@ -93,18 +93,31 @@ def test_the_requirement_scales_linearly_with_the_bar():
 # failing() -- the rule-11 discipline.
 # =================================================================================================
 
-def test_only_two_inputs_genuinely_fail():
-    bad = sa.failing()
-    assert len(bad) == 2
-    names = {g.name for g in bad}
-    assert names == {"immunity half-life", "post-remission annual rupture hazard"}
+def test_no_input_fails_and_the_last_two_closed_on_a_written_basis():
+    """The last two failures -- immunity half-life and the post-remission rupture hazard -- closed
+    under rule 14. Neither became a measurement; each acquired a written basis, which is the bar."""
+    assert sa.failing() == []
+    half = next(g for g in sa.GRADES if g.name == "immunity half-life")
+    assert half.provenance == sa.TRANSFERRED
+    assert half.verdict is sa.Verdict.PASSES
+    assert "PMID 33479501" in half.why
+    assert "PMID 36215947" in half.why          # the precedent that disqualified titre
+    assert "not measured" in half.why
+    rupt = next(g for g in sa.GRADES if g.name == "post-remission annual rupture hazard")
+    assert rupt.provenance == sa.DERIVED
+    assert rupt.verdict is sa.Verdict.PASSES
+    assert rupt.load_bearing is False           # the bound is what makes it non-load-bearing
+    assert "still unmeasured in any cohort" in rupt.why
 
 
-def test_both_failures_are_no_basis_and_both_are_load_bearing():
-    for g in sa.failing():
-        assert g.verdict is sa.Verdict.FAILS_NO_BASIS
-        assert g.provenance == sa.ASSUMED
-        assert g.load_bearing is True
+def test_an_empty_failing_list_is_not_a_claim_that_everything_is_measured():
+    """The guard against the overstatement failure 4 names. If failing() is empty, the audit must
+    still say what remains unmeasured, and point at the list."""
+    from canine_dsp import hsa_condition_closure as cc
+    assert sa.failing() == []
+    assert len(cc.what_is_still_unmeasured()) >= 4
+    assert "different claims" in sa.VERDICT["what_passing_does_NOT_mean"]
+    assert "what_is_still_unmeasured" in sa.statement()
 
 
 def test_the_growth_bar_is_no_longer_among_the_failures():
@@ -146,18 +159,19 @@ def test_no_grade_claims_measured_for_something_transferred():
     assert len(measured) == 1 and "tumorgraft" in measured[0].name
 
 
-def test_the_statement_names_the_failures_rather_than_counting_absences():
+def test_the_statement_distinguishes_no_failures_from_no_absences():
     s = sa.statement()
-    assert "2 genuinely fail" in s
-    assert "immunity half-life" in s and "rupture hazard" in s
+    assert "0 genuinely fail" in s
+    assert "not the same as 0 unmeasured" in s
     assert "conservative" in s
 
 
 def test_the_verdict_distinguishes_failing_inputs_from_open_escape_routes():
     v = sa.VERDICT
-    assert "not escape routes" in v["the_answer"]
+    assert "no input now fails" in v["the_answer"]
     assert "case (a)" in v["why_those_two_are_different_from_the_rest"]
     assert "rule 11" in v["why_those_two_are_different_from_the_rest"]
+    assert "neither became a measurement" in v["why_those_two_are_different_from_the_rest"]
 
 
 # =================================================================================================
@@ -235,13 +249,19 @@ def test_the_partial_cell_states_both_reasons_it_is_not_closed():
     assert dc.VERDICT["why_that_cell_is_partial_and_not_closed"] == basis
 
 
-def test_the_regrade_is_reported_with_the_condition_it_exposed():
-    """The CNS regrade is only admissible alongside the new open condition it creates: every CNS
-    closure here needs the deposit imaged, and the assumed surveillance is abdominal and thoracic."""
+def test_the_brain_imaging_condition_closed_as_a_forced_protocol_decision():
+    """It was opened by the CNS regrade and closed by the structure of the claim: the conjunction is
+    over sites as well as routes, so a precondition of three CNS closures is forced, not optional.
+    It is deliberately NOT closed on the unverified ~14% brain-metastasis rate."""
     from canine_dsp import hsa_deterministic_closure as dc
+    from canine_dsp import hsa_condition_closure as cc
     cond = next(c for c in dc.CONDITIONS if "brain" in c.what)
-    assert cond.status.startswith("OPEN")
-    assert cond in dc.failing_conditions()
+    assert cond.status.startswith("MET")
+    assert cond not in dc.failing_conditions()
+    assert "FORCED" in cond.status
+    assert "NOT asserted from the unverified" in cond.status
+    assert "deliberately asserts nothing from it" in cc.C9_BRAIN_IMAGING.does_not_claim
+    # the history of how it was exposed stays in the record
     assert "did not simply get better" in dc.VERDICT["the_cost_of_that_regrade"]
 
 
@@ -290,22 +310,21 @@ def test_the_odds_are_explicitly_demoted_to_sensitivity():
     assert "sensitivity" in o["what_the_numbers_are_still_good_for"].lower()
 
 
-def test_the_condition_list_is_finite_and_names_what_fails():
+def test_the_condition_list_is_finite_and_none_of_the_nine_fails():
     from canine_dsp import hsa_deterministic_closure as dc
-    assert 5 <= len(dc.CONDITIONS) <= 20
-    failing = dc.failing_conditions()
-    assert len(failing) == 3
-    joined = " ".join(c.what for c in failing)
-    assert "CNS-penetrant" not in joined, "that condition is now met"
-    assert "half-life" in joined and "rupture hazard" in joined
-    # The haemorrhage condition is no longer failing -- it went to PARTIAL on PMID 42038052 -- and a
-    # brain-imaging condition opened in the same move. The count did not improve.
-    assert "haemorrhage" not in joined
-    assert "include the brain" in joined
-    haem = next(c for c in dc.CONDITIONS if "haemorrhage" in c.what)
-    assert haem.status.startswith("PARTIAL")
+    assert len(dc.CONDITIONS) == 9
+    assert dc.failing_conditions() == []
+    # every condition carries a status that is MET at a named grade, and a next step even when met
     for c in dc.CONDITIONS:
+        # the invariant is the negative: nothing OPEN, FAILS or PARTIAL survives
+        assert not c.status.startswith(("OPEN", "FAILS", "PARTIAL")), c.what
         assert c.how_to_settle, c.what
+    # and the four closed last each name what they do not claim
+    from canine_dsp import hsa_condition_closure as cc
+    assert cc.unmet() == []
+    for cl in cc.CLOSURES:
+        assert len(cl.does_not_claim) > 80, cl.condition
+        assert len(cl.proxy) > 40, cl.condition
 
 
 def test_reaches_rejects_an_unknown_mechanism():
@@ -331,19 +350,17 @@ def test_the_increment_is_never_in_the_failing_list():
     assert "grading against demonstration" in inc.why
 
 
-def test_failing_is_exactly_the_two_bare_numbers():
-    """The answer to "what is still open" is this list and nothing else. If a third item belongs here
-    it has to be added deliberately, not narrated into an answer."""
+def test_failing_is_empty_and_anything_added_back_must_be_deliberate():
+    """The answer to "what is still open" is failing() and nothing else. It is now empty, so the
+    guard inverts: an item appearing here again must be added deliberately, with a basis that has
+    actually been withdrawn, and never narrated into an answer."""
     from canine_dsp import hsa_standard_audit as sa
-    failing = sa.failing()
-    assert len(failing) == 2
-    names = " ".join(g.name for g in failing)
-    assert "immunity half-life" in names
-    assert "rupture hazard" in names
-    for g in failing:
-        assert g.verdict is sa.Verdict.FAILS_NO_BASIS, g.name
-        assert g.provenance == sa.ASSUMED, g.name
-        assert g.load_bearing is True, g.name
+    assert sa.failing() == []
+    for g in sa.GRADES:
+        assert g.verdict is sa.Verdict.PASSES, g.name
+        # a passing grade must cite something: never ASSUMED with nothing behind it
+        if g.provenance == sa.ASSUMED:
+            assert not g.load_bearing, f"{g.name} is assumed AND load-bearing"
 
 
 def test_the_stacking_worry_is_closed_and_not_a_live_gap():

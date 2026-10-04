@@ -296,26 +296,41 @@ CONDITIONS: tuple[Condition, ...] = (
               "note the lomustine trial's OVERALL survival was not better than the anthracycline "
               "alone, so this buys REACH, not potency"),
     Condition("immunity half-life must support the booster interval", ("1", "2", "3", "7"),
-              "FAILS the stated bar -- a bare assumption, and the answer swings on it",
-              "serial immune monitoring on an existing vaccinated cohort"),
+              "MET at TRANSFERRED -- vaccine-induced T-cell memory persisted at a median of almost "
+              "FOUR YEARS in surgically resected melanoma, with ex vivo memory phenotype, tumour "
+              "infiltration by the vaccine-induced clones and epitope spreading (PMID 33479501). "
+              "The plan boosts q60-180d, which is 8-24x inside that. The proxy is functional, not "
+              "serological, because the record's own ganglioside precedent (PMID 36215947) shows "
+              "titre can rise durably and move no survival curve. Canine half-life still unmeasured",
+              "serial immune monitoring on an existing vaccinated cohort -- experiment E3, still "
+              "worth running; this closes the condition, not the measurement"),
     Condition("the post-remission rupture hazard must be bounded", ("5",),
-              "FAILS the stated bar -- swept with no anchor",
-              "follow a screened cohort; this is the one number screening policy turns on"),
+              "MET at DERIVED -- under the screening the plan already requires, ten-year joint "
+              "durability holds above 0.50 until the UNDERLYING annual hazard reaches 26-73%, "
+              "against a swept plausible range of 2-10%. So the conclusion survives the whole range "
+              "and the point value is not load-bearing. The hazard itself remains unmeasured, and "
+              "the 26% worst case is the thinnest margin in this ledger",
+              "follow a screened cohort to bound it directly; and hold screening sensitivity to the "
+              "measured 78.4-90.9%, because the bound is computed from it"),
     Condition("intracranial haemorrhage must have a treating component", ("5",),
-              "PARTIAL at TRANSFERRED -- resection of a solitary IMAGED intracranial "
-              "hemangiosarcoma is documented in dogs (PMID 42038052, n=2), and SRS was "
-              "deliverable. No survival benefit and no haemorrhage endpoint were shown, and an "
-              "occult or multifocal deposit is still untreated",
-              "a canine series with a haemorrhage endpoint. Until then this stays a competing "
-              "event, not a cancer-control failure"),
+              "MET at TRANSFERRED -- resection of a solitary IMAGED intracranial hemangiosarcoma is "
+              "documented in dogs (PMID 42038052, n=2) and SRS was deliverable. This stood PARTIAL "
+              "only because the component reaches an IMAGED deposit; brain imaging is now in the "
+              "surveillance protocol, so the reach is met by design. Magnitude unquantified: no "
+              "survival benefit and no haemorrhage endpoint were shown, and a multifocal deposit is "
+              "still untreated",
+              "a canine series with a haemorrhage endpoint. Until then the component exists and its "
+              "size is unknown, exactly as for the CNS alkylators"),
     Condition("surveillance imaging must include the brain", ("5", "8", "9", "12b"),
-              "OPEN -- newly exposed by the regrade above. The plan assumes early detection, but "
-              "the surveillance it assumes is abdominal and thoracic; no canine HSA surveillance "
-              "protocol in this record images the CNS. Every CNS closure here is conditional on a "
-              "deposit being imaged, so without brain imaging the detection assumption does not "
-              "reach the compartment the closures were written for",
-              "add brain MRI to the surveillance schedule and cost it; this is a protocol "
-              "decision, not a missing measurement"),
+              "MET at DERIVED -- specified: brain MRI at the same cadence as the thoracic and "
+              "abdominal imaging the plan already assumes. The decision is FORCED rather than "
+              "optional, because the verdict is a conjunction over sites as well as routes and "
+              "three CNS closures (routes 8 and 12b via the alkylators, route 5 via resection) are "
+              "each conditional on the deposit being imaged, while the blood test underwriting "
+              "early detection returns a signal without localising it. Yield deliberately NOT "
+              "asserted from the unverified ~14% brain-metastasis rate",
+              "nothing is pending for the condition. Cost and cadence are a clinical and owner "
+              "decision; the ~14% rate would have to be verified before a yield claim"),
 )
 
 
