@@ -440,10 +440,17 @@ measured sensitivity. Do not describe this margin as comfortable.
 Consolidated 2026-10-03 at the user's instruction: *"Are there multiple final artifacts? If so
 consolidate and simplify, remember I don't want back and forth discussions in the report."*
 
-**Superseded by it — and this list is exactly four, verified 2026-10-04:**
-*Splenic Hemangiosarcoma Consolidated Analysis* `3EpReVYXcQCFNUvyeciNwS`, *The Three-Move Plan*
-`8itmt26MXKkkxaqn7LtXBu`, *The Potency Gap* `RacbPzWWofZxkVGXiMvBRt`, *Hemangiosarcoma Escape Routes*
-`RhgKULHsEb3gVtRxsy1Ndv`. Left published, not deleted; deleting is the user's call.
+**The four superseded HSA pages were DELETED on 2026-10-04 at the user's instruction**, after
+their content was verified present in the single report: *Splenic Hemangiosarcoma Consolidated
+Analysis* `3EpReVYXcQCFNUvyeciNwS`, *The Three-Move Plan* `8itmt26MXKkkxaqn7LtXBu`, *The Potency Gap*
+`RacbPzWWofZxkVGXiMvBRt`, *Hemangiosarcoma Escape Routes* `RhgKULHsEb3gVtRxsy1Ndv`. Those URLs are
+dead and unrecoverable — **do not cite them**; anything that referenced them means The Splenic Ledger.
+*Hemangiosarcoma Escape Routes* was read before deletion to confirm the disease (it carried the
+ERstrePs/eVim trials, the 1.7× shortfall, the 0.888 figure, propranolol and toceranib — all present in
+the report).
+
+**One reader-facing HSA artifact now exists.** Verified by listing: 19 artifacts remain on the
+account, of which exactly one is this disease.
 
 **Correction (2026-10-04).** An earlier version of this section also claimed *The Two-Move Plan* ×2,
 *The Durability Gap*, *Four Cells Ten Years*, *Antigen-Independent Immunity Ledger*, *Four Persistence
