@@ -180,3 +180,12 @@ def test_the_correction_itself_is_recorded_rather_than_silently_applied():
     assert "does NOT close the invading edge by itself" in c["consequence"]
     # the measured access result must be explicitly preserved, since only the reading was wrong
     assert "stands untouched" in c["consequence"]
+
+
+def test_the_direction_of_the_rodent_to_dog_access_transfer_is_recorded():
+    """Kido 2022, recovered from a superseded page: 7 of 12 P-gp substrates had dog brain:plasma
+    more than 3x mouse. It scales nothing -- it records that rodent-derived access figures in this
+    project err conservatively, which is part of grading those transfers."""
+    s = pkpd.RODENT_TO_DOG_EFFLUX_DIRECTION
+    assert "UNDER-estimate" in s
+    assert "7 of 12" in s

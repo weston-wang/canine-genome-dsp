@@ -462,7 +462,12 @@ UNIVERSE: tuple[Modality, ...] = (
         "sanctuary-site / local delivery",
         Status.IN_MODEL,
         "intrathecal bolus (obtainable); convection-enhanced delivery; drug-eluting cavity implant; "
-        "focused ultrasound BBB opening",
+        "focused ultrasound BBB opening. Two further device modalities were assessed and are NOT "
+        "scored, each for a stated reason rather than for absent canine data: HISTOTRIPSY, which in "
+        "the first-in-dog brain series could not be delivered transcranially and was applied through "
+        "a cranial defect, and H-FIRE, which needs electrodes placed through craniotomy defects. "
+        "Both are single-session ablative procedures, so neither supplies the continuous presence "
+        "C3 requires, and both are strictly more invasive than the backup that already closes.",
         "Removes penetration as a constraint by construction (access 1.0) where it is used. The "
         "delivery analysis demoted this from a requirement to a BACKUP: the required access is 0.196 "
         "/ 0.0145, which intrinsic molecular penetration already clears, so no procedure is on the "

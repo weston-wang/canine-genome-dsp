@@ -116,3 +116,13 @@ def test_closure_claim_reports_the_availability_split():
     claim = cu.closure_claim(ea.audited_escape_count())
     assert str(len(cu.exists_today_in_model())) in claim
     assert "today" in claim
+
+
+def test_the_two_ablative_device_modalities_are_assessed_with_a_stated_reason():
+    """Histotripsy and H-FIRE were named only on a superseded page. Rule 13: a modality may be set
+    aside for a scientific reason, never for absent canine data -- here, both need a cranial defect
+    in the dog and neither gives continuous presence."""
+    m = next(x for x in cu.UNIVERSE if x.name == "sanctuary-site / local delivery")
+    assert "HISTOTRIPSY" in m.representative and "H-FIRE" in m.representative
+    assert "cranial defect" in m.representative or "craniotomy" in m.representative
+    assert cu.excluded_citing_absent_canine_data() == []

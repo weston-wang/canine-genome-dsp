@@ -938,8 +938,8 @@ them.
 
 The repository previously carried four HTML reports for this disease. They are superseded by
 `the_closed_ledger.html`, which is the single reader-facing version, and were removed from `docs/` in
-the same pass. Their published pages remain live at the URLs below and are **out of date**; they
-predate the growth-bar derivation, the escape audit, the modality-universe enumeration, the
+the same pass. Their published pages have since been deleted (see below); they
+predated the growth-bar derivation, the escape audit, the modality-universe enumeration, the
 deterministic conjunction, the access measurement and both corrections above.
 
 | Removed file | Title | Published page (stale) |
@@ -950,30 +950,58 @@ deterministic conjunction, the access measurement and both corrections above.
 
 `docs/preprint/hypothesis_note.html` is retained: it is the preprint submission text, not a report.
 
-### Their published pages now carry a pointer, not stale numbers
+### Their published pages were pointed on 2026-10-03, then deleted on 2026-10-04
 
-Rather than deleting them (which would break any shared link) or leaving out-of-date figures live, each
-URL was overwritten with a short notice naming what changed and linking to the current analysis. The
-original content of each is recoverable from this repository's git history at the commit before the
-removal.
+First each URL was overwritten with a short notice naming what changed and linking to the current
+analysis, rather than left serving out-of-date figures. The next instruction was that one artifact
+exist, so the pointers were deleted as well — see the section below, which is the live record.
 
-| Published page | Now | Source of original content |
+| Published page | Source of original content |
+|---|---|
+| `MiEzRRPL5JPDs9MuFKMQpX` | `docs/consolidated_report.html`, removed 2026-10-03 |
+| `HUudwjgNWstpG5KS7HrXm2` | `docs/plain_language_report.html`, removed 2026-10-03 |
+| `7Vgtir7sBYTKAvuikfyd68` | earlier draft of the same page |
+| `GTEwrabdtdXQEfa5aWxjJH` | `docs/researcher_brief.html`, removed 2026-10-03 |
+
+### One page, and the nine that were folded in and deleted (2026-10-04)
+
+The instruction was that `the_closed_ledger.html` be the only artifact for this disease, with anything
+else folded in and then deleted. Every page below was read in full first, verified as **this** disease
+(primary intracranial HS in a predisposed breed — not hemangiosarcoma; the two unverified ones both
+name the Pembroke Welsh Corgi and primary intracranial HS outright), checked claim by claim against the
+repository, and deleted. The four pointer pages are gone too: a pointer is a second artifact.
+
+| Deleted page | Was | Verified as this disease by |
 |---|---|---|
-| `MiEzRRPL5JPDs9MuFKMQpX` | pointer (v2) | `docs/consolidated_report.html`, removed 2026-10-03 |
-| `HUudwjgNWstpG5KS7HrXm2` | pointer (v6) | `docs/plain_language_report.html`, removed 2026-10-03 |
-| `7Vgtir7sBYTKAvuikfyd68` | pointer (v11) | earlier draft of the same page |
-| `GTEwrabdtdXQEfa5aWxjJH` | pointer (v3) | `docs/researcher_brief.html`, removed 2026-10-03 |
+| `MiEzRRPL5JPDs9MuFKMQpX` | pointer (consolidated analysis) | title, and the mapping above |
+| `HUudwjgNWstpG5KS7HrXm2` | pointer (the two-move plan) | title |
+| `7Vgtir7sBYTKAvuikfyd68` | pointer (earlier draft of the same) | title |
+| `GTEwrabdtdXQEfa5aWxjJH` | pointer (researcher brief) | title |
+| `58K7cEMatKmzyZ7b7PwgXr` | "The Corgi Brain Tumour Analysis" | masthead: Pembroke Welsh Corgi, primary brain HS |
+| `1zM1Agabh7iu8U7AsLeodX` | "Antigen-Independent Immunity Ledger" | four-cell grid, corgi PIHS niche |
+| `C5X3HgH1yoLtuLKa8KYZxw` | "Four Persistence Mechanisms" | eyebrow: canine HS, corgi niche |
+| `Tj9PqoWceEqWYMMTbgnGok` | "Four Cells, Ten Years" | meta line: Pembroke Welsh Corgi, primary intracranial HS |
+| `XwmUfAtawBZ3yZfFCzcfjH` | "Cobimetinib Escape Audit" | lede: primary intracranial HS in a Pembroke Welsh Corgi |
 
-Pointer source: `docs/superseded/*.html`.
+Their content is recoverable from git history (the four pointers' originals at the commit before
+their removal) and the read HTML of the two largest is in this session's tool-results directory.
 
-### Older pages in the same lineage, not yet pointed
+**Three things lived only on those pages and were folded into code before deletion.** Everything else
+each page asserted was already in the repository, checked term by term — including the cobimetinib
+canine IC50/Cmax pair, the transcranial-ultrasound beagle series, liposomal clodronate, parthenolide,
+CD47/CD204, the resiquimod cavity depot, droppability, ERK2 100% / PI3Kα 99.81% / ABCB1 91.08%,
+temuterkib's non-enhancing measurement, TP53 4/7, SHP2 E76K's >100-fold allosteric loss, the 37.5%
+lomustine backtest and the extinction-state correction.
 
-Reading `MiEzRRPL5JPDs9MuFKMQpX` revealed it was itself a merge of three earlier HS pages, which are
-still live with their own stale figures. They were not touched because the instruction covered the
-four above, and because two of them have not been verified as this disease rather than hemangiosarcoma:
+| Folded in | Where it now lives | Why it is not a new open item |
+|---|---|---|
+| The NK counter-escape: MHC-I down with HLA-E up engaging NKG2A, plus ADAM10/17 shedding of the NKG2D ligands | `escape_audit.A19`, SUBSUMED, maps to route 6 | Routes 6 and A16 are carried by ribociclib + dordaviprone + clodronate, every one antigen-indifferent; the ledger already states that the NK missing-self backstop never fires. An escape from a mechanism no route is closed by adds no requirement. |
+| Kido 2022: 7 of 12 P-gp substrates had dog brain:plasma >3× mouse | `pkpd.RODENT_TO_DOG_EFFLUX_DIRECTION` | Scales nothing. It records that rodent-derived access figures here err conservatively — the direction of a transfer's error is part of grading it. |
+| Histotripsy and H-FIRE as device modalities | `candidate_universe`, under sanctuary-site / local delivery | Assessed with a scientific ground, not absent canine data: both need a cranial defect in the dog, and both are single-session, so neither supplies the continuous presence C3 requires. |
 
-- `58K7cEMatKmzyZ7b7PwgXr` "The Corgi Brain Tumour Analysis" — named as a source of the consolidated page
-- `1zM1Agabh7iu8U7AsLeodX` "Antigen-Independent Immunity Ledger" — named as a source
-- `C5X3HgH1yoLtuLKa8KYZxw` "Four Persistence Mechanisms" — named as a source
-- `Tj9PqoWceEqWYMMTbgnGok` "Four Cells, Ten Years" — the four-cell grid is this branch's framing; unverified
-- `XwmUfAtawBZ3yZfFCzcfjH` "Cobimetinib Escape Audit" — cobimetinib appears in both this branch and HSA; unverified
+Two items were deliberately **not** folded in. The old pages' ten-year *probabilities* (0.973, 0.965,
+0.99, 1.00, and the four-cell grid they sit in) are superseded by rule 12, which makes the headline a
+decidable conjunction rather than odds. And branch E, a hypothesised lung GM-CSF axis, is theoretical
+by its own page's admission, which rule 13 forbids counting.
+
+`docs/superseded/*.html` was removed with the pages it fed.

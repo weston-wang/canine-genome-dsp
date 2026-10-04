@@ -533,6 +533,18 @@ RIBOCICLIB_NONENHANCING_NM: dict[str, tuple[float, str]] = {
     "900 mg QD, mean": (560.0, "PMID 31285369 (Phase 0, recurrent glioblastoma)"),
 }
 
+#: Which way the human/rodent -> dog access transfer is likely to err, measured rather than assumed.
+#: Kido 2022 dosed 19 drugs across mouse, cynomolgus monkey and BEAGLE DOG; of the 12 P-glycoprotein
+#: substrates, SEVEN had brain:plasma ratios more than three-fold HIGHER in dog than in mouse. Every
+#: transfer in this project that borrows a rodent ratio for a P-gp substrate therefore errs
+#: CONSERVATIVELY. It supports a bracket, not a point estimate -- seven of twelve, with no per-molecule
+#: factor -- so no number here is scaled by it; it is recorded because the direction of a transfer's
+#: error is part of grading it, and because this anchor lived only on a superseded page.
+RODENT_TO_DOG_EFFLUX_DIRECTION = (
+    "7 of 12 P-gp substrates: dog brain:plasma >3x mouse (Kido 2022). Rodent ratios UNDER-estimate "
+    "dog for effluxed compounds, so a rodent-derived access figure is a floor, not a best guess."
+)
+
 #: Measured unbound ribociclib in CSF, same Phase 0. The leptomeningeal compartment, directly.
 RIBOCICLIB_CSF_NM = 374.0
 #: Measured unbound ribociclib in ENHANCING tumour -- the extra-axial/blood-side analogue.

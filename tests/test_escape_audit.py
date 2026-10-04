@@ -48,3 +48,15 @@ def test_every_candidate_names_a_source_and_a_rationale():
     for c in ea.CANDIDATES:
         assert c.rationale.strip()
         assert c.mechanism.strip()
+
+
+def test_the_nk_counter_escape_recovered_from_a_deleted_page_is_retained():
+    """A19. It was enumerated only on a superseded published page; when that page was deleted the
+    mechanism would have left the record with it. It is SUBSUMED rather than open because routes 6
+    and A16 are carried by antigen-indifferent agents -- an escape from a mechanism no route is
+    closed by adds no requirement."""
+    a19 = next(c for c in ea.CANDIDATES if c.tag == "A19")
+    assert a19.outcome is ea.AuditOutcome.SUBSUMED
+    assert a19.maps_to == 6
+    for phrase in ("NKG2A", "HLA-E", "NKG2D", "RECOVERED FROM AN EARLIER PAGE"):
+        assert phrase in a19.mechanism + a19.rationale, phrase

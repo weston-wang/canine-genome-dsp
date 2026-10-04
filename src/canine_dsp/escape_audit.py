@@ -238,6 +238,25 @@ CANDIDATES: tuple[Candidate, ...] = (
         "asymmetry route 5 and core.catalogue already record. Reinforces a known limit; no new "
         "requirement.",
     ),
+    Candidate(
+        "A19", "inhibitory-receptor counter-escape to missing-self recognition",
+        "the tumour loses MHC-I but raises non-classical class I (HLA-E), which engages the "
+        "inhibitory receptor NKG2A and protects the MHC-I-low cell from NK lysis; the backup "
+        "recognition handle is removed in parallel by ADAM10/17 shedding of the NKG2D ligands "
+        "MICA/MICB/ULBP2, which also systemically downregulates NKG2D on the effector",
+        Source.CASE_BIOLOGY, AuditOutcome.SUBSUMED, 6,
+        "RECOVERED FROM AN EARLIER PAGE OF THIS ANALYSIS, which enumerated it against a regimen "
+        "whose brain answer leaned on a missing-self NK term. It was never in this list. It is "
+        "real: HLA-E engaging NKG2A protects MHC-I-low cells and NKG2A blockade restores killing, "
+        "and ligand shedding removes the NKG2D handle that was the stated backstop for MHC-I loss. "
+        "Canine class Ib biology is barely characterised and no canine NKG2A blocker exists, so it "
+        "could not be closed by adding an agent. It is SUBSUMED because the closure no longer "
+        "depends on the mechanism it attacks: routes 6 and A16 are both carried by "
+        "ribociclib + dordaviprone + clodronate, every one antigen-indifferent, and the ledger "
+        "states outright that 'the NK missing-self backstop never fires'. An escape from a "
+        "mechanism no route is closed by adds no requirement -- which is the same reason the "
+        "vaccine and engager classes are excluded for this case.",
+    ),
 )
 
 
