@@ -327,3 +327,51 @@ factor 0.56, plausible but not measured in dogs). It is conservative against obs
 
 So: the B-cell program clears at every bar up to the gross ceiling at both input sets; the T-cell program clears at the central CAR-T inputs up to the ceiling, and at the pessimistic CAR-T inputs only if the bar is at most about 0.10 /day.
 That is a stated boundary, not a re-tuning. `failing()` now returns nothing; `wrongly_reported_as_gaps()` lists the items that pass (no canine CAR-T efficacy, no non-enhancing-lymphoma measurement, no canine engager, MHC loss under a DLA-identical graft, E12).
+
+## H. Is anyone building the near-future agents for dogs, and what closes the cases if not (2026-10-04; /goal: "do 1, and if you can't find them then go back to the drawing board to see if there's other ways to close these")
+
+Sweeps: `docs/universe/SWEEP_dog_programs.md` (programs search), `SWEEP_persistent_graft.md`, `SWEEP_regrade.md` (partial: rate-limited), `SWEEP_sustain.md`. Code: `lymphoma_joint.DOG_STATUS`, `DOG_PROGRAM_PROGRAMS`, `dog_program_gaps`; `lymphoma_sustained.py`.
+
+### H.1 Program search (item 1). Result: only the B-cell CAR-T has a dog program; the engager, CD7/CD5 CAR-T and the spinal-fluid route do not (not found)
+
+| agent | dog status found | source quality |
+|---|---|---|
+| canine CD3 engager (CD3xCD20) | **NOT FOUND.** Only an anti-canine CD3 mAb (Front Vet Sci 2025, "could serve" for bispecifics) and an AKC-CHF grant for BiTE-redirected antiviral T cells in T-cell malignancies (2022-25, outcome unpublished). A canine NK engager (TriKE, B7-H3, sarcoma) is in dogs, but it engages NK cells | institutional page, grant snippet |
+| canine CAR-T, B-cell | **Program active**: Penn autologous CD20 CAR-T trial (7 dogs reported; did not expand or persist); the in-vitro/mouse fix is human 4-1BB-CD3z (PMID 41376156); tandem CD19/CD20 is preclinical with a stated dog-trial intent (PMID 42480604); LEAH Labs xenogeneic CAR-T (NSF SBIR) is **on hold** on both its Missouri and Minnesota pages | peer-reviewed + institutional pages |
+| canine CD7/CD5 CAR-T (T-cell) | **NOT FOUND**; CD5 clones exist but CD5 loss is the commonest aberrancy in canine T-cell lymphoma (310 cases) | PubMed + web |
+| spinal-fluid (CSF) CAR-T or antibody in dogs | **NOT FOUND**; the only canine intracranial CAR-T trial (CSU/CU, glioma, with verdinexor) is intratumoral | institutional page |
+| in-vivo CAR-T in dogs | **NOT FOUND** (NHP and human first-in-human are real); mRNA-LNP reaches canine brain tumour (PMID 41218853) | PubMed |
+| allogeneic NK cells in dogs | Phase 1 done (3 dogs, no GVHD) | preprint, Vet Comp Oncol |
+| licensing calibration | Tanovea conditional 2016 to full 2021 (4.6 y); Laverdia 2021 to 2026 (5.4 y); Oncept 2007 to 2010 (3 y). The search agent's judgement: at least 7-10 years to a licence for an agent not yet built; 2-4 years to research-use build | FDA / company filings |
+
+So "near-future for dogs" is supported for the **B-cell CAR-T only**. For the engager, CD7/CD5 CAR-T and the CSF route what is supported is human clinical-stage evidence for the class, not a canine program. Veterinary trials do not sit on ClinicalTrials.gov, so absence from it means little; the institutional pages and grants were searched instead.
+
+**What the B-cell case needs from agents that have a dog program** (`DOG_PROGRAM_PROGRAMS["B"]`; no engager, no CSF route): anti-CD20 antibody, hydroxychloroquine, verdinexor, matched transplant, oral cytarabine, and a systemic CAR-T. It clears body and brain from CAR-T kill 0.12 /day (central 0.35 also survives halving) but is not fault tolerant: the CAR-T is load-bearing.
+
+### H.2 Drawing board: other ways to close the open rows
+
+| route | evidence | closes? |
+|---|---|---|
+| **Persistent graft-versus-lymphoma** after day 166 (the donor immune system is lifelong) | Dog: stable full chimerism and no relapse after day 268 in 8 dogs to 4+ years = a hold or extinction, rate not separable; CML: BCR-ABL transcripts held for 10+ years (PMID 23333776). Contradicted: T-PLL relapsed at 12, 59, 84 months with full donor chimerism (PMID 32259827); allo-ALL CNS relapse 4-5% regardless of conditioning; donor DLI into mixed-chimeric dogs does nothing unless sensitised. Bracket: human leukaemia hazard decline implies a net 0.0008-0.004 /day | **No.** The model needs an effective persistent kill of about 0.12 /day (brain, B-cell) or 0.06 /day (T-cell body) to clear the dormant progenitor; the bracket is 30 to 150 times lower. The graft holds, it does not clear |
+| **Re-graded existing dog agents** (rabacfosadine, lomustine, L-asparaginase) | Rabacfosadine: acts on dividing cells (resting lymphocytes 127x less sensitive, so dormant kill 0.003-0.02 /day), dCK-independent (GMP-kinase route), CSF access not found, pulmonary fibrosis 4%. Lomustine: CSF radioactivity >=50% of plasma (human label), derived kill 0.004-0.04 /day, dormant-cell kill not shown (mouse HSC data negative), cumulative hepatotoxicity. L-asparaginase: enzyme, not pumped, depletes CSF asparagine in humans, but kill is cytostatic-then-apoptotic and dormant-cell evidence is negative (CML stem-like cells not killed); outcome-only rate 0.03-0.05 /day | **No**, none kills dormant cells; they add bulk coverage only. The HD-methotrexate, intrathecal cytarabine and other regrades did not finish (rate limit) |
+| **Sustain an existing agent for years** | E5 is cleared by a pump-independent agent that is present long enough, because the dormant cells wake slowly and are killed once awake (the earlier "longer dosing does not close the brain" was tested only to 730 days; that statement is withdrawn). B-cell brain: oral cytarabine ocfosfate sustained about **1,500 days** (4.1 y) at a time-average CSF level of 0.3 uM; the others at their documented windows. Required duration is set by the swept cell-switching rate (383 days if cells switch at 0.1 /day or faster) | **Conditionally, B-cell brain only.** See H.3 |
+| **T-cell body** | Verdinexor sustained at least about 170 days closes it with the other agents at their windows (documented continuous use: 17 months in one dog; partial responses lasting 246 and 354 days; the label is licensed for continuous twice-weekly dosing) | **Yes, conditionally**: verdinexor for about 6 months |
+| **T-cell brain** | Thiotepa (115-day course) closes the dCK-loss lineage (E2) in the brain, but the dormant lineage then needs oral cytarabine for about 8 years in T-cell disease (lower T-cell CSF kill) | **No** from existing agents. Leads: hydroxyurea (dCK-independent; dog on continuous dosing >= 448 days; CSF penetration not found), procarbazine (50 dogs on a continuous regimen, CSF not found) |
+
+### H.3 The sustained-cytarabine route, graded (rule 11)
+
+- **Correction found while grading it.** The "CSF 1.0-3.6 uM" for oral cytarabine ocfosfate that this record carried as measured (and used as the kill-rate set-point) is the product of a trough CSF:serum ratio (0.54-1.2) and a PEAK serum value (1.88-2.98 uM). The directly measured CSF values in the paper (PMID 37670479, 4 healthy dogs, 7 daily doses) are troughs of **0.04-0.27 uM**. The time-average CSF level is derived at about **0.3-1.4 uM** (AUC/24 h x accumulation index 2.1 x CSF:serum; no CSF sample was taken at the peak). The model now uses 0.3 uM (`OCFOSFATE_CSF_NM`), which lowered the oral-cytarabine kill rate 2.2-fold. Effect: the T-cell near-future program is no longer fault tolerant at the pessimistic inputs (intrathecal cytarabine is load-bearing); the B-cell program is unchanged.
+- **How the closure depends on the CSF level.** Oral-cytarabine kill scale x1.0 / x0.5 / x0.3 / x0.2 / x0.15 / x0.1 needs 1,468 / 1,504 / 1,577 / 1,848 / 4,166 days / does not close. The route closes only if the brain kill reaches about 0.1 /day (a CSF time-average of about 0.11 uM); the measured troughs (0.04-0.27 uM) straddle that and the derived time-average (0.3-1.4 uM) is above it, but **no CSF time-average has been measured**.
+- **Sustainability.** Continuous ocfosfate for years has no source. Human use is intermittent (10-14 days per 28; PMIDs 9766508, 12646944, 15550587); at 600 mg/day 25-60% stop within a year for cumulative GI or marrow toxicity; at the label dose (100-200 mg/day) the longest course found is 2 years of maintenance (PMID 25652695, one patient) and at least 18 months continuous in one advanced-CML patient (abstract). Dogs: only 7 daily doses (all 3 dogs had grade 1 neutropenia and thrombocytopenia within the week); pulsed IV cytarabine 600 mg/m2 every 3-6 weeks for 24 months or more in neurological disease with no serious adverse events (PMID 41742567). An intermittent 14-on/14-off schedule stretches 1,500 days to roughly 2,000-2,900 calendar days (scaling assumed). Grade: **ASSUMED** beyond about 2 years; CONTRADICTED for continuous dosing at 600 mg/day. Availability for dogs: research import from Japan only.
+- **Verdict.** This is a route to a testable condition, not a closure: it needs (i) a CSF time-average measurement in dogs on the intended schedule and (ii) a multi-year intermittent-tolerability study. Neither exists; both are cheap relative to building a CAR-T. It is **not** counted as closing the B-cell brain.
+
+### H.4 Where each case stands (the decidable list)
+
+| case | closed by agents that exist today? | closes through | still depends on |
+|---|---|---|---|
+| B-cell body | **Yes** | anti-CD20 + verdinexor + matched transplant + oral cytarabine (day 74) | a DLA-identical donor |
+| B-cell brain | No | (a) sustained oral cytarabine, about 1,500 d, or (b) the B-cell CAR-T that has a dog program (kill >= 0.12 /day) | (a) CSF time-average >= ~0.11 uM (unmeasured) and multi-year tolerability (assumed); (b) dog CAR-T expansion (failed in 7 dogs; fix shown in vitro only) |
+| T-cell body | No | verdinexor sustained >= ~170 d | verdinexor continuous use past 17 months not documented (not needed beyond 6) |
+| T-cell brain | No | only CD7/CD5 CAR-T (+ thiotepa course for E2) | **no dog program found for CD7/CD5 CAR-T**; the CSF route is not built either |
+
+The engager and the CSF route are **not needed** for the B-cell case. The engager has no dog program found; it stays in the near-future program as an additional independent route labelled "class clinical-stage in humans; canine version not started".
