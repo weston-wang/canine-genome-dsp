@@ -121,3 +121,60 @@ def minimal_window_with_rt(ip: str, prefixes, comp: str, efolds: float, *, lo: i
         else:
             lo = mid
     return hi
+
+
+# --- intrathecal methotrexate (docs/LYMPHOMA_UNIVERSE.md section J) -----------------------------------------------------------------------
+from .core.lymphoma_toxicity import Organ as _O, ToxicityProfile as _P            # noqa: E402
+from .core.regimen import Agent as _Agent, Axis as _Axis, Layer as _Layer          # noqa: E402
+
+IT_MTX = "intrathecal methotrexate (repeated)"
+#: Not a pump substrate in the CSF (peak 423 uM after 6 mg, PMID 2809687, saturates efflux), dCK-independent, access 1.0 (given into the
+#: compartment), acts on cycling cells only. Canine lymphoma-line IC50 2-3 nM (secondary citation of PMID 28992489; ID50 28-122 nM in older lines,
+#: PMID 6109397). Human CSF kinetics after 6 mg: 423 uM peak, 4.6 uM at 24 h, 1.05 uM at 48 h, half-life 5.7 h (PMID 2809687); dog cisternal
+#: terminal CSF half-life 5.2 h (PMID 581360). Derived time-averaged kill for weekly dosing 0.2-0.7 /day (0.25-0.58 after a 3.4x pulse penalty,
+#: PMID 9920857); every second week about half of that. The default below is 0.12 /day (about every 2-3 weeks), under the weekly range.
+IT_MTX_MEAN_KILL_DEFAULT = 0.12
+PROFILES[IT_MTX] = _P(_O.CNS_LOCAL, 0.5, False,
+                      "chemical arachnoiditis, leukoencephalopathy (dose-dependent; with whole-brain radiation and high-dose methotrexate 29% at 2 y, "
+                      "IT methotrexate the only independent risk factor, HR 4.5, PMID 39269476); 1 seizure in 112 dogs and 8 cats on IT methotrexate + cytarabine",
+                      source="PMIDs 25041580 (dogs), 39269476, 2809687, 581360, 37732143; budget partly ASSUMED; repeated dosing beyond 6 doses in a dog not found.",
+                      sustainable_days=3650.0, hard_cap_days=None, reversible=True)
+G.AVAILABILITY[IT_MTX] = G.OFF_LABEL
+
+
+def it_mtx_agent(mean_kill: float = IT_MTX_MEAN_KILL_DEFAULT):
+    return _Agent(IT_MTX, _Axis.CYTOTOXIC, _Layer.RECEPTOR, mean_kill, 1.0, 1.0, True, division_gated=True, efflux_substrate=False,
+                  potency_evidence=("DERIVED: canine lymphoma-line IC50 2-3 nM (secondary citation) against the human and dog CSF methotrexate kinetics "
+                                    f"after 6 mg / 2.5 mg intrathecal doses; time-averaged kill {mean_kill:.2f} /day. Cycling cells only."),
+                  note="Division-gated; defeated by loss of folate transport (E9) at low CSF levels, but the CSF peak is 100,000 times the IC50.")
+
+
+def clock_program(ip: str, prefixes, comp: str, *, rt_efolds: float = 0.0, it_mtx_kill: float = 0.0, windows: dict | None = None,
+                  kill: float = J.CENTRAL["kill"], duty: float = J.CENTRAL["duty"]):
+    """Strict clock verdict for a program plus optional radiation course and repeated intrathecal methotrexate."""
+    pools = J._pools(ip, kill, duty)
+    esc = J._escapes(ip)
+    with with_windows(windows or {}):
+        reg = [pools[comp][J._resolve(p, pools)] for p in prefixes]
+        if rt_efolds > 0.0:
+            reg.append(rt_agent(ip, comp, rt_efolds))
+        if it_mtx_kill > 0.0:
+            reg.append(it_mtx_agent(it_mtx_kill))
+        ev = G.evaluate_best_schedule(reg, esc, compartment=comp)
+        return ev.horizon_strict.cure_inside_window, ev.horizon_strict.verdict()
+
+
+def minimal_it_mtx_window(ip: str, prefixes, comp: str, *, rt_efolds: float = 0.0, it_mtx_kill: float = IT_MTX_MEAN_KILL_DEFAULT,
+                          lo: int = 84, hi: int = 5475, step: int = 30):
+    """Smallest window (days) of repeated intrathecal methotrexate at which program (+ radiation) clears `comp`; None if even `hi` fails."""
+    def ok(d):
+        return clock_program(ip, prefixes, comp, rt_efolds=rt_efolds, it_mtx_kill=it_mtx_kill, windows={IT_MTX: d})[0]
+    if not ok(hi):
+        return None
+    while hi - lo > step:
+        mid = (lo + hi) // 2
+        if ok(mid):
+            hi = mid
+        else:
+            lo = mid
+    return hi

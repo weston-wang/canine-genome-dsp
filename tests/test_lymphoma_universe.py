@@ -355,3 +355,37 @@ def test_t_cell_body_closes_with_radiation_free_existing_agents_after_about_six_
     assert 100 <= S.minimal_window_with_rt("T", S.EXISTING["T"], SYSTEMIC, S.rt_efolds_in_vivo("1771 (median)")) <= 250
     for ln in S.RT_EFOLDS_IN_VITRO:
         assert S.minimal_window_with_rt("T", S.EXISTING["T"], CNS, S.rt_efolds_in_vivo(ln)) is None
+
+
+# --- intrathecal methotrexate closes the T-cell brain (/goal 2026-10-05) ------------------------------------------------------------------
+
+def test_t_cell_brain_closes_with_radiation_plus_repeated_intrathecal_methotrexate_for_about_a_year_with_matched_transplant():
+    """Existing T-cell program (matched-donor transplant, verdinexor, ...) at documented windows + a 23.4 Gy course + repeated intrathecal methotrexate
+    (mean kill 0.12 /day, about every 2-3 weeks). The binding quantity is the duration of the methotrexate: about 400 days at the median canine line,
+    840 days at the most resistant, 230 days at the most sensitive, about 1,350 days with no radiation; and it needs a mean kill of at least ~0.1."""
+    from canine_dsp import lymphoma_sustained as S
+    from canine_dsp.core.lymphoma_catalogue import CNS
+    prog = S.EXISTING["T"]
+    med = S.minimal_it_mtx_window("T", prog, CNS, rt_efolds=S.rt_efolds_in_vivo("1771 (median)"))
+    res = S.minimal_it_mtx_window("T", prog, CNS, rt_efolds=S.rt_efolds_in_vivo("CLL1390 (most resistant)"))
+    sen = S.minimal_it_mtx_window("T", prog, CNS, rt_efolds=S.rt_efolds_in_vivo("CLBL1 (most sensitive)"))
+    none = S.minimal_it_mtx_window("T", prog, CNS)
+    assert 330 <= med <= 470 and 750 <= res <= 950 and 180 <= sen <= 280 and 1200 <= none <= 1500
+    assert S.minimal_it_mtx_window("T", prog, CNS, rt_efolds=S.rt_efolds_in_vivo("1771 (median)"), it_mtx_kill=0.06) is None
+
+
+def test_the_transplant_is_load_bearing_for_the_methotrexate_route():
+    """Without the matched-donor transplant (which clears the remaining lineages in its window) radiation + methotrexate alone does not close it in a credible time."""
+    from canine_dsp import lymphoma_sustained as S
+    from canine_dsp.core.lymphoma_catalogue import CNS
+    prog = tuple(p for p in S.EXISTING["T"] if p != "allogeneic DLA")
+    w = S.minimal_it_mtx_window("T", prog, CNS, rt_efolds=S.rt_efolds_in_vivo("1771 (median)"))
+    assert w is None or w > 3000
+
+
+def test_b_cell_brain_also_closes_in_about_a_year_with_the_same_methotrexate_route():
+    """A much shorter alternative to the 2.7-3.4 years of oral cytarabine."""
+    from canine_dsp import lymphoma_sustained as S
+    from canine_dsp.core.lymphoma_catalogue import CNS
+    w = S.minimal_it_mtx_window("B", S.EXISTING["B"], CNS, rt_efolds=S.rt_efolds_in_vivo("1771 (median)"))
+    assert 330 <= w <= 470

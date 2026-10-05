@@ -405,3 +405,38 @@ A 23.4 Gy course delivers 1.71 / 3.18 / 7.05 e-folds in vitro for the most resis
 - The B-cell case no longer needs a CAR-T, an engager or a spinal-fluid route, and the T-cell body no longer needs one either. They remain additional, independent routes (sections E, G, H), not requirements.
 - The T-cell brain is the one case that stays open from existing agents, and it is stated as an open quantity (primary canine T-lymphoma radiosensitivity; toxicity budget), not as "a future program will solve it".
 - Two inputs carry the B-cell brain: radiation e-folds on the dormant progenitor (a TRANSFER from lymphoid and stem-cell radiobiology, not canine E5 data) and multi-year oral cytarabine tolerability (ASSUMED beyond about 2 years). If the sensitive-line value holds, the sustained window drops from 975 to 250 days (8 months), inside the human maintenance experience.
+
+## J. The T-cell brain closes with an existing combination: radiation + repeated intrathecal methotrexate + matched-donor transplant (2026-10-05; /goal: "look broader to close the T-cell brain. Do not stop until you found something. Something being worked on actively is acceptable. Purely theoretical from you is not")
+
+Sweeps (four agents): `SWEEP_tcell_agents.md` (T-cell-active agents), `SWEEP_brain_access.md` (access methods in dogs), `SWEEP_wake_dormant.md` (waking dormant cells), `SWEEP_xpo1_cns.md` (verdinexor CNS), `SWEEP_nm600_itmtx.md` (a radiopharmaceutical now in dogs, and intrathecal methotrexate). Code: `lymphoma_sustained.py` (`it_mtx_agent`, `clock_program`, `minimal_it_mtx_window`); tests in `tests/test_lymphoma_universe.py`.
+
+### J.1 What the broad sweep found
+| lead | actively worked on? | CNS evidence | verdict |
+|---|---|---|---|
+| **Verdinexor brain access** (the model had an unsourced 0.05) | licensed for dogs; in the CSU/CU canine glioma trial (given at home twice weekly until progression) | selinexor (same chemical series; verdinexor is slightly more lipophilic, lower polar surface area) brain:plasma **0.60-0.72** at an intact barrier in monkey, rat and mouse (PMID 27323910, full text); human enhancing glioblastoma tumour:plasma 0.09 (0.06-0.19; PMID 34728525, barrier disrupted, timing mismatch possible); verdinexor not a canine P-gp substrate (PMID 36924353); CNS signs in the dog field study (tremor 11%, ataxia 6%, convulsion 4%) | access **0.6 TRANSFERRED** (floor 0.09); helps but does not close alone |
+| **Intrathecal methotrexate** | routine in dogs (PMID 25041580, 112 dogs and 8 cats, 2.5 mg + cytarabine 100 mg flat dose; 30022475 CNS lymphoma in 18 dogs); the same agent is the standard CNS prophylaxis in human T-ALL (CNS relapse 1.5% in 598 children, PMID 31657981) | human CSF 423 uM peak, 4.6 uM at 24 h, 1.05 uM at 48 h after 6 mg (PMID 2809687); dog cisternal CSF half-life 5.2 h (PMID 581360); canine lymphoma-line IC50 2-3 nM (secondary citation of PMID 28992489) | **closes the T-cell brain with the combination below** (derived mean kill 0.2-0.7 /day weekly) |
+| 90Y-NM600 (targeted radiopharmaceutical) | **in dogs with peripheral T-cell lymphoma now** (UW-Madison, page-level) | two of four treated dogs developed brain metastases invisible on the earlier PET; poor intact-barrier uptake; human 124I-CLR1404 shows no normal-brain uptake (PMID 28913154) | **not credited for the CNS** (body marrow-dose-limited); useful for the body |
+| Focused ultrasound BBB opening | in research | dogs: one safety study (PMID 28912896, 10 beagles, no drug level); human gains 1.5-8x focal | no canine drug-delivery data; not credited |
+| Osmotic BBB disruption + intra-arterial MTX | human PCNSL (PMID 19451444: ORR 82%, 25% alive at 8.5 y) | dog mechanism 1980s | not veterinary practice; not credited |
+| Plerixafor / G-CSF to wake dormant cells | trials in AML | AML null to modest (PMIDs 28282031, 41980027); no lymphoma priming data | not credited |
+| JAK1 / ITK / PI3K / HDAC / EZH2 inhibitors for T-cell lymphoma (golidocitinib, soquelitinib in dogs with T-cell lymphoma, valemetostat, duvelisib) | phase 2-3 in humans; soquelitinib 3 dogs (1 CR, 2 PR) | none has measured CNS access and a derivable kill | not credited (soquelitinib and oclacitinib are the leads for a CSF measurement) |
+
+### J.2 The program and the numbers (every part exists; mean kill of the intrathecal methotrexate 0.12 /day, about every 2-3 weeks, below the derived weekly range 0.2-0.7)
+**T-cell brain:** the T-cell program at its documented windows (matched-donor transplant, prednisolone, hydroxychloroquine, verdinexor, romidepsin, oral cytarabine) **plus** a 23.4 Gy whole-brain or craniospinal course **plus** intrathecal methotrexate. The model clears every lineage when the methotrexate is continued for:
+
+| radiation in vivo (e-folds) | no radiation | 0.9 (most resistant line) | 1.67 (median line) | 3.71 (most sensitive line) |
+|---|---|---|---|---|
+| methotrexate window, mean kill 0.12 /day | 1,346 d | 841 d | **399 d** | 231 d |
+| mean kill 0.20 /day (about weekly) | 1,094 d | 693 d | 336 d | 231 d |
+
+The transplant is load-bearing (without it the window exceeds 4,000 days), and the methotrexate must reach a mean kill of about 0.1 /day (every four weeks or less often fails at 0.06 unless verdinexor reaches the brain at 0.3 or more, when it closes in about 800 days). Verdinexor and oral cytarabine are not needed at all for this closure. **B-cell brain** closes the same way, in 399 / 841 / 168 days at the median / most resistant / most sensitive line, which replaces the 2.7-3.4 years of oral cytarabine in section I with about 13 months and 28 to 36 methotrexate doses (the human median is 46 punctures).
+
+### J.3 What this rests on, and what could break it (rule 11 grading)
+- Derived, not measured in dogs: the methotrexate kill (IC50 is a secondary citation; the dog CSF volume is taken equal to the human apparent volume; the CSF tail beyond 48 h is extrapolated). Dog repeated dosing beyond 6 doses has no source; no Ommaya reservoir use in dogs was found.
+- **It acts on cycling cells in the CSF space and the perivascular spaces, not deep parenchyma.** The model credits the full compartment. At half the effective kill (0.06) the route needs verdinexor at brain access 0.3 or more (800 days); the radiation covers the parenchyma. This is the weakest assumption.
+- **Neurotoxicity is the real limiter:** leukoencephalopathy reached 29% at 2 years with high-dose methotrexate plus whole-brain radiation, and intrathecal methotrexate was the only independent risk factor (HR 4.5, dose-dependent; PMID 39269476). The model's budget (0.5 of the local CNS axis, staging with the radiation course) does not capture a late white-matter risk; no canine series of whole-brain radiation plus repeated intrathecal methotrexate exists.
+- Radiation e-folds on the dormant cells are a transfer (section I); with no radiation the window is 3.0-3.7 years.
+- This does not depend on any unbuilt product, a CAR-T, an engager, or the verdinexor brain-access value.
+
+### J.4 What is superseded
+Section I.3/I.4's "T-cell brain: no program from existing agents closes it" and section H.4's T-cell brain row ("only CD7/CD5 CAR-T"). Both were true only because intrathecal methotrexate was never in the model (the model carried an ASSUMED-grade intrathecal cytarabine, which a dCK-loss lineage defeats).
