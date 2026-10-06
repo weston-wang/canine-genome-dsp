@@ -178,3 +178,120 @@ def minimal_it_mtx_window(ip: str, prefixes, comp: str, *, rt_efolds: float = 0.
         else:
             lo = mid
     return hi
+
+
+# --- lawful availability for a pet dog (docs/LYMPHOMA_UNIVERSE.md section K) ---------------------------------------------------------
+# US framework (21 CFR Part 530, from AMDUCA 1994): extra-label use is permitted for FDA-APPROVED new animal drugs and FDA-APPROVED
+# human drugs, by or on the lawful order of a licensed veterinarian within a valid veterinarian-client-patient relationship. It does NOT
+# make an unapproved drug lawful, so a drug approved only in a foreign country has no extra-label route. That single rule removes two
+# agents the earlier programs leaned on (oral cytarabine ocfosfate, Japan-only; the canine anti-CD20 antibody, investigational).
+APPROVED_ANIMAL, APPROVED_HUMAN_ELU, PROCEDURE = "approved animal drug", "approved human drug, extra-label", "procedure"
+NO_US_APPROVAL, INVESTIGATIONAL, NOT_A_PRODUCT = "no US approval", "investigational only", "not a product"
+LAWFUL = (APPROVED_ANIMAL, APPROVED_HUMAN_ELU, PROCEDURE)
+
+#: name prefix -> (status, authority / note). Checked 2026-10-06; see docs/universe/SWEEP_legal.md.
+LEGAL_STATUS = {
+    "verdinexor": (APPROVED_ANIMAL, "Laverdia-CA1 (verdinexor tablets): FDA conditional approval Jan 2021, FULL approval Jan 2026; "
+                                    "label is oral twice weekly at home, >=72 h apart, for canine lymphoma -- so sustained dosing is ON-LABEL"),
+    "prednisolone": (APPROVED_ANIMAL, "veterinary prednisolone products are approved for dogs"),
+    "rabacfosadine": (APPROVED_ANIMAL, "Tanovea (NADA 141-545), approved for canine lymphoma"),
+    "intrathecal methotrexate": (APPROVED_HUMAN_ELU, "methotrexate injection, PRESERVATIVE-FREE: FDA-approved and INTRATHECAL is a labelled human "
+                                                     "route (the preserved formulation contains benzyl alcohol and must never be given intrathecally). "
+                                                     "Extra-label in the dog under 21 CFR 530; intrathecal methotrexate + cytarabine is reported in 112 dogs (PMID 25041580)"),
+    "cytarabine CRI": (APPROVED_HUMAN_ELU, "cytarabine injection is FDA-approved; infusion and subcutaneous use in dogs is published (PMIDs 31769013, 22943060)"),
+    "intrathecal cytarabine": (APPROVED_HUMAN_ELU, "as above, given intrathecally extra-label (PMID 25041580)"),
+    "hydroxychloroquine": (APPROVED_HUMAN_ELU, "FDA-approved human generic"),
+    "romidepsin": (APPROVED_HUMAN_ELU, "FDA-approved; the relapsed/refractory PTCL indication was withdrawn in 2021-22 after Ro-CHOP missed its endpoint, "
+                                       "but the drug remains approved and marketed for cutaneous T-cell lymphoma, so it is still an approved human drug"),
+    "belinostat": (APPROVED_HUMAN_ELU, "FDA-approved for PTCL"),
+    "lomustine": (APPROVED_HUMAN_ELU, "FDA-approved (Gleostine); routine in veterinary oncology"),
+    "doxorubicin": (APPROVED_HUMAN_ELU, "FDA-approved; standard in canine CHOP"),
+    "vincristine": (APPROVED_HUMAN_ELU, "FDA-approved; standard in canine CHOP"),
+    "cyclophosphamide": (APPROVED_HUMAN_ELU, "FDA-approved; standard in canine CHOP"),
+    "high-dose methotrexate": (APPROVED_HUMAN_ELU, "FDA-approved"),
+    "high-dose thiotepa": (APPROVED_HUMAN_ELU, "thiotepa is FDA-approved; the regimen is extra-label and needs a stem-cell graft"),
+    "venetoclax": (APPROVED_HUMAN_ELU, "FDA-approved"),
+    "panobinostat": (APPROVED_HUMAN_ELU, "FDA-approved"), "vorinostat": (APPROVED_HUMAN_ELU, "FDA-approved"),
+    "bortezomib": (APPROVED_HUMAN_ELU, "FDA-approved"), "zanubrutinib": (APPROVED_HUMAN_ELU, "FDA-approved"),
+    "acalabrutinib": (APPROVED_HUMAN_ELU, "FDA-approved"),
+    "craniospinal radiotherapy": (PROCEDURE, "external-beam radiotherapy at a veterinary radiation-oncology centre"),
+    "half-body irradiation": (PROCEDURE, "as above"),
+    "total body irradiation": (PROCEDURE, "conditioning for transplant"),
+    "allogeneic DLA": (PROCEDURE, "allogeneic haematopoietic cell transplant from a DLA-identical littermate; performed at referral centres, "
+                                  "not a drug approval question; needs a matched donor (about 25% per littermate)"),
+    # --- NOT lawfully available as a routine therapy -------------------------------------------------------------------------------
+    "cytarabine ocfosfate": (NO_US_APPROVAL, "Starasid is approved only in JAPAN. 21 CFR 530 extra-label use covers only FDA-APPROVED animal or human "
+                                             "drugs, so a Japan-only product has no extra-label route in the US. REMOVED from the closing programs."),
+    "anti-CD20 monoclonal antibody": (INVESTIGATIONAL, "Blontress (AT-004) was conditionally licensed 2012, fully licensed 2015 and DISCONTINUED 2017; "
+                                                       "the Elanco 1E4 antibody is investigational. No licensed canine anti-CD20 product exists. "
+                                                       "REMOVED from the closing programs."),
+    "CD3xCD20": (NOT_A_PRODUCT, "no canine engager has been built"),
+    "CAR-T": (NOT_A_PRODUCT, "no licensed canine CAR-T; trials only"),
+    "continuous intrathecal cytarabine": (NOT_A_PRODUCT, "the implanted pump regimen is a specification, not a product"),
+    "autologous tumour vaccine": (INVESTIGATIONAL, "APAVAC-type autologous vaccines are not US-licensed"),
+    "dTERT": (INVESTIGATIONAL, "trial vaccine"),
+    "autologous T-cell add-back": (INVESTIGATIONAL, "cell product, not licensed"),
+    "P-gp / TGF-beta": (INVESTIGATIONAL, "no licensed veterinary chemosensitiser"),
+    "CD5/CD52": (NOT_A_PRODUCT, "no such canine product"),
+}
+
+
+def legal_status(name: str):
+    for prefix, v in LEGAL_STATUS.items():
+        if name.startswith(prefix):
+            return v
+    return (None, "not classified")
+
+
+def lawful_pool(ip: str, comp: str) -> dict:
+    """Agents a veterinarian could lawfully obtain and give to a pet dog, at sound evidence grades."""
+    out = {}
+    for a in G.sound_pool(G.available(G.grounded_agents(comp, ip), "any")):
+        if legal_status(a.name)[0] in LAWFUL:
+            out[a.name] = a
+    return out
+
+
+#: Closing programs rebuilt from lawful agents only (docs/LYMPHOMA_UNIVERSE.md section K). Verdinexor is sustained (on-label continuous
+#: twice-weekly dosing); the brain adds one 23.4 Gy course and repeated intrathecal methotrexate.
+LAWFUL_PROGRAMS = {
+    "B": ("hydroxychloroquine", "verdinexor", "allogeneic DLA", "cytarabine CRI (q7d)"),
+    "T": ("prednisolone", "hydroxychloroquine", "verdinexor", "allogeneic DLA", "romidepsin", "cytarabine CRI (q7d)"),
+}
+
+
+def lawful_clock(ip: str, comp: str, *, rt_efolds: float = 0.0, it_mtx_kill: float = 0.0, window: int = 84,
+                 prefixes=None, kill: float = J.CENTRAL["kill"], duty: float = J.CENTRAL["duty"]):
+    """Strict clock verdict for the lawful-only program in one compartment. `window` sustains verdinexor and the methotrexate."""
+    pool = lawful_pool(ip, comp)
+    esc = J._escapes(ip)
+    names = list(prefixes or LAWFUL_PROGRAMS[ip])
+    with with_windows({VERDINEXOR: window, IT_MTX: window}):
+        reg = []
+        for n in names:
+            hit = [v for k, v in pool.items() if k.startswith(n)]
+            if not hit:
+                raise KeyError(f"{n} is not in the lawful pool")
+            reg.append(hit[0])
+        if rt_efolds > 0.0:
+            reg.append(rt_agent(ip, comp, rt_efolds))
+        if it_mtx_kill > 0.0:
+            reg.append(it_mtx_agent(it_mtx_kill))
+        ev = G.evaluate_best_schedule(reg, esc, compartment=comp)
+        return ev.horizon_strict.cure_inside_window, ev.horizon_strict.verdict()
+
+
+def minimal_lawful_window(ip: str, comp: str, *, rt_efolds: float = 0.0, it_mtx_kill: float = 0.0, prefixes=None,
+                          lo: int = 84, hi: int = 5475, step: int = 30):
+    """Smallest sustained window (days) at which the lawful-only program clears `comp`; None if even `hi` fails."""
+    def ok(d):
+        return lawful_clock(ip, comp, rt_efolds=rt_efolds, it_mtx_kill=it_mtx_kill, window=d, prefixes=prefixes)[0]
+    if not ok(hi):
+        return None
+    while hi - lo > step:
+        mid = (lo + hi) // 2
+        if ok(mid):
+            hi = mid
+        else:
+            lo = mid
+    return hi

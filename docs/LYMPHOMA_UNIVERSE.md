@@ -440,3 +440,33 @@ The transplant is load-bearing (without it the window exceeds 4,000 days), and t
 
 ### J.4 What is superseded
 Section I.3/I.4's "T-cell brain: no program from existing agents closes it" and section H.4's T-cell brain row ("only CD7/CD5 CAR-T"). Both were true only because intrathecal methotrexate was never in the model (the model carried an ASSUMED-grade intrathecal cytarabine, which a dCK-loss lineage defeats).
+
+## K. Lawful availability: two load-bearing agents had no legal route, and the programs rebuilt without them still close (2026-10-06; /goal: "I know there's that rule where human meds can be used for pets under exceptions. Make sure the human ones you cited qualify. Also some of these closures seem to be on weak grounds, I need you to look further and truly close these")
+
+Details and sources: `docs/universe/SWEEP_legal.md`. Code: `lymphoma_sustained.LEGAL_STATUS`, `lawful_pool`, `LAWFUL_PROGRAMS`, `lawful_clock`, `minimal_lawful_window`; tests in `tests/test_lymphoma_universe.py`.
+
+### K.1 The rule, and the two agents it removes
+21 CFR Part 530 (from AMDUCA 1994) permits extra-label use of **FDA-approved animal drugs and FDA-approved human drugs**, by or on the order of a veterinarian within a valid veterinarian-client-patient relationship. It does **not** make an unapproved drug lawful. So:
+- **Oral cytarabine ocfosfate (Starasid) is approved only in Japan: no extra-label route in the US.** It carried the B-cell brain closure in section I (2.7-3.4 years of dosing) and appeared in every program since section F.
+- **No licensed canine anti-CD20 antibody exists.** Blontress was licensed in 2015 and **discontinued in 2017**; the Elanco 1E4 antibody is investigational. It carried the B-cell body closure in section F (day 74).
+Both are now recorded as unlawful-for-routine-use and excluded from the programs. This is a correction to sections F through J, not a new gap.
+
+### K.2 The programs rebuilt from lawful agents only, and the result
+Everything below is an FDA-approved animal drug, an FDA-approved human drug used extra-label, or a procedure.
+
+| case | program | the quantity that has to hold |
+|---|---|---|
+| **B-cell body** | hydroxychloroquine + **verdinexor** + matched-donor transplant (with its total-body irradiation) + cytarabine infusion | verdinexor continued **168 days**. Laverdia-CA1's label is continuous twice-weekly dosing until progression, so this is **on-label use of an approved animal drug** |
+| **T-cell body** | the above + prednisolone + romidepsin | verdinexor continued **168 days** (romidepsin and hydroxychloroquine are not load-bearing) |
+| **B-cell brain** | the body program + one **23.4 Gy** whole-brain or craniospinal course + **repeated intrathecal methotrexate** | methotrexate for **420 days** at the median canine radiosensitivity (820 d at the most resistant line, 231 d at the most sensitive, 1,283 d with no radiation) |
+| **T-cell brain** | the T-cell body program + the same radiation course + repeated intrathecal methotrexate | methotrexate for **378 days** (799 / 231 / 1,283 d as above) |
+
+**The methotrexate is indispensable and it is also the best-supported agent legally:** with the radiation course but no methotrexate, neither brain ever clears at any window out to 15 years. Preservative-free methotrexate is FDA-approved **with intrathecal as a labelled human route** (the preserved formulation contains benzyl alcohol and must never be given intrathecally), and intrathecal methotrexate with cytarabine is reported in 112 dogs (PMID 25041580).
+
+### K.3 What still has to be true (unchanged by the legal pass, and not hidden)
+1. The methotrexate kill rate (0.12 /day time-averaged) is **derived**, and its canine IC50 input is a secondary citation. At half that value the brain windows roughly double.
+2. Intrathecal drug reaches the CSF and perivascular spaces, **not deep parenchyma**; the model credits the whole compartment and the radiation course is what covers the parenchyma.
+3. **Late neurotoxicity of whole-brain radiation plus repeated intrathecal methotrexate is the real limiter** (29% leukoencephalopathy at 2 years in a human series, methotrexate the only independent risk factor, HR 4.5, PMID 39269476). No canine series of the combination exists, and the toxicity budget does not model a late white-matter effect. The sweep that would have settled the canine whole-brain dose and its late effects was cut off by a rate limit and is **not finished**.
+4. Radiation e-folds on the dormant cells are transferred from lymphoid and stem-cell radiobiology (section I), not measured on canine E5 cells.
+5. Repeated intrathecal dosing in a dog beyond about 6 doses has no published precedent; the programs need 20-30 doses over 12-14 months.
+6. A DLA-identical littermate donor is required (about 25% per sibling), and the transplant is load-bearing in every case.

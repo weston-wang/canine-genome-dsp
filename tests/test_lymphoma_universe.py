@@ -389,3 +389,42 @@ def test_b_cell_brain_also_closes_in_about_a_year_with_the_same_methotrexate_rou
     from canine_dsp.core.lymphoma_catalogue import CNS
     w = S.minimal_it_mtx_window("B", S.EXISTING["B"], CNS, rt_efolds=S.rt_efolds_in_vivo("1771 (median)"))
     assert 330 <= w <= 470
+
+
+# --- lawful availability for a pet dog (/goal 2026-10-06) --------------------------------------------------------------------------------
+
+def test_the_two_agents_with_no_lawful_route_are_recorded_and_excluded():
+    """21 CFR 530 extra-label use covers only FDA-APPROVED animal or human drugs, so a Japan-only product has no route, and an
+    investigational biologic is not a routine therapy. Both were load-bearing in the earlier programs."""
+    from canine_dsp import lymphoma_sustained as S
+    assert S.legal_status("cytarabine ocfosfate, oral continuous")[0] == S.NO_US_APPROVAL
+    assert S.legal_status("anti-CD20 monoclonal antibody")[0] == S.INVESTIGATIONAL
+    for ip in ("B", "T"):
+        pool = S.lawful_pool(ip, CNS)
+        assert not any("ocfosfate" in n or n.startswith("anti-CD20") for n in pool)
+        assert all(S.legal_status(n)[0] in S.LAWFUL for n in pool)
+
+
+def test_intrathecal_methotrexate_has_the_strongest_legal_footing_of_the_closing_agents():
+    """Preservative-free methotrexate is FDA-approved WITH intrathecal as a labelled human route; verdinexor is an approved ANIMAL drug
+    whose label is continuous twice-weekly dosing, so sustaining it is on-label."""
+    from canine_dsp import lymphoma_sustained as S
+    assert S.legal_status(S.IT_MTX)[0] == S.APPROVED_HUMAN_ELU
+    assert "INTRATHECAL is a labelled human" in S.legal_status(S.IT_MTX)[1]
+    assert S.legal_status("verdinexor")[0] == S.APPROVED_ANIMAL
+    assert "ON-LABEL" in S.legal_status("verdinexor")[1]
+
+
+def test_all_four_cases_close_on_lawful_agents_only():
+    """Body: about 6 months of verdinexor (on-label continuous dosing). Brain: one 23.4 Gy course plus repeated intrathecal methotrexate,
+    for about 420 days (B) and 378 days (T) at the median canine radiosensitivity. The methotrexate is indispensable: with the radiation
+    course but no methotrexate neither brain ever clears."""
+    from canine_dsp import lymphoma_sustained as S
+    from canine_dsp.core.lymphoma_catalogue import CNS, SYSTEMIC
+    med = S.rt_efolds_in_vivo("1771 (median)")
+    for ip, expect in (("B", 420), ("T", 378)):
+        assert 120 <= S.minimal_lawful_window(ip, SYSTEMIC) <= 220
+        got = S.minimal_lawful_window(ip, CNS, rt_efolds=med, it_mtx_kill=S.IT_MTX_MEAN_KILL_DEFAULT)
+        assert abs(got - expect) <= 60, (ip, got)
+        assert S.minimal_lawful_window(ip, CNS, rt_efolds=med) is None            # radiation without methotrexate never clears
+        assert 1100 <= S.minimal_lawful_window(ip, CNS, it_mtx_kill=S.IT_MTX_MEAN_KILL_DEFAULT) <= 1500   # methotrexate without radiation
