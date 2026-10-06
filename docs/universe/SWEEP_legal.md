@@ -35,6 +35,11 @@ B-cell brain in section I, and the anti-CD20 antibody carried the B-cell body in
 (`lymphoma_sustained.lawful_pool`, `LAWFUL_PROGRAMS`) and all four cases still close; see section K.
 
 ## Not checked
-EU and UK: the prescribing cascade (Regulation (EU) 2019/6 Articles 112-114) has an import limb that may permit a product authorised in a
-third country, so cytarabine ocfosfate could have a route there. Not verified, so it is not relied on. DEA scheduling, state practice acts,
+~~EU and UK: the prescribing cascade (Regulation (EU) 2019/6 Articles 112-114) has an import limb that may permit a product authorised in a
+third country, so cytarabine ocfosfate could have a route there.~~ **CORRECTED 2026-10-06** (section L, `SWEEP_import.md`): checked, and
+**the EU has NO route.** Article 112(2) requires a *veterinary* medicinal product authorised in the third country "for the same animal
+species and the same indication" -- cytarabine ocfosfate is a human product, not canine, and is indicated for leukaemia and MDS rather
+than lymphoma, so it fails all three tests. The **UK** does have a route, but not through the cascade either: the cascade limb reaches
+only a *veterinary* product authorised abroad, so the operative provision is Schedule 4 paragraph 7 ("treatment in exceptional
+circumstances"), which says "a medicinal product". DEA scheduling, state practice acts,
 hazardous-drug handling rules for cytotoxics, and compounding from bulk substances (FDA GFI #256) were not examined.

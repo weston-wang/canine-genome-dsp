@@ -560,3 +560,22 @@ So the honest value of the prodrug is one trade for B-cell brain disease: about 
 
 ### L.5 Not checked
 EU member-state named-patient import schemes individually (Regulation (EU) 2019/6 Articles 112-114 were not read verbatim in this pass); Canada's Emergency Drug Release for veterinary drugs; Australia's APVMA permits; Switzerland, South Korea, China; FDA compounding from bulk drug substances (GFI #256) for this specific substance; FDA's Personal Importation Policy as applied to animals; whether any other country authorises cytarabine ocfosfate.
+
+### L.6 Corrections and the four remaining US routes, now closed out
+The full cross-jurisdiction pass (`docs/universe/SWEEP_import.md`) corrects two things stated earlier in this record and closes the routes section K left open.
+
+**Correction 1 — the EU has NO route, where section K said it might.** `SWEEP_legal.md` had recorded that the EU cascade's import limb "may permit" a third-country product. It does not. **Regulation (EU) 2019/6 Article 112(2)** requires a **veterinary** medicinal product authorised in the third country **"for the same animal species and the same indication"**. Cytarabine ocfosfate is a human product, is not authorised for dogs, and is indicated for leukaemia and MDS rather than lymphoma — it fails all three tests. (Article 110 covers immunologicals only; Article 116 is member-state to member-state.) That earlier "may permit" is struck.
+
+**Correction 2 — the UK route is real but the guidance I quoted is withdrawn.** The statutory basis (VMR 2013 Sch 4 para 7 + reg 25(5)) stands, and VMGN No. 5 paragraph 42 expressly addresses "longer term use in a particular animal", but **VMGN No. 5 is marked withdrawn (2013)**, so the scheme mechanics quoted in L.2 should be re-checked against current VMD guidance before anyone relies on them.
+
+**The four US routes section K had not examined, all now closed:**
+1. **Importation by a vet for private practice is expressly barred.** FDA's own import guidance states that unapproved drugs "consigned to veterinarians for use in their private practices … may not be legally imported."
+2. **The Personal Importation Policy does not apply.** It is written for human patients, and **Import Alert 66-40** states that "personal importation is not allowed for unapproved animal drugs."
+3. **Compounding from bulk cannot reach it, and my framing of GFI #256 was wrong.** The bulk-substance lists gate office *stock*, not patient-specific prescriptions, so "is it on the list" was the wrong question. The actual blockers are FD&C Act **502(o)** (the bulk substance must come from an FDA-registered facility; none was found for this substance) and the fact that **making the prodrug from cytarabine is synthesis, not compounding**.
+4. **MUMS / conditional approval exists but needs a sponsor** — the pathway that produced Tanovea for canine lymphoma. That is a drug-development route, not a way to treat a dog next month.
+
+**Canada** is the next-best jurisdiction: the **Emergency Drug Release** scheme lets a vet apply (about 2 business days) but it authorises the *manufacturer* to sell — and cytarabine ocfosfate is not authorised in Canada either (Drug Product Database search returned nothing), as it is not in the US, EU or UK. Japan is the only authorisation anywhere.
+
+**And the decisive pharmacological point: the lawful injectable route reaches the CSF better than the oral prodrug.** Measured CSF cytarabine after intravenous infusion in dogs is **8.3 uM**, against the **derived 0.3-1.4 uM** time-average for the oral prodrug (section K.6). So the prodrug's only real advantage is convenience — a tablet at home with a 23-29 h half-life — not exposure. There is one new canine clinical data point for it (a pet dog with MDS treated in Japan, PMID 15084010), which is worth recording but does not change this.
+
+**Net: the Japan-only prodrug is not needed, not better in the compartment that matters, not lawfully obtainable in the US outside a trial, not obtainable in the EU at all, and is being withdrawn by its maker. It stays out.**
