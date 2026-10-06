@@ -466,3 +466,17 @@ def test_the_brain_closure_has_two_independent_inputs_either_of_which_suffices()
         assert not ok(ip, 0.06, 0.05, 3650)       # neither input adequate -> never clears, even over 10 years
         assert ok(ip, 0.06, 0.30, 730)            # route 2: verdinexor reaches the brain, methotrexate at half
         assert not ok(ip, 0.0, 0.05, 3650)        # radiation alone never clears
+
+
+def test_the_t_cell_radiation_input_was_conservative_because_a_canine_t_cell_line_was_sitting_unlabelled():
+    """OSW was established from a dog with peripheral T-cell lymphoma (PMID 17532464); the radiosensitivity table that supplied the
+    model's lines (PMID 27257868) labels it only "Lymphoid". Using it as the lineage-matched value for T-cell disease gives 2.94 in-vivo
+    e-folds against the 1.67 the earlier T-cell windows used, so those windows were conservative and the matched one is shorter."""
+    from canine_dsp import lymphoma_sustained as S
+    osw = S.rt_efolds_in_vivo("OSW (canine peripheral T-cell lymphoma)")
+    assert 2.8 <= osw <= 3.1
+    assert osw > S.rt_efolds_in_vivo("1771 (median)")
+    with_median = S.minimal_lawful_window("T", CNS, rt_efolds=S.rt_efolds_in_vivo("1771 (median)"),
+                                          it_mtx_kill=S.IT_MTX_MEAN_KILL_DEFAULT)
+    with_osw = S.minimal_lawful_window("T", CNS, rt_efolds=osw, it_mtx_kill=S.IT_MTX_MEAN_KILL_DEFAULT)
+    assert with_osw < with_median and 200 <= with_osw <= 300

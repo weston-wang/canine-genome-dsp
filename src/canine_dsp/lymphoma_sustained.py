@@ -80,11 +80,17 @@ RT_NAME = "craniospinal radiotherapy"
 RT_COURSE_DAYS = 18.0                     # 13 x 1.8 Gy = 23.4 Gy
 RT_DMF_IN_VIVO = 1.9
 #: e-folds of kill from the 23.4 Gy course by canine line (gi.rt_efolds), before the in-vivo factor; resistant / median / sensitive.
+#: OSW is added as the LINEAGE-MATCHED value for T-cell disease: it was established from a dog with peripheral T-cell lymphoma with
+#: oligoclonal TCR-gamma rearrangement (PMID 17532464), which Maeda's table (PMID 27257868) labels only "Lymphoid". It is therefore a
+#: measured canine T-cell lymphoma radiosensitivity, and it is HIGHER than the unlabelled median line the earlier T-cell windows used,
+#: so those windows were conservative. CLBL-1 is verified B-cell; the lineages of 17-71 and CLL-1390 are unverified.
 RT_EFOLDS_IN_VITRO = {"CLL1390 (most resistant)": 1.71, "1771 (median)": 3.18, "CLBL1 (most sensitive)": 7.05}
+RT_EFOLDS_T_LINEAGE = {"OSW (canine peripheral T-cell lymphoma)": 5.58}
 
 
 def rt_efolds_in_vivo(line: str) -> float:
-    return RT_EFOLDS_IN_VITRO[line] / RT_DMF_IN_VIVO
+    table = dict(RT_EFOLDS_IN_VITRO, **RT_EFOLDS_T_LINEAGE)
+    return table[line] / RT_DMF_IN_VIVO
 
 
 def rt_agent(ip: str, comp: str, efolds: float):
@@ -135,9 +141,14 @@ IT_MTX = "intrathecal methotrexate (repeated)"
 #: PMID 9920857); every second week about half of that. The default below is 0.12 /day (about every 2-3 weeks), under the weekly range.
 IT_MTX_MEAN_KILL_DEFAULT = 0.12
 PROFILES[IT_MTX] = _P(_O.CNS_LOCAL, 0.5, False,
-                      "chemical arachnoiditis, leukoencephalopathy (dose-dependent; with whole-brain radiation and high-dose methotrexate 29% at 2 y, "
-                      "IT methotrexate the only independent risk factor, HR 4.5, PMID 39269476); 1 seizure in 112 dogs and 8 cats on IT methotrexate + cytarabine",
-                      source="PMIDs 25041580 (dogs), 39269476, 2809687, 581360, 37732143; budget partly ASSUMED; repeated dosing beyond 6 doses in a dog not found.",
+                      "chemical arachnoiditis; leukoencephalopathy on imaging in 29.2% at 2 y (CI 20.6-38.2) with high-dose methotrexate, "
+                      "intrathecal methotrexate the only independent risk factor (HR 4.50, p<0.001) -- but MOST CASES WERE ASYMPTOMATIC, median onset "
+                      "3.0 months, and whole-brain radiotherapy was NOT a risk factor in that series (PMID 39269476, verified); two prospective cohorts "
+                      "given exactly 23.4 Gy in 13 fractions had no severe white-matter change and stable-to-improved neuropsychology to 36 months "
+                      "(PMIDs 24101038 n=52, 35772168 n=29); 1 seizure in 112 dogs and 8 cats on intrathecal methotrexate + cytarabine",
+                      source="PMIDs 25041580 (dogs), 39269476, 24101038, 35772168, 2809687, 581360, 37732143; budget partly ASSUMED; repeated dosing "
+                             "beyond 6 doses in a dog not found, and 20-30 doses plus 13 radiation anaesthetics carry an unpriced 1.3-6.3% cumulative "
+                             "anaesthetic mortality (PMIDs 18658000, 9657167).",
                       sustainable_days=3650.0, hard_cap_days=None, reversible=True)
 G.AVAILABILITY[IT_MTX] = G.OFF_LABEL
 
