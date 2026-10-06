@@ -500,3 +500,27 @@ The sweep that section K.3 recorded as unfinished is now done (`docs/universe/SW
 **The cost nobody had priced:** 13 radiation fractions plus 20-30 intrathecal doses each need general anaesthesia, carrying **1.3-6.3% cumulative anaesthetic mortality** (PMIDs 18658000, 9657167). Against a 10-year goal that is a real charge on the program and it is not in any toxicity budget. A **single 8 Gy fraction** would give 1.37-3.40 e-folds at a *lower* late-effect dose (40 vs 44.5 Gy-2) with one anaesthetic instead of 13 — derived by extrapolating the fit beyond its range, with no CNS-lymphoma data, so it is a hypothesis to test, not support. **2 x 2 Gy cannot substitute** (0.17-0.67 e-folds).
 
 **Canine precedent for the combination remains thin:** four dogs given intrathecal cytarabine with craniospinal cobalt irradiation in 1984, "marked improvement", no dose and no late follow-up (PMID 6547126). The statement that no canine series of the combination exists survives.
+
+### K.6 The methotrexate derivation re-done from measured canine numbers: the weakest input turns out not to matter
+`docs/universe/SWEEP_itmtx2.md`; code `lymphoma_sustained.dog_csf_volume_ml`, `it_mtx_derived_kill`.
+
+**The canine IC50 is not load-bearing.** Section J's weakest input was a secondary-citation canine methotrexate IC50 of 2-3 nM (the primary, PMID 28992489, is paywalled and could not be opened, so it stays secondary). It does not matter. Canine CSF volume is now **measured** rather than assumed: MRI in 12 dogs of 7.5-35 kg against a phantom accurate to 99.8% gives **total CSF = 1.39 x bodyweight + 17.5 mL** (adjusted r-squared 0.836), so 45 mL in a 20 kg dog. A 2.5 mg intrathecal dose therefore peaks at about **121 uM**, which is 10^3-10^4 times any plausible IC50, and the kill is set by how long the level stays above threshold, not by the IC50. Sweeping the IC50 across its entire range (2.5 nM; the measured human T-ALL anchor 14 nM; a pessimistic 118 nM, measured in older canine lines) moves the time-averaged kill by only **1.6x**:
+
+| dosing interval | kill at IC50 118 nM (pessimistic) | at 14 nM | at 2.5 nM |
+|---|---|---|---|
+| weekly | 0.131 /day | 0.173 | 0.208 |
+| every 2 weeks | 0.065 | 0.087 | 0.104 |
+| every 3 weeks | 0.044 | 0.058 | 0.069 |
+
+**The closure restated so it can be checked against what dogs have tolerated.** Dogs have carried indwelling intraventricular and lumbar catheters to **subcutaneous titanium ports, dosed every other week for 8-11 months, i.e. 20-28 doses** (doi 10.1002/jnr.23423, 10.1016/j.ymgme.2014.09.004) — so the dose count, not the drug, is the practical limit. At the **pessimistic IC50**, every 21 days, with verdinexor brain access 0.30 and the lineage-matched canine radiosensitivity:
+
+| case | interval | window | **intrathecal doses** | inside canine precedent? |
+|---|---|---|---|---|
+| **T-cell brain** | every 21 d | 250 d | **12** | yes, comfortably |
+| **B-cell brain** | every 21 d | 417 d | **20** | yes, at the lower edge |
+| T-cell brain, weekly | every 7 d | 250 d | 36 | above precedent |
+| B-cell brain, weekly | every 7 d | 389 d | 56 | well above precedent |
+
+So the every-three-weeks schedule is both the most conservative on the drug side and the only one inside canine procedural experience, and it closes both brains. The human anchor for repeated dosing is unchanged and specific: in TT16, 598 children received **13-27 intrathecal doses each with no cranial irradiation**, and CNS relapse was 1.5% (T-cell hazard ratio 5.15; 1 of 21 CNS-positive patients relapsed in the CNS).
+
+**The honest residual, which is procedural rather than pharmacological.** Repeated CSF access in dogs is not free: in the port series 2 dogs died of meningitis or hydrocephalus and catheters occluded or migrated; lumbar port patency was 67-86% at 30 days; in 19 dogs given percutaneous cisternal injections 4 times over 4 months there were 5 seizures and **one fatal brainstem haemorrhage**; against that, 0 of 108 diagnostic taps caused deterioration. Ventriculoperitoneal shunts run for years in dogs. Added to the 13 radiation anaesthetics, the program carries a **procedural mortality of a few percent** that no toxicity budget here models. That is now the largest single uncosted risk in the whole project, and it is a reason to prefer the 12-dose T-cell schedule and to test a single 8 Gy fraction in place of 13.

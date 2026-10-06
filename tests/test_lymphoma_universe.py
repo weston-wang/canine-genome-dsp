@@ -480,3 +480,57 @@ def test_the_t_cell_radiation_input_was_conservative_because_a_canine_t_cell_lin
                                           it_mtx_kill=S.IT_MTX_MEAN_KILL_DEFAULT)
     with_osw = S.minimal_lawful_window("T", CNS, rt_efolds=osw, it_mtx_kill=S.IT_MTX_MEAN_KILL_DEFAULT)
     assert with_osw < with_median and 200 <= with_osw <= 300
+
+
+def test_the_methotrexate_kill_does_not_depend_on_the_uncertain_ic50():
+    """The weakest input in section J was a secondary-citation canine IC50 (2-3 nM). It turns out not to matter: the peak CSF level after
+    a 2.5 mg intrathecal dose into the MEASURED canine CSF volume is about 121 uM, which is 10^3-10^4 times any plausible IC50, so the
+    kill is set by how long the level stays above threshold. Sweeping the IC50 across its entire range (2.5 nM, the human T-ALL anchor
+    14 nM, and the pessimistic 118 nM) moves the answer by about 1.6x, and the closure holds at the pessimistic end."""
+    from canine_dsp import lymphoma_sustained as S
+    assert 44.0 <= S.dog_csf_volume_ml(20.0) <= 46.0                    # 1.39 x BW + 17.5, MRI in 12 dogs
+    lo = S.it_mtx_derived_kill(14, ic50_nM=118.0)
+    hi = S.it_mtx_derived_kill(14, ic50_nM=2.5)
+    assert 1.3 <= hi / lo <= 2.0, (lo, hi)
+    assert S.it_mtx_derived_kill(7, ic50_nM=118.0) > 0.12 > S.it_mtx_derived_kill(21, ic50_nM=118.0)
+
+
+def test_both_brains_close_at_the_pessimistic_ic50_with_a_dose_count_dogs_have_tolerated():
+    """The closure stated so it can be checked against canine experience. At the PESSIMISTIC IC50 (118 nM), intrathecal methotrexate
+    every 21 days, with verdinexor brain access 0.30 (below the 0.60-0.72 measured for its sister compound across an intact barrier) and
+    the lineage-matched canine radiosensitivity: the T-cell brain needs 12 doses over 250 days and the B-cell brain 20 over 417 days.
+    Dogs have carried subcutaneous CSF ports dosed every other week for 8-11 months, i.e. 20-28 doses, so both are inside precedent."""
+    from dataclasses import replace
+    from canine_dsp import lymphoma_sustained as S, lymphoma_joint as J
+    from canine_dsp.core import lymphoma_grounded as G
+    from canine_dsp.core.lymphoma_catalogue import CNS
+    k = S.it_mtx_derived_kill(21, ic50_nM=118.0)
+    assert 0.035 <= k <= 0.055
+
+    def window(ip, efolds):
+        def ok(w):
+            pool = S.lawful_pool(ip, CNS)
+            with S.with_windows({S.VERDINEXOR: w, S.IT_MTX: w}):
+                reg = []
+                for n in S.LAWFUL_PROGRAMS[ip]:
+                    a = [v for kk, v in pool.items() if kk.startswith(n)][0]
+                    if a.name.startswith("verdinexor"):
+                        a = replace(a, access=0.30)
+                    reg.append(a)
+                reg.append(S.rt_agent(ip, CNS, efolds))
+                reg.append(S.it_mtx_agent(k))
+                return G.evaluate_best_schedule(reg, J._escapes(ip), compartment=CNS).horizon_strict.cure_inside_window
+        lo, hi = 84, 3650
+        assert ok(hi)
+        while hi - lo > 30:
+            mid = (lo + hi) // 2
+            if ok(mid):
+                hi = mid
+            else:
+                lo = mid
+        return hi
+
+    t = window("T", S.rt_efolds_in_vivo("OSW (canine peripheral T-cell lymphoma)"))
+    b = window("B", S.rt_efolds_in_vivo("1771 (median)"))
+    assert 200 <= t <= 300 and round(t / 21) <= 14          # ~12 doses
+    assert 380 <= b <= 460 and round(b / 21) <= 24          # ~20 doses

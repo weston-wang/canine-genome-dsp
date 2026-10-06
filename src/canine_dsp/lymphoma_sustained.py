@@ -306,3 +306,43 @@ def minimal_lawful_window(ip: str, comp: str, *, rt_efolds: float = 0.0, it_mtx_
         else:
             lo = mid
     return hi
+
+
+# --- the intrathecal methotrexate kill, re-derived from MEASURED canine CSF numbers (section K.6) -------------------------------------
+import math as _math                                                               # noqa: E402
+
+#: Canine CSF volume, MEASURED by MRI in 12 dogs of 7.5-35 kg against a phantom accurate to 99.8%: total volume = 1.39 x bodyweight(kg)
+#: + 17.5 mL (adjusted r-squared 0.836); intracranial 9.4-23.7 mL and spinal 20.2-44.1 mL (doi 10.1556/004.2017.001, 10.1111/vru.12283).
+#: This replaces the earlier assumption that the dog's CSF volume equalled the human apparent volume.
+def dog_csf_volume_ml(bodyweight_kg: float = 20.0) -> float:
+    return 1.39 * bodyweight_kg + 17.5
+
+
+#: CSF production 0.047 mL/min (0.033 under halothane) to 0.065 mL/min = 1.5-2.6 turnovers/day; terminal CSF half-life of methotrexate
+#: after cisternal dosing in the dog 5.20 h (PMID 581360). Clinical canine intrathecal dose 2.5 mg flat (PMID 37732143).
+DOG_CSF_MTX_HALF_LIFE_H = 5.20
+DOG_IT_MTX_DOSE_MG = 2.5
+_MTX_MW = 454.4
+
+
+def it_mtx_derived_kill(interval_days: float, *, dose_mg: float = DOG_IT_MTX_DOSE_MG, bodyweight_kg: float = 20.0,
+                        ic50_nM: float = 118.0, assay_days: float = 5.0, cap: float = 0.45) -> float:
+    """Time-averaged kill per day from repeated intrathecal methotrexate, integrated over one dosing interval.
+
+    Peak CSF concentration = dose / measured canine CSF volume (full instantaneous mixing, which is the conservative reading because
+    real distribution is uneven and the lumbar peak is higher). Concentration then decays with the measured canine CSF half-life.
+    Instantaneous kill uses the same log form as every other derived agent here, k(t) = ln(1 + C(t)/IC50) / assay_days, capped.
+
+    The point of this function is the SENSITIVITY it exposes: the peak is 10^3-10^4 times any plausible IC50, so the kill is set by how
+    long the concentration stays above threshold, not by the IC50 itself. Moving the IC50 across its whole range (2.5 nM to 118 nM)
+    changes the answer by about 1.5x, so the secondary-citation IC50 is NOT load-bearing for the closure.
+    """
+    c0_nM = (dose_mg * 1e-3 / (dog_csf_volume_ml(bodyweight_kg) * 1e-3)) / _MTX_MW * 1e9 / 1e3  # mg/L -> nM, /1e3 for nmol->... see note
+    c0_nM = (dose_mg / (dog_csf_volume_ml(bodyweight_kg) / 1000.0)) / _MTX_MW * 1e6             # mg/L / (g/mol) * 1e6 = nM
+    lam = _math.log(2.0) / (DOG_CSF_MTX_HALF_LIFE_H / 24.0)                                     # per day
+    steps, total = 2000, 0.0
+    for i in range(steps):
+        t = (i + 0.5) * interval_days / steps
+        c = c0_nM * _math.exp(-lam * t)
+        total += min(cap, _math.log1p(c / ic50_nM) / assay_days)
+    return total / steps
