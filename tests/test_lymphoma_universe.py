@@ -295,6 +295,10 @@ def test_b_cell_brain_closes_with_existing_agents_only_if_oral_cytarabine_is_sus
         assert S.clock("B", prog, CNS)[0]
     assert 1350 <= S.minimal_window("B", prog, CNS, S.OCFOSFATE, lo=730, hi=1825) <= 1650
     assert not S.clock("B", prog, CNS)[0]                                   # context manager restored the default
+    # ...but this route is NOT lawfully available in the US: the oral prodrug is approved only in Japan, so extra-label use does not
+    # reach it (21 CFR 530 covers FDA-APPROVED drugs only). Section K replaces it with intrathecal methotrexate. Tied together here
+    # so neither fact can drift from the other.
+    assert S.legal_status(S.OCFOSFATE)[0] == S.NO_US_APPROVAL
 
 
 def test_t_cell_body_closes_with_existing_agents_if_verdinexor_is_sustained_about_six_months():
