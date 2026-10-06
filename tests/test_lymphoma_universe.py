@@ -534,3 +534,14 @@ def test_both_brains_close_at_the_pessimistic_ic50_with_a_dose_count_dogs_have_t
     b = window("B", S.rt_efolds_in_vivo("1771 (median)"))
     assert 200 <= t <= 300 and round(t / 21) <= 14          # ~12 doses
     assert 380 <= b <= 460 and round(b / 21) <= 24          # ~20 doses
+
+
+def test_the_japanese_prodrug_is_recorded_as_being_discontinued_not_merely_unapproved():
+    """Checked across jurisdictions: the obstacle is no longer only legal. The manufacturer told the Japanese regulator demand had
+    ceased and withdrew the larger strength, the label is intermittent with an explicit long-term-use warning, and the indications are
+    leukaemia and MDS rather than lymphoma. So it stays out of the programs on supply and label grounds as well as legal ones."""
+    from canine_dsp import lymphoma_sustained as S
+    status, why = S.legal_status("cytarabine ocfosfate, oral continuous")
+    assert status == S.NO_US_APPROVAL
+    for phrase in ("discontinued", "INTERMITTENT", "not lymphoma", "Sch 4 para 7", "21 CFR 511"):
+        assert phrase in why, phrase

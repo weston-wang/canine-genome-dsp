@@ -231,8 +231,18 @@ LEGAL_STATUS = {
     "allogeneic DLA": (PROCEDURE, "allogeneic haematopoietic cell transplant from a DLA-identical littermate; performed at referral centres, "
                                   "not a drug approval question; needs a matched donor (about 25% per littermate)"),
     # --- NOT lawfully available as a routine therapy -------------------------------------------------------------------------------
-    "cytarabine ocfosfate": (NO_US_APPROVAL, "Starasid is approved only in JAPAN. 21 CFR 530 extra-label use covers only FDA-APPROVED animal or human "
-                                             "drugs, so a Japan-only product has no extra-label route in the US. REMOVED from the closing programs."),
+    "cytarabine ocfosfate": (NO_US_APPROVAL, "Starasid (Nippon Kayaku) is approved only in JAPAN, and 21 CFR 530 extra-label use covers only "
+                                             "FDA-APPROVED animal or human drugs, so there is no extra-label route in the US. Checked across "
+                                             "jurisdictions 2026-10-06 (docs/universe/SWEEP_import.md) and the position is now worse than a legal "
+                                             "obstacle: (a) the manufacturer asked MHLW to STOP SUPPLY on the ground that medical demand had ceased, "
+                                             "the 100 mg capsule left the Japanese pricing standard with the transitional period ending March 2026, "
+                                             "and only the 50 mg pack remains on the June-2026 insert -- the product is being discontinued; (b) its "
+                                             "Japanese indications are adult acute NON-lymphocytic leukaemia and MDS, not lymphoma; (c) its label is "
+                                             "INTERMITTENT (2-3 weeks on, 2-3 weeks off, max 300 mg/day) and warns that long-term use makes adverse "
+                                             "reactions stronger and protracted -- which contradicts the multi-year continuous dosing the old section-I "
+                                             "plan assumed. A UK vet CAN lawfully import it (VMR 2013 Sch 4 para 7 + reg 25(5), Special Import "
+                                             "Certificate), and a US university could use it in a dog only as a subject of a bona fide investigation "
+                                             "under 21 CFR 511. REMOVED from the closing programs and it should stay removed."),
     "anti-CD20 monoclonal antibody": (INVESTIGATIONAL, "Blontress (AT-004) was conditionally licensed 2012, fully licensed 2015 and DISCONTINUED 2017; "
                                                        "the Elanco 1E4 antibody is investigational. No licensed canine anti-CD20 product exists. "
                                                        "REMOVED from the closing programs."),
