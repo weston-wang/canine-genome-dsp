@@ -470,3 +470,21 @@ Everything below is an FDA-approved animal drug, an FDA-approved human drug used
 4. Radiation e-folds on the dormant cells are transferred from lymphoid and stem-cell radiobiology (section I), not measured on canine E5 cells.
 5. Repeated intrathecal dosing in a dog beyond about 6 doses has no published precedent; the programs need 20-30 doses over 12-14 months.
 6. A DLA-identical littermate donor is required (about 25% per sibling), and the transplant is load-bearing in every case.
+
+### K.4 The brain closure is redundant, not fragile — but only because verdinexor's brain access was wrong
+The user's suspicion of weak ground was correct for the single-input version. If the intrathecal methotrexate is the only thing covering the brain and it reaches only half the compartment (effective kill 0.06 /day instead of 0.12), **neither brain ever clears, even over ten years.** The cliff is sharp: the route holds at 0.09 /day and fails at 0.06. A closure that turns on one derived number reaching a threshold is not closed.
+
+What makes it redundant is that the model's brain access for verdinexor, a generic 0.05 default with no source, is contradicted by measurement. Verdinexor's sister compound selinexor (same SINE series; verdinexor is slightly more lipophilic with a lower polar surface area) has **measured total brain:plasma of 0.71 (mouse), 0.72 (rat) and 0.60 (monkey) across an INTACT blood-brain barrier** (PMID 27323910, Table 1, full text read); the human value in contrast-enhancing glioblastoma is 0.09. Verdinexor itself has no tissue-distribution study, so this is a TRANSFER, and it is corroborated in direction by the CNS signs in the canine field study (tremor 11%, ataxia 6%, convulsion 4% versus 0, 0, 3% on control) and by selinexor's 30% human neurological-toxicity rate — a drug that does not enter the brain does not do that.
+
+Minimal sustained window (days) for the brain, lawful agents plus one 23.4 Gy course at median canine radiosensitivity:
+
+| verdinexor brain access | methotrexate 0 | methotrexate 0.06 /day (half reach) | methotrexate 0.12 /day (full reach) |
+|---|---|---|---|
+| 0.05 (the unsourced default) | never | **never** | 417 (B) / 389 (T) |
+| 0.09 (human disrupted tumour) | never | never | 389 / 389 |
+| **0.30** (below the animal transfer, above the human tumour value) | never | **417 / 529** | 361 / 361 |
+| **0.60** (the animal intact-barrier transfer) | 306 (B) / never (T) | **361 / 361** | 361 / 333 |
+
+So **the brain closes if EITHER the methotrexate reaches the whole compartment OR verdinexor reaches the brain at 0.3 or more**, and these are independent measurements of different agents. Radiation alone never closes it at any verdinexor access except the B-cell case at 0.6. The two routes also fail differently: methotrexate covers the CSF and perivascular space, verdinexor covers parenchyma, and the radiation course covers both once.
+
+**What would settle it, in one experiment each:** a verdinexor brain:plasma ratio in a dog (the single most valuable measurement in this project now — it is a tissue sample from any dog on the licensed drug), and a CSF methotrexate level in a dog on the intended schedule. Both are cheap, and neither needs a new product.

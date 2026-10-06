@@ -432,3 +432,37 @@ def test_all_four_cases_close_on_lawful_agents_only():
         assert abs(got - expect) <= 60, (ip, got)
         assert S.minimal_lawful_window(ip, CNS, rt_efolds=med) is None            # radiation without methotrexate never clears
         assert 1100 <= S.minimal_lawful_window(ip, CNS, it_mtx_kill=S.IT_MTX_MEAN_KILL_DEFAULT) <= 1500   # methotrexate without radiation
+
+
+def test_the_brain_closure_has_two_independent_inputs_either_of_which_suffices():
+    """The fragility the user suspected is real if only ONE input carries the brain: with intrathecal methotrexate at half reach
+    (0.06/day) and verdinexor at the model's generic brain access 0.05, neither brain ever clears. It becomes redundant because
+    verdinexor's own brain access is not 0.05: its sister compound selinexor measures brain:plasma 0.60-0.72 across an INTACT barrier in
+    mouse, rat and monkey (PMID 27323910). At verdinexor access 0.3 -- below that transfer and above the human disrupted-tumour value
+    0.09 -- half-strength methotrexate closes both brains. So the closure holds if EITHER the methotrexate reaches the whole compartment
+    OR verdinexor reaches the brain at 0.3 or more."""
+    from dataclasses import replace
+    from canine_dsp import lymphoma_sustained as S, lymphoma_joint as J
+    from canine_dsp.core import lymphoma_grounded as G
+    from canine_dsp.core.lymphoma_catalogue import CNS
+    med = S.rt_efolds_in_vivo("1771 (median)")
+
+    def ok(ip, mtx_kill, verdinexor_access, window):
+        pool = S.lawful_pool(ip, CNS)
+        with S.with_windows({S.VERDINEXOR: window, S.IT_MTX: window}):
+            reg = []
+            for n in S.LAWFUL_PROGRAMS[ip]:
+                a = [v for k, v in pool.items() if k.startswith(n)][0]
+                if a.name.startswith("verdinexor"):
+                    a = replace(a, access=verdinexor_access)
+                reg.append(a)
+            reg.append(S.rt_agent(ip, CNS, med))
+            if mtx_kill > 0:
+                reg.append(S.it_mtx_agent(mtx_kill))
+            return G.evaluate_best_schedule(reg, J._escapes(ip), compartment=CNS).horizon_strict.cure_inside_window
+
+    for ip in ("B", "T"):
+        assert ok(ip, 0.12, 0.05, 730)            # route 1: methotrexate reaches the whole compartment
+        assert not ok(ip, 0.06, 0.05, 3650)       # neither input adequate -> never clears, even over 10 years
+        assert ok(ip, 0.06, 0.30, 730)            # route 2: verdinexor reaches the brain, methotrexate at half
+        assert not ok(ip, 0.0, 0.05, 3650)        # radiation alone never clears
