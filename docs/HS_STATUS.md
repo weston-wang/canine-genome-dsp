@@ -992,7 +992,9 @@ biology (`emergence.py`); the CNS trial was not.
 ### Verified NEW: niraparib's access transfer got stronger, and the honest limit did not move
 
 Already in the record (do NOT re-report): fractions unbound 0.05 brain / 0.16 plasma, PMID 38657366,
-NCT05076513 ongoing, and the statement that there is **no published unbound tumour concentration**,
+NCT05076513 ongoing, and the statement that there is **no published unbound tumour concentration**
+   (**THAT STATEMENT IS WRONG -- corrected in the verification pass at the end of this file: the
+   concentration is published at 226.7 nM unbound in non-enhancing tumour**),
 which is why niraparib closes structurally rather than by a computed margin. Still true. New:
 
 - **PMID 41023116** (*Sci Rep* 2025;15:33670, [DOI](https://doi.org/10.1038/s41598-025-18255-9),
@@ -1190,7 +1192,9 @@ record entirely before today:
   in mouse, rat AND monkey**; **haematotoxicity explicitly evaluated in rat** for monotherapy and in
   combination; in an MGMT-methylated **orthotopic glioma** model, AZD9574 + temozolomide extended
   survival over temozolomide alone. The authors' claim is "best-in-class PARP inhibitor for the
-  treatment of primary and secondary brain tumors". **Phase I: NCT05417594.**
+  treatment of primary and secondary brain tumors". **Phase 1/2: NCT05417594** — verified at registry 2026-10-31: AstraZeneca, RECRUITING, start
+  2022-06-24, last updated 2026-10-05, enrolment 695, advanced solid malignancies (not a CNS-specific
+  trial).
 - Supporting, and relevant to two escapes: in H3K27M diffuse midline glioma — dordaviprone's own
   indication — PARP inhibition radiosensitises an HRR-defective tumour and **induces NKG2D ligand
   expression with NK-cell-mediated lysis, with NK cells REQUIRED for efficacy**; AZD9574 compares
@@ -1200,8 +1204,7 @@ record entirely before today:
 Why it is worth recording rather than filing: the project's PARP arm carries the Rb-independent kill
 and the MTAP/PRMT5 axis, and its binding cost is marrow. A PARP1-selective agent is the one
 modification that could keep that mechanism while loosening the 95% collision, and it is
-brain-penetrant in three species. **Tier: NEAR_FUTURE** (phase I, no veterinary access, no canine
-data), so it changes nothing today and is not written into the model. The honest next step is to
+brain-penetrant in three species. **Tier: NEAR_FUTURE** (phase 1/2, no veterinary access, no canine data), so it changes nothing today and is not written into the model. The honest next step is to
 price AZD9574 on the marrow axis against niraparib's 0.50 load and see whether the collision eases.
 Note also that the NKG2D-ligand induction cuts against escape A19's shedding arm, which is a
 tension worth testing rather than a resolution.
@@ -1237,3 +1240,137 @@ hand. **No enumerated escape route changed status and no condition closed.** Wha
 catalogue (one class added as open, one exclusion flagged for re-test), the strength of two existing
 rows (niraparib's access transfer, the MAPK axis gaining a licensed brain-indicated pan-RAF), and a
 list of named near-future agents that would improve specific weak rows if they reach a dog.
+
+## Verification pass, 2026-10-31 — every open item chased to primary source
+
+The sweep's unverified leads were blocked by publisher 403s and Cloudflare. All were reachable
+through Europe PMC and NCBI efetch instead. Results below; **one changes a claim this project has
+been making, and one second-hand figure turned out to be wrong.**
+
+### CORRECTION: niraparib's unbound tumour concentration IS published, and the record said it was not
+
+`availability_tiers` and `HS_STATUS` both stated: *"The trial (NCT05076513) is ongoing, so there is a
+measured fraction unbound but NO published unbound tumour CONCENTRATION yet -- which is exactly why
+this agent closes structurally rather than by a derived margin."* **That was wrong.** The phase 0 arm
+reported in 2023. Read at primary source (NCBI efetch of the PMC record, Neuro-Oncology
+25(Suppl 5):v78, DOI 10.1093/neuonc/noad179.0304, Sanai et al., abstract CTNI-22):
+
+- PK trigger: **unbound niraparib > 5x the biochemical IC50, i.e. > 19 nM, in NON-ENHANCING tumour**
+  — so the biochemical IC50 is **3.8 nM**.
+- **All 44 phase 0 patients met the threshold.**
+- **Mean unbound concentration in non-enhancing tumour: 226.7 nM (n = 38)** — roughly **60x** the
+  biochemical IC50.
+- Target engagement in the same tissue: **PAR suppression after ex vivo irradiation in 71% (20/28)**.
+- Authors' conclusion: niraparib reaches "pharmacologically-relevant concentrations in non-enhancing,
+  newly-diagnosed GBM tissue **in excess of any other studied PARP inhibitor**".
+- **Measured cost: grade 4 thrombocytopenia in 5 of the first 18 phase 2 patients** on niraparib plus
+  radiotherapy. PFS6 64% (n=11).
+
+So the ACCESS half of the niraparib row is now **measured in the compartment at issue**, at the same
+standing as the ribociclib figure and at a larger multiple. **The row still closes structurally**,
+for a reason that must not be blurred: a kill RATE needs a **cytotoxic** potency in this tumour, and
+3.8 nM is an **enzymatic** PARP-inhibition IC50, not a cytotoxic IC50 in canine HS cells, which does
+not exist. Reading one through the other would repeat the cytostatic/cytocidal error already recorded
+in `pkpd.ribociclib_margin_correction()`. The strengthening item is therefore rewritten: what is
+missing is a cytotoxic potency, not a concentration.
+
+The grade 4 thrombocytopenia figure is the other half of this and cuts the other way: it is measured
+human haematotoxicity for niraparib at therapeutic dosing, against a marrow axis this programme
+already runs at 95%. It strengthens the case for pricing a PARP1-selective alternative (AZD9574).
+
+**My own second-hand figure was wrong.** The earlier entry reported "mean unbound 253.2 nM in 32
+evaluable patients, all 35 clearing the trigger" from a search summary and flagged it unverified. The
+real numbers are **226.7 nM, n = 38, all 44**. Wrong on all three counts. The flag did its job; the
+lesson is that a search-summary number is not a number.
+
+### RESOLVED: the mirdametinib Kp,uu 0.243 claim is untraceable, so it is not used
+
+Chased properly. The claim exists only in a St. Jude medulloblastoma preprint (bioRxiv
+10.1101/2025.11.20.689490, Europe PMC PPR1123579, **not peer reviewed**), whose full text is
+unobtainable through five routes and which attributes the value to unnamed "existing studies". A
+Europe PMC **full-text** search for `mirdametinib AND "0.243"` returns two hits, neither a
+mirdametinib brain-PK source; `mirdametinib AND "Kp,uu"` returns five, of which the only relevant one
+is the NHP abstract below. **There is no traceable published primary source for 0.243**, so under the
+stated bar it is ASSUMED, not TRANSFERRED, and the MAPK-brain row is NOT changed on it.
+
+### What the real published mirdametinib brain-PK source actually says (and it is usable)
+
+Read at primary source (efetch, PMC9661017; Neuro-Oncology 2022;24(Suppl 7):vii233, abstract
+EXTH-102). NHP model, 4 animals, mirdametinib 0.50 mg/kg PO qd or 0.20 mg/kg IV:
+
+- **CSF/unbound-plasma ratio 2.5-3.0** — unbound drug in CSF EXCEEDS unbound plasma.
+- CSF Cmax 0.43 +/- 0.18 (single dose), 0.56 +/- 0.18 (multiple dose), 2.0 +/- 1.8 ng/mL (IV).
+- CSF penetration 1.3-1.6% of plasma AUC. **Plasma free fraction 0.52 +/- 0.1%** (heavily bound).
+- Target-engagement anchors quoted in the same abstract: murine ERK-phosphorylation inhibition in
+  **brain tissue at 1.15 nM**, and in tumour cell lines at **0.33-0.59 nM**.
+- NF1 plexiform-neurofibroma phase II: 42% PR, mean plasma AUC0-12h 443 h*ng/mL.
+
+Read against the project's requirements this splits the weak row rather than closing it. CSF Cmax of
+0.43-0.56 ng/mL is about **1.1-1.5 nM**, i.e. roughly **1-1.3x** the murine brain-tissue
+pERK-inhibition concentration and **2-4.5x** the tumour-cell-line figure — real but thin. And a
+CSF:unbound-plasma ratio above 1 is a genuine measured transfer for the **leptomeningeal/CSF** site,
+where the requirement is 0.0145. It says nothing about **invaded parenchyma**, where the requirement
+is 0.196. So: the CSF branch of the MAPK tier now has a measured NHP basis; the parenchymal branch
+remains a hypothesis, exactly as recorded. Nothing is regraded without a decision on whether an NHP
+CSF ratio may stand in for canine parenchyma, which it may not.
+
+### VERIFIED: AMG 193's phase I says three things the record does not carry
+
+Read at primary source (PMID 39293516, *Ann Oncol* 2024;35:1138-47,
+[DOI](https://doi.org/10.1016/j.annonc.2024.08.2339)). The record already has "ORR 21.4%, n=80". Not
+in the record, and each material:
+
+1. It is described as a **CNS-PENETRANT** MTA-cooperative PRMT5 inhibitor, in the title sentence of
+   the abstract. The record's line that "neither [PRMT5i nor MAT2Ai] has human CNS activity data"
+   remains literally true — penetrance is not activity — but "CNS-penetrant" is more than the record
+   currently allows the class.
+2. **At doses >=480 mg, COMPLETE intratumoral PRMT5 inhibition was confirmed in paired MTAP-deleted
+   tumour biopsies**, with ctDNA clearance. That is target engagement measured in tumour tissue, in
+   this tumour's own genotype — the rule-14 proxy for "engages the target".
+3. **"A favorable safety profile WITHOUT CLINICALLY SIGNIFICANT MYELOSUPPRESSION."** Against a marrow
+   axis at 95% with 5% headroom, a genotype-anchored agent that does not load marrow is the opposite
+   of niraparib's grade 4 thrombocytopenia problem.
+   Trial enrols **CDKN2A-deleted and/or MTAP-deleted** tumours — this tumour's exact lesion. MTD
+   1200 mg od; DLTs in 8 patients at >=240 mg (nausea, vomiting, fatigue, hypersensitivity,
+   hypokalaemia).
+
+### CHARACTERISED: how bacterial vectors actually reach a brain tumour, and why it is still open
+
+Read at primary source (efetch, PMC9978951, *Acta Pharm Sin B*). The mechanism in the one directly
+relevant study is **not** a bacterium crossing an intact barrier: attenuated *Salmonella* selectively
+colonises the **hypoxic** tumour region, repolarises macrophages, downregulates P-gp and **recruits
+neutrophils**, and the payload (doxorubicin-loaded outer-membrane vesicles) crosses the barrier by
+**hitchhiking those neutrophils**. Dosing 8 x 10^6 CFU in a mouse glioma model.
+
+That is a characterisation, not a grading, and it points the wrong way for this case: the access
+mechanism is **hypoxia-dependent**, and the site that matters here is the **invading edge behind an
+intact barrier** — the least hypoxic part of the tumour. The class therefore stays NOT_ASSESSED with
+the next measurement unchanged (colonisation or payload expression in gadolinium-non-enhancing
+tissue), now with the reason stated: what has been shown is colonisation of hypoxic cores plus
+leukocyte transport, which is not the compartment this analysis needs.
+
+### Protocol documents: one read in full, one still second-hand
+
+- **MSU quasiorganelle pilot: READ IN FULL** (trial flyer PDF, extracted). Inclusion, exclusion,
+  both arms and the full dosing schedule are recorded above and come from the primary document, not a
+  summary.
+- **COTC033: still second-hand.** Its Studypages listing is JavaScript-gated and returns only a title
+  to both WebFetch and curl; the CSU URL 301-redirects there. The eligibility detail above
+  (15-60 kg, 2-12 cm biopsy-accessible tumour, the four excluded diagnoses, IM prime then weekly
+  intratumoral x8) comes from a search summary of that page and is **not primary-source verified**.
+  It does not matter for the conclusion -- the route alone, weekly intratumoral injection into an
+  accessible mass, rules the trial out for a primary intracranial tumour -- but the numbers should
+  not be quoted as verified.
+
+### Test environment, for the next thread
+
+The rebuilt container had no numpy/pandas/scipy/scikit-learn visible to pytest, which is installed as
+a **uv-isolated tool** at `/root/.local/share/uv/tools/pytest/` with its own venv — so project
+dependencies installed with `pip` are invisible to it and 29 suites could not be collected. Fixed by
+injecting them into that venv:
+
+    uv pip install --python /root/.local/share/uv/tools/pytest/bin/python numpy pandas scipy scikit-learn
+    PYTHONPATH=src /root/.local/bin/pytest -q
+
+`torch` is still absent, so `tests/test_hybrid_rnn.py` and `tests/test_vaccine_eval.py` cannot be
+collected here. Neither touches the HS analysis.

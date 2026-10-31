@@ -293,7 +293,9 @@ CONDITIONS: tuple[Condition, ...] = (
         "mechanistic argument for that computed inequality (availability_tiers.program_a()).",
         "ALREADY MET at the stated bar. What would still improve it, none of which gates the "
         "closure: veterinary availability of the three near-future agents, and an unbound tumour "
-        "concentration for niraparib or dordaviprone, which would give the licensed-only variant a "
+        "CYTOTOXIC POTENCY in this tumour for niraparib or dordaviprone (the access half is now "
+        "published: 226.7 nM unbound in non-enhancing tumour), which would give the licensed-only "
+        "variant a "
         "computed margin too (the niraparib trial NCT05076513 is running).",
     ),
 )
@@ -506,10 +508,15 @@ def goal_verdict() -> dict:
             "veterinary availability of the three near-future agents -- none needs discovery: human "
             "Phase III (paxalisib), human Phase I/II (the PRMT5 anchor), and a published compound "
             "with measured rodent brain PK (RGN3067)",
-            "an unbound tumour concentration for niraparib or dordaviprone, which would give the "
-            "licensed-only variant a computed margin too (NCT05076513 is already running; as of "
-            "2026-10-31 still no published concentration, but niraparib has advanced to a "
-            "randomised phase 3 in glioblastoma, NCT06388733)",
+            "a CYTOTOXIC potency for niraparib or dordaviprone IN THIS TUMOUR, which is now the only "
+            "missing half of a computed margin for the licensed-only variant. CORRECTED 2026-10-31: "
+            "the ACCESS half is no longer missing -- niraparib's mean unbound concentration in "
+            "NON-ENHANCING tumour is published at 226.7 nM (n=38, all 44 patients over a >19 nM "
+            "trigger, PAR suppression confirmed in the same tissue; DOI 10.1093/neuonc/noad179.0304). "
+            "What blocks the margin is that 3.8 nM is an enzymatic PARP IC50, not a cytotoxic IC50 in "
+            "canine HS cells. Reading one through the other would repeat the cytostatic/cytocidal "
+            "error. Measured cost, now also published: grade 4 thrombocytopenia in 5 of the first 18 "
+            "phase 2 patients, against a marrow axis already at 95%",
             "a measured brain concentration on the PI3K arm, where the licensed option's access is "
             "a transfer and a different agent on that axis was measured undetectable",
         ],
