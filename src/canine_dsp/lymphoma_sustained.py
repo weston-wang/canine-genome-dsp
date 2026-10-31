@@ -356,3 +356,52 @@ def it_mtx_derived_kill(interval_days: float, *, dose_mg: float = DOG_IT_MTX_DOS
         c = c0_nM * _math.exp(-lam * t)
         total += min(cap, _math.log1p(c / ic50_nM) / assay_days)
     return total / steps
+
+
+# --- verdinexor brain reach re-graded from a MEASURED human CSF level (2026-10-31; docs/LYMPHOMA_UNIVERSE.md section M) ---------------
+#: Selinexor (verdinexor's sister compound) in CSF, MSZ trial, Blood 2025;146(Suppl 1):3550 (doi 10.1182/blood-2025-3550): 0.919 ng/mL
+#: in CSF at a plasma level of 204.67 ng/mL 4 h after 40 mg, with a "stable CSF-to-plasma ratio (~0.6%)" from 4 to 25 h. Plasma protein
+#: binding 95% (FDA Xpovio label), so CSF / UNBOUND plasma = 0.919 / 10.2 = 0.09. CSF is the measurable proxy for unbound brain
+#: interstitial drug (CLAUDE.md rule 14), so this outranks the 0.30 the closure used, which was set "below" the rodent/monkey TOTAL
+#: brain:plasma 0.60-0.72 (PMID 27323910) -- a ratio that counts tissue-bound drug. Grade TRANSFERRED (sister compound, human CSF,
+#: conference abstract that does not state how many patients were sampled; 0.919/204.67 is 0.45%, not the stated 0.6%).
+VERDINEXOR_CNS_ACCESS_MEASURED = 0.09
+VERDINEXOR_CNS_ACCESS_SUPERSEDED = 0.30
+
+#: Repeated intrathecal dosing in dogs: subcutaneous CSF ports dosed every other week for 8-11 months, i.e. 20-28 doses (section K.6).
+DOG_IT_DOSES_PRECEDENT_MAX = 28
+
+
+def lawful_brain_window(ip: str, *, interval_days: float, ic50_nM: float = 118.0,
+                        verdinexor_access: float = VERDINEXOR_CNS_ACCESS_MEASURED, rt_line: str | None = None,
+                        lo: int = 84, hi: int = 5475, step: int = 15):
+    """Smallest window (days) at which the lawful brain program clears CNS: the lawful agents (verdinexor at `verdinexor_access`), one
+    23.4 Gy course at the lineage-matched canine radiosensitivity, and intrathecal methotrexate every `interval_days` with the kill
+    derived from measured canine CSF numbers. Returns (days, doses) or None if it does not clear inside `hi`."""
+    line = rt_line or ("OSW (canine peripheral T-cell lymphoma)" if ip == "T" else "1771 (median)")
+    efolds = rt_efolds_in_vivo(line)
+    k = it_mtx_derived_kill(interval_days, ic50_nM=ic50_nM)
+    pool = lawful_pool(ip, CNS)
+    esc = J._escapes(ip)
+
+    def ok(w):
+        with with_windows({VERDINEXOR: w, IT_MTX: w}):
+            reg = []
+            for n in LAWFUL_PROGRAMS[ip]:
+                a = [v for kk, v in pool.items() if kk.startswith(n)][0]
+                if a.name.startswith(VERDINEXOR):
+                    a = replace(a, access=verdinexor_access)
+                reg.append(a)
+            reg.append(rt_agent(ip, CNS, efolds))
+            reg.append(it_mtx_agent(k))
+            return G.evaluate_best_schedule(reg, esc, compartment=CNS).horizon_strict.cure_inside_window
+
+    if not ok(hi):
+        return None
+    while hi - lo > step:
+        mid = (lo + hi) // 2
+        if ok(mid):
+            hi = mid
+        else:
+            lo = mid
+    return hi, round(hi / interval_days)

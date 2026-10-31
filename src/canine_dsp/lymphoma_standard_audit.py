@@ -76,12 +76,31 @@ def growth_bar_item() -> Item:
     return Item("growth-rate bar", b["grade"], b["grade"] in ("DERIVED", "TRANSFERRED", "MEASURED"), b["basis"])
 
 
+def lawful_brain_items() -> list:
+    """Inputs the LAWFUL brain programs depend on once verdinexor's brain reach is the measured 0.09 (section M, 2026-10-31).
+    The intrathecal dose count is load-bearing: a closing schedule inside canine precedent (<= 28 doses) passes; one that needs
+    more has no canine or written-transfer basis for its tolerability and is graded ASSUMED until one is found."""
+    from . import lymphoma_sustained as S
+    out = []
+    for ip, candidates in (("T", ((10, 118.0), (14, 14.0))), ("B", ((10, 118.0), (14, 14.0), (14, 2.5)))):
+        found = [w for w in (S.lawful_brain_window(ip, interval_days=i, ic50_nM=c) for i, c in candidates) if w]
+        best, worst = min(found, key=lambda w: w[1]), max(found, key=lambda w: w[1])
+        inside = worst[1] <= S.DOG_IT_DOSES_PRECEDENT_MAX
+        out.append(Item(f"{ip}: tolerability of {best[1]}-{worst[1]} intrathecal methotrexate doses over {best[0]}-{worst[0]} d",
+                        "MEASURED-PRECEDENT" if inside else "ASSUMED", inside,
+                        f"closing schedules across the IC50 range at verdinexor brain reach {S.VERDINEXOR_CNS_ACCESS_MEASURED}; canine "
+                        f"precedent is 20-{S.DOG_IT_DOSES_PRECEDENT_MAX} doses (CSF ports, 8-11 months)"
+                        + ("" if inside else "; no canine series and no written human transfer yet for this many")))
+    return out
+
+
 def failing() -> list:
     """Every input that fails the stated bar. Empty means nothing fails; this is what to quote."""
     out = []
     gb = growth_bar_item()
     if not gb.passes:
         out.append(gb)
+    out += [i for i in lawful_brain_items() if not i.passes]
     for ip in ("B", "T"):
         out += [i for i in program_potency_items(ip) if not i.passes]
         out += [i for i in load_bearing_unsourced(ip) if not i.passes]
@@ -146,6 +165,9 @@ def routes_not_counted() -> list:
              "multi-year tolerability (no source: human use is 10-14 days per 28; longest dog dosing is 7 days continuous / pulsed IV for 24 months)"),
         Item("persistent graft-versus-lymphoma past day 166 closing the dormant progenitor", "TRANSFERRED hold, no rate", False,
              "supports a hold (dog plateau, CML transcripts) but the model needs 0.06-0.12 /day against a 0.0008-0.004 /day bracket"),
+        Item("brain closure on 20 (B) / 11-12 (T) intrathecal doses every 21 days", "CONTRADICTED", False,
+             "needed verdinexor brain reach 0.30, read off a TOTAL brain:plasma ratio; measured human selinexor CSF / unbound plasma "
+             "is 0.09 (Blood 2025;146 Suppl 1:3550), at which this schedule never clears (section M)"),
         Item("T-cell brain from existing agents", "OPEN", False,
              "dormant lineage needs ~8 years of oral cytarabine in T-cell disease; CD7/CD5 CAR-T has no dog program found"),
     ]

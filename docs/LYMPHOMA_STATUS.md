@@ -341,3 +341,14 @@ Details `LYMPHOMA_UNIVERSE.md` section L; `docs/universe/SWEEP_import.md`; `lymp
 - **Nowhere else authorises it:** not US, Canada (DPD empty), EU or UK. Canada's **Emergency Drug Release** is the next-best mechanism but authorises the manufacturer to sell, and there is nothing to sell.
 - **The lawful injectable route is pharmacologically BETTER in the CSF:** measured **8.3 uM** after IV infusion in dogs versus a **derived 0.3-1.4 uM** time-average for the oral prodrug. The prodrug's advantage is convenience (oral at home, 23-29 h half-life), not exposure.
 - New canine data point: a pet dog with MDS treated with cytarabine ocfosfate in Japan (PMID 15084010).
+
+## New-treatment sweep (2026-10-31; user: "Do a deep search to see if there's any new treatment came out since last time we looked at this")
+
+Details `LYMPHOMA_UNIVERSE.md` section M; report `docs/reports/Canine lymphoma new treatments 2026.md`; notes `docs/research_notes/Canine lymphoma new treatments 2026/`.
+
+- **Nothing new to prescribe.** No new canine lymphoma approval, licence or launch anywhere in October 2026; no new FDA approval for T-cell or CNS lymphoma in 2025-2026. Tirabrutinib (CNS lymphoma) has an FDA decision date of 18 Dec 2026.
+- **Canine CAR-T trial (LEAH Labs; Minnesota, Missouri) is enrolling again**; the record's "on hold" is out of date. New dog trials recorded: ORBIT (VSV + anti-PD-1, takes T-cell dogs), Zoetis SC anti-CD20, Tufts/NCI combinations, Bellingham adoptive T cells.
+- **Brain closure weakened by a new measurement.** Human selinexor CSF / unbound plasma = 0.09 (Blood 2025;146 Suppl 1:3550) replaces the 0.30 verdinexor brain reach the closure used. The reported every-21-day schedule (20 B / 12 T doses) never closes at 0.09. With methotrexate every 10-14 days: **T-cell brain closes on 17-24 doses, inside canine precedent; B-cell brain closes on 29-45 doses, above the 20-28 dogs have received.** The brain is no longer covered by two independent routes (supersedes K.4 and the "two independent routes" line in the plain-language report).
+- **Audit:** `failing()` now returns exactly one item: B-cell brain intrathecal dose count (29-45) tolerability, ASSUMED. `routes_not_counted()` adds the every-21-day schedule as CONTRADICTED. Bodies unchanged.
+- **Next step that would clear it:** a written transfer for >28 intrathecal doses (human long-course intrathecal/Ommaya precedent) or a canine series; plus the two measurements already named (verdinexor brain:plasma in a dog; CSF methotrexate on schedule).
+- **Plain-language page (`docs/LYMPHOMA_PLAIN_LANGUAGE.html`) not yet updated** to this result.

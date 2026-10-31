@@ -233,9 +233,10 @@ def test_theoretical_agents_are_inadmissible():
         del READINESS["__theory__"]
 
 
-def test_audit_nothing_fails_the_stated_bar_and_the_growth_bar_is_derived():
+def test_audit_only_the_b_cell_dose_count_fails_and_the_growth_bar_is_derived():
+    """Was `failing() == []` until section M (2026-10-31) moved the B-cell brain dose count above canine precedent."""
     from canine_dsp import lymphoma_standard_audit as A
-    assert A.failing() == []
+    assert [i.name[:22] for i in A.failing()] == ["B: tolerability of 29-"]
     assert A.GROWTH_BAR_BASIS["grade"] == "DERIVED" and A.GROWTH_BAR_BASIS["band"][1] >= A.GROWTH_BAR_BASIS["value"]
     assert all(i.passes for i in A.wrongly_reported_as_gaps())
 
@@ -331,7 +332,8 @@ def test_t_cell_brain_is_not_closed_by_sustaining_existing_agents():
 def test_audit_lists_the_routes_that_were_set_aside_with_their_grades():
     from canine_dsp import lymphoma_standard_audit as A
     r = A.routes_not_counted()
-    assert len(r) == 3 and not any(i.passes for i in r)
+    assert len(r) == 4 and not any(i.passes for i in r)        # 4th added 2026-10-31: the every-21-day brain schedule (section M)
+    assert any(i.grade == "CONTRADICTED" for i in r)
 
 
 # --- radiation as a cycle-independent agent (/goal 2026-10-04, "realistic ways") -------------------------------------------------------
@@ -499,7 +501,10 @@ def test_both_brains_close_at_the_pessimistic_ic50_with_a_dose_count_dogs_have_t
     """The closure stated so it can be checked against canine experience. At the PESSIMISTIC IC50 (118 nM), intrathecal methotrexate
     every 21 days, with verdinexor brain access 0.30 (below the 0.60-0.72 measured for its sister compound across an intact barrier) and
     the lineage-matched canine radiosensitivity: the T-cell brain needs 12 doses over 250 days and the B-cell brain 20 over 417 days.
-    Dogs have carried subcutaneous CSF ports dosed every other week for 8-11 months, i.e. 20-28 doses, so both are inside precedent."""
+    Dogs have carried subcutaneous CSF ports dosed every other week for 8-11 months, i.e. 20-28 doses, so both are inside precedent.
+
+    SUPERSEDED 2026-10-31 (section M): the 0.30 brain reach was read off a total brain:plasma ratio; measured human selinexor CSF gives
+    0.09, at which this schedule never clears. Kept as the record of what the earlier claim depended on; see the test below."""
     from dataclasses import replace
     from canine_dsp import lymphoma_sustained as S, lymphoma_joint as J
     from canine_dsp.core import lymphoma_grounded as G
@@ -545,3 +550,36 @@ def test_the_japanese_prodrug_is_recorded_as_being_discontinued_not_merely_unapp
     assert status == S.NO_US_APPROVAL
     for phrase in ("discontinued", "INTERMITTENT", "not lymphoma", "Sch 4 para 7", "21 CFR 511"):
         assert phrase in why, phrase
+
+
+def test_measured_selinexor_csf_removes_the_brain_redundancy_and_moves_the_b_cell_dose_count_above_canine_precedent():
+    """Section M (2026-10-31). A human CSF measurement of selinexor (0.6% of total plasma; CSF / unbound plasma 0.09, Blood 2025;146
+    (Suppl 1):3550) replaces the 0.30 verdinexor brain reach, which had been read off a TOTAL brain:plasma ratio. Consequences:
+    (1) the reported every-21-day schedule (20 B / 11-12 T doses at the pessimistic IC50) depended on 0.30 and never clears at 0.09;
+    (2) both brains still close with more frequent methotrexate -- T-cell inside canine precedent (<= 28 doses) at every IC50,
+    and its window does not depend on verdinexor at all; B-cell needs 29-45 doses, above the 20-28 dogs have received."""
+    from canine_dsp import lymphoma_sustained as S
+    m = S.VERDINEXOR_CNS_ACCESS_MEASURED
+    assert abs(m - 0.919 / (204.67 * 0.05)) < 0.005
+    # (1) the old schedule needed the superseded number
+    assert S.lawful_brain_window("B", interval_days=21, verdinexor_access=S.VERDINEXOR_CNS_ACCESS_SUPERSEDED)[1] <= 22
+    assert S.lawful_brain_window("B", interval_days=21) is None
+    assert S.lawful_brain_window("T", interval_days=21) is None
+    # (2) T-cell brain closes inside precedent at the pessimistic IC50, independent of verdinexor
+    t = S.lawful_brain_window("T", interval_days=10)
+    assert t is not None and t[1] <= S.DOG_IT_DOSES_PRECEDENT_MAX
+    assert S.lawful_brain_window("T", interval_days=10, verdinexor_access=0.0) == t
+    # B-cell brain closes, but every closing schedule exceeds the canine dose precedent
+    for interval, ic50 in ((10, 118.0), (14, 14.0), (14, 2.5)):
+        b = S.lawful_brain_window("B", interval_days=interval, ic50_nM=ic50)
+        assert b is not None and b[1] > S.DOG_IT_DOSES_PRECEDENT_MAX, (interval, ic50, b)
+    assert S.lawful_brain_window("B", interval_days=14, ic50_nM=118.0) is None
+
+
+def test_audit_names_the_b_cell_intrathecal_dose_count_as_the_one_failing_input():
+    """After section M the audit's failing() is no longer empty: the B-cell brain closes only with more intrathecal doses than any dog
+    series has received, and that tolerability has no basis yet. The T-cell brain's dose count is inside precedent and passes."""
+    from canine_dsp import lymphoma_standard_audit as A
+    names = [i.name for i in A.failing()]
+    assert len(names) == 1 and names[0].startswith("B: tolerability of")
+    assert all(i.passes for i in A.lawful_brain_items() if i.name.startswith("T:"))

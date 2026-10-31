@@ -579,3 +579,28 @@ The full cross-jurisdiction pass (`docs/universe/SWEEP_import.md`) corrects two 
 **And the decisive pharmacological point: the lawful injectable route reaches the CSF better than the oral prodrug.** Measured CSF cytarabine after intravenous infusion in dogs is **8.3 uM**, against the **derived 0.3-1.4 uM** time-average for the oral prodrug (section K.6). So the prodrug's only real advantage is convenience — a tablet at home with a 23-29 h half-life — not exposure. There is one new canine clinical data point for it (a pet dog with MDS treated in Japan, PMID 15084010), which is worth recording but does not change this.
 
 **Net: the Japan-only prodrug is not needed, not better in the compartment that matters, not lawfully obtainable in the US outside a trial, not obtainable in the EU at all, and is being withdrawn by its maker. It stays out.**
+
+## M. New-treatment sweep, 31 Oct 2026: nothing new to prescribe, but a new measurement weakens the brain closure (user: "Do a deep search to see if there's any new treatment came out since last time we looked at this")
+
+Report: `docs/reports/Canine lymphoma new treatments 2026.md`; notes: `docs/research_notes/Canine lymphoma new treatments 2026/` (five sweeps, a verification pass, and `model_rerun_selinexor_csf.md`). Code: `lymphoma_sustained.VERDINEXOR_CNS_ACCESS_MEASURED`, `lawful_brain_window`, `DOG_IT_DOSES_PRECEDENT_MAX`; `lymphoma_standard_audit.lawful_brain_items`; tests in `tests/test_lymphoma_universe.py`.
+
+### M.1 New treatments: none that changes the lawful menu
+- **No new veterinary approval, licence or launch** for canine lymphoma anywhere, 1-31 Oct 2026 (EMA veterinary committee 6-8 Oct issued no oncology opinion). Laverdia went on sale in the US on 23 Sep 2026 (launch, not a new approval).
+- **No new FDA approval for any T-lineage lymphoma** in 2025-2026; no FDA approval for CNS lymphoma. Axi-cel's label restriction against primary CNS lymphoma was lifted on 6 Feb 2026 (human autologous product; no path to dogs). Tirabrutinib has an FDA decision date of 18 Dec 2026; if approved it becomes extra-label usable, with no canine data.
+- **Dog trials, changed status:** the LEAH Labs canine CD20 CAR-T (Minnesota, Missouri; Ohio State per sponsor) is **open and enrolling** again (pages read 31 Oct; the record had it on hold). Readiness for canine CAR-T moves from "on hold" to B (in dog trials, enrolling). Outcome data: two dogs in remission after intranodal infusion, both relapsed months later (press only). **New to the record:** ORBIT (Minnesota; oncolytic VSV then anti-PD-1; accepts T-cell dogs), Zoetis subcutaneous canine anti-CD20 (16 dogs, B-cell depletion at 5-10 mg/kg; abstract), Tufts/NCI anti-CD20 + doxorubicin + TAK-981/KPT-9274/RV1001 (>70 dogs; news release), Bellingham adoptive T cells after CHOP (82 dogs, PMID 42833272).
+- **Lawful but never evaluated:** denileukin diftitox-cxdl (Lymphir; FDA 2024) has canine in-vivo dosing data (PMIDs 16920555, 22173275) and human ORR ~16% in PTCL. Not added to the catalogue in this pass.
+- **Closes off a route:** canine TRBC1 and TRBC2 have no extracellular sequence difference (PMID 41236719), so TRBC1/TRBC2-selective antibodies or CAR-T cannot work in dogs.
+
+### M.2 The measurement that matters: selinexor in human CSF
+MSZ trial (Blood 2025;146(Suppl 1):3550; primary abstract text): selinexor CSF 0.919 ng/mL at plasma 204.67 ng/mL, stable CSF:plasma ~0.6% from 4 to 25 h. With 95% protein binding (Xpovio label), CSF/unbound plasma = **0.09**. The closure had used verdinexor brain reach **0.30**, set below the rodent/monkey TOTAL brain:plasma 0.60-0.72 (PMID 27323910), which counts tissue-bound drug. Under rule 14 the compartment measurement outranks it, even though it is worse. Grade TRANSFERRED (sister compound, CSF not parenchyma, abstract without the number sampled).
+
+### M.3 Consequences (re-run, pinned by tests)
+| | old (reach 0.30, every 21 d, pessimistic IC50) | at measured reach 0.09 |
+|---|---|---|
+| T-cell brain | 11-12 doses / 241 d | **closes, 17-24 doses / 241 d** (every 10-14 d), inside canine precedent (20-28); does not depend on verdinexor at all |
+| B-cell brain | 20 doses / 420 d | **closes in the model, 29-45 doses / 409-451 d** (every 10-14 d), **above canine precedent** |
+| every-21-day schedule | closes | **never closes** (either lineage) |
+
+- **K.4 is superseded:** the brain closure is no longer redundant. The every-21-day schedule needed both inputs; at the measured reach the brain rests on the intrathecal methotrexate.
+- **`failing()` is no longer empty.** It returns one item: **B-cell brain, tolerability of 29-45 intrathecal doses**, graded ASSUMED (no canine series beyond 28 doses, no written human transfer yet). The cheapest route to clearing it is a written transfer from human long-course intrathecal / Ommaya precedent, or a canine port series with more doses; neither has been searched yet.
+- Bodies (B and T, 168 d verdinexor) are unchanged.
