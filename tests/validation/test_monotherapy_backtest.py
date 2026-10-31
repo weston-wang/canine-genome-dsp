@@ -177,15 +177,59 @@ def test_the_verdict_is_qualified_not_a_blanket_pass_or_fail():
 
 def test_validation_changes_no_analysis_module():
     """The separation the user asked for, enforced: this package may import from the analysis but
-    must not be imported BY it, or a validation failure could alter a frozen finding."""
+    must not be imported BY it, or a validation failure could alter a frozen finding.
+
+    FIXED 2026-10-31. This test had been RED since the melanoma benchmark landed (0b3a846,
+    2026-08-02), and it was the test that was wrong, not the code. The old heuristic asked whether
+    the substring "validation" appeared anywhere in a module with an "import" within 200 characters
+    before it -- so `from .clinical_validation import (...)` in melanoma_benchmark.py tripped it.
+    `clinical_validation` is a sibling ANALYSIS module; the package this guard protects against is
+    `canine_dsp.validation`. A guard that cannot tell those apart is worse than no guard: it had
+    been failing for three months, which is how long the invariant went unchecked.
+
+    Now it matches the import statement itself, so the real rule is enforced: no module under
+    src/canine_dsp/ may import the validation package, by any of its spellings.
+    """
     import pathlib
+    import re
 
     src = pathlib.Path(__file__).resolve().parents[2] / "src" / "canine_dsp"
-    offenders = [
-        p.name for p in src.glob("*.py")
-        if "validation" in p.read_text() and "import" in p.read_text().split("validation")[0][-200:]
-    ]
-    assert offenders == []
+    # `from .validation import x`, `from canine_dsp.validation import x`, `import
+    # canine_dsp.validation`, `from . import validation` -- but NOT `.clinical_validation`.
+    pattern = re.compile(
+        r"^\s*(?:from\s+(?:\.|canine_dsp\.)validation(?:\.\w+)*\s+import"
+        r"|import\s+canine_dsp\.validation"
+        r"|from\s+\.\s+import\s+(?:[\w,\s]*\b)?validation\b)",
+        re.MULTILINE,
+    )
+    offenders = sorted(p.name for p in src.glob("*.py") if pattern.search(p.read_text()))
+    assert offenders == [], offenders
+
+
+def test_the_separation_guard_can_actually_detect_a_violation():
+    """A guard is only worth its green tick if it fails on the thing it claims to catch. The old
+    one passed nothing and failed on a false positive; this pins both directions."""
+    import re
+
+    pattern = re.compile(
+        r"^\s*(?:from\s+(?:\.|canine_dsp\.)validation(?:\.\w+)*\s+import"
+        r"|import\s+canine_dsp\.validation"
+        r"|from\s+\.\s+import\s+(?:[\w,\s]*\b)?validation\b)",
+        re.MULTILINE,
+    )
+    # must CATCH these
+    for bad in ("from .validation import monotherapy_backtest\n",
+                "from canine_dsp.validation import monotherapy_backtest\n",
+                "from .validation.monotherapy_backtest import EXTINCTION_RERUN\n",
+                "import canine_dsp.validation\n",
+                "from . import validation\n"):
+        assert pattern.search(bad), bad
+    # must NOT catch these -- the false positive that kept this test red, plus ordinary prose
+    for ok in ("from .clinical_validation import clinical_utility_rank\n",
+                "from .melanoma_data import ARMS\n",
+                '"""Weak falsification test, not patient-level validation."""\n',
+                'full = summary["randomized_arm_validation"]["full_dsp_stack"]\n'):
+        assert not pattern.search(ok), ok
 
 
 # --- the extinction follow-up ---

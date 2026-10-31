@@ -98,11 +98,18 @@ Durability is therefore reached in **two moves**:
   is quantitative: per-day kill rates, CNS access, and the growth-rate bar.
 - **The claim is now scoped to a stated catalogue, not an unstated one.** Two audits were added
   after the above was first written, both required by the project's own rule 9:
-  `candidate_universe` enumerates **25 therapy-modality classes** (15 in the model, 10 excluded
+  `candidate_universe` enumerates **26 therapy-modality classes** (15 in the model, 11 excluded
   with a recorded reason, **0 unassessed**), and `escape_audit` derives the escape list
   independently of the one in hand, finding **4 route gaps** the original twelve missed —
   so the audited count is **16 escapes**. The honest headline is therefore "closed within this
-  catalogue of 25 modality classes and 16 escape routes", with the exclusions named.
+  catalogue of 26 modality classes and 16 escape routes", with the exclusions named.
+
+  Updated 2026-10-31: it was 25 classes until a literature sweep found a 26th that had never been
+  enumerated at all — live bacterial vector / intracellular delivery, in use in a funded dog trial in
+  this disease. That is the rule-9 failure this module exists to catch, and it was caught by looking
+  rather than by remembering. The class was carried as a declared hole for a day, then excluded on a
+  derived site mismatch (hypoxia-driven tropism versus a non-hypoxic target site). "0 unassessed" is
+  true again by assessment, not by deletion.
   The most important of the four new routes is structural rather than biological: **six of the
   twelve original closures rest on one agent class** (the microtubule cytotoxic), whose resistance
   mechanism — ABCB1/ABCG2 efflux — is *measured present* in canine HS lines in the same paper that

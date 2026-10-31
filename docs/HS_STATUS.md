@@ -250,7 +250,7 @@ check) **fails identically on the clean tree** and is unrelated to this work.
 
 | Gap | Closed by | Result |
 |---|---|---|
-| Therapy universe never enumerated (rule 9) | new `candidate_universe.py` + tests | **25 modality classes, 0 unassessed.** 15 in model, 10 excluded with recorded reasons. Newly assessed: ADCs, bispecific engagers, marrow transplant, oncolytic virus |
+| Therapy universe never enumerated (rule 9) | new `candidate_universe.py` + tests | **25 modality classes, 0 unassessed.** 15 in model, 10 excluded with recorded reasons. [**Superseded 2026-10-31: a 26th class was found unenumerated and is now excluded — 26 classes, 11 excluded. See the end of this file.**] Newly assessed: ADCs, bispecific engagers, marrow transplant, oncolytic virus |
 | Escape list never independently audited (rule 9) | new `escape_audit.py` + tests | **18 candidates enumerated from outside the project; 4 new route gaps found → 16 audited escapes.** All 4 close on a measurement, a justified transfer or a structural argument; none on a bare assumption |
 | CSF prior assumed at 0.70 | `emergence.csf_reach_fail_terms()` | **Derived 0.428 [0.24, 0.69]**, decomposed into pharmacologic (0.12) × delivery (0.35). CSF durability rises 0.33 → **0.434**. Dominant risk is now correctly named as **sustained delivery, not potency** |
 | "Recurrent minority" label | `genotype_tiered_durability`, `maintenance_durability` | Corrected to **≤62.8% region-level** (upper bound on MTAP-null), with the stain still the gate |
@@ -281,7 +281,7 @@ scientifically sound."*
 | Part | Verdict | Basis (where) |
 |---|---|---|
 | Clearing the first tumour | **Holds within a now-stated catalogue.** Every escape has a closing agent: of the original 12, 7 measured in canine HS, 2 transferred, 1 model-derived, 2 structural, **0 assumed**; all 45 pairs and 120 triples covered; toxicity budgets computed, one collision (radiation + CNS microtubule agent) resolved by sequencing. The 4 audit-added routes close on 1 measurement-backed drug choice, 2 transfers, 1 structural argument | `CONSOLIDATED_REPORT.md`, `coverage_assessment`, `escape_audit` |
-| "Every mechanism" | **Now established, as a scoped claim.** "Closed within this catalogue of **25 modality classes and 16 escape routes**", 0 classes unassessed, 10 excluded with reasons named. Not the same as "every conceivable mechanism" — it is a claim whose boundary is written down | `candidate_universe.closure_claim()`, `escape_audit` |
+| "Every mechanism" | **Now established, as a scoped claim.** "Closed within this catalogue of **25 modality classes and 16 escape routes**", 0 classes unassessed, 10 excluded with reasons named. [**Superseded 2026-10-31: 26 classes, 11 excluded.**] Not the same as "every conceivable mechanism" — it is a claim whose boundary is written down | `candidate_universe.closure_claim()`, `escape_audit` |
 | Staying clear for 10 years | **Scientifically sound hypothesis, not a result.** Model P(10-year), systemic sites: 0.56–0.72 without monitoring, 0.81–0.86 with detect-and-switch. Brain-local hinges on drug access. **CSF now 0.434 [0.17, 0.69]** on a derived rather than assumed prior, and the binding constraint there is sustained delivery (no intrathecal sustained-release product exists), not potency | `emergence.py`; `maintenance_durability.csf_answer()` |
 | Oct 2026 literature | **No change to the design.** PRMT5 brain arm weaker, CDK4/6 brain arm better evidenced on the same deletion (section A); the deletion is common (62.8%), which widens coverage; the immune floor is weaker in MTAP-null tumours | sections A, B |
 | Largest uncertainty | **How often a cleared, predisposed dog throws a new primary (Λ)** — 50–90% of the variance. Not a drug question | `emergence.py` value-of-information |
@@ -1374,3 +1374,84 @@ injecting them into that venv:
 
 `torch` is still absent, so `tests/test_hybrid_rnn.py` and `tests/test_vaccine_eval.py` cannot be
 collected here. Neither touches the HS analysis.
+
+## Closing the open items, 2026-10-31 (end of day)
+
+### The bacterial-vector class is now GRADED, and the catalogue is back to zero unassessed
+
+It was carried at NOT_ASSESSED for the day it took to read its access mechanism at primary source.
+It is now **EXCLUDED on KILL_CONTRADICTED**, and the ground is a *derived site mismatch*, not absent
+canine data:
+
+- Bacterial tumour tropism is documented as driven by **hypoxia, necrosis and aberrant vasculature**,
+  with hypoxic/necrotic regions described as the preferred colonisation sites; engineered obligate
+  anaerobes are built to replicate strictly in necrotic cores and explicitly **not** to persist in
+  normoxic tissue.
+- In the one directly relevant brain study the bacteria **do not cross an intact barrier at all**:
+  *Salmonella* colonises the hypoxic region and **recruits neutrophils**, and the payload crosses by
+  hitchhiking them (PMC9978951, mouse glioma, 8x10^6 CFU).
+- The site that decides this case is the **invading edge behind an intact barrier** — the least
+  hypoxic, least necrotic compartment, and the one this tropism does not select for. No search found
+  colonisation measured at a normoxic margin or invasive front in any species.
+- Second, independent ground: it **cannot be co-administered**. The MSU protocol excludes
+  immunosuppressants, systemic antibiotics, neutropenia and any prior anti-cancer treatment, while
+  this programme runs continuous myelosuppressive maintenance at 95% marrow after debulking and
+  radiation. Years of a live attenuated bacterium in a myelosuppressed dog is a listeriosis exposure.
+- **Falsifiable, and the test is named:** a measured colonisation or payload-expression figure in
+  gadolinium-non-enhancing tumour tissue, in any species, defeats the ground directly. The hypoxic
+  core of the extra-axial mass is where the class retains a theoretical role — not the compartment
+  the decade turns on.
+
+Catalogue now reads **26 classes — 15 in model, 11 excluded, 0 unassessed** (6 kill-contradicted, 3
+defeated-by-escape, 2 toxicity-unaffordable). Zero again by **assessment**, not by deleting the row;
+`KNOWN_OPEN_CLASSES` stays in the code so the next hole can be carried honestly.
+
+### The PRMT5-class CNS question is graded, and the answer does not change the ordering
+
+Both claims checked at source, and they point in opposite directions:
+
+- AMG 193's first-in-human paper calls it a **"CNS-penetrant"** MTA-cooperative PRMT5 inhibitor
+  (PMID 39293516). That is an **author descriptor, not a measured brain or tumour concentration**,
+  and it does not displace the one **measured** CNS efficacy datum in the class, which is
+  **negative**: TNG462's 0/23 PR in glioblastoma. Penetrance is not activity. Where they conflict
+  within a class, the measured brain outcome wins — rule 14 applied in the unflattering direction.
+  **The CNS lead stays CDK4/6.**
+- What AMG 193 does add is on the toxicity axis, and it is material: complete intratumoral PRMT5
+  inhibition in paired MTAP-deleted biopsies at >=480 mg with ctDNA clearance, and **no clinically
+  significant myelosuppression** — the opposite of niraparib's grade 4 thrombocytopenia, against a
+  marrow axis at 95%. That bears on *which* MTAP-directed agent to ask a sponsor for, not on whether
+  to lead with one.
+- The experiment that would change the brain ordering is named and running: **NCT06883747**. Until it
+  reports, the MTAP arm stays systemic-first and **C7 stays open**.
+
+### COTC033 eligibility: not verifiable from this environment, and it does not matter
+
+Three routes tried and recorded: the Studypages listing is fully client-rendered (42 KB of HTML, five
+lines of visible text, no eligibility content server-side); the CSU URL 301-redirects there;
+web.archive.org has a snapshot from 2026-03-11 but is **blocked by this environment's egress policy**,
+to both curl and WebFetch. PubMed has no COTC033 design paper. So the eligibility numbers quoted
+earlier (15-60 kg, 2-12 cm biopsy-accessible tumour, the four excluded diagnoses) remain
+**search-summary level and must not be quoted as verified**.
+
+What IS primary-verified is the part the conclusion rests on: the mechanism paper (PMID 40280970,
+*npj Vaccines* 2025) is explicitly about **INTRATUMORAL** injection of licensed vaccines, in mice.
+A weekly intratumoral course into an accessible mass is not a route to a primary intracranial
+extra-axial tumour, so the trial is out of scope for this case on the route alone, regardless of the
+weight and size thresholds. Anyone with browser access should confirm the eligibility text directly.
+
+### Test suite: green, with nothing excluded
+
+**834 passed, 0 failed.** The one long-standing failure was a bug in the guard, not the code:
+`test_validation_changes_no_analysis_module` substring-matched the word "validation", so
+`from .clinical_validation import (...)` in `melanoma_benchmark.py` tripped it — a sibling ANALYSIS
+module, not the `canine_dsp.validation` package the guard protects against. It had been red since
+2026-08-02, meaning the separation went unverified for three months. The guard now matches the import
+statement itself, and a companion test pins both directions (it must catch all five real spellings
+and must not catch `clinical_validation` or prose). The real invariant **holds**: no analysis module
+imports the validation package.
+
+Environment: `torch` is now installed in the pytest venv too, so `test_hybrid_rnn.py` and
+`test_vaccine_eval.py` run rather than being skipped. Full recipe:
+
+    uv pip install --python /root/.local/share/uv/tools/pytest/bin/python numpy pandas scipy scikit-learn
+    uv pip install --python /root/.local/share/uv/tools/pytest/bin/python torch --index-url https://download.pytorch.org/whl/cpu

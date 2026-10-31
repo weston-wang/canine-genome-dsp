@@ -6,22 +6,30 @@ from canine_dsp import candidate_universe as cu, escape_audit as ea
 def test_no_modality_class_is_left_unassessed():
     """The failure this module exists to prevent: claiming closure over a list with holes in it.
 
-    This assertion was `== []` until the 2026-10-31 literature sweep found a class the universe had
-    never enumerated -- live bacterial vector / intracellular delivery -- while a funded dog trial
-    in THIS disease was already using it. The honest fix is to carry the hole, not to hide it: the
-    test now pins exactly which class is open, so a second hole still fails, and closing this one
-    means grading it (rule 13 ground, or a derived transfer) rather than deleting the row.
+    History, because it is the point: this was `== []` until the 2026-10-31 sweep found a class the
+    universe had never enumerated (live bacterial vector), while a funded dog trial in THIS disease
+    was already using it. It was carried as a declared hole for the day it took to read the access
+    mechanism at primary source, then EXCLUDED on a derived site mismatch. So it is `== []` again by
+    ASSESSMENT rather than by deleting the row -- and KNOWN_OPEN_CLASSES still exists, so the next
+    hole can be carried honestly instead of forcing that choice again.
     """
-    open_classes = {m.name for m in cu.not_assessed()}
-    assert open_classes == {"live bacterial vector / intracellular delivery platform"}, open_classes
+    assert cu.not_assessed() == []
+    assert cu.KNOWN_OPEN_CLASSES == ()
 
 
-def test_the_open_class_names_the_measurement_that_would_settle_it():
-    """Rule 14: an unassessed class is only honest if it says what would assess it."""
-    m = next(iter(cu.not_assessed()))
-    assert "NON-ENHANCING" in m.basis, "the rule-14 proxy must be named"
-    assert "RULE-9 HOLE" in m.basis
-    assert m.exclusion_ground is None, "it is not excluded; it is unassessed"
+def test_the_bacterial_vector_class_is_excluded_on_a_site_mismatch_not_on_absent_canine_data():
+    """Rule 13: the ground must be scientific. This one is a derived mismatch between a documented
+    hypoxia-driven tropism and a target site that is the least hypoxic part of the tumour."""
+    m = next(x for x in cu.UNIVERSE if x.name.startswith("live bacterial vector"))
+    assert m.status is cu.Status.EXCLUDED
+    assert m.exclusion_ground is cu.ExclusionGround.KILL_CONTRADICTED
+    for phrase in ("HYPOXIA", "INVADING EDGE BEHIND AN INTACT BARRIER", "WHAT WOULD REOPEN IT",
+                   "hitchhiking"):
+        assert phrase in m.basis, phrase
+    # the exclusion must stay falsifiable and must not rest on missing dog data
+    assert "NON-ENHANCING" in m.basis
+    assert m in cu.excluded()
+    assert cu.excluded_citing_absent_canine_data() == []
 
 
 def test_every_excluded_class_records_a_reason():

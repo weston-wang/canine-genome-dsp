@@ -547,33 +547,53 @@ UNIVERSE: tuple[Modality, ...] = (
     ),
     Modality(
         "live bacterial vector / intracellular delivery platform",
-        Status.NOT_ASSESSED,
+        Status.EXCLUDED,
         "attenuated Listeria monocytogenes-derived 'quasiorganelles' delivering a genetic payload "
         "into tumour and immune cells (MSU pilot in dogs with HS, Morris Animal Foundation "
-        "26CAANEI-0062, start 2026-01-31); Listeria-vectored cancer immunotherapy in humans",
-        "A RULE-9 HOLE FOUND BY THE 2026-10-31 LITERATURE SWEEP, recorded rather than quietly "
-        "graded. This class was absent from the 25-class universe entirely -- not excluded, not "
-        "in the model, simply never enumerated, while an actively enrolling dog trial uses it in "
-        "THIS DISEASE. It cannot be excluded under rule 13: its kill is not contradicted, no named "
-        "escape defeats it, and no toxicity budget is blown; and 'no canine data' is exactly the "
-        "ground rule 13 forbids. It cannot be put in the model either, because no dose, kill rate "
-        "or exposure exists for it in any species at this site, so any margin would be ASSUMED. "
-        "WHAT WOULD SETTLE IT, in rule-14 form: the proxy for 'reaches the invading edge' is "
-        "measured bacterial colonisation of, or payload expression in, gadolinium-NON-ENHANCING "
-        "brain tumour tissue. Searched only far enough to establish that the modality is "
-        "clinical-stage in humans (>160 indexed trial-linked reports for Listeria/Salmonella "
-        "vectored cancer immunotherapy, and a brain-tumour literature) -- NOT far enough to grade "
-        "it. Until that search is run and a transfer is derived or refused, the honest catalogue "
-        "statement is 25 classes assessed and 1 open, not 'zero unassessed'.",
+        "26CAANEI-0062, start 2026-01-31); Listeria- and Salmonella-vectored cancer immunotherapy "
+        "in humans (axalimogene filolisbac, VNP20009, Clostridium novyi-NT)",
+        "FOUND AS A RULE-9 HOLE on 2026-10-31 -- the class was absent from the universe entirely "
+        "while an enrolling dog trial used it in THIS DISEASE -- then ASSESSED and excluded on "
+        "2026-10-31 once its access mechanism was read at primary source. It was carried at "
+        "NOT_ASSESSED in between, deliberately, rather than graded on a guess. "
+        "THE GROUND IS A DERIVED SITE MISMATCH, not absent canine data. Bacterial tumour tropism is "
+        "documented as driven by HYPOXIA, NECROSIS and aberrant vasculature, with hypoxic/necrotic "
+        "regions described as the preferred sites of colonisation; engineered obligate anaerobes are "
+        "built to replicate strictly in necrotic cores and explicitly NOT to persist in normoxic "
+        "tissue. In the one directly relevant brain study the bacteria do not themselves cross an "
+        "intact barrier at all: attenuated Salmonella colonises the hypoxic region, repolarises "
+        "macrophages, downregulates P-gp and RECRUITS NEUTROPHILS, and the payload crosses by "
+        "hitchhiking those neutrophils (PMC9978951, Acta Pharm Sin B, mouse glioma, 8e6 CFU). "
+        "The site that decides this case is the INVADING EDGE BEHIND AN INTACT BARRIER -- the least "
+        "hypoxic, least necrotic part of the tumour, and the one compartment this tropism does not "
+        "select for. So the kill at the site that matters is contradicted by the mechanism's own "
+        "documented behaviour, which is what ExclusionGround.KILL_CONTRADICTED means by 'at this "
+        "site'. No search found colonisation measured at a normoxic tumour margin or invasive front "
+        "in any species. "
+        "A SECOND, INDEPENDENT GROUND, recorded because it would bite even if access were solved: "
+        "the class cannot be CO-ADMINISTERED with this programme. The MSU protocol excludes "
+        "immunosuppressants, systemic antibiotics within 14 days, neutropenia and immune-mediated "
+        "disease, and any prior anti-cancer treatment (no chemotherapy within 14 days, no radiation "
+        "within 30) -- while this programme runs continuous myelosuppressive maintenance at 95% of "
+        "the marrow axis after debulking and radiation. A live attenuated bacterium given for years "
+        "to a myelosuppressed dog is a listeriosis/sepsis exposure, not a tolerable addition. "
+        "WHAT WOULD REOPEN IT, stated so the exclusion is falsifiable: a measured colonisation or "
+        "payload-expression figure in gadolinium-NON-ENHANCING tumour tissue, in any species. That "
+        "would defeat the site-mismatch ground directly. The hypoxic/necrotic CORE of the "
+        "extra-axial mass is the one compartment where this class retains a theoretical role, the "
+        "same way the ADC exclusion retains a leptomeningeal note -- and that is not the compartment "
+        "the decade turns on.",
         "None for this case. The MSU pilot is the first administration to dogs with naturally "
-        "occurring HS; it is a systemic INFUSION, and its eligibility (visible tumour, up to 5 "
-        "lesions, summed longest dimensions <15 cm, 20 kg minimum, and NO prior anti-cancer "
-        "treatment -- no chemotherapy within 14 days, no radiation within 30) excludes a dog "
-        "treated on this programme's own induction, and does not address an intracranial site.",
+        "occurring HS and has not reported. Its own framing -- 'tested in laboratory and preclinical "
+        "studies but not yet in dogs with naturally occurring cancer' -- is the honest status. "
+        "Human experience is also cautionary rather than supportive: reviews record that the "
+        "attenuation required for safety compromised antitumour immunity and that early clinical "
+        "trials did not reproduce preclinical success.",
         Availability.EXISTS_TODAY,
         "Obtainable TODAY through a named, funded, enrolling dog trial in this disease -- which is "
-        "why leaving the class unenumerated was a defect. Availability is not the open question; "
-        "access behind an intact barrier and a gradeable kill are.",
+        "why leaving the class unenumerated was a defect, and why the exclusion rests on site "
+        "access and co-administration rather than on availability.",
+        ExclusionGround.KILL_CONTRADICTED,
     ),
     Modality(
         "autophagy inhibition",
@@ -636,13 +656,11 @@ UNIVERSE: tuple[Modality, ...] = (
 
 #: A class may sit at NOT_ASSESSED only by being named here. The import-time guard below still
 #: raises for any unassessed class that is NOT on this list, so the thing it was built to stop --
-#: a SILENT hole in the catalogue -- still fails loudly. What changed on 2026-10-31 is that a hole
-#: was found (see the live-bacterial-vector entry) and the choice was between carrying it visibly
-#: and deleting the row to keep a green invariant. Deleting it would have been failure 4 in
-#: CLAUDE.md: claiming a closure over a universe that was never enumerated. Every name here must
-#: also appear in the report's catalogue line as an open class, and removing a name means GRADING
-#: the class, not forgetting it.
-KNOWN_OPEN_CLASSES = ("live bacterial vector / intracellular delivery platform",)
+#: a SILENT hole in the catalogue -- still fails loudly. The list was non-empty for one day: the
+#: live-bacterial-vector class was found missing on 2026-10-31, carried here while its access
+#: mechanism was read at primary source, and then EXCLUDED on a derived site mismatch the same day.
+#: It is empty again by ASSESSMENT, not by deleting the row, which is the distinction that matters.
+KNOWN_OPEN_CLASSES: tuple[str, ...] = ()
 
 
 def _validate() -> None:
