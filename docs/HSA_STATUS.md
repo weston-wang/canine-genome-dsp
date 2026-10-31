@@ -430,8 +430,81 @@ measured sensitivity. Do not describe this margin as comfortable.
   2–4 years before a tumour appears; Phase 3 testing eBAT as prevention in test-positives. This is the
   screening arm plus the early-eBAT closure being run together. Institutional reporting, not
   peer-reviewed, so not folded into any figure.
+  - **2026-10-31 UPDATE — an abstract exists and its contents could NOT be read.** A prevention-arm
+    interim readout appears to sit in the **VCS 2026 abstract supplement**: PMID **42767940**,
+    *Vet Comp Oncol* 2026;24 Suppl 3:4–41, doi 10.1111/vco.70098, conference 24–26 Sept 2026. The
+    **citation is verified real and correctly characterised** — title, journal and year agree across
+    PubMed, Europe PMC and Semantic Scholar. The **contents are not reachable from this session**:
+    Europe PMC has `isOpenAccess: N`, `inEPMC: N` and a zero-length abstract, and Semantic Scholar
+    returns no abstract and points at the same Wiley BRONZE PDF.
+  - **Numbers circulating for it are UNVERIFIED and must not be folded into any figure.** A search
+    agent read, from search-engine snippets of the Wiley landing page only: 15 test-positive high-risk
+    healthy dogs given eBAT vs 78 untreated test-positive controls, hemangiosarcoma in 2/15 (13%) vs
+    52/78 (67%), p=0.01, eBAT safe with minor self-limiting events. Non-randomised, small,
+    abstract-level. **Not confirmed against the primary text.** Two specific contamination risks were
+    identified: (i) figures of "1 CR, 3 PR, 1 SD, 1 PD, metastasis-specific PFS 163.5 d" belong to a
+    DIFFERENT abstract in the same supplement (metastatic osteosarcoma on TDI + autologous vaccination
+    + gilvetmab, median PFS 111 d, OS 138 d) and must not be credited to eBAT; (ii) the "78 controls"
+    denominator may be confused with the separate 78-dog eBAT cohort in PMID 39330834.
+  - **To close it:** institutional or library access to doi 10.1111/vco.70098, or ask the Modiano lab.
+    **Do not re-run these routes, all of which failed:** WebFetch of the Wiley `/doi/`, `/doi/full/`
+    and `/doi/pdfdirect/` paths; doi.org (302 to the same blocked host); curl with a browser
+    user-agent (403); r.jina.ai (Cloudflare interstitial); archive.org Wayback (no snapshot);
+    Europe PMC and Semantic Scholar (confirmed above, metadata only).
 
 ---
+
+## Sweep of 2026-10-31 — INCOMPLETE, and what the one angle that ran found
+
+**The sweep did not run.** An 11-angle workflow was launched; **55 of 56 agents failed on the
+account's 5-hour usage limit**. One angle completed (eBAT / uPAR / toxin-based agents). Nothing was
+adversarially verified, no completeness critic ran, and there is **no synthesis**. Treat everything
+below as leads from a single un-cross-checked angle, not as findings. Re-running is
+`Workflow({scriptPath: '…/hsa-treatment-sweep-oct2026-wf_c02b2899-67e.js', resumeFromRunId:
+'wf_c02b2899-67e'})`, which replays the completed agent from cache and re-runs the 55 that failed.
+
+**Angles that never ran:** canine HSA trials, canine vaccines (incl. the GD3 randomised trial and
+VACCS), canine checkpoint, human angiosarcoma, early detection, CNS agents, ferroptosis/GPX4,
+preprints, modality classes not in the plan, and the combination-levers question. **So this sweep says
+nothing about the GD3 randomised vaccine trial or VACCS.**
+
+### Leads from the eBAT/uPAR angle — none verified, none folded into any figure
+
+| PMID | what it is | why it might matter |
+|---|---|---|
+| **42767940** | VCS 2026 abstracts | the Shine On prevention readout; see the entry above — citation real, contents unreadable, numbers unverified |
+| **39330834** | eBAT toxicity profile, *Toxins* 2024;16(9):376, **PMC11436214 open** | the dose-headroom document for a plan component: liver fails first, uPAR-knockout gives a clean on-target/off-target separation, and it names a **"species-optimized eBAT"** (dog-matched construct) the record does not mention. If the plan's eBAT exposure is limited by cross-species ligand affinity, a caninised construct changes the dose–response |
+| **26286429** | uPAR/uPA immunohistochemistry in canine vascular endothelial tumours | reported as uPAR positivity across canine HSAs **including splenic** — would let the eBAT coverage term be SET rather than discounted |
+| **23553371** | eBAT kills HSA **and its cancer-stem-cell subpopulation** | uPAR arm reported to kill without an expression threshold; CSC compartment costs ~2 logs of IC50 |
+| **42835716** | uPAR-directed immunotherapies review, *Front Pharmacol*, 2026-09-21 | identifies uPAR as a **fifth** independently druggable microenvironment lever via a senescence-associated uPAR+ stromal niche, and names a uPAR multi-epitope **vaccine** as an existing modality class |
+| **42701183** | cytokine fusion proteins review, *J Hematol Oncol*, 2026-09-05 | a named path for the record's **UNASSESSED "cytokine agents"** class |
+| **42043033** | targeted toxin therapy in glioma, *Toxins* 2026 | delivery literature for getting a protein toxin into the CNS compartment; reports late-phase failures were **delivery, receptor heterogeneity and trial design rather than insufficient potency** |
+| **40100321** | uPA/uPAR cyclic-peptide radiotheranostic, mice | a systemically administered radioligand is **not geometry-limited the way external-beam radiation is** — which is the specific ground on which field radiation was excluded, so this is the shape of evidence that could reopen that exclusion |
+| **40700925** | uPAR small-molecule inhibitors review | an orally dosable, chronically administrable form factor on the plan's existing uPAR axis — the shape a decade of maintenance needs and an IV liver-limited protein toxin cannot supply |
+
+### Negative results worth keeping
+
+- **There is no full peer-reviewed eBAT paper published in 2026 at all.** The only 2026 eBAT item in
+  existence is the VCS abstract. The eBAT literature is exhaustively enumerated: Europe PMC
+  "eBAT AND hemangiosarcoma" returns exactly 17 records, PubMed "eBAT dogs" exactly 5.
+- **No eBAT preprints** on bioRxiv/medRxiv, and none on uPAR in canine or vascular sarcoma.
+- **No commercialisation signal** — "eBAT" appears in no corporate filing; no FDA CVM conditional
+  pathway found. Access remains investigator-held at the University of Minnesota via the Shine On
+  continuation and a compassionate-care arm. **That is an access constraint on a plan component**, not
+  a scientific one, and it is not currently recorded anywhere else.
+- Other unread abstract supplements behind the same Wiley wall: PMID 42767961 (ESVONC 2026),
+  41796044 (VCS 2025).
+
+### Search-method lessons (save the next thread the same dead ends)
+
+- The **bioRxiv MCP server cannot keyword-search** — date and category only. Use Europe PMC with
+  `SRC_TYPE:PPR` for preprints instead.
+- **PubMed's MCP server ANDs every term**, so long queries return zero. Use 2–4 terms.
+- **Never put a year in a PubMed query string** — it is ANDed as a term and kills the query.
+- PubMed mangles `CAR T` into `car t[Author]`; use `chimeric antigen receptor`.
+- Zero-result queries already tried: "Shine On hemangiosarcoma prevention trial"; "PLAUR canine
+  hemangiosarcoma expression"; "suPAR dog hemangiosarcoma biomarker"; "uPAR PET imaging AE105
+  micrometastasis"; "EGFR uPAR hemangiosarcoma microenvironment".
 
 ## Published reports
 
