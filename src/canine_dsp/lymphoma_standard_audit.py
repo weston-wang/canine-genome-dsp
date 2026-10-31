@@ -168,6 +168,7 @@ def routes_not_counted() -> list:
         Item("brain closure on 20 (B) / 11-12 (T) intrathecal doses every 21 days", "CONTRADICTED", False,
              "needed verdinexor brain reach 0.30, read off a TOTAL brain:plasma ratio; measured human selinexor CSF / unbound plasma "
              "is 0.09 (Blood 2025;146 Suppl 1:3550), at which this schedule never clears (section M)"),
-        Item("T-cell brain from existing agents", "OPEN", False,
-             "dormant lineage needs ~8 years of oral cytarabine in T-cell disease; CD7/CD5 CAR-T has no dog program found"),
+        Item("T-cell brain by the section-I route (sustained oral cytarabine or CD7/CD5 CAR-T, no intrathecal methotrexate)", "OPEN", False,
+             "dormant lineage needs ~8 years of oral cytarabine in T-cell disease; CD7/CD5 CAR-T has no dog program found. The T-cell "
+             "brain itself closes by radiation + intrathecal methotrexate (sections J, M); this lists only the set-aside route"),
     ]
