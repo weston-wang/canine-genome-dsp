@@ -1110,3 +1110,68 @@ catalytic-core identity and the non-enhancing-access argument from DMG all stand
 ever derived from the ORR. It does mean the phrase "licensed 2025" should not be read as "efficacy
 established": it is an accelerated approval on 50 patients at ~20% ORR, publicly debated. The
 division-independent route still has no published tumour concentration.
+
+### The best single find of the sweep: a LICENSED pan-RAF whose approved indication is a brain tumour
+
+The MAPK axis is the maintenance arm for the ~59% driver majority, and its brain branch has been the
+project's weakest row: cobimetinib's brain headroom is 0.5x and mirdametinib's canine ratio is
+unmeasured. The record had **no pan-RAF member at all** -- "pan-RAF" appeared nowhere in the
+repository before today, and the old escape audit's successor for MAPK reactivation above the block
+was "an ERK1/2 inhibitor or a pan-RAF inhibitor, neither of which has canine PK, a canine HS IC50, or
+a canine brain:plasma ratio."
+
+**Tovorafenib** (DAY101 / TAK-580 / MLN2480), type II RAF inhibitor, verified via PubMed:
+
+- **FDA-approved for paediatric BRAF-altered glioma** — listed with dabrafenib+trametinib and
+  vorasidenib among the approvals for low-grade glioma (PMID 41201564, *CNS Drugs* 2025,
+  [DOI](https://doi.org/10.1007/s40263-025-01238-9)). A licensed MAPK-axis agent whose indication is
+  a BRAIN tumour is precisely what every MEK member in this class lacks.
+- Phase 2 FIREFLY-1: **ORR 67%** by RANO-HGG in BRAF-altered pLGG, with response **independent of
+  histology, of BRAF alteration type (fusion vs mutation), of prior lines of therapy, and of PRIOR
+  MAPK-PATHWAY INHIBITOR USE** — that last clause bears directly on the reroute escape. Its
+  **CNS-penetration properties** are the stated reason the SIOPe-BTG-LGG group took it into a
+  first-line phase 3 (LOGGIC/FIREFLY-2, NCT05566795; PMID 38291372,
+  [DOI](https://doi.org/10.1186/s12885-024-11820-x)).
+- Type I RAF inhibitors are ineffective against BRAF fusions and can paradoxically drive growth;
+  type II works there. Dose **once weekly**, 420 mg/m2 capped at 600 mg.
+- Also in **phase 2 for recurrent/refractory Langerhans cell histiocytosis** (NCT05828069,
+  recruiting) — inside the histiocytic family this project transfers from.
+
+**It does not close the brain branch, and is not recorded as doing so.** Two limits: the clinical
+evidence is in **BRAF-altered** tumours while canine HS is PTPN11/SHP2 (~56%) and KRAS (~3%) driven
+with BRAF under 1% — a type II RAF inhibitor acts on RAF *dimers*, which is the mechanistically right
+node for RAS-driven signalling, but that is a mechanism argument rather than the trial result; and
+once-weekly dosing carries the same tension with continuous presence as dordaviprone. No canine PK,
+HS IC50 or brain:plasma ratio exists. Recorded in `candidate_universe` as a listed exists-today
+option on the MAPK axis, not as a graded closure.
+
+### CDK axis: two brain-penetrant agents entering the clinic, both absent from the record
+
+Relevant to escape A15 (acquired RB1 loss / **CDK2-cyclin E bypass**), whose only recorded successor
+is a switch to the Rb-independent arm:
+
+- **AL-605** (Alaw Therapeutics), a selective **brain-penetrant CDK2 inhibitor** aimed at
+  CCNE1-amplified tumours and CDK2-mediated CDK4/6 resistance — **Phase 1a/b dosing began May 2026**.
+  Its sister **AL-433**, a brain-penetrant **CDK4** inhibitor, was slated for first-in-human in Q4
+  2026. A CDK2 agent that reaches brain would address the cyclin-E half of A15 directly rather than
+  by switching arms.
+- **Atirmociclib (PF-07220060)**, CDK4-selective and largely CDK6-sparing, hypothesised to reduce
+  neutropenia — potentially relevant to the 95%-loaded marrow axis, but **no CNS or glioma data was
+  found**, so it is a lead only.
+- Class constraint worth recording: selective CDK2 agents need >100x selectivity over CDK1 to support
+  chronic dosing, which is the relevant bar for indefinite maintenance. Others in development:
+  INX-315, AZD8421, PF-07104091, INCB123667. None approved.
+
+These are company-announcement and landscape-level sources, not peer-reviewed readouts, so they are
+recorded as leads and nothing is graded from them.
+
+### Human histiocytic neoplasms: one trial that enrolls histiocytic sarcoma itself
+
+- **MSK 23-282**, phase 2 of **ulixertinib** (ERK1/2) in histiocytic neoplasms, with **Erdheim-Chester
+  disease, LCH, Rosai-Dorfman and HISTIOCYTIC SARCOMA** among eligible conditions, adults 18+.
+  Ulixertinib is already in the record as an ERK-class agent; this trial, which enrols HS itself, was
+  not. It is the closest human clinical-stage evidence for the ERK arm in this disease.
+- Also noted: a paediatric basket trial covering CNS tumours and histiocytic disorders (ivosidenib);
+  a trametinib trial in refractory paediatric histiocytosis in Poland due to end March 2026; and a
+  case series restating that no standard treatment for human HS is established (3/9 complete
+  remission then relapse, 3/9 stable, 2/9 progressive).

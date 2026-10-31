@@ -188,9 +188,27 @@ UNIVERSE: tuple[Modality, ...] = (
     Modality(
         "targeted small molecules -- MAPK axis (MEK/ERK/SHP2)",
         Status.IN_MODEL,
-        "trametinib / cobimetinib / mirdametinib",
+        "trametinib / cobimetinib / mirdametinib; tovorafenib as the licensed pan-RAF option",
         "The maintenance arm for the ~59% MAPK-driver majority. Site-split: closes the lung "
-        "systemically; brain closure depends on unmeasured canine CNS access.",
+        "systemically; brain closure depends on unmeasured canine CNS access. "
+        "ADDED 2026-10-31 -- a pan-RAF member, which this class did not list and the project had "
+        "nowhere: TOVORAFENIB (DAY101/TAK-580/MLN2480), a type II RAF inhibitor, is FDA-APPROVED for "
+        "paediatric BRAF-altered glioma (PMID 41201564) -- i.e. a licensed MAPK-axis agent whose "
+        "approved indication is a BRAIN TUMOUR, which is exactly what the MEK members lack. Phase 2 "
+        "FIREFLY-1 gave ORR 67% by RANO-HGG, with response INDEPENDENT of histology, of BRAF "
+        "alteration type, of prior lines, and -- load-bearing for the reroute escape -- of PRIOR "
+        "MAPK-PATHWAY INHIBITOR USE; its CNS-penetration properties are the stated reason it was "
+        "taken into a first-line phase 3 (PMID 38291372, NCT05566795). It is also in phase 2 for "
+        "recurrent/refractory Langerhans cell histiocytosis (NCT05828069), i.e. inside the "
+        "histiocytic family this project transfers from. "
+        "TWO HONEST LIMITS, both of which stop this from closing the brain branch today: (1) the "
+        "clinical evidence is in BRAF-ALTERED tumours, whereas canine HS is PTPN11/SHP2 (~56%) and "
+        "KRAS (~3%) driven with BRAF under 1% -- a type II RAF inhibitor acts on RAF DIMERS, which is "
+        "the mechanistically right place for RAS-driven signalling, but that is a mechanism argument, "
+        "not the trial result; (2) dosing is ONCE WEEKLY (420 mg/m2, cap 600 mg), the same tension "
+        "with continuous presence that dordaviprone carries. No canine PK, HS IC50 or brain:plasma "
+        "ratio exists for it. So it enters as a LISTED EXISTS-TODAY OPTION on this axis, not as a "
+        "graded closure of the brain branch.",
         "MEASURED: canine HS sensitivity surveyed; a canine Phase I exists (trametinib), ~30% of "
         "dogs underdosed at the MTD.",
         Availability.EXISTS_TODAY,
