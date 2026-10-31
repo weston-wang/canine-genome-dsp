@@ -1175,3 +1175,65 @@ recorded as leads and nothing is graded from them.
   a trametinib trial in refractory paediatric histiocytosis in Poland due to end March 2026; and a
   case series restating that no standard treatment for human HS is established (3/9 complete
   remission then relapse, 3/9 stable, 2/9 progressive).
+
+### PARP angle: a brain-penetrant PARP1-SELECTIVE agent, which speaks to the marrow collision
+
+The tightest cost in the programme is the marrow axis: niraparib + ribociclib together use **95% of
+it, 5% headroom**, so nothing else myelosuppressive joins without a dose reduction. Niraparib is a
+PARP1/2 inhibitor, and PARP2 inhibition is the part associated with haematotoxicity. Absent from the
+record entirely before today:
+
+- **AZD9574** — "Preclinical Characterization of AZD9574, a **Blood-Brain Barrier Penetrant
+  Inhibitor of PARP1**" (PMID 37967136, *Clin Cancer Res* 2024;30:1338-51,
+  [DOI](https://doi.org/10.1158/1078-0432.CCR-23-2094), AstraZeneca). PARP1-selective by
+  fluorescence anisotropy, PARylation and PARP-DNA trapping; **BBB penetration demonstrated in vivo
+  in mouse, rat AND monkey**; **haematotoxicity explicitly evaluated in rat** for monotherapy and in
+  combination; in an MGMT-methylated **orthotopic glioma** model, AZD9574 + temozolomide extended
+  survival over temozolomide alone. The authors' claim is "best-in-class PARP inhibitor for the
+  treatment of primary and secondary brain tumors". **Phase I: NCT05417594.**
+- Supporting, and relevant to two escapes: in H3K27M diffuse midline glioma — dordaviprone's own
+  indication — PARP inhibition radiosensitises an HRR-defective tumour and **induces NKG2D ligand
+  expression with NK-cell-mediated lysis, with NK cells REQUIRED for efficacy**; AZD9574 compares
+  favourably to olaparib in a syngeneic orthotopic model (PMID 39253432, bioRxiv preprint, **not
+  peer reviewed**).
+
+Why it is worth recording rather than filing: the project's PARP arm carries the Rb-independent kill
+and the MTAP/PRMT5 axis, and its binding cost is marrow. A PARP1-selective agent is the one
+modification that could keep that mechanism while loosening the 95% collision, and it is
+brain-penetrant in three species. **Tier: NEAR_FUTURE** (phase I, no veterinary access, no canine
+data), so it changes nothing today and is not written into the model. The honest next step is to
+price AZD9574 on the marrow axis against niraparib's 0.50 load and see whether the collision eases.
+Note also that the NKG2D-ligand induction cuts against escape A19's shedding arm, which is a
+tension worth testing rather than a resolution.
+
+### Three angles that found nothing which changes anything
+
+- **CNS delivery.** 2026 work is incremental and does not touch the device arithmetic. Neuronavigated
+  focused-ultrasound BBB opening was reported in three children with relapsed diffuse midline glioma
+  (*Sci Transl Med*, doi 10.1126/scitranslmed.adq6645); mouse cerebellar FUS raised antibody delivery
+  about twofold with restoration of barrier integrity by 12 h (PMID 42547692); a UVA trial posted
+  results in Oct 2026 on raising doxorubicin accumulation. Enhancement factors remain in the 2-10x
+  band the project already models, so **5.9 x 0.021 = 0.124 against a required 0.196 still holds** and
+  devices stay a backup rather than a requirement.
+- **Canine immunotherapy.** No 2026 licensing decision found. Gilvetmab's USDA conditional approval
+  is already in the record. New to the record but changing no closure, because the programme
+  deliberately does not rely on the immune arm: a chimeric anti-PD-L1 (c4G12) in veterinary trials, a
+  caninized anti-CTLA-4 (ca1C5) positioned as salvage after anti-PD-L1 failure, a multicentre
+  caninized anti-PD-1 (ca-4F12-E6) melanoma preprint, and canine CAR-T work reporting **CD20 loss**
+  with tandem CARs in development to counter antigen escape.
+- **Reopen-excluded sweep.** **No exclusion is overturned.** The 2026 bispecific-engager and
+  oncolytic-virus combinations in glioblastoma are preclinical (*Mol Ther Oncology* Apr 2026, PMID
+  42094336; *Nat Commun* Apr 2026), which is below the near-future bar for a mechanism with no
+  clinical evidence in this disease family. The one clinical datum, a 2026 AACR review of phase I
+  CAR-T in malignant brain tumours (PMID 42806401), reports feasibility and early radiographic
+  activity alongside **antigen loss and treatment-linked myeloid suppression** — i.e. it confirms the
+  two grounds the project already cites rather than defeating them. Nothing was found on
+  haematopoietic stem-cell transplant in this setting.
+
+### Sweep closed, 2026-10-31
+
+All fourteen angles are now run: one by the parallel workflow before it was rate-limited, thirteen by
+hand. **No enumerated escape route changed status and no condition closed.** What changed is the
+catalogue (one class added as open, one exclusion flagged for re-test), the strength of two existing
+rows (niraparib's access transfer, the MAPK axis gaining a licensed brain-indicated pan-RAF), and a
+list of named near-future agents that would improve specific weak rows if they reach a dog.
