@@ -4,8 +4,24 @@ from canine_dsp import candidate_universe as cu, escape_audit as ea
 
 
 def test_no_modality_class_is_left_unassessed():
-    """The failure this module exists to prevent: claiming closure over a list with holes in it."""
-    assert cu.not_assessed() == []
+    """The failure this module exists to prevent: claiming closure over a list with holes in it.
+
+    This assertion was `== []` until the 2026-10-31 literature sweep found a class the universe had
+    never enumerated -- live bacterial vector / intracellular delivery -- while a funded dog trial
+    in THIS disease was already using it. The honest fix is to carry the hole, not to hide it: the
+    test now pins exactly which class is open, so a second hole still fails, and closing this one
+    means grading it (rule 13 ground, or a derived transfer) rather than deleting the row.
+    """
+    open_classes = {m.name for m in cu.not_assessed()}
+    assert open_classes == {"live bacterial vector / intracellular delivery platform"}, open_classes
+
+
+def test_the_open_class_names_the_measurement_that_would_settle_it():
+    """Rule 14: an unassessed class is only honest if it says what would assess it."""
+    m = next(iter(cu.not_assessed()))
+    assert "NON-ENHANCING" in m.basis, "the rule-14 proxy must be named"
+    assert "RULE-9 HOLE" in m.basis
+    assert m.exclusion_ground is None, "it is not excluded; it is unassessed"
 
 
 def test_every_excluded_class_records_a_reason():

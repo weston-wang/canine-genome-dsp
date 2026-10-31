@@ -888,3 +888,78 @@ toxicity priced; a conjunction, not odds; 11 + 3 + 0 agents with nothing theoret
 qualification remains and it concerns the licensed-only variant, not the closure.
 
 788 analysis tests pass.
+
+## Literature sweep, 2026-10-31 — one rule-9 hole found, and nothing that changes a route
+
+A 14-angle sweep was launched against the record as frozen in early October 2026. **13 of the 14
+angles never ran**: an account rate limit killed them before they reported. One angle (canine HS
+direct) completed 16 queries first, and everything below comes from it plus the verification done
+by hand afterwards. So this entry is a PARTIAL pass, and the unrun angles are listed at the end as
+still-open search work, not as searched-and-clean.
+
+### The one finding that changes the record: a modality class that was never enumerated
+
+`candidate_universe` had **no live-bacterial-vector class** — not excluded, not in the model, simply
+absent — while a funded pilot was already enrolling dogs with this disease using one. That is the
+rule-9 failure the module exists to prevent, so the class is now carried explicitly:
+
+- **Study:** "Pilot Study for a New Quasiorganelle Therapy in Dogs with Histiocytic Sarcoma",
+  Michigan State University; PI Christopher Contag; Morris Animal Foundation study
+  **26CAANEI-0062**, $120,000, start **2026-01-31**, listed active.
+- **What it is:** attenuated, non-pathogenic *Listeria monocytogenes*-derived "quasiorganelles"
+  delivering genetic payloads into tumour and immune cells. Group 1 (8 dogs) therapy alone; group 2
+  (8 dogs) the same plus a gene-therapy payload. Systemic **infusion**, weekly x4 then 2 weeks off,
+  three cycles, 16 weeks total.
+- **Eligibility that matters for scope:** confirmed HS incl. hemophagocytic; **visible tumour, up to
+  5 lesions, summed longest dimensions <15 cm**; >=20 kg; VCOG PS <=2. Excludes **any prior
+  anti-cancer treatment** (no chemotherapy within 14 days, no radiation within 30), concurrent
+  endocrine or kidney disease, immunosuppressants or systemic antibiotics within 14 days,
+  neutropenia or immune-mediated disease.
+- **Why it is NOT_ASSESSED rather than graded.** It cannot be excluded under rule 13: its kill is
+  not contradicted, no named escape defeats it, no toxicity budget is blown, and "no canine data" is
+  the one ground rule 13 forbids. It cannot enter the model either: no dose, kill rate or exposure
+  exists for it at this site in any species, so any margin would be ASSUMED. The modality IS
+  clinical-stage in humans (>160 indexed trial-linked reports for *Listeria*/*Salmonella*-vectored
+  cancer immunotherapy, plus a brain-tumour literature), which is why it is a real class and not a
+  theoretical one.
+- **What would settle it, in rule-14 form:** measured bacterial colonisation of, or payload
+  expression in, **gadolinium-non-enhancing brain tumour tissue**. That search has not been run.
+- **Scope note (rule 10):** as written the trial does not apply to this case. It is a systemic
+  infusion with no CNS-access figure, its eligibility requires visible measurable lesions, and its
+  no-prior-treatment rule excludes a dog that has had this programme's own debulking and radiation.
+
+Consequence: the catalogue line is now **26 classes — 15 in model, 10 excluded, 1 open**, in
+`docs/CONSOLIDATED_REPORT.md` and in `candidate_universe.KNOWN_OPEN_CLASSES`. The import-time guard
+still raises for any unassessed class not on that list, so a *silent* hole still fails loudly.
+
+### Found, verified, and NOT new: the canine trametinib phase I
+
+PMID **38889903** (Takada et al., *Vet Comp Oncol*) — 18 dogs, MTD **0.5 mg/m2/day PO**, ~70% reach
+an average steady-state 10 ng/mL, saturable elimination, grade 3 DLTs (hypertension, proteinuria,
+lethargy, ALP), and **target engagement not observed** in day-0/day-7 biopsies. Already cited in
+`pkpd.py`, `candidate_universe.py` and `availability_tiers.py`; its numbers are already the
+`TRAMETINIB_*` constants. Recorded here only so a later thread does not re-report it as a discovery.
+
+### Found, absent from the record, but ruled out for this case on route
+
+**COTC033 "Repurposing Vaccine Immunity to Treat Cancers: Validation in Canine Patients"** (CSU /
+NCI-COTC). Intramuscular Shingrix or Gardasil-9 priming, randomised against rabies vaccine, then
+**weekly intratumoral injection x8**. Eligibility: 15-60 kg, tumour **2-12 cm and accessible for
+biopsy**; excludes mast cell tumour, thyroid carcinoma, lymphoma, cutaneous hemangiosarcoma; HS is
+listed among the enrolling tumour types. Mechanism paper PMID **40280970** / DOI
+10.1038/s41541-025-01131-y (*npj Vaccines*, Apr 2025): **murine** TC-1 model in prevaccinated mice,
+Shingrix intratumoral injection often inducing regression and resistance to re-challenge, driven by
+gE-specific CD4 T cells, with a dual-flank experiment clearing the non-injected tumour.
+
+Why it does not move this case: the route is weekly intratumoral injection into an accessible 2-12 cm
+mass, which a primary intracranial extra-axial tumour is not, and the abscopal result needs an
+injectable second lesion that non-disseminated disease by definition does not have. It is a real
+exists-today canine delivery route for the vaccine class in ACCESSIBLE disease — indirect here.
+
+### Angles that did NOT run, and must not be read as searched
+
+MTAP/PRMT5/MAT2A clinical readouts (bears on C7); the CDK axis incl. CDK2 and CDK4-selective agents;
+ClpP/imipridones after the 2025 approval; PARP and DNA repair; CNS delivery; regulatory actions since
+September 2026; canine immunotherapy; preprints; evidence that would reopen an excluded class; the
+non-enhancing-tumour access proxy across all drug classes; the MAPK-brain weak row; and the ChEMBL
+target sweep. Each remains unsearched as of this entry.

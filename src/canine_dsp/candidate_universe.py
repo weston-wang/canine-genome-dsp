@@ -516,6 +516,36 @@ UNIVERSE: tuple[Modality, ...] = (
         ExclusionGround.KILL_CONTRADICTED,
     ),
     Modality(
+        "live bacterial vector / intracellular delivery platform",
+        Status.NOT_ASSESSED,
+        "attenuated Listeria monocytogenes-derived 'quasiorganelles' delivering a genetic payload "
+        "into tumour and immune cells (MSU pilot in dogs with HS, Morris Animal Foundation "
+        "26CAANEI-0062, start 2026-01-31); Listeria-vectored cancer immunotherapy in humans",
+        "A RULE-9 HOLE FOUND BY THE 2026-10-31 LITERATURE SWEEP, recorded rather than quietly "
+        "graded. This class was absent from the 25-class universe entirely -- not excluded, not "
+        "in the model, simply never enumerated, while an actively enrolling dog trial uses it in "
+        "THIS DISEASE. It cannot be excluded under rule 13: its kill is not contradicted, no named "
+        "escape defeats it, and no toxicity budget is blown; and 'no canine data' is exactly the "
+        "ground rule 13 forbids. It cannot be put in the model either, because no dose, kill rate "
+        "or exposure exists for it in any species at this site, so any margin would be ASSUMED. "
+        "WHAT WOULD SETTLE IT, in rule-14 form: the proxy for 'reaches the invading edge' is "
+        "measured bacterial colonisation of, or payload expression in, gadolinium-NON-ENHANCING "
+        "brain tumour tissue. Searched only far enough to establish that the modality is "
+        "clinical-stage in humans (>160 indexed trial-linked reports for Listeria/Salmonella "
+        "vectored cancer immunotherapy, and a brain-tumour literature) -- NOT far enough to grade "
+        "it. Until that search is run and a transfer is derived or refused, the honest catalogue "
+        "statement is 25 classes assessed and 1 open, not 'zero unassessed'.",
+        "None for this case. The MSU pilot is the first administration to dogs with naturally "
+        "occurring HS; it is a systemic INFUSION, and its eligibility (visible tumour, up to 5 "
+        "lesions, summed longest dimensions <15 cm, 20 kg minimum, and NO prior anti-cancer "
+        "treatment -- no chemotherapy within 14 days, no radiation within 30) excludes a dog "
+        "treated on this programme's own induction, and does not address an intracranial site.",
+        Availability.EXISTS_TODAY,
+        "Obtainable TODAY through a named, funded, enrolling dog trial in this disease -- which is "
+        "why leaving the class unenumerated was a defect. Availability is not the open question; "
+        "access behind an intact barrier and a gradeable kill are.",
+    ),
+    Modality(
         "autophagy inhibition",
         Status.IN_MODEL,
         "hydroxychloroquine",
@@ -574,13 +604,29 @@ UNIVERSE: tuple[Modality, ...] = (
 )
 
 
+#: A class may sit at NOT_ASSESSED only by being named here. The import-time guard below still
+#: raises for any unassessed class that is NOT on this list, so the thing it was built to stop --
+#: a SILENT hole in the catalogue -- still fails loudly. What changed on 2026-10-31 is that a hole
+#: was found (see the live-bacterial-vector entry) and the choice was between carrying it visibly
+#: and deleting the row to keep a green invariant. Deleting it would have been failure 4 in
+#: CLAUDE.md: claiming a closure over a universe that was never enumerated. Every name here must
+#: also appear in the report's catalogue line as an open class, and removing a name means GRADING
+#: the class, not forgetting it.
+KNOWN_OPEN_CLASSES = ("live bacterial vector / intracellular delivery platform",)
+
+
 def _validate() -> None:
     names = [m.name for m in UNIVERSE]
     if len(names) != len(set(names)):
         raise ValueError("duplicate modality names")
-    if any(m.status is Status.NOT_ASSESSED for m in UNIVERSE):
-        unassessed = [m.name for m in UNIVERSE if m.status is Status.NOT_ASSESSED]
-        raise ValueError(f"rule 9 violated: modality classes left unassessed: {unassessed}")
+    undeclared = [m.name for m in UNIVERSE
+                  if m.status is Status.NOT_ASSESSED and m.name not in KNOWN_OPEN_CLASSES]
+    if undeclared:
+        raise ValueError(f"rule 9 violated: modality classes left unassessed: {undeclared}")
+    stale = [n for n in KNOWN_OPEN_CLASSES
+             if n not in {m.name for m in UNIVERSE if m.status is Status.NOT_ASSESSED}]
+    if stale:
+        raise ValueError(f"KNOWN_OPEN_CLASSES names a class that is no longer open: {stale}")
     # Rule 13: an exclusion without one of the three admissible grounds is not an exclusion.
     ungrounded = [m.name for m in UNIVERSE
                   if m.status is Status.EXCLUDED and m.exclusion_ground is None]

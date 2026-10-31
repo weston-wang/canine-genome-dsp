@@ -32,10 +32,14 @@ checklist, not a probability.
 | Items previously mis-reported as open | 9, each now graded and guarded | same |
 | Growth bar beaten | 0.055 / day | same |
 
-**Catalogue the claim is made over:** 25 therapy-modality classes — 15 in the model, 10 excluded, **0
-unassessed** — and 16 escape routes from an independent audit. No class is excluded for lacking canine
+**Catalogue the claim is made over:** 26 therapy-modality classes — 15 in the model, 10 excluded, **1
+open** — and 16 escape routes from an independent audit. No class is excluded for lacking canine
 data; each exclusion rests on a contradicted kill (5), a named escape that defeats it (3), or a
-toxicity budget it would blow (2).
+toxicity budget it would blow (2). The one open class is **live bacterial vector / intracellular
+delivery** — attenuated *Listeria*-derived carriers, the subject of a funded pilot now enrolling dogs
+with this disease. It was never enumerated, so it is carried as open rather than graded: it has no
+dose or kill in any species at this site, and what would settle it is a measured colonisation or
+payload-expression figure in gadolinium-non-enhancing brain tumour.
 
 **Conditions:** eight, **six met**. The two outstanding are a pre-treatment immunostain and sponsor
 access to a compound already in human trials. Neither is an engineering problem.
