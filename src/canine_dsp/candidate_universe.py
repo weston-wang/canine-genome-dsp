@@ -311,7 +311,19 @@ UNIVERSE: tuple[Modality, ...] = (
         "1000-fold access deficit, so the derived kill at that site is below the growth bar whatever "
         "the payload -- the kill is contradicted by arithmetic, not by missing data. Retains a "
         "theoretical role in the leptomeningeal/blood-side compartment, where antibody access is "
-        "0.01 -- still an order of magnitude below the liposome that is already there.",
+        "0.01 -- still an order of magnitude below the liposome that is already there. "
+        "FLAGGED FOR RE-TEST, 2026-10-31. This ground is an INFERENCE INTO the compartment (a "
+        "generic antibody-access figure scaled by a payload advantage), and rule 14 says a "
+        "measurement in the compartment at issue outranks any inference into it. A Phase 0/1 trial "
+        "of a B7-H3-directed ADC in recurrent grade 4 glioma and brain metastases is now recruiting "
+        "(GSK5764227, NCT07268053, start 2026-02-11), and its Phase 0 design selects the surgical "
+        "window by the highest median unbound PAYLOAD concentration in gadolinium-NON-ENHANCING "
+        "tissue -- i.e. it measures exactly the quantity this exclusion currently infers, for the "
+        "payload rather than the antibody. B7-H3 is also a plausible histiocytic target. The "
+        "exclusion stands for now, because no concentration has been reported and the arithmetic is "
+        "the best estimate available; but when that trial reports, this ground must be recomputed "
+        "against the measured payload figure rather than defended. Recorded so the re-test is not "
+        "left to memory.",
         "None in canine HS. The exclusion does not rest on that: it rests on the compartment access "
         "figures, which are measured and already in the model.",
         Availability.NEAR_FUTURE,

@@ -963,3 +963,103 @@ ClpP/imipridones after the 2025 approval; PARP and DNA repair; CNS delivery; reg
 September 2026; canine immunotherapy; preprints; evidence that would reopen an excluded class; the
 non-enhancing-tumour access proxy across all drug classes; the MAPK-brain weak row; and the ChEMBL
 target sweep. Each remains unsearched as of this entry.
+
+## Literature sweep part 2, 2026-10-31 — four verified new items, none of which opens a route
+
+The parallel sweep hit the account rate limit twice (reset moved 11:20 -> 18:50 UTC), so the
+remaining angles were run by hand, sequentially. Below is what has been verified at primary source.
+Angles still unrun are listed at the end. **No enumerated escape route changed status.**
+
+### Verified NEW: a CNS trial for the MTAP-directed class — the condition the record itself set
+
+`maintenance_durability` says of the brain site: *"neither [PRMT5i nor MAT2A i] has human CNS
+activity data (TNG908 failed on CNS exposure; TNG462 0/23 PR in glioblastoma; TNG456 mouse-only) ...
+add an MTAP-directed agent when one reads out in the CNS."* That trial now exists and is running:
+
+- **NCT06883747** — "A Phase 0/1 Study of **BMS-986504**, a MTA Cooperative PRMT5 Inhibitor in
+  Recurrent Glioblastoma Participants With **MTAP Deleted** Tumors Scheduled for Resection to
+  Evaluate **Central Nervous System (CNS) Penetration** With PK-Trigger". Early Phase 1, n=12,
+  sponsor Nader Sanai, **RECRUITING**, start 2025-04-28, last updated 2026-06-25. Phase 0 entry
+  requires archival tissue with NGS-confirmed MTAP loss.
+
+Why it matters here: this is the same Phase 0 "trigger" design, from the same centre, that produced
+the ribociclib non-enhancing-tumour measurement this project calls its strongest input. It is aimed
+at this tumour's own germline lesion. It does not change a closure today -- no readout -- but it is
+the named experiment behind **C7**, and it turns "add one when it reads out in the CNS" from a wish
+into a dated, identifiable trial. BMS-986504/MRTX1719 was already in the record for its *resistance*
+biology (`emergence.py`); the CNS trial was not.
+
+### Verified NEW: niraparib's access transfer got stronger, and the honest limit did not move
+
+Already in the record (do NOT re-report): fractions unbound 0.05 brain / 0.16 plasma, PMID 38657366,
+NCT05076513 ongoing, and the statement that there is **no published unbound tumour concentration**,
+which is why niraparib closes structurally rather than by a computed margin. Still true. New:
+
+- **PMID 41023116** (*Sci Rep* 2025;15:33670, [DOI](https://doi.org/10.1038/s41598-025-18255-9),
+  29 Sep 2025, GSK): multimodal imaging across healthy non-human-primate brain, mouse glioblastoma
+  and mouse brain metastasis finds **niraparib superior to olaparib** at crossing the barrier,
+  distributing through brain, and accumulating in tumour lesions. This matters specifically because
+  the MTAP-genotype evidence in the record is an **olaparib** result -- so the drug actually in the
+  programme is the better-penetrating member of the pair, not a hopeful substitution for it.
+- **NCT06388733** — niraparib vs temozolomide, newly diagnosed MGMT-unmethylated glioblastoma,
+  **PHASE 3**, Ivy Brain Tumor Center, active (not recruiting). The drug has advanced past the
+  Phase 0 trigger to a randomised phase 3 in a brain tumour.
+
+Neither is a tumour concentration, so **neither converts the row into a computed margin** and the
+licensed-only variant still closes 12 of 16 routes structurally. Recorded in
+`availability_tiers.py` next to the limit it does not lift.
+
+Not verified at source: an ASCO 2023 abstract (JCO 41:16_suppl:2069) is reported to give a mean
+unbound niraparib of **253.2 nM in non-enhancing tumour** in 32 evaluable patients, with all 35
+clearing a >5x-IC50 PK trigger. ascopubs.org returned 403 to two fetch attempts, so this figure is
+**second-hand and must not be used** until the abstract or its full publication is read directly. If
+it holds, it is exactly the number that would give the licensed-only variant its computed margin.
+
+### Verified NEW: the ADC exclusion now has a measurement aimed at the quantity it infers
+
+The ADC class is excluded on this project's own arithmetic -- antibody access to invaded parenchyma
+0.001 against a required 0.196, "the kill is contradicted by arithmetic, not by missing data". That
+ground is an **inference into** the compartment, and rule 14 ranks a measurement in the compartment
+above any inference into it.
+
+- **NCT07268053** — Phase 0/1 with expansion of **GSK5764227**, a **B7-H3-targeted ADC**, in
+  recurrent grade 4 glioma and brain metastases. n=15, sponsor Nader Sanai, **RECRUITING**, start
+  2026-02-11. Its Phase 0 defines the optimal surgical window by the **highest median unbound
+  PAYLOAD concentration in gadolinium-non-enhancing tissue**, and only PK-positive participants
+  proceed.
+
+So the exact quantity the exclusion infers -- payload, not antibody, in non-enhancing tumour -- is
+being measured. The exclusion **stands for now** (no concentration reported; the arithmetic remains
+the best available estimate), but it is flagged in `candidate_universe` for recomputation rather
+than defence when that trial reports. B7-H3 is also a plausible histiocytic target.
+
+### Searched, verified, NOTHING new
+
+- **Regulatory actions, Sept-Oct 2026.** No new FDA approval or conditional approval of a canine
+  cancer drug. Laverdia (verdinexor) received **full** approval in Jan 2026 after four conditional
+  renewals -- oral canine lymphoma, not relevant here. CannEpil (canine bone-cancer pain) got only a
+  CVM determination that the conditional pathway applies, 5 Oct 2026, with a presubmission meeting
+  set for 19 Nov 2026; it is not an antineoplastic. LOY-002 is a lifespan drug, not a cancer drug.
+- **MTAP/PRMT5/MAT2A readouts.** Nothing beyond what the record already holds (AMG 193 ORR 21.4%
+  n=80 DoR 8.3 mo; IDE397 38%/30% PR; TNG908 CNS exposure failure; TNG462 0/23 PR in GBM; TNG456
+  mouse-only; documented PRMT5i resistance by MAPK reprogramming with collateral MEK sensitivity).
+  The only addition is the CNS trial above.
+
+### Bacterial-vector access: the evidence found so far runs AGAINST the class at this site
+
+Relevant to the open class recorded earlier today. At search-summary level (the primary MDPI paper
+returned 403): attenuated *Salmonella* A1-R work describes the organism as **poorly penetrating the
+blood-brain barrier**, with investigators using **intracranial** delivery to bypass it; a 2025
+VNP20009 glioblastoma study demonstrates preferential accumulation in **subcutaneous** xenografts and
+states that brain distribution, persistence and BBB interaction still need investigation; and
+*Listeria* brain colonisation is reported to require prolonged bacteraemia of 10^2-10^3 CFU/mL. No
+study was found reporting brain-tumour CFU after systemic dosing with an intact barrier. This is
+**not yet a grading** -- it is search-summary level on a class whose status is NOT_ASSESSED, and it
+needs the primary sources read before the ground is written.
+
+### Angles still unrun
+
+ClpP/imipridones after the 2025 approval; the CDK axis (CDK2, CDK4-selective); PARP beyond niraparib;
+CNS delivery devices; canine immunotherapy; preprints; the remainder of the reopen-excluded sweep
+(bispecifics, HSCT, oncolytic, cytokines, epigenetic, ferroptosis, CSF1R, alkylators, metabolic);
+human histiocytic neoplasms; the MAPK-brain weak row; and the ChEMBL target sweep.

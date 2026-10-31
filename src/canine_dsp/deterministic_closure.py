@@ -507,7 +507,9 @@ def goal_verdict() -> dict:
             "Phase III (paxalisib), human Phase I/II (the PRMT5 anchor), and a published compound "
             "with measured rodent brain PK (RGN3067)",
             "an unbound tumour concentration for niraparib or dordaviprone, which would give the "
-            "licensed-only variant a computed margin too (NCT05076513 is already running)",
+            "licensed-only variant a computed margin too (NCT05076513 is already running; as of "
+            "2026-10-31 still no published concentration, but niraparib has advanced to a "
+            "randomised phase 3 in glioblastoma, NCT06388733)",
             "a measured brain concentration on the PI3K arm, where the licensed option's access is "
             "a transfer and a different agent on that axis was measured undetectable",
         ],
