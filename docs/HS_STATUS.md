@@ -1063,3 +1063,50 @@ ClpP/imipridones after the 2025 approval; the CDK axis (CDK2, CDK4-selective); P
 CNS delivery devices; canine immunotherapy; preprints; the remainder of the reopen-excluded sweep
 (bispecifics, HSCT, oncolytic, cytokines, epigenetic, ferroptosis, CSF1R, alkylators, metabolic);
 human histiocytic neoplasms; the MAPK-brain weak row; and the ChEMBL target sweep.
+
+### MAPK-brain angle: one lead that could close the weak row, NOT yet verified
+
+The weak row says mirdametinib's brain access is unmeasured and "the access 0.50 in the model is the
+maintenance THRESHOLD, not a mirdametinib figure; treat this branch as a hypothesis." A figure now
+exists in the literature, but **it is not verified at source and is NOT written into the model**:
+
+- A St. Jude preprint, "Hidden-driver inference reveals synergistic brain-penetrant therapies for
+  medulloblastoma" (bioRxiv 10.1101/2025.11.20.689490, posted 2025-11-20, **not peer reviewed**), is
+  reported to state: *"Consistent with existing studies, we found mirdametinib to have a superior
+  K p,uu of 0.243."* The literal value **0.243 appears nowhere in this repository**, so it is new to
+  the record. Against the project's own requirement of **0.196** unbound access in brain tissue,
+  0.243 would clear the bar — by 1.24x, which is thin.
+- **It is deliberately not graded.** bioRxiv returned Cloudflare 1015 to four fetch attempts, so the
+  sentence above is second-hand from a search summary; the preprint itself attributes the value to
+  "existing studies", meaning the primary source is elsewhere and was not found (PubMed returns
+  nothing for mirdametinib + Kp,uu); and a medulloblastoma systems-biology preprint is not the right
+  provenance for a number that would flip a site from hypothesis to closed. NEXT STEP, precisely:
+  read 10.1101/2025.11.20.689490 directly, follow its citation for the 0.243, and grade the PRIMARY
+  source. Only then may `genotype_tiered_durability` change.
+- Supporting, weaker: company data report mirdametinib's brain:plasma above selumetinib's after IV
+  (0.6 vs 0.02 ng/mL) with minimal P-gp/BCRP restriction; NHP CSF penetration ~1.3% of plasma AUC
+  with CSF Cmax ~0.56 ng/mL (Neuro-Oncology 2022, doi 10.1093/neuonc/noac209.900) — the NHP CSF
+  point is ALREADY in the record as "notable CSF penetration in NHP".
+- Also new, also preprint: mirdametinib **plus abemaciclib** cooperate in atypical teratoid rhabdoid
+  tumour, with mirdametinib extending survival in mouse orthotopic xenografts and the combination
+  suppressing growth further (bioRxiv 10.64898/2026.03.24.714018, March 2026). That is the MEK +
+  CDK4/6 pairing this programme uses, in a brain tumour, preclinically.
+
+### Dordaviprone: the approval is real, and its evidence base is thinner than "licensed 2025" conveys
+
+The programme leans on dordaviprone for the division-independent kill, graded a STRUCTURAL closure.
+Recorded for strength-of-evidence (rule 5), all absent from the record before today:
+
+- Accelerated approval **6 August 2025**, recurrent **H3 K27M-mutant** diffuse midline glioma, adults
+  and children >=1 year, after prior therapy. First systemic therapy approved for this disease.
+- The basis is a pre-specified integrated analysis of **50 patients across five open-label studies**,
+  with a reported **~20% objective response rate** and ~40% disease control. Weekly oral dosing.
+- *Neuro-Oncology* published a point/counterpoint, "Dordaviprone for diffuse midline glioma — a
+  landmark approval or a premature step?" (doi 10.1093/neuonc/noag117), i.e. the approval is
+  contested in print.
+
+This does **not** change the structural closure — the ClpP mechanism, the computed 98.41% canine
+catalytic-core identity and the non-enhancing-access argument from DMG all stand, and no kill rate was
+ever derived from the ORR. It does mean the phrase "licensed 2025" should not be read as "efficacy
+established": it is an accelerated approval on 50 patients at ~20% ORR, publicly debated. The
+division-independent route still has no published tumour concentration.
