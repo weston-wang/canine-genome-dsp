@@ -894,8 +894,9 @@ qualification remains and it concerns the licensed-only variant, not the closure
 A 14-angle sweep was launched against the record as frozen in early October 2026. **13 of the 14
 angles never ran**: an account rate limit killed them before they reported. One angle (canine HS
 direct) completed 16 queries first, and everything below comes from it plus the verification done
-by hand afterwards. So this entry is a PARTIAL pass, and the unrun angles are listed at the end as
-still-open search work, not as searched-and-clean.
+by hand afterwards. So this entry was a PARTIAL pass when written. [**Superseded the same day: all 14 angles were
+subsequently run by hand — see 'Sweep closed' and the verification pass below. The 'did not run'
+lists in this entry are historical.**]
 
 ### The one finding that changes the record: a modality class that was never enumerated
 
@@ -956,7 +957,7 @@ mass, which a primary intracranial extra-axial tumour is not, and the abscopal r
 injectable second lesion that non-disseminated disease by definition does not have. It is a real
 exists-today canine delivery route for the vaccine class in ACCESSIBLE disease — indirect here.
 
-### Angles that did NOT run, and must not be read as searched
+### Angles that had not run WHEN THIS ENTRY WAS WRITTEN (all were run later the same day)
 
 MTAP/PRMT5/MAT2A clinical readouts (bears on C7); the CDK axis incl. CDK2 and CDK4-selective agents;
 ClpP/imipridones after the 2025 approval; PARP and DNA repair; CNS delivery; regulatory actions since
@@ -1059,7 +1060,7 @@ study was found reporting brain-tumour CFU after systemic dosing with an intact 
 **not yet a grading** -- it is search-summary level on a class whose status is NOT_ASSESSED, and it
 needs the primary sources read before the ground is written.
 
-### Angles still unrun
+### Angles still unrun AT THAT POINT (all were run later the same day; see 'Sweep closed')
 
 ClpP/imipridones after the 2025 approval; the CDK axis (CDK2, CDK4-selective); PARP beyond niraparib;
 CNS delivery devices; canine immunotherapy; preprints; the remainder of the reopen-excluded sweep
@@ -1354,13 +1355,8 @@ leukocyte transport, which is not the compartment this analysis needs.
 - **MSU quasiorganelle pilot: READ IN FULL** (trial flyer PDF, extracted). Inclusion, exclusion,
   both arms and the full dosing schedule are recorded above and come from the primary document, not a
   summary.
-- **COTC033: still second-hand.** Its Studypages listing is JavaScript-gated and returns only a title
-  to both WebFetch and curl; the CSU URL 301-redirects there. The eligibility detail above
-  (15-60 kg, 2-12 cm biopsy-accessible tumour, the four excluded diagnoses, IM prime then weekly
-  intratumoral x8) comes from a search summary of that page and is **not primary-source verified**.
-  It does not matter for the conclusion -- the route alone, weekly intratumoral injection into an
-  accessible mass, rules the trial out for a primary intracranial tumour -- but the numbers should
-  not be quoted as verified.
+- **COTC033: NOW VERIFIED at a primary source, and the second-hand numbers were wrong.** See the
+  dedicated entry at the end of this file.
 
 ### Test environment, for the next thread
 
@@ -1455,3 +1451,49 @@ Environment: `torch` is now installed in the pytest venv too, so `test_hybrid_rn
 
     uv pip install --python /root/.local/share/uv/tools/pytest/bin/python numpy pandas scipy scikit-learn
     uv pip install --python /root/.local/share/uv/tools/pytest/bin/python torch --index-url https://download.pytorch.org/whl/cpu
+
+### COTC033: eligibility VERIFIED at a primary source, and the second-hand numbers were wrong
+
+The CSU listing is client-rendered and web.archive.org is egress-blocked, but COTC033 is a
+**multi-institution NCI Comparative Oncology Program trial** — sites are Colorado State, Ohio State,
+UC Davis, Missouri and Wisconsin (NCI program manager Christina Mazcko) — and the **University of
+Missouri Veterinary Medical Center serves its criteria as static HTML**. Read directly, verbatim:
+
+> Body weight between 15 and 60 kg · Tumor biopsy or cytology to confirm diagnosis · **Solid tumor
+> measuring 2 to 8 cm** · No mast cell tumors, cutaneous hemangiosarcomas, thyroid carcinomas, or
+> lymphomas · **Must not have received ANY prior experimental therapy** · No concurrent chemotherapy
+> or radiation therapy – **2 week washout** · No concurrent immunomodulatory therapy (including
+> Apoquel or Cytopoint) – **6 week washout** · No concurrent corticosteroids – **1 week washout** ·
+> No hypercalcemia causing illness · No significant co-morbid illness ... pulmonary metastatic
+> disease, renal or hepatic failure, history of congestive heart failure or clinical coagulopathy,
+> autoimmune disorders, or uncontrolled endocrinopathies
+
+Up to **13 weekly visits**; all treatment and recheck costs covered.
+
+**Two corrections to what was recorded earlier from the search summary:**
+1. The tumour-size window is **2 to 8 cm**, not 2–12 cm.
+2. Missouri describes the agent as a **"Vaccine Peptide Library (VPL)"**, not as "Shingrix or
+   Gardasil randomised against rabies vaccine". Those descriptions are not obviously the same thing.
+   The CSU-derived version may describe the randomisation arms and Missouri the platform, or one may
+   simply be wrong — **the discrepancy is recorded rather than resolved**, because no source read
+   directly settles it. What IS primary-verified is the mechanism paper (PMID 40280970, *npj
+   Vaccines* 2025), which is explicitly about **INTRATUMORAL** injection of licensed viral vaccines,
+   in mice.
+
+**The scope conclusion is unchanged and now rests on verified criteria.** The trial requires a
+measurable 2–8 cm solid tumour confirmed by biopsy or cytology, which a primary intracranial
+extra-axial mass is not a candidate for on an injection-and-measurement basis; and the washout rules
+(any prior experimental therapy excluded outright, 2 weeks off chemotherapy or radiation, 6 weeks off
+immunomodulators) are incompatible with this programme, which begins with debulking plus radiation
+and then runs continuous maintenance including an anti-PD-1. So COTC033 is **out of scope for this
+case on verified eligibility, not merely on an inferred route**.
+
+### Search-side verification: complete
+
+Every angle is run and every lead that this environment can reach has been taken to a primary
+source. The three figures that could not be reached are each resolved rather than left hanging: the
+niraparib concentration was **found and corrected** (226.7 nM, not the 253.2 nM reported
+second-hand); the mirdametinib Kp,uu 0.243 was **established as untraceable** and is therefore not
+used; and COTC033's eligibility was **obtained from a participating site** after the lead site's page
+proved unreadable. What remains unresolved is one documented discrepancy between two descriptions of
+COTC033's agent, recorded above, which does not bear on any closure in this analysis.
