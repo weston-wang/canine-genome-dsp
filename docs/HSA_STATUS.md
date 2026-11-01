@@ -647,7 +647,16 @@ worse, Yunnan Baiyao failed in trial, eBAT's compressed schedule was worse, plat
 
 ## Test status
 
-`884 passed` (2026-10-04, exit 0, 22m24s). Five test modules require `torch` and were not run in that container:
-`test_hybrid_rnn`, `test_alphafold`, `test_hsa_cli`, `test_mapk_cli`, `test_vaccine_eval`. The HSA
-analysis modules themselves have no such dependency. Run with
-`PYTHONPATH=src python3 -m pytest tests/ -q` (needs numpy, scipy, pandas, scikit-learn, matplotlib).
+`899 passed` (2026-11-01, exit 0, 28m50s) — 884 plus the 15 added with the completed sweep (14 in
+`test_hsa_sweep_oct2026`, one in `test_hsa_agent_tiers` for the BNCT disposition). Five test modules
+require `torch` and were not run in that container: `test_hybrid_rnn`, `test_alphafold`,
+`test_hsa_cli`, `test_mapk_cli`, `test_vaccine_eval`. The HSA analysis modules themselves have no such
+dependency. Run with `PYTHONPATH=src python3 -m pytest tests/ -q` (needs numpy, scipy, pandas,
+scikit-learn, matplotlib).
+
+**Container note (2026-11-01):** a fresh container shipped a broken Pillow — `from PIL import
+_imaging` fails, which breaks *collection* of `test_melanoma_benchmark` and
+`test_osteosarcoma_benchmark` (both import matplotlib) and so aborts the whole run with
+"2 errors during collection" before any test executes. Fix is
+`python3 -m pip install --break-system-packages --force-reinstall --no-cache-dir pillow`, not skipping
+the two modules. Worth knowing because the failure looks like a test failure and is an install fault.
