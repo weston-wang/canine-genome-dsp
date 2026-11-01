@@ -1625,3 +1625,54 @@ injection. "Vaccine Peptide Library" is one participating site's wording for the
 source states what it denotes. That residual is a question about one site's phrasing, not about the
 trial's intervention, and it bears on nothing in this analysis — the trial is out of scope for a
 primary intracranial tumour on the verified route and the verified washout rules.
+
+## Final provenance sweep, 2026-11-01 — three verifications and two definitive negatives
+
+### Tovorafenib's LABEL tightens its caveat from soft to hard
+
+Read at openFDA (`drug/label`, OJEMDA). Verbatim: indicated for "relapsed or refractory **pediatric
+low-grade glioma (LGG) harboring a BRAF fusion or rearrangement, or BRAF V600 mutation**"; the label
+directs "Confirm the presence of BRAF fusion or rearrangement, or BRAF V600 mutation **prior to
+initiation**"; the indication "is approved under **accelerated approval based on response rate and
+duration of response**" with continued approval "contingent upon verification ... in a confirmatory
+trial(s)"; dosing is "**orally, once weekly**".
+
+Canine HS carries BRAF alterations in **under 1%**. So tovorafenib's licensed indication is
+**genotype-gated to a lesion this disease essentially does not have**, and its approval is itself
+accelerated and provisional. It stays an **off-label, mechanism-based** option on this axis — type II
+RAF inhibition acts on RAF dimers, the right node for RAS-driven signalling — and "licensed, brain
+indication" must not be read as "licensed for this tumour's genotype". `candidate_universe` updated.
+
+### AL-605 and AL-433 have NO trial registry record
+
+ClinicalTrials.gov returns **nothing** for either. The "Phase 1a/b dosing began May 2026" claim is
+therefore **company-announcement provenance only and not registry-verifiable**. They were already
+recorded as leads with nothing graded from them; that label is now justified rather than cautious.
+Atirmociclib by contrast has many registry records, through **phase 3** (e.g. NCT07890597), but
+**none in CNS or glioma** — consistent with what was recorded.
+
+### The four MTAP-axis percentages are conclusively NOT in the indexed literature
+
+**Four** peer-reviewed reviews were read in full text — PMC13099004 (GBM-specific), PMC12732168
+(comprehensive, Dec 2025), PMC13044523 and PMC13394919 (both 2026) — plus four targeted Europe PMC
+**full-text** searches (`IDE397 AND "38%"`, `IDE397 AND urothelial`, `TNG462 AND "partial response"`,
+and the earlier `TNG462 AND glioblastoma`). None carries IDE397's 38%/30%/81% or TNG462's 0/23 PR in
+glioblastoma. The only numeric TNG462 content found anywhere is **preclinical** SDMA pharmacodynamics
+(undetectable to 72 h in xenografts). Conference-abstract or company-presentation provenance is now
+established by exhaustion, not assumed, and the figures carry that label in code.
+
+### No registered human trial of intratumoral Shingrix exists
+
+ClinicalTrials.gov returns **zero** studies for intratumoral Shingrix, so the "current human trials"
+the Missouri page says COTC033 complements are not registry-identifiable, and that route to resolving
+the "Vaccine Peptide Library" wording is closed too. The verified account of what COTC033
+administers remains the NCI sponsor page: randomisation to Shingrix/Gardasil or rabies vaccine,
+intramuscular primer then weekly intratumoral injection.
+
+### Search-side verification: nothing further is reachable from this environment
+
+Every item on the open list has now been either verified at a primary source or established as
+unreachable **by exhaustion with the routes recorded**. The three that end as negatives — the
+mirdametinib Kp,uu figure, the four MTAP percentages, and the COTC033 agent wording — are each
+closed in the only way a missing source can honestly be closed: the search was run, the routes are
+written down so nobody repeats them, and nothing in the model depends on any of the three.
