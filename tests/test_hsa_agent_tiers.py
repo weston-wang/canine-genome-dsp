@@ -86,7 +86,7 @@ def test_no_class_is_excluded_for_absence_of_canine_data():
 def test_every_exclusion_cites_one_of_the_three_admissible_reasons():
     assert at.exclusions_with_inadmissible_reasons() == []
     excluded = [c for c in at.CLASS_LEDGER if c.status == at.EXCLUDED]
-    assert len(excluded) == 6
+    assert len(excluded) == 7          # BNCT joined on 2026-10-31, excluded on field geometry
     for c in excluded:
         assert c.reason_kind in at.ADMISSIBLE_REASONS, c.modality_class
         assert len(c.reason) > 60, c.modality_class
@@ -134,10 +134,30 @@ def test_radiation_is_split_by_whether_the_target_can_be_imaged():
     brain = next(x for x in at.CLASS_LEDGER
                  if x.modality_class == "radiation -- brain, to an imaged deposit")
     assert body.status == at.EXCLUDED and body.reason_kind == at.DEFEATED_BY_ESCAPE
+    # the canine SBRT series that excluded HSA from enrolment still stands as a negative
     assert "PMID 31841095" in body.the_evidence
-    assert "EXPLICITLY EXCLUDED" in body.the_evidence      # the canine series excluded HSA itself
+    assert "excluded hemangiosarcoma from enrolment" in body.the_evidence
+    # CORRECTED 2026-10-31: this entry used to rest partly on "no transferable canine dataset
+    # exists", which PMID 42903052 falsified. The exclusion must now rest on the geometry alone.
+    assert "no transferable canine dataset exists" not in body.reason
+    assert "geometry" in body.reason.lower() or "no radiation field can cover" in body.reason
+    assert "PMID 42903052" in body.the_evidence
     assert brain.status == at.IN_PROGRAM
     assert "NOT credited" in brain.reason and "occult" in brain.reason
+
+
+def test_bnct_is_a_separate_disposition_from_external_beam_radiation():
+    """Added 2026-10-31. Canine, disease-matched kill data exist for BNCT, so the exclusion has to
+    rest on the field geometry -- the one reason that survives having the dog data."""
+    b = next(x for x in at.CLASS_LEDGER
+             if "boron neutron capture" in x.modality_class)
+    assert b.status == at.EXCLUDED
+    assert b.reason_kind == at.DEFEATED_BY_ESCAPE
+    assert b.tier_of_the_best_available_agent == at.NEAR_FUTURE
+    assert "NOT for absent canine data" in b.reason
+    assert "PMID 42205798" in b.the_evidence
+    assert "2.60" in b.the_evidence            # the measured compound biological effectiveness
+    assert "no field to aim at" in b.the_evidence
 
 
 def test_unassessed_classes_are_labelled_unassessed_rather_than_excluded_or_closed():
@@ -161,7 +181,7 @@ def test_the_ledger_covers_the_classes_rule_9_enumerates():
 def test_every_ledger_entry_has_exactly_one_of_the_three_statuses():
     for c in at.CLASS_LEDGER:
         assert c.status in (at.IN_PROGRAM, at.EXCLUDED, at.NOT_YET_ASSESSED), c.modality_class
-    assert len(at.CLASS_LEDGER) == 16
+    assert len(at.CLASS_LEDGER) == 17   # 16 + BNCT, added 2026-10-31
     assert len(at.classes_in_program()) == 8
 
 

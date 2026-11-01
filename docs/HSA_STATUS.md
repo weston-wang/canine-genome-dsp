@@ -454,19 +454,100 @@ measured sensitivity. Do not describe this margin as comfortable.
 
 ---
 
-## Sweep of 2026-10-31 — INCOMPLETE, and what the one angle that ran found
+## Sweep of 2026-10-31 — COMPLETE. All eleven angles searched; nothing moves a cell
 
-**The sweep did not run.** An 11-angle workflow was launched; **55 of 56 agents failed on the
-account's 5-hour usage limit**. One angle completed (eBAT / uPAR / toxin-based agents). Nothing was
-adversarially verified, no completeness critic ran, and there is **no synthesis**. Treat everything
-below as leads from a single un-cross-checked angle, not as findings. Re-running is
-`Workflow({scriptPath: '…/hsa-treatment-sweep-oct2026-wf_c02b2899-67e.js', resumeFromRunId:
-'wf_c02b2899-67e'})`, which replays the completed agent from cache and re-runs the 55 that failed.
+**Verdict: no new agent changes the conjunction.** One modality class is added to the ledger as
+excluded, **two of the record's own claims are corrected**, and no route-site cell and no condition
+moves. Dispositions are in `src/canine_dsp/hsa_sweep_oct2026.py`
+(`FINDINGS`, `ANGLES_SEARCHED`, `VERDICT`); reasoning in `docs/HSA_DURABLE_RESPONSE.md` §6e.
 
-**Angles that never ran:** canine HSA trials, canine vaccines (incl. the GD3 randomised trial and
-VACCS), canine checkpoint, human angiosarcoma, early detection, CNS agents, ferroptosis/GPX4,
-preprints, modality classes not in the plan, and the combination-levers question. **So this sweep says
-nothing about the GD3 randomised vaccine trial or VACCS.**
+The 11-angle workflow failed twice on the account's 5-hour subagent limit (55/56 agents, then 12/12).
+The angles were then **run inline through the main loop**, which had working quota. Method note for
+the next thread: when subagents are rate-limited, the main loop is a working fallback — the limit
+applied to subagent spawns, not to this session's own tool calls.
+
+### The two corrections — these matter more than the candidates
+
+1. **The radiation-body exclusion was resting on an absence that no longer holds.** The ledger
+   asserted "no transferable canine dataset exists for this disease" and "a PubMed search for canine
+   hemangiosarcoma radiotherapy outcome returns only the eBAT trial". **Both clauses are falsified**
+   by Rebelo et al. 2026, *Front Vet Sci* 13:1925779, **PMID 42903052** — 53 dogs, subcutaneous and
+   intramuscular HSA, hypofractionated RT, 93% objective response, and **median survival 2,059 vs 287
+   days** for dogs operated before RT (p=0.007). That is the longest median survival in any RT cohort
+   in this literature. The class **stays EXCLUDED** — the benefit is local control of a treatable
+   field, which is exactly what route 7's disseminated seeding does not offer, and the presentation is
+   subcutaneous/intramuscular rather than primary splenic, so rule 10 makes it indirect. But it is now
+   excluded **on the geometry alone**, which is what rule 13 requires, rather than on a false absence.
+2. **CANDiD's `0.784`/`0.909` was labelled as two measured sensitivities. It is one point estimate's
+   95% confidence interval.** The paper reports a detection rate of **85.4% (95% CI 78.4–90.9%)** for
+   the three most aggressive canine cancers. The downstream sweep is unaffected in substance — it
+   spans the interval and takes 0.784 as the pessimistic end, which is conservative against the 0.854
+   point estimate — so **C7's 2.6× margin and §3b's table stand**. The description was wrong, not the
+   arithmetic. Corrected in `hsa_open_route_closure.CANDID_SCREENING` and
+   `hsa_condition_closure.CANDID_SENSITIVITY`.
+
+### The eleven angles
+
+| angle | result |
+|---|---|
+| eBAT / uPAR | unchanged; literature still exhaustively enumerated at 17 records. Leads below |
+| canine HSA trials | 828 records, 20 newer than the record's newest. **One** bears on the program (PMID 42903052); the rest are diagnostics, pathology or other anatomical sites |
+| canine vaccines | **no new readout.** The GD3 randomised trial and VACCS remain unreported — the record's pending readouts are still pending |
+| canine checkpoint | 106 records, nothing the record lacks. Gilvetmab's conditional licensure was already held |
+| human angiosarcoma | the richest angle — see below |
+| early detection | CANDiD is already the record's source, cited from the primary paper. SDMA assessed, not credited |
+| CNS agents | **nothing newer than 2024.** The CNS cells rest where they did, on lomustine and temozolomide |
+| ferroptosis / GPX4 | **ZERO records** in angiosarcoma or hemangiosarcoma, any species — control-verified |
+| preprints | **167 records once the query was fixed** (see the method defect below). Four canine therapeutic preprints, none peer reviewed |
+| new modality classes | BNCT added as excluded on geometry; oncolytic virus unchanged at NOT YET ASSESSED |
+| combination levers | the A091902 contrast is the first outcome evidence on which pairings combine |
+
+### Candidates assessed and not credited — each on a scientific reason, none for want of dog data
+
+- **Cabozantinib + nivolumab, ORR 59%** in taxane-pretreated human angiosarcoma (Alliance A091902,
+  second-line; PMID 40056281 and PMID 42536112) — against 5–13% for single-agent axitinib/pazopanib,
+  27.8% cemiplimab, 25% dual checkpoint. The pairing is **already structurally in the program** as
+  toceranib + gilvetmab, so it adds no agent. Its 59% is an **objective response rate in measurable
+  advanced disease**, and this case is microscopic residual disease with no lesion to respond, so it
+  is logged as corroboration of the lever's direction and **not as an effect size**.
+- **BNCT** (PMID 42205798): canine, disease-matched, *measured* radiobiological kill — CBE 2.60 /
+  2.31 / 1.25 in three HSA lines with LAT1-mediated boronophenylalanine uptake. So this class is
+  emphatically **not** excluded for absent canine data; it is excluded because BNCT irradiates one
+  positioned field at an epithermal neutron source and routes 7/8/12b are occult disseminated seeding.
+- **Decitabine** (preprint, not peer reviewed): kill is **internally discordant in the paper's own two
+  models** — Re21 xenografts responded, JuB2 did not, same drug, same readouts.
+- **SQAP** (preprint): 3/3 PDX growth suppression, but the paper locates the mechanism in **host**
+  vascular/macrophage remodelling with minimal direct cytotoxicity — a cytostatic floor-holder, not a
+  log-remover, and the host in the experiment is a mouse.
+- **Enoxacin** (preprint): no exposure–response figure in any species for this disease.
+- **SDMA** (PMID 42661152): rises *with* burden, elevated in under half of dogs with overt disease —
+  a burden marker, not an early-detection test. Not load-bearing anywhere.
+
+**The negative that is worth as much as the positives:** in A091902's first-line arm, adding nivolumab
+to paclitaxel gave **no PFS benefit**, while TKI + checkpoint reached 59%. Same disease, same trial
+programme. This is consistent with the already-settled finding that the plan does **not depend** on
+its levers stacking (`hsa_standard_audit.DOES_THE_PLAN_DEPEND_ON_THE_LEVERS_STACKING`, graded
+TRANSFERRED) and is logged as support for that closed item. **It does not reopen it.**
+
+### What would have changed a cell, and why nothing did
+
+A log-remover with an exposure–response figure against microscopic disease at a site the stack does
+not already cover. Nothing found reports one: the two in-vivo canine signals are a host-stromal
+cytostatic and a discordant hypomethylator, and the sweep's largest efficacy number (59%) is an ORR in
+bulk human disease.
+
+### A method defect in the record's own stated method — it had produced a false negative
+
+The previous sweep recorded, as a lesson, "use Europe PMC `SRC_TYPE:PPR` for preprints". **`SRC_TYPE`
+is not a Europe PMC field.** The API does not error on an unknown field — it returns `hitCount 0`. So
+that query reported "no preprints exist" when it had asked nothing. Caught by running a **control
+query that must return results**: `cancer AND SRC_TYPE:PPR` also returned 0, which no true negative
+explains. The correct field is **`SRC:PPR`** — under which `cancer AND SRC:PPR` returns 111,034 and
+`(hemangiosarcoma OR angiosarcoma) AND SRC:PPR` returns **167**.
+
+**General rule, now recorded:** a zero from a machine-readable source is a claim about the *query*
+until a control query proves the source and the field work. The ferroptosis/GPX4 empty set above was
+confirmed that way; the preprint "empty set" was not, and was wrong.
 
 ### Leads from the eBAT/uPAR angle — none verified, none folded into any figure
 
@@ -498,7 +579,13 @@ nothing about the GD3 randomised vaccine trial or VACCS.**
 ### Search-method lessons (save the next thread the same dead ends)
 
 - The **bioRxiv MCP server cannot keyword-search** — date and category only. Use Europe PMC with
-  `SRC_TYPE:PPR` for preprints instead.
+  **`SRC:PPR`** for preprints instead. ~~`SRC_TYPE:PPR`~~ **was wrong and silently returned zero** —
+  see "A method defect in the record's own stated method" above.
+- **PubMed's MCP server over-ANDs narrow queries**, which produced a second false negative in this
+  sweep: `canine hemangiosarcoma vaccine` returned a newest record of Sept 2025 and
+  `dog hemangiosarcoma clinical trial` nothing from 2026 at all, while the broad
+  `dog hemangiosarcoma` returned 828 records with 20 from 2026. **Search broad, then triage** — and
+  if a query's newest hit looks stale, suspect the query before concluding the field is quiet.
 - **PubMed's MCP server ANDs every term**, so long queries return zero. Use 2–4 terms.
 - **Never put a year in a PubMed query string** — it is ANDed as a term and kills the query.
 - PubMed mangles `CAR T` into `car t[Author]`; use `chimeric antigen receptor`.

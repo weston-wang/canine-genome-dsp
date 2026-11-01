@@ -276,14 +276,40 @@ CLASS_LEDGER: tuple[ClassDisposition, ...] = (
             "lacks the T-cell arm route 9 requires"),
     ClassDisposition(
         "radiation -- body", EXCLUDED, LICENSED,
-        "no transferable canine dataset exists for this disease and the modality is a "
-        "field-limited log-remover, which is the term the stack is already strongest in",
+        "the modality is a field-limited log-remover, which is the term the stack is already "
+        "strongest in. Route 7 is disseminated micrometastatic disease, which no radiation field "
+        "can cover. The exclusion rests on that geometry ALONE -- a canine dataset now exists",
         DEFEATED_BY_ESCAPE,
-        "the one canine curative-intent SBRT series in soft-tissue sarcoma EXPLICITLY EXCLUDED "
-        "hemangiosarcoma from enrolment (Gagnon et al. 2020, JAVMA 256(1):102-110, "
-        "PMID 31841095), and a PubMed search for canine hemangiosarcoma radiotherapy outcome "
-        "returns only the eBAT trial. Route 7 is disseminated micrometastatic disease, which a "
-        "radiation field cannot cover -- that is the named escape, not the missing dataset"),
+        "CORRECTED 2026-10-31. This entry previously read 'no transferable canine dataset exists "
+        "for this disease' and 'a PubMed search for canine hemangiosarcoma radiotherapy outcome "
+        "returns only the eBAT trial'. BOTH CLAUSES WERE FALSIFIED by Rebelo et al. 2026, Front "
+        "Vet Sci 13:1925779, PMID 42903052, doi 10.3389/fvets.2026.1925779: 53 dogs with "
+        "subcutaneous or intramuscular hemangiosarcoma given hypofractionated radiotherapy "
+        "(24 Gy/3 fx or 30 Gy/5 fx), 89% also receiving chemotherapy; objective response 93% in "
+        "30 evaluable dogs, overall median survival 306 days, and in the subgroup operated BEFORE "
+        "radiotherapy a median survival of 2,059 days against 287 days without surgery "
+        "(p = 0.007). That 2,059-day figure is the longest median survival for any radiotherapy "
+        "cohort in this literature and it is NOT credited here, for two reasons stated under rule "
+        "10: the disease is SUBCUTANEOUS/INTRAMUSCULAR, not primary splenic, so it is indirect "
+        "evidence for this case; and the benefit is LOCAL CONTROL of a treatable field, which is "
+        "precisely what route 7 does not offer. The earlier canine negative also still stands "
+        "(Gagnon et al. 2020, JAVMA 256(1):102-110, PMID 31841095, whose curative-intent SBRT "
+        "series explicitly excluded hemangiosarcoma from enrolment). So the class stays EXCLUDED, "
+        "but on the escape and not on an absence -- which is what rule 13 requires"),
+    ClassDisposition(
+        "radiation -- boron neutron capture therapy (BNCT)", EXCLUDED, NEAR_FUTURE,
+        "the same field geometry that excludes external-beam radiation, and worse: the dog must be "
+        "positioned at an epithermal neutron source. Canine hemangiosarcoma kill data now exist, "
+        "so this exclusion is NOT for absent canine data",
+        DEFEATED_BY_ESCAPE,
+        "Iwasaki et al. 2026, Front Vet Sci 13:1763965, PMID 42205798, doi "
+        "10.3389/fvets.2026.1763965: three canine hemangiosarcoma lines (JuB2, Ud6, Re21) take up "
+        "boronophenylalanine by LAT1 transport (abolished by the LAT1 inhibitor BCH), and "
+        "clonogenic survival after neutron irradiation gives compound biological effectiveness of "
+        "2.60, 2.31 and 1.25 -- a measured, canine, disease-matched radiobiological kill. The "
+        "modality is clinical-stage in humans, which under rule 13 makes the tier NEAR-FUTURE "
+        "rather than theoretical. It is excluded anyway because BNCT irradiates one positioned "
+        "field, and routes 7, 8 and 12b are occult disseminated seeding with no field to aim at"),
     ClassDisposition(
         "radiation -- brain, to an imaged deposit", IN_PROGRAM, LICENSED,
         "credited only against an imaged intracranial deposit, and deliberately NOT credited "

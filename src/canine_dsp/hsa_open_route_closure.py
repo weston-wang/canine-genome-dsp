@@ -73,7 +73,16 @@ CANDID_SCREENING = {
     "design": "international multi-centre validation, 1,358 dogs enrolled, 1,100 analysed",
     "overall_sensitivity": 0.547,
     "specificity": 0.985,
-    "sensitivity_three_most_aggressive_cancers": (0.784, 0.909),
+    # PROVENANCE CORRECTED 2026-10-31. The paper reports ONE point estimate for the three most
+    # aggressive cancers -- a detection rate of 85.4% -- with a 95% confidence interval of
+    # 78.4-90.9%. So 0.784 and 0.909 are the CI BOUNDS AROUND 0.854, not two measured
+    # sensitivities and not a low/high scenario pair. Everything downstream sweeps the pair, which
+    # remains legitimate (it spans the interval and takes 0.784 as the pessimistic end, which is
+    # conservative relative to the point estimate), but the pair must not be described as two
+    # measurements. The sweep's conclusions are unchanged by this relabelling.
+    "detection_rate_three_most_aggressive_cancers": 0.854,
+    "detection_rate_three_most_aggressive_95ci": (0.784, 0.909),
+    "sensitivity_three_most_aggressive_cancers": (0.784, 0.909),  # = the 95% CI, swept as a range
     "aggressive_group_includes_hemangiosarcoma": True,
     "presymptomatic_detections": 4,
     "why_it_closes_route_5": "Rupture hazard is a consequence of late detection, not a fixed "

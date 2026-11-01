@@ -116,7 +116,11 @@ C6_IMMUNITY_HALF_LIFE = ConditionClosure(
 # =================================================================================================
 
 SWEPT_HAZARD_RANGE = (0.02, 0.10)
-CANDID_SENSITIVITY = (0.784, 0.909)     # measured, 1,100 dogs
+# The 95% CONFIDENCE INTERVAL (not two measurements) around CANDiD's 85.4% detection rate for the
+# three most aggressive canine cancers, hemangiosarcoma among them; 1,100 dogs analysed. Swept as a
+# range so the pessimistic end, 0.784, drives the worst case -- conservative against the 0.854
+# point estimate. Mislabelled "measured" until 2026-10-31; see hsa_open_route_closure.CANDID_SCREENING.
+CANDID_SENSITIVITY = (0.784, 0.909)
 TUMOUR_CONTROL_VARIANTS = (0.888, 0.992)
 FAILURE_THRESHOLD = 0.50
 HORIZON_YEARS = 10.0

@@ -2349,6 +2349,99 @@ together.
 
 ---
 
+## 6e. The 2026-10-31 literature sweep — what a complete re-search changed
+
+Eleven angles were searched for anything published since the analysis was built. **No new agent
+changes the conjunction.** One class joins the ledger as excluded, two of this document's own claims
+are corrected, and no route-site cell and no condition moves.
+
+### Two corrections to claims made above
+
+The first is the more serious, because it is the failure mode rule 13 exists to prevent. The radiation
+class was excluded partly on the assertion that **"no transferable canine dataset exists for this
+disease"** and that a search **"returns only the eBAT trial"**. Both clauses are now false. Rebelo et
+al. 2026 (*Front Vet Sci* 13:1925779, PMID 42903052) report 53 dogs with subcutaneous or intramuscular
+hemangiosarcoma given hypofractionated radiotherapy: 93% objective response in 30 evaluable dogs, and
+in the subgroup operated before radiotherapy a median survival of **2,059 days against 287** (p=0.007)
+— the longest median survival of any radiotherapy cohort in this literature.
+
+The exclusion survives, and it is worth being precise about why, because a 2,059-day median is the
+sort of number that invites being credited. It is local control of a treatable field. Route 7 is
+disseminated micrometastatic disease, where there is no field to treat, and that is the named escape
+the class was always defeated by. The presentation is also subcutaneous and intramuscular rather than
+primary splenic, so under rule 10 it is indirect evidence for this case. What changes is the *stated
+reason*: the class is now excluded on the geometry alone, not on an absence that has stopped being
+true. The earlier canine negative still stands alongside it — Gagnon et al. 2020 (PMID 31841095)
+explicitly excluded hemangiosarcoma from a curative-intent SBRT series.
+
+The second correction is a provenance error on a load-bearing input. The CANDiD screening pair
+`0.784`/`0.909` was carried as two measured sensitivities and swept as a low/high scenario. It is
+neither: the paper reports **one** detection rate for the three most aggressive canine cancers, **85.4%
+(95% CI 78.4–90.9%)**, and those two figures are that interval's bounds. The substance is unaffected —
+the sweep spans the interval and drives the worst case from 0.784, which is conservative against the
+0.854 point estimate — so **C7's 2.6× margin and the §3b table stand unchanged**. But "measured" was
+the wrong word for a confidence bound, and an input this load-bearing has to be described as what it
+is.
+
+### What was assessed and not credited
+
+Rule 13 allows a class to be set aside only for a contradicted kill, a defeating escape, or
+unaffordable toxicity. Each of the following names one.
+
+**Boron neutron capture therapy** is the instructive case. Iwasaki et al. 2026 (PMID 42205798) report
+boronophenylalanine uptake by LAT1 transport in three canine hemangiosarcoma lines, abolished by the
+LAT1 inhibitor BCH, with compound biological effectiveness of 2.60, 2.31 and 1.25 after neutron
+irradiation. That is a measured, canine, disease-matched radiobiological kill — so this class
+emphatically is *not* excluded for want of dog data, and the tier is NEAR-FUTURE rather than
+theoretical, the modality being clinical-stage in humans. It is excluded because BNCT irradiates a
+single positioned field at an epithermal neutron source, which is the same geometry that defeats
+external-beam radiation, only less practicable.
+
+**Cabozantinib plus nivolumab** is the sweep's largest efficacy number and the one most at risk of
+being misquoted. Alliance A091902's second-line arm reached an **objective response rate of 59%** in
+taxane-pretreated human angiosarcoma, cutaneous and non-cutaneous alike, against 5–13% for
+single-agent axitinib or pazopanib, 27.8% for cemiplimab and 25% for dual checkpoint blockade. The
+pairing it validates — a multi-target TKI with a checkpoint antibody — is already structurally in this
+program as toceranib plus gilvetmab, so it contributes no agent. And 59% is a response rate in
+*measurable advanced disease*, while this case is microscopic residual disease after splenectomy,
+where there is no measurable lesion to respond. A shrinkage rate in bulk disease is not a log-kill
+against micrometastases. It is recorded as corroboration for the lever's direction and explicitly not
+as an effect size.
+
+The same trial programme supplies a negative that is worth as much. In A091902's **first-line** arm,
+adding nivolumab to paclitaxel produced **no** progression-free survival benefit. Same disease, same
+programme: checkpoint blockade added to an anti-angiogenic stacked, checkpoint blockade added to a
+cytotoxic did not. This is the first outcome evidence in this disease on which pairings combine, and
+it sits consistently with the already-settled finding that this plan does not *depend* on its levers
+stacking (`hsa_standard_audit.DOES_THE_PLAN_DEPEND_ON_THE_LEVERS_STACKING`, graded TRANSFERRED). It is
+logged as support for that closed item and is not a reopening of it.
+
+Three canine preprints and one biomarker complete the list, none peer reviewed except the last.
+**Decitabine** reduced ROBO1 promoter methylation and retarded growth in two cell lines, but inhibited
+Re21 xenografts and not JuB2, with the 5mC/5hmC shifts likewise confined to Re21 — a kill contradicted
+within the paper's own two models. **SQAP** suppressed growth in three of three patient-derived
+xenografts, but with minimal direct cytotoxicity and a transcriptional response larger in *mouse* host
+cells than in canine tumour cells, acting through host vascular and macrophage remodelling: a
+cytostatic floor-holder rather than a log-remover, and host-mediated in a host this model cannot
+transfer. **Enoxacin** has no exposure–response figure in any species for this disease, so there is
+nothing to grade. **SDMA** (PMID 42661152) rises with tumour burden and was elevated in under half of
+dogs who already had overt disease, which makes it a burden marker rather than the early-detection
+test the premise would need.
+
+### What would have changed a cell
+
+A log-remover with an exposure–response figure against microscopic disease, at a site the stack does
+not already cover. Nothing found reports one. The two in-vivo canine signals are a host-stromal
+cytostatic and a discordant hypomethylator; the strongest number of the sweep is a response rate in
+bulk human disease. The CNS angle returned nothing newer than 2024, so those cells rest where they
+did; ferroptosis and GPX4 return zero records in this tumour in any species; and the canine vaccine
+angle produced no new readout, so the GD3 randomised trial and VACCS remain pending.
+
+*Module: `hsa_sweep_oct2026`. `credited()` returns `[]`; `excluded_for_absent_canine_data()` returns
+`[]`; `FINDINGS` holds twelve dispositions and `ANGLES_SEARCHED` all eleven angles.*
+
+---
+
 ## 7. The answer
 
 A lasting remission runs through the **vaccine**, not the targeted drug. The drug makes tumours
