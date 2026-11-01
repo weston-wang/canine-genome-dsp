@@ -386,15 +386,34 @@ VERDINEXOR_CNS_ACCESS_FOR_PRECEDENT = (0.18, 0.24)
 #: Repeated intrathecal dosing in dogs: subcutaneous CSF ports dosed every other week for 8-11 months, i.e. 20-28 doses (section K.6).
 DOG_IT_DOSES_PRECEDENT_MAX = 28
 
+#: Written transfer for MORE intrathecal methotrexate doses (docs/universe/SWEEP_it_longcourse.md, section M.5), grade TRANSFERRED:
+#: up to 45 doses, >= 10 days apart, 2.5 mg preservative-free methotrexate alone (dogs >= 10 kg), ventricular port with cisternal
+#: fallback, radiation finished first, no high-dose IV methotrexate. Basis: 45 is at or below human long-course medians (HIT 2000:
+#: 36 intraventricular doses in 6 months, PMIDs 21636711, 26346136); per-dose canine CSF concentration at or below the human
+#: standard (0.080 mg/mL at 10 kg); same CSF half-life (dog 5.2 h, human 5.7 h) so nothing accumulates at >= 10-day spacing;
+#: neurotoxicity tracks peak/cumulative concentration and IV methotrexate, not the intrathecal count (PMIDs 638249, 24550419,
+#: 37171700); dogs dosed intrathecally every other week for up to 20 months (~43 doses, an enzyme not methotrexate; PMID 35717448).
+#: What it does NOT cover: the procedure. If every dose needs a general anaesthetic and a puncture, cumulative mortality compounded
+#: from the record's per-event figures is ~7-18% at 30 doses and ~11-25% at 45 (PROCEDURAL_MORTALITY_AT_DOSES).
+DOG_IT_DOSES_TRANSFERRED_MAX = 45
+DOG_IT_MIN_INTERVAL_DAYS = 10
+PROCEDURAL_MORTALITY_AT_DOSES = {30: (0.07, 0.18), 45: (0.11, 0.25)}
+
+#: Brain radiation escalation (docs/universe/SWEEP_rt3_escalation.md, section M.5), grade TRANSFERRED: 36 Gy / 20 x 1.8 Gy whole
+#: brain is the strongest defensible canine course (EQD2 34.2 Gy against a canine whole-brain anchor of ~37.5-39.6 Gy, PMIDs
+#: 41420297, 12065111), 1.54x the e-folds of 23.4 Gy / 13 fx. The SPINE stays at 23.4 Gy: with the transplant's 2 x 5 Gy TBI a 36 Gy
+#: spinal field puts the cord at ~90% of tolerance. Costs 7 more anaesthetics.
+RT_BRAIN_ESCALATION_FACTOR = 1.54
+
 
 def lawful_brain_window(ip: str, *, interval_days: float, ic50_nM: float = 118.0,
                         verdinexor_access: float = VERDINEXOR_CNS_ACCESS_MEASURED, rt_line: str | None = None,
-                        lo: int = 84, hi: int = 5475, step: int = 15):
+                        rt_scale: float = 1.0, lo: int = 84, hi: int = 5475, step: int = 15):
     """Smallest window (days) at which the lawful brain program clears CNS: the lawful agents (verdinexor at `verdinexor_access`), one
     23.4 Gy course at the lineage-matched canine radiosensitivity, and intrathecal methotrexate every `interval_days` with the kill
     derived from measured canine CSF numbers. Returns (days, doses) or None if it does not clear inside `hi`."""
     line = rt_line or ("OSW (canine peripheral T-cell lymphoma)" if ip == "T" else "1771 (median)")
-    efolds = rt_efolds_in_vivo(line)
+    efolds = rt_efolds_in_vivo(line) * rt_scale          # rt_scale = RT_BRAIN_ESCALATION_FACTOR for 36 Gy whole brain
     k = it_mtx_derived_kill(interval_days, ic50_nM=ic50_nM)
     pool = lawful_pool(ip, CNS)
     esc = J._escapes(ip)

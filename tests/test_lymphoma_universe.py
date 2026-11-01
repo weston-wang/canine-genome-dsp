@@ -236,7 +236,7 @@ def test_theoretical_agents_are_inadmissible():
 def test_audit_only_the_b_cell_dose_count_fails_and_the_growth_bar_is_derived():
     """Was `failing() == []` until section M (2026-10-31) moved the B-cell brain dose count above canine precedent."""
     from canine_dsp import lymphoma_standard_audit as A
-    assert [i.name[:22] for i in A.failing()] == ["B: tolerability of 29-"]
+    assert A.failing() == []        # [B dose count] from 31 Oct until the long-course intrathecal transfer (section M.5, 1 Nov)
     assert A.GROWTH_BAR_BASIS["grade"] == "DERIVED" and A.GROWTH_BAR_BASIS["band"][1] >= A.GROWTH_BAR_BASIS["value"]
     assert all(i.passes for i in A.wrongly_reported_as_gaps())
 
@@ -576,13 +576,15 @@ def test_measured_selinexor_csf_removes_the_brain_redundancy_and_moves_the_b_cel
     assert S.lawful_brain_window("B", interval_days=14, ic50_nM=118.0) is None
 
 
-def test_audit_names_the_b_cell_intrathecal_dose_count_as_the_one_failing_input():
-    """After section M the audit's failing() is no longer empty: the B-cell brain closes only with more intrathecal doses than any dog
-    series has received, and that tolerability has no basis yet. The T-cell brain's dose count is inside precedent and passes."""
+def test_b_cell_dose_count_passes_on_the_long_course_transfer_and_its_procedural_cost_is_reported():
+    """Section M.5. 29-45 intrathecal doses at >= 10-day spacing is TRANSFERRED (human long courses to 36+ doses; same CSF half-life;
+    neurotoxicity tracks peak/cumulative concentration, not count; dogs dosed intrathecally for 20 months). It passes the bar, but
+    the procedure is a reported cost: ~7-18% cumulative mortality at 30 doses and ~11-25% at 45 if each dose needs an anaesthetic."""
     from canine_dsp import lymphoma_standard_audit as A
-    names = [i.name for i in A.failing()]
-    assert len(names) == 1 and names[0].startswith("B: tolerability of")
-    assert all(i.passes for i in A.lawful_brain_items() if i.name.startswith("T:"))
+    items = {i.name[:2]: i for i in A.lawful_brain_items()}
+    assert items["B:"].grade == "TRANSFERRED" and items["B:"].passes
+    assert items["T:"].grade == "MEASURED-PRECEDENT"
+    assert A.procedural_cost()[45][1] >= 0.2
 
 
 def test_selinexor_csf_is_a_floor_for_verdinexor_and_the_b_cell_brain_hinges_on_where_above_it_the_dog_value_sits():
@@ -597,3 +599,17 @@ def test_selinexor_csf_is_a_floor_for_verdinexor_and_the_b_cell_brain_hinges_on_
     assert S.lawful_brain_window("B", interval_days=14, ic50_nM=14.0, verdinexor_access=0.15)[1] > S.DOG_IT_DOSES_PRECEDENT_MAX
     assert S.lawful_brain_window("B", interval_days=21, verdinexor_access=hi)[1] <= S.DOG_IT_DOSES_PRECEDENT_MAX
     assert S.lawful_brain_window("B", interval_days=14, ic50_nM=14.0, verdinexor_access=S.VERDINEXOR_CNS_ACCESS_FLOOR)[1] > 28
+
+
+
+def test_36_gy_whole_brain_brings_the_brain_inside_canine_precedent_but_the_23_4_gy_spine_still_governs():
+    """Section M.5. 36 Gy / 20 fx whole brain (TRANSFERRED; 1.54x the e-folds of 23.4 Gy) closes the B-cell BRAIN on 17-18 intrathecal
+    doses every 14 days even at the pessimistic IC50 and verdinexor's floor -- inside canine precedent. The spine stays at 23.4 Gy
+    (cord tolerance with the transplant's TBI), and a spinal sub-compartment at 23.4 Gy still needs the 34-45 doses. So escalation adds
+    margin where intrathecal drug reaches least (parenchyma) but does not cut the injection count while the spine is counted separately."""
+    from canine_dsp import lymphoma_sustained as S
+    f = S.RT_BRAIN_ESCALATION_FACTOR
+    for ic50 in (14.0, 118.0):
+        w = S.lawful_brain_window("B", interval_days=14, ic50_nM=ic50, rt_scale=f)
+        assert w is not None and w[1] <= S.DOG_IT_DOSES_PRECEDENT_MAX, (ic50, w)
+    assert S.lawful_brain_window("B", interval_days=14, ic50_nM=14.0)[1] > S.DOG_IT_DOSES_PRECEDENT_MAX   # 23.4 Gy spine

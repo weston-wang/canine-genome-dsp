@@ -360,3 +360,11 @@ User: "I don't really buy the sister drug story. Did you even look at what the a
 - The old 0.30 is regraded ASSUMED, not CONTRADICTED.
 - **B-cell brain: closes inside canine dose precedent if verdinexor's dog brain reach is >= 0.18-0.24; needs 29-45 intrathecal doses at the 0.09 floor.** T-cell brain unaffected.
 - **Decisive measurement:** CSF + plasma verdinexor + plasma protein binding in one dog on Laverdia.
+
+### B-cell brain strengthened (2026-11-01; user: "that's not good enough though. I want stronger answers. Search broader")
+Details `LYMPHOMA_UNIVERSE.md` M.5; sweeps `SWEEP_it_longcourse.md`, `SWEEP_rt3_escalation.md`, `SWEEP_lawful_cns_agents.md`.
+- **`failing()` is empty again.** The 29-45 intrathecal dose count is TRANSFERRED (up to 45 doses >= 10 days apart; human long courses, same CSF half-life, neurotoxicity tracks concentration not count, dogs dosed intrathecally for 20 months).
+- **Real cost, now stated:** ~7-18% (30 doses) to ~11-25% (45 doses) cumulative procedural mortality if each dose needs an anaesthetic. Larger than K.6's "a few percent". Near zero only with an awake-dosed working port, which no canine series has shown for this many doses.
+- **36 Gy whole brain** (TRANSFERRED; 1.54x kill) closes the brain itself on 17-18 injections, inside canine precedent; the spine stays at 23.4 Gy and still needs 34-45.
+- **No second independent drug route** among lawful agents (temozolomide, ibrutinib, ifosfamide, dexamethasone, lomustine, HD-MTX checked). Brain closure rests on intrathecal methotrexate + radiation.
+- Lomustine's derived kill (0.004-0.04/day) is still not written back into the catalogue (follow-up; not load-bearing).

@@ -77,24 +77,35 @@ def growth_bar_item() -> Item:
 
 
 def lawful_brain_items() -> list:
-    """Inputs the LAWFUL brain programs depend on once verdinexor's brain reach is the measured 0.09 (section M, 2026-10-31).
-    The intrathecal dose count is load-bearing: a closing schedule inside canine precedent (<= 28 doses) passes; one that needs
-    more has no canine or written-transfer basis for its tolerability and is graded ASSUMED until one is found."""
+    """Inputs the LAWFUL brain programs depend on at verdinexor's brain-reach FLOOR 0.09 (sections M.2-M.5).
+    The intrathecal dose count is load-bearing. Inside canine precedent (<= 28 doses): MEASURED-PRECEDENT. Up to 45 doses at >= 10-day
+    spacing: TRANSFERRED (written transfer from human long-course and canine repeated-dosing series, SWEEP_it_longcourse.md). Beyond
+    that: ASSUMED. The procedural mortality of that many injections is a cost reported by procedural_cost(), not a pass/fail input."""
     from . import lymphoma_sustained as S
     out = []
     for ip, candidates in (("T", ((10, 118.0), (14, 14.0))), ("B", ((10, 118.0), (14, 14.0), (14, 2.5)))):
-        found = [w for w in (S.lawful_brain_window(ip, interval_days=i, ic50_nM=c) for i, c in candidates) if w]
-        best, worst = min(found, key=lambda w: w[1]), max(found, key=lambda w: w[1])
-        inside = worst[1] <= S.DOG_IT_DOSES_PRECEDENT_MAX
-        out.append(Item(f"{ip}: tolerability of {best[1]}-{worst[1]} intrathecal methotrexate doses over {best[0]}-{worst[0]} d",
-                        "MEASURED-PRECEDENT" if inside else "ASSUMED", inside,
-                        f"closing schedules across the IC50 range at verdinexor brain reach {S.VERDINEXOR_CNS_ACCESS_MEASURED}; canine "
-                        f"precedent is 20-{S.DOG_IT_DOSES_PRECEDENT_MAX} doses (CSF ports, 8-11 months)"
-                        + ("" if inside else "; no canine series and no written human transfer yet for this many. Clears instead if "
-                           f"verdinexor's brain reach in the dog is >= {S.VERDINEXOR_CNS_ACCESS_FOR_PRECEDENT[0]} (central IC50) - "
-                           f"{S.VERDINEXOR_CNS_ACCESS_FOR_PRECEDENT[1]} (pessimistic); 0.09 is only a floor transferred from "
-                           "selinexor, the value itself is unmeasured")))
+        found = [(w, i) for w, i in ((S.lawful_brain_window(ip, interval_days=i, ic50_nM=c), i) for i, c in candidates) if w]
+        best, worst = min(found, key=lambda x: x[0][1]), max(found, key=lambda x: x[0][1])
+        if worst[0][1] <= S.DOG_IT_DOSES_PRECEDENT_MAX:
+            grade = "MEASURED-PRECEDENT"
+        elif worst[0][1] <= S.DOG_IT_DOSES_TRANSFERRED_MAX and min(i for _, i in found) >= S.DOG_IT_MIN_INTERVAL_DAYS:
+            grade = "TRANSFERRED"
+        else:
+            grade = "ASSUMED"
+        out.append(Item(f"{ip}: tolerability of {best[0][1]}-{worst[0][1]} intrathecal methotrexate doses over {best[0][0]}-{worst[0][0]} d",
+                        grade, grade != "ASSUMED",
+                        f"closing schedules across the IC50 range at verdinexor brain-reach floor {S.VERDINEXOR_CNS_ACCESS_FLOOR}; canine "
+                        f"precedent 20-{S.DOG_IT_DOSES_PRECEDENT_MAX} doses; written transfer to {S.DOG_IT_DOSES_TRANSFERRED_MAX} doses at "
+                        f">= {S.DOG_IT_MIN_INTERVAL_DAYS} d spacing (SWEEP_it_longcourse.md)"))
     return out
+
+
+def procedural_cost() -> dict:
+    """The cost the closure carries that is not a pass/fail input: cumulative procedural mortality if each intrathecal dose needs a
+    general anaesthetic and a puncture (compounded from the record's per-event figures; SWEEP_it_longcourse.md). Near zero only if a
+    working ventricular port can be dosed without anaesthesia, which no canine series has yet shown for this many doses."""
+    from . import lymphoma_sustained as S
+    return dict(S.PROCEDURAL_MORTALITY_AT_DOSES)
 
 
 def failing() -> list:
@@ -117,8 +128,9 @@ def wrongly_reported_as_gaps() -> list:
              "human CAR-T kill 0.12/0.35/1.1 per day (PMIDs 33757357, 33565700) and the exact threshold the programs need (0.08-0.2) are stated; "
              "dog CAR-T non-expansion (7 dogs) is a condition with a route (in-vivo CAR-T; the B-cell program also has a CAR-T-free route)"),
         Item("no drug level in gadolinium-non-enhancing lymphoma", "TRANSFERRED", True,
-             "the rule-14 proxy was searched; no measurement exists for any agent; access factors are transferred from CSF/plasma and trial data "
-             "(docs/LYMPHOMA_UNIVERSE.md section G) and every brain route has at least four covering agents"),
+             "the rule-14 proxy was searched; no lymphoma measurement exists; one exists for high-dose IV methotrexate in human glioma "
+             "(non-enhancing tissue 22-24 uM peak, unbound ratio ~0.07-0.21, PMID 18787762; SWEEP_lawful_cns_agents.md); access factors are "
+             "transferred from CSF/plasma and trial data (docs/LYMPHOMA_UNIVERSE.md section G)"),
         Item("no canine engager exists", "TRANSFERRED", True,
              "class is licensed or late-stage in humans; potency 0.16/day TRANSFER-OUTCOME; the B-cell program closes without CAR-T on it and "
              "clears without it at CAR-T kill >= 0.08/day"),
