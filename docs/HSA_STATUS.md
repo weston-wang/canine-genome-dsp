@@ -491,6 +491,21 @@ measured sensitivity. Do not describe this margin as comfortable.
     15 carboplatin). **That is a THIRD abstract from this supplement not to be confused with eBAT**,
     alongside the TDI/gilvetmab one already flagged. Metadata services surface an arbitrary member of
     a multi-abstract supplement; check the title before attributing anything.
+  - **2026-11-01 — ACCESS DETERMINATION: this is a publisher bot-wall, and it is where the search
+    stops.** The blocker was diagnosed rather than assumed. The session's egress proxy reports
+    `recentRelayFailures: []`, so **the proxy is not blocking Wiley**; the 403 body is Cloudflare's
+    own "Just a moment..." interstitial, i.e. Wiley's bot protection on an article whose OA status is
+    merely BRONZE. **Unpaywall confirms the only OA location in existence is that same blocked Wiley
+    PDF** — there is no repository, preprint or mirror copy anywhere. Also tried and failed:
+    `lifescience.net` (bibliographic metadata only, rest behind login), CORE (API rejected the
+    request), scholar.archive.org (no full text), and the Veterinary Cancer Society's own abstracts
+    page (served no content).
+  - **Defeating the bot-wall is not an option and must not be attempted.** `/root/.ccr/README.md` is
+    explicit for this failure class: "Do not retry or route around it — report the blocked host."
+    So the correct terminal state for this item is **UNREADABLE FROM ANY AGENT SESSION**, not
+    "search incomplete". It closes only through a human with institutional or library access to
+    doi 10.1111/vco.70098, or by asking the Modiano lab directly. **No further retrieval attempts
+    are warranted; every class of route has now been tried and recorded.**
 
 ---
 
