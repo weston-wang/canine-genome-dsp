@@ -214,7 +214,18 @@ UNIVERSE: tuple[Modality, ...] = (
         Availability.EXISTS_TODAY,
         "Trametinib has a COMPLETED canine Phase I with a recommended dose (PMID 38889903), and "
         "cobimetinib has both a canine-HS IC50 and a canine plasma Cmax (PMID 39202410). This is "
-        "the best-tiered maintenance class in the project: obtainable AND measured in the dog.",
+        "the best-tiered maintenance class in the project: obtainable AND measured in the dog. "
+        "CORRECTED 2026-11-01: this class's two CNS-relevant members are LICENSED, which the record "
+        "had not said -- it treated both as investigational. Verified at Drugs@FDA: mirdametinib is "
+        "GOMEKLI, NDA 219379 and NDA 219389 (SpringWorks), oral, approved 2025-02-11 for NF1-"
+        "associated plexiform neurofibromas, and a peer-reviewed review states its 'added advantage "
+        "of CNS penetration' (PMID 40932001); tovorafenib is OJEMDA, NDA 217700 and NDA 218033 (Day "
+        "One Biopharms), oral, approved 2024-04-23, for a BRAIN TUMOUR indication. So 'the agent "
+        "does not exist' is no longer a reason the brain branch is weak -- both are obtainable "
+        "off-label today. The remaining reason is the MEASUREMENT: no canine brain:plasma ratio "
+        "exists for either, and for the parenchymal site the class is still ungraded. For the CSF "
+        "site it is not: mirdametinib's NHP CSF/unbound-plasma ratio is 2.5-3.0 (PMC9661017), a "
+        "measured transfer against a 0.0145 requirement.",
     ),
     Modality(
         "targeted small molecules -- PI3K/AKT/mTOR axis",

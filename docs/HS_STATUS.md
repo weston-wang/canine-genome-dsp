@@ -1497,3 +1497,79 @@ second-hand); the mirdametinib Kp,uu 0.243 was **established as untraceable** an
 used; and COTC033's eligibility was **obtained from a participating site** after the lead site's page
 proved unreadable. What remains unresolved is one documented discrepancy between two descriptions of
 COTC033's agent, recorded above, which does not bear on any closure in this analysis.
+
+## Final verification round, 2026-11-01 — the MAPK axis has two LICENSED CNS agents
+
+### COTC033: the discrepancy is RESOLVED at the sponsor's own page
+
+The NCI Center for Cancer Research Comparative Oncology Program page for COTC033 was read directly
+(server-rendered, 4 KB of text). It settles it:
+
+> The purpose of this study is to evaluate the safety and effectiveness of **intra-tumoral
+> administered vaccines**, when given to dogs with cancer. ... There will be **15-20 dogs** taking
+> part in this study across North America. Dogs weighing **more than 15 kg** who have been diagnosed
+> with a **solid tumor**. Dogs with mast cell tumor, hemangiosarcoma, thyroid cancer or lymphoma are
+> **not eligible**. Dogs cannot receive chemotherapy or radiation for **2 weeks** prior. ... Your dog
+> will be **randomized to either receive Shingrix/Gardasil vaccines or rabies vaccines** ... Study
+> weeks 1, 5 and 9 will require a tumor biopsy. Your dog will come in **weekly for an injection
+> directly into the tumor**. ... Consent for a necropsy ... is required.
+
+Sites: Colorado State, Ohio State, UC Davis, **University of Georgia**, Missouri, Wisconsin.
+
+So the **Shingrix/Gardasil-versus-rabies randomisation is correct** — it is the sponsor's own
+description. The phrase "Vaccine Peptide Library" appears nowhere on the NCI page; it is Missouri's
+local label for the agent, and no source states that the VPL *is* one of those vaccines. The
+discrepancy was a difference in naming between a site page and the sponsor page, not a contradiction
+about what is given. **Resolved: the NCI description governs.** Site-level numbers (Missouri's
+15-60 kg and 2-8 cm) are refinements of NCI's ">15 kg, solid tumour", which states no size.
+
+Scope conclusion unchanged and now resting entirely on primary sources: weekly **intratumoral**
+injection, biopsies at weeks 1/5/9, and a 2-week chemo/radiation washout. Not a route to a primary
+intracranial extra-axial mass, and incompatible with this programme's induction.
+
+### Mirdametinib is FDA-APPROVED, which the record did not say
+
+Verified at Drugs@FDA (openFDA): **GOMEKLI**, mirdametinib, **NDA 219379 and NDA 219389**, sponsor
+SpringWorks, oral, 1/2/3/4 mg, **original approvals both 2025-02-11**. A peer-reviewed review
+(PMID 40932001, *Expert Opin Investig Drugs* 2025;34:665-673,
+[DOI](https://doi.org/10.1080/13543784.2025.2558656)) describes it as "an FDA-Approved MEK1/2
+inhibitor for adult and pediatric NF1-associated plexiform neurofibromas" offering "an effective,
+targeted, and orally available treatment ... with the added advantage of **CNS penetration**".
+
+The record called mirdametinib "CNS-penetrant, notable CSF penetration in NHP, in paediatric
+brain-cancer trials" — i.e. it treated the agent as investigational. **It is licensed.** Combined
+with tovorafenib, also verified at Drugs@FDA (**OJEMDA**, NDA 217700 and NDA 218033, Day One
+Biopharms, original approval **2024-04-23**, oral), the MAPK axis now has **two licensed agents with
+CNS credentials** where the record had only "cobimetinib headroom 0.5x and mirdametinib unmeasured".
+
+What this does and does not change. It does NOT produce a canine brain:plasma figure, so the
+parenchymal branch of the MAPK tier is still not graded on a measured canine number. What it changes
+is availability: the brain branch's leading agents are **obtainable today, off-label**, rather than
+investigational — which is a rule-13 tier correction, and it removes "the agent does not exist" from
+the list of reasons that branch is weak. The remaining reason is the measurement, and for the CSF
+compartment even that is now a measured NHP transfer (CSF/unbound plasma 2.5-3.0, PMC9661017).
+
+### Ulixertinib: trial status verified at registry
+
+- **NCT06411821** — "Ulixertinib in People With Histiocytic Neoplasms", **Phase 2, RECRUITING**,
+  Memorial Sloan Kettering, last updated 2026-10-15, condition "Histiocytic Neoplasms".
+- Two NCI Pediatric MATCH records list **Histiocytic Sarcoma** and **Recurrent/Refractory Primary
+  CNS Neoplasm** among eligible conditions together: **NCT03155620** (screening, Phase 2, active)
+  and **NCT03698994** (the ulixertinib arm, Phase 2, active). An ERK-inhibitor arm that enrols both
+  histiocytic disease and CNS tumours is the closest clinical-stage precedent for the ERK option
+  here, and it is registry-verified rather than inferred.
+
+### The mirdametinib Kp,uu 0.243 claim: closed as UNTRACEABLE, by search not by assumption
+
+Seven distinct routes were tried and are recorded so nobody repeats them: bioRxiv HTML (Cloudflare
+1015), bioRxiv source XML (1015), WebFetch of the preprint (429 then 1015), Europe PMC
+`PPR1123579/fullTextXML` (404), Europe PMC `PMC12667814/fullTextXML` (404), NCBI efetch of
+PMC12667814 (metadata only, 2.9 KB, no results text), and the PMC OA service (404). Decisively, a
+Europe PMC **full-text search** for `mirdametinib AND "0.243"` returns two records, neither a
+mirdametinib brain-PK source, and `mirdametinib AND "Kp,uu"` returns five, of which the only relevant
+one is the NHP CSF abstract already in hand.
+
+So the absence is **established by search rather than assumed**: no published source carries the
+figure, and the preprint that quotes it attributes it to unnamed "existing studies". Under the stated
+bar that makes it ASSUMED, and it is therefore **not used anywhere in the model**. The usable number
+for this axis remains the measured NHP CSF dataset. This item is closed, not pending.

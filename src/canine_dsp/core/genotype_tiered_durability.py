@@ -291,7 +291,20 @@ MAPK_MAINTENANCE_BY_SITE = {
         "CNS-penetrant MEK inhibitor -- mirdametinib, notable CSF penetration in NHP, in paediatric "
         "brain-cancer trials -- but NO canine brain:plasma ratio is measured. The access 0.50 in the "
         "model is the maintenance THRESHOLD, not a mirdametinib figure; treat this branch as a "
-        "hypothesis.",
+        "hypothesis. UPDATED 2026-11-01, two changes in opposite directions. (a) AVAILABILITY "
+        "improves: mirdametinib is LICENSED (GOMEKLI, NDA 219379/219389, approved 2025-02-11, "
+        "verified at Drugs@FDA), and the axis also has a licensed type II pan-RAF whose approved "
+        "indication is a brain tumour (tovorafenib, OJEMDA, NDA 217700/218033, approved "
+        "2024-04-23). So this branch no longer waits on an agent existing; both are obtainable "
+        "off-label. (b) The MEASUREMENT still splits by site, and the honest split is: for CSF the "
+        "branch is no longer a bare hypothesis -- mirdametinib's NHP CSF/unbound-plasma ratio is "
+        "2.5-3.0 with CSF Cmax 0.43-0.56 ng/mL and plasma fu 0.52% (PMC9661017), against a 0.0145 "
+        "requirement, which is a measured transfer; for invaded PARENCHYMA it remains a hypothesis, "
+        "because no brain-tissue ratio exists for either agent in any species and the one figure "
+        "circulating for mirdametinib (Kp,uu 0.243) was traced to a preprint attributing it to "
+        "unnamed sources and is not published anywhere, so it is NOT used. Tovorafenib's own caveat "
+        "is that its clinical evidence is in BRAF-altered tumours while this disease is SHP2/KRAS "
+        "driven, and its dosing is once weekly.",
 }
 
 EARLY_WORK_ALREADY_ESTABLISHED = (
