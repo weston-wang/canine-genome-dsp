@@ -130,7 +130,8 @@ def test_the_two_bispecific_entries_are_kept_apart():
 def test_radiation_is_split_by_whether_the_target_can_be_imaged():
     """Body radiation is excluded on dissemination; brain SRS is credited only against an imaged
     deposit. The same modality gets two dispositions because the targets differ."""
-    body = next(x for x in at.CLASS_LEDGER if x.modality_class == "radiation -- body")
+    body = next(x for x in at.CLASS_LEDGER
+                if x.modality_class == "radiation -- EXTERNAL BEAM to the body")
     brain = next(x for x in at.CLASS_LEDGER
                  if x.modality_class == "radiation -- brain, to an imaged deposit")
     assert body.status == at.EXCLUDED and body.reason_kind == at.DEFEATED_BY_ESCAPE
@@ -160,10 +161,58 @@ def test_bnct_is_a_separate_disposition_from_external_beam_radiation():
     assert "no field to aim at" in b.the_evidence
 
 
+def test_systemic_radionuclide_does_not_inherit_the_beam_exclusion():
+    """Added 2026-11-01, after the user asked whether the whole FIELD of radiation had been
+    assessed. It had not: all three radiation entries were beams, and the geometry argument --
+    'a field cannot cover disseminated disease' -- was silently generalised to a delivery mode it
+    does not describe. An injected radionuclide circulates, so that reason cannot reach it."""
+    sysrad = next(x for x in at.CLASS_LEDGER if "SYSTEMIC radionuclide" in x.modality_class)
+    beam = next(x for x in at.CLASS_LEDGER
+                if x.modality_class == "radiation -- EXTERNAL BEAM to the body")
+
+    # the class is OPEN, not excluded -- it never had a reason of its own
+    assert sysrad.status == at.NOT_YET_ASSESSED
+    assert sysrad.reason_kind == ""
+    assert "cannot inherit that exclusion" in sysrad.reason
+    assert "NOT geometry-limited" in sysrad.reason
+
+    # and the beam entry now says so itself, so the two cannot be conflated again
+    assert "SCOPE NARROWED" in beam.reason
+    assert "BEAM radiation only" in beam.reason
+    assert "argument about beams" in beam.reason
+
+    # the modality is deliverable in dogs today, which is why the tier is not theoretical
+    assert sysrad.tier_of_the_best_available_agent == at.DOG_TRIALS
+    assert "PMID 37431065" in sysrad.the_evidence
+    assert "1.75 mCi/kg" in sysrad.the_evidence
+
+
+def test_the_systemic_radionuclide_path_states_physics_limits_not_a_data_gap():
+    """Rule 13: the reasons for withholding credit must be scientific. Here the binding one is an
+    isotope/target-size mismatch -- a physics argument -- plus marrow-limited finiteness."""
+    sysrad = next(x for x in at.CLASS_LEDGER if "SYSTEMIC radionuclide" in x.modality_class)
+    ev = sysrad.the_evidence
+    assert "ISOTOPE-CLASS MISMATCH" in ev
+    assert "physics argument, not a data gap" in ev
+    assert "PMID 17684582" in ev
+    assert "0.5 cm" in ev                      # where beta emitters are appropriate
+    assert "alpha" in ev and "minimal residual disease" in ev
+    assert "MARROW-LIMITED" in ev and "FINITE" in ev
+    assert "never the permanent floor" in ev   # so it cannot replace the vaccine
+    # the forbidden reason appears exactly once, and only to be ruled OUT as the reason
+    assert "none of these is 'canine data are absent'" in ev
+    assert ev.count("canine data are absent") == 1
+    # it is credited to the hardest route only as a PROFILE, not as a number
+    assert "route 8" in ev and "NOT growth-dependent" in ev
+
+
 def test_unassessed_classes_are_labelled_unassessed_rather_than_excluded_or_closed():
     """Rule 9's third category. Each must carry a named path to assessment."""
     unassessed = at.unassessed_classes()
-    assert {c.modality_class for c in unassessed} == {"oncolytic virus", "cytokine agents"}
+    assert {c.modality_class for c in unassessed} == {
+        "oncolytic virus", "cytokine agents",
+        "radiation -- SYSTEMIC radionuclide therapy (radiopharmaceutical, radioimmunotherapy, "
+        "radiotheranostic)"}
     for c in unassessed:
         assert c.reason_kind == ""                      # no exclusion reason is claimed
         assert "named path" in c.the_evidence or "path to assessment" in c.the_evidence
@@ -181,7 +230,7 @@ def test_the_ledger_covers_the_classes_rule_9_enumerates():
 def test_every_ledger_entry_has_exactly_one_of_the_three_statuses():
     for c in at.CLASS_LEDGER:
         assert c.status in (at.IN_PROGRAM, at.EXCLUDED, at.NOT_YET_ASSESSED), c.modality_class
-    assert len(at.CLASS_LEDGER) == 17   # 16 + BNCT, added 2026-10-31
+    assert len(at.CLASS_LEDGER) == 18   # +BNCT (2026-10-31), +systemic radionuclide (2026-11-01)
     assert len(at.classes_in_program()) == 8
 
 

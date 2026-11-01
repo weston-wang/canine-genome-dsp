@@ -596,6 +596,62 @@ not already cover. Nothing found reports one: the two in-vivo canine signals are
 cytostatic and a discordant hypomethylator, and the sweep's largest efficacy number (59%) is an ORR in
 bulk human disease.
 
+### 2026-11-01 — A WHOLE DELIVERY MODE OF RADIATION HAD NEVER BEEN ASSESSED. Caught by the user, not by the sweep.
+
+The user asked whether the field of radiation had actually been assessed. It had not. **All three
+radiation entries in the ledger were BEAMS** — external beam to the body, BNCT (a neutron beam), and
+brain radiosurgery. There was no entry for **systemic radionuclide therapy** at all: no
+radiopharmaceutical, radioimmunotherapy, radiotheranostic, alpha emitter or beta emitter appears
+anywhere in the package.
+
+**Why that is a reasoning failure and not just a missing row.** The beam entry's stated reason is *"a
+radiation field cannot cover disseminated micrometastatic disease."* That is an argument **about
+beams**. An injected radionuclide circulates; it is not geometry-limited. So the one reason on file
+was silently generalised to a delivery mode it does not describe, and a class was kept out of the
+candidate universe without any reason that applies to it — exactly what rules 9 and 13 exist to stop.
+
+**The record had already flagged this and the sweep did not follow it.** The prior sweep's own lead
+table says of PMID 40100321: *"a systemically administered radioligand is **not geometry-limited the
+way external-beam radiation is** — which is the specific ground on which field radiation was
+excluded, so this is the shape of evidence that could reopen that exclusion."* It was written down,
+and the eleven-angle sweep walked past it. Writing the lead is not following the lead.
+
+**What the class actually looks like, now that it has been searched:**
+
+- **The modality is deliverable in dogs today.** Selting et al. 2023, *Vet Radiol Ultrasound*
+  64(5):982–991, **PMID 37431065** — CycloSam (Sm-153-DOTMP) dose-escalated in **20 dogs** with
+  spontaneous appendicular osteosarcoma. Recommended canine dose **1.75 mCi/kg**; dose-limiting
+  neutropenia and thrombocytopenia at 2 mCi/kg; no dose-limiting non-haematologic toxicity; **safely
+  combined with carboplatin**. A canine dose and a canine toxicity profile both exist.
+- **The program's own target already has radioligands.** uPAR is what eBAT binds.
+  `[64Cu]DOTA-AE105` is in **human Phase 2**; a cyclic-peptide uPA radiotheranostic suppressed
+  tumour growth and prolonged survival in mice after a **single dose** (PMID 40100321); and
+  Lu-177-labelled uPAR peptides with an albumin binder reach 6.0–16% IA/g in xenograft, **7–18×**
+  DOTA-AE105, uPAR Kd 31–42 nM (PMID 41143984).
+- **It would act on the hardest route.** A radionuclide kills by DNA damage, so it is
+  antigen-independent, pathway-independent and **not growth-dependent** — the exact profile route 8
+  (antigen-null *and* drug-resistant) and route 13 (dormancy) call for.
+
+**Why it is still NOT CREDITED — and none of the reasons is "no canine data":**
+
+1. **Isotope-class mismatch, which is physics rather than a data gap.** Beta emitters (Sm-153,
+   Lu-177) have mm-range crossfire and are *"more appropriate for solid tumours and large tumour
+   burdens (> 0.5 cm)"*, while alpha and Auger emitters are more efficient at killing **single
+   cells** and are the class suggested for micrometastases and **minimal residual disease**
+   (Karagiannis 2007, *Hell J Nucl Med* 10(2):82–8, **PMID 17684582**). This case *is* minimal
+   residual disease, so the right isotope class is alpha/Auger — and that is the class with the
+   least canine support, so the canine dose above does not transfer to it.
+2. **No dosimetry exists for hemangiosarcoma micrometastatic deposits**, so no log-kill can be
+   derived without inventing one.
+3. **Marrow-limited, therefore finite.** It could only ever be a clearing agent alongside
+   doxorubicin and eBAT — **never the permanent floor**, so it does not substitute for the vaccine.
+
+**Status: NOT YET ASSESSED with a named path** (`hsa_agent_tiers`, 18 classes now). To close it: an
+alpha-emitter uPAR-ligand dosimetry estimate for a micrometastatic deposit, graded TRANSFERRED, run
+against the same exposure and duration criteria as every other lever. **No cell or condition moves on
+this today** — but the candidate universe was incomplete, and the sweep's "nothing new" was therefore
+narrower than it sounded.
+
 ### A method defect in the record's own stated method — it had produced a false negative
 
 The previous sweep recorded, as a lesson, "use Europe PMC `SRC_TYPE:PPR` for preprints". **`SRC_TYPE`

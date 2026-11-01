@@ -275,10 +275,14 @@ CLASS_LEDGER: tuple[ClassDisposition, ...] = (
         "", "PMID 37686485. eVim is excluded as the PLATFORM CHOICE, not as a class, because it "
             "lacks the T-cell arm route 9 requires"),
     ClassDisposition(
-        "radiation -- body", EXCLUDED, LICENSED,
+        "radiation -- EXTERNAL BEAM to the body", EXCLUDED, LICENSED,
         "the modality is a field-limited log-remover, which is the term the stack is already "
         "strongest in. Route 7 is disseminated micrometastatic disease, which no radiation field "
-        "can cover. The exclusion rests on that geometry ALONE -- a canine dataset now exists",
+        "can cover. The exclusion rests on that geometry ALONE -- a canine dataset now exists. "
+        "SCOPE NARROWED 2026-11-01: this entry covers BEAM radiation only and must never be read "
+        "as a disposition of radiation as a field, because the geometry argument is an argument "
+        "about beams and does not apply to a systemically injected radionuclide -- see the "
+        "separate systemic-radionuclide entry",
         DEFEATED_BY_ESCAPE,
         "CORRECTED 2026-10-31. This entry previously read 'no transferable canine dataset exists "
         "for this disease' and 'a PubMed search for canine hemangiosarcoma radiotherapy outcome "
@@ -310,6 +314,45 @@ CLASS_LEDGER: tuple[ClassDisposition, ...] = (
         "modality is clinical-stage in humans, which under rule 13 makes the tier NEAR-FUTURE "
         "rather than theoretical. It is excluded anyway because BNCT irradiates one positioned "
         "field, and routes 7, 8 and 12b are occult disseminated seeding with no field to aim at"),
+    ClassDisposition(
+        "radiation -- SYSTEMIC radionuclide therapy (radiopharmaceutical, radioimmunotherapy, "
+        "radiotheranostic)", NOT_YET_ASSESSED, DOG_TRIALS,
+        "never assessed. The ledger carried three radiation entries and all three were BEAMS, so "
+        "the field-geometry argument was silently generalised to a delivery mode it does not "
+        "describe: an injected radionuclide circulates and is NOT geometry-limited, which is "
+        "precisely the ground the beam entry was excluded on. This class therefore cannot inherit "
+        "that exclusion and is opened as unassessed",
+        "",
+        "the named path to assessment, and why it is a path rather than a closure. "
+        "(1) THE MODALITY IS DELIVERABLE IN DOGS TODAY: Selting et al. 2023, Vet Radiol Ultrasound "
+        "64(5):982-991, PMID 37431065, doi 10.1111/vru.13274 -- CycloSam (Sm-153-DOTMP) "
+        "dose-escalated in 20 dogs with spontaneous appendicular osteosarcoma, recommended canine "
+        "dose 1.75 mCi/kg, dose-limiting neutropenia and thrombocytopenia at 2 mCi/kg, no "
+        "dose-limiting non-haematologic toxicity, and SAFELY COMBINED with carboplatin. So a "
+        "canine dose and a canine toxicity profile for systemic radionuclide therapy both exist. "
+        "(2) THE PROGRAM'S OWN TARGET ALREADY HAS RADIOLIGANDS: uPAR is what eBAT binds. "
+        "[64Cu]DOTA-AE105 is in human Phase 2; a cyclic-peptide uPA radiotheranostic suppressed "
+        "tumour growth and prolonged survival in mice after a SINGLE dose (Wang et al. 2025, "
+        "Chemistry 31(28):e202500479, PMID 40100321); and Lu-177-labelled uPAR peptides with an "
+        "albumin binder reach 6.0-16% IA/g in xenograft, 7-18x DOTA-AE105, with uPAR Kd 31-42 nM "
+        "(Vaccarin et al. 2025, Eur J Nucl Med Mol Imaging 53(4):2502-2517, PMID 41143984). "
+        "(3) IT WOULD ACT ON THE HARDEST ROUTE: a radionuclide kills by DNA damage, so it is "
+        "antigen-independent, pathway-independent and NOT growth-dependent -- the profile route 8 "
+        "(antigen-null AND drug-resistant) and route 13 (dormancy) need. "
+        "WHY IT IS NOT CREDITED YET, and none of these is 'canine data are absent': "
+        "(a) ISOTOPE-CLASS MISMATCH, which is a physics argument, not a data gap. Beta emitters "
+        "like Sm-153 and Lu-177 have mm-range crossfire and are 'more appropriate for solid "
+        "tumours and large tumour burdens (> 0.5 cm)', whereas alpha and Auger emitters are more "
+        "efficient at killing SINGLE cells and are the class suggested for micrometastases and "
+        "minimal residual disease (Karagiannis 2007, Hell J Nucl Med 10(2):82-8, PMID 17684582). "
+        "This case IS minimal residual disease, so the right isotope class is alpha/Auger -- and "
+        "that is the class with the least canine support, so the canine dose above does not "
+        "transfer to it. (b) No dosimetry exists for hemangiosarcoma micrometastatic deposits, so "
+        "no log-kill can be derived without inventing one. (c) MARROW-LIMITED, therefore FINITE: "
+        "it can only ever be a clearing agent alongside doxorubicin and eBAT, never the permanent "
+        "floor, so it does not substitute for the vaccine. To close it: an alpha-emitter "
+        "uPAR-ligand dosimetry estimate for a micrometastatic deposit, graded TRANSFERRED, tested "
+        "against the same exposure and duration criteria as every other lever"),
     ClassDisposition(
         "radiation -- brain, to an imaged deposit", IN_PROGRAM, LICENSED,
         "credited only against an imaged intracranial deposit, and deliberately NOT credited "

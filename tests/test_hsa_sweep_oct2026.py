@@ -88,7 +88,8 @@ def test_the_radiation_correction_fixes_a_reason_not_a_verdict():
     assert "does not change the radiation disposition" in r.why
     # the class is still excluded, and now for the geometry alone
     from canine_dsp import hsa_agent_tiers as t
-    body = [c for c in t.CLASS_LEDGER if c.modality_class == "radiation -- body"][0]
+    body = [c for c in t.CLASS_LEDGER
+            if c.modality_class == "radiation -- EXTERNAL BEAM to the body"][0]
     assert body.status == t.EXCLUDED
     assert "CORRECTED 2026-10-31" in body.the_evidence
     assert "PMID 42903052" in body.the_evidence
