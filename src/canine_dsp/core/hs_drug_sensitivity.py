@@ -112,6 +112,18 @@ CITATION = ("PMID 25715778. SPECIES: DOG. DISEASE: HISTIOCYTIC SARCOMA. Four can
             "(CHS-1, CHS-2, CHS-3, DH82) vs two canine lymphoma lines (CLBL-1 B-cell, Ema T-cell) "
             "as a chemosensitive comparator. Ten drugs, plus expression of 16 drug-resistance genes.")
 
+#: WHY `DrugClass.ANTIMETABOLITE` HAS NO ROW HERE, AND WHY THAT IS NOT AN OVERSIGHT ANY MORE.
+#: PMID 25715778 tested ten drugs and no antimetabolite among them, so this table -- which is
+#: deliberately ONE paper, with one chemosensitive comparator panel -- has nothing to put under that
+#: member. The member being empty was for a long time the only trace of a class the rule-9 catalogue
+#: had never enumerated at all; `candidate_universe` now carries that class explicitly, as an OPEN
+#: hole. The antimetabolite data that exist in canine HS come from a different design and cannot be
+#: appended to this tuple without breaking its semantics: PMID 42129963 screened 1824 compounds
+#: across 10 CHS lines with NO comparator panel, so there is no `comparator_ic50_ng_ml` to compute
+#: a fold-resistance from. What it reports is that 5-fluorouracil, clofarabine and floxuridine all
+#: reduced viable cell counts to <=70% at 5 uM in ALL ten lines, and that 5-FU's median IC50 across
+#: them is 7.49 uM (about 974 ng/ml at MW 130.08). Read that number next to this table's own: it is
+#: three orders of magnitude better than the alkylators and three worse than the vincas.
 MEASURED = (
     Sensitivity("nimustine (ACNU)", DrugClass.O6_ALKYLATOR, (190_000.0, 587_000.0), (876.0, 1420.0)),
     Sensitivity("melphalan", DrugClass.N7_CROSSLINKER, (29_000.0, 65_000.0), (158.0, 689.0)),

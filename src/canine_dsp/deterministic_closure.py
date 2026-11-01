@@ -222,7 +222,26 @@ CONDITIONS: tuple[Condition, ...] = (
         "year is duty 0.0575, giving kill 0.017/day against a 0.055/day bar.",
         "Already met by oral agents. The constraint it imposes is on the CYTOTOXIC: cumulative-dose "
         "caps (lomustine ~4 doses) are incompatible with continuous dosing, which is a further "
-        "reason the alkylator class is dropped.",
+        "reason the alkylator class is dropped. "
+        "HUMAN OUTCOME DATA ADDED 2026-11-01, AND IT CUTS BOTH WAYS -- the Histiocyte Society's "
+        "blueprint for non-LCH research (PMID 41178439) supplies the first real-world numbers this "
+        "condition has had, from the human histiocytic family rather than from persister biology. "
+        "The first half CONFIRMS the condition: 'the relapse rate was nearly 75% after interruption "
+        "of targeted therapies'. That is the strongest support C3's rationale has ever had, and it "
+        "is measured in patients rather than argued from reversibility. The second half is a "
+        "FEASIBILITY PRESSURE the record did not contain: '60% of patients with ECD discontinued "
+        "BRAF inhibitors at a median follow-up of 4 years due to adverse events'. A ten-year "
+        "continuous-dosing premise therefore has a human analogue in which a majority could not "
+        "stay on the drug for four. "
+        "WHY C3 STAYS MET RATHER THAN BECOMING OPEN, stated so the grading is auditable: the "
+        "discontinuation figure is indirect on two axes at once (human, and the BRAF-inhibitor "
+        "class rather than any agent in this regimen), and what it threatens is not the mechanism "
+        "but the delivery of ONE axis. The structure that answers it is already in the model and "
+        "not newly invented for the occasion: maintenance is tiered across non-overlapping axes "
+        "with a named successor for every reroute, so losing an axis to toxicity is a SWITCH, which "
+        "the ledger already prices, and not a STOP, which is what the 75% figure punishes. That "
+        "answer is structural, not demonstrated -- no dog has been switched for toxicity in this "
+        "disease -- and it is recorded here at that strength and no higher.",
     ),
     Condition(
         "C4", "Induction agent is NOT an efflux (P-gp/BCRP) substrate",

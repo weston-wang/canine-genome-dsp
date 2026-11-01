@@ -98,11 +98,23 @@ Durability is therefore reached in **two moves**:
   is quantitative: per-day kill rates, CNS access, and the growth-rate bar.
 - **The claim is now scoped to a stated catalogue, not an unstated one.** Two audits were added
   after the above was first written, both required by the project's own rule 9:
-  `candidate_universe` enumerates **26 therapy-modality classes** (15 in the model, 11 excluded
-  with a recorded reason, **0 unassessed**), and `escape_audit` derives the escape list
+  `candidate_universe` enumerates **28 therapy-modality classes** (15 in the model, 12 excluded
+  with a recorded reason, **1 open**), and `escape_audit` derives the escape list
   independently of the one in hand, finding **4 route gaps** the original twelve missed —
   so the audited count is **16 escapes**. The honest headline is therefore "closed within this
-  catalogue of 26 modality classes and 16 escape routes", with the exclusions named.
+  catalogue of 28 modality classes and 16 escape routes, with 1 class open", with the exclusions
+  named.
+
+  Updated 2026-11-01, and this one is a DOWNGRADE of a published line: a second-pass sweep found
+  two more classes that had never been rows, so "0 unassessed" became "1 open". Antimetabolites /
+  nucleoside analogues cannot be excluded — three members are measured active in all ten canine HS
+  lines and clofarabine holds a 2-year PFS of 89% in relapsed LCH — but no single member carries
+  potency, brain access and tolerability together, so the class is carried open until one IC50 is
+  measured. The FGFR axis, found in the same sweep, is excluded on a human glioma phase 2 whose
+  durable responders all carried an activating FGFR mutation or fusion that this tumour lacks. The
+  procedural lesson is recorded in `candidate_universe`'s docstring: a count of "0 unassessed" says
+  nothing about rows that were never written, so rule 9's list has to be rebuilt from the
+  literature each time rather than audited against itself.
 
   Updated 2026-10-31: it was 25 classes until a literature sweep found a 26th that had never been
   enumerated at all — live bacterial vector / intracellular delivery, in use in a funded dog trial in

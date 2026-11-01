@@ -32,10 +32,28 @@ checklist, not a probability.
 | Items previously mis-reported as open | 9, each now graded and guarded | same |
 | Growth bar beaten | 0.055 / day | same |
 
-**Catalogue the claim is made over:** 26 therapy-modality classes — 15 in the model, 11 excluded, **0
-unassessed** — and 16 escape routes from an independent audit. No class is excluded for lacking canine
-data; each exclusion rests on a contradicted kill (6), a named escape that defeats it (3), or a
-toxicity budget it would blow (2). The newest class is **live bacterial vector** — attenuated
+**Catalogue the claim is made over:** 28 therapy-modality classes — 15 in the model, 12 excluded, **1
+open** — and 16 escape routes from an independent audit. No class is excluded for lacking canine
+data; each exclusion rests on a contradicted kill (7), a named escape that defeats it (3), or a
+toxicity budget it would blow (2).
+
+**The one open class, and this line was "0 unassessed" until 2026-11-01.** A second-pass sweep found
+two classes that had never been rows at all. **Antimetabolites / nucleoside analogues** is the one
+that stays open: three members — 5-fluorouracil, clofarabine, floxuridine — are measured active in
+*all ten* canine HS lines (PMID 42129963), and clofarabine carries the only durability figure any
+agent in this project has in a histiocytic neoplasm (2-year progression-free survival 89% ± 7% and
+overall survival 100% in relapsed/refractory Langerhans-cell histiocytosis after six cycles,
+PMID 42126265). It is not excludable, because at the brain each member fails a *different* leg:
+5-FU's catabolite causes convulsions and cerebral vacuolation in beagles (PMID 15206584);
+clofarabine's CSF penetration is 5%, range 3–26% (PMID 16115942); cytarabine has the best measured
+canine CSF access in this whole project, 0.62 of plasma in dogs with an intact barrier
+(PMID 1742843), but its canine-HS kill is unconfirmed rather than contradicted. What would close it
+is one IC50 measurement. **FGFR axis**, the second missing row, does close: infigratinib's phase 2 in
+FGFR-altered recurrent glioma gave 6-month PFS 16% and ORR 3.8%, with every durable responder
+carrying an activating FGFR mutation or fusion — a biomarker canine HS, an overexpression tumour, is
+not reported to have (PMID 35344029).
+
+The previous newest class was **live bacterial vector** — attenuated
 *Listeria*-derived carriers, the subject of a funded pilot now enrolling dogs with this disease. It
 had never been enumerated at all; it is now excluded on a derived site mismatch, because bacterial
 tumour tropism is driven by hypoxia and necrosis while the site that decides this case is the

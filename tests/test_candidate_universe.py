@@ -3,18 +3,31 @@
 from canine_dsp import candidate_universe as cu, escape_audit as ea
 
 
-def test_no_modality_class_is_left_unassessed():
+def test_no_modality_class_is_left_unassessed_SILENTLY():
     """The failure this module exists to prevent: claiming closure over a list with holes in it.
 
-    History, because it is the point: this was `== []` until the 2026-10-31 sweep found a class the
-    universe had never enumerated (live bacterial vector), while a funded dog trial in THIS disease
-    was already using it. It was carried as a declared hole for the day it took to read the access
-    mechanism at primary source, then EXCLUDED on a derived site mismatch. So it is `== []` again by
-    ASSESSMENT rather than by deleting the row -- and KNOWN_OPEN_CLASSES still exists, so the next
-    hole can be carried honestly instead of forcing that choice again.
+    History, because it is the point. This was `cu.not_assessed() == []` twice over. The 2026-10-31
+    sweep found a class the universe had never enumerated (live bacterial vector) while a funded dog
+    trial in THIS disease was already using it; it was carried as a declared hole for a day, then
+    EXCLUDED on a derived site mismatch, and the assertion went back to `== []`.
+
+    Then the 2026-11-01 sweep found two more rows that had never existed, and one of them --
+    antimetabolites -- cannot be excluded on any admissible ground and cannot be called in-model
+    without an agent wired into the regimen. At that point `== []` stopped being an invariant and
+    started being a thing to satisfy, which is the failure mode in miniature: the test would have
+    pushed towards grading the class rather than reporting it.
+
+    So the invariant is restated as what it always meant: no hole may be SILENT. Every open class
+    must be declared in KNOWN_OPEN_CLASSES, which `candidate_universe._validate()` enforces at
+    import and which the published catalogue line must match. The count of open classes is pinned
+    separately, in `test_the_catalogue_count_and_the_open_count_are_what_the_docs_say`, so a change
+    to it fails loudly instead of passing quietly.
     """
-    assert cu.not_assessed() == []
-    assert cu.KNOWN_OPEN_CLASSES == ()
+    undeclared = [m.name for m in cu.not_assessed() if m.name not in cu.KNOWN_OPEN_CLASSES]
+    assert undeclared == [], undeclared
+    stale = [n for n in cu.KNOWN_OPEN_CLASSES
+             if n not in {m.name for m in cu.not_assessed()}]
+    assert stale == [], stale
 
 
 def test_the_bacterial_vector_class_is_excluded_on_a_site_mismatch_not_on_absent_canine_data():
@@ -150,3 +163,70 @@ def test_the_two_ablative_device_modalities_are_assessed_with_a_stated_reason():
     assert "HISTOTRIPSY" in m.representative and "H-FIRE" in m.representative
     assert "cranial defect" in m.representative or "craniotomy" in m.representative
     assert cu.excluded_citing_absent_canine_data() == []
+
+
+def test_the_antimetabolite_class_is_enumerated_and_carried_open():
+    """The second rule-9 hole, found 2026-11-01. Three members are measured active in all ten
+    canine HS lines, so the class cannot be dismissed; no single member carries potency, brain
+    access and tolerability together, so it cannot be closed either. It must therefore be OPEN --
+    and declared, so the import-time guard stays loud about it."""
+    m = next(x for x in cu.UNIVERSE if "antimetabolite" in x.name)
+    assert m.status is cu.Status.NOT_ASSESSED
+    assert m.name in cu.KNOWN_OPEN_CLASSES
+    assert m.exclusion_ground is None, "an open class must not carry an exclusion ground"
+    assert m.availability is cu.Availability.EXISTS_TODAY
+    assert m.canine_hs_evidence.startswith("MEASURED")
+    # the three members and the leg each one fails
+    for token in ("5-fluorouracil", "clofarabine", "cytarabine", "floxuridine"):
+        assert token.lower() in m.basis.lower() or token.lower() in m.canine_hs_evidence.lower()
+    assert "15206584" in m.basis, "the dog-cerebrum vacuolation finding is what disqualifies 5-FU"
+    assert "1742843" in m.basis, "the measured canine CSF:plasma 0.62 is what keeps it open"
+    assert "42126265" in m.basis, "clofarabine's LCH durability readout"
+
+
+def test_the_open_class_does_not_become_a_failing_input():
+    """Rule 11 keeps two axes apart: `standard_audit.failing()` grades the inputs the model USES,
+    while rule 9 grades the candidate list the claim is quantified OVER. An unenumerated class is
+    the second kind. Collapsing them would re-grade a live input against demonstration."""
+    from canine_dsp import standard_audit
+    assert standard_audit.failing() == [] or all(
+        "antimetabolite" not in str(f).lower() for f in standard_audit.failing()
+    )
+
+
+def test_the_fgfr_axis_is_excluded_on_brain_tumour_data_not_on_absent_canine_data():
+    """Found in the same sweep and it closes out: the licensed members exist, the canine signal is
+    real, and the class still fails -- in human recurrent glioma, in the biomarker this tumour
+    actually has."""
+    m = next(x for x in cu.UNIVERSE if "FGFR" in x.name)
+    assert m.status is cu.Status.EXCLUDED
+    assert m.exclusion_ground is cu.ExclusionGround.KILL_CONTRADICTED
+    assert m.availability is cu.Availability.EXISTS_TODAY
+    assert "35344029" in m.basis, "the infigratinib glioma phase 2 is the ground"
+    assert "212018" in m.availability_basis and "213736" in m.availability_basis
+    assert m in cu.newly_assessed()
+    assert cu.excluded_citing_absent_canine_data() == []
+
+
+def test_the_catalogue_count_and_the_open_count_are_what_the_docs_say():
+    """The published line moved from '26 -- 15/11/0 unassessed' to '28 -- 15/12/1 open'. If this
+    test fails, three documents and a reader-facing page are now lying."""
+    t = cu.tally()
+    assert len(cu.UNIVERSE) == 28
+    assert t["IN_MODEL"] == 15
+    assert t["EXCLUDED"] == 12
+    assert t["NOT_ASSESSED"] == 1
+    claim = cu.closure_claim(ea.audited_escape_count())
+    assert "28 modality classes" in claim
+    assert "1 unassessed" in claim
+
+
+def test_c3_records_the_maintenance_pincer_at_the_strength_shown():
+    """Rule 5: the 75% relapse figure CONFIRMS C3 and the 60% discontinuation figure pressures it.
+    Both are human and indirect, and the answer to the second is structural, not demonstrated."""
+    from canine_dsp import deterministic_closure as dc
+    c3 = next(c for c in dc.CONDITIONS if c.tag == "C3")
+    blob = " ".join(str(v) for v in vars(c3).values())
+    assert "41178439" in blob
+    assert "75%" in blob and "60%" in blob
+    assert "structural, not demonstrated" in blob

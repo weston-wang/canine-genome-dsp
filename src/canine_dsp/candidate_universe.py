@@ -75,6 +75,33 @@ Three classes were NOT_ASSESSED before this module and are now assessed:
 
 ONCOLYTIC VIROTHERAPY was mentioned in the report but never assessed; it is now assessed.
 
+TWO MORE CLASSES WERE MISSING, FOUND 2026-11-01, AND ONE OF THEM IS STILL OPEN
+------------------------------------------------------------------------------
+The catalogue reached "26 classes, 0 unassessed" and that line was published. A second-pass
+literature sweep found two classes that had never been rows at all:
+
+  * ANTIMETABOLITES / NUCLEOSIDE ANALOGUES -- the hole that matters. Cytotoxics were split into
+    microtubule agents and alkylators and the enumeration stopped there, while
+    `core.hs_drug_sensitivity.DrugClass` carried an ANTIMETABOLITE member with no drug under it.
+    Three members (5-fluorouracil, clofarabine, floxuridine) are measured active in ALL TEN canine
+    HS lines, and clofarabine additionally holds the only durability readout in this project from a
+    histiocytic neoplasm (2-year PFS 89% in relapsed/refractory LCH). It is NOT excludable: at the
+    intracranial site the members split the three legs -- 5-FU has the quantified canine potency and
+    causes cerebral vacuolation in beagles, clofarabine has potency plus the outcome but 5% CSF
+    penetration, cytarabine has a measured canine CSF:plasma of 0.62 with an unconfirmed kill. So it
+    sits in KNOWN_OPEN_CLASSES and the claim is now "28 classes, 1 open".
+  * FGFR AXIS -- every other targeted axis had its own row; this one did not, although three FGFR
+    inhibitors score in the canine screen and two are licensed. It is EXCLUDED on measured data at
+    the right site: infigratinib's phase 2 in FGFR-altered recurrent glioma gave 6-month PFS 16%
+    and ORR 3.8%, with every durable responder carrying an activating FGFR point mutation or fusion
+    -- a biomarker canine HS is not reported to have, it being an overexpression tumour.
+
+The lesson is about the ENUMERATION PROCEDURE, not about these two drugs: both holes were at a
+level of granularity the table itself uses everywhere else (per-chemotype for cytotoxics,
+per-axis for targeted agents), and a count of "0 unassessed" says nothing about rows that were
+never written. Rule 9's candidate list has to be rebuilt from the literature each time, which is
+exactly what the rule says and what had stopped happening.
+
 THE HONEST EFFECT ON THE HEADLINE
 ---------------------------------
 Enumerating the universe does not add a drug to the regimen. It converts "every escape is closed"
@@ -186,6 +213,63 @@ UNIVERSE: tuple[Modality, ...] = (
         ExclusionGround.KILL_CONTRADICTED,
     ),
     Modality(
+        "cytotoxic chemotherapy -- antimetabolites / nucleoside analogues",
+        Status.NOT_ASSESSED,
+        "clofarabine (potency + outcome); cytarabine (access); 5-FU / floxuridine (potency)",
+        "THE SECOND RULE-9 HOLE, FOUND 2026-11-01, and a bigger one than the first. The catalogue "
+        "split cytotoxics into microtubule agents and alkylators and stopped. Antimetabolites were "
+        "never a row -- even though `core.hs_drug_sensitivity.DrugClass` has an ANTIMETABOLITE "
+        "member with NO drug under it, which is the signature of a class that was named and never "
+        "populated. On the evidence this class has the second-strongest canine-HS grounding in the "
+        "project, behind only the microtubule class: THREE members are measured active in ALL TEN "
+        "canine HS lines. "
+        "WHY IT IS CARRIED OPEN RATHER THAN EXCLUDED: none of rule 13's three grounds holds for the "
+        "class, and under rule 11 'not yet wired into the regimen' is not a ground at all. What the "
+        "assessment found instead is that at the INTRACRANIAL site the three members split the "
+        "three legs and no single member carries all of them: "
+        "(1) POTENCY WITHOUT THE BRAIN -- 5-fluorouracil is pan-active in all 10 lines with a "
+        "quantified median IC50 of 7.49 uM, and it is the member this disease should NOT get: its "
+        "catabolite FBAL (alpha-fluoro-beta-alanine), dosed orally to beagles for 3 months, gives "
+        "hyperaesthesia, excitement, CONVULSIONS and VACUOLAR CHANGES IN SEVERAL AREAS OF THE DOG "
+        "CEREBRUM (PMID 15206584). That is measured, dog-specific and cerebrum-specific -- the one "
+        "member with a quantified canine potency is disqualified at the one site under analysis. "
+        "Floxuridine is the same chemistry one step upstream and inherits the objection. "
+        "(2) POTENCY AND A HISTIOCYTIC OUTCOME, WITHOUT ACCESS -- clofarabine is pan-active in all "
+        "10 canine HS lines AND carries the only durability readout any agent in this project has "
+        "in a histiocytic neoplasm: prospective phase 2 in relapsed/refractory LCH, 17/20 (85%) "
+        "responders, NO on-treatment progression, 2-year PFS 89% +/- 7% and OS 100% (n=20, median "
+        "follow-up 40.9 months) after a FINITE six-cycle course, PMID 42126265. Its CSF penetration "
+        "is measured and modest: median 5% (range 3-26%) in non-human primates, PMID 16115942. "
+        "(3) ACCESS WITHOUT A CONFIRMED KILL -- cytarabine is the rule-14 ideal on access and is "
+        "measured IN THE DOG WITH AN INTACT BARRIER: CSF:plasma 0.62 +/- 0.14 at steady state on a "
+        "12-hour infusion, CSF Css 8.3 +/- 1.1 uM, bolus CSF peak 29 +/- 11 uM, in ten healthy dogs "
+        "with no significant toxicity at 600 mg/m2 (PMID 1742843). A measured canine CSF ratio of "
+        "0.62 is higher than ANY access figure elsewhere in this project. But cytarabine is NOT in "
+        "the pan-active table: it was a Group-B-specific CANDIDATE that the authors then rejected on "
+        "IC50 ('no compound was identified as Group B-specific'), with >=30% inhibition at 5 uM in "
+        "5 of 10 lines. So its canine-HS kill is unconfirmed, not contradicted. "
+        "WHAT WOULD CLOSE IT: a clofarabine or cytarabine IC50 in canine HS lines, which the screen "
+        "did not compute for either (it published IC50s only for 5-FU, sunitinib and the 28 "
+        "subgroup candidates). Until then the class is open, and the headline must say so.",
+        "MEASURED, in ten canine HS lines, for three members. Table 2 of PMID 42129963 -- the "
+        "compounds that reduced viable cell counts to <=70% at 5 uM in ALL CHS lines with "
+        "reproducibility -- contains 5-FLUOROURACIL, CLOFARABINE and FLOXURIDINE. The same paper "
+        "lists METHOTREXATE among the drugs it excluded from screening a priori 'because they had "
+        "been previously reported to have antiproliferative effects on CHS cells and cases', so the "
+        "class has prior-literature activity in this disease as well; its racemate (amethopterin) "
+        "and TRIMETREXATE, ANCITABINE, CYTARABINE and 5-fluoro-5'-deoxyuridine all appear among the "
+        "19 Group-B candidates, i.e. five of those nineteen are antimetabolites. Trimetrexate had "
+        "low IC50 in 8 of 10 lines, which the authors note but did not pursue.",
+        Availability.EXISTS_TODAY,
+        "Every member is obtainable today, verified at openFDA on 2026-11-01: clofarabine is "
+        "marketed as generics (ANDA 209775 MSN, ANDA 205375 Dr Reddy's, ANDA 216233 ScinoPharm) "
+        "although the CLOLAR brand, NDA 021673 Genzyme, is discontinued; cytarabine is marketed by "
+        "several holders (ANDA 072168 Hospira, ANDA 074245 West-Ward, ANDA 205696/208485 Meitheal) "
+        "while DEPOCYT, NDA 021041 Pacira, is discontinued -- which independently confirms this "
+        "project's existing statement that the sustained-release intrathecal product is gone; "
+        "5-fluorouracil is generic and ancient. Availability is emphatically not what is open here.",
+    ),
+    Modality(
         "targeted small molecules -- MAPK axis (MEK/ERK/SHP2)",
         Status.IN_MODEL,
         "trametinib / cobimetinib / mirdametinib; tovorafenib as the licensed pan-RAF option",
@@ -250,6 +334,43 @@ UNIVERSE: tuple[Modality, ...] = (
         "member with the canine-HS IC50. Paxalisib -- the member with the measured Kp,uu 0.31 and "
         "confirmed P-gp/BCRP non-substrate status -- is investigational, so the class splits: the "
         "exists-today member supplies the potency, the to-build member supplies the access.",
+    ),
+    Modality(
+        "targeted small molecules -- FGFR axis",
+        Status.EXCLUDED,
+        "infigratinib; erdafitinib (BALVERSA); pemigatinib (PEMAZYRE)",
+        "NEWLY ASSESSED 2026-11-01, enumerated in the same sweep as the antimetabolites and unlike "
+        "them it closes out. The table "
+        "gives every other targeted axis its own row (MAPK, PI3K, CDK4/6, synthetic lethality, "
+        "CSF1R) and had no FGFR row, although FGFR1 OVEREXPRESSION is reported in canine HS cases "
+        "and three FGFR inhibitors score in the canine screen: infigratinib inhibited proliferation "
+        "in ALL CHS lines EXCEPT CHS8, erdafitinib had low IC50 in the Group A lines 'although not "
+        "as low as duvelisib', and pemigatinib hit 6 of the 8 Group A lines on the screen criterion "
+        "(PMID 42129963). Two of the three are licensed. On paper that is a stronger starting hand "
+        "than several classes that are IN_MODEL. "
+        "IT IS EXCLUDED ANYWAY, ON MEASURED DATA AT THE RIGHT SITE AND FOR THE RIGHT BIOMARKER. The "
+        "class has already been tested in human recurrent BRAIN tumours: a multicentre phase 2 of "
+        "infigratinib in FGFR-altered recurrent glioma (n=26) gave 6-month PFS 16.0%, median PFS "
+        "1.7 months and ORR 3.8% -- and the four patients with durable control beyond a year ALL "
+        "carried an activating FGFR1 (K656E) or FGFR3 (K650E) POINT MUTATION or an FGFR3-TACC3 "
+        "FUSION (PMID 35344029). Canine HS is reported with FGFR1 OVEREXPRESSION, not with "
+        "activating FGFR point mutations or fusions, so this tumour's biomarker is precisely the one "
+        "in which the class failed at this site. The screen's own authors reach the same place from "
+        "the other direction: ponatinib, which also targets FGFR1, did not inhibit most CHS lines, "
+        "so they conclude infigratinib's canine-HS effect 'may not be solely attributable to FGFR1 "
+        "inhibition and could involve FGFR1-independent mechanisms' -- i.e. the canine signal is "
+        "not evidence that the FGFR axis is the driver. On-target hyperphosphataemia in 76.9% is a "
+        "second cost against a class whose benefit is unsupported in this biomarker.",
+        "MEASURED, and the canine signal is real but mechanistically unattributed: infigratinib "
+        "9/10 lines, erdafitinib Group-A-selective, pemigatinib 6/8 Group A (PMID 42129963); FGFR1 "
+        "overexpression reported in CHS cases. The exclusion rests on the human brain-tumour trial, "
+        "not on any absence of canine data.",
+        Availability.EXISTS_TODAY,
+        "Verified at openFDA 2026-11-01: erdafitinib is BALVERSA, NDA 212018, Janssen Biotech; "
+        "pemigatinib is PEMAZYRE, NDA 213736, Incyte. Both are obtainable off-label today. "
+        "Infigratinib (TRUSELTIQ) is the one with the glioma trial and is no longer marketed. "
+        "Availability is not the ground; the glioma phase 2 is.",
+        ExclusionGround.KILL_CONTRADICTED,
     ),
     Modality(
         "targeted small molecules -- cell-cycle (CDK4/6)",
@@ -680,8 +801,18 @@ UNIVERSE: tuple[Modality, ...] = (
 #: a SILENT hole in the catalogue -- still fails loudly. The list was non-empty for one day: the
 #: live-bacterial-vector class was found missing on 2026-10-31, carried here while its access
 #: mechanism was read at primary source, and then EXCLUDED on a derived site mismatch the same day.
-#: It is empty again by ASSESSMENT, not by deleting the row, which is the distinction that matters.
-KNOWN_OPEN_CLASSES: tuple[str, ...] = ()
+#: It was empty again by ASSESSMENT, not by deleting the row, which is the distinction that matters.
+#:
+#: IT IS NON-EMPTY AGAIN AS OF 2026-11-01, and this one does not resolve the same day. The
+#: antimetabolite / nucleoside-analogue class was never a row, has three members measured active in
+#: all ten canine HS lines, and cannot be excluded on any of rule 13's grounds -- so it is carried
+#: here, openly, and the catalogue claim drops from "0 unassessed" to "1 open". That is a downgrade
+#: of a headline this project has already published, which is the point: the alternative was to
+#: write the class in as IN_MODEL without an agent wired into the regimen, and that would be the
+#: overstatement rule 5 exists to stop.
+KNOWN_OPEN_CLASSES: tuple[str, ...] = (
+    "cytotoxic chemotherapy -- antimetabolites / nucleoside analogues",
+)
 
 
 def _validate() -> None:
