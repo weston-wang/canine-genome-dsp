@@ -500,6 +500,11 @@ measured sensitivity. Do not describe this margin as comfortable.
     `lifescience.net` (bibliographic metadata only, rest behind login), CORE (API rejected the
     request), scholar.archive.org (no full text), and the Veterinary Cancer Society's own abstracts
     page (served no content).
+  - **Confirmed at the canonical source, not inherited from the earlier pass:** PubMed's own record
+    for PMID 42767940 carries the literal abstract text **"[Abstract not available]"**, is indexed as
+    *Conference Proceedings*, and the NCBI ID converter returns **no PMCID** — so there is no PMC
+    copy either. Combined with Unpaywall, the primary text is absent from every index reachable
+    without a subscription.
   - **Defeating the bot-wall is not an option and must not be attempted.** `/root/.ccr/README.md` is
     explicit for this failure class: "Do not retry or route around it — report the blocked host."
     So the correct terminal state for this item is **UNREADABLE FROM ANY AGENT SESSION**, not
