@@ -969,7 +969,8 @@ target sweep. Each remains unsearched as of this entry.
 
 The parallel sweep hit the account rate limit twice (reset moved 11:20 -> 18:50 UTC), so the
 remaining angles were run by hand, sequentially. Below is what has been verified at primary source.
-Angles still unrun are listed at the end. **No enumerated escape route changed status.**
+Angles still unrun are listed at the end. [**All were run later the same day — see 'Sweep closed'.**]
+**No enumerated escape route changed status.**
 
 ### Verified NEW: a CNS trial for the MTAP-directed class — the condition the record itself set
 
@@ -1350,7 +1351,7 @@ the next measurement unchanged (colonisation or payload expression in gadolinium
 tissue), now with the reason stated: what has been shown is colonisation of hypoxic cores plus
 leukocyte transport, which is not the compartment this analysis needs.
 
-### Protocol documents: one read in full, one still second-hand
+### Protocol documents: one read in full, one second-hand AT THE TIME (both since verified)
 
 - **MSU quasiorganelle pilot: READ IN FULL** (trial flyer PDF, extracted). Inclusion, exclusion,
   both arms and the full dosing schedule are recorded above and come from the primary document, not a
@@ -1676,3 +1677,47 @@ unreachable **by exhaustion with the routes recorded**. The three that end as ne
 mirdametinib Kp,uu figure, the four MTAP percentages, and the COTC033 agent wording — are each
 closed in the only way a missing source can honestly be closed: the search was run, the routes are
 written down so nobody repeats them, and nothing in the model depends on any of the three.
+
+## Why the three negatives are final, 2026-11-01
+
+The last routes were tried and the explanation for two of the three is now structural rather than
+circumstantial.
+
+### The four MTAP percentages cannot have a primary source yet, because the trials have not reported
+
+Checked at the registry:
+
+- **NCT04794699** (IDE397, MTAP-deleted solid tumours): Phase 1, **ACTIVE_NOT_RECRUITING**, n=169,
+  last updated 2026-04-09, **no results section posted**.
+- **NCT05732831** (TNG462, MTAP-deleted solid tumours): Phase 1/2, **RECRUITING**, n=225, last
+  updated 2026-09-08, **no results section posted**.
+
+So the reason four peer-reviewed reviews and four full-text searches do not carry IDE397's 38%/30%/81%
+or TNG462's 0/23 is simply that **both studies are still running and neither has reported results**.
+Those figures are therefore necessarily interim conference or company disclosures from ongoing
+trials, and no primary source for them exists to be found. This is not an incomplete search — it is
+the state of the evidence, and the record's provenance label is exactly right.
+
+### "Vaccine Peptide Library" is not an established term, which supports the disposition already taken
+
+A Europe PMC search for the exact phrase returns **one** record, an influenza vaccine paper
+(Multimeric-001), unrelated to oncology. The University of Georgia listing — the last COTC site not
+previously checked — serves no COTC033 content. So "VPL" is not a recognised agent or platform name
+in the indexed literature, which is consistent with it being one site's wording. The sponsor's own
+description of what is administered stands verified and is what the analysis uses.
+
+### The mirdametinib Kp,uu figure
+
+Nothing further was attempted because nothing further exists to attempt: seven retrieval routes and a
+Europe PMC full-text search for the value itself were already exhausted, and the preprint that quotes
+it attributes it to unnamed sources. It is not used.
+
+### Status of the search work
+
+Complete. All 14 angles run; every finding either verified at a primary source (PubMed, NCBI efetch
+of PMC full texts, ClinicalTrials.gov API, openFDA Drugs@FDA and drug labels, the NCI Comparative
+Oncology Program page, a participating trial site) or closed as unobtainable with the routes recorded
+and the reason established. Three figures were refused rather than used, and **nothing in the model
+depends on any of them**. The remaining partial labels in earlier entries above are historical
+markers of what was true when each entry was written, annotated in place rather than rewritten, so
+the sequence of what was known when stays readable.
