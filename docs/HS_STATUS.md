@@ -1573,3 +1573,55 @@ So the absence is **established by search rather than assumed**: no published so
 figure, and the preprint that quotes it attributes it to unnamed "existing studies". Under the stated
 bar that makes it ASSUMED, and it is therefore **not used anywhere in the model**. The usable number
 for this axis remains the measured NHP CSF dataset. This item is closed, not pending.
+
+## Provenance audit of the MTAP-axis response rates, 2026-11-01
+
+The MAT2A-before-PRMT5 ordering at systemic sites rests on four percentages in
+`maintenance_durability`: IDE397 38% PR in squamous NSCLC, 30% in urothelial, molecular response in
+81%; and TNG462 0/23 PR in glioblastoma. Those were traced.
+
+**Two peer-reviewed reviews were read in full text and neither carries any of those figures:**
+
+- PMID 42021873 / PMC13099004, *Int J Transl Med* 2025, "Exploiting Synthetic Lethality of PRMT5 for
+  Precision Treatment of **MTAP-Deficient Glioblastoma**" — the GBM-specific review. It covers
+  TNG908, TNG462, MRTX1719, AMG 193 and AZD3470 by name and gives no glioblastoma response figure
+  for TNG462.
+- PMID 41439984 / PMC12732168, *Cells* 2025 (10 Dec), "MTAP-Null Tumors: A Comprehensive Review" —
+  covers the same agents plus IDE397, AG270, S095035, ISM3412 with their trial numbers, and gives no
+  response percentages for IDE397.
+
+What the reviews DO corroborate is the AMG 193 MTD of 1200 mg once daily (which matches the primary
+paper, PMID 39293516) and the overall landscape. So:
+
+**The four percentages have conference-abstract or company-presentation provenance at best, and are
+NOT traceable to peer-reviewed full text from this environment.** They should carry that label. They
+are not load-bearing for the brain conclusion -- they order two systemic arms against each other --
+but an ordering justified by unverifiable numbers is weaker than the record implies.
+
+**And the conclusion they support is independently corroborated, in stronger terms than the record
+uses.** Both reviews bear directly on the brain stance:
+
+- *Cells* 2025: "**Despite multiple efforts to exploit MTAP loss for targeted therapies, none of
+  these efforts have yielded substantial results in clinical trials.**"
+- *Int J Transl Med* 2025, on GBM specifically: "Despite promising anti-tumor activity in vitro, the
+  **clinical efficacy of PRMT5 inhibitors is often limited by the tumor microenvironment**,
+  particularly the impact of non-malignant cells that attenuate drug activity."
+
+So the decision to lead the brain with CDK4/6 rather than an MTAP-directed agent is supported by
+peer-reviewed review-level evidence, not only by the single TNG462 datum. That is the stronger
+footing, and it does not depend on any of the four unverified percentages.
+
+### COTC033 "Vaccine Peptide Library": as resolved as this environment allows, and it does not matter
+
+Routes exhausted: NCI sponsor page (read in full — the phrase does **not** appear), Missouri site page
+(read in full — the phrase appears, defined only as "a new immunotherapy"), the CSU URL the NCI page
+links to (**404**), the Studypages listing (client-rendered, no content), web.archive.org
+(egress-blocked), Ohio State / UC Davis / Wisconsin listings (no COTC033 content served), the
+MIB Agents trial index (site list only), PubMed (no design paper), and a targeted web search.
+
+**Disposition: the sponsor's description governs and is verified** — dogs are randomised to
+Shingrix/Gardasil or rabies vaccine, with an intramuscular primer phase then weekly **intratumoral**
+injection. "Vaccine Peptide Library" is one participating site's wording for the agent; no reachable
+source states what it denotes. That residual is a question about one site's phrasing, not about the
+trial's intervention, and it bears on nothing in this analysis — the trial is out of scope for a
+primary intracranial tumour on the verified route and the verified washout rules.
