@@ -199,8 +199,10 @@ FINDINGS: tuple[Finding, ...] = (
 # -------------------------------------------------------------------------------------------------
 
 ANGLES_SEARCHED: dict[str, str] = {
-    "eBAT / uPAR": "no peer-reviewed 2026 eBAT paper exists; the literature was exhaustively "
-                   "enumerated at 17 Europe PMC records by the preceding sweep. Unchanged",
+    "eBAT / uPAR": "no peer-reviewed 2026 eBAT paper exists; the INDEXED literature is enumerated at "
+                   "17 Europe PMC records. One source in this angle is identified but UNREADABLE -- "
+                   "see THE_ONE_UNREADABLE_SOURCE. Its contents are excluded from every figure, so "
+                   "no conclusion here depends on it",
     "canine hemangiosarcoma trials": "828 PubMed records; 20 newer than the record's newest "
                                      "citation. One bears on the program (PMID 42903052); the "
                                      "rest are diagnostics, pathology, or other anatomical sites",
@@ -249,6 +251,46 @@ SEARCH_METHOD_CORRECTION: dict[str, str] = {
                         "ANGLES_SEARCHED was confirmed that way, the preprint zero was not.",
     "what_it_cost": "one false negative of record, asserting no preprints where there were 167.",
 }
+
+# -------------------------------------------------------------------------------------------------
+# The single source this sweep could not read. Recorded separately so the completeness claim is
+# explicitly BOUNDED and no conclusion is left resting on an unread document.
+# -------------------------------------------------------------------------------------------------
+
+THE_ONE_UNREADABLE_SOURCE: dict[str, str] = {
+    "what_it_is": "PMID 42767940, doi 10.1111/vco.70098 -- the VCS 2026 conference abstract "
+                  "supplement (Vet Comp Oncol 24 Suppl 3:4-41). It contains an abstract titled "
+                  "'Reduction of Cancer Incidence in a Cohort of High-Risk Dogs Using eBAT', with "
+                  "Modiano among the authors.",
+    "why_it_is_unreadable": "its full text exists in exactly one place: a Wiley PDF behind "
+                            "Cloudflare bot protection, on an article whose OA status is only "
+                            "BRONZE. PubMed's own record carries the literal text '[Abstract not "
+                            "available]' and the NCBI ID converter returns no PMCID; Europe PMC has "
+                            "inEPMC: N and a zero-length abstract; Unpaywall shows the sole OA "
+                            "location to be that same blocked PDF. CrossRef, OpenAlex, CORE, "
+                            "scholar.archive.org, lifescience.net and the society's own site hold "
+                            "metadata or nothing. The session's egress proxy is NOT the blocker "
+                            "(recentRelayFailures: []), so there is no configuration fix.",
+    "why_no_conclusion_rests_on_it": "its figures (2/15 vs 52/78, p=0.01) are excluded from every "
+                                     "input, grade, route, condition and margin in this project. "
+                                     "They appear nowhere outside the status document's narrative. "
+                                     "So the sweep's verdict is unchanged whether the abstract is "
+                                     "read or not.",
+    "why_it_could_not_change_a_cell_anyway": "it is a PREVENTION result in healthy high-risk dogs. "
+                                            "This analysis is durability in dogs with established "
+                                            "disease after splenectomy. It bears on the Shine On "
+                                            "screening arm, not on the route-site conjunction.",
+    "the_only_thing_that_closes_it": "a human with institutional or library access to "
+                                     "doi 10.1111/vco.70098, or asking the Modiano lab. Defeating "
+                                     "the bot protection is forbidden by /root/.ccr/README.md for "
+                                     "this failure class and must not be attempted.",
+    "scope_of_the_completeness_claim": "the sweep is complete over REACHABLE sources. It is not and "
+                                       "cannot be claimed exhaustive over the whole literature "
+                                       "while this one document is unreadable -- that is a property "
+                                       "of the source, not of the search, and it is enumerated here "
+                                       "rather than glossed.",
+}
+
 
 VERDICT: dict[str, str] = {
     "headline": "no new agent changes the conjunction. One class is added to the ledger as "

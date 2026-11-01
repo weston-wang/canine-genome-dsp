@@ -138,6 +138,42 @@ def test_candid_provenance_is_corrected_in_both_modules():
     assert min(cc.CANDID_SENSITIVITY) == lo
 
 
+def test_the_completeness_claim_is_bounded_and_names_its_one_gap():
+    """The sweep claims completeness over REACHABLE sources, not over the literature. One document
+    is unreadable, and it is enumerated rather than glossed so the claim carries its own limit."""
+    u = sw.THE_ONE_UNREADABLE_SOURCE
+    assert "42767940" in u["what_it_is"]
+    assert "10.1111/vco.70098" in u["what_it_is"]
+    assert "complete over REACHABLE sources" in u["scope_of_the_completeness_claim"]
+    assert "cannot be claimed exhaustive" in u["scope_of_the_completeness_claim"]
+    assert "property" in u["scope_of_the_completeness_claim"]
+    # the blocker is diagnosed, not assumed -- including that the proxy was ruled out
+    assert "recentRelayFailures: []" in u["why_it_is_unreadable"]
+    assert "[Abstract not available]" in u["why_it_is_unreadable"]
+    assert "no PMCID" in u["why_it_is_unreadable"]
+    assert "forbidden" in u["the_only_thing_that_closes_it"]
+
+
+def test_no_figure_depends_on_the_unreadable_source():
+    """The point of enumerating it: the verdict must be invariant to whether it is ever read. Its
+    numbers must not appear in any graded input anywhere in the package."""
+    u = sw.THE_ONE_UNREADABLE_SOURCE
+    assert "excluded from every input" in u["why_no_conclusion_rests_on_it"]
+    assert "unchanged whether the abstract is read or not" in u["why_no_conclusion_rests_on_it"]
+    assert "PREVENTION" in u["why_it_could_not_change_a_cell_anyway"]
+    # the eBAT angle points at it instead of claiming exhaustiveness
+    assert "UNREADABLE" in sw.ANGLES_SEARCHED["eBAT / uPAR"]
+    assert "no conclusion here depends on it" in sw.ANGLES_SEARCHED["eBAT / uPAR"]
+    # and the figures really are absent from the graded modules
+    import pathlib
+    src = pathlib.Path(sw.__file__).parent
+    for mod in ("hsa_standard_audit.py", "hsa_deterministic_closure.py",
+                "hsa_condition_closure.py", "hsa_route_effect_sizes.py"):
+        text = (src / mod).read_text()
+        assert "52/78" not in text, mod
+        assert "2/15" not in text, mod
+
+
 def test_nothing_in_the_sweep_moved_a_cell_or_a_condition():
     """The sweep's own claim, checked against the live conjunction rather than asserted."""
     from canine_dsp import hsa_deterministic_closure as dc
