@@ -45,3 +45,40 @@ def coherence(x: np.ndarray, y: np.ndarray, fs: float = 1.0) -> tuple[np.ndarray
     x, y = _clean(np.asarray(x)[:n]), _clean(np.asarray(y)[:n])
     return signal.coherence(x, y, fs=fs, nperseg=min(256, n))
 
+
+def bicoherence(x: np.ndarray, nperseg: int = 64, noverlap: int | None = None
+                ) -> tuple[np.ndarray, np.ndarray]:
+    """Squared bicoherence b^2(f1,f2): normalized third-order spectrum measuring *quadratic phase
+    coupling* between frequency pairs. This is a genuinely nonlinear measure, not another linear
+    one. The ordinary power spectrum and coherence are blind to phase relationships between
+    components: a linear Gaussian process and a nonlinearly-coupled process can share an identical
+    PSD.
+    """
+    x = _clean(x)
+    noverlap = nperseg // 2 if noverlap is None else noverlap
+    if not 8 <= nperseg <= x.size:
+        raise ValueError(f"require 8 <= nperseg <= len(x); got nperseg={nperseg}, len(x)={x.size}")
+    if not 0 <= noverlap < nperseg:
+        raise ValueError("require 0 <= noverlap < nperseg")
+    step = nperseg - noverlap
+    starts = range(0, x.size - nperseg + 1, step)
+    window = signal.windows.hann(nperseg)
+    segments = np.array([np.fft.rfft(window * x[s:s + nperseg]) for s in starts])
+    if len(segments) < 2:
+        raise ValueError("bicoherence needs >=2 segments to average; use a smaller nperseg")
+
+    n_freq = segments.shape[1]
+    b2 = np.full((n_freq, n_freq), np.nan)
+    # Triple product <X(f1) X(f2) X*(f1+f2)> normalized by <|X(f1)X(f2)|^2><|X(f1+f2)|^2>.
+    for i in range(n_freq):
+        for j in range(i, n_freq):
+            if i + j >= n_freq:
+                continue
+            pair = segments[:, i] * segments[:, j]
+            sum_term = segments[:, i + j]
+            numerator = np.abs(np.mean(pair * np.conj(sum_term))) ** 2
+            denominator = np.mean(np.abs(pair) ** 2) * np.mean(np.abs(sum_term) ** 2)
+            value = numerator / denominator if denominator > 0 else np.nan
+            b2[i, j] = b2[j, i] = value
+    return np.fft.rfftfreq(nperseg), b2
+
