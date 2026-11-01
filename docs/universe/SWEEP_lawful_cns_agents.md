@@ -1,4 +1,5 @@
-# Lawful CNS agents for the canine B-cell brain sanctuary (sweep 2026-11-01) -- WORKING DRAFT, written incrementally
+# Lawful CNS agents for the canine B-cell brain sanctuary (sweep 2026-11-01)
+Labels: [REC] = already in record (file named); [NEW] = not in record (grep of docs/ and src/ by PMID). PubMed via MCP; web where stated.
 
 Question: which drugs a US veterinarian can lawfully give a dog (FDA-approved animal drug, or FDA-approved human drug used
 extra-label under 21 CFR 530) reach the brain/CSF at UNBOUND levels that kill canine B-cell lymphoma, so they could form an
@@ -87,9 +88,107 @@ number, temozolomide CSF/brain ECF numbers, THOP (PMID 40266942), TMZ single-age
   Low protein binding -> CSF/unbound ~0.4 (parent).
 - Contrast with cyclophosphamide in the pool (access 0.05): children on CP had NO detectable metabolites in CSF (9815588) -> ifosfamide is
   the oxazaphosphorine that reaches CSF.
-- Alkylator (phosphoramide mustard): dCK/RFC-independent; not P-gp-limited by class (not verified); dormant-cell kill not shown.
-  Neurotoxicity (encephalopathy, chloroacetaldehyde) and nephrotoxicity are the budget axes; dog use: sarcoma, 375 mg/m2 with mesna
-  (not verified this sweep).
+- Alkylator (phosphoramide mustard): dCK/RFC-independent; not P-gp-limited by class (not verified). Class evidence on non-cycling B cells:
+  mafosfamide (activated oxazaphosphorine) alone triggers apoptosis ex vivo in circulating CLL cells, which are non-dividing (PMID 23744431,
+  abstract; human CLL, indirect for E5).
+- **DOG OUTCOME CONTRADICTS KILL**: 72 dogs, 350-375 mg/m2 IV + mesna; of the 40 with LYMPHOMA, **one partial response (112 d)**; dose-limiting
+  neutropenia day 7; no haemorrhagic cystitis (PMID 10830540, Rassnick 2000 JVIM, DOI 10.1892/0891-6640(2000)014<0271:eoifto>2.3.co;2).
+  OSA salvage 375-425 mg/m2: 2/19 hospitalised (PMID 22985083). The canine tolerated dose (~375 mg/m2) is ~1/4-1/5 of one human daily dose
+  (1.3-2 g/m2), so canine CSF exposure would also scale down (direction: lowers the transferred CSF level).
+- Verdict: EXCLUDED with a stated reason (rule 13): kill contradicted by canine lymphoma outcome at the tolerable dose.
+
+### Procarbazine [label + canine outcome; NEW pmids]
+- Lawful: Matulane (human, FDA-approved), extra-label in dogs; used routinely in LOPP/MOPP/PPC.
+- CNS: label "crosses the blood-brain barrier and rapidly equilibrates between plasma and cerebrospinal fluid after oral administration"
+  (Matulane PI via drugs.com/medlibrary; qualitative, no ratio); parent t1/2 ~10 min IV; activity needs hepatic CYP activation to azo/azoxy
+  methylating species -> CSF level of the PARENT does not measure the active species. Kp,uu: NOT FOUND (no number in any source read).
+- Canine: oral procarbazine + prednisolone + cyclophosphamide daily, n=50 failed/intolerant dogs: ORR 70% (CR 46%), "very well tolerated"
+  (PMID 35338560, DOI 10.1111/vco.12814); LOPP naive T-cell n=35 median PFS 431 d (30117253), n=31 ORR 97% (28508557), n=67 PFS 118 d
+  (34464024); UF-LOPP rescue n=33 ORR 61% (21756176); MPP rescue n=41 ORR 34% (19222829). [all NEW pmids; record had only "50 dogs, CSF not found"]
+- Human CNS lymphoma: procarbazine is the "P" of R-MPV (+ rdWBRT 23.4 Gy: CR pts median PFS 7.7 y, PMID 24101038 [REC]).
+- Escapes: MGMT (O6-methylguanine; same escape as lomustine/TMZ), MMR loss; dCK/RFC-independent; P-gp: NOT FOUND. Cycle dependence: NOT FOUND.
+- Kill: not derivable (prodrug, no IC50 meaningful in vitro) -> OUTCOME-only (multi-agent). Grade: access MECHANISM/label-qualitative.
+
+### Agents whose CNS facts are already in the record (not re-searched; summarised for the table)
+- Lomustine: SWEEP_regrade s3 (CSF radioactivity >=50% of plasma, Gleostine label; NOT ABCB1 substrate 36252775; derived k 0.004-0.04/d;
+  canine hepatotoxicity 6.1%, cumulative, 14765735; MGMT in 2/5 canine lines 26130852; dog intracranial glioma MST 138 vs 35 d, 29797768).
+  NEW: lomustine CSF in dogs still NOT FOUND (PubMed "lomustine cerebrospinal fluid", 31 hits, none a measurement).
+- Thiotepa: SWEEP_cnsregimens s8, SWEEP_nongated A.  Zanubrutinib: 35004280.  Lenalidomide/pomalidomide: SWEEP_inhibitors_partial D.
+  Venetoclax: SWEEP_outside_model item 5.  Cytarabine: 1742843, 7075116.  Busulfan/treosulfan/cladribine/ATO/artesunate: SWEEP_nongated.
+- Acalabrutinib: NEW search "acalabrutinib central nervous system lymphoma cerebrospinal" returned one case (PMID 35732356: MCL leptomeningeal
+  relapse in CR 3 y on acalabrutinib maintenance after ibrutinib + IT cytarabine + dex induction; n=1). No CSF level found. Labelled P-gp + BCRP
+  substrate [REC] -> the pump escape defeats it at the BBB and in E5.
+- Bendamustine: PubMed "bendamustine cerebrospinal fluid" (20 hits) contains no CSF measurement; not assessed further.
+
+## 2. Table
+
+Kp,uu = CSF (or brain ECF) / UNBOUND plasma unless marked "total". Grades: MEASURED / DERIVED / TRANSFER / OUTCOME / ASSUMED / NOT FOUND.
+Escapes: E2 dCK loss, E5 quiescent P-gp-high progenitor, E9 RFC loss, E1 GR loss, MGMT, BCL2 rewiring (E4), P-gp/BCRP.
+
+| agent | lawful status (US vet) | unbound CNS ratio + source + species | potency on canine / human lymphoma | cycle-independent? | defeated by | canine tolerability | grade / record |
+|---|---|---|---|---|---|---|---|
+| **thiotepa (HD, graft)** | human-approved, ELU | CSF:plasma AUC 1.01, fu ~0.8-1 -> ~1 (human n=1, 2491958); NHP transcapillary t1/2 1 min (810575) | NCI-60 lymphoid 6-10 uM; derived k 0.13-0.37/d per pulse; human PCNSL ASCT 3-y PFS 78% | class mechanism yes; dormant kill not shown | GST/MRP conjugate efflux (9788613); BER; NOT P-gp (P388/ADR 1.07x); not E2/E9/MGMT-primary | NO canine thiotepa PK; needs autologous graft (dog HCT exists) | TRANSFER access + OUTCOME; IN POOL; [REC] |
+| **lomustine** | human-approved (Gleostine), routine in dogs | CSF radioactivity >=50% of plasma (label, total incl. metabolites) -> ~0.5 floor (human) | canine line 27 uM; NCI-60 8-18 uM; derived k 0.004-0.04/d; dog RR 87% first line (38890811) | alkylator; mouse late-HSC data negative (7917905) | MGMT (2/5 canine lines); not P-gp; not E2/E9 | 60-90 mg/m2 q3w; cumulative hepatotoxicity 6.1% (14765735), marrow | ASSUMED in catalogue (excluded by sound_pool); DERIVED-low in SWEEP_regrade; [REC] |
+| procarbazine | human-approved (Matulane), ELU, routine in LOPP/PPC | "rapidly equilibrates" plasma-CSF (label, qualitative); no ratio | prodrug, no IC50; dog PPC ORR 70% n=50 (35338560); R-MPV in PCNSL | NOT FOUND | MGMT, MMR; not E2/E9 | daily oral for months tolerated (35338560) | access label-qualitative; kill OUTCOME (multi-agent) [NEW pmids] |
+| temozolomide | human-approved, ELU | CSF/plasma AUC 0.20 (15173079), 0.37 children (35355137), NHP 0.33 (12675312); **peritumoral brain ECF 0.178** (19861433); fu ~0.85 -> Kp,uu ~0.2-0.4 | NCI-60 lymphoid 78->100 uM vs brain ECF Cmax ~3 uM -> kill ~0; dog rescue ORR 32%, TTP 15 d (28766920); THOP 14/14 CR (40266942, in docs/reports) | NO (needs replication/MMR) | MGMT, MMR loss, ABCB1/BCRP (36252775, 31493543) | well tolerated orally | MEASURED access (human); kill ~0 -> EXCLUDED [NEW numbers] |
+| HD IV methotrexate | human-approved, ELU | **non-enhancing brain ECF AUC 0.032-0.094 total, Cmax 22-24 uM; enhancing 0.28-0.31** (18787762, glioma, n=4); fu ~0.45 -> Kp,uu ~0.07-0.21; CSF >1 uM (18282) | canine IC50 2-3 nM (secondary); ECF >2 uM for 20-26 h | NO (S-phase) | **E9**, E5 | no canine HD-MTX (12 g/m2) series found | MEASURED access in barrier-intact tissue (human glioma) [NEW]; kill ASSUMED in catalogue |
+| HD/CRI cytarabine | human-approved, ELU | dog CSF:plasma 0.62 (1742843); human HD CSF 7.8 uM (7075116) | canine IC50 ~0.4 uM | NO | **E2**, E5 | CRI GI tox 65% (31769013) | IN POOL [REC] |
+| ifosfamide | human-approved, ELU | CSF/plasma 0.38 parent (0.18-0.72); 4-OH-IFO 0.6-29, absent in 6/17 (20182727, human) | **dog lymphoma 1 PR in 40 at 350-375 mg/m2** (10830540) | alkylator; mafosfamide kills non-cycling CLL (23744431) | not E2/E9; P-gp not verified | neutropenia d7; tolerated with mesna | access MEASURED (human); kill CONTRADICTED in dogs -> EXCLUDED [NEW] |
+| carmustine | human-approved, ELU | CSF 15-70% of plasma (BC Cancer monograph; label radioactivity >=50%) | NCI-60 14-33 uM | as lomustine | MGMT | canine PK NOT FOUND; pulmonary/marrow | access label-level; conditioning partner only [REC + web] |
+| dexamethasone | **FDA-approved for dogs** | dog CSF/plasma radioactivity 0.31 at 15 min -> 0.92-0.94 at 3 h (944876, total); rhesus CSF 0.15 total ~= free plasma -> Kp,uu ~0.5-1 (3806166, already used in code for prednisolone 0.08) | canine CL-1/GL-1 dex-resistant, low GR (20362310) | yes (GR apoptosis) | **E1** (GR loss, ~universal by 68 d, 31943234); P-gp substrate (class, not re-verified) | routine | access MEASURED (dog, total) [NEW]; same mechanism as prednisolone -> not independent |
+| ibrutinib | human-approved, ELU | CSF 1.7-4.4 nM day 1, 3.7-7.2 nM day 29 (28619981, n=18); corrected penetration 29-43% (protocol PDF, unverified) | canine CLBL-1 IC50 1.3 uM (34884478) -> CSF 200-700x below; human PCNSL ORR 74%, PFS 4.5 mo | cytostatic outside BCR dependence | BTK C481S, CARD11, CD79B; weak ABCB1 | dog: responses stated, n not retrievable (20615965) | access MEASURED (human); canine kill ~0 -> EXCLUDED [CSF number NEW] |
+| zanubrutinib | human-approved, ELU | CSF/free plasma 0.43 +- 0.28 (35004280, human) | human BCR-dependent lines nM; canine BCR-independent | cytostatic | P-gp "likely" (label); BCR-independence | no canine data; dog tox study clean (32484067) | IN POOL as TRANSFER [REC]; canine kill unsupported (flag) |
+| acalabrutinib | human-approved, ELU | CSF NOT FOUND | dog ORR 25%, PFS 22.5 d (27434128) | cytostatic | **P-gp + BCRP substrate** (label) | grade 1-2 GI, no DLT | ASSUMED; EXCLUDED by pump escape [REC] |
+| lenalidomide / pomalidomide | human-approved (REMS), ELU | len CSF 1.3-2.4% (35732975) or >=20% (29986852); rhesus 11%; pom rat ~39% (23940785) | canine CRBN Ile at hV388 -> predicted IMiD-resistant; direct kill 0.0004-0.025/d | NOT FOUND | CRBN (species), P-gp weak | no canine data | EXCLUDED (named species reason) [REC] |
+| venetoclax | human-approved, ELU | CSF/plasma 0.0026-0.0074 (37215448, 39286959) | canine B-cell EC50 288 uM | likely yes | E4 BCL2 rewiring; P-gp/BCRP | - | MEASURED-NEGATIVE for B-cell [REC] |
+| topotecan | human-approved, ELU | CSF lactone 0.2-0.42 (children; search-level, primary not opened) | - | NO (S-phase) | BCRP, P-gp | - | EXCLUDED (pump + gated) |
+| pemetrexed | human-approved, ELU | CSF <2-5% of plasma; rat unbound brain 0.078 (15987831, abstract-level) | - | NO | **E9** (RFC) | - | EXCLUDED |
+| verdinexor | **FDA-approved for dogs** | floor 0.09 (selinexor transfer) | canine IC50 2-42 / 90-418 nM | likely | XPO1 mut | on-label continuous | IN POOL [REC] |
+
+## 3. Ranked shortlist for an independent second brain route (B-cell), covering E5 and not defeated by E2/E9
+
+Criteria applied: lawful; measured or transferred unbound brain reach >= ~0.3; kill not contradicted in dogs; not division-gated; not a
+P-gp/BCRP substrate; not E2- or E9-dependent; escape set disjoint from IT MTX (E9, E5) and radiation.
+
+1. **Thiotepa, high-dose with autologous graft** (already in the lawful pool). Only lawful drug that meets every mechanistic criterion with
+   numbers: access ~1 (human n=1 + NHP), no P-gp cross-resistance, dCK/RFC/MGMT-independent, human CNS-lymphoma outcome. Its escapes (GST/MRP,
+   BER) are disjoint from MTX and radiation. Weak points: dormant-cell kill is class mechanism only; a PULSE (one course), not sustained;
+   canine thiotepa PK/MTD not found. Grade: TRANSFER + OUTCOME.
+2. **Lomustine** (lawful, oral, routine in dogs). Reach >=0.5 (label, total radioactivity -> a floor on parent+metabolites, not a Kp,uu),
+   not ABCB1, dCK/RFC-independent -> escape set disjoint from MTX/cytarabine. Fails on size: derived kill 0.004-0.04/d is below the 0.06/d
+   bar; MGMT defeats it in 2/5 canine lines; cumulative hepatotoxicity caps the number of doses; nitrosoureas spare late quiescent HSC in mice.
+   **Action for the model**: replace the ASSUMED 0.12 with the DERIVED 0.004-0.04 (SWEEP_regrade s3) so `sound_pool` admits it at its real
+   number, then test whether it changes the B-cell brain window. Expectation from the numbers: it does not close E5 alone.
+3. **Procarbazine** (lawful, oral, months-long daily dosing tolerated in dogs). Reaches CSF (qualitative), MGMT shares the escape with
+   lomustine, kill OUTCOME-only. Adds a sustained, home-dosed alkylator but not an escape-independent one from lomustine.
+4. **HD IV methotrexate** -- not independent (E9, gated), but it is the only lawful agent with a MEASURED concentration in barrier-intact
+   (non-enhancing) tissue (22-24 uM, Kp,uu ~0.07-0.21): it extends the IT-MTX route from CSF/meninges into parenchyma for RFC-intact cycling
+   cells. Treat as depth for route 1 (IT MTX), not as route 2.
+5. **Dexamethasone instead of prednisolone in the CNS phase** -- higher free CSF level (dog CSF/plasma ~0.9 at 3 h, total; rhesus CSF ~= free
+   plasma), cycle-independent kill, approved for dogs; same mechanism and same escape (E1) as prednisolone, so it strengthens an existing
+   agent rather than adding a route.
+
+Excluded with stated reasons (rule 13): temozolomide (lymphoid GI50 25-30x above brain ECF peak; gated; MGMT), ifosfamide (dog lymphoma 1 PR
+in 40), ibrutinib/zanubrutinib/acalabrutinib (canine B-cell is BCR-independent for ibrutinib, CLBL-1 1.3 uM; acalabrutinib pumped),
+lenalidomide/pomalidomide (canine CRBN), venetoclax (canine B EC50 288 uM), topotecan (pumps, gated), pemetrexed (E9, CSF <5%),
+carmustine (IV member of the lomustine class; no canine data; kept only as thiotepa conditioning partner).
+
+**Bottom line (at the strength shown):** among lawful drugs, the only class with the mechanism to reach E5 without E2/E9 is the
+non-methylating alkylator, and its one member with brain reach ~1 and no pump liability -- thiotepa -- is already in the pool. No lawful agent
+outside the current pool adds an independent route with a derived brain kill at the 0.06/day bar; lomustine and procarbazine add a
+mechanistically independent but numerically weak alkylator layer (MGMT-limited). This is a finding within the catalogue of 18 agents above,
+not a proof that none exists: hydroxyurea, bendamustine, melphalan and busulfan-class agents were not re-assessed here (see SWEEP_nongated).
+
+## 4. Could not verify / not found
+- Ibrutinib protein-binding-corrected CSF penetration (28.7-43.4%): only in a trial-protocol PDF summary (NCT05211336), not the primary paper.
+- Topotecan and pemetrexed CSF ratios: web-search summaries; primary papers not opened.
+- Carmustine CSF 15-70%: drug monograph, not a primary PK paper; FDA BiCNU label not opened.
+- Procarbazine: no numeric CSF or Kp,uu value in any source read; cycle dependence and P-gp status not found.
+- Dexamethasone dog CSF (944876): Japanese paper, abstract only, tritium radioactivity (parent + metabolites), total plasma.
+- Lomustine CSF in dogs, thiotepa PK in dogs, acalabrutinib CSF: NOT FOUND.
+- No measurement in Gd-non-enhancing LYMPHOMA for any agent; the MTX and TMZ numbers are glioma / peritumoral tissue (indirect, rule 10).
+- Canine CNS-lymphoma outcome series beyond the record (LaRue 30022475, nimustine 37756055): none new found (PubMed 2023+ search: 3 hits, all in record).
+
 
 ### High-dose IV methotrexate [NEW: rule-14 proxy measurement in NON-ENHANCING tissue]
 - Blakeley 2008/9 J Neurooncol (PMID 18787762; PMC4029102 read): MTX 12 g/m2 4-h IV, microdialysis in recurrent high-grade glioma, probe in
