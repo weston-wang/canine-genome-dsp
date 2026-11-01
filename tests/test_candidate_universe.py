@@ -230,3 +230,26 @@ def test_c3_records_the_maintenance_pincer_at_the_strength_shown():
     assert "41178439" in blob
     assert "75%" in blob and "60%" in blob
     assert "structural, not demonstrated" in blob
+
+
+def test_every_cross_compound_transfer_in_the_new_classes_states_a_direction():
+    """Rule 15, added to CLAUDE.md on 2026-11-01 while these two classes were being written up.
+    A transfer from one compound to another needs a written comparison and a DIRECTION, and may
+    bound the other compound's number but never contradict it. Both new entries lean entirely on
+    cross-compound and cross-species evidence, so both must show their work."""
+    anti = next(x for x in cu.UNIVERSE if "antimetabolite" in x.name)
+    # 5-FU: the study dosed the CATABOLITE, not the drug -- that must be stated, not glossed
+    assert "FBAL" in anti.basis and "CATABOLITE" in anti.basis.upper()
+    assert "principal catabolite" in anti.basis, "the direction that licenses the transfer"
+    assert "NOT a measured neurotoxic dose for 5-FU itself" in anti.basis
+    # floxuridine: bounded, never contradicted
+    assert "it bounds the class's brain use, it does not measure it" in anti.basis
+    # clofarabine: an efficacy transfer across disease, and LCH is the milder one -> a ceiling
+    assert "CEILING for HS and never a floor" in anti.basis
+    # the comparison that would have been the easy error
+    assert "rule-15 violation" in anti.basis
+
+    fgfr = next(x for x in cu.UNIVERSE if "FGFR" in x.name)
+    assert "one compound's trial cannot contradict another compound's number" in fgfr.basis
+    assert "statement about the TARGET" in fgfr.basis
+    assert "CEILING for an overexpression-only tumour" in fgfr.basis

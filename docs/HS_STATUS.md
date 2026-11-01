@@ -1791,18 +1791,41 @@ intracranial site the three members split the three legs and no member carries a
 
 | Member | Canine-HS kill | Brain | Verdict |
 |---|---|---|---|
-| 5-fluorouracil / floxuridine | pan-active, 10/10 lines, IC50 **7.49 µM** quantified | **disqualified**: its catabolite FBAL, oral, 3 months, in beagles → hyperaesthesia, excitement, **convulsions**, and **vacuolar changes in several areas of the dog cerebrum** (PMID 15206584, DOI 10.2131/jts.29.155) | potency without the brain |
+| 5-fluorouracil / floxuridine | pan-active, 10/10 lines, IC50 **7.49 µM** quantified | **disqualified at the mechanism level** — what was dosed to beagles orally for 3 months was **FBAL and fluoroacetate, 5-FU's catabolites**, with tegafur-uracil as positive control; all three gave hyperaesthesia, excitement, **convulsions** and **vacuolar changes in several areas of the dog cerebrum** (PMID 15206584, DOI 10.2131/jts.29.155) | potency without the brain |
 | clofarabine | pan-active, 10/10 lines **+** 2-yr PFS 89% in R/R LCH | CSF penetration **median 5%, range 3–26%** in non-human primates (PMID 16115942, DOI 10.1158/1078-0432.CCR-05-0261); authors: "penetrates into the CSF only modestly, but the concentrations obtained may approach those that are cytotoxic in vitro" | potency and outcome without access |
 | cytarabine | **unconfirmed** (Group-B candidate rejected on IC50; 5/10 lines at 5 µM) | **best measured access in the project**: dog, intact barrier, 12-h infusion → **CSF:plasma 0.62 ± 0.14**, CSF Css **8.3 ± 1.1 µM**, bolus CSF peak 29 ± 11 µM, ten healthy dogs, no significant toxicity at 600 mg/m² (PMID 1742843, DOI 10.1007/BF00686329) | access without a confirmed kill |
 
 Two things in that table deserve to be said plainly. First, the member with the *quantified* canine
-potency is the one this disease must not get, and the disqualification is measured in **this species
-at this site** — not inferred. Second, cytarabine's **0.62** is a higher measured access figure than
-anything else in this project, obtained in dogs with an **intact** barrier, which is the rule-14
-ideal: a measurement in the compartment at issue rather than an inference into it. It is paired with
-an unconfirmed kill, so it closes nothing on its own — but a CSF steady state of 8.3 µM sits above
-the 5 µM concentration at which the three pan-active members were active, which is why the class is
-open rather than dead.
+potency is the one this disease must not get, and the lesion behind that is measured in **this
+species at this site** — not inferred. Second, cytarabine's **0.62** is a higher measured access
+figure than anything else in this project, obtained in dogs with an **intact** barrier, which is the
+rule-14 ideal: a measurement in the compartment at issue rather than an inference into it.
+
+**Rule 15 applied to all three rows, because this class is nothing but transfers.** Rule 15 arrived
+on this branch (`cc9bb5a`) while these findings were being written up, and it bites on each of them:
+
+- **5-FU.** The beagle study dosed **FBAL and fluoroacetate**, 5-FU's catabolites, with
+  **tegafur-uracil** as positive control. 5-FU itself was not the dosed agent. The *direction* is
+  what makes it transfer: FBAL is 5-FU's principal catabolite, so FBAL exposure is a consequence of
+  dosing 5-FU rather than an alternative to it, and a second fluoropyrimidine in the same pathway
+  produced the same lesion. So what transfers is a **mechanism-level disqualification**, qualitative,
+  with **no number carried across** — and none needed, the conclusion being qualitative.
+  **Floxuridine** inherits it by the same route and no further: same DPD catabolism to the same
+  FBAL, never dosed in that study, so nothing quantitative transfers to it either. Calling this a
+  *contradicted* figure for floxuridine would be the rule-15 error; it **bounds** the class's brain
+  use.
+- **Clofarabine.** The LCH figure is an **efficacy** transfer across species and across disease
+  within the lineage. LCH is far less aggressive than histiocytic sarcoma, so it is a **ceiling for
+  HS and never a floor**: it establishes that the class can produce multi-year control in this
+  lineage, not that it would do so here. The 5% CSF figure is a separate **exposure** transfer in a
+  third species; no NHP-to-dog direction is established in this project, so it is used as an order
+  of magnitude and never converted into a canine number.
+- **Cytarabine.** No transfer at all — its own measurement, in the species and compartment at issue
+  (total drug by HPLC in both fluids, not unbound). The **only** comparison permitted is cytarabine
+  against itself: its measured canine CSF steady state, **8.3 µM**, sits above the **5 µM** at which
+  its own 5-of-10-line screen result was obtained. That is why the class is open rather than dead.
+  Reading that 8.3 µM against the 5 µM threshold of the *other three* members would be a rule-15
+  violation — their activity is not cytarabine's potency — and this analysis does not make that move.
 
 **What would close it: one measurement.** The screen computed IC50s only for 5-FU, sunitinib and the
 28 subgroup candidates. A clofarabine or cytarabine IC50 in canine HS lines would decide this class
@@ -1835,6 +1858,16 @@ benefit. The screen's authors arrive at the same place independently: ponatinib 
 and did **not** inhibit most CHS lines, so they conclude infigratinib's effect "may not be solely
 attributable to FGFR1 inhibition and could involve FGFR1-independent mechanisms" — i.e. the canine
 signal is not evidence that the FGFR axis is the driver. Ground: `KILL_CONTRADICTED`.
+
+**Rule 15 on this exclusion, because it is the obvious objection.** The trial dosed *infigratinib*
+while the licensed members are *erdafitinib* and *pemigatinib*, and one compound's trial cannot
+contradict another compound's number. This exclusion does not make that move: what transfers is a
+statement about the **target**, which all three share — that FGFR-axis benefit at this site tracked
+an activating lesion rather than the FGFR-altered population at large — and not infigratinib's
+potency, exposure or response rate attached to either other compound. The **direction** is what makes
+it safe: the trial enrolled tumours with FGFR *alterations*, a population already enriched beyond
+mere overexpression, so its 3.8% response rate is a **ceiling** for an overexpression-only tumour,
+not a floor. A ceiling that low at this site is what the exclusion rests on.
 
 ### Condition C3 now has human numbers, and they cut both ways
 

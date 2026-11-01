@@ -44,11 +44,15 @@ that stays open: three members — 5-fluorouracil, clofarabine, floxuridine — 
 agent in this project has in a histiocytic neoplasm (2-year progression-free survival 89% ± 7% and
 overall survival 100% in relapsed/refractory Langerhans-cell histiocytosis after six cycles,
 PMID 42126265). It is not excludable, because at the brain each member fails a *different* leg:
-5-FU's catabolite causes convulsions and cerebral vacuolation in beagles (PMID 15206584);
-clofarabine's CSF penetration is 5%, range 3–26% (PMID 16115942); cytarabine has the best measured
+5-FU's catabolite FBAL — what was actually dosed in the beagle study, 5-FU itself was not — causes
+convulsions and cerebral vacuolation (PMID 15206584), which transfers to 5-FU as a mechanism-level
+disqualification and not as a measured dose, FBAL being 5-FU's principal catabolite;
+clofarabine's CSF penetration is 5%, range 3–26%, in non-human primates (PMID 16115942), used as an
+order of magnitude and not converted into a canine figure; cytarabine has the best measured
 canine CSF access in this whole project, 0.62 of plasma in dogs with an intact barrier
-(PMID 1742843), but its canine-HS kill is unconfirmed rather than contradicted. What would close it
-is one IC50 measurement. **FGFR axis**, the second missing row, does close: infigratinib's phase 2 in
+(PMID 1742843), but its canine-HS kill is unconfirmed rather than contradicted. The LCH durability
+figure is a **ceiling** for histiocytic sarcoma, LCH being the less aggressive disease, never a
+floor. What would close the class is one IC50 measurement. **FGFR axis**, the second missing row, does close: infigratinib's phase 2 in
 FGFR-altered recurrent glioma gave 6-month PFS 16% and ORR 3.8%, with every durable responder
 carrying an activating FGFR mutation or fusion — a biomarker canine HS, an overexpression tumour, is
 not reported to have (PMID 35344029).
