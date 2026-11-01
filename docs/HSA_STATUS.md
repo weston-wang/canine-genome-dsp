@@ -423,9 +423,26 @@ measured sensitivity. Do not describe this margin as comfortable.
 
 - **Randomised placebo-controlled GD3 liposomal vaccine trial** in canine splenic HSA (AKC CHF) — the
   first randomised vaccine trial in this disease.
+  - **2026-11-01 — CHECKED, STILL PENDING, and now located.** AKC CHF grant **03011**, "A GD3
+    Nano-scaled Liposomal Cancer Vaccine Clinical Trial for Canine Hemangiosarcoma", $170,087 (2022),
+    PI **Rowan Milner**. Dogs get standard of care and are randomised to GD3 vaccine or placebo.
+    **Preliminary results in the first 17 dogs were promising enough that the study was expanded**,
+    and a next phase will test the vaccine without concurrent cancer drugs. **No efficacy figures and
+    no peer-reviewed report exist.** PubMed has nothing: `ganglioside vaccine canine splenic
+    hemangiosarcoma randomized` and `GD3 liposomal vaccine hemangiosarcoma` both return zero, and the
+    only GD3-vaccine-in-dogs record at all is PMID 17027091 (2006). So "pending" is confirmed as a
+    real state, not an unsearched gap.
 - **VACCS** — 804 dogs, five years, 31 shared frameshift neoantigens, preventive, three universities.
   Completed; results not published. A working preventive vaccine would reframe what "vaccine height"
   is for rather than adjust a parameter.
+  - **2026-11-01 — CHECKED, STILL PENDING, and confirmed as a true negative.** The trial concluded
+    (announced May 2024) and was **extended by a year, making it six years and 800+ dogs**. PubMed
+    holds **only the design paper** — Burton et al. 2023, *Vet Immunol Immunopathol* 267:110691,
+    PMID 38056066 — and an author-targeted search returns that same single record. The sponsor states
+    results are "being statistically analysed for publication". The only outcome language in
+    existence is a **company statement** (the CEO saying incidence was lower in dogs that mounted an
+    immune response, and that an improved vaccine is in production). **Company claims, not
+    peer-reviewed findings — unusable under the bar and not folded into anything.**
 - **UMN "Shine On"** — 210 at-risk dogs; blood test reported at ~90% accuracy identifying high risk
   2–4 years before a tumour appears; Phase 3 testing eBAT as prevention in test-positives. This is the
   screening arm plus the early-eBAT closure being run together. Institutional reporting, not
@@ -446,11 +463,34 @@ measured sensitivity. Do not describe this margin as comfortable.
     DIFFERENT abstract in the same supplement (metastatic osteosarcoma on TDI + autologous vaccination
     + gilvetmab, median PFS 111 d, OS 138 d) and must not be credited to eBAT; (ii) the "78 controls"
     denominator may be confused with the separate 78-dog eBAT cohort in PMID 39330834.
+  - **2026-11-01 — PARTIALLY ADVANCED. The abstract is now identified by title and author; its
+    numbers are corroborated but still not read from the primary text.** The abstract is
+    **"Reduction of Cancer Incidence in a Cohort of High-Risk Dogs Using eBAT"**, with **Jaime
+    Modiano** among the authors, describing eBAT as a bispecific ligand-targeted toxin fusing a
+    deimmunised *Pseudomonas* exotoxin to EGF and the amino-terminal fragment of urokinase. A
+    **second, independent** retrieval pass reproduced the same figures as the first: **2/15 (13%)
+    treated vs 52/78 (67%) untreated high-risk controls, p = 0.01**, safe with minor self-limiting
+    events. That **resolves contamination risk (ii)**: the 78 is this abstract's own control group,
+    not the separate 78-dog eBAT cohort of PMID 39330834.
+  - **This is still not a verification, and the numbers stay out of every figure.** Both passes read
+    search-engine renderings of the Wiley landing page, not the primary text; two agreeing snippet
+    reads raise confidence without changing the kind of evidence. The result is also abstract-level,
+    non-randomised and n=15.
+  - **It would not move a cell even if fully verified.** It is a *prevention* result in healthy
+    high-risk dogs, whereas this analysis is about durability in dogs with established disease after
+    splenectomy. It bears on the Shine On screening arm, not on the conjunction.
   - **To close it:** institutional or library access to doi 10.1111/vco.70098, or ask the Modiano lab.
     **Do not re-run these routes, all of which failed:** WebFetch of the Wiley `/doi/`, `/doi/full/`
     and `/doi/pdfdirect/` paths; doi.org (302 to the same blocked host); curl with a browser
     user-agent (403); r.jina.ai (Cloudflare interstitial); archive.org Wayback (no snapshot);
-    Europe PMC and Semantic Scholar (confirmed above, metadata only).
+    Europe PMC and Semantic Scholar (metadata only). **Added 2026-11-01:** CrossRef
+    (`api.crossref.org/works/10.1111/vco.70098` — real metadata, `abstract: NONE`); Wiley
+    `/doi/full-xml/` (Cloudflare 403); and OpenAlex, which *does* carry an
+    `abstract_inverted_index` but holds **only the supplement's first abstract** — an unrelated
+    autologous-tumour-vaccine + CpG + CD200AR-L trial in appendicular osteosarcoma (n=45 vaccine vs
+    15 carboplatin). **That is a THIRD abstract from this supplement not to be confused with eBAT**,
+    alongside the TDI/gilvetmab one already flagged. Metadata services surface an arbitrary member of
+    a multi-abstract supplement; check the title before attributing anything.
 
 ---
 
