@@ -604,3 +604,21 @@ MSZ trial (Blood 2025;146(Suppl 1):3550; primary abstract text): selinexor CSF 0
 - **K.4 is superseded:** the brain closure is no longer redundant. The every-21-day schedule needed both inputs; at the measured reach the brain rests on the intrathecal methotrexate.
 - **`failing()` is no longer empty.** It returns one item: **B-cell brain, tolerability of 29-45 intrathecal doses**, graded ASSUMED (no canine series beyond 28 doses, no written human transfer yet). The cheapest route to clearing it is a written transfer from human long-course intrathecal / Ommaya precedent, or a canine port series with more doses; neither has been searched yet.
 - Bodies (B and T, 168 d verdinexor) are unchanged.
+
+### M.4 Correction (2026-11-01): the selinexor number is a floor for verdinexor, not its value (user: "I don't really buy the sister drug story. Did you even look at what the actual composition differences are and see if the efficacy can be taken at face value like that")
+M.2 and M.3 moved selinexor's human CSF figure onto verdinexor at face value, applied selinexor's human protein binding to it, and graded the old 0.30 "CONTRADICTED". The structural comparison already in the record (`SWEEP_xpo1_cns.md`, ChEMBL 2026-10-05) was not consulted. Done properly:
+
+| | selinexor (KPT-330) | verdinexor (KPT-335, Laverdia) |
+|---|---|---|
+| scaffold | 3,5-bis(CF3)phenyl-1,2,4-triazole acrylhydrazide, covalent XPO1 Cys528 | same |
+| the one difference | hydrazide on **pyrazin-2-yl** (C17H11F6N7O, 443.3) | hydrazide on **pyridin-2-yl** (C18H12F6N6O, 442.3): one ring N fewer |
+| polar surface / lipophilicity | PSA 97.6 A^2, ALogP 3.39, HBA 7 | PSA 84.7, ALogP 3.99, HBA 6 |
+| efflux | not a P-gp/BCRP substrate (label, in vitro) | not a canine P-gp substrate (PMID 36924353); BCRP untested |
+| plasma protein binding | 95% (human, label) | **never measured, any species** |
+| CNS measurement | human CSF / total plasma ~0.5-0.6%; animal total brain:plasma 0.60-0.72 | **none**; field study CNS signs (tremor 11%, ataxia 6%) suggest it reaches the canine CNS |
+
+- **What transfers:** the unbound entry ratio (Kp,uu). Verdinexor is less polar and more lipophilic, and neither drug is a known efflux substrate, so its passive entry should be at least selinexor's. **0.09 is a floor for verdinexor, graded TRANSFERRED-floor.**
+- **What does not transfer at face value:** protein binding (verdinexor's unknown; its higher lipophilicity usually means tighter binding), the CSF-to-total-plasma ratio that depends on it, and the human-to-dog step. The animal total brain:plasma ratio cannot be converted to Kp,uu without brain-tissue binding (never measured); plausible values span ~0.1-0.7.
+- **Kill ("efficacy") was never transferred:** verdinexor's kill in the model is DERIVED from canine lymphoma cell lines (PMID 40872651) and exposure in lymphoma dogs (PMID 30143046). Only brain reach is borrowed from selinexor.
+- **Re-grade:** 0.30 is ASSUMED (no basis in the compartment), **not contradicted**. The B-cell brain closes inside canine intrathecal precedent (<= 28 doses) if verdinexor's brain reach in the dog is **>= 0.18** (central IC50, every 14 d) or **>= 0.24** (pessimistic IC50, every 21 d). At the 0.09 floor it needs 29-45 doses. The T-cell brain is unaffected (closes on 17-24 doses whatever verdinexor does).
+- **So the B-cell brain is decided by one measurement, not by the transfer:** CSF and plasma verdinexor plus plasma protein binding in one dog on Laverdia. `failing()` still returns the single B-cell item, now stating both ways to clear it.

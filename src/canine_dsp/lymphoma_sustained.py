@@ -358,15 +358,30 @@ def it_mtx_derived_kill(interval_days: float, *, dose_mg: float = DOG_IT_MTX_DOS
     return total / steps
 
 
-# --- verdinexor brain reach re-graded from a MEASURED human CSF level (2026-10-31; docs/LYMPHOMA_UNIVERSE.md section M) ---------------
-#: Selinexor (verdinexor's sister compound) in CSF, MSZ trial, Blood 2025;146(Suppl 1):3550 (doi 10.1182/blood-2025-3550): 0.919 ng/mL
-#: in CSF at a plasma level of 204.67 ng/mL 4 h after 40 mg, with a "stable CSF-to-plasma ratio (~0.6%)" from 4 to 25 h. Plasma protein
-#: binding 95% (FDA Xpovio label), so CSF / UNBOUND plasma = 0.919 / 10.2 = 0.09. CSF is the measurable proxy for unbound brain
-#: interstitial drug (CLAUDE.md rule 14), so this outranks the 0.30 the closure used, which was set "below" the rodent/monkey TOTAL
-#: brain:plasma 0.60-0.72 (PMID 27323910) -- a ratio that counts tissue-bound drug. Grade TRANSFERRED (sister compound, human CSF,
-#: conference abstract that does not state how many patients were sampled; 0.919/204.67 is 0.45%, not the stated 0.6%).
-VERDINEXOR_CNS_ACCESS_MEASURED = 0.09
-VERDINEXOR_CNS_ACCESS_SUPERSEDED = 0.30
+# --- verdinexor brain reach: what the human selinexor CSF measurement does and does not tell us (sections M.2, M.4) ------------------
+#: Selinexor in human CSF, MSZ trial, Blood 2025;146(Suppl 1):3550 (doi 10.1182/blood-2025-3550): 0.919 ng/mL in CSF at plasma
+#: 204.67 ng/mL 4 h after 40 mg, "stable CSF-to-plasma ratio (~0.6%)" 4-25 h. With selinexor's 95% plasma binding (Xpovio label),
+#: CSF / unbound plasma = 0.09 -- an unbound brain-entry ratio (Kp,uu) for SELINEXOR IN HUMANS.
+#:
+#: Transferring it to verdinexor in dogs (written comparison, docs/universe/SWEEP_xpo1_cns.md and section M.4):
+#:  - structure: identical scaffold (3,5-bis(CF3)phenyl-triazole acrylhydrazide, covalent XPO1 Cys528); ONE ring atom differs --
+#:    selinexor's hydrazide carries a pyrazin-2-yl, verdinexor's a pyridin-2-yl (C17H11F6N7O vs C18H12F6N6O).
+#:  - that atom makes verdinexor LESS polar and MORE lipophilic (ChEMBL: PSA 84.7 vs 97.6 A^2, ALogP 3.99 vs 3.39, HBA 6 vs 7), which
+#:    favours passive barrier crossing; verdinexor is not a substrate of canine P-gp (PMID 36924353); selinexor is not a P-gp/BCRP
+#:    substrate (label). So verdinexor's Kp,uu is expected to be AT LEAST selinexor's: 0.09 is a FLOOR for verdinexor, not a point.
+#:  - NOT transferable at face value: plasma protein binding (verdinexor's never measured, any species; higher lipophilicity usually
+#:    means higher binding), the CSF-to-total-plasma ratio (depends on that binding), and human-to-dog barrier differences.
+#:  - the rodent/monkey TOTAL brain:plasma 0.60-0.72 (PMID 27323910) cannot be converted to Kp,uu without brain-tissue binding, which
+#:    was never measured; with plausible values it spans ~0.1 to ~0.7, so it neither supports nor contradicts 0.30.
+#: Net: verdinexor Kp,uu is bracketed below by 0.09 (TRANSFERRED floor) and is otherwise unmeasured. 0.30 has no basis in the right
+#: compartment (ASSUMED), but is not contradicted for verdinexor either. Decisive measurement: CSF + plasma + plasma binding in one dog
+#: on Laverdia.
+VERDINEXOR_CNS_ACCESS_MEASURED = 0.09        # floor; name kept for the tests and audit that use it
+VERDINEXOR_CNS_ACCESS_FLOOR = VERDINEXOR_CNS_ACCESS_MEASURED
+VERDINEXOR_CNS_ACCESS_SUPERSEDED = 0.30       # the earlier point value; ASSUMED (no basis in the compartment), not contradicted
+#: Verdinexor brain reach at which the B-cell brain closes inside canine intrathecal precedent (<= 28 doses): 0.18 at the central IC50
+#: dosing every 14 days, 0.24 at the pessimistic IC50 every 21 days (sweep, section M.4). Unmeasured; the floor is 0.09.
+VERDINEXOR_CNS_ACCESS_FOR_PRECEDENT = (0.18, 0.24)
 
 #: Repeated intrathecal dosing in dogs: subcutaneous CSF ports dosed every other week for 8-11 months, i.e. 20-28 doses (section K.6).
 DOG_IT_DOSES_PRECEDENT_MAX = 28

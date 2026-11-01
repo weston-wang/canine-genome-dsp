@@ -333,7 +333,7 @@ def test_audit_lists_the_routes_that_were_set_aside_with_their_grades():
     from canine_dsp import lymphoma_standard_audit as A
     r = A.routes_not_counted()
     assert len(r) == 4 and not any(i.passes for i in r)        # 4th added 2026-10-31: the every-21-day brain schedule (section M)
-    assert any(i.grade == "CONTRADICTED" for i in r)
+    assert any(i.name.startswith("brain closure on 20 (B)") and i.grade == "ASSUMED" for i in r)   # not CONTRADICTED (section M.4)
 
 
 # --- radiation as a cycle-independent agent (/goal 2026-10-04, "realistic ways") -------------------------------------------------------
@@ -583,3 +583,17 @@ def test_audit_names_the_b_cell_intrathecal_dose_count_as_the_one_failing_input(
     names = [i.name for i in A.failing()]
     assert len(names) == 1 and names[0].startswith("B: tolerability of")
     assert all(i.passes for i in A.lawful_brain_items() if i.name.startswith("T:"))
+
+
+def test_selinexor_csf_is_a_floor_for_verdinexor_and_the_b_cell_brain_hinges_on_where_above_it_the_dog_value_sits():
+    """Section M.4 (2026-11-01, after the user challenged the sister-drug transfer). Selinexor and verdinexor differ by one ring atom
+    (pyrazine vs pyridine); verdinexor is less polar and more lipophilic and is not a canine P-gp substrate, so selinexor's human
+    CSF/unbound-plasma 0.09 transfers only as a FLOOR. The B-cell brain closes inside canine intrathecal precedent (<= 28 doses) once
+    verdinexor's dog brain reach is >= 0.18 (central IC50, every 14 d) and needs 29+ doses at the floor -- so the case is decided by one
+    measurement in a dog on Laverdia, not by the transfer."""
+    from canine_dsp import lymphoma_sustained as S
+    lo, hi = S.VERDINEXOR_CNS_ACCESS_FOR_PRECEDENT
+    assert S.lawful_brain_window("B", interval_days=14, ic50_nM=14.0, verdinexor_access=lo)[1] <= S.DOG_IT_DOSES_PRECEDENT_MAX
+    assert S.lawful_brain_window("B", interval_days=14, ic50_nM=14.0, verdinexor_access=0.15)[1] > S.DOG_IT_DOSES_PRECEDENT_MAX
+    assert S.lawful_brain_window("B", interval_days=21, verdinexor_access=hi)[1] <= S.DOG_IT_DOSES_PRECEDENT_MAX
+    assert S.lawful_brain_window("B", interval_days=14, ic50_nM=14.0, verdinexor_access=S.VERDINEXOR_CNS_ACCESS_FLOOR)[1] > 28

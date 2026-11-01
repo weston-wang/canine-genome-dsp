@@ -352,3 +352,11 @@ Details `LYMPHOMA_UNIVERSE.md` section M; report `docs/reports/Canine lymphoma n
 - **Audit:** `failing()` now returns exactly one item: B-cell brain intrathecal dose count (29-45) tolerability, ASSUMED. `routes_not_counted()` adds the every-21-day schedule as CONTRADICTED. Bodies unchanged.
 - **Next step that would clear it:** a written transfer for >28 intrathecal doses (human long-course intrathecal/Ommaya precedent) or a canine series; plus the two measurements already named (verdinexor brain:plasma in a dog; CSF methotrexate on schedule).
 - **Plain-language page (`docs/LYMPHOMA_PLAIN_LANGUAGE.html`) not yet updated** to this result.
+
+### Correction (2026-11-01): selinexor's CSF figure is a floor for verdinexor, not its value
+User: "I don't really buy the sister drug story. Did you even look at what the actual composition differences are and see if the efficacy can be taken at face value like that." Right: the 31 Oct re-grade moved selinexor's number onto verdinexor without the comparison (which was already in `SWEEP_xpo1_cns.md`). Details in `LYMPHOMA_UNIVERSE.md` M.4.
+- The drugs differ by one ring atom (pyrazine vs pyridine). Verdinexor is less polar and more lipophilic, and is not a canine P-gp substrate, so its brain entry should be at least selinexor's. **0.09 is a floor.** Verdinexor's protein binding and brain/CSF levels are unmeasured in any species.
+- Verdinexor's kill was never borrowed from selinexor (it is derived from canine cells and dog exposure); only brain reach is.
+- The old 0.30 is regraded ASSUMED, not CONTRADICTED.
+- **B-cell brain: closes inside canine dose precedent if verdinexor's dog brain reach is >= 0.18-0.24; needs 29-45 intrathecal doses at the 0.09 floor.** T-cell brain unaffected.
+- **Decisive measurement:** CSF + plasma verdinexor + plasma protein binding in one dog on Laverdia.

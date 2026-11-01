@@ -68,6 +68,14 @@ Concrete failures (so the rules have a reason):
    something we went over and over again."* The machinery to prevent this existed and was not executed; writing
    the guard is not running the guard.
 
+11. **Moving a number from one drug to another on the word "sister compound".** A human spinal-fluid level of
+   selinexor was applied to verdinexor at face value, with selinexor's protein binding attached, and the earlier figure
+   was graded "contradicted". The user: *"I don't really buy the sister drug story. Did you even look at what the actual
+   composition differences are and see if the efficacy can be taken at face value like that."* The comparison already sat
+   in the record (one ring atom differs; verdinexor less polar, more lipophilic, not a canine P-gp substrate) and was not
+   consulted. Done properly, the measurement is a FLOOR for verdinexor, the old figure is unsupported rather than
+   contradicted, and the case turns on one measurement in a dog.
+
 ## Rules
 
 1. **Search the record before answering any "what did we cover / what's missing / did we discuss X"
@@ -153,6 +161,14 @@ Concrete failures (so the rules have a reason):
    a measured value in the right compartment outranks a more flattering inferred one (use the agent's own numbers
    even when they are worse), and a trial that reports a NEGATIVE for one arm (everolimus undetectable) is
    evidence about that arm, not a missing number.
+
+15. **A cross-compound transfer needs a written comparison and a direction, before it is used.** Name what differs
+   (structure, polarity/lipophilicity, efflux-transporter status, protein binding, species) and say which way each
+   difference pushes the transferred quantity. Transfer only the property the comparison supports (for brain reach, the
+   unbound ratio, not a total ratio that depends on the other drug's binding), and transfer it as a floor or ceiling unless
+   the property is shown equal. Never attach one compound's binding, clearance or potency to another. A transfer from
+   another compound cannot "contradict" a number for this one; at most it bounds it. Keep "efficacy" (kill) and
+   "exposure/reach" separate and state which one is being transferred.
 
 ## Standing standards for the cancer durable-response work (the user's words)
 

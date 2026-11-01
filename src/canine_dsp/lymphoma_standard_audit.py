@@ -90,7 +90,10 @@ def lawful_brain_items() -> list:
                         "MEASURED-PRECEDENT" if inside else "ASSUMED", inside,
                         f"closing schedules across the IC50 range at verdinexor brain reach {S.VERDINEXOR_CNS_ACCESS_MEASURED}; canine "
                         f"precedent is 20-{S.DOG_IT_DOSES_PRECEDENT_MAX} doses (CSF ports, 8-11 months)"
-                        + ("" if inside else "; no canine series and no written human transfer yet for this many")))
+                        + ("" if inside else "; no canine series and no written human transfer yet for this many. Clears instead if "
+                           f"verdinexor's brain reach in the dog is >= {S.VERDINEXOR_CNS_ACCESS_FOR_PRECEDENT[0]} (central IC50) - "
+                           f"{S.VERDINEXOR_CNS_ACCESS_FOR_PRECEDENT[1]} (pessimistic); 0.09 is only a floor transferred from "
+                           "selinexor, the value itself is unmeasured")))
     return out
 
 
@@ -165,9 +168,11 @@ def routes_not_counted() -> list:
              "multi-year tolerability (no source: human use is 10-14 days per 28; longest dog dosing is 7 days continuous / pulsed IV for 24 months)"),
         Item("persistent graft-versus-lymphoma past day 166 closing the dormant progenitor", "TRANSFERRED hold, no rate", False,
              "supports a hold (dog plateau, CML transcripts) but the model needs 0.06-0.12 /day against a 0.0008-0.004 /day bracket"),
-        Item("brain closure on 20 (B) / 11-12 (T) intrathecal doses every 21 days", "CONTRADICTED", False,
-             "needed verdinexor brain reach 0.30, read off a TOTAL brain:plasma ratio; measured human selinexor CSF / unbound plasma "
-             "is 0.09 (Blood 2025;146 Suppl 1:3550), at which this schedule never clears (section M)"),
+        Item("brain closure on 20 (B) / 11-12 (T) intrathecal doses every 21 days", "ASSUMED", False,
+             "needs verdinexor brain reach >= ~0.24 (B) / 0.25-0.30 (T) in the dog. The 0.30 used was read off a TOTAL brain:plasma "
+             "ratio and has no basis in the right compartment; the only compartment measurement is selinexor's human CSF / unbound "
+             "plasma 0.09 (Blood 2025;146 Suppl 1:3550), a FLOOR for verdinexor (less polar, not a canine P-gp substrate), at which this "
+             "schedule never clears. Not contradicted for verdinexor; unsupported (sections M.2, M.4)"),
         Item("T-cell brain by the section-I route (sustained oral cytarabine or CD7/CD5 CAR-T, no intrathecal methotrexate)", "OPEN", False,
              "dormant lineage needs ~8 years of oral cytarabine in T-cell disease; CD7/CD5 CAR-T has no dog program found. The T-cell "
              "brain itself closes by radiation + intrathecal methotrexate (sections J, M); this lists only the set-aside route"),
