@@ -2556,8 +2556,82 @@ not have.
 The planned sweep is now fully executed: fourteen angles, nine salvaged candidates re-verified, and
 the completeness critic run against **two independent external taxonomies** on different axes
 (chemical, then biological). Two diffs produced ten missing classes between them, which is the real
-measure of how incomplete "0 unassessed" had been. **A third pass should use a third axis** — an NCI
-thesaurus mechanism listing, or a current systemic-therapy review's modality table — and both ATC and
-the hallmarks map are now spent as independent checks. The eight open classes are named and each
-carries what would settle it; none is open for want of canine data, which rule 13 forbids as a
-ground.
+measure of how incomplete "0 unassessed" had been. [**A third axis was then run the same day — see
+the next section. 42 classes, 11 open.**] The open classes are named and each carries what would
+settle it; none is open for want of canine data, which rule 13 forbids as a ground.
+
+## 2026-11-03 (third axis): 42 classes, 11 open — and why the count keeps growing
+
+Third external taxonomy, since the previous two are spent as independent checks. Axis: **molecular
+target class** — nuclear receptors, protein–protein interactions, nucleic acid as target, ion
+channels, proteases — which is orthogonal to both the chemical list (ATC) and the biological map
+(hallmarks). **42 classes — 15 in the model, 16 excluded, 11 open.**
+
+### The worst hole yet, and it is the most mundane drug in the field
+
+**Glucocorticoid-receptor agonists.** The words `prednisone`, `prednisolone` and `glucocorticoid`
+appeared **nowhere in this repository** — not in the catalogue, not in `therapies.py`, not in the
+docs. The cheapest, most available, most routinely dosed class in all of veterinary oncology:
+licensed for dogs, oral, indefinitely dosable (so condition C3 is satisfied trivially, where most of
+this catalogue's agents fail on schedule), and *already* given to a dog with this presentation for
+peritumoural oedema. Absent from a catalogue that reported "0 unassessed" for weeks.
+
+What argues against it, each at its own strength: an **n=1 negative in the right family at the right
+site** — the isolated CNS Erdheim-Chester case was "refractory to **corticosteroids**, radiotherapy,
+and cladribine monotherapy" before the combination worked (PMID 42780343); the mechanism expectation
+that glucocorticoid cytotoxicity is a **lymphoid** property and steroids act as anti-inflammatory
+rather than cytoreductive in the histiocytoses; and **antagonism with this model's immune arms**
+(anti-PD-1, vaccine, CD47). **None of the three is an admissible rule-13 ground** — an n=1 refractory
+case is not a contradicted kill, a mechanism expectation is not a canine-HS measurement, and immune
+antagonism is an interaction rather than a toxicity budget. So it is open, and what would settle it
+is **a glucocorticoid IC50 in canine HS lines — a trivial assay on cells that already exist, which
+nobody in this project has ever looked for.**
+
+Also added: **MDM2–p53** (the project had already named the lesion — low TP53 expression in the HS
+lines, TP53 variants in 4/7 corgi cases, both recorded in other modules — and never enumerated the
+class that targets it; gated on a p53 state never resolved here) and **nucleic-acid therapeutics**
+(ranked last, clearing the plausibility bar on *delivery* — intrathecal ASO has a licensed precedent
+and this model already has an intrathecal arm — rather than on any oncology evidence).
+
+### The finding that matters more than the classes: the denominator is axis-dependent
+
+| axis | kind | classes it added |
+|---|---|---|
+| ATC L01 (+ L02–L04 later) | chemical | **7** |
+| Hanahan hallmarks therapeutic map | biological | **3** |
+| molecular target class | target | **3** |
+
+Each independent axis found classes the previous ones missed, and the third found as many as the
+second. **There was no convergence.** So the honest conclusion is *not* "the catalogue is now
+complete":
+
+> "Modality class" has no canonical granularity, so the **denominator of any closure claim is
+> axis-dependent**. "Closed within a catalogue of N classes" is only as meaningful as the list of
+> axes the catalogue was built from — which is why those axes are now named in the record, and why
+> the next pass should add a fourth rather than re-run one of these.
+
+That is a weaker claim than this project used to make and it is the correct one. `_validate()` still
+cannot see a row nobody wrote; what has changed is that the record now says so and names what was
+checked instead of implying the enumeration terminated.
+
+### Reading "11 open", because one number hides a real distinction
+
+`candidate_universe.open_with_canine_hs_evidence()` returns **five** — XPO1, proteasome, HSP90,
+cardiac glycosides, translation-elongation — each with a measurement in canine HS, all from the 2026
+screen's pan-active table. These are the ones worth working up first.
+`open_without_canine_hs_evidence()` returns **six** — cereblon degraders, glucocorticoids, MDM2–p53,
+nucleic-acid therapeutics, BH3 mimetics, IL-1 blockade — with nothing in this disease at all. Being
+in the second list is **not** a rule-13 ground for exclusion and **not** a rule-11 gap to report; it
+is a statement about where to look next. Quoting "11 open" without that split invites a reader to
+treat a pan-active screen hit and an unsearched mechanism as the same kind of thing.
+
+### What is queued rather than noted
+
+The two sweep phases that never ran as designed — **independent verification** and **synthesis** —
+could not run while the weekly agent limit held (it reset at 16:00 UTC). Rather than record them as
+an outstanding item for a future thread, they are **scheduled to run at 16:10 UTC** with the full
+list of findings to re-check, including the one claim in this record that is a **cross-branch record
+I never verified myself**: verdinexor's January 2026 full FDA approval. The same scheduled run
+carries the **fourth** taxonomy diff. Every substantive finding above was verified by me at primary
+source first-hand; what the scheduled phase adds is **independence**, which is the thing hand-
+verification cannot supply.

@@ -191,6 +191,52 @@ Two hallmark columns were considered and judged NOT to meet rule 9's "could plau
 differentiation therapy and microbiome modulation -- and that judgement is written down next to
 KNOWN_OPEN_CLASSES rather than left as a silent omission.
 
+A THIRD TAXONOMY, AND THE RESULT THAT MATTERS MORE THAN THE CLASSES (same day)
+-----------------------------------------------------------------------------
+Third axis: molecular TARGET CLASS -- nuclear receptors, protein-protein interactions, nucleic acid
+as target, ion channels, proteases -- orthogonal to both the chemical list and the biological map.
+Count: 42 classes, 15 / 16 / 11 open. Three more rows:
+
+  * GLUCOCORTICOID-RECEPTOR AGONISTS -- OPEN, and the most embarrassing hole of the eleven. The words
+    `prednisone`, `prednisolone` and `glucocorticoid` appeared NOWHERE in this repository. The
+    cheapest, most available, most routinely dosed class in veterinary oncology -- licensed for dogs,
+    oral, indefinitely dosable, already given to a dog with this presentation for peritumoural oedema
+    -- was absent from a catalogue reporting "0 unassessed". Nobody in this project has ever looked
+    for a glucocorticoid potency in canine HS, which is a trivial assay on cells that already exist.
+  * MDM2-p53 -- OPEN. The project had already NAMED the lesion (low TP53 expression in the HS lines;
+    TP53 variants in 4/7 corgi cases, both recorded in other modules) and never enumerated the class
+    that targets it. Gated on a p53 state the project has never resolved.
+  * NUCLEIC-ACID THERAPEUTICS -- OPEN, ranked last, and clearing the plausibility bar on DELIVERY
+    (intrathecal ASO has a licensed precedent and this model already has an intrathecal arm) rather
+    than on any oncology evidence.
+
+THE RESULT: THREE AXES, THREE SETS OF FINDS, NO CONVERGENCE -- AND THAT BOUNDS THE CLAIM
+----------------------------------------------------------------------------------------
+ATC L01 added seven. The hallmarks map added three. Target class added three more. Each independent
+external axis found classes the previous ones missed, and the third found as many as the second. So
+the honest conclusion is NOT "the catalogue is now complete". It is this:
+
+    "Modality class" has no canonical granularity, so the denominator of any closure claim is
+    AXIS-DEPENDENT. A claim of the form "closed within a catalogue of N classes" is only as
+    meaningful as the list of axes the catalogue was built from -- which is why those axes are
+    now named in the record (chemical/ATC L01 + L02-L04; biological/Hanahan hallmarks; molecular
+    target class) and why the next thread should add a fourth rather than re-run one of these.
+
+That is a weaker claim than this module used to make, and it is the correct one. The guard
+`_validate()` still cannot see a row nobody wrote; what has changed is that the record now says so
+and names what was checked instead of implying the enumeration terminated.
+
+READING THE ELEVEN OPEN CLASSES, because one number hides a real distinction
+---------------------------------------------------------------------------
+`open_with_canine_hs_evidence()` returns FIVE (XPO1, proteasome, HSP90, cardiac glycosides,
+translation elongation) -- each with a measurement in canine HS, all from the 2026 screen's
+pan-active table, and these are the ones worth working up first. `open_without_canine_hs_evidence()`
+returns SIX (cereblon degraders, glucocorticoids, MDM2-p53, nucleic-acid therapeutics, BH3 mimetics,
+IL-1 blockade) -- nothing in this disease at all. Being in the second list is NOT a rule-13 ground
+for exclusion and NOT a rule-11 gap to report; it is a statement about where to look next. Quoting
+"11 open" without that split invites a reader to treat a pan-active screen hit and an unsearched
+mechanism as the same kind of thing.
+
 Two of the eight open classes carry an explicit refusal to assert the obvious: no CNS figure is
 claimed for the proteasome inhibitors, and no achievable-exposure arithmetic is claimed for the
 cardiac glycosides, because neither was fetched. Under rule 16 an unsourced explanation is how a
@@ -559,6 +605,108 @@ UNIVERSE: tuple[Modality, ...] = (
         "cycles, which is a continuous-enough schedule to satisfy condition C3 unlike the weekly "
         "agents. The newer CELMoDs (mezigdomide, golcadomide, iberdomide) are clinical-stage rather "
         "than licensed and would be NEAR_FUTURE if the class were taken forward on one of them.",
+    ),
+    Modality(
+        "glucocorticoid-receptor agonists (corticosteroids)",
+        Status.NOT_ASSESSED,
+        "prednisone / prednisolone (licensed for dogs, oral, indefinitely dosable); dexamethasone",
+        "FOUND MISSING 2026-11-03 BY THE THIRD TAXONOMY DIFF (molecular TARGET CLASS -- nuclear "
+        "receptors -- an axis orthogonal to both the chemical ATC list and the biological hallmarks "
+        "map). THIS IS THE MOST EMBARRASSING HOLE OF THE TEN, and it is worth saying so plainly: "
+        "`prednisone`, `prednisolone` and `glucocorticoid` appear NOWHERE in this repository -- not "
+        "in the catalogue, not in `therapies.py`, not in the docs. The single most obtainable, "
+        "cheapest, most routinely used drug class in veterinary oncology was absent from a catalogue "
+        "that reported '0 unassessed' for weeks.\n"
+        "WHAT IT HAS, and it is formidable on every axis this project usually complains about: "
+        "licensed for dogs, ORAL, dosable INDEFINITELY (so condition C3 is satisfied trivially, "
+        "where most of this catalogue's agents fail on schedule), decades of canine dosing "
+        "experience, and standard first-line use in the human histiocytoses this project transfers "
+        "from. Dexamethasone is additionally standard for peritumoural oedema in brain tumours, so "
+        "it is already the drug a dog with this presentation would receive.\n"
+        "WHAT ARGUES AGAINST IT, stated at the strength the evidence actually has: (1) a NEGATIVE in "
+        "the right disease family at the right site, n=1 -- the isolated CNS Erdheim-Chester case "
+        "verified in this session was 'refractory to CORTICOSTEROIDS, radiotherapy, and cladribine "
+        "monotherapy' before the cladribine-cytarabine combination worked (PMID 42780343). Steroids "
+        "were tried first and failed. (2) Mechanistically, glucocorticoid cytotoxicity is a LYMPHOID "
+        "lineage property; histiocytic and myeloid tumours are not steroid-sensitive in the way "
+        "lymphoma is, and in the histiocytoses steroids function largely as anti-inflammatory and "
+        "supportive therapy rather than as cytoreduction. (3) ANTAGONISM WITH THIS MODEL'S IMMUNE "
+        "ARMS: the regimen carries anti-PD-1 (gilvetmab), a vaccine arm and CD47 blockade, and "
+        "sustained glucocorticoid exposure is immunosuppressive. That is a real interaction cost and "
+        "it is NOT one of rule 13's three grounds, so it cannot be used to exclude the class -- it is "
+        "a quantity someone has to put a number on.\n"
+        "WHY IT IS OPEN RATHER THAN EXCLUDED: none of the three arguments above is an admissible "
+        "ground. An n=1 refractory case is not a contradicted kill; 'this lineage is usually not "
+        "sensitive' is a mechanism expectation and not a measurement in canine HS; and immune "
+        "antagonism is an interaction, not a toxicity budget. WHAT WOULD SETTLE IT: a glucocorticoid "
+        "IC50 in canine HS lines -- which is a trivial assay on cells that already exist and which, "
+        "remarkably, nobody in this project has looked for -- plus a quantified immune-arm "
+        "interaction if it survives that.",
+        "NONE, and that absence is itself the finding: this project has never searched for a "
+        "glucocorticoid potency in canine HS. Dexamethasone appears in the record only as the "
+        "CO-DOSED agent in the pomalidomide primary-CNS-lymphoma trial (which is why that trial's "
+        "48% response rate is a combination result and not attributable to the degrader alone), and "
+        "corticosteroids appear only as the therapy the CNS Erdheim-Chester case had already failed.",
+        Availability.EXISTS_TODAY,
+        "The most available class in the entire catalogue: licensed for dogs, oral, pennies per dose, "
+        "indefinitely dosable, and already in routine use for the peritumoural oedema this "
+        "presentation causes. Availability could not be less of an obstacle, which is exactly why "
+        "the missing potency measurement is the whole question.",
+    ),
+    Modality(
+        "MDM2-p53 interaction inhibition",
+        Status.NOT_ASSESSED,
+        "idasanutlin, milademetan, navtemadlin (clinical-stage); nutlin-3a as the tool compound",
+        "FOUND MISSING 2026-11-03 by the same target-class diff (protein-protein interaction). The "
+        "catalogue had no p53-directed class -- although p53 IS ALREADY NAMED IN THIS PROJECT AS A "
+        "RESISTANCE MECHANISM: `core.hs_drug_sensitivity` records the 2015 authors' conclusion that "
+        "'the low expression level of TP53 in HS cell lines might play a role in the resistance "
+        "against a diverse range of chemotherapeutic agents', and TP53 variants are recorded in 4 of "
+        "7 corgi HS cases. So the project identified the lesion and never enumerated the class that "
+        "targets it.\n"
+        "THE GATE, WHICH IS WHY THIS IS NOT A SIMPLE ADDITION: MDM2 inhibitors work by blocking the "
+        "degradation of WILD-TYPE p53. They are useless, and potentially counterproductive, where "
+        "p53 is mutated. The record carries BOTH states for this disease -- LOW EXPRESSION in the "
+        "cell lines (which is compatible with wild-type protein and would be the favourable case) "
+        "and VARIANTS in 4 of 7 corgi cases (which is the unfavourable case). Those are different "
+        "tumours and different assays, and the project has never resolved which state the case under "
+        "analysis would be in.\n"
+        "WHY IT IS OPEN: no canine-HS measurement for any MDM2 inhibitor, no member licensed in any "
+        "species, and the eligibility gate above is undetermined. It cannot be excluded on an "
+        "admissible ground. WHAT WOULD SETTLE IT: p53 sequencing plus protein status on the tumour, "
+        "which is the same tissue block the MTAP immunostain of condition C5 already needs -- so it "
+        "is a second stain on a sample that has to be taken anyway, not a new procedure.",
+        "NONE for any MDM2 inhibitor. What exists is the LESION side rather than the drug side: low "
+        "TP53 expression in the canine HS lines (PMID 25715778) and TP53 variants in 4/7 corgi cases "
+        "-- recorded in `mutational_supply` and `core.breed_wide_durability`, and never connected to "
+        "a therapeutic class until now.",
+        Availability.NEAR_FUTURE,
+        "No MDM2 inhibitor is licensed in any species; several are in human phase I/II after a long "
+        "history of haematological toxicity. So this is NEAR_FUTURE at best and shares condition "
+        "C7's sponsor-access problem.",
+    ),
+    Modality(
+        "nucleic-acid therapeutics (antisense oligonucleotide, siRNA)",
+        Status.NOT_ASSESSED,
+        "intrathecal antisense oligonucleotide, on the nusinersen delivery precedent",
+        "FOUND MISSING 2026-11-03 by the target-class diff (nucleic acid as the target rather than a "
+        "protein), and recorded as the weakest of the three because rule 9 asks every plausible class "
+        "to carry a status, not only the convincing ones. The reason it clears 'could plausibly "
+        "matter' at all is DELIVERY RATHER THAN TARGET: intrathecal antisense is an established CNS "
+        "route with a licensed precedent (nusinersen in spinal muscular atrophy), and this project "
+        "already carries an intrathecal delivery arm for the leptomeningeal compartment -- so the "
+        "route exists in the model even though no nucleic-acid agent does.\n"
+        "WHY IT IS OPEN: no canine-HS evidence, no oncology precedent for an intrathecal ASO against "
+        "a solid intracranial mass, and the same parenchymal problem every antibody-sized agent has "
+        "in this analysis -- intrathecal drug reaches CSF and perivascular space rather than deep "
+        "parenchyma, which is the site that decides this case. It cannot be excluded on an "
+        "admissible ground, but it is ranked last of the open classes and should be triaged rather "
+        "than worked up.",
+        "NONE, in this disease or species.",
+        Availability.NEAR_FUTURE,
+        "No oncology ASO is licensed for an intracranial solid tumour; the licensed precedent "
+        "(nusinersen) is a non-oncological indication and establishes the ROUTE rather than the "
+        "agent. NEAR_FUTURE on the route, nothing on the drug.",
     ),
     Modality(
         "anti-angiogenic / VEGFR-axis multikinase inhibition",
@@ -1548,6 +1696,9 @@ KNOWN_OPEN_CLASSES: tuple[str, ...] = (
     "translation-elongation inhibition",
     "apoptosis induction / BH3 mimetics (BCL-2, BCL-XL)",
     "interleukin-1 blockade as a tolerability enabler (not a tumour-kill modality)",
+    "glucocorticoid-receptor agonists (corticosteroids)",
+    "MDM2-p53 interaction inhibition",
+    "nucleic-acid therapeutics (antisense oligonucleotide, siRNA)",
 )
 
 #: TWO HALLMARK COLUMNS WERE CONSIDERED AND JUDGED NOT TO MEET RULE 9's "COULD PLAUSIBLY MATTER"
@@ -1611,6 +1762,21 @@ def in_model() -> list[Modality]:
 
 def excluded() -> list[Modality]:
     return [m for m in UNIVERSE if m.status is Status.EXCLUDED]
+
+
+def open_with_canine_hs_evidence() -> list[Modality]:
+    """The open classes that already have a measurement in canine HS -- i.e. the ones worth working
+    up first. Eleven open classes is a lot to read as one number, and they are not equivalent: five
+    carry a canine-HS screen result and six carry nothing in this disease at all. A closure claim
+    quantified over "11 open" without that split invites the reader to treat a pan-active screen hit
+    and an unsearched mechanism as the same kind of gap."""
+    return [m for m in not_assessed() if m.canine_hs_evidence.startswith("MEASURED")]
+
+
+def open_without_canine_hs_evidence() -> list[Modality]:
+    """The open classes with no measurement in this disease. Being here is NOT a rule-13 ground for
+    exclusion and NOT a rule-11 gap to report -- it is a statement about where to look next."""
+    return [m for m in not_assessed() if not m.canine_hs_evidence.startswith("MEASURED")]
 
 
 def not_assessed() -> list[Modality]:

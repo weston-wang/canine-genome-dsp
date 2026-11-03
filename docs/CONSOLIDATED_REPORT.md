@@ -32,8 +32,8 @@ checklist, not a probability.
 | Items previously mis-reported as open | 9, each now graded and guarded | same |
 | Growth bar beaten | 0.055 / day | same |
 
-**Catalogue the claim is made over:** 39 therapy-modality classes — 15 in the model, 16 excluded, **8
-open** — and 16 escape routes from an independent audit. No class is excluded for lacking canine
+**Catalogue the claim is made over:** 42 therapy-modality classes — 15 in the model, 16 excluded, **11
+open** (5 of those 11 carry a canine-HS measurement; 6 carry nothing in this disease) — and 16 escape routes from an independent audit. No class is excluded for lacking canine
 data; each exclusion rests on a contradicted kill (9), a named escape that defeats it (4), or a
 toxicity budget it would blow (3).
 
@@ -63,8 +63,25 @@ blockade** as a tolerability enabler, and **BH3 mimetics / BCL-2**. The last of 
 bookkeeping: the class had been set aside on navitoclax's on-target thrombocytopenia — which *is*
 BCL-XL inhibition, the very liability **venetoclax was engineered to avoid**, and the reason it
 reached licensure where navitoclax did not. Venetoclax, a licensed oral drug dosed continuously to
-progression, appears nowhere in this repository. Ten missing classes across two diffs is the real
-measure of how incomplete "0 unassessed" had been.
+progression, appears nowhere in this repository.
+
+**A third diff, on a third axis — molecular target class — added three more, and that is the result
+that matters more than any of the drugs.** It found **glucocorticoids**: the words *prednisone*,
+*prednisolone* and *glucocorticoid* appeared **nowhere in this repository**. The cheapest, most
+available, most routinely dosed class in veterinary oncology — licensed for dogs, oral, indefinitely
+dosable, and already given to a dog with this presentation for brain swelling — was absent from a
+catalogue reporting "0 unassessed"; nobody here has ever looked for a steroid potency in canine HS,
+which is a trivial assay on cells that already exist. Also **MDM2–p53** (the project had named the
+lesion in other modules and never enumerated the class that targets it) and **nucleic-acid
+therapeutics**.
+
+**Three axes, three sets of finds — 7, then 3, then 3 — and no convergence.** So the honest
+conclusion is *not* that the catalogue is now complete. "Modality class" has no canonical
+granularity, which makes the denominator of any closure claim **axis-dependent**: "closed within a
+catalogue of N classes" means only as much as the list of axes the catalogue was built from. Those
+axes are now named in the record (chemical/ATC; biological/hallmarks; molecular target class) so the
+next pass can add a fourth rather than re-run one of these. That is a weaker claim than this report
+used to make, and it is the correct one.
 
 **Three classes were found missing from this catalogue in three days, while the line read "0
 unassessed".** That is the procedural finding, and it matters more than any of the three: each was

@@ -244,13 +244,13 @@ def test_the_catalogue_count_and_the_open_count_are_what_the_docs_say():
     '26 -- 15/11/0 unassessed' -> '28 -- 15/12/1 open' -> '29 -- 15/13/1 open'. If this test fails,
     three documents and a reader-facing page are now lying."""
     t = cu.tally()
-    assert len(cu.UNIVERSE) == 39
+    assert len(cu.UNIVERSE) == 42
     assert t["IN_MODEL"] == 15
     assert t["EXCLUDED"] == 16
-    assert t["NOT_ASSESSED"] == 8
+    assert t["NOT_ASSESSED"] == 11
     claim = cu.closure_claim(ea.audited_escape_count())
-    assert "39 modality classes" in claim
-    assert "8 unassessed" in claim
+    assert "42 modality classes" in claim
+    assert "11 unassessed" in claim
 
 
 def test_c3_records_the_maintenance_pincer_at_the_strength_shown():
@@ -512,3 +512,45 @@ def test_the_two_rejected_hallmark_columns_are_recorded_not_silently_dropped():
     assert "judgements about plausibility, not exclusions on rule 13 grounds" in src
     names = {m.name for m in cu.UNIVERSE}
     assert not any("differentiation" in n or "microbiome" in n for n in names)
+
+
+def test_three_independent_axes_are_named_and_none_converged():
+    """The result that matters more than any of the classes. Three external taxonomies on different
+    axes each found classes the others missed -- 7, then 3, then 3 -- so the denominator of a closure
+    claim is axis-dependent and the module must say so instead of implying the enumeration
+    terminated."""
+    doc = cu.__doc__
+    for axis in ("ATC L01", "Hanahan hallmarks", "molecular TARGET CLASS"):
+        assert axis in doc, axis
+    assert "AXIS-DEPENDENT" in doc
+    assert "NOT \"the catalogue is now complete\"" in doc
+    assert "add a fourth rather than re-run one of these" in doc
+
+
+def test_the_open_classes_split_by_whether_canine_evidence_exists():
+    """Eleven open classes is not one number. Five carry a canine-HS measurement and are worth
+    working up; six carry nothing in this disease and are a statement about where to look next.
+    Collapsing them would let a pan-active screen hit read as the same kind of gap as an unsearched
+    mechanism."""
+    withev = cu.open_with_canine_hs_evidence()
+    without = cu.open_without_canine_hs_evidence()
+    assert len(withev) + len(without) == len(cu.not_assessed())
+    assert len(withev) == 5 and len(without) == 6
+    assert all(m.canine_hs_evidence.startswith("MEASURED") for m in withev)
+    names = {m.name for m in withev}
+    assert "nuclear export inhibition (XPO1 / SINE compounds)" in names
+
+
+def test_the_glucocorticoid_hole_is_recorded_as_the_embarrassment_it_is():
+    """prednisone, prednisolone and glucocorticoid appeared NOWHERE in the repo -- the cheapest and
+    most available class in veterinary oncology, missing from a catalogue claiming 0 unassessed.
+    Recorded bluntly, with the n=1 negative and the immune-arm antagonism each at its own strength,
+    and with the explicit note that neither is an admissible ground for exclusion."""
+    m = next(x for x in cu.UNIVERSE if "glucocorticoid" in x.name)
+    assert m.status is cu.Status.NOT_ASSESSED
+    assert m.availability is cu.Availability.EXISTS_TODAY
+    assert "NOWHERE in this repository" in m.basis
+    assert "42780343" in m.basis, "the n=1 CNS-ECD case that was refractory to corticosteroids"
+    assert "NOT one of rule 13's three grounds" in m.basis
+    # and the reason that matters: the measurement nobody looked for
+    assert "trivial assay on cells that already exist" in m.basis
