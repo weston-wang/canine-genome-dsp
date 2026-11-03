@@ -165,23 +165,54 @@ def test_the_two_ablative_device_modalities_are_assessed_with_a_stated_reason():
     assert cu.excluded_citing_absent_canine_data() == []
 
 
-def test_the_antimetabolite_class_is_enumerated_and_carried_open():
-    """The second rule-9 hole, found 2026-11-01. Three members are measured active in all ten
-    canine HS lines, so the class cannot be dismissed; no single member carries potency, brain
-    access and tolerability together, so it cannot be closed either. It must therefore be OPEN --
-    and declared, so the import-time guard stays loud about it."""
+def test_the_antimetabolite_class_is_closed_on_three_measured_ic50s():
+    """Enumerated 2026-11-01 as the second rule-9 hole, carried open for ONE DAY, then EXCLUDED on
+    2026-11-02 -- because the measurements that close it were already cited by this project, in a
+    table it had transcribed five rows out of ten. This test pins the closure and its ground so the
+    class cannot drift back to open on the day-one reasoning, which rested on reading a 5 uM
+    screening threshold as a potency (CLAUDE.md failure 13)."""
     m = next(x for x in cu.UNIVERSE if "antimetabolite" in x.name)
-    assert m.status is cu.Status.NOT_ASSESSED
-    assert m.name in cu.KNOWN_OPEN_CLASSES
-    assert m.exclusion_ground is None, "an open class must not carry an exclusion ground"
-    assert m.availability is cu.Availability.EXISTS_TODAY
-    assert m.canine_hs_evidence.startswith("MEASURED")
-    # the three members and the leg each one fails
-    for token in ("5-fluorouracil", "clofarabine", "cytarabine", "floxuridine"):
-        assert token.lower() in m.basis.lower() or token.lower() in m.canine_hs_evidence.lower()
-    assert "15206584" in m.basis, "the dog-cerebrum vacuolation finding is what disqualifies 5-FU"
-    assert "1742843" in m.basis, "the measured canine CSF:plasma 0.62 is what keeps it open"
-    assert "42126265" in m.basis, "clofarabine's LCH durability readout"
+    assert m.status is cu.Status.EXCLUDED
+    assert m.exclusion_ground is cu.ExclusionGround.KILL_CONTRADICTED
+    assert m.name not in cu.KNOWN_OPEN_CLASSES
+    assert m.availability is cu.Availability.EXISTS_TODAY, "availability was never the issue"
+    # the three measured members, from two independent laboratories
+    for pmid in ("25715778", "29490634"):
+        assert pmid in m.basis, f"{pmid} carries one of the measured IC50 sets"
+    assert "27062671" in m.basis, "the canine toxicity ceiling below the dose that reached the CSF"
+    # the decisive arithmetic: both sides measured in the dog
+    assert "38.2" in m.basis and "8.3 uM" in m.basis
+    assert "4.6x" in m.basis
+    # the counter-evidence is recorded, not buried, and scoped
+    assert "39428688" in m.basis, "the human LCH 6-year OS that cuts the other way"
+    assert "42780343" in m.basis, "the n=1 CNS Erdheim-Chester remission"
+    assert "93.2%" in m.basis
+    # and it is labelled as cross-disease rather than allowed to overturn the canine measurement
+    assert "cannot overturn a measurement in this one" in m.basis
+
+
+def test_the_antimetabolite_exclusion_names_what_would_reopen_it():
+    """Rule 13 exclusions stay falsifiable. Clofarabine is the one member with pan-activity and no
+    IC50, and rule 15 forbids transferring cladribine's resistance onto it -- so the exclusion must
+    say so rather than quietly treating the class as uniform."""
+    m = next(x for x in cu.UNIVERSE if "antimetabolite" in x.name)
+    assert "WHAT WOULD REOPEN IT" in m.basis
+    assert "CLOFARABINE IC50" in m.basis
+    assert "deamination" in m.basis, "the chemistry that blocks the within-class transfer"
+    assert "deoxycytidine kinase" in m.basis, "the second reopening route"
+
+
+def test_the_false_explanation_for_the_empty_enum_member_is_recorded_not_deleted():
+    """CLAUDE.md failure 12. The empty DrugClass.ANTIMETABOLITE member was explained in the code as
+    'the paper tested no antimetabolite'. It had two. Keeping the retraction in the file is the only
+    thing that stops the same invented explanation being written again."""
+    m = next(x for x in cu.UNIVERSE if "antimetabolite" in x.name)
+    assert "IT HAD TWO ANTIMETABOLITE ROWS" in m.basis
+    assert "five rows out of ten" in m.basis
+    assert "failure 12" in m.basis
+    # and the misreading of the 2026 screen's a-priori exclusion list
+    assert "MISREAD" in m.canine_hs_evidence
+    assert "MELPHALAN is on the same exclusion list" in m.canine_hs_evidence
 
 
 def test_the_open_class_does_not_become_a_failing_input():
@@ -209,15 +240,16 @@ def test_the_fgfr_axis_is_excluded_on_brain_tumour_data_not_on_absent_canine_dat
 
 
 def test_the_catalogue_count_and_the_open_count_are_what_the_docs_say():
-    """The published line moved from '26 -- 15/11/0 unassessed' to '28 -- 15/12/1 open'. If this
-    test fails, three documents and a reader-facing page are now lying."""
+    """The published line has moved three times in three days as holes were found by looking:
+    '26 -- 15/11/0 unassessed' -> '28 -- 15/12/1 open' -> '29 -- 15/13/1 open'. If this test fails,
+    three documents and a reader-facing page are now lying."""
     t = cu.tally()
-    assert len(cu.UNIVERSE) == 28
+    assert len(cu.UNIVERSE) == 29
     assert t["IN_MODEL"] == 15
-    assert t["EXCLUDED"] == 12
+    assert t["EXCLUDED"] == 13
     assert t["NOT_ASSESSED"] == 1
     claim = cu.closure_claim(ea.audited_escape_count())
-    assert "28 modality classes" in claim
+    assert "29 modality classes" in claim
     assert "1 unassessed" in claim
 
 
@@ -246,10 +278,66 @@ def test_every_cross_compound_transfer_in_the_new_classes_states_a_direction():
     assert "it bounds the class's brain use, it does not measure it" in anti.basis
     # clofarabine: an efficacy transfer across disease, and LCH is the milder one -> a ceiling
     assert "CEILING for HS and never a floor" in anti.basis
-    # the comparison that would have been the easy error
-    assert "rule-15 violation" in anti.basis
+    # within-class: cladribine's measured resistance may NOT be carried onto clofarabine
+    assert "rule 15 forbids transferring cladribine's resistance to it" in anti.basis
+    # and the cross-disease human outcomes bound nothing about the canine kill
+    assert "Under rule 15 neither bounds the canine-HS kill" in anti.basis
 
     fgfr = next(x for x in cu.UNIVERSE if "FGFR" in x.name)
     assert "one compound's trial cannot contradict another compound's number" in fgfr.basis
     assert "statement about the TARGET" in fgfr.basis
     assert "CEILING for an overexpression-only tumour" in fgfr.basis
+
+
+def test_the_degrader_class_is_the_third_hole_and_is_carried_open():
+    """Found 2026-11-02. Targeted protein degradation was not a row, and no existing row covers it:
+    a cereblon molecular glue is not a kinase inhibitor, not an epigenetic agent and not a
+    checkpoint or cytokine agent. It cannot be dismissed (a licensed member has a phase 2 with
+    POSTED results in a cohort including histiocytic sarcoma) and cannot be called closed (its
+    measured human CSF access falls short at the parenchyma), so it is OPEN and declared."""
+    m = next(x for x in cu.UNIVERSE if "degradation" in x.name)
+    assert m.status is cu.Status.NOT_ASSESSED
+    assert m.name in cu.KNOWN_OPEN_CLASSES
+    assert m.exclusion_ground is None
+    assert m.availability is cu.Availability.EXISTS_TODAY
+    # the trial that forbids dismissing it, with its posted numbers
+    assert "NCT02523040" in m.basis
+    assert "HISTIOCYTIC SARCOMA" in m.basis
+    for n in ("0.67", "62%", "92%"):
+        assert n in m.basis, n
+    # rule 14: the proxy was named and searched, and the WORSE of two measurements is the one used
+    assert "22109830" in m.basis and "35732975" in m.basis
+    assert "1.3-2.4%" in m.basis
+    assert "even when it is the worse number" in m.basis
+    # and the arithmetic is stated in both directions rather than rounded to a verdict
+    assert "STRADDLES" in m.basis and "8-15x SHORT" in m.basis
+
+
+def test_the_degrader_class_names_its_next_step_as_a_within_class_direction():
+    """Rule 15: the same assay measured pomalidomide an order of magnitude more permeable than
+    lenalidomide, so that transfers as a DIRECTION (which member to take to a brain site) and never
+    as a number attached to the other compound."""
+    m = next(x for x in cu.UNIVERSE if "degradation" in x.name)
+    assert "POMALIDOMIDE is the class member to take to a brain site" in m.basis
+    assert "ONE ORDER OF MAGNITUDE" in m.basis
+    assert "forbids attaching" in m.basis
+    assert "WHAT WOULD CLOSE IT" in m.basis
+    # no canine data at all, and that is explicitly NOT the ground for anything
+    assert m.canine_hs_evidence.startswith("NONE IN THIS DISEASE")
+    assert "not a ground for exclusion" in m.canine_hs_evidence
+
+
+def test_cobimetinib_carries_a_licensed_genotype_agnostic_histiocytic_indication():
+    """The strongest single fact in the sweep, and it was a label read rather than a trial. The
+    record had cited NDA 206192 only for the canine minimum lethal dose."""
+    m = next(x for x in cu.UNIVERSE if "MAPK axis" in x.name)
+    # it lives in availability_basis, which is where a regulatory fact belongs
+    a = m.availability_basis
+    assert "206192" in a and "20260729" in a
+    assert "HISTIOCYTIC NEOPLASMS" in a
+    # the point is the ABSENCE of a genotype gate, shown by contrast with the same label's other use
+    assert "V600E or V600K" in a
+    assert "74-372 nM" in a, "the measured canine-HS IC50 that makes it more than a tier label"
+    # and it must not be read as closing the brain
+    assert "WHAT IT DOES NOT DO" in a
+    assert "0.5x" in a

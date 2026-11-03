@@ -281,7 +281,7 @@ scientifically sound."*
 | Part | Verdict | Basis (where) |
 |---|---|---|
 | Clearing the first tumour | **Holds within a now-stated catalogue.** Every escape has a closing agent: of the original 12, 7 measured in canine HS, 2 transferred, 1 model-derived, 2 structural, **0 assumed**; all 45 pairs and 120 triples covered; toxicity budgets computed, one collision (radiation + CNS microtubule agent) resolved by sequencing. The 4 audit-added routes close on 1 measurement-backed drug choice, 2 transfers, 1 structural argument | `CONSOLIDATED_REPORT.md`, `coverage_assessment`, `escape_audit` |
-| "Every mechanism" | **Now established, as a scoped claim.** "Closed within this catalogue of **25 modality classes and 16 escape routes**", 0 classes unassessed, 10 excluded with reasons named. [**Superseded 2026-10-31: 26 classes, 11 excluded.**] [**Superseded again 2026-11-01: 28 classes, 12 excluded, 1 OPEN** — antimetabolites, which cannot be excluded on any admissible ground.] Not the same as "every conceivable mechanism" — it is a claim whose boundary is written down | `candidate_universe.closure_claim()`, `escape_audit` |
+| "Every mechanism" | **Now established, as a scoped claim.** "Closed within this catalogue of **25 modality classes and 16 escape routes**", 0 classes unassessed, 10 excluded with reasons named. [**Superseded 2026-10-31: 26 classes, 11 excluded.**] [**Superseded again 2026-11-01: 28 classes, 12 excluded, 1 OPEN** — antimetabolites.] [**Superseded again 2026-11-02: 29 classes, 13 excluded, 1 OPEN** — antimetabolites CLOSED on three measured canine-HS IC50s; targeted protein degradation found missing and opened.] Not the same as "every conceivable mechanism" — it is a claim whose boundary is written down | `candidate_universe.closure_claim()`, `escape_audit` |
 | Staying clear for 10 years | **Scientifically sound hypothesis, not a result.** Model P(10-year), systemic sites: 0.56–0.72 without monitoring, 0.81–0.86 with detect-and-switch. Brain-local hinges on drug access. **CSF now 0.434 [0.17, 0.69]** on a derived rather than assumed prior, and the binding constraint there is sustained delivery (no intrathecal sustained-release product exists), not potency | `emergence.py`; `maintenance_durability.csf_answer()` |
 | Oct 2026 literature | **No change to the design.** PRMT5 brain arm weaker, CDK4/6 brain arm better evidenced on the same deletion (section A); the deletion is common (62.8%), which widens coverage; the immune floor is weaker in MTAP-null tumours | sections A, B |
 | Largest uncertainty | **How often a cleared, predisposed dog throws a new primary (Λ)** — 50–90% of the variance. Not a drug question | `emergence.py` value-of-information |
@@ -1734,6 +1734,12 @@ verified is refused by name at the end.
 
 ### The headline moves backwards: "0 unassessed" becomes "1 open"
 
+> **Annotated 2026-11-02, left in place rather than rewritten:** the class this section opens was
+> **closed the next day** on three measured canine-HS IC50s, two of them in a table this project had
+> already half-transcribed, and a *third* missing class took its place in `KNOWN_OPEN_CLASSES`. The
+> count is now **29 — 15 / 13 / 1 open**. See the 2026-11-02 section below. Everything in this
+> section is what was true when it was written.
+
 `candidate_universe` now enumerates **28 classes — 15 in the model, 12 excluded, 1 open**. The
 previous line, **26 — 15 / 11 / 0 unassessed**, was published in `CONSOLIDATED_REPORT.md`, in
 `AUDIT_TRAIL.md` and on the reader-facing page, and it is now wrong. It is corrected in all three
@@ -1914,3 +1920,260 @@ subject to the same "none confirmed on IC50" caveat); intra-arterial superselect
 (PMID 41129771); MEK monotherapy 43% vs 14% vertical blockade (PMID 42309537); the recruiting phase
 II trametinib dog trial (PMC11940154); cladribine + cytarabine (PMID 42780343). None is in the model
 and none supports any claim in it.
+
+## 2026-11-02: the open class closed, a third hole opened, and a licensed indication nobody had read
+
+Three things happened, and the first is a correction to this file's own entry from the day before.
+
+### The antimetabolite class is EXCLUDED, and the numbers that closed it were already ours
+
+`core/hs_drug_sensitivity.py` is built from PMID 25715778 and carried **five of that paper's ten
+rows**. The five dropped rows are **methotrexate, cytarabine, WSMP, doxorubicin and etoposide**. So
+the `DrugClass.ANTIMETABOLITE` member sat declared-and-empty not because the paper lacked
+antimetabolites but because its two antimetabolite rows were never copied across — and on 2026-11-01
+that emptiness was explained *in the file* as "PMID 25715778 tested ten drugs and no antimetabolite
+among them". **That was false**, written without re-reading the paper the table itself cites.
+
+Table 1 of PMC4488404, verbatim, 48-h CCK-8:
+
+| | CHS-1 | CHS-2 | CHS-3 | DH82 | CLBL-1 | Ema |
+|---|---|---|---|---|---|---|
+| Methotrexate | >100 µg/ml | 8.56 µg/ml | 495 ng/ml | >100 µg/ml | 7.10 ng/ml | 17.3 ng/ml |
+| Cytarabin | 14.4 µg/ml | 40.8 µg/ml | 9.29 µg/ml | 142 µg/ml | 91.7 ng/ml | 736 ng/ml |
+
+And the authors' own conclusion: *"it was suggested that alkylating agents, **antimetabolites**,
+antitumor antibiotics and topoisomerase inhibitors might not be effective as treatment of HS."*
+
+Three members are now measured, in two independent laboratories:
+
+- **Cytarabine — the decisive row, because both sides are measured in the dog.** Canine-HS IC50
+  **38.2 µM** in the most sensitive of four lines (9.29 µg/ml, CHS-3, at MW 243.22) rising to
+  **583.8 µM** in DH82; **101× to 1549×** the chemosensitive canine lymphoma comparator CLBL-1. Its
+  own measured canine CSF exposure with an **intact barrier** is **8.3 µM** at steady state and
+  **29 µM** at the bolus peak (PMID 1742843) — so the best line needs **4.6×** the steady state and
+  **1.3×** more than even the transient peak. And the canine toxicity ceiling sits *below* the dose
+  that produced that peak: fatal suspected cytarabine-induced infiltrative lung disease in a dog
+  after the fourth **300 mg/m²** infusion, against the **600 mg/m²** that gave the 29 µM peak
+  (PMID 27062671, DOI 10.1111/vec.12470). Kill, reach and toxicity each measured, in the dog, and
+  they do not meet. Recorded as `hs_drug_sensitivity.CYTARABINE_CSF_ARITHMETIC`.
+- **Methotrexate** — 495 ng/ml in the best line against 7.10 ng/ml in CLBL-1 (**69.7×**), and
+  **>100 µg/ml** in CHS-1 and DH82, so **>14,000×** as a lower bound (the >100 entries are
+  right-censored).
+- **Cladribine**, from a second laboratory and a second panel — IC50 **64 µM** (BD, a
+  Bernese-derived line) and **222 µM** (DH82) against an **achievable plasma concentration of
+  0.028 µM**: short by **2,286× to 7,929×** (PMID 29490634 / PMC5831740 Table 2, 72-h MTS). That
+  table exists precisely to compare IC50 against achievable exposure; dasatinib is the only agent in
+  it that clears its own bar, and cladribine is the worst in the table after CCNU.
+
+All ten rows are now in the table, and the completed table **reproduces the 2015 authors' sentence
+as a computation**: `resistant_classes()` returns the alkylators, the antimetabolites *and* the
+topoisomerase agents; `sensitive_classes()` returns the microtubule agents alone. The half-table
+could not do that.
+
+**Two of my own readings from 2026-11-01 were also wrong and are corrected:**
+
+1. *"Cytarabine's canine-HS kill is unconfirmed, not contradicted."* It was measured in 2015, in the
+   project's own source paper.
+2. *"Methotrexate is on that paper's a-priori exclusion list as previously reported active in CHS
+   cells and cases, so the class has prior-literature activity in this disease as well."* The 2026
+   screen's phrase means **"already studied"**, not "found active" — **melphalan** is on the same
+   exclusion list and melphalan is measured 42–411× resistant. The prior report for methotrexate
+   *is* the 2015 paper, which measures it resistant.
+
+**The counter-evidence, recorded at its own strength rather than buried.** In *human* histiocytic
+disease these same drugs do well: methotrexate 1 g/m² + cytarabine 0.1 g/m²×5 for six cycles in 95
+adults with newly diagnosed LCH gave ORR 89.5%, **6-year OS 93.2%** and EFS 55.2% at a median 78
+months' follow-up — the longest durability readout anywhere in this project (PMID 39428688,
+DOI 10.1111/bjh.19830) — and cladribine + cytarabine produced clinical improvement and radiologic
+remission in **isolated, MAPK-wild-type CNS Erdheim-Chester disease** that had failed steroids,
+radiotherapy *and* cladribine monotherapy (PMID 42780343 / PMC13597168, DOI 10.1002/jha2.70389,
+n=1). Under **rule 15** neither bounds the canine-HS kill: both are *efficacy* readouts in a
+different and far less aggressive disease, and a transfer from another disease cannot overturn a
+measurement in this one. Under **rule 14** the measurement in the species and disease at issue
+outranks the flattering cross-disease outcome *even though the measured number is the worse one*. So
+the honest sentence is "these drugs work in LCH and are measured resistant in canine HS".
+
+**What would reopen it**, both obtainable and neither a demonstration: (a) a **clofarabine** IC50 in
+canine HS below achievable exposure — clofarabine is the one member with pan-activity at 5 µM and no
+IC50, and rule 15 forbids transferring cladribine's resistance to it, because clofarabine's
+2′-fluoro substitution was designed to resist the deamination that limits cytarabine and cladribine,
+so the chemistry differs in the direction that matters; (b) a measured canine-HS uptake or
+activation advantage — deoxycytidine kinase expression, a nucleoside-transporter level — that would
+explain the cell-line resistance as culture artefact. Also unfollowed: **trimetrexate** had low IC50
+in 8 of 10 lines in the 2026 screen and the authors did not pursue it.
+
+### A third never-enumerated class: targeted protein degradation. Catalogue → 29
+
+Cereblon molecular glues are a distinct modality in any modern catalogue and were not a row. Not a
+kinase inhibitor, not an epigenetic agent, not a checkpoint or cytokine agent — no existing row
+covered them. The only trace in the project was a parenthetical that PRMT5 PROTAC degraders are
+"emerging", which is a remark about a future agent on another axis.
+
+It **cannot be dismissed**: `NCT02523040`, "Lenalidomide for Adult Histiocyte Disorders", phase 2,
+n=12 actual, conditions LCH, Erdheim-Chester **and histiocytic sarcoma**, results first posted
+2025-04-25 — **ORR 0.67, 12-month PFS 62%, 12-month OS 92%, grade 3–4 treatment-related toxicity
+0.25**, serum TNF-α maximum change −14.4%. A licensed agent with a human outcome calibration in the
+right disease family is a sound input under rule 13.
+
+It **cannot be called closed** either, and rule 14's proxy settles why. "Reaches the brain" is a
+measured CSF:plasma ratio, and it exists **twice** for lenalidomide — which is exactly the case rule
+14 legislates for:
+
+| source | figure |
+|---|---|
+| Non-human primates, AUC CSF/AUC plasma, detected in 2 of 3 animals (PMID 22109830) | **11%** |
+| Three human patients, 20 mg oral (PMID 35732975) | **1.3–2.4%** |
+
+Rule 14 says prefer the measurement in the compartment at issue even when it is the worse number, so
+this project uses **1.3–2.4%**. Against the requirements the project computes — 0.0145 in CSF,
+0.196 in parenchyma — that **straddles** the CSF bar (0.013 just under, 0.024 clearing by 1.7×) and
+falls **8–15× short** at the parenchyma, which is the site the case turns on.
+
+The mechanism is measured too, and it names the next step under rule 15: lenalidomide's influx
+permeability in a monkey BBB model and human placental cells is **one order of magnitude below**
+thalidomide, pomalidomide and a caffeine control, and the authors conclude lenalidomide "exerts its
+favorable immunomodulatory effects via systemic exposures". That is a within-class, same-assay
+permeability comparison, so it transfers as a **direction, not a number**: **pomalidomide** is the
+member to take to a brain site (thalidomide measures 42% CSF penetration in the NHP study).
+**What would close it: pomalidomide's measured CSF:plasma** — one number, in a licensed drug,
+obtainable from the literature rather than from an experiment.
+
+### Cobimetinib is licensed for this disease family, with no genotype gate
+
+The strongest single fact in two days of sweeping, and it was a label read. **COTELLIC, NDA 206192,
+label `effective_time` 20260729**: *"As a single agent for the treatment of adult patients with
+**histiocytic neoplasms**."* The absence of a qualifier is the point, because the same label gates
+its other indication — *"unresectable or metastatic melanoma with a BRAF V600E or V600K mutation, in
+combination with vemurafenib"*. Sponsor and FDA have agreed an indication in histiocytic neoplasms
+that requires no mutation to be demonstrated first. That is precisely the problem tovorafenib cannot
+solve: its label *directs* confirming a BRAF fusion or V600 mutation before initiation, and this
+disease is BRAF under 1%.
+
+Why it matters beyond a tier label: cobimetinib already carries, in this project, a **measured
+canine-HS IC50 of 74–372 nM and a measured canine plasma Cmax of 1640 nM** (PMID 39202410). It is
+therefore the only agent in the catalogue that is simultaneously licensed, licensed *for this
+disease family without a biomarker precondition*, and measured in canine histiocytic sarcoma cells
+with a canine exposure to compare against.
+
+**What it does not do:** the indication is for adult *human* patients, so a dog is off-label; human
+"histiocytic neoplasms" is dominated by ECD and LCH rather than histiocytic sarcoma, so the match is
+to the family, not the tumour; and **the brain is untouched** — cobimetinib's brain headroom here
+remains 0.5×, i.e. short. It upgrades the systemic arm and the regulatory story, not the site that
+decides the case. The repo had cited NDA 206192 only for the canine minimum lethal dose in
+`core/toxicity.py`; the indication itself was absent.
+
+### Catalogue and provenance
+
+**29 classes — 15 in the model, 13 excluded, 1 open** (8 kill-contradicted, 3 defeated by a named
+escape, 2 toxicity-unaffordable; **0** excluded for absent canine data). `standard_audit.failing()`
+still returns `[]`: no live *input* changed, and the open class is a candidate-list item, not an
+input. Also now in the table and previously missing: **WSMP = Paccal Vet®, water-soluble micellar
+paclitaxel**, measured 15.6–92.8 ng/ml — the only agent in the 2015 panel with a veterinary product
+behind it, landing in the sensitive class with the other microtubule agents. Its marketing status is
+*not* asserted here and is an open question for `availability_tiers`.
+
+### How this round was run, and what it cost
+
+A 14-angle workflow (`wf_72fcf13e-d56`) hit the 5-hour usage limit with 2 angles returned and **all
+48 verifier agents killed**, so its reported `passed_both_lenses: 0` meant "nothing was checked",
+not "nothing survived". The 17 candidates were recovered from `journal.jsonl` and the consequential
+ones verified by hand — which is how the cytarabine row was found. A follow-up run
+(`wf_1d38233b-feb`) re-verifies the remaining 9 salvaged claims and runs the 12 angles that never
+ran. **Unverified and used for nothing** until that returns: vinorelbine in 9 dogs (PMID 25970220);
+masitinib as a >70× vinblastine chemosensitiser (PMID 21333567); MEK-in-ECD n=170 76% retention
+(PMID 42840804) and its claim that C3's discontinuation figure is attributed to the wrong drug
+class; anakinra raising retention 65%→94% (PMID 39814074); the C3 figure's true provenance as 61% of
+n=64 (PMID 40053897); the sign of PMID 42309537's 43%/14%; the n=1174 ECD cohort (PMID 42880331);
+the MAPK-wild-type MEK warrant (PMID 40269272); and COBRAH (NCT04007848) as a completed randomised
+phase 3.
+
+## 2026-11-03: the nine salvaged claims, independently re-verified — three of them false
+
+The follow-up workflow (`wf_1d38233b-feb`) completed its salvage phase (9 of 9 checked) before a
+**weekly** usage limit killed 11 of the 12 sweep angles, the completeness critic and the synthesis.
+What the salvage returned is the more valuable half, because it caught agent claims that would
+otherwise have entered the record.
+
+### Killed, and recorded so they are not revived
+
+- **"The record attributes C3's discontinuation pressure to the wrong drug class."** FALSE, and the
+  premise was manufactured. The cited 170-patient cohort (PMID 42840804) is **MEK-monotherapy only**:
+  it reports no BRAF-inhibitor retention rate and no BRAF-inhibitor discontinuation rate anywhere,
+  and the figure "60%" does not occur in it. All 17 occurrences of "BRAF" in the full text were
+  checked; they are 32 patients with prior-line BRAFi, 1 patient switched to BRAFi, and BRAF V600E
+  as a baseline mutation in 57/170. The record's class attribution was already correct.
+- **"MEK inhibitors 71% vs BRAF inhibitors 74% first-line ORR in n=1174."** The four numbers are
+  exact (PMID 42880331; 185/262 = 70.6%, 286/387 = 73.9%, ten countries) but **"first-line" is
+  wrong**, and the source refutes it arithmetically: the first-line BRAF/MEK population is 350
+  patients for both classes combined, while the two ORR denominators sum to 649. Changes nothing
+  live.
+- **COBRAH (NCT04007848) as a usable readout.** Every structural element is exact — COMPLETED,
+  RANDOMIZED, QUADRUPLE-masked, PLACEBO_COMPARATOR, PHASE3, cobimetinib, histiocytoses — but
+  **results are not posted** (`hasResults: false`, actual completion 2022-03-14, last update
+  2025-01-24; a 2026 publication says COBRAH results "are awaited"), and **histiocytic sarcoma is
+  not in the trial** — the string "sarcoma" does not occur in the record. It is a design that
+  exists, not a readout.
+
+### A correction to a number this project pushed on 2026-11-01
+
+Condition **C3**'s feasibility pressure was recorded as the verbatim review quote *"60% of patients
+with ECD discontinued BRAF inhibitors at a median follow-up of 4 years due to adverse events"*. The
+quote is accurate; the review compresses its own source. At the primary report (**PMID 40053897**,
+Blood 2025, 145(18):2100-2103) the figure is **39 of 64 = 61% all-cause** discontinuation, of which
+**adverse events account for 20 of the 39** — i.e. **20/64 = 31% of the cohort**, not 60%. The
+abstract says "primarily because of adverse events"; the review rendered that as "due to adverse
+events". The same cohort's response rate is 85%.
+
+So the AE-driven discontinuation rate at a median four years is about **half** what C3's pressure
+was recorded as. The correction runs in the project's favour, which is precisely why it is written
+down: an overstated pressure that happens to be conservative is still a wrong number.
+
+One mitigation is measured and travels as an **association only**: adding anakinra to MAPK-targeted
+therapy in ECD went with 18-month drug retention of **94% vs 65%** (PMID 39814074) — but
+retrospective, observational, two referral centres, 52 patients / 60 courses with the anakinra arm
+just **16 of 60 courses**, physician discretion, no confounding adjustment. The paper's body says
+"was associated with"; only its title says "improves".
+
+### Confirmed, each with the qualification that changes how it may be used
+
+- **Vinorelbine in canine HS** (PMID 25970220) — species, disease, n=9 and agent all exact, but it
+  is **not a 9-dog study**: the 9 HS dogs are a 16% subgroup of a 58-dog, 12-tumour-type
+  retrospective series from one teaching hospital, 1997–2012. The abstract's response figures are
+  for the whole 58 and **must not be read as the HS numbers**. Upgrades the provenance of the
+  microtubule class's canine support; changes nothing else.
+- **Masitinib as a chemosensitiser** (PMID 21333567) — the ">70-fold reduction in vinblastine IC50"
+  is exact *but the claim dropped its condition*: the source says ">70-fold reduction in IC50 **at
+  5 µM masitinib**", an unconstrained in-dish concentration, which is the whole usability question.
+  No absolute IC50 is recoverable, so it **cannot** be joined to this project's measured canine-HS
+  vinblastine IC50 of 1.75–2.78 ng/ml (different lab, different lines, no published denominator),
+  and the abstract names no cell line. It does **not** touch condition C4 — C4 is about the
+  induction agent not being a P-gp substrate and is met by drug choice — and it touches escape A13
+  as a **flag, not a closure**.
+- **The 43%/14% sign inversion** (PMID 42309537) — confirmed, and the figures are **radiological
+  non-response**: 43% = 10/23 trametinib monotherapy, 14% = 2/14 trametinib + dabrafenib, UK
+  multicentre retrospective audit, n=37. A further correction to the correction: non-response here
+  is SD **or** PD, not progression — progression alone is 2/23 (8.7%) and 0/14 (0%). Anyone
+  "fixing" the record by calling 43%/14% progression rates would introduce a second error. The
+  figure is cited in no module and changes nothing live.
+- **The MAPK-wild-type MEK warrant** (PMID 40269272) — 63% response in MAPK-wild-type ECD confirmed,
+  and it is **10/16**, so n=16. Critically, **the paper names no MEK inhibitor at all**: a grep of
+  the full text for cobimetinib|trametinib|binimetinib|selumetinib returns zero hits, as do "dose"
+  and "mg". It is a **class/target-level** warrant only, and under rule 15 nothing here may be
+  attached to cobimetinib or trametinib specifically — "63% on cobimetinib" would be fabricating the
+  compound.
+
+**On the FGFR/MEK asymmetry this raises, stated rather than assumed.** The FGFR axis was excluded on
+the ground that benefit tracked an activating lesion rather than overexpression. MEK benefit, by
+contrast, does *not* require a demonstrated MAPK lesion — 10/16 in wild-type ECD, at class level.
+The asymmetry is therefore supported by data on both sides rather than being a double standard: for
+FGFR the biomarker-stratified trial showed benefit confined to the lesion; for MEK a wild-type
+cohort showed benefit without it. Both are human, both indirect, and the MEK figure is n=16.
+
+### Search status
+
+Still not run, and now blocked until the weekly limit resets: the 12 angles `mtap-axis`, `cdk-axis`
+(1 of 12 returned, 4 candidates, 0 survivors), `clpp`, `parp`, `cns-delivery`, `approvals`,
+`canine-immuno`, `preprints`, `reopen-excluded`, `nonenhancing`, `mapk-brain` and the new `degraders`
+angle, plus the completeness critic that was to diff the class list against the literature
+independently. Given three holes were found in three days, that critic is the highest-value
+outstanding item and the catalogue should not be described as complete before it runs.

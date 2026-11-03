@@ -130,3 +130,58 @@ def test_the_limits_of_cell_culture_are_stated():
     doc = hs.__doc__
     assert "cell culture" in doc
     assert "cell lines drift" in doc
+
+
+# --- the half-transcribed table, completed 2026-11-02 ---------------------------------------------
+
+def test_all_ten_rows_of_the_source_table_are_present():
+    """CLAUDE.md failure 12. This tuple carried FIVE of the paper's TEN drugs for months, and the
+    five dropped rows included both antimetabolites -- which is why `DrugClass.ANTIMETABOLITE` sat
+    declared-and-empty and why that emptiness got explained as 'the paper tested no antimetabolite'.
+    It tested two. Ten rows is the invariant; anything less is a partial transcription."""
+    assert len(hs.MEASURED) == 10
+    for drug in ("methotrexate", "cytarabine", "doxorubicin", "etoposide"):
+        assert drug in hs.BY_NAME, drug
+    assert any("WSMP" in n for n in hs.BY_NAME), "Paccal Vet, the veterinary paclitaxel formulation"
+
+
+def test_the_completed_table_reproduces_the_authors_own_conclusion():
+    """The paper says: 'alkylating agents, ANTIMETABOLITES, antitumor antibiotics and topoisomerase
+    inhibitors might not be effective', with microtubule inhibitors as the candidates. The
+    half-table could not express that; the completed one computes it."""
+    resistant = {c.name for c in hs.resistant_classes()}
+    assert resistant == {"O6_ALKYLATOR", "N7_CROSSLINKER", "ANTIMETABOLITE", "TOPOISOMERASE"}
+    assert hs.sensitive_classes() == (DrugClass.MICROTUBULE,)
+
+
+def test_the_antimetabolites_are_resistant_by_orders_of_magnitude():
+    cyt = hs.BY_NAME["cytarabine"]
+    mtx = hs.BY_NAME["methotrexate"]
+    assert cyt.resistant and mtx.resistant
+    # against the chemosensitive comparator the project names (CLBL-1, the lower bound of the pair)
+    assert cyt.hs_ic50_ng_ml[0] / cyt.comparator_ic50_ng_ml[0] == pytest.approx(101.3, abs=0.5)
+    assert mtx.hs_ic50_ng_ml[0] / mtx.comparator_ic50_ng_ml[0] == pytest.approx(69.7, abs=0.5)
+
+
+def test_the_cytarabine_arithmetic_is_measured_on_both_sides_in_the_dog():
+    """The decisive row for the antimetabolite exclusion: potency, reach AND toxicity ceiling are
+    each measured in the dog, and they do not meet. 38.2 uM needed, 8.3 uM reachable at steady
+    state, 29 uM at a bolus peak whose dose is twice one that has killed a dog."""
+    a = hs.CYTARABINE_CSF_ARITHMETIC
+    assert a["hs_ic50_most_sensitive_line_uM"] == pytest.approx(38.2, abs=0.1)
+    assert a["measured_canine_csf_css_uM"] == pytest.approx(8.3, abs=0.1)
+    ratio = a["hs_ic50_most_sensitive_line_uM"] / a["measured_canine_csf_css_uM"]
+    assert ratio == pytest.approx(a["shortfall_vs_css"], abs=0.1)
+    assert a["hs_ic50_most_sensitive_line_uM"] > a["measured_canine_csf_bolus_peak_uM"], \
+        "the IC50 must exceed even the transient peak, or the class would not close"
+    for pmid in ("25715778", "1742843", "27062671"):
+        assert pmid in a["provenance"], pmid
+
+
+def test_the_false_explanation_is_retracted_in_place():
+    """Not deleted -- retracted. The next thread has to be able to see that this explanation was
+    written, and why it was wrong, or it will be written again."""
+    src = __import__("inspect").getsource(hs)
+    assert "THAT WAS FALSE" in src
+    assert "five rows out of ten" in src or "FIVE of them" in src
+    assert "rule 16" in src

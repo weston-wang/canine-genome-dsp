@@ -89,7 +89,8 @@ literature sweep found two classes that had never been rows at all:
     intracranial site the members split the three legs -- 5-FU has the quantified canine potency and
     causes cerebral vacuolation in beagles, clofarabine has potency plus the outcome but 5% CSF
     penetration, cytarabine has a measured canine CSF:plasma of 0.62 with an unconfirmed kill. So it
-    sits in KNOWN_OPEN_CLASSES and the claim is now "28 classes, 1 open".
+    sat in KNOWN_OPEN_CLASSES and the claim became "28 classes, 1 open" -- for one day. See the
+    next section: it is now EXCLUDED, and a third hole took its place in that list.
   * FGFR AXIS -- every other targeted axis had its own row; this one did not, although three FGFR
     inhibitors score in the canine screen and two are licensed. It is EXCLUDED on measured data at
     the right site: infigratinib's phase 2 in FGFR-altered recurrent glioma gave 6-month PFS 16%
@@ -101,6 +102,38 @@ level of granularity the table itself uses everywhere else (per-chemotype for cy
 per-axis for targeted agents), and a count of "0 unassessed" says nothing about rows that were
 never written. Rule 9's candidate list has to be rebuilt from the literature each time, which is
 exactly what the rule says and what had stopped happening.
+
+THEN A THIRD HOLE, 2026-11-02 -- AND THE ANTIMETABOLITE CLASS CLOSED THE SAME DAY
+---------------------------------------------------------------------------------
+The count is now 29 classes: 15 in the model, 13 excluded, 1 open. Two things moved at once.
+
+  * ANTIMETABOLITES CLOSED, on KILL_CONTRADICTED, and the measurements that closed them were
+    ALREADY CITED BY THIS PROJECT. `core.hs_drug_sensitivity` is built from PMID 25715778 and had
+    transcribed FIVE of that paper's TEN rows; the five dropped rows include methotrexate and
+    cytarabine. So when this module recorded the class as open on 2026-11-01, and explained the
+    empty `DrugClass.ANTIMETABOLITE` member as "the paper tested no antimetabolite", both the
+    opening and the explanation were wrong against a table one function call away. Cytarabine is
+    measured at 38.2-583.8 uM in canine HS against its own measured canine CSF steady state of
+    8.3 uM; methotrexate at 69.7x to >14,000x the chemosensitive comparator; and cladribine, from a
+    second laboratory, at 64-222 uM against 0.028 uM achievable plasma (PMID 29490634). All ten rows
+    are now in the table, and `resistant_classes()` now reproduces the 2015 authors' own sentence as
+    a computation.
+  * TARGETED PROTEIN DEGRADATION OPENED -- cereblon molecular glues, which no row covered. A
+    licensed member has a phase 2 with POSTED RESULTS in a cohort including histiocytic sarcoma
+    (NCT02523040: ORR 0.67, 12-month PFS 62%, OS 92%), so it cannot be dismissed; and its measured
+    human CSF:plasma of 1.3-2.4% straddles this project's CSF requirement while falling 8-15x short
+    at the parenchyma, so it cannot be called closed either.
+
+THE PROCEDURAL FINDING, WHICH IS WORTH MORE THAN ANY OF THE THREE CLASSES
+------------------------------------------------------------------------
+Three holes in three days, in a catalogue that had reported "0 unassessed" for weeks. Each was found
+by rebuilding the class list from the literature, and none by auditing the existing list against
+itself. A guard that checks every enumerated class is sound and says nothing at all about the
+classes nobody enumerated; `_validate()` cannot see a missing row. The second lesson is narrower and
+sharper: an EMPTY CONTAINER in the model -- a declared enum member with no data, a class with no
+agent -- is indistinguishable from an absent measurement, and the cheap move is to explain the
+emptiness from memory. Re-read the source instead. That is CLAUDE.md failure 12 / rule 16, and it
+cost a day here.
 
 THE HONEST EFFECT ON THE HEADLINE
 ---------------------------------
@@ -214,19 +247,74 @@ UNIVERSE: tuple[Modality, ...] = (
     ),
     Modality(
         "cytotoxic chemotherapy -- antimetabolites / nucleoside analogues",
-        Status.NOT_ASSESSED,
-        "clofarabine (potency + outcome); cytarabine (access); 5-FU / floxuridine (potency)",
-        "THE SECOND RULE-9 HOLE, FOUND 2026-11-01, and a bigger one than the first. The catalogue "
+        Status.EXCLUDED,
+        "cytarabine, methotrexate and cladribine (all three measured in canine HS); clofarabine, "
+        "5-FU, floxuridine (screen-active, no IC50)",
+        "CARRIED OPEN FOR ONE DAY, THEN CLOSED ON 2026-11-02 BY THREE MEASURED IC50s -- two of which "
+        "were in a table this project had already half-transcribed, and one in a paper nobody had "
+        "read. The class is excluded on KILL_CONTRADICTED, from measurements in the right species "
+        "and the right disease, by two independent laboratories:\n"
+        "  * CYTARABINE, and this is the decisive row because BOTH sides are measured in the dog. "
+        "Canine-HS IC50 38.2 uM in the most sensitive of four lines (9.29 ug/ml, CHS-3) rising to "
+        "583.8 uM in DH82 (PMID 25715778 Table 1, 48-h CCK-8), i.e. 101x to 1549x the chemosensitive "
+        "canine lymphoma comparator CLBL-1. Its own measured canine CSF exposure with an INTACT "
+        "barrier is 8.3 uM at steady state and 29 uM at the bolus peak (PMID 1742843), so the best "
+        "line needs 4.6x the steady state and 1.3x more than even the transient peak. And the canine "
+        "toxicity ceiling sits BELOW the dose that produced that peak: fatal suspected "
+        "cytarabine-induced infiltrative lung disease in a dog after the fourth 300 mg/m2 infusion, "
+        "against the 600 mg/m2 that gave the 29 uM peak (PMID 27062671). Kill, reach and toxicity "
+        "are each measured, in the dog, and they do not meet. See "
+        "`core.hs_drug_sensitivity.CYTARABINE_CSF_ARITHMETIC`.\n"
+        "  * METHOTREXATE: >100 ug/ml in CHS-1 and DH82, 8.56 ug/ml in CHS-2, 495 ng/ml in CHS-3, "
+        "against 7.10 ng/ml in CLBL-1 -- 69.7x in the best line and >14,000x in the worst (same "
+        "table; the >100 entries are right-censored, so those folds are LOWER BOUNDS).\n"
+        "  * CLADRIBINE, from a second laboratory and a second cell-line panel: IC50 64 uM (BD, a "
+        "Bernese-derived line) and 222 uM (DH82) against an ACHIEVABLE PLASMA CONCENTRATION of "
+        "0.028 uM -- short by 2,286x to 7,929x (PMID 29490634 Table 2, 72-h MTS). That table exists "
+        "precisely to compare IC50 with achievable exposure, and dasatinib is the only agent in it "
+        "that clears its own bar; cladribine is the worst in the table after CCNU.\n"
+        "BOTH PAPERS STATE THE CONCLUSION THEMSELVES, which is why this is not an inference: "
+        "PMID 25715778 -- 'it was suggested that alkylating agents, ANTIMETABOLITES, antitumor "
+        "antibiotics and topoisomerase inhibitors might not be effective as treatment of HS'. "
+        "The completed `hs_drug_sensitivity` table now reproduces that sentence as a computation: "
+        "`resistant_classes()` returns the alkylators, the antimetabolites and the topoisomerase "
+        "agents, and `sensitive_classes()` returns the microtubule agents alone.\n"
+        "THE COUNTER-EVIDENCE, RECORDED AT ITS OWN STRENGTH AND NOT HIDDEN, because it is real and "
+        "it is what made this class worth a day's work: in HUMAN histiocytic disease the same drugs "
+        "perform well. Methotrexate 1 g/m2 + cytarabine 0.1 g/m2 x5 for six cycles in 95 adults with "
+        "newly diagnosed LCH gave ORR 89.5%, 6-year OS 93.2% and EFS 55.2% at a median 78 months' "
+        "follow-up -- the LONGEST durability readout anywhere in this project (PMID 39428688) -- and "
+        "cladribine + cytarabine produced clinical improvement and radiologic remission in isolated, "
+        "MAPK-wild-type CNS Erdheim-Chester disease that had failed steroids, radiotherapy AND "
+        "cladribine monotherapy (PMID 42780343, n=1). Under rule 15 neither bounds the canine-HS "
+        "kill: they are EFFICACY readouts in a different and far less aggressive disease, and a "
+        "transfer from another disease cannot overturn a measurement in this one. Under rule 14 the "
+        "measurement in the species and disease at issue outranks the flattering cross-disease "
+        "outcome, EVEN THOUGH the measured number is the worse one. So the honest statement is "
+        "'these drugs work in LCH and are measured resistant in canine HS', not 'the class works'.\n"
+        "WHAT WOULD REOPEN IT -- two obtainable things, and neither is a demonstration: (a) a "
+        "CLOFARABINE IC50 in canine HS lines below achievable exposure. Clofarabine is the one "
+        "member with pan-activity in all ten lines at 5 uM and no IC50, and rule 15 forbids "
+        "transferring cladribine's resistance to it: clofarabine was designed to resist the "
+        "deamination that limits cytarabine and cladribine, so the chemistry differs in the "
+        "direction that matters and its 2'-fluoro substitution makes it the one member whose "
+        "resistance is NOT bounded by the other two. (b) a measured canine-HS uptake or activation "
+        "advantage -- deoxycytidine kinase expression, or a nucleoside-transporter level -- that "
+        "would explain the cell-line resistance as culture artefact. Absent either, the class stays "
+        "excluded.\n"
+        "HISTORY, KEPT BECAUSE IT IS THE POINT. The catalogue "
         "split cytotoxics into microtubule agents and alkylators and stopped. Antimetabolites were "
-        "never a row -- even though `core.hs_drug_sensitivity.DrugClass` has an ANTIMETABOLITE "
-        "member with NO drug under it, which is the signature of a class that was named and never "
-        "populated. On the evidence this class has the second-strongest canine-HS grounding in the "
-        "project, behind only the microtubule class: THREE members are measured active in ALL TEN "
-        "canine HS lines. "
-        "WHY IT IS CARRIED OPEN RATHER THAN EXCLUDED: none of rule 13's three grounds holds for the "
-        "class, and under rule 11 'not yet wired into the regimen' is not a ground at all. What the "
-        "assessment found instead is that at the INTRACRANIAL site the three members split the "
-        "three legs and no single member carries all of them: "
+        "never a row -- even though `core.hs_drug_sensitivity.DrugClass` had an ANTIMETABOLITE "
+        "member with no drug under it. On 2026-11-01 that empty member was explained here as 'the "
+        "paper tested no antimetabolite'. IT HAD TWO ANTIMETABOLITE ROWS; the table had been "
+        "transcribed five rows out of ten. The empty member was the signature not of an absent "
+        "measurement but of a HALF-COPIED ONE, and the difference is the whole of this entry -- the "
+        "numbers that closed the class were already cited by the project, one function call away. "
+        "That is CLAUDE.md failure 12 / rule 16. "
+        "WHAT THE FIRST DAY'S ASSESSMENT SAID, AND WHERE IT WAS WRONG: it found that at the "
+        "INTRACRANIAL site the members split three legs with no single member carrying all of them, "
+        "and concluded the class was not excludable. Legs (1) and (2) below stand as written. Leg "
+        "(3) was wrong, and it was the leg holding the class open: "
         "(1) POTENCY WITHOUT THE BRAIN -- 5-fluorouracil is pan-active in all 10 lines with a "
         "quantified median IC50 of 7.49 uM, and it is the member this disease should NOT get. "
         "STATED UNDER RULE 15, because the toxicity finding is about a DIFFERENT COMPOUND and must "
@@ -269,25 +357,38 @@ UNIVERSE: tuple[Modality, ...] = (
         "is the strongest access datum in the project at 0.62 (total, not unbound; the study assayed "
         "drug by HPLC in both fluids). But cytarabine is NOT in the pan-active table: it was a "
         "Group-B-specific CANDIDATE that the authors then rejected on IC50 ('no compound was "
-        "identified as Group B-specific'), with >=30% inhibition at 5 uM in 5 of 10 lines. So its "
-        "canine-HS kill is unconfirmed, not contradicted. "
-        "THE ONE COMPARISON RULE 15 PERMITS HERE is cytarabine against ITSELF: its measured canine "
-        "CSF steady state, 8.3 uM, is above the 5 uM at which its own 5-of-10-line screen result was "
-        "obtained. That is why the class is open rather than dead. It would be a rule-15 violation "
-        "to read that 8.3 uM against the 5 uM threshold of the OTHER three members -- their activity "
-        "is not cytarabine's potency, and this analysis does not make that move. "
-        "WHAT WOULD CLOSE IT: a clofarabine or cytarabine IC50 in canine HS lines, which the screen "
-        "did not compute for either (it published IC50s only for 5-FU, sunitinib and the 28 "
-        "subgroup candidates). Until then the class is open, and the headline must say so.",
+        "identified as Group B-specific'), with >=30% inhibition at 5 uM in 5 of 10 lines. "
+        "THE DAY-ONE CONCLUSION WAS THAT ITS KILL WAS THEREFORE 'UNCONFIRMED, NOT CONTRADICTED', "
+        "AND THAT IS THE SENTENCE THE NEXT DAY FALSIFIED. Cytarabine's canine-HS IC50 was not "
+        "unmeasured -- it was measured in 2015, in the paper that supplies this project's whole "
+        "sensitivity table, and the answer is 38.2-583.8 uM against that measured 8.3 uM CSF steady "
+        "state. The day-one text also reasoned that '8.3 uM is above the 5 uM at which its own "
+        "screen result was obtained, which is why the class is open rather than dead'. That "
+        "comparison was legitimate under rule 15 (cytarabine against itself) but it was the WRONG "
+        "QUANTITY: a 5 uM screening concentration at which 5 of 10 lines showed >=30% inhibition is "
+        "not an IC50, and the IC50 is 4.6x higher than the exposure. Reaching a compartment at a "
+        "concentration that inhibits some lines by 30% is not a kill. "
+        "The lesson generalises past this class: a screening threshold is a lower bound on potency "
+        "and must never be read as a potency when the real IC50 is obtainable.",
         "MEASURED, in ten canine HS lines, for three members. Table 2 of PMID 42129963 -- the "
         "compounds that reduced viable cell counts to <=70% at 5 uM in ALL CHS lines with "
         "reproducibility -- contains 5-FLUOROURACIL, CLOFARABINE and FLOXURIDINE. The same paper "
         "lists METHOTREXATE among the drugs it excluded from screening a priori 'because they had "
-        "been previously reported to have antiproliferative effects on CHS cells and cases', so the "
-        "class has prior-literature activity in this disease as well; its racemate (amethopterin) "
-        "and TRIMETREXATE, ANCITABINE, CYTARABINE and 5-fluoro-5'-deoxyuridine all appear among the "
-        "19 Group-B candidates, i.e. five of those nineteen are antimetabolites. Trimetrexate had "
-        "low IC50 in 8 of 10 lines, which the authors note but did not pursue.",
+        "been previously reported to have antiproliferative effects on CHS cells and cases'. "
+        "MISREAD ON 2026-11-01 AS 'the class has prior-literature activity in this disease as well'. "
+        "It does not say that. MELPHALAN is on the same exclusion list and melphalan is measured "
+        "42-411x RESISTANT in these lines, so the phrase means 'already studied', not 'found "
+        "active' -- and the prior report for methotrexate is the 2015 paper, which measures it "
+        "69.7x to >14,000x resistant. Its racemate (amethopterin) and TRIMETREXATE, ANCITABINE, "
+        "CYTARABINE and 5-fluoro-5'-deoxyuridine all appear among the 19 Group-B candidates, i.e. "
+        "five of those nineteen are antimetabolites, but the authors confirmed NONE of them on IC50. "
+        "Trimetrexate had low IC50 in 8 of 10 lines, which the authors note but did not pursue, and "
+        "which is the one screen-level signal in the class that nobody has followed up. "
+        "DECISIVE, AND FROM TWO LABORATORIES: PMID 25715778 Table 1 gives cytarabine 9.29-142 ug/ml "
+        "and methotrexate 495 ng/ml->100 ug/ml across four lines against a 7.10-91.7 ng/ml "
+        "chemosensitive comparator; PMID 29490634 Table 2 gives cladribine 64 and 222 uM against "
+        "0.028 uM achievable plasma. All ten rows of the 2015 table are now in "
+        "`core.hs_drug_sensitivity`, where they were five.",
         Availability.EXISTS_TODAY,
         "Every member is obtainable today, verified at openFDA on 2026-11-01: clofarabine is "
         "marketed as generics (ANDA 209775 MSN, ANDA 205375 Dr Reddy's, ANDA 216233 ScinoPharm) "
@@ -295,7 +396,69 @@ UNIVERSE: tuple[Modality, ...] = (
         "several holders (ANDA 072168 Hospira, ANDA 074245 West-Ward, ANDA 205696/208485 Meitheal) "
         "while DEPOCYT, NDA 021041 Pacira, is discontinued -- which independently confirms this "
         "project's existing statement that the sustained-release intrathecal product is gone; "
-        "5-fluorouracil is generic and ancient. Availability is emphatically not what is open here.",
+        "5-fluorouracil is generic and ancient. Availability was never the issue, which is why this "
+        "exclusion is a scientific one: three measured IC50s, two laboratories, one of them against "
+        "a measured canine CSF concentration and a measured canine toxicity ceiling.",
+        ExclusionGround.KILL_CONTRADICTED,
+    ),
+    Modality(
+        "targeted protein degradation / cereblon modulators (immunomodulatory imides, CELMoDs)",
+        Status.NOT_ASSESSED,
+        "lenalidomide (licensed, and the member with a histiocytic trial); pomalidomide (the member "
+        "for a brain site)",
+        "THE THIRD RULE-9 HOLE, FOUND 2026-11-02, and the reason the catalogue is now 29 classes "
+        "rather than 28. Targeted protein degradation -- molecular glues acting through the CRL4-CRBN "
+        "E3 ligase -- is a distinct modality in any modern catalogue, and it was not a row. It is not "
+        "a kinase inhibitor, not an epigenetic agent, and not a checkpoint or cytokine agent, so no "
+        "existing row covers it. The only trace in the project was a parenthetical note in "
+        "`maintenance_durability` that PRMT5 PROTAC degraders are 'emerging', which is a remark about "
+        "a future agent on another axis, not an enumerated class.\n"
+        "WHY IT CANNOT BE DISMISSED: there is a registered PHASE 2 of a licensed degrader in this "
+        "disease family, WITH POSTED RESULTS. NCT02523040, 'Lenalidomide for Adult Histiocyte "
+        "Disorders', phase 2, n=12 actual, conditions Langerhans cell histiocytosis, Erdheim-Chester "
+        "disease AND HISTIOCYTIC SARCOMA, results first posted 2025-04-25: overall response rate "
+        "0.67, 12-month progression-free survival 62%, 12-month overall survival 92%, grade 3-4 "
+        "treatment-related toxicity 0.25, and a pharmacodynamic readout (serum TNF-alpha maximum "
+        "change -14.4%). Under rule 13 a licensed agent with a human outcome calibration in the "
+        "right disease family is a sound input, so absent canine data is not a ground.\n"
+        "WHY IT CANNOT BE CALLED IN-MODEL EITHER, which is the honest reason it sits open: no agent "
+        "of the class is wired into the regimen, there is no canine-HS potency for any member, and "
+        "the brain arithmetic for the member that has the trial does not close. Rule 14's proxy for "
+        "'reaches the brain' is a measured CSF:plasma ratio, and it exists TWICE for lenalidomide, "
+        "which is exactly the case rule 14 legislates for: non-human primates give CSF penetration "
+        "11% (AUC CSF/AUC plasma, detected in 2 of 3 animals, PMID 22109830), while THREE HUMAN "
+        "PATIENTS give CSF:plasma 1.3-2.4% (PMID 35732975). Rule 14 says prefer the measurement in "
+        "the compartment at issue even when it is the worse number, so this project uses 1.3-2.4%, "
+        "not 11%. Against the requirements this project computes -- 0.0145 in CSF and 0.196 in "
+        "parenchyma -- that STRADDLES the CSF bar (0.013 just under, 0.024 clearing it by 1.7x) and "
+        "falls 8-15x SHORT at the parenchyma. The parenchymal site is the one the case turns on, so "
+        "the class does not close the brain today.\n"
+        "THE MECHANISM IS KNOWN, AND IT NAMES THE NEXT STEP UNDER RULE 15. The same paper that "
+        "measured the human ratio also measured why it is low: lenalidomide's influx permeability in "
+        "a monkey blood-brain-barrier model and in human placental cells is ONE ORDER OF MAGNITUDE "
+        "BELOW thalidomide, pomalidomide and a caffeine positive control, and the authors conclude "
+        "lenalidomide 'exerts its favorable immunomodulatory effects via systemic exposures'. That "
+        "is a within-class, same-assay permeability comparison, so it transfers as a DIRECTION and "
+        "not as a number: POMALIDOMIDE is the class member to take to a brain site, and thalidomide "
+        "is measured at 42% CSF penetration in the NHP study. Rule 15 forbids attaching "
+        "pomalidomide's permeability to lenalidomide's trial result or vice versa -- the trial is an "
+        "EFFICACY readout for lenalidomide, the permeability is an EXPOSURE property of pomalidomide, "
+        "and they are different quantities about different compounds.\n"
+        "WHAT WOULD CLOSE IT: pomalidomide's measured CSF:plasma or brain-tumour-tissue "
+        "concentration. That is one number, in a licensed drug, obtainable from the literature "
+        "rather than from an experiment -- which is why this class is carried open rather than "
+        "guessed at in either direction.",
+        "NONE IN THIS DISEASE AND NONE IN THE DOG. The canine side of this class is empty: no "
+        "canine-HS IC50 for any degrader, no canine PK for lenalidomide or pomalidomide, no dog "
+        "trial. Under rule 13 that is not a ground for exclusion, and under rule 11 it is not a gap "
+        "to report -- it is the reason the class is graded on a human outcome transfer (NCT02523040) "
+        "and a human exposure measurement (PMID 35732975) instead.",
+        Availability.EXISTS_TODAY,
+        "Lenalidomide, thalidomide and pomalidomide are all human-licensed and obtainable off-label; "
+        "the histiocytic trial used lenalidomide orally, days 1-21 of a 28-day cycle, up to 12 "
+        "cycles, which is a continuous-enough schedule to satisfy condition C3 unlike the weekly "
+        "agents. The newer CELMoDs (mezigdomide, golcadomide, iberdomide) are clinical-stage rather "
+        "than licensed and would be NEAR_FUTURE if the class were taken forward on one of them.",
     ),
     Modality(
         "targeted small molecules -- MAPK axis (MEK/ERK/SHP2)",
@@ -337,6 +500,30 @@ UNIVERSE: tuple[Modality, ...] = (
         "Trametinib has a COMPLETED canine Phase I with a recommended dose (PMID 38889903), and "
         "cobimetinib has both a canine-HS IC50 and a canine plasma Cmax (PMID 39202410). This is "
         "the best-tiered maintenance class in the project: obtainable AND measured in the dog. "
+        "THE STRONGEST SINGLE FACT FOUND IN THIS WHOLE SWEEP, 2026-11-02, AND IT WAS A LABEL READ: "
+        "COBIMETINIB IS LICENSED FOR THIS DISEASE FAMILY, WITH NO GENOTYPE GATE. COTELLIC, NDA "
+        "206192, label effective_time 20260729, reads: 'As a single agent for the treatment of adult "
+        "patients with HISTIOCYTIC NEOPLASMS' -- and the absence of a qualifier is the point, because "
+        "the SAME LABEL gates its other indication ('unresectable or metastatic melanoma with a BRAF "
+        "V600E or V600K mutation, in combination with vemurafenib'). So the drug's sponsor and the "
+        "FDA have agreed an indication in histiocytic neoplasms that does not require any mutation "
+        "to be demonstrated first. That is exactly the problem tovorafenib has and cannot solve: "
+        "tovorafenib's label DIRECTS confirming a BRAF fusion or V600 mutation before initiation, "
+        "and this disease is BRAF under 1%. Cobimetinib's does not. "
+        "WHY THIS MATTERS MORE THAN A TIER LABEL: cobimetinib already carries, in this project, a "
+        "MEASURED canine-HS IC50 of 74-372 nM and a MEASURED canine plasma Cmax of 1640 nM "
+        "(PMID 39202410). It is therefore the only agent anywhere in this analysis that is "
+        "simultaneously (a) licensed, (b) licensed for the disease FAMILY under analysis without a "
+        "biomarker precondition, and (c) measured in canine histiocytic sarcoma cells with a canine "
+        "exposure to compare against. Nothing else in the catalogue has all three. "
+        "WHAT IT DOES NOT DO, stated so this is not read as more than it is: the indication is for "
+        "ADULT HUMAN patients, so a dog is still off-label; 'histiocytic neoplasms' in the human "
+        "nosology is dominated by Erdheim-Chester and LCH rather than histiocytic sarcoma, so the "
+        "disease match is to the family and not to this tumour; and the brain is untouched by it -- "
+        "cobimetinib's brain headroom in this project remains 0.5x, i.e. SHORT, so a licensed "
+        "indication does not supply parenchymal access. It upgrades the systemic arm and the "
+        "regulatory story, not the site that decides the case. The repo had cited NDA 206192 only "
+        "for the canine minimum lethal dose in `core.toxicity`; the indication itself was absent. "
         "CORRECTED 2026-11-01: this class's two CNS-relevant members are LICENSED, which the record "
         "had not said -- it treated both as investigational. Verified at Drugs@FDA: mirdametinib is "
         "GOMEKLI, NDA 219379 and NDA 219389 (SpringWorks), oral, approved 2025-02-11 for NF1-"
@@ -849,8 +1036,13 @@ UNIVERSE: tuple[Modality, ...] = (
 #: of a headline this project has already published, which is the point: the alternative was to
 #: write the class in as IN_MODEL without an agent wired into the regimen, and that would be the
 #: overstatement rule 5 exists to stop.
+#: UPDATED 2026-11-02. The antimetabolite class closed -- EXCLUDED on three measured canine-HS
+#: IC50s, so it leaves this list by ASSESSMENT, exactly as the bacterial vector did. But the same
+#: sweep found a THIRD never-enumerated class, targeted protein degradation, so the list is not
+#: empty: one hole closes, another opens, and the count of classes goes 28 -> 29. Three holes in
+#: three days is itself the finding -- see the docstring.
 KNOWN_OPEN_CLASSES: tuple[str, ...] = (
-    "cytotoxic chemotherapy -- antimetabolites / nucleoside analogues",
+    "targeted protein degradation / cereblon modulators (immunomodulatory imides, CELMoDs)",
 )
 
 

@@ -112,25 +112,66 @@ CITATION = ("PMID 25715778. SPECIES: DOG. DISEASE: HISTIOCYTIC SARCOMA. Four can
             "(CHS-1, CHS-2, CHS-3, DH82) vs two canine lymphoma lines (CLBL-1 B-cell, Ema T-cell) "
             "as a chemosensitive comparator. Ten drugs, plus expression of 16 drug-resistance genes.")
 
-#: WHY `DrugClass.ANTIMETABOLITE` HAS NO ROW HERE, AND WHY THAT IS NOT AN OVERSIGHT ANY MORE.
-#: PMID 25715778 tested ten drugs and no antimetabolite among them, so this table -- which is
-#: deliberately ONE paper, with one chemosensitive comparator panel -- has nothing to put under that
-#: member. The member being empty was for a long time the only trace of a class the rule-9 catalogue
-#: had never enumerated at all; `candidate_universe` now carries that class explicitly, as an OPEN
-#: hole. The antimetabolite data that exist in canine HS come from a different design and cannot be
-#: appended to this tuple without breaking its semantics: PMID 42129963 screened 1824 compounds
-#: across 10 CHS lines with NO comparator panel, so there is no `comparator_ic50_ng_ml` to compute
-#: a fold-resistance from. What it reports is that 5-fluorouracil, clofarabine and floxuridine all
-#: reduced viable cell counts to <=70% at 5 uM in ALL ten lines, and that 5-FU's median IC50 across
-#: them is 7.49 uM (about 974 ng/ml at MW 130.08). Read that number next to this table's own: it is
-#: three orders of magnitude better than the alkylators and three worse than the vincas.
+#: THE TABLE WAS HALF-TRANSCRIBED FOR MONTHS, AND A FALSE EXPLANATION WAS WRITTEN FOR THE GAP.
+#: Corrected 2026-11-02. PMID 25715778 tested TEN drugs; this tuple carried FIVE of them. The five
+#: that were dropped are methotrexate, cytarabine, WSMP, doxorubicin and etoposide -- so
+#: `DrugClass.ANTIMETABOLITE` sat declared-but-empty not because the paper lacked antimetabolites
+#: but because its two antimetabolite rows were never copied across. On 2026-11-01 a note was added
+#: here asserting "PMID 25715778 tested ten drugs and no antimetabolite among them". THAT WAS FALSE,
+#: and it was written without re-reading the paper this very table cites. The lesson is CLAUDE.md
+#: failure 12 / rule 16: an empty container in the model is indistinguishable from an absent
+#: measurement, so re-read the source before explaining the emptiness.
+#:
+#: All ten rows are now present, verbatim from Table 1 of PMC4488404 (48-h CCK-8 assay). The two
+#: antimetabolite rows are what closed the antimetabolite class in `candidate_universe`, and the
+#: paper states the conclusion itself: "it was suggested that alkylating agents, ANTIMETABOLITES,
+#: antitumor antibiotics and topoisomerase inhibitors might not be effective as treatment of HS."
+#:
+#: Censoring: methotrexate is reported as ">100 ug/ml" in CHS-1 and DH82, so its upper bound here is
+#: entered as 100_000.0 ng/ml and every fold-resistance computed from it is a LOWER BOUND.
+#: WSMP is Paccal Vet(R), water-soluble micellar paclitaxel -- the only agent in this table with a
+#: VETERINARY product behind it, and it lands in the sensitive class with the other microtubule
+#: agents. Its marketing status is not asserted here; see `availability_tiers`.
+#: The 2026 screen (PMID 42129963) is a different design and is deliberately NOT appended: it
+#: screened 1824 compounds across 10 CHS lines with no comparator panel, so there is no
+#: `comparator_ic50_ng_ml` to compute a fold from. It reports 5-fluorouracil, clofarabine and
+#: floxuridine reducing viable counts to <=70% at 5 uM in all ten lines, 5-FU median IC50 7.49 uM
+#: (~974 ng/ml at MW 130.08). Cladribine's canine-HS IC50s come from a third design again
+#: (PMID 29490634, 64 and 222 uM against 0.028 uM achievable plasma) and are likewise not appended.
 MEASURED = (
     Sensitivity("nimustine (ACNU)", DrugClass.O6_ALKYLATOR, (190_000.0, 587_000.0), (876.0, 1420.0)),
     Sensitivity("melphalan", DrugClass.N7_CROSSLINKER, (29_000.0, 65_000.0), (158.0, 689.0)),
+    Sensitivity("methotrexate", DrugClass.ANTIMETABOLITE, (495.0, 100_000.0), (7.10, 17.3)),
+    Sensitivity("cytarabine", DrugClass.ANTIMETABOLITE, (9_290.0, 142_000.0), (91.7, 736.0)),
     Sensitivity("vincristine", DrugClass.MICROTUBULE, (1.77, 2.69), (1.86, 52.4)),
     Sensitivity("vinblastine", DrugClass.MICROTUBULE, (1.75, 2.78), (12.0, 39.7)),
     Sensitivity("paclitaxel", DrugClass.MICROTUBULE, (23.8, 58.4), (133.0, 263.0)),
+    Sensitivity("WSMP (Paccal Vet, micellar paclitaxel)", DrugClass.MICROTUBULE,
+                (15.6, 92.8), (12.3, 85.5)),
+    Sensitivity("doxorubicin", DrugClass.TOPOISOMERASE, (95.0, 343.0), (24.8, 69.5)),
+    Sensitivity("etoposide", DrugClass.TOPOISOMERASE, (755.0, 8_180.0), (67.5, 230.0)),
 )
+
+#: Cytarabine is the one row in this table whose achievable concentration IN THE COMPARTMENT AT ISSUE
+#: is also measured, which is what makes it decisive rather than merely unfavourable. Its own canine
+#: CSF pharmacokinetics (PMID 1742843, ten healthy dogs, INTACT barrier) give a steady-state CSF
+#: concentration of 8.3 +/- 1.1 uM and a bolus CSF peak of 29 +/- 11 uM at 600 mg/m2. Converted at
+#: MW 243.22, the most sensitive canine HS line needs 38.2 uM (9.29 ug/ml) -- 4.6x above the
+#: steady state and 1.3x above even the transient peak -- and DH82 needs 583.8 uM. A fatal
+#: suspected cytarabine-induced infiltrative lung disease is reported in a dog at 300 mg/m2
+#: (PMID 27062671), i.e. the canine toxicity ceiling sits BELOW the dose that produced the 29 uM
+#: peak. Kill, reach and toxicity are each measured, in the dog, and they do not meet.
+CYTARABINE_CSF_ARITHMETIC = {
+    "hs_ic50_most_sensitive_line_uM": 38.2,
+    "hs_ic50_least_sensitive_line_uM": 583.8,
+    "measured_canine_csf_css_uM": 8.3,
+    "measured_canine_csf_bolus_peak_uM": 29.0,
+    "shortfall_vs_css": 4.6,
+    "shortfall_vs_bolus_peak": 1.3,
+    "provenance": "MEASURED both sides, same species: IC50 PMID 25715778 Table 1; CSF PMID 1742843; "
+                  "canine toxicity ceiling PMID 27062671 (fatal ILD at 300 mg/m2, half the dose "
+                  "that produced the 29 uM peak).",
+}
 
 BY_NAME = {s.drug: s for s in MEASURED}
 

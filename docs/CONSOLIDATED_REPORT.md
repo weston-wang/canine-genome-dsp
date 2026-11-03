@@ -32,27 +32,50 @@ checklist, not a probability.
 | Items previously mis-reported as open | 9, each now graded and guarded | same |
 | Growth bar beaten | 0.055 / day | same |
 
-**Catalogue the claim is made over:** 28 therapy-modality classes — 15 in the model, 12 excluded, **1
+**Catalogue the claim is made over:** 29 therapy-modality classes — 15 in the model, 13 excluded, **1
 open** — and 16 escape routes from an independent audit. No class is excluded for lacking canine
-data; each exclusion rests on a contradicted kill (7), a named escape that defeats it (3), or a
+data; each exclusion rests on a contradicted kill (8), a named escape that defeats it (3), or a
 toxicity budget it would blow (2).
 
-**The one open class, and this line was "0 unassessed" until 2026-11-01.** A second-pass sweep found
-two classes that had never been rows at all. **Antimetabolites / nucleoside analogues** is the one
-that stays open: three members — 5-fluorouracil, clofarabine, floxuridine — are measured active in
-*all ten* canine HS lines (PMID 42129963), and clofarabine carries the only durability figure any
-agent in this project has in a histiocytic neoplasm (2-year progression-free survival 89% ± 7% and
-overall survival 100% in relapsed/refractory Langerhans-cell histiocytosis after six cycles,
-PMID 42126265). It is not excludable, because at the brain each member fails a *different* leg:
-5-FU's catabolite FBAL — what was actually dosed in the beagle study, 5-FU itself was not — causes
-convulsions and cerebral vacuolation (PMID 15206584), which transfers to 5-FU as a mechanism-level
-disqualification and not as a measured dose, FBAL being 5-FU's principal catabolite;
-clofarabine's CSF penetration is 5%, range 3–26%, in non-human primates (PMID 16115942), used as an
-order of magnitude and not converted into a canine figure; cytarabine has the best measured
-canine CSF access in this whole project, 0.62 of plasma in dogs with an intact barrier
-(PMID 1742843), but its canine-HS kill is unconfirmed rather than contradicted. The LCH durability
-figure is a **ceiling** for histiocytic sarcoma, LCH being the less aggressive disease, never a
-floor. What would close the class is one IC50 measurement. **FGFR axis**, the second missing row, does close: infigratinib's phase 2 in
+**Three classes were found missing from this catalogue in three days, while the line read "0
+unassessed".** That is the procedural finding, and it matters more than any of the three: each was
+found by rebuilding the class list from the literature, none by auditing the existing list against
+itself. A guard that validates every enumerated class cannot see a row nobody wrote.
+
+- **Antimetabolites / nucleoside analogues — enumerated 2026-11-01, carried open for one day, now
+  EXCLUDED** on three measured canine-HS IC50s from two independent laboratories. Cytarabine is the
+  decisive one because both sides are measured in the dog: IC50 38.2 µM in the most sensitive of
+  four lines rising to 583.8 µM, against its *own* measured canine CSF steady state of 8.3 µM and
+  bolus peak of 29 µM (PMID 25715778 Table 1; PMID 1742843) — and a fatal canine infiltrative lung
+  disease is reported at 300 mg/m², half the dose that produced that peak (PMID 27062671). Kill,
+  reach and toxicity each measured, in the dog, and they do not meet. Methotrexate is 69.7× to
+  >14,000× the chemosensitive comparator; cladribine 64–222 µM against 0.028 µM achievable plasma
+  (PMID 29490634). The 2015 authors state the conclusion themselves, and the completed sensitivity
+  table now reproduces it as a computation. **These numbers were already cited by this project** —
+  its table had transcribed five of that paper's ten rows, and the missing rows were the
+  antimetabolites. Counter-evidence, at its own strength: the same drugs give 6-year overall
+  survival 93.2% in human LCH (PMID 39428688) and a remission in isolated CNS Erdheim-Chester
+  disease (PMID 42780343, n=1) — *efficacy* readouts in a milder disease, which under rule 15 cannot
+  overturn a measurement in this one.
+- **FGFR axis — excluded**: infigratinib's phase 2 in FGFR-altered recurrent glioma gave 6-month PFS
+  16% and ORR 3.8%, with every durable responder carrying an activating FGFR mutation or fusion — a
+  biomarker canine HS, an overexpression tumour, is not reported to have (PMID 35344029).
+- **Targeted protein degradation (cereblon molecular glues) — the open one.** A licensed member has
+  a phase 2 with posted results in a cohort including histiocytic sarcoma (NCT02523040: ORR 0.67,
+  12-month PFS 62%, OS 92%), so it cannot be dismissed; its measured *human* CSF:plasma of 1.3–2.4%
+  straddles this project's CSF requirement of 0.0145 and falls 8–15× short of the parenchymal 0.196,
+  so it cannot be called closed. One obtainable number would settle it — pomalidomide's CSF:plasma,
+  pomalidomide being the member measured an order of magnitude more permeable in the same assay
+  (PMID 35732975, PMID 22109830).
+
+**A licensed indication nobody had read.** COTELLIC (cobimetinib), NDA 206192, label effective
+2026-07-29: *"As a single agent for the treatment of adult patients with histiocytic neoplasms"* —
+with no mutational qualifier, unlike the same label's melanoma indication. Cobimetinib already
+carries a measured canine-HS IC50 of 74–372 nM and a measured canine plasma Cmax of 1640 nM, making
+it the only agent here that is at once licensed, licensed for this disease family without a
+biomarker precondition, and measured in canine histiocytic sarcoma cells. It does not touch the
+brain — its headroom there remains 0.5×, i.e. short — so it upgrades the systemic arm, not the site
+the case turns on. **FGFR axis**, the second missing row, does close: infigratinib's phase 2 in
 FGFR-altered recurrent glioma gave 6-month PFS 16% and ORR 3.8%, with every durable responder
 carrying an activating FGFR mutation or fusion — a biomarker canine HS, an overexpression tumour, is
 not reported to have (PMID 35344029).

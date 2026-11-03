@@ -98,23 +98,41 @@ Durability is therefore reached in **two moves**:
   is quantitative: per-day kill rates, CNS access, and the growth-rate bar.
 - **The claim is now scoped to a stated catalogue, not an unstated one.** Two audits were added
   after the above was first written, both required by the project's own rule 9:
-  `candidate_universe` enumerates **28 therapy-modality classes** (15 in the model, 12 excluded
+  `candidate_universe` enumerates **29 therapy-modality classes** (15 in the model, 13 excluded
   with a recorded reason, **1 open**), and `escape_audit` derives the escape list
   independently of the one in hand, finding **4 route gaps** the original twelve missed —
   so the audited count is **16 escapes**. The honest headline is therefore "closed within this
-  catalogue of 28 modality classes and 16 escape routes, with 1 class open", with the exclusions
+  catalogue of 29 modality classes and 16 escape routes, with 1 class open", with the exclusions
   named.
 
   Updated 2026-11-01, and this one is a DOWNGRADE of a published line: a second-pass sweep found
   two more classes that had never been rows, so "0 unassessed" became "1 open". Antimetabolites /
-  nucleoside analogues cannot be excluded — three members are measured active in all ten canine HS
-  lines and clofarabine holds a 2-year PFS of 89% in relapsed LCH — but no single member carries
-  potency, brain access and tolerability together, so the class is carried open until one IC50 is
-  measured. The FGFR axis, found in the same sweep, is excluded on a human glioma phase 2 whose
-  durable responders all carried an activating FGFR mutation or fusion that this tumour lacks. The
-  procedural lesson is recorded in `candidate_universe`'s docstring: a count of "0 unassessed" says
-  nothing about rows that were never written, so rule 9's list has to be rebuilt from the
-  literature each time rather than audited against itself.
+  nucleoside analogues appeared not to be excludable — three members are measured active in all ten
+  canine HS lines and clofarabine holds a 2-year PFS of 89% in relapsed LCH — so the class was
+  carried open pending one IC50. The FGFR axis, found in the same sweep, is excluded on a human
+  glioma phase 2 whose durable responders all carried an activating FGFR mutation or fusion that
+  this tumour lacks.
+
+  Updated again 2026-11-02, twice over. **The antimetabolite class CLOSED** — EXCLUDED on
+  KILL_CONTRADICTED — and the measurements that closed it were already cited by this project:
+  `core/hs_drug_sensitivity` is built from PMID 25715778 and had transcribed **five of that paper's
+  ten rows**, with both antimetabolite rows among the five dropped. Cytarabine is measured at
+  38.2–583.8 µM in canine HS against its *own* measured canine CSF steady state of 8.3 µM, with a
+  fatal canine lung injury reported at half the dose that reached that compartment; methotrexate at
+  69.7× to >14,000×; cladribine, from a second laboratory, at 64–222 µM against 0.028 µM achievable
+  plasma. All ten rows are now present and `resistant_classes()` reproduces the 2015 authors' own
+  conclusion as a computation. **A third never-enumerated class opened**: targeted protein
+  degradation (cereblon molecular glues), which has a licensed member with posted phase-2 results in
+  a cohort including histiocytic sarcoma, and a measured human CSF:plasma of 1.3–2.4% that straddles
+  this project's CSF requirement while falling 8–15× short at the parenchyma. So the count is
+  **29 — 15 / 13 / 1 open**.
+
+  The procedural lesson, recorded in `candidate_universe`'s docstring and as CLAUDE.md rule 16:
+  three classes were found missing in three days, every one by rebuilding the class list from the
+  literature and none by auditing the existing list against itself — `_validate()` cannot see a row
+  nobody wrote. And an empty container in the model (a declared enum member with no data) is
+  indistinguishable from an absent measurement, so the source must be re-read rather than the
+  emptiness explained from memory. That is what cost a day here.
 
   Updated 2026-10-31: it was 25 classes until a literature sweep found a 26th that had never been
   enumerated at all — live bacterial vector / intracellular delivery, in use in a funded dog trial in

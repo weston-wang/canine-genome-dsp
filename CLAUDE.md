@@ -76,6 +76,21 @@ Concrete failures (so the rules have a reason):
    consulted. Done properly, the measurement is a FLOOR for verdinexor, the old figure is unsupported rather than
    contradicted, and the case turns on one measurement in a dog.
 
+12. **Explaining an empty container from memory instead of re-reading the source.** `core/hs_drug_sensitivity.py`
+   declared a `DrugClass.ANTIMETABOLITE` member with no drug under it. Asked why, the answer written into the file
+   was "PMID 25715778 tested ten drugs and no antimetabolite among them". The paper has **two** antimetabolite
+   rows — methotrexate and cytarabine — and the table had been transcribed **five rows out of ten**. On the
+   strength of that invented explanation, antimetabolites were enumerated as an OPEN modality class and the
+   project's headline was downgraded from "0 unassessed" to "1 open", when the measurements that close the class
+   (cytarabine 38.2–583.8 µM against its own measured canine CSF steady state of 8.3 µM; methotrexate 69.7× to
+   >14,000×) were already cited by the project, one function call away. An empty container is indistinguishable
+   from an absent measurement, and a partial transcription looks exactly like a complete one.
+
+13. **Reading a screening threshold as a potency.** The same class was held open by comparing cytarabine's measured
+   canine CSF concentration (8.3 µM) against the 5 µM at which a screen had shown ≥30% inhibition in 5 of 10 lines,
+   and concluding the class was "open rather than dead". A fixed screening concentration is a **lower bound** on
+   potency, not a potency. The real IC50 was published and is 4.6× above the achievable exposure.
+
 ## Rules
 
 1. **Search the record before answering any "what did we cover / what's missing / did we discuss X"
@@ -169,6 +184,17 @@ Concrete failures (so the rules have a reason):
    the property is shown equal. Never attach one compound's binding, clearance or potency to another. A transfer from
    another compound cannot "contradict" a number for this one; at most it bounds it. Keep "efficacy" (kill) and
    "exposure/reach" separate and state which one is being transferred.
+
+16. **Before explaining why a container in the model is empty, re-read the source it came from; and before
+   enumerating a class as open, check the data the project already cites.** An empty enum member, a class with no
+   agent, a `None` where a number should be — these have two possible causes that look identical from inside the
+   code: nobody measured it, or somebody only copied half of it. Never write the first explanation without
+   checking for the second. Concretely: open the cited paper's tables and compare them row by row against what the
+   module transcribed. The same applies to a stated potency — a fixed screening concentration ("≤70% viability at
+   5 µM", "≥30% inhibition") is a **lower bound** on potency and must never be read as an IC50 while the real IC50
+   is obtainable. And a rule-9 guard that validates every enumerated class says nothing about classes nobody
+   enumerated: `_validate()` cannot see a missing row, so the candidate list must be rebuilt from the literature,
+   not audited against itself. Three classes were found missing in three days this way.
 
 ## Standing standards for the cancer durable-response work (the user's words)
 
