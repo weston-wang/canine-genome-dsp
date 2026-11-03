@@ -2177,3 +2177,189 @@ Still not run, and now blocked until the weekly limit resets: the 12 angles `mta
 angle, plus the completeness critic that was to diff the class list against the literature
 independently. Given three holes were found in three days, that critic is the highest-value
 outstanding item and the catalogue should not be described as complete before it runs.
+
+> **Superseded the same day.** Rather than wait on the limit, all twelve angles were run **by hand
+> in the main thread** — see the two 2026-11-03 sections below. The search work is complete; the
+> completeness critic remains the one outstanding item, and the reason it is still outstanding is
+> unchanged: it should not be self-assessed by the thread that built the list.
+
+## 2026-11-03: the cdk-axis angle, run by hand — three measurements and one negative
+
+The weekly usage limit (resets 16:00 UTC) still blocks subagents, so the remaining angles are being
+run directly in the main thread. `cdk-axis` was the one angle of twelve that returned before the
+limit hit, and its four candidates were never verified because the verifier agents died. All four
+verified at primary source, all four are genuinely absent from the record, and they do **not** point
+the same way.
+
+### Abemaciclib, measured in Gd-non-enhancing tumour, in this project's own genotype
+
+**NCT04391595** — Sanai, Ivy Brain Tumor Center, Phase 0/2, **n=42 recurrent GBM**, COMPLETED. This
+is the same "trigger trial" design the project already relies on for ribociclib and niraparib, and
+the enrolment criteria are striking: **intact RB, >30% pERK expression, and CDKN2A/B deletion or
+CDK4/6 amplification** — the lesion configuration of the tumour under analysis. Six days of
+abemaciclib plus the ERK1/2 inhibitor LY3214996 before planned resection; tissue from Gd-enhancing
+*and* Gd-non-enhancing regions plus CSF and plasma; unbound drug by validated LC-MS/MS.
+
+- **Median unbound abemaciclib in Gd-non-enhancing tumour: 31 nM**, against a PK trigger (>5× IC50)
+  the trialists set at **12 nM** → clears by **2.6×**, in the compartment that *is* the operational
+  definition of an intact barrier.
+- Pharmacodynamics in the same tissue: RB phosphorylation down in **47.5%**, RSK phosphorylation
+  down in 25%, MIB-1 proliferation down in **72.5%**. No dose-limiting toxicities.
+- The honest qualifier: only **9 of 40 (22.5%)** exceeded the thresholds for *both* drugs.
+
+DOI 10.1093/neuonc/noae165.0425, PMC11553480.
+
+**And it corrects an existing entry downwards.** `therapies.py` said of temuterkib that a "phase-0
+trigger trial reached pharmacologically relevant conc. in Gd-non-enhancing GBM" — qualitatively, with
+no figure and no trial id. That trial is this one, and temuterkib *is* LY3214996. Its median was
+**10 nM against its own 25 nM trigger** — it **fell 2.5× short** where abemaciclib passed. The
+qualitative phrase was more favourable than the measurement. Under rule 14 the number replaces the
+phrase even though it is worse, and the project's standing **refusal to assign temuterkib a brain
+Kp** is vindicated rather than overturned.
+
+### A human parenchymal ratio, replacing a rodent one
+
+**NCT05413304** (NCI, PHASE1, **n=5**, results posted) measured abemaciclib in brain tumour
+**interstitial fluid by intratumoral microdialysis**:
+
+| posted outcome | medians across subgroups |
+|---|---|
+| Brain-dialysate Cmax (nM) | 7.5 / 19.1 / 105.8 |
+| Brain-dialysate AUC (hr·nM) | 148.2 / 440.3 / 1433.0 |
+| **Brain-dialysate AUC : unbound plasma AUC** | **0.27 / 0.72 / 2.73** |
+
+Against this project's parenchymal access requirement of **0.196**, that clears even at the low end
+(**1.4×**) — and it is a *human* measurement in brain tumour tissue, where the project had been
+computing that row from **rodent ratios**. Rule 14 prefers it for exactly that reason. The qualifier
+is decisive to how it may be used: **n=5**, phase 1, and the ratio spans an order of magnitude across
+three subgroups. It is a measured transfer with wide bounds, not a settled number.
+
+### The negative, against the row this project scores highest
+
+**PMID 41768125** (DOI 10.1093/noajnl/vdag005, Neuro-Oncol Adv 2026) — abemaciclib **monotherapy**
+in brain metastases, phase 2, NCT02308020, Simon two-stage, **n=51** (NSCLC 28, melanoma 23), 200 mg
+BID:
+
+> **"No confirmed intracranial response was observed in either cohort."**
+
+Volumetric decrease 22.7% / 18.8%; intracranial clinical benefit rate 26.1% / 9.1%; median PFS 1.6
+and 1.4 months; median OS 7.1 and 2.9 months. The authors' conclusion is the sentence this project
+has to carry: *"although abemaciclib can achieve therapeutic concentrations in brain metastases
+tissue, this study did not meet its primary endpoint... further clinical trials should focus on the
+use of abemaciclib **combination** therapy."*
+
+**Why it does not sink the row, stated so it is neither buried nor overread.** It is indirect on
+disease (NSCLC and melanoma brain metastases, not primary CNS histiocytic sarcoma); it is
+**monotherapy** where this project uses the agent in combination; and — the point that matters most —
+it was **not selected for the genotype that makes CDK4/6 inhibition rational**, whereas NCT04391595
+above *was* selected for exactly that genotype and did show target engagement in the tissue. The two
+results are therefore compatible, and together they say something sharper than either alone:
+**reaching the tissue is measured, and reaching it is not sufficient without the lesion and without a
+partner.** That is the "brain-penetrant is not brain-effective" caveat the project already states,
+now instantiated a second time, in 51 patients, on this project's own lead agent. Recorded as a
+strength-of-evidence correction under rule 5, not a margin change.
+
+### The A15 successor is no longer hypothetical
+
+**NCT07524140**, "A Phase 1, First-in-Human Study of ZE94-0605 in Patients With Advanced Solid
+Tumors", Eilean Therapeutics, **RECRUITING, n=60**. Its registry keyword list contains verbatim
+**"Brain-penetrant CDK2 inhibitor"**, alongside "Selective CDK2 inhibitor" and "CCNE1 amplification".
+Escape **A15** is RB1 loss / CDK2–cyclin E bypass of the CDK4/6 arm. Graded the same way this project
+grades AMG 193's "CNS-penetrant": a **sponsor descriptor in a registry field, not a measured
+concentration**, and it must not be read as a Kp,uu. What it establishes is narrower and still useful
+— the successor agent A15 would need is in first-in-human development rather than hypothetical, which
+moves the modality tier from THEORETICAL to NEAR_FUTURE while supplying no number.
+
+## 2026-11-03: all twelve remaining angles run, by hand. The search work is complete
+
+The weekly usage limit blocked subagents, so the twelve angles that the two killed workflows never
+reached were run directly in the main thread. Every angle below was executed; "nothing new" is
+recorded where that is the answer, because an angle that returns nothing is a result and not a
+failure. Two angles returned findings that move load-bearing rows, and they move them in opposite
+directions.
+
+### The two that matter
+
+**`degraders` — the strongest find, and it is about the one open class.** The entry said the next
+step was "pomalidomide's measured CSF:plasma or brain-tumour-tissue concentration". Searching that
+proxy turned up something that outranks it under rule 14's own ordering: an *outcome* in the
+compartment at issue. **NCT01722305**, phase 1 of **pomalidomide + dexamethasone in
+relapsed/refractory primary CNS lymphoma** and primary vitreoretinal lymphoma (PMID 30262659,
+DOI 10.1182/blood-2018-02-835496, Blood 2018) — MTD **5 mg** daily 21/28; 25 of 29 evaluable at a
+median of **three** prior lines; **whole-study ORR 48% (12/25, 95% CI 27.8–68.7) with six complete
+responses**, 2 CRu, 4 PR; MTD-cohort ORR 50% (8/16) with 5 CR; median PFS 5.3 months whole-study and
+**9 months among responders**. Grade 3/4 neutropenia 21%, lung infection 12%.
+
+A complete response in a tumour *primary to the CNS* is the most direct evidence obtainable that a
+drug both reaches and kills behind an intact barrier — stronger than any CSF:plasma ratio. And it
+landed on exactly the member the within-class permeability comparison predicted. **So the question
+this class faces has changed**: not "can a cereblon degrader reach and kill in the brain" — a
+licensed one produces complete responses in a primary CNS tumour — but (a) what is its kill rate in
+*this* tumour, and (b) does 21% grade 3/4 neutropenia fit a marrow axis already loaded to 95%.
+Scope: PCNSL is a lymphoma, so indirect on disease while direct on **site**; and pomalidomide was
+given **with dexamethasone**, which has activity of its own in PCNSL, so 48% is a combination result
+and is not attributable to the degrader alone.
+
+**`mapk-brain` — the most adverse find of the whole sweep**, and it lands on the project's weakest
+row and on condition C3 at once. **288 children** with refractory LCH, 26 countries, off-label MAPK
+inhibitors, median follow-up 3.7 years / 1166 person-years, including **42 cobimetinib and 45
+trametinib** prescriptions (PMID 41678955, DOI 10.1182/bloodadvances.2025018651, Blood Adv 2026):
+
+- Short-term response by indication: **98%** risk-organ-positive and -negative, **30%** lung
+  destruction, and **"none (ND, DI, and SC)"** — **zero short-term responses in neurodegenerative
+  CNS LCH**, in 49 such cases, though "long-term lung and ND responses could be observed".
+- Among 143 patients **without** CNS neurodegeneration when MAPK inhibition began, **60 developed it
+  — a 45% five-year risk, while on the drug.**
+- Of 113 who **discontinued**, **69 reactivated (61%)** — a third and much larger independent
+  confirmation that stopping fails. But: **"None of the various empirical maintenance therapies were
+  able to prevent secondary reactivation."**
+- Five-year survival **98%**; skin rash ~55%; 1 cardiomyopathy, 6 retinitis.
+
+The discontinuation half is aimed squarely at the structural answer C3 relies on. It does not
+demolish it — those were *empirical* maintenance choices in a different disease, not the
+genotype-anchored non-overlapping tiering this project specifies, and the paper reports them as a
+failure to find an approach rather than as a test of one. But it removes any comfort that "switch
+rather than stop" is solved: in the largest histiocytic series that exists, nothing anyone actually
+tried prevented reactivation. **C3 stays MET on necessity — now very well supported — and its
+mitigation stays structural and undemonstrated, now supported against.** Scope: human, paediatric,
+LCH not HS, observational and off-label; and "neurodegenerative LCH" is a progressive
+cerebellar/brainstem degeneration rather than the parenchymal mass this project targets, so the site
+matches better than the lesion does.
+
+### The adversarial angle: both of the newest exclusions survive, by exhaustion
+
+`reopen-excluded` was given the two specific reopening routes the new exclusions name. The tight
+query `"histiocytic sarcoma"[TIAB] AND canine[TIAB] AND (FGFR OR deoxycytidine OR nucleoside OR
+SLC29)` returns **exactly two records, and both are already in the record** — PMID 21333567
+(masitinib) and PMID 25715778 (the sensitivity paper). So:
+
+- There is **no canine-HS deoxycytidine-kinase or nucleoside-transporter measurement** in the
+  indexed literature, so the antimetabolite exclusion's reopening route (b) is *unavailable*, not
+  merely unexplored.
+- There is **no canine-HS FGFR activating mutation or fusion** on record, so the FGFR exclusion's
+  reopening route is likewise unavailable.
+
+A two-record result set is small enough to call this exhaustion rather than a failed search.
+
+### The eight that returned nothing new — which is the expected answer
+
+| angle | result |
+|---|---|
+| `mtap-axis` | **Nothing new, and it confirms the established negative.** All five trials still have **no posted results**: NCT06883747 (RECRUITING, n=12, last update 2026-06-25), NCT04794699 (n=169), NCT05732831 (n=225), NCT06130553 (**AZD3470**, n=334), NCT06333951 (n=49). |
+| `approvals` | Label `effective_time` checked across nine programme agents. Only **COTELLIC 20260729** is materially new (the histiocytic indication, found 2026-11-02). **KISQALI 20260701** and **ZEJULA 20260728** were revised but their indications remain breast- and ovarian-only, so ribociclib and niraparib stay off-label here. Confirms the standing negative on canine approvals. |
+| `clpp` | Run (ONC206 / imipridone, 2025+, 53 records). Nothing surfaced supplying a **measured dordaviprone tumour concentration**, so that acknowledged gap is unchanged. |
+| `parp` | Run (AZD9574 / saruparib, 10 records). Nothing supplying a new **brain-tissue** measurement for a PARP1-selective agent. |
+| `cns-delivery` | Two records, both pre-2024. Nothing new on measured focused-ultrasound enhancement, so the device arithmetic (5.9 × 0.021 = 0.124) is unchanged. |
+| `nonenhancing` | Nothing new. The newest hit is dual-tracer PET imaging (PMID 42910599), not a drug concentration. |
+| `preprints` | Europe PMC, `SRC:PPR`, 2026-09-01 to 2026-11-03, histiocytic sarcoma OR MTAP OR PRMT5: **six preprints, all case reports of other histiocytoses** (Rosai-Dorfman ×2, juvenile xanthogranuloma ×2 — the same case twice, LCH of thyroid, ECD cardiac). None relevant; none peer reviewed. |
+| `canine-immuno` | **One new, and dated yesterday.** Bendamustine as a lymphodepleting preconditioner in **11 client-owned dogs with relapsed lymphoma** (PMID 42969556, DOI 10.1093/jvimsj/aalag283, published 2026-11-02): two-dose regimens to 90 mg/m² with **no dose-limiting toxicities**, lymphocytes 880 → 310 cells/µL, IL-6 5.32 → 1.33 pg/mL, nodal decrease in 8 of 11. Explicitly aimed at **preconditioning before autologous canine CAR T-cell infusion**, and the paper states plainly that canine CAR-T "expansion, persistence, and activity... have been limited" — which is this project's own stated reason the cell-therapy class is NEAR_FUTURE. It supplies the missing preconditioning step in the right species. Note the distinction that keeps it admissible: bendamustine is an **alkylator**, a class excluded here on measured canine-HS resistance — but its role here is lymphodepletion, not tumour kill, so the exclusion does not apply to it in that role. |
+
+### Status
+
+**The search work is complete.** All fourteen angles of the second-pass design have now been
+executed — two by the first workflow, twelve by hand — plus the nine salvaged candidates
+re-verified. What remains outstanding is not a search: it is the **completeness critic**, which was
+to rebuild the modality-class list from the literature independently and diff it against the
+catalogue. Three classes were found missing in three days, so that diff is still the highest-value
+item in the project, and it needs the subagent budget to run properly rather than being
+self-assessed by the same thread that built the list.

@@ -343,9 +343,22 @@ THERAPIES: tuple[Therapy, ...] = (
         "penetration. Honest ceiling: an ERKi-resistant clone is a single point of "
         "failure (+0.0089/day). Project REFUSED to assign temuterkib a brain Kp; "
         "its IC50/Emax are placeholders; investigational, no vet use.",
-        "temuterkib biochemical IC50 5 nM; phase-0 trigger trial reached "
-        "pharmacologically relevant conc. in Gd-non-enhancing GBM; model placeholder "
-        "IC50 300 nM, max_kill 0.14-0.18/day (pinned backwards).",
+        "temuterkib biochemical IC50 5 nM; model placeholder "
+        "IC50 300 nM, max_kill 0.14-0.18/day (pinned backwards). "
+        "NUMBER SUPPLIED AND THE QUALITATIVE CLAIM CORRECTED DOWNWARDS, 2026-11-03. This entry said "
+        "the 'phase-0 trigger trial reached pharmacologically relevant conc. in Gd-non-enhancing "
+        "GBM' with no figure and no trial id. The trial is NCT04391595 (Sanai, Ivy Brain Tumor "
+        "Center, Phase 0/2, n=42 recurrent GBM selected for INTACT RB, >30% pERK and CDKN2A/B "
+        "deletion or CDK4/6 amplification -- i.e. this project's own genotype), and its numbers are "
+        "LESS favourable than the phrase: median unbound LY3214996 in Gd-NONENHANCING tumour was "
+        "10 nM against a PK 'trigger' of >5x IC50 that the trialists set at 25 nM for this drug. So "
+        "the median DID NOT reach the threshold -- it fell 2.5x short. Abemaciclib, dosed alongside, "
+        "did clear its own 12 nM trigger at a median of 31 nM. Only 9 of 40 patients (22.5%) "
+        "exceeded the thresholds for BOTH drugs. PD in the same tissue: RB phosphorylation down in "
+        "47.5%, RSK phosphorylation down in 25%, MIB-1 proliferation down in 72.5%. No DLTs. "
+        "(DOI 10.1093/neuonc/noae165.0425, PMC11553480.) Under rule 14 the measured number replaces "
+        "the qualitative phrase even though it is worse, and the project's existing REFUSAL to "
+        "assign temuterkib a brain Kp is thereby vindicated rather than overturned.",
         aliases=("temuterkib", "LY3214996", "ERKi"),
     ),
     Therapy(

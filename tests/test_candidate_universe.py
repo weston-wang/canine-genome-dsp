@@ -321,7 +321,15 @@ def test_the_degrader_class_names_its_next_step_as_a_within_class_direction():
     assert "POMALIDOMIDE is the class member to take to a brain site" in m.basis
     assert "ONE ORDER OF MAGNITUDE" in m.basis
     assert "forbids attaching" in m.basis
-    assert "WHAT WOULD CLOSE IT" in m.basis
+    # and the direction was then CONFIRMED by searching it: rule 14 found an outcome, not a ratio
+    assert "30262659" in m.basis, "pomalidomide in primary CNS lymphoma"
+    assert "SIX COMPLETE RESPONSES" in m.basis
+    assert "48%" in m.basis
+    # the question the class now faces is narrower than the one it was opened with
+    assert "HAS CHANGED" in m.basis.upper()
+    # and the two confounds are stated rather than glossed
+    assert "WITH DEXAMETHASONE" in m.basis
+    assert "PCNSL is a LYMPHOMA" in m.basis
     # no canine data at all, and that is explicitly NOT the ground for anything
     assert m.canine_hs_evidence.startswith("NONE IN THIS DISEASE")
     assert "not a ground for exclusion" in m.canine_hs_evidence
@@ -341,3 +349,54 @@ def test_cobimetinib_carries_a_licensed_genotype_agnostic_histiocytic_indication
     # and it must not be read as closing the brain
     assert "WHAT IT DOES NOT DO" in a
     assert "0.5x" in a
+
+
+def test_the_cdk_row_carries_the_negative_as_well_as_the_two_positives():
+    """Rule 5. The 2026-11-03 sweep found three measurements on this row pointing two ways: a 31 nM
+    unbound concentration in Gd-non-enhancing tumour in THIS project's genotype, a human
+    microdialysis ratio that clears the parenchymal bar, and 51 patients with NO confirmed
+    intracranial response. A row that recorded only the first two would be the overstatement rule 5
+    exists to stop."""
+    m = next(x for x in cu.UNIVERSE if "cell-cycle" in x.name)
+    # the positive, in the compartment at issue and the matching genotype
+    assert "31 nM" in m.basis and "12 nM" in m.basis
+    assert "CDKN2A/B DELETION" in m.basis and "INTACT RB" in m.basis
+    # the second, independent method -- and its n
+    assert "0.27" in m.basis and "2.73" in m.basis
+    assert "n=5" in m.basis, "the microdialysis n must travel with the ratio"
+    # the negative, and the authors' own sentence
+    assert "NO CONFIRMED INTRACRANIAL RESPONSE" in m.basis.upper()
+    assert "41768125" in m.basis
+    assert "COMBINATION" in m.basis
+    # why it does not sink the row -- the reasoning must be explicit, not implied
+    assert "NOT SELECTED for the genotype" in m.basis
+    assert "STRENGTH-OF-EVIDENCE correction" in m.basis
+
+
+def test_the_mapk_row_carries_the_288_patient_cns_negative():
+    """The most adverse finding of the sweep sits on the weakest row. Zero short-term responses in
+    neurodegenerative CNS LCH, and a 45% five-year risk of DEVELOPING CNS disease while on the drug."""
+    m = next(x for x in cu.UNIVERSE if "MAPK axis" in x.name)
+    a = m.availability_basis   # it sits with the other regulatory/availability facts
+    assert "41678955" in a
+    assert "288 children" in a
+    assert "45%" in a
+    assert "NONE (ND, DI, and SC)" in a
+    # scoped, so it is not overread
+    assert "distinct CNS pathology" in a
+
+
+def test_c3_records_the_largest_discontinuation_dataset_and_its_attack_on_the_mitigation():
+    """61% reactivation after discontinuation in 113 patients CONFIRMS C3. The next sentence --
+    that no empirical maintenance prevented reactivation -- attacks C3's structural answer, and the
+    condition has to carry both halves."""
+    from canine_dsp import deterministic_closure as dc
+    c3 = next(c for c in dc.CONDITIONS if c.tag == "C3")
+    blob = " ".join(str(v) for v in vars(c3).values())
+    assert "41678955" in blob
+    assert "69 REACTIVATED" in blob
+    assert "NONE of the various" in blob
+    # and the correction to the figure this project published on 2026-11-01
+    assert "40053897" in blob
+    assert "31% of the cohort" in blob
+    assert "ALL-CAUSE" in blob
