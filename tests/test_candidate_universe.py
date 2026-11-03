@@ -244,13 +244,13 @@ def test_the_catalogue_count_and_the_open_count_are_what_the_docs_say():
     '26 -- 15/11/0 unassessed' -> '28 -- 15/12/1 open' -> '29 -- 15/13/1 open'. If this test fails,
     three documents and a reader-facing page are now lying."""
     t = cu.tally()
-    assert len(cu.UNIVERSE) == 29
+    assert len(cu.UNIVERSE) == 36
     assert t["IN_MODEL"] == 15
-    assert t["EXCLUDED"] == 13
-    assert t["NOT_ASSESSED"] == 1
+    assert t["EXCLUDED"] == 15
+    assert t["NOT_ASSESSED"] == 6
     claim = cu.closure_claim(ea.audited_escape_count())
-    assert "29 modality classes" in claim
-    assert "1 unassessed" in claim
+    assert "36 modality classes" in claim
+    assert "6 unassessed" in claim
 
 
 def test_c3_records_the_maintenance_pincer_at_the_strength_shown():
@@ -400,3 +400,64 @@ def test_c3_records_the_largest_discontinuation_dataset_and_its_attack_on_the_mi
     assert "40053897" in blob
     assert "31% of the cohort" in blob
     assert "ALL-CAUSE" in blob
+
+
+def test_the_completeness_critic_ran_and_its_seven_classes_are_recorded():
+    """The critic was a planned phase of the sweep, failed twice on usage limits, and was then
+    deferred on the argument that it should not be self-assessed. That argument was wrong. Running it
+    -- against ATC L01 and the source screen's pan-active table rather than against this list --
+    found seven more classes and took the headline from '29, 1 open' to '36, 6 open'."""
+    names = {m.name for m in cu.UNIVERSE}
+    for expected in ("cytotoxic chemotherapy -- topoisomerase inhibitors",
+                     "cytotoxic chemotherapy -- cytotoxic antibiotics / anthracyclines",
+                     "nuclear export inhibition (XPO1 / SINE compounds)",
+                     "proteasome inhibition",
+                     "HSP90 inhibition",
+                     "cardiac glycosides / Na+,K+-ATPase inhibition",
+                     "translation-elongation inhibition"):
+        assert expected in names, expected
+    # the external taxonomy must be named in the record, so the next thread can pick a different one
+    assert "ATC L01" in cu.__doc__
+
+
+def test_the_xpo1_class_carries_the_canine_licensed_agent_and_its_rule_15_limits():
+    """The most consequential hole: a canine-LICENSED, oral, indefinitely-scheduled agent in a class
+    with no row -- whose pharmacology a sibling branch of this project had already done."""
+    m = next(x for x in cu.UNIVERSE if "XPO1" in x.name)
+    assert m.status is cu.Status.NOT_ASSESSED
+    assert m.name in cu.KNOWN_OPEN_CLASSES
+    assert m.availability is cu.Availability.EXISTS_TODAY
+    assert "LICENSED FOR DOGS" in m.availability_basis
+    assert "Laverdia-CA1" in m.basis
+    # the measured three-species access, verified in this thread from the source table
+    assert "0.71" in m.basis and "0.72" in m.basis and "0.60 monkey" in m.basis
+    assert "27323910" in m.basis
+    # and the two rule-15 limits that keep it from being graded in
+    assert "TOTAL brain:plasma ratios, not unbound" in m.basis
+    assert "FLOOR for verdinexor" in m.basis
+    # cross-branch provenance labelled, not passed off as this thread's own verification
+    assert "CROSS-BRANCH RECORD" in m.basis
+
+
+def test_the_anthracycline_row_records_that_its_potency_CLEARS():
+    """Rule 5, in the direction that is easy to skip: this class was missing, and when assessed its
+    measured potency turned out to sit BELOW achievable canine exposure. The exclusion rests on the
+    cumulative cardiac ceiling, not on a pretence that the drug does not work."""
+    m = next(x for x in cu.UNIVERSE if "anthracyclines" in x.name)
+    assert m.exclusion_ground is cu.ExclusionGround.TOXICITY_UNAFFORDABLE
+    assert "0.175-0.631 uM" in m.basis
+    assert "1.13 uM" in m.basis
+    assert "clears by 1.8x to 6.5x" in m.basis
+    assert "the potency clears and the schedule cannot" in m.basis
+
+
+def test_two_open_classes_refuse_to_assert_the_unsourced_obvious():
+    """Rule 16. It would have been easy to exclude the proteasome inhibitors on bortezomib's
+    reputation for poor CNS entry, and the cardiac glycosides on digoxin's nanomolar therapeutic
+    range. Neither source was fetched, so neither claim is made."""
+    pro = next(x for x in cu.UNIVERSE if x.name == "proteasome inhibition")
+    assert "NO CNS ACCESS FIGURE WAS ESTABLISHED BY THIS THREAD" in pro.basis
+    assert "this row does not" in pro.basis
+    gly = next(x for x in cu.UNIVERSE if "cardiac glycosides" in x.name)
+    assert "NOT as a ground" in gly.basis
+    assert "has NOT fetched" in gly.basis

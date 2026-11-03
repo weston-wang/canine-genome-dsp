@@ -98,12 +98,23 @@ Durability is therefore reached in **two moves**:
   is quantitative: per-day kill rates, CNS access, and the growth-rate bar.
 - **The claim is now scoped to a stated catalogue, not an unstated one.** Two audits were added
   after the above was first written, both required by the project's own rule 9:
-  `candidate_universe` enumerates **29 therapy-modality classes** (15 in the model, 13 excluded
-  with a recorded reason, **1 open**), and `escape_audit` derives the escape list
+  `candidate_universe` enumerates **36 therapy-modality classes** (15 in the model, 15 excluded
+  with a recorded reason, **6 open**), and `escape_audit` derives the escape list
   independently of the one in hand, finding **4 route gaps** the original twelve missed —
   so the audited count is **16 escapes**. The honest headline is therefore "closed within this
-  catalogue of 29 modality classes and 16 escape routes, with 1 class open", with the exclusions
+  catalogue of 36 modality classes and 16 escape routes, with 6 classes open", with the exclusions
   named.
+
+  Updated 2026-11-03, and this is the largest correction in the series. The sweep's **completeness
+  critic** finally ran — the step that rebuilds the class list from an external taxonomy rather than
+  re-reading this one. Diffed against **ATC L01** and the canine screen's pan-active table, the
+  catalogue was missing **seven** classes: topoisomerase inhibitors and anthracyclines (both now
+  excluded, the latter despite a potency that *clears* achievable canine exposure), and XPO1 /
+  nuclear export, proteasome inhibition, HSP90, cardiac glycosides and translation-elongation
+  inhibition (all open). The XPO1 row matters most: verdinexor is **licensed for dogs**, oral and
+  labelled until progression, and a sibling branch of this project had already measured the class's
+  brain access. The operational lesson is now CLAUDE.md rule 16 — name the external taxonomy you
+  diff against, because asking "what is missing?" while re-reading your own list finds nothing.
 
   Updated 2026-11-01, and this one is a DOWNGRADE of a published line: a second-pass sweep found
   two more classes that had never been rows, so "0 unassessed" became "1 open". Antimetabolites /

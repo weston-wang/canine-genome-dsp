@@ -124,6 +124,48 @@ The count is now 29 classes: 15 in the model, 13 excluded, 1 open. Two things mo
     human CSF:plasma of 1.3-2.4% straddles this project's CSF requirement while falling 8-15x short
     at the parenchyma, so it cannot be called closed either.
 
+THEN SEVEN MORE, 2026-11-03, WHEN THE COMPLETENESS CRITIC FINALLY RAN
+---------------------------------------------------------------------
+The count is now 36 classes: 15 in the model, 15 excluded, 6 OPEN. The critic had been planned as a
+phase of the sweep, failed twice on usage limits, and was then deferred on the argument that it
+"should not be self-assessed by the thread that built the list". That argument was wrong -- it is a
+quality preference, not a reason to leave a step unrun -- and running it changed the headline more
+than anything else in the exercise.
+
+WHAT MADE IT WORK WAS THE SOURCE OF THE LIST, not the diligence of the reader. Instead of re-reading
+this catalogue and asking "what is missing", the class list was rebuilt from an EXTERNAL taxonomy --
+ATC L01, the WHO's antineoplastic classification -- and from the drug classes represented in the
+2026 canine screen's own pan-active table. Diffing those against the 29 rows found seven classes
+with no row at all, every one of them represented among the compounds that reduced viable cell
+counts to <=70% at 5 uM in ALL TEN canine HS lines:
+
+  * TOPOISOMERASE INHIBITORS (ATC L01CB/L01CE) -- EXCLUDED on DEFEATED_BY_ESCAPE. And note what this
+    one exposes: `core.hs_drug_sensitivity.DrugClass` has carried a TOPOISOMERASE member all along,
+    and `resistant_classes()` has been RETURNING it since the table was completed, while the
+    catalogue had no such class. The same empty-container failure as the antimetabolites, inverted:
+    the data was present and the row was not.
+  * CYTOTOXIC ANTIBIOTICS / ANTHRACYCLINES (ATC L01D) -- EXCLUDED on TOXICITY_UNAFFORDABLE, and the
+    surprise of the diff, because the potency does NOT fail: doxorubicin's canine-HS IC50 of
+    0.175-0.631 uM sits BELOW a measured achievable canine plasma of 1.13 uM. A catalogue that never
+    listed anthracyclines was hiding the best cytotoxic potency-to-exposure ratio in the project
+    after the vincas. The cumulative cardiac ceiling is what excludes it, on the same argument
+    already used against the alkylators' dose caps.
+  * NUCLEAR EXPORT INHIBITION (XPO1 / SINE) -- OPEN, and the most consequential hole of the whole
+    exercise, because the class contains a CANINE-LICENSED, ORALLY DOSED, INDEFINITELY SCHEDULED
+    agent: verdinexor (Laverdia-CA1). Rule 1 found the pharmacology already done on a SIBLING BRANCH
+    of this same project, and CLAUDE.md failure 11 is itself about this drug pair -- so the class had
+    been discussed in this project and never enumerated in this case's universe.
+  * PROTEASOME INHIBITION (ATC L01XG) -- OPEN. Two members pan-active; ixazomib is oral.
+  * HSP90 INHIBITION, CARDIAC GLYCOSIDES, TRANSLATION-ELONGATION INHIBITION -- OPEN, on weaker
+    evidence, and recorded anyway because rule 9 asks every class to carry a status rather than
+    asking for the convincing ones to be listed. Each says plainly what it lacks.
+
+Two of the six open classes carry an explicit refusal to assert the obvious: no CNS figure is
+claimed for the proteasome inhibitors, and no achievable-exposure arithmetic is claimed for the
+cardiac glycosides, because neither was fetched. Under rule 16 an unsourced explanation is how a
+class gets wrongly graded, and the general belief about bortezomib's CNS penetration or digoxin's
+nanomolar therapeutic range is not a source.
+
 THE PROCEDURAL FINDING, WHICH IS WORTH MORE THAN ANY OF THE THREE CLASSES
 ------------------------------------------------------------------------
 Three holes in three days, in a catalogue that had reported "0 unassessed" for weeks. Each was found
@@ -486,6 +528,220 @@ UNIVERSE: tuple[Modality, ...] = (
         "cycles, which is a continuous-enough schedule to satisfy condition C3 unlike the weekly "
         "agents. The newer CELMoDs (mezigdomide, golcadomide, iberdomide) are clinical-stage rather "
         "than licensed and would be NEAR_FUTURE if the class were taken forward on one of them.",
+    ),
+    Modality(
+        "cytotoxic chemotherapy -- topoisomerase inhibitors",
+        Status.EXCLUDED,
+        "etoposide and teniposide (measured); topotecan, belotecan, exatecan, rubitecan, amsacrine",
+        "FOUND MISSING 2026-11-03 BY THE COMPLETENESS CRITIC, which diffed this catalogue against an "
+        "EXTERNAL taxonomy (ATC L01) instead of against itself. ATC L01CB/L01CE is a subgroup with no "
+        "row here, and `core.hs_drug_sensitivity.DrugClass` has carried a TOPOISOMERASE member all "
+        "along -- `resistant_classes()` has been RETURNING it since the table was completed, while "
+        "the catalogue had no corresponding class. The same empty-container failure as the "
+        "antimetabolites, in the opposite direction: the data was present and the row was not.\n"
+        "MEASURED: etoposide 755 ng/ml in the most sensitive canine HS line rising to 8180 ng/ml "
+        "(1.28-13.9 uM at MW 588.56), i.e. 3.3x to 121x the chemosensitive canine lymphoma "
+        "comparator (PMID 25715778 Table 1). Six further members are pan-active at 5 uM in all ten "
+        "lines of the 2026 screen (belotecan, exatecan, rubitecan, topotecan, teniposide, "
+        "amsacrine), so the class is NOT inert in this disease -- which is why it needs a real "
+        "ground rather than a dismissal.\n"
+        "GROUND -- DEFEATED_BY_ESCAPE, on two of this project's own named routes. (1) Etoposide and "
+        "topotecan are canonical P-gp/BCRP substrates, and ABCB1/ABCG2 are MEASURED elevated in "
+        "these very cell lines in the same paper that supplies the potency -- the single point of "
+        "failure `escape_audit.A13` names, and the reason condition C4 exists. (2) Topoisomerase "
+        "poisoning is REPLICATION-COUPLED: it converts a transient enzyme-DNA intermediate into a "
+        "double-strand break only in a cell that is replicating, so it cannot reach the "
+        "non-dividing drug-tolerant persister the ledger carries. Those two are the same grounds "
+        "that already govern this project's cytotoxic choices, applied consistently.",
+        "MEASURED, and measured unfavourable: etoposide 3.3-121x resistant versus the comparator "
+        "(PMID 25715778). The authors' own conclusion names this class: 'alkylating agents, "
+        "antimetabolites, antitumor antibiotics and TOPOISOMERASE INHIBITORS might not be effective "
+        "as treatment of HS.' Six members pan-active at a 5 uM screening concentration "
+        "(PMID 42129963) -- which is a lower bound on potency and not an IC50, per CLAUDE.md "
+        "failure 13.",
+        Availability.EXISTS_TODAY,
+        "Etoposide, teniposide, topotecan and mitoxantrone are all generic and etoposide is used in "
+        "dogs. Availability is not the issue; efflux and division-gating are.",
+        ExclusionGround.DEFEATED_BY_ESCAPE,
+    ),
+    Modality(
+        "cytotoxic chemotherapy -- cytotoxic antibiotics / anthracyclines",
+        Status.EXCLUDED,
+        "doxorubicin (measured, and the potency CLEARS); daunorubicin, idarubicin, aclarubicin, "
+        "mitoxantrone, dactinomycin, mitomycin C, trabectedin",
+        "ALSO FOUND MISSING 2026-11-03 (ATC L01D, no row here), AND IT IS THE SURPRISE OF THE "
+        "CRITIC'S DIFF -- because this class's potency does NOT fail. It is the only cytotoxic "
+        "class in this project, besides the vincas, whose measured canine-HS IC50 sits BELOW a "
+        "measured achievable canine exposure:\n"
+        "  * doxorubicin canine-HS IC50 95.0-343.0 ng/ml = 0.175-0.631 uM (MW 543.52; PMID 25715778 "
+        "Table 1), against an ACHIEVABLE CANINE PLASMA CONCENTRATION of 1.13 uM at 30 mg/m2, "
+        "therapeutic dose, in the DOG (PMID 29490634 Table 2). That clears by 1.8x to 6.5x. In that "
+        "second paper's own achievability framing, doxorubicin and dasatinib are the ONLY two agents "
+        "of thirteen that clear their own bar -- and doxorubicin is also the weakest resistance in "
+        "the 2015 table at 1.4-14x versus the comparator.\n"
+        "  * seven members are pan-active at 5 uM in all ten lines of the 2026 screen.\n"
+        "So this class must not be waved away on potency, and saying so is the point of recording "
+        "it: a catalogue that had simply never listed anthracyclines would have hidden the best "
+        "cytotoxic potency-to-exposure ratio in the project after the microtubule class.\n"
+        "GROUND -- TOXICITY_UNAFFORDABLE, and it is the identical argument this project already "
+        "makes against the alkylators' dose caps rather than a new one invented for this row. "
+        "Anthracyclines carry a CUMULATIVE LIFETIME DOSE CEILING set by irreversible "
+        "cardiomyopathy, which is structurally incompatible with condition C3 -- maintenance dosed "
+        "CONTINUOUSLY and indefinitely, duty -> 1.0. A decade of continuous anthracycline is not a "
+        "dosing question, it is an arithmetic impossibility, exactly as lomustine's ~4-dose cap is. "
+        "Doxorubicin is additionally a canonical P-gp substrate against the measured elevated "
+        "ABCB1/ABCG2, so escape A13 applies as a second ground. The honest summary is 'the potency "
+        "clears and the schedule cannot'.",
+        "MEASURED, and favourably on potency: doxorubicin 0.175-0.631 uM in four canine HS lines, "
+        "below the 1.13 uM achievable canine plasma; weakest fold-resistance in the 2015 table at "
+        "1.4-14x. Seven members pan-active at 5 uM (PMID 42129963). The 2015 authors nonetheless "
+        "group 'antitumor antibiotics' with the classes they judge ineffective, on the fold-"
+        "resistance rather than on achievability -- a disagreement with their own data that this "
+        "row records rather than resolves.",
+        Availability.EXISTS_TODAY,
+        "Doxorubicin is a veterinary standard of care with a canine therapeutic dose and a canine "
+        "achievable plasma concentration in the literature. Entirely obtainable; the lifetime "
+        "cardiac ceiling is what excludes it.",
+        ExclusionGround.TOXICITY_UNAFFORDABLE,
+    ),
+    Modality(
+        "nuclear export inhibition (XPO1 / SINE compounds)",
+        Status.NOT_ASSESSED,
+        "verdinexor (Laverdia-CA1 -- LICENSED FOR DOGS); selinexor (XPOVIO, and the member with the "
+        "canine-HS screen activity and the measured brain access)",
+        "THE MOST CONSEQUENTIAL HOLE THE CRITIC FOUND, because this class contains a CANINE-LICENSED, "
+        "ORALLY DOSED, INDEFINITELY SCHEDULED agent -- and this catalogue had no row for it, while a "
+        "SIBLING BRANCH of this same project had already done the pharmacology. Rule 1 found it: "
+        "`git show origin/claude/duplicate-codex-prefix-branch-lt1qh6:docs/LYMPHOMA_STATUS.md`. "
+        "CLAUDE.md failure 11 is itself about this drug pair, so the class was discussed in this "
+        "project and never enumerated in this case's universe.\n"
+        "WHAT IT HAS: (1) SELINEXOR IS PAN-ACTIVE in all ten canine HS lines at 5 uM "
+        "(PMID 42129963 Table 2) -- verified directly, so the class has canine-HS activity in this "
+        "disease. (2) MEASURED BRAIN ACCESS ACROSS THREE SPECIES AT AN INTACT BARRIER: selinexor "
+        "total brain:plasma 0.71 mouse / 0.72 rat / 0.60 monkey, from Table 1 of PMC5143172 "
+        "(PMID 27323910, Leukemia 2016) -- plasma 1760/1670/2545 h.ng/mL against brain "
+        "1295/1207/1565 h.ng/g at 2 h after oral dosing in healthy animals. The same table is the "
+        "basis on which its successor KPT-8602 was designed for LOWER CNS penetration (0.19/0.22/"
+        "<0.02), so selinexor's brain entry is the deliberate, documented property of the pair. "
+        "(3) A LICENSED CANINE AGENT ON AN INDEFINITE SCHEDULE: verdinexor is Laverdia-CA1, FDA "
+        "conditional approval January 2021 and FULL APPROVAL JANUARY 2026, label twice weekly at "
+        ">=72 h apart UNTIL PROGRESSION. Recorded as the sibling branch records it -- a CROSS-BRANCH "
+        "RECORD, not this thread's own regulatory verification, and flagged as such.\n"
+        "WHY IT IS OPEN RATHER THAN IN-MODEL, and the reasons are rule-15 reasons: (a) the 0.60-0.72 "
+        "figures are TOTAL brain:plasma ratios, not unbound, so they CANNOT be compared directly "
+        "with this project's unbound parenchymal access requirement of 0.196 -- that comparison is "
+        "precisely the trap rule 15 names, and it is not made here. (b) They are SELINEXOR's "
+        "numbers, and the licensed canine agent is VERDINEXOR; the sibling branch's own 2026-11-01 "
+        "correction states that selinexor's CSF figure is a FLOOR for verdinexor rather than its "
+        "value, and verdinexor's tissue distribution is unmeasured in any species. (c) No canine-HS "
+        "IC50 exists for either member -- the screen gives a 5 uM threshold, which failure 13 "
+        "forbids reading as a potency. (d) Verdinexor's canine-lymphoma efficacy is modest where it "
+        "is measured: 37% response, median duration 18 days (cross-branch record). (e) Twice-weekly "
+        "dosing is the same tension with C3's continuous presence that dordaviprone and tovorafenib "
+        "carry -- though 'until progression' makes it indefinite rather than capped, unlike the "
+        "anthracyclines and alkylators.\n"
+        "WHAT WOULD CLOSE IT, and the sibling branch already names them as its two cheapest decisive "
+        "measurements: a VERDINEXOR BRAIN:PLASMA RATIO FROM ANY DOG ON THE LICENSED DRUG, and a "
+        "canine-HS IC50 for either member. Both are obtainable from animals already receiving an "
+        "approved drug.",
+        "MEASURED, in this disease, for one member: selinexor reduced viable cell counts to <=70% at "
+        "5 uM in ALL TEN canine HS lines (PMID 42129963 Table 2). No canine-HS IC50 for any member, "
+        "and no verdinexor tissue distribution in any species -- which under rule 13 is not a ground "
+        "for exclusion and under rule 11 is not a gap to report, but IS the reason the class cannot "
+        "yet be graded into the model.",
+        Availability.EXISTS_TODAY,
+        "UNIQUELY STRONG IN THIS CATALOGUE: verdinexor is LICENSED FOR DOGS (Laverdia-CA1), oral, "
+        "and labelled until progression -- the only agent in any class here that is simultaneously "
+        "licensed in the target species, orally dosed and indefinitely scheduled. Selinexor is "
+        "human-licensed (XPOVIO, NDA 212306) and obtainable off-label, and it is the member carrying "
+        "both the canine-HS screen activity and the three-species brain measurement. The class is "
+        "therefore the opposite of a to-build problem.",
+    ),
+    Modality(
+        "proteasome inhibition",
+        Status.NOT_ASSESSED,
+        "ixazomib (oral); carfilzomib; bortezomib",
+        "FOUND MISSING 2026-11-03 (ATC L01XG, no row here). TWO MEMBERS ARE PAN-ACTIVE in all ten "
+        "canine HS lines at 5 uM -- carfilzomib and ixazomib citrate, both in Table 2 of "
+        "PMID 42129963, verified directly. All three members are human-licensed, and IXAZOMIB IS "
+        "ORAL, which matters because condition C3 requires continuous presence and most of this "
+        "catalogue's near-future agents fail on schedule rather than on potency.\n"
+        "WHY IT IS OPEN: no canine-HS IC50 for any member (the 5 uM figure is a screening threshold, "
+        "not a potency -- failure 13), and NO CNS ACCESS FIGURE WAS ESTABLISHED BY THIS THREAD for "
+        "any proteasome inhibitor. It would have been easy to assert that bortezomib penetrates the "
+        "CNS poorly, which is the general belief; this row does not, because no source for it was "
+        "fetched. Under rule 16 an unsourced explanation is what gets a class wrongly graded. "
+        "WHAT WOULD CLOSE IT: a measured brain or CSF concentration for any proteasome inhibitor, "
+        "and a canine-HS IC50 for ixazomib or carfilzomib.",
+        "MEASURED, in this disease, for two members: carfilzomib and ixazomib reduced viable cell "
+        "counts to <=70% at 5 uM in all ten canine HS lines (PMID 42129963 Table 2). Nothing further "
+        "in dogs.",
+        Availability.EXISTS_TODAY,
+        "Bortezomib, carfilzomib and ixazomib are all human-licensed and obtainable off-label; "
+        "ixazomib is oral, which is the schedule this project needs. Availability is not what is "
+        "open here -- the access measurement is.",
+    ),
+    Modality(
+        "HSP90 inhibition",
+        Status.NOT_ASSESSED,
+        "retaspimycin (the screen hit); ganetespib, onalespib as the clinical-stage members",
+        "FOUND MISSING 2026-11-03 by the same diff, on weaker evidence than the four above and "
+        "recorded anyway, because rule 9 asks for every class to carry a status rather than for the "
+        "convincing ones to be listed. Retaspimycin hydrochloride is pan-active at 5 uM in all ten "
+        "canine HS lines (PMID 42129963 Table 2). That is the whole of the evidence: one member, one "
+        "screening concentration, no IC50, no canine PK, no CNS figure, and no licensed member. "
+        "It cannot be excluded on any admissible ground and cannot be graded in. The honest "
+        "assessment is that it is the weakest of the six open classes and should be triaged before "
+        "it is worked up.",
+        "MEASURED, in this disease, at a screening threshold only: retaspimycin pan-active at 5 uM "
+        "across ten canine HS lines (PMID 42129963). No IC50, no canine PK.",
+        Availability.NEAR_FUTURE,
+        "No HSP90 inhibitor is licensed in any species; several reached human phase II and were not "
+        "carried forward. So this class is NEAR_FUTURE at best and would need a sponsor, which is "
+        "the same position as condition C7.",
+    ),
+    Modality(
+        "cardiac glycosides / Na+,K+-ATPase inhibition",
+        Status.NOT_ASSESSED,
+        "digoxin, ouabain, lanatoside C, proscillaridin A, resibufogenin",
+        "FOUND MISSING 2026-11-03, and recorded with an explicit caution rather than enthusiasm. "
+        "FIVE members are pan-active at 5 uM in all ten canine HS lines (PMID 42129963 Table 2), "
+        "which is the largest member count of any newly found class, and digoxin is licensed, oral "
+        "and dosed indefinitely in dogs for heart failure -- so on the face of it this is an "
+        "exists-today, continuously-dosed, canine-dosed class.\n"
+        "THE CAUTION, WHICH IS WHY IT IS NOT BEING WORKED UP FIRST: cardiac glycosides are a "
+        "notorious recurring hit class in drug-repurposing screens, because Na+,K+-ATPase inhibition "
+        "is broadly cytotoxic at micromolar concentrations in culture and the therapeutic plasma "
+        "range for digoxin in vivo is roughly 1-2 ng/ml (about 1-3 nM), three orders of magnitude "
+        "below the 5 uM screening concentration. So the expected finding is that the achievable "
+        "exposure falls far short of the screen concentration -- but this thread has NOT fetched a "
+        "canine digoxin achievable-concentration source, so that arithmetic is stated as the "
+        "expectation to test and NOT as a ground. Asserting it unsourced is exactly rule 16's "
+        "failure. WHAT WOULD SETTLE IT: a canine digoxin therapeutic plasma concentration, which is "
+        "a routine veterinary monitoring value, set against a canine-HS IC50.",
+        "MEASURED, at a screening threshold only: five members pan-active at 5 uM across ten canine "
+        "HS lines (PMID 42129963). No IC50 in this disease and no achievable-exposure comparison "
+        "fetched by this thread.",
+        Availability.EXISTS_TODAY,
+        "Digoxin is licensed, oral, cheap and dosed indefinitely in dogs, with routine therapeutic "
+        "drug monitoring -- so if the exposure arithmetic worked this would be among the most "
+        "obtainable agents in the whole catalogue. The arithmetic is what is unestablished.",
+    ),
+    Modality(
+        "translation-elongation inhibition",
+        Status.NOT_ASSESSED,
+        "homoharringtonine (omacetaxine, licensed); emetine; cycloheximide (tool compound)",
+        "FOUND MISSING 2026-11-03. Three members pan-active at 5 uM in all ten canine HS lines "
+        "(PMID 42129963 Table 2), and one of them -- homoharringtonine, as omacetaxine mepesuccinate "
+        "-- is human-licensed for chronic myeloid leukaemia, so the class is not purely preclinical. "
+        "No canine-HS IC50, no canine PK, no CNS access figure, and cycloheximide is a laboratory "
+        "tool rather than a drug. Cannot be excluded on an admissible ground; cannot be graded in. "
+        "Recorded as open and ranked below the four substantive classes above.",
+        "MEASURED, at a screening threshold only: three members pan-active at 5 uM across ten canine "
+        "HS lines (PMID 42129963). Nothing further in dogs.",
+        Availability.EXISTS_TODAY,
+        "Omacetaxine is human-licensed and therefore obtainable off-label, though it is a "
+        "subcutaneous cycled agent, which sits badly with C3's continuous-presence requirement.",
     ),
     Modality(
         "targeted small molecules -- MAPK axis (MEK/ERK/SHP2)",
@@ -1147,6 +1403,11 @@ UNIVERSE: tuple[Modality, ...] = (
 #: three days is itself the finding -- see the docstring.
 KNOWN_OPEN_CLASSES: tuple[str, ...] = (
     "targeted protein degradation / cereblon modulators (immunomodulatory imides, CELMoDs)",
+    "nuclear export inhibition (XPO1 / SINE compounds)",
+    "proteasome inhibition",
+    "HSP90 inhibition",
+    "cardiac glycosides / Na+,K+-ATPase inhibition",
+    "translation-elongation inhibition",
 )
 
 

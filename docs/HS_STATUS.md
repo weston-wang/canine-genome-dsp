@@ -2363,3 +2363,111 @@ to rebuild the modality-class list from the literature independently and diff it
 catalogue. Three classes were found missing in three days, so that diff is still the highest-value
 item in the project, and it needs the subagent budget to run properly rather than being
 self-assessed by the same thread that built the list.
+
+## 2026-11-03 (later): the completeness critic ran, and it found seven more classes
+
+The critic was a planned phase of the sweep. It failed twice on usage limits, and was then deferred
+on my own argument that it "should not be self-assessed by the thread that built the list". **That
+argument was wrong** — it is a quality preference, not a reason to leave a planned step unrun — and
+running it changed the headline more than anything else in this exercise.
+
+**Catalogue: 36 classes — 15 in the model, 15 excluded, 6 OPEN.** Previously 29 — 15 / 13 / 1.
+
+### What made it work was the source of the list, not the diligence of the reader
+
+Asking "what is missing?" while re-reading the catalogue finds nothing, because the catalogue is what
+shaped the question. So the class list was rebuilt from two **external** sources and diffed against
+the 29 rows:
+
+1. **ATC L01**, the WHO antineoplastic classification, by subgroup.
+2. The drug classes represented in the 2026 canine screen's own **pan-active table** — the 73
+   compounds that reduced viable cell counts to ≤70% at 5 µM in **all ten** canine HS lines.
+
+Seven classes had no row at all, and **every one is represented in that pan-active table**:
+
+| class | members pan-active in all 10 canine HS lines | disposition |
+|---|---|---|
+| Topoisomerase inhibitors (L01CB/L01CE) | belotecan, exatecan, rubitecan, topotecan, teniposide, amsacrine (6) | **EXCLUDED** — defeated by escape |
+| Cytotoxic antibiotics / anthracyclines (L01D) | aclarubicin, daunorubicin, idarubicin, dactinomycin, mitomycin C, mitoxantrone, trabectedin (7) | **EXCLUDED** — toxicity unaffordable |
+| **XPO1 / nuclear export (SINE)** | selinexor (1) | **OPEN** |
+| Proteasome inhibition (L01XG) | carfilzomib, ixazomib (2) | **OPEN** |
+| HSP90 inhibition | retaspimycin (1) | **OPEN** |
+| Cardiac glycosides / Na⁺,K⁺-ATPase | digoxin, ouabain, lanatoside C, proscillaridin A, resibufogenin (5) | **OPEN** |
+| Translation-elongation inhibition | homoharringtonine, emetine, cycloheximide (3) | **OPEN** |
+
+### The one that matters: a canine-licensed agent in a class with no row
+
+**XPO1 / nuclear export inhibition.** Verdinexor is **Laverdia-CA1 — FDA conditional approval
+January 2021, full approval January 2026, label twice weekly ≥72 h apart until progression**. It is
+the only agent in any class in this catalogue that is simultaneously **licensed in the target
+species, orally dosed and indefinitely scheduled**. And rule 1 is what found it: the pharmacology was
+already done on a **sibling branch of this same project**
+(`git show origin/claude/duplicate-codex-prefix-branch-lt1qh6:docs/LYMPHOMA_STATUS.md`), and
+**CLAUDE.md failure 11 is itself about this drug pair** — so the class had been discussed inside this
+project and never enumerated in this case's universe.
+
+Verified directly by this thread:
+
+- **Selinexor is pan-active in all ten canine HS lines at 5 µM** (PMID 42129963 Table 2).
+- **Measured brain access across three species at an intact barrier** — Table 1 of PMC5143172
+  (PMID 27323910, Leukemia 2016): selinexor total brain:plasma **0.71 mouse / 0.72 rat / 0.60
+  monkey**, from plasma 1760/1670/2545 h·ng/mL against brain 1295/1207/1565 h·ng/g, 2 h after oral
+  dosing in healthy animals. The same table is why its successor KPT-8602 was *designed* for lower
+  CNS entry (0.19 / 0.22 / <0.02), so selinexor's brain penetration is the deliberate, documented
+  property of the pair.
+
+**Why it is open and not in the model — all rule-15 reasons, stated rather than skipped:**
+
+1. Those are **total** brain:plasma ratios, not unbound, so they **cannot** be compared with this
+   project's unbound parenchymal requirement of 0.196. That comparison is exactly the trap rule 15
+   names, and it is not made.
+2. They are **selinexor's** numbers; the licensed canine agent is **verdinexor**. The sibling
+   branch's own 2026-11-01 correction says selinexor's CSF figure is a **floor** for verdinexor, not
+   its value, and verdinexor's tissue distribution is unmeasured in any species.
+3. No canine-HS IC50 for either member — 5 µM is a screening threshold, which failure 13 forbids
+   reading as a potency.
+4. Verdinexor's canine-lymphoma efficacy is modest where measured: 37% response, median duration 18
+   days (cross-branch record).
+
+**What would close it**, and the sibling branch already names these as its two cheapest decisive
+measurements: a **verdinexor brain:plasma ratio from any dog on the licensed drug**, and a canine-HS
+IC50 for either member. Both are obtainable from animals already receiving an approved drug.
+
+### The surprise: the anthracycline potency *clears*
+
+Doxorubicin's canine-HS IC50 is **0.175–0.631 µM** (95.0–343.0 ng/ml at MW 543.52, PMID 25715778
+Table 1) against a **measured achievable canine plasma concentration of 1.13 µM** at 30 mg/m²,
+therapeutic dose, in the dog (PMID 29490634 Table 2) — so it clears by **1.8× to 6.5×**. In that
+second paper's own achievability framing, doxorubicin and dasatinib are the **only two of thirteen
+agents** that clear their own bar. A catalogue that had simply never listed anthracyclines was
+hiding the best cytotoxic potency-to-exposure ratio in the project after the vincas.
+
+It is excluded anyway, on **TOXICITY_UNAFFORDABLE** — the cumulative lifetime anthracycline ceiling
+set by irreversible cardiomyopathy is structurally incompatible with condition C3's indefinite
+continuous dosing, which is the identical argument already used against lomustine's ~4-dose cap, not
+a new one invented here. The honest summary is **"the potency clears and the schedule cannot."**
+
+### And one inverted empty-container failure
+
+`core/hs_drug_sensitivity.DrugClass` has carried a **TOPOISOMERASE** member all along, and
+`resistant_classes()` has been *returning* it since the table was completed yesterday — while the
+catalogue had no topoisomerase class. The same failure as the antimetabolites, in the opposite
+direction: the data was present and the row was not.
+
+### Two refusals, recorded deliberately
+
+It would have been easy to exclude the **proteasome inhibitors** on bortezomib's reputation for poor
+CNS entry, and the **cardiac glycosides** on digoxin's nanomolar therapeutic range against a 5 µM
+screening concentration. Neither source was fetched, so **neither claim is made** — both rows say so
+explicitly. Under rule 16 an unsourced explanation is exactly how a class gets wrongly graded, and
+"everyone knows" is not a source. The cardiac-glycoside row records the expected arithmetic as *the
+thing to test* and names the obtainable measurement (a canine digoxin therapeutic plasma
+concentration, a routine veterinary monitoring value).
+
+### Status of the search work
+
+**Complete.** All fourteen angles run, the nine salvaged candidates re-verified, and the completeness
+critic executed. The catalogue is now stated over 36 classes with 6 open and the open ones named,
+which is the first time this project's closure claim has had an honest denominator. The next thread
+should diff against a **different** external taxonomy — NCI thesaurus, or a current systemic-therapy
+review's modality table — since ATC L01 is now used up as an independent check.

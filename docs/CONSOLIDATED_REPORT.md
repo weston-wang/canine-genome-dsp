@@ -32,10 +32,26 @@ checklist, not a probability.
 | Items previously mis-reported as open | 9, each now graded and guarded | same |
 | Growth bar beaten | 0.055 / day | same |
 
-**Catalogue the claim is made over:** 29 therapy-modality classes — 15 in the model, 13 excluded, **1
+**Catalogue the claim is made over:** 36 therapy-modality classes — 15 in the model, 15 excluded, **6
 open** — and 16 escape routes from an independent audit. No class is excluded for lacking canine
-data; each exclusion rests on a contradicted kill (8), a named escape that defeats it (3), or a
-toxicity budget it would blow (2).
+data; each exclusion rests on a contradicted kill (8), a named escape that defeats it (4), or a
+toxicity budget it would blow (3).
+
+**This count moved four times in four days, and the last move is the largest.** It read "25 classes,
+0 unassessed", then 26, then 28 with 1 open, then 29, and now **36 with 6 open**. The last jump came
+from finally running the sweep's **completeness critic** — the step that rebuilds the class list from
+an *external* taxonomy and diffs it against this one. Diffed against **ATC L01** and against the drug
+classes represented in the canine screen's own pan-active table, the 29-row catalogue was missing
+seven classes, every one of them represented among the compounds that kill all ten canine
+histiocytic-sarcoma cell lines. Two closed on assessment (topoisomerase inhibitors, defeated by
+efflux and by division-gating; anthracyclines, whose potency *clears* achievable canine exposure and
+which fail instead on the cumulative cardiac ceiling). Five stayed open. The most consequential is
+**XPO1 / nuclear-export inhibition**, which contains **verdinexor (Laverdia-CA1) — licensed for dogs,
+oral, labelled until progression** — the only agent in any class here that is at once licensed in the
+target species, orally dosed and indefinitely scheduled; selinexor, its sibling, kills all ten canine
+lines at 5 µM and has measured brain:plasma of 0.60–0.72 across three species at an intact barrier.
+A sibling branch of this project had already done that pharmacology; this case's universe had never
+listed the class.
 
 **Three classes were found missing from this catalogue in three days, while the line read "0
 unassessed".** That is the procedural finding, and it matters more than any of the three: each was

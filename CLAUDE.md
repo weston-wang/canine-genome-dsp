@@ -195,6 +195,14 @@ Concrete failures (so the rules have a reason):
    is obtainable. And a rule-9 guard that validates every enumerated class says nothing about classes nobody
    enumerated: `_validate()` cannot see a missing row, so the candidate list must be rebuilt from the literature,
    not audited against itself. Three classes were found missing in three days this way.
+   **Rebuild it from an EXTERNAL taxonomy, and say which one.** Asking "what is missing?" while re-reading your
+   own list finds nothing, because the list is what shaped the question. On 2026-11-03 the same catalogue was
+   diffed instead against **ATC L01** (the WHO antineoplastic classification) and against the drug classes
+   represented in the source screen's own pan-active table — and that found **seven** further missing classes,
+   including one containing a canine-licensed agent, taking the count from "29 classes, 1 open" to "36, 6 open".
+   Name the external taxonomy you diffed against in the record, so the next thread can pick a different one.
+   Corollary: a completeness check is a planned step like any other. "It would be better done by someone else"
+   is a quality preference, not a reason to leave it unrun — run it and label its provenance.
 
 ## Standing standards for the cancer durable-response work (the user's words)
 
