@@ -244,13 +244,13 @@ def test_the_catalogue_count_and_the_open_count_are_what_the_docs_say():
     '26 -- 15/11/0 unassessed' -> '28 -- 15/12/1 open' -> '29 -- 15/13/1 open'. If this test fails,
     three documents and a reader-facing page are now lying."""
     t = cu.tally()
-    assert len(cu.UNIVERSE) == 36
+    assert len(cu.UNIVERSE) == 39
     assert t["IN_MODEL"] == 15
-    assert t["EXCLUDED"] == 15
-    assert t["NOT_ASSESSED"] == 6
+    assert t["EXCLUDED"] == 16
+    assert t["NOT_ASSESSED"] == 8
     claim = cu.closure_claim(ea.audited_escape_count())
-    assert "36 modality classes" in claim
-    assert "6 unassessed" in claim
+    assert "39 modality classes" in claim
+    assert "8 unassessed" in claim
 
 
 def test_c3_records_the_maintenance_pincer_at_the_strength_shown():
@@ -461,3 +461,54 @@ def test_two_open_classes_refuse_to_assert_the_unsourced_obvious():
     gly = next(x for x in cu.UNIVERSE if "cardiac glycosides" in x.name)
     assert "NOT as a ground" in gly.basis
     assert "has NOT fetched" in gly.basis
+
+
+def test_the_second_taxonomy_diff_used_a_different_axis_and_named_it():
+    """Rule 16's corollary. ATC L01 is a CHEMICAL taxonomy; re-diffing against it would re-ask the
+    same question. The second pass used a BIOLOGICAL one and must name it, so a third pass can pick
+    yet another."""
+    assert "Hanahan hallmarks" in cu.__doc__
+    assert "L02/L03/L04" in cu.__doc__
+    names = {m.name for m in cu.UNIVERSE}
+    for expected in ("anti-angiogenic / VEGFR-axis multikinase inhibition",
+                     "apoptosis induction / BH3 mimetics (BCL-2, BCL-XL)"):
+        assert expected in names, expected
+
+
+def test_the_vegfr_row_credits_the_existing_agent_verdict_rather_than_claiming_discovery():
+    """CLAUDE.md failure 1. Toceranib was already assessed in therapies.py; only the class row was
+    missing. Calling that a discovery would be the failure rule 1 exists to stop. What the row adds
+    is measured arithmetic in place of a 'likely'."""
+    m = next(x for x in cu.UNIVERSE if "VEGFR-axis" in x.name)
+    assert m.exclusion_ground is cu.ExclusionGround.KILL_CONTRADICTED
+    assert "ALREADY ASSESSED AS AGENTS" in m.basis
+    assert "CONSIDERED_UNMEASURED" in m.basis
+    assert "failure 1" in m.basis
+    # the arithmetic that replaces the guess, from two independent datasets
+    assert "17-19x" in m.basis and "37-149x" in m.basis
+    assert "608 nM" in m.basis, "the screen's own headline figure, previously unused here"
+
+
+def test_the_bh3_row_records_the_rule_15_error_in_the_existing_record():
+    """The class was set aside on navitoclax's on-target thrombocytopenia -- which is BCL-XL
+    inhibition, the very thing venetoclax was engineered to spare. One compound's toxicity was
+    allowed to bound another's in the direction opposite to the chemistry."""
+    m = next(x for x in cu.UNIVERSE if "BH3" in x.name)
+    assert m.status is cu.Status.NOT_ASSESSED
+    assert m.name in cu.KNOWN_OPEN_CLASSES
+    assert "ENGINEERED" in m.basis and "SPARE" in m.basis
+    assert "does not appear anywhere in this repository" in m.basis, \
+        "venetoclax is absent from the whole repo"
+    # and the absence from the screen's hit list is NOT graded as a negative
+    assert "UNDETERMINED by this thread" in m.canine_hs_evidence
+
+
+def test_the_two_rejected_hallmark_columns_are_recorded_not_silently_dropped():
+    """Rule 9 asks for a status on everything that could plausibly matter. Two columns were judged
+    not to meet that bar; the judgement is written down so it can be challenged, and deliberately
+    NOT dressed up as a rule-13 exclusion it has no ground for."""
+    src = __import__("inspect").getsource(cu)
+    assert "DIFFERENTIATION THERAPY" in src and "MICROBIOME MODULATION" in src
+    assert "judgements about plausibility, not exclusions on rule 13 grounds" in src
+    names = {m.name for m in cu.UNIVERSE}
+    assert not any("differentiation" in n or "microbiome" in n for n in names)

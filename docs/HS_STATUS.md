@@ -2372,6 +2372,7 @@ argument was wrong** — it is a quality preference, not a reason to leave a pla
 running it changed the headline more than anything else in this exercise.
 
 **Catalogue: 36 classes — 15 in the model, 15 excluded, 6 OPEN.** Previously 29 — 15 / 13 / 1.
+[**Superseded the same day by a second diff on a different axis: 39 — 15 / 16 / 8 open.** See the next section.]
 
 ### What made it work was the source of the list, not the diligence of the reader
 
@@ -2467,7 +2468,96 @@ concentration, a routine veterinary monitoring value).
 ### Status of the search work
 
 **Complete.** All fourteen angles run, the nine salvaged candidates re-verified, and the completeness
-critic executed. The catalogue is now stated over 36 classes with 6 open and the open ones named,
+critic executed. The catalogue is now stated over 36 classes with 6 open and the open ones named
+[**annotated: 39 with 8 open after the second taxonomy diff below**],
 which is the first time this project's closure claim has had an honest denominator. The next thread
 should diff against a **different** external taxonomy — NCI thesaurus, or a current systemic-therapy
 review's modality table — since ATC L01 is now used up as an independent check.
+
+## 2026-11-03 (later still): a second taxonomy, because the first one is used up
+
+My own closing note said the next pass should diff against a different external taxonomy, which made
+it an open item I had created. Closing it now. **39 classes — 15 in the model, 16 excluded, 8 open.**
+
+ATC L01 is a **chemical** taxonomy, so re-diffing against it would re-ask the same question. The
+second diff used a **biological** one — the Hanahan hallmarks therapeutic map, one column per
+hallmark — plus the ATC branches **L02/L03/L04** the first pass never touched. Three more rows:
+
+### Anti-angiogenic / VEGFR axis — EXCLUDED, and rule 1 changes what this is
+
+Rule 1 first, because the distinction matters: **both members were already assessed as agents** in
+`therapies.py`. Toceranib carries `Verdict.CONSIDERED_UNMEASURED` with the note that its only real
+efficacy readout is **negative** (Gardner, BMC Vet Res 2015, PMC4464614: median survival 172 vs 169
+days in canine haemangiosarcoma), and that "as a sunitinib analog it likely penetrates the CNS
+poorly". So the science was examined and only the **class row** was missing. Presenting that as a
+discovery would be failure 1.
+
+What the row adds is **the arithmetic that replaces a "likely"**, and it settles the class without
+needing the CNS at all:
+
+- PMID 29490634 Table 2: toceranib canine-HS IC50 **1.9 and 1.7 µM** against achievable canine
+  plasma **0.1 µM** (3.25 mg/kg, therapeutic dose) — short by **17–19×**; sunitinib **4.5 and
+  17.9 µM** against achievable **0.12 µM** — short by **37–149×**.
+- The 2026 screen's own headline figure, which this project had never used: sunitinib's **median
+  canine-HS IC50 across all ten lines is 608 nM** (PMID 42129963) — the second of that paper's two
+  named compounds beside 5-FU. Even that most favourable number is **5× above** achievable plasma.
+
+Toceranib is the **only FDA-approved canine kinase inhibitor**, so availability is as good as it gets
+in this species — which is exactly why the exclusion had to be quantitative.
+
+### BH3 mimetics / BCL-2 — OPEN, and it exposes a rule-15 error already in the record
+
+`therapies.py` rejected **navitoclax** because "its on-target thrombocytopenia stacks badly with
+lomustine's myelosuppression". That reasoning is sound *for navitoclax*. It was then allowed to stand
+for the whole mechanism, and no BH3 row was ever enumerated.
+
+**That is an error of exactly the shape rule 15 names.** Navitoclax's dose-limiting thrombocytopenia
+*is* on-target BCL-XL inhibition — platelets depend on BCL-XL — and **venetoclax was engineered
+specifically to spare BCL-XL**, which is the entire reason it reached licensure where navitoclax did
+not. The class was set aside on a liability its leading member is designed not to have, and the
+direction of the transfer runs opposite to the assumption: BCL-2 selectivity *removes* the platelet
+liability. **Venetoclax appears nowhere in this repository** — not in `therapies.py`, not in the
+catalogue, not in the docs.
+
+It matters rather than being a technicality: venetoclax is licensed, **oral**, and dosed
+**continuously to progression** — the schedule condition C3 demands and which most near-future
+agents here fail — and apoptosis evasion is already a named route in this project's escape ledger.
+Senolytics are folded into this row rather than given their own, because navitoclax *is* the
+canonical senolytic and the persister rationale is the same mechanism.
+
+Open rather than graded either way: no canine-HS IC50 for any BH3 mimetic. Venetoclax is **not**
+among the screen's 73 pan-active compounds, but **whether it was in the 1824-compound library at all
+is undetermined by this thread**, so that absence is explicitly *not* graded as a negative.
+
+### IL-1 blockade as a tolerability enabler — OPEN
+
+Enumerated on the model of the existing `molecular surveillance` row: not a therapy, but in the
+catalogue because the plan's deliverability depends on it. Anakinra alongside MAPK-targeted therapy
+in ECD went with 18-month retention of **94% vs 65%** (PMID 39814074) — as an **association**:
+retrospective, two centres, 52 patients across 60 courses with the anakinra arm only **16 of 60**,
+physician discretion, no confounding adjustment. It addresses the single soft spot C3 admits to.
+
+### Two hallmark columns judged not to meet the bar — recorded, not silently dropped
+
+- **Differentiation therapy** (retinoids/ATRA, "unlocking phenotypic plasticity"): differentiation
+  induction is lineage-specific and its one clinical success is APL, driven by PML-RARA. Canine HS is
+  an already-differentiated myeloid/dendritic tumour with no analogous fusion, and there is no
+  retinoid evidence in this lineage in any species.
+- **Microbiome modulation** ("polymorphic microbiomes"): its documented oncology effect is modulation
+  of *checkpoint-inhibitor* response, which this catalogue already carries as its own row, and there
+  is no route by which it reaches a primary intracranial mass as a therapy in its own right.
+
+Both are judgements about **plausibility**, not exclusions on rule 13 grounds — which is why they sit
+beside `KNOWN_OPEN_CLASSES` as a stated decision rather than as EXCLUDED rows with a ground they do
+not have.
+
+### Search status
+
+The planned sweep is now fully executed: fourteen angles, nine salvaged candidates re-verified, and
+the completeness critic run against **two independent external taxonomies** on different axes
+(chemical, then biological). Two diffs produced ten missing classes between them, which is the real
+measure of how incomplete "0 unassessed" had been. **A third pass should use a third axis** — an NCI
+thesaurus mechanism listing, or a current systemic-therapy review's modality table — and both ATC and
+the hallmarks map are now spent as independent checks. The eight open classes are named and each
+carries what would settle it; none is open for want of canine data, which rule 13 forbids as a
+ground.

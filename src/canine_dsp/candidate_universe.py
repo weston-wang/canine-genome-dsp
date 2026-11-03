@@ -160,7 +160,38 @@ counts to <=70% at 5 uM in ALL TEN canine HS lines:
     evidence, and recorded anyway because rule 9 asks every class to carry a status rather than
     asking for the convincing ones to be listed. Each says plainly what it lacks.
 
-Two of the six open classes carry an explicit refusal to assert the obvious: no CNS figure is
+AND A SECOND TAXONOMY, BECAUSE THE FIRST ONE IS USED UP (same day)
+-----------------------------------------------------------------
+ATC L01 is a CHEMICAL taxonomy, so diffing against it again would re-ask the same question. The
+second diff used a BIOLOGICAL one -- the Hanahan hallmarks therapeutic map, one column per hallmark
+-- plus the ATC branches L02/L03/L04 that the first pass never touched. Count: 39 classes,
+15 / 16 / 8 open. Three more rows, and the middle one is not bookkeeping:
+
+  * ANTI-ANGIOGENIC / VEGFR-AXIS ("inducing or accessing vasculature") -- EXCLUDED on
+    KILL_CONTRADICTED. Rule 1 first: both members were ALREADY assessed as agents in `therapies.py`
+    (toceranib carries CONSIDERED_UNMEASURED with a negative canine efficacy readout), so the
+    science was examined and only the class row was missing. What this adds is the arithmetic that
+    replaces a "likely penetrates the CNS poorly": toceranib 1.7-1.9 uM and sunitinib 4.5-17.9 uM
+    against achievable canine plasma of 0.1 and 0.12 uM, and the screen's own unused headline of
+    sunitinib median 608 nM -- 5x above achievable even at its most favourable.
+  * APOPTOSIS INDUCTION / BH3 MIMETICS ("resisting cell death") -- OPEN, and it exposes an error of
+    exactly the shape rule 15 names. `therapies.py` rejected navitoclax because its on-target
+    thrombocytopenia stacks with lomustine, and that reasoning then stood for the whole mechanism.
+    But navitoclax's thrombocytopenia IS BCL-XL inhibition, and VENETOCLAX WAS ENGINEERED TO SPARE
+    BCL-XL -- which is why it reached licensure where navitoclax did not. The class was set aside on
+    a liability its leading member is designed not to have, and venetoclax appears NOWHERE in this
+    repository. It is licensed, oral and dosed continuously to progression, which is the schedule
+    C3 demands.
+  * IL-1 BLOCKADE AS A TOLERABILITY ENABLER ("tumour-promoting inflammation") -- OPEN, enumerated on
+    the model of the `molecular surveillance` row: not a therapy, but in the catalogue because the
+    plan's deliverability depends on it. Anakinra went with 18-month retention of 94% vs 65% in ECD,
+    as an association in a retrospective series of 16 anakinra courses out of 60.
+
+Two hallmark columns were considered and judged NOT to meet rule 9's "could plausibly matter" bar --
+differentiation therapy and microbiome modulation -- and that judgement is written down next to
+KNOWN_OPEN_CLASSES rather than left as a silent omission.
+
+Two of the eight open classes carry an explicit refusal to assert the obvious: no CNS figure is
 claimed for the proteasome inhibitors, and no achievable-exposure arithmetic is claimed for the
 cardiac glycosides, because neither was fetched. Under rule 16 an unsourced explanation is how a
 class gets wrongly graded, and the general belief about bortezomib's CNS penetration or digoxin's
@@ -528,6 +559,113 @@ UNIVERSE: tuple[Modality, ...] = (
         "cycles, which is a continuous-enough schedule to satisfy condition C3 unlike the weekly "
         "agents. The newer CELMoDs (mezigdomide, golcadomide, iberdomide) are clinical-stage rather "
         "than licensed and would be NEAR_FUTURE if the class were taken forward on one of them.",
+    ),
+    Modality(
+        "anti-angiogenic / VEGFR-axis multikinase inhibition",
+        Status.EXCLUDED,
+        "toceranib (Palladia -- the only FDA-approved canine kinase inhibitor); sunitinib",
+        "FOUND MISSING 2026-11-03 BY THE SECOND TAXONOMY DIFF -- against the Hanahan hallmarks "
+        "therapeutic map (a BIOLOGICAL taxonomy) rather than ATC L01 (a chemical one), which is the "
+        "point of using a second axis. 'Inducing or accessing vasculature' is a hallmark with its own "
+        "therapeutic column, and this catalogue had no row for it.\n"
+        "BUT RULE 1 FIRST, because this is a bookkeeping gap and not an unexamined one: both members "
+        "are ALREADY ASSESSED AS AGENTS in `therapies.py`. Toceranib carries "
+        "`Verdict.CONSIDERED_UNMEASURED` with the note that its only real efficacy readout is "
+        "NEGATIVE (Gardner, BMC Vet Res 2015, PMC4464614: median survival 172 vs 169 days in canine "
+        "haemangiosarcoma) and that 'as a sunitinib analog it likely penetrates the CNS poorly'. So "
+        "the science was examined; the class was never enumerated. Presenting this as a discovery "
+        "would be CLAUDE.md failure 1.\n"
+        "WHAT THIS ROW ADDS IS THE ARITHMETIC THAT REPLACES A 'LIKELY'. The existing note rests on a "
+        "guess about CNS penetration. Two independent measured datasets settle it on ACHIEVABILITY "
+        "instead, without needing the CNS at all: (a) PMID 29490634 Table 2, the achievability table, "
+        "gives toceranib canine-HS IC50 1.9 and 1.7 uM against an achievable canine plasma of 0.1 uM "
+        "at 3.25 mg/kg therapeutic dose -- short by 17-19x; and sunitinib 4.5 and 17.9 uM against an "
+        "achievable 0.12 uM -- short by 37-149x. (b) The 2026 screen's own headline figure, which "
+        "this project had never used: sunitinib's MEDIAN canine-HS IC50 across all ten lines is "
+        "608 nM (PMID 42129963) -- the second of the paper's two named compounds beside 5-FU. Even "
+        "that most favourable figure is 5x above the 0.12 uM achievable plasma. So the class fails "
+        "on exposure in both datasets and on both members, which is a measured ground rather than a "
+        "prediction about the brain.",
+        "MEASURED, in this disease, for both members and in two laboratories: toceranib 1.7-1.9 uM "
+        "and sunitinib 4.5-17.9 uM against achievable plasma of 0.1 and 0.12 uM (PMID 29490634 "
+        "Table 2); sunitinib median 608 nM across ten lines (PMID 42129963). Plus a NEGATIVE canine "
+        "in-vivo efficacy readout for toceranib in another canine sarcoma (PMC4464614).",
+        Availability.EXISTS_TODAY,
+        "Toceranib is the ONLY FDA-approved canine kinase inhibitor, so availability is as good as it "
+        "gets in this species -- which is exactly why the exclusion has to be, and is, quantitative. "
+        "Sunitinib is human-licensed and obtainable off-label.",
+        ExclusionGround.KILL_CONTRADICTED,
+    ),
+    Modality(
+        "apoptosis induction / BH3 mimetics (BCL-2, BCL-XL)",
+        Status.NOT_ASSESSED,
+        "venetoclax (BCL-2-selective, licensed, oral, continuous -- and ABSENT FROM THIS REPO); "
+        "navitoclax (BCL-XL, already rejected)",
+        "FOUND MISSING 2026-11-03 by the hallmarks diff ('resisting cell death'), and this one is "
+        "not mere bookkeeping -- it exposes an error in the existing record of exactly the shape "
+        "rule 15 names.\n"
+        "WHAT THE RECORD SAYS: `therapies.py` carries navitoclax with `Verdict.REJECTED`, on the "
+        "ground that 'its on-target thrombocytopenia stacks badly with lomustine's "
+        "myelosuppression'. That reasoning is sound FOR NAVITOCLAX. It was then allowed to stand for "
+        "the whole mechanism, and no BH3 row was ever enumerated.\n"
+        "WHY THAT IS AN ERROR: navitoclax's dose-limiting thrombocytopenia is ON-TARGET BCL-XL "
+        "inhibition -- platelets depend on BCL-XL for survival -- and VENETOCLAX WAS ENGINEERED "
+        "SPECIFICALLY TO SPARE BCL-XL, which is the entire reason it reached licensure where "
+        "navitoclax did not. So the class was set aside on a liability that its leading member is "
+        "designed not to have. Under rule 15 one compound's toxicity may bound another's only with a "
+        "written comparison and a direction, and here the direction runs the opposite way to the "
+        "assumption: BCL-2 selectivity REMOVES the platelet liability. Venetoclax does not appear "
+        "anywhere in this repository -- not in `therapies.py`, not in the catalogue, not in the "
+        "docs.\n"
+        "WHY IT MATTERS HERE RATHER THAN BEING A TECHNICALITY: venetoclax is licensed, ORAL and dosed "
+        "CONTINUOUSLY to progression, which is the schedule condition C3 demands and which most "
+        "near-future agents in this catalogue fail; and apoptosis evasion is a named resistance "
+        "mechanism in this project's own escape ledger (`escape_audit` references BCL-2). "
+        "SENOLYTICS ARE FOLDED IN HERE rather than given a separate row, because navitoclax is "
+        "itself the canonical senolytic and the persister/senescent-cell rationale is the same "
+        "mechanism.\n"
+        "WHY IT IS OPEN AND NOT GRADED EITHER WAY: no canine-HS IC50 for venetoclax or any BH3 "
+        "mimetic -- it is NOT among the 73 pan-active compounds of the 2026 screen, and this thread "
+        "did not establish whether it was in the 1824-compound library at all, so its absence from "
+        "the hit list is not yet evidence of inactivity. No CNS access figure was fetched for it "
+        "either, and none is asserted. WHAT WOULD SETTLE IT: whether venetoclax was in the screened "
+        "library and failed (which would be a measured negative in this disease), plus a venetoclax "
+        "brain or CSF concentration.",
+        "NONE for the licensed member. Venetoclax does not appear in the 2026 screen's pan-active "
+        "table, but whether it was in the 1824-compound library is UNDETERMINED by this thread, so "
+        "that absence is not graded as a negative. Navitoclax has no canine-HS measurement either; "
+        "its rejection was on toxicity stacking, not potency.",
+        Availability.EXISTS_TODAY,
+        "Venetoclax is human-licensed (VENCLEXTA), oral, and labelled for continuous daily dosing -- "
+        "the schedule profile this project needs and rarely finds. Obtainable off-label. Canine "
+        "dosing would need deriving; dogs have received it in research settings.",
+    ),
+    Modality(
+        "interleukin-1 blockade as a tolerability enabler (not a tumour-kill modality)",
+        Status.NOT_ASSESSED,
+        "anakinra, added alongside a MAPK-axis agent rather than instead of one",
+        "FOUND MISSING 2026-11-03 by the hallmarks diff ('tumour-promoting inflammation'), and "
+        "enumerated on the model of the `molecular surveillance` row -- which is likewise not a "
+        "therapy but is in the catalogue because the plan's durability depends on it. This class "
+        "does not kill the tumour; it addresses the one soft spot condition C3 admits to, which is "
+        "whether a decade of continuous maintenance can actually be DELIVERED.\n"
+        "THE EVIDENCE, VERIFIED IN THIS SESSION AND ALREADY RECORDED AGAINST C3: adding anakinra to "
+        "MAPK-targeted therapy in Erdheim-Chester disease went with 18-month drug retention of 94% "
+        "against 65% without it (PMID 39814074). It travels as an ASSOCIATION and not an effect: "
+        "retrospective, observational, two referral centres, 52 patients across 60 treatment "
+        "courses with the anakinra arm only 16 of those 60, anakinra at physician discretion and no "
+        "adjustment for confounding. The paper's own body says 'was associated with'; only its title "
+        "says 'improves'.\n"
+        "WHY IT IS OPEN: an association in a human histiocytosis is not an effect size this project "
+        "may apply to a dog, and no canine data exist. It cannot be excluded on any of rule 13's "
+        "three grounds -- its 'kill' is not contradicted because kill is not its claim. WHAT WOULD "
+        "SETTLE IT: a prospective retention comparison, or a canine tolerability series on a "
+        "MAPK agent with and without IL-1 blockade.",
+        "NONE in this disease or species. The retention figures are human Erdheim-Chester disease, "
+        "retrospective, 16 of 60 courses.",
+        Availability.EXISTS_TODAY,
+        "Anakinra is human-licensed, used off-label in dogs, and short-acting -- which suits a "
+        "tolerability adjunct. Availability is not what is open.",
     ),
     Modality(
         "cytotoxic chemotherapy -- topoisomerase inhibitors",
@@ -1408,7 +1546,22 @@ KNOWN_OPEN_CLASSES: tuple[str, ...] = (
     "HSP90 inhibition",
     "cardiac glycosides / Na+,K+-ATPase inhibition",
     "translation-elongation inhibition",
+    "apoptosis induction / BH3 mimetics (BCL-2, BCL-XL)",
+    "interleukin-1 blockade as a tolerability enabler (not a tumour-kill modality)",
 )
+
+#: TWO HALLMARK COLUMNS WERE CONSIDERED AND JUDGED NOT TO MEET RULE 9's "COULD PLAUSIBLY MATTER"
+#: BAR, recorded here rather than silently omitted so the judgement is reviewable:
+#:   * DIFFERENTIATION THERAPY (retinoids / ATRA, the "unlocking phenotypic plasticity" column).
+#:     Differentiation induction is lineage-specific and its one clinical success is APL, driven by
+#:     PML-RARA. Canine HS is an already-differentiated myeloid/dendritic tumour with no analogous
+#:     fusion, and there is no retinoid evidence in this lineage in any species. Not enumerated.
+#:   * MICROBIOME MODULATION (the "polymorphic microbiomes" column). Its documented oncology effect
+#:     is modulation of CHECKPOINT-INHIBITOR response, which this catalogue already carries as its
+#:     own row; there is no route by which it reaches a primary intracranial mass as a therapy in
+#:     its own right. Not enumerated.
+#: Both are judgements about plausibility, not exclusions on rule 13 grounds -- which is why they sit
+#: here as a stated decision rather than as EXCLUDED rows with a ground they do not have.
 
 
 def _validate() -> None:

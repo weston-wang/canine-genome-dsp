@@ -98,11 +98,11 @@ Durability is therefore reached in **two moves**:
   is quantitative: per-day kill rates, CNS access, and the growth-rate bar.
 - **The claim is now scoped to a stated catalogue, not an unstated one.** Two audits were added
   after the above was first written, both required by the project's own rule 9:
-  `candidate_universe` enumerates **36 therapy-modality classes** (15 in the model, 15 excluded
-  with a recorded reason, **6 open**), and `escape_audit` derives the escape list
+  `candidate_universe` enumerates **39 therapy-modality classes** (15 in the model, 16 excluded
+  with a recorded reason, **8 open**), and `escape_audit` derives the escape list
   independently of the one in hand, finding **4 route gaps** the original twelve missed —
   so the audited count is **16 escapes**. The honest headline is therefore "closed within this
-  catalogue of 36 modality classes and 16 escape routes, with 6 classes open", with the exclusions
+  catalogue of 39 modality classes and 16 escape routes, with 8 classes open", with the exclusions
   named.
 
   Updated 2026-11-03, and this is the largest correction in the series. The sweep's **completeness
@@ -115,6 +115,16 @@ Durability is therefore reached in **two moves**:
   labelled until progression, and a sibling branch of this project had already measured the class's
   brain access. The operational lesson is now CLAUDE.md rule 16 — name the external taxonomy you
   diff against, because asking "what is missing?" while re-reading your own list finds nothing.
+
+  A SECOND diff the same day, against a BIOLOGICAL taxonomy (the Hanahan hallmarks therapeutic map
+  plus ATC L02/L03/L04) rather than the chemical one, added three more classes -> **39, 8 open**.
+  The anti-angiogenic/VEGFR row is bookkeeping (both members were already assessed as agents in
+  `therapies.py`; what the row adds is measured achievability in place of a "likely penetrates the
+  CNS poorly"). The BH3-mimetic row is not: the class had been dropped on navitoclax's on-target
+  thrombocytopenia, which IS BCL-XL inhibition -- the liability venetoclax was engineered to avoid,
+  and the reason it was licensed where navitoclax was not. Venetoclax appears nowhere in this repo.
+  Ten missing classes across two diffs on different axes is the measure of how incomplete the
+  "0 unassessed" line had been.
 
   Updated 2026-11-01, and this one is a DOWNGRADE of a published line: a second-pass sweep found
   two more classes that had never been rows, so "0 unassessed" became "1 open". Antimetabolites /

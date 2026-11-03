@@ -32,13 +32,14 @@ checklist, not a probability.
 | Items previously mis-reported as open | 9, each now graded and guarded | same |
 | Growth bar beaten | 0.055 / day | same |
 
-**Catalogue the claim is made over:** 36 therapy-modality classes — 15 in the model, 15 excluded, **6
+**Catalogue the claim is made over:** 39 therapy-modality classes — 15 in the model, 16 excluded, **8
 open** — and 16 escape routes from an independent audit. No class is excluded for lacking canine
-data; each exclusion rests on a contradicted kill (8), a named escape that defeats it (4), or a
+data; each exclusion rests on a contradicted kill (9), a named escape that defeats it (4), or a
 toxicity budget it would blow (3).
 
 **This count moved four times in four days, and the last move is the largest.** It read "25 classes,
-0 unassessed", then 26, then 28 with 1 open, then 29, and now **36 with 6 open**. The last jump came
+0 unassessed", then 26, then 28 with 1 open, then 29, then 36 with 6 open, and now **39 with 8 open**
+after a second, independent diff on a different axis. The first jump came
 from finally running the sweep's **completeness critic** — the step that rebuilds the class list from
 an *external* taxonomy and diffs it against this one. Diffed against **ATC L01** and against the drug
 classes represented in the canine screen's own pan-active table, the 29-row catalogue was missing
@@ -52,6 +53,18 @@ target species, orally dosed and indefinitely scheduled; selinexor, its sibling,
 lines at 5 µM and has measured brain:plasma of 0.60–0.72 across three species at an intact barrier.
 A sibling branch of this project had already done that pharmacology; this case's universe had never
 listed the class.
+
+**Then the same check was run against a second, different kind of taxonomy** — a *biological* one
+(the Hanahan hallmarks therapeutic map, plus the ATC branches the first pass never touched) rather
+than a chemical one — and it found three more classes: the **anti-angiogenic / VEGFR axis** (now
+excluded on measured achievability: toceranib and sunitinib sit 17–149× above achievable canine
+plasma, and even the screen's own unused headline of sunitinib at 608 nM is 5× short), **IL-1
+blockade** as a tolerability enabler, and **BH3 mimetics / BCL-2**. The last of those is not
+bookkeeping: the class had been set aside on navitoclax's on-target thrombocytopenia — which *is*
+BCL-XL inhibition, the very liability **venetoclax was engineered to avoid**, and the reason it
+reached licensure where navitoclax did not. Venetoclax, a licensed oral drug dosed continuously to
+progression, appears nowhere in this repository. Ten missing classes across two diffs is the real
+measure of how incomplete "0 unassessed" had been.
 
 **Three classes were found missing from this catalogue in three days, while the line read "0
 unassessed".** That is the procedural finding, and it matters more than any of the three: each was
