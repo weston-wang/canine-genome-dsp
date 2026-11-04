@@ -2298,8 +2298,9 @@ KNOWN_OPEN_CLASSES: tuple[str, ...] = (
 # Each of the 28 classes that sat at NOT_ASSESSED was searched (PubMed: class terms AND canine
 # histiocytic sarcoma / malignant histiocytosis; plus the targeted look-ups cited) and given a
 # verdict: EXCLUDED where a rule-13 ground was found, otherwise CANDIDATE with the ONE measurement
-# that would decide it. Two were excluded (MDM2 on measured subclonal TP53 loss; FTIs on K-Ras
-# alternative prenylation). Nothing was moved to IN_MODEL: no agent was wired into the regimen.
+# that would decide it. Two were first excluded (MDM2; FTIs) and BOTH were reverted to CANDIDATE the
+# same day after independent verification showed the grounds overreached (see their entries).
+# Nothing was moved to IN_MODEL: no agent was wired into the regimen.
 # The original row text is kept; the verdict is appended, so the history stays readable.
 # ---------------------------------------------------------------------------------------------
 @dataclass(frozen=True)
@@ -2315,15 +2316,15 @@ OPEN_BEFORE_ASSESSMENT_2026_11_04: tuple[str, ...] = KNOWN_OPEN_CLASSES
 
 ASSESSMENT_2026_11_04: dict[str, _Assessment] = {
     'MDM2-p53 interaction inhibition': _Assessment(
-        Status.EXCLUDED, ExclusionGround.DEFEATED_BY_ESCAPE,
+        Status.CANDIDATE, None,
         'PubMed 2026-11-04: (MDM2 OR nutlin OR idasanutlin OR TP53 OR p53) AND (histiocytic sarcoma OR malignant histiocytosis) AND (dog OR canine OR dogs) -> 6 records.',
-        'EXCLUDED. MDM2 inhibitors kill only through WILD-TYPE p53, and canine HS carries pre-existing p53-null subclones: a 2-base TP53 insertion (p.Tyr150SerfsX8) in 12/26 dogs, 10 of them the same allele (PMID 28867679); by digital PCR in 26/64 dogs (41%) at mean mutant allele frequency 1.9%, i.e. SUBCLONAL, and enriched in metastatic disease (PMID 30852355); regionally heterogeneous in 6/8 tumours (PMID 30662044); and the insertion abolishes p53 protein and its transcriptional function in canine HS cells (PMID 31246118); DH82 is TP53-deleted. A drug whose kill requires p53 therefore selects the p53-null subclone that is already present -- escape A7 (intratumour heterogeneity) acting through A2 (target loss). Measured in this disease, so it is a rule-13 ground, not an absence of data.',
-        ''),
+        "Assessed. FIRST RECORDED AS EXCLUDED (DEFEATED_BY_ESCAPE) AND REVERTED THE SAME DAY BY INDEPENDENT VERIFICATION. The numbers stand: a 2-base TP53 insertion (p.Tyr150SerfsX8) in 10 of 26 dogs, 12/26 with any TP53 change by PCR-SSCP, though a later paper could not re-detect the other seven point mutations (PMID 28867679 / 30662044); by digital PCR 26/64 (41%) at mean mutant allele frequency 1.9%, enriched in METASTATIC disease and possibly 'acquired... during development of metastasis', and not associated with survival or lomustine response (PMID 30852355); regionally heterogeneous in 6/8 primary lesions (PMID 30662044); the insertion abolishes p53 function when transduced into DH82 and CHS-3 (PMID 31246118). MDM2 inhibitors do select p53-mutant clones (human cells and a human liposarcoma series, PMIDs 21643018, 22476102, 27576846 -- indirect). WHY THE EXCLUSION DID NOT STAND: the cohorts were mostly extracranial (1 CNS case of 26) and half disseminated; the lesion is enriched in metastatic disease, which argues it is LESS frequent in non-disseminated intracranial HS; at ~59% insertion-negative and 1.9% mean allele frequency most cells in most dogs are p53-wild-type; and a pre-existing resistant subclone defeats MONOTHERAPY, not a combination whose other arms are p53-independent -- the same argument would exclude almost every agent. So escape A7/A2 defeats MDM2 inhibition as monotherapy only.",
+        'TP53 status of the case itself (digital PCR for the insertion plus sequencing), then an MDM2-inhibitor IC50 in p53-wild-type canine HS lines (CHS-3 is wild-type); combination use only'),
     'farnesyltransferase inhibition': _Assessment(
-        Status.EXCLUDED, ExclusionGround.KILL_CONTRADICTED,
+        Status.CANDIDATE, None,
         'PubMed 2026-11-04: (tipifarnib OR farnesyltransferase OR lonafarnib) AND (histiocytic sarcoma OR malignant histiocytosis) AND (dog OR canine OR dogs) -> 0 records.',
-        "EXCLUDED. Farnesyltransferase inhibitors block H-Ras but not K-Ras (or N-Ras), which are alternatively prenylated by geranylgeranyltransferase when FTase is inhibited (PMID 12882980; PMID 28530791). This tumour's recorded driver lesions are PTPN11/SHP2 (~56%) and KRAS -- upstream of, or in, the isoforms that bypass the drug. The licensed trial use was HRAS-gated (NCT04284774). Derived from mechanism, scoped: an HRAS-mutant canine HS would reopen the class.",
-        ''),
+        "Assessed, low priority. FIRST RECORDED AS EXCLUDED (KILL_CONTRADICTED) AND REVERTED THE SAME DAY BY INDEPENDENT VERIFICATION. What stands: FTIs 'can inhibit H-Ras localization but not K-Ras due to... alternative prenylation by geranylgeranyltransferase' (PMID 28530791) -- the earlier '(or N-Ras)' was unsourced and is withdrawn. Canine HS drivers: PTPN11 56.75% (63/111) and KRAS 7.2% (8/111) (PMID 32212266), PTPN11 55.8% and KRAS ~3% (PMID 39202410), PTPN11 43% and KRAS 3.1% in Bernese mountain dogs (PMID 31277422) -- and PTPN11 mutations are 'associated to visceral disseminated HS subtype' (PMID 32212266), so the driver premise is INDIRECT for primary intracranial HS. WHY THE EXCLUSION DID NOT STAND: PMID 12882980 itself says FTIs 'can inhibit the growth of tumors containing oncogenic K-Ras4B, implicating other farnesylated proteins', so what the mechanism removes is the Ras RATIONALE, not the kill. NCT04284774 is a Pediatric MATCH phase 2 subprotocol for HRAS-altered tumours, not a licensed use.",
+        'lonafarnib or tipifarnib IC50 in canine HS lines, including PTPN11-mutant ones'),
     'targeted protein degradation / cereblon modulators (immunomodulatory imides, CELMoDs)': _Assessment(
         Status.CANDIDATE, None,
         'PubMed 2026-11-04: (lenalidomide OR pomalidomide OR thalidomide OR cereblon) AND (histiocytic sarcoma OR malignant histiocytosis) AND (dog OR canine OR dogs) -> 1 records.',
@@ -2337,7 +2338,7 @@ ASSESSMENT_2026_11_04: dict[str, _Assessment] = {
     'proteasome inhibition': _Assessment(
         Status.CANDIDATE, None,
         'PubMed 2026-11-04: (bortezomib OR carfilzomib OR ixazomib OR proteasome) AND (histiocytic sarcoma OR malignant histiocytosis) AND (dog OR canine OR dogs) -> 0 records.',
-        "Assessed: pan-active in the canine HS screen. The one brain-penetrant member has a NEGATIVE phase 3 in a different brain tumour: marizomib added to standard therapy in 749 newly diagnosed glioblastoma patients did not improve OS (17 vs 16.5 months, HR 1.04) and added toxicity (PMID 38502052). Indirect for HS (other tumour), so not a rule-13 ground, but it removes the class's obvious route to the brain.",
+        "Assessed: pan-active in the canine HS screen. The one brain-penetrant member has a NEGATIVE phase 3 in a different brain tumour: marizomib added to standard therapy in 749 newly diagnosed glioblastoma patients did not improve OS (standard 17 vs marizomib 16.5 months, HR 1.04) and added toxicity (PMID 38502052). Indirect for HS (other tumour), so not a rule-13 ground, but it removes the class's obvious route to the brain.",
         'an IC50 in canine HS for a member with measured unbound brain exposure'),
     'HSP90 inhibition': _Assessment(
         Status.CANDIDATE, None,
@@ -2357,7 +2358,7 @@ ASSESSMENT_2026_11_04: dict[str, _Assessment] = {
     'apoptosis induction / BH3 mimetics (BCL-2, BCL-XL)': _Assessment(
         Status.CANDIDATE, None,
         'PubMed 2026-11-04: (venetoclax OR navitoclax OR BCL-2 OR BCL2 OR BCL-XL) AND (histiocytic sarcoma OR malignant histiocytosis) AND (dog OR canine OR dogs) -> 1 records.',
-        'Assessed: PubMed returns no BCL-2 inhibitor data in canine HS; the anti-apoptotic gene that IS measured high in canine HS is survivin, not BCL-2 (PMID 24260303) -- a reason to test before use.',
+        'Assessed: PubMed returns no BCL-2 inhibitor data in canine HS; survivin mRNA ranked above BCL-2, BCL-XL and MCL-1 in 30 canine HS (PMID 24260303) -- an expression ranking, not evidence against BCL-2 dependence, so it is only a reason to test before use.',
         'BH3 profiling or a venetoclax IC50 in canine HS lines'),
     'interleukin-1 blockade as a tolerability enabler (not a tumour-kill modality)': _Assessment(
         Status.CANDIDATE, None,
@@ -2367,17 +2368,17 @@ ASSESSMENT_2026_11_04: dict[str, _Assessment] = {
     'glucocorticoid-receptor agonists (corticosteroids)': _Assessment(
         Status.CANDIDATE, None,
         'PubMed 2026-11-04: (prednisone OR prednisolone OR dexamethasone OR glucocorticoid) AND (histiocytic sarcoma OR malignant histiocytosis) AND (dog OR canine OR dogs) -> 7 records.',
-        'Assessed, and the strongest in-case evidence of any candidate: a corgi with INTRACRANIAL HS, prednisolone 1 mg/kg/day shrank the lesion before radiation (PMID 34556593) -- right site, right species, n=1, with oedema reduction not separable from kill; the dog died at day 164 of CSF-borne intracranial spread. Glucocorticoids also blunt the immune arms.',
+        'Assessed, and the strongest in-case evidence of any candidate: a corgi with INTRACRANIAL HS, prednisolone 1 mg/kg/day shrank the lesion before radiation (PMID 34556593) -- right site, right species, n=1, but HS was NOT tissue-confirmed before treatment (meningioma and lymphoma were also in the differential), isosorbide was co-administered, and oedema reduction is not separable from kill; no tumour was found in the radiation field at necropsy, and the dog was EUTHANISED at day 164 for CSF-borne intracranial spread. The same paper cites the contrary: an intracranial HS that ENLARGED on prednisolone, and shorter time to progression with prednisolone in periarticular HS. Glucocorticoids also blunt the immune arms.',
         'a prednisolone/dexamethasone IC50 in canine HS lines (cells exist; a trivial assay)'),
     'nucleic-acid therapeutics (antisense oligonucleotide, siRNA)': _Assessment(
         Status.CANDIDATE, None,
         'PubMed 2026-11-04: (antisense OR siRNA OR oligonucleotide) AND (histiocytic sarcoma OR malignant histiocytosis) AND (dog OR canine OR dogs) -> 7 records.',
-        'Assessed: target dependency IS measured in canine HS -- survivin siRNA in 4 canine HS lines caused apoptosis, growth inhibition and chemosensitisation, and survivin was the highest of six anti-apoptotic genes in 30 tumours (PMID 24260303). What is missing is delivery: no CNS-capable anti-survivin oligonucleotide exists for the dog.',
+        'Assessed: target dependency IS measured in canine HS -- survivin siRNA in 4 canine HS lines caused apoptosis, growth inhibition and chemosensitisation, and survivin mRNA was the highest of seven anti-apoptotic genes measured in 30 tumours (PMID 24260303; the abstract says six, the methods list seven; expression ranking, not a dependency comparison). What is missing is delivery: no CNS-capable anti-survivin oligonucleotide exists for the dog.',
         "an intrathecally deliverable anti-survivin oligonucleotide's knockdown in canine HS in vivo"),
     'photodynamic / sonodynamic therapy (energy-activated sensitiser)': _Assessment(
         Status.CANDIDATE, None,
         'PubMed 2026-11-04: (photodynamic OR aminolevulinic OR sonodynamic) AND (histiocytic sarcoma OR malignant histiocytosis) AND (dog OR canine OR dogs) -> 1 records.',
-        "Assessed: a canine histiocytic sarcoma 'significantly diminished' after chlorin e6 PDT (one dog, presentation not stated, so indirect for the intracranial case; PMID 36556469); canine normal-brain MTD measured (PMID 10461068); 5-ALA localises to a canine brain tumour (PMID 30351464). Cavity-only and session-based, so its role is induction.",
+        "Assessed: a canine histiocytic sarcoma 'significantly diminished' after chlorin e6 PDT (one dachshund with multifocal cutaneous and nodal, i.e. disseminated, HS after surgery and doxorubicin/CCNU/imatinib; an axillary skin lesion diminished after the second treatment -- indirect for the intracranial case; PMID 36556469); canine normal-brain MTD measured (PMID 10461068); 5-ALA localises to a canine brain tumour (PMID 30351464). Cavity-only and session-based, so its role is induction.",
         '5-ALA or Ce6 fluorescence in a resected canine intracranial HS specimen'),
     'high-Z nanoparticle radioenhancement': _Assessment(
         Status.CANDIDATE, None,

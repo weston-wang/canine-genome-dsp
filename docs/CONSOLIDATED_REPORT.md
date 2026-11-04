@@ -32,10 +32,10 @@ checklist, not a probability.
 | Items previously mis-reported as open | 9, each now graded and guarded | same |
 | Growth bar beaten | 0.055 / day | same |
 
-**Catalogue the claim is made over:** 63 therapy-modality classes — 17 in the model, 20 excluded,
-**26 assessed candidates, 0 unassessed** (6 of the 26 carry a canine-HS measurement). Every class has
+**Catalogue the claim is made over:** 63 therapy-modality classes — 17 in the model, 18 excluded,
+**28 assessed candidates, 0 unassessed** (6 of the 28 carry a canine-HS measurement). Every class has
 now been searched and given a verdict; a candidate carries the one measurement that would decide it — and 16 escape routes from an independent audit. No class is excluded for lacking canine
-data; each exclusion rests on a contradicted kill (11), a named escape that defeats it (6), or a
+data; each exclusion rests on a contradicted kill (10), a named escape that defeats it (5), or a
 toxicity budget it would blow (3). *(Was 42 / 15 / 16 / 11 until 2026-11-04; see "Fourth to seventh
 axes" below.)*
 
@@ -120,15 +120,17 @@ first sign in the record that the search is converging. Closure is still claimed
 **named** catalogue.
 
 **Then every open family was examined, the same day.** Each of the 28 was searched against the
-canine histiocytic-sarcoma literature and given a verdict. Two were ruled out on admissible grounds:
-**MDM2 inhibitors** — they need working p53, and canine HS already carries cells without it (a p53
-frameshift in 41% of dogs, present in only part of each tumour), so the drug would select those cells;
-and **farnesyltransferase inhibitors** — they cannot block K-Ras, which this tumour's drivers run
-through. The other 26 are **candidates**: none can be ruled out on the evidence, none is in the plan,
-and each now names the single experiment that would decide it — most often an IC50 in the canine HS
+canine histiocytic-sarcoma literature and given a verdict. I first ruled two out — MDM2 inhibitors
+and farnesyltransferase inhibitors — and an **independent verifier overturned both the same day**:
+the p53 loss behind the first is mostly in spread (disseminated) disease, present in a minority of
+cells, and only defeats the drug used alone; and the K-Ras argument behind the second removes the
+drug's rationale, not its kill — its own source says these drugs still slow K-Ras tumours. Both are
+back as candidates. So all 28 are **candidates**: none can be ruled out on the evidence, none is in
+the plan, and each now names the single experiment that would decide it — most often an IC50 in the canine HS
 cell lines that already exist. Three searches turned up evidence in this tumour that had not been in
-the record: prednisolone shrank an **intracranial** HS in a dog before radiation (n=1); light-activated
-therapy shrank a canine HS (n=1, site not stated); and switching off survivin killed canine HS cells
+the record: prednisolone shrank a brain mass in a dog before radiation (n=1; histiocytic sarcoma was
+only confirmed afterwards, and the same paper cites a case that grew on prednisolone); light-activated
+therapy shrank a skin lesion in a dog with spread HS (n=1); and switching off survivin killed canine HS cells
 in the dish. One turned up a strong negative for a neighbouring tumour: the only brain-penetrant
 proteasome inhibitor failed a 749-patient glioblastoma trial.
 

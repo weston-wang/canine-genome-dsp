@@ -281,7 +281,7 @@ scientifically sound."*
 | Part | Verdict | Basis (where) |
 |---|---|---|
 | Clearing the first tumour | **Holds within a now-stated catalogue.** Every escape has a closing agent: of the original 12, 7 measured in canine HS, 2 transferred, 1 model-derived, 2 structural, **0 assumed**; all 45 pairs and 120 triples covered; toxicity budgets computed, one collision (radiation + CNS microtubule agent) resolved by sequencing. The 4 audit-added routes close on 1 measurement-backed drug choice, 2 transfers, 1 structural argument | `CONSOLIDATED_REPORT.md`, `coverage_assessment`, `escape_audit` |
-| "Every mechanism" | **Now established, as a scoped claim.** "Closed within this catalogue of **25 modality classes and 16 escape routes**", 0 classes unassessed, 10 excluded with reasons named. [**Superseded 2026-10-31: 26 classes, 11 excluded.**] [**Superseded again 2026-11-01: 28 classes, 12 excluded, 1 OPEN** — antimetabolites.] [**Superseded again 2026-11-02: 29 classes, 13 excluded, 1 OPEN** — antimetabolites CLOSED on three measured canine-HS IC50s; targeted protein degradation found missing and opened.] [**Superseded again 2026-11-03: 42 classes, 16 excluded, 11 OPEN** (three external-taxonomy diffs).] [**Superseded 2026-11-04 (fourth/fifth axes): 55 classes, 21 OPEN.**] [**Current, 2026-11-04: 63 classes — 17 in model, 20 excluded, 26 assessed candidates, 0 unassessed** (seven axes, every class assessed; see the last section of this file).] Not the same as "every conceivable mechanism" — it is a claim whose boundary is written down | `candidate_universe.closure_claim()`, `escape_audit` |
+| "Every mechanism" | **Now established, as a scoped claim.** "Closed within this catalogue of **25 modality classes and 16 escape routes**", 0 classes unassessed, 10 excluded with reasons named. [**Superseded 2026-10-31: 26 classes, 11 excluded.**] [**Superseded again 2026-11-01: 28 classes, 12 excluded, 1 OPEN** — antimetabolites.] [**Superseded again 2026-11-02: 29 classes, 13 excluded, 1 OPEN** — antimetabolites CLOSED on three measured canine-HS IC50s; targeted protein degradation found missing and opened.] [**Superseded again 2026-11-03: 42 classes, 16 excluded, 11 OPEN** (three external-taxonomy diffs).] [**Superseded 2026-11-04 (fourth/fifth axes): 55 classes, 21 OPEN.**] [**Current, 2026-11-04: 63 classes — 17 in model, 18 excluded, 28 assessed candidates, 0 unassessed** (seven axes, every class assessed; see the last section of this file).] Not the same as "every conceivable mechanism" — it is a claim whose boundary is written down | `candidate_universe.closure_claim()`, `escape_audit` |
 | Staying clear for 10 years | **Scientifically sound hypothesis, not a result.** Model P(10-year), systemic sites: 0.56–0.72 without monitoring, 0.81–0.86 with detect-and-switch. Brain-local hinges on drug access. **CSF now 0.434 [0.17, 0.69]** on a derived rather than assumed prior, and the binding constraint there is sustained delivery (no intrathecal sustained-release product exists), not potency | `emergence.py`; `maintenance_durability.csf_answer()` |
 | Oct 2026 literature | **No change to the design.** PRMT5 brain arm weaker, CDK4/6 brain arm better evidenced on the same deletion (section A); the deletion is common (62.8%), which widens coverage; the immune floor is weaker in MTAP-null tumours | sections A, B |
 | Largest uncertainty | **How often a cleared, predisposed dog throws a new primary (Λ)** — 50–90% of the variance. Not a drug question | `emergence.py` value-of-information |
@@ -2904,4 +2904,29 @@ already exist.
 3 toxicity), 26 candidates, 0 unassessed.** `standard_audit.failing()` returns `[]`; 873 tests pass.
 The search phase is complete: every planned step, every named axis, and every class has been run
 and recorded. What remains are laboratory measurements, each named, not searches.
+
+### Correction, same day: both new exclusions reverted by independent verification
+
+An independent verifier re-fetched every source behind the assessment's six load-bearing claims.
+Claims 3–6 stood with corrections now in the code: the prednisolone corgi was not tissue-confirmed
+before treatment, also received isosorbide, and was euthanised; the same paper cites an intracranial
+HS that *grew* on prednisolone. The Ce6 PDT dog had **disseminated cutaneous/nodal** HS. The survivin
+paper measured seven genes, not six, and its ranking is expression-only. The marizomib arms are now
+labelled.
+
+**Both exclusions were overturned:**
+- **MDM2** goes back to CANDIDATE. The TP53 insertion is enriched in *metastatic* disease and may be
+  acquired during spread, with 1 CNS case among 26. Most cells in most dogs are p53-wild-type, and a
+  pre-existing resistant subclone defeats monotherapy, not a combination. The deciding measurement is
+  the case's own TP53 status.
+- **Farnesyltransferase** goes back to CANDIDATE. Its own source says FTIs "can inhibit the growth of
+  tumors containing oncogenic K-Ras4B", so the mechanism removes the rationale, not the kill. The
+  "(or N-Ras)" claim was unsourced and is withdrawn. Driver frequencies are corrected to PTPN11
+  ~43–57% and KRAS 3–7%, with PTPN11 associated with *disseminated* HS (PMID 32212266), so the
+  premise is indirect here.
+
+That is the same failure the earlier verification caught: an inference hardened into a ground. Each
+time, a verifier fetching the source without my framing found it.
+
+**Final: 63 classes — 17 in model, 18 excluded (10 / 5 / 3), 28 candidates, 0 unassessed.**
 

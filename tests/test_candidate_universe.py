@@ -246,12 +246,12 @@ def test_the_catalogue_count_and_the_open_count_are_what_the_docs_say():
     t = cu.tally()
     assert len(cu.UNIVERSE) == 63
     assert t["IN_MODEL"] == 17
-    assert t["EXCLUDED"] == 20
-    assert t["CANDIDATE"] == 26
+    assert t["EXCLUDED"] == 18
+    assert t["CANDIDATE"] == 28
     assert t["NOT_ASSESSED"] == 0
     claim = cu.closure_claim(ea.audited_escape_count())
     assert "63 modality classes" in claim
-    assert "26 assessed candidates" in claim and "0 unassessed" in claim
+    assert "28 assessed candidates" in claim and "0 unassessed" in claim
 
 
 def test_c3_records_the_maintenance_pincer_at_the_strength_shown():
@@ -549,7 +549,7 @@ def test_the_open_classes_split_by_whether_canine_evidence_exists():
     withev = cu.open_with_canine_hs_evidence()
     without = cu.open_without_canine_hs_evidence()
     assert len(withev) + len(without) == len(cu.candidates()) + len(cu.not_assessed())
-    assert len(withev) == 6 and len(without) == 20
+    assert len(withev) == 6 and len(without) == 22
     assert all(m.canine_hs_evidence.startswith("MEASURED") for m in withev)
     names = {m.name for m in withev}
     assert "nuclear export inhibition (XPO1 / SINE compounds)" in names
@@ -653,11 +653,11 @@ def test_every_formerly_open_class_was_assessed_and_given_a_verdict():
             assert m.status in (cu.Status.CANDIDATE, cu.Status.EXCLUDED), m.name
     by = {m.name: m for m in cu.UNIVERSE}
     mdm2 = by["MDM2-p53 interaction inhibition"]
-    assert mdm2.exclusion_ground is cu.ExclusionGround.DEFEATED_BY_ESCAPE
-    assert "30852355" in mdm2.basis and "A7" in mdm2.basis
+    assert mdm2.status is cu.Status.CANDIDATE and "REVERTED THE SAME DAY" in mdm2.basis
+    assert "30852355" in mdm2.basis and "MONOTHERAPY" in mdm2.basis
     fti = by["farnesyltransferase inhibition"]
-    assert fti.exclusion_ground is cu.ExclusionGround.KILL_CONTRADICTED
-    assert "12882980" in fti.basis
+    assert fti.status is cu.Status.CANDIDATE and "REVERTED THE SAME DAY" in fti.basis
+    assert "32212266" in fti.basis and "withdrawn" in fti.basis
     assert "38502052" in by["proteasome inhibition"].basis
     assert "34556593" in by["glucocorticoid-receptor agonists (corticosteroids)"].basis
     assert "36556469" in by["photodynamic / sonodynamic therapy (energy-activated sensitiser)"].basis
