@@ -141,7 +141,11 @@ none of the 28 does that measurement exist in print, so the candidates are settl
 not by more searching. The sweep did turn up one family that had never been listed: **survivin
 suppression (YM155)**, which in canine HS cells reverses lomustine resistance by blocking the cells'
 drug pumps, and improved chemotherapy in mice carrying canine HS (PMIDs 26048444, 25744435). Final:
-**64 families — 17 in the plan, 18 ruled out, 29 candidates, 0 unexamined.**
+**64 families — 17 in the plan, 18 ruled out, 29 candidates, 0 unexamined.** All 29 candidates were then independently
+re-checked against their sources: none could be ruled out, and the check corrected several entries —
+notably that eflornithine (two-year cap), rabacfosadine (five doses) and verdinexor (label silent on
+duration) are not licensed for indefinite use, and that a second dog with HS in the brain improved
+only briefly on prednisolone.
 
 **Three classes were found missing from this catalogue in three days, while the line read "0
 unassessed".** That is the procedural finding, and it matters more than any of the three: each was

@@ -670,3 +670,18 @@ def test_deciding_measurement_sweep_covers_every_original_candidate_and_found_ym
     m = next(x for x in cu.UNIVERSE if x.name.startswith("survivin suppression"))
     assert m.status is cu.Status.CANDIDATE
     assert "25744435" in m.canine_hs_evidence and "A1" in m.basis
+
+
+def test_every_candidate_was_independently_verified():
+    names = {m.name for m in cu.candidates()}
+    assert names <= set(cu.VERIFICATION_2026_11_04)
+    for m in cu.candidates():
+        assert "VERIFIED 2026-11-04 (independent)" in m.basis, m.name
+    by = {m.name: m for m in cu.UNIVERSE}
+    assert "36504314" in by["glucocorticoid-receptor agonists (corticosteroids)"].basis
+    assert "two years" in by["polyamine-synthesis inhibition (ornithine decarboxylase)"].basis
+    assert "five doses" in by["acyclic nucleotide phosphonate prodrugs (rabacfosadine)"].basis
+    assert "11026694" in by["boron neutron capture therapy"].basis
+    assert by["farnesyltransferase inhibition"].availability is cu.Availability.EXISTS_TODAY
+    xpo = by["nuclear export inhibition (XPO1 / SINE compounds)"]
+    assert "labelled until progression --" not in xpo.availability_basis

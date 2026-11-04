@@ -2951,3 +2951,31 @@ count is stored in `candidate_universe.DECIDING_MEASUREMENT_SWEEP_2026_11_04`.
 **Final: 64 classes — 17 in model, 18 excluded, 29 candidates (7 with canine-HS measurements), 0
 unassessed.**
 
+### Independent verification of all 29 candidates
+
+Four verifiers (about seven classes each) re-fetched every load-bearing source and ran one fresh
+search per class, including the cell-line names. **No class gained an admissible exclusion ground;
+all 29 stay CANDIDATE.** Notes are appended to every row (`VERIFICATION_2026_11_04`). The material ones:
+
+- **Schedules I had wrong:** eflornithine's label caps it at **two years**; rabacfosadine is a
+  **five-dose** course; and the verdinexor row still said "until progression" in two fields after
+  its own retraction — now fixed. None of the three is licensed for indefinite use.
+- **Missed evidence at the right site:** a second **primary CNS** HS dog improved only transiently on
+  prednisolone and worsened over five months (PMID 36504314). Every in-site canine report now shows
+  no durable control on steroids — recorded against steroids as a stand-alone kill arm, not as an
+  exclusion (n=3, confounded).
+- **Missed canine data:** BNCT has a measured **canine brain tolerance** (6.7 Gy whole brain, 12
+  dogs, PMID 11026694) and has been given to dogs with tumours (PMIDs 33036386, 35053138).
+- **Results I said were unfetched are negative:** etanercept in LCH (0/5) and tocilizumab in
+  Erdheim-Chester (CNS progression in one of three) — indirect.
+- **Cell lines worse than stated:** only CHS-3 is TP53 wild-type among the four lines (PMID 25715778).
+- **Availability:** lonafarnib is licensed (Zokinvy), so farnesyltransferase exists today;
+  omacetaxine is discontinued in the US.
+- **Overstatements withdrawn:** YM155 "strongest evidence of any candidate"; NCT02523040 is a pooled
+  arm that may contain no HS; the PDT dog was on chemotherapy at the same time.
+- **Concrete toxicity test for digoxin:** canine toxicity at ~6 nM (PMID 35821778), so a canine HS
+  IC50 above ~5 nM would exclude the class on toxicity.
+
+**Final: 64 classes — 17 in model, 18 excluded, 29 candidates (each independently verified, each with
+the measurement that decides it), 0 unassessed.**
+

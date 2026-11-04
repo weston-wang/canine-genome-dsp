@@ -648,7 +648,8 @@ UNIVERSE: tuple[Modality, ...] = (
         "indirect on disease even while being direct on SITE; it is human; the patients were "
         "relapsed/refractory at a median of three prior lines; and pomalidomide was given WITH "
         "DEXAMETHASONE, which has activity of its own in PCNSL, so the 48% is a combination result "
-        "and may not be attributed to the degrader alone.",
+        "and may not be attributed to the degrader alone [SUPERSEDED 2026-11-04: dexamethasone ran "
+        "two cycles only -- see the correction in the basis].",
         "NONE IN THIS DISEASE AND NONE IN THE DOG. The canine side of this class is empty: no "
         "canine-HS IC50 for any degrader, no canine PK for lenalidomide or pomalidomide, no dog "
         "trial. Under rule 13 that is not a ground for exclusion, and under rule 11 it is not a gap "
@@ -1033,8 +1034,8 @@ UNIVERSE: tuple[Modality, ...] = (
         "forbids reading as a potency. (d) Verdinexor's canine-lymphoma efficacy is modest where it "
         "is measured: 37% response, median duration 18 days (cross-branch record). (e) Twice-weekly "
         "dosing is the same tension with C3's continuous presence that dordaviprone and tovorafenib "
-        "carry -- though 'until progression' makes it indefinite rather than capped, unlike the "
-        "anthracyclines and alkylators.\n"
+        "carry. [CORRECTED 2026-11-04: the Laverdia label does not contain the word 'until'; it gives "
+        "doses and stops, so indefinite scheduling is ASSUMED, not licensed.]\n"
         "WHAT WOULD CLOSE IT, and the sibling branch already names them as its two cheapest decisive "
         "measurements: a VERDINEXOR BRAIN:PLASMA RATIO FROM ANY DOG ON THE LICENSED DRUG, and a "
         "canine-HS IC50 for either member. Both are obtainable from animals already receiving an "
@@ -1045,9 +1046,9 @@ UNIVERSE: tuple[Modality, ...] = (
         "for exclusion and under rule 11 is not a gap to report, but IS the reason the class cannot "
         "yet be graded into the model.",
         Availability.EXISTS_TODAY,
-        "UNIQUELY STRONG IN THIS CATALOGUE: verdinexor is LICENSED FOR DOGS (Laverdia-CA1), oral, "
-        "and labelled until progression -- the only agent in any class here that is simultaneously "
-        "licensed in the target species, orally dosed and indefinitely scheduled. Selinexor is "
+        "Verdinexor is LICENSED FOR DOGS (LAVERDIA, NADA 141-614; Laverdia-CA1 while conditional), "
+        "oral. [CORRECTED 2026-11-04: an earlier version said 'labelled until progression' and "
+        "'indefinitely scheduled'; the label says neither, so indefinite use is an assumption.] Selinexor is "
         "human-licensed (XPOVIO, NDA 212306) and obtainable off-label, and it is the member carrying "
         "both the canine-HS screen activity and the three-species brain measurement. The class is "
         "therefore the opposite of a to-build problem.",
@@ -1924,9 +1925,9 @@ UNIVERSE: tuple[Modality, ...] = (
         Status.NOT_ASSESSED,
         "eflornithine / DFMO (IWILFIN, NDA215500, oral maintenance)",
         "FOUND BY THE NCIt DIFF. Relevant on schedule rather than potency: IWILFIN is the one "
-        "licensed antineoplastic whose indication IS indefinite oral relapse-risk reduction after "
-        "response (high-risk neuroblastoma), which is exactly the maintenance shape condition C3 "
-        "asks for. CNS access is MEASURED in humans: CSF up to 51% of serum in 5 patients with "
+        "licensed antineoplastic whose indication is oral relapse-risk reduction after response "
+        "(high-risk neuroblastoma) -- [CORRECTED 2026-11-04: TIME-LIMITED, the label says 'for a "
+        "maximum of two years', so it is closer to, but not, the indefinite shape C3 asks for]. CNS access is MEASURED in humans: CSF up to 51% of serum in 5 patients with "
         "late-stage sleeping sickness (PMID 3120607) -- an inflamed-barrier disease, so per rule 15 "
         "that is a CEILING, not a point value, and 'up to' is a maximum, not a mean.",
         "NONE in canine HS and none in the dog.",
@@ -2192,8 +2193,9 @@ UNIVERSE: tuple[Modality, ...] = (
         "YM155 (sepantronium bromide)",
         "FOUND BY THE DECIDING-MEASUREMENT SWEEP, which searched canine HS cell-line names (DH82, "
         "CHS-3) and not only the disease name -- the earlier queries missed it. Survivin is the "
-        "highest-expressed of seven anti-apoptotic genes in canine HS and HIGH survivin predicts "
-        "shorter disease-free interval and survival in 30 dogs (PMID 26048444). YM155 suppressed "
+        "highest-expressed of seven anti-apoptotic genes in canine HS (PMID 24260303) and HIGH "
+        "survivin predicts shorter disease-free interval and survival in 30 dogs (PMID 26048444). "
+        "YM155 suppressed "
         "growth of four canine HS lines and REVERSED lomustine resistance by inhibiting ABC-"
         "transporter activity (PMID 26048444) -- which bears directly on escape A1 (efflux) -- and "
         "increased chemotherapy efficacy in mice carrying canine HS xenografts (PMID 25744435). "
@@ -2338,8 +2340,9 @@ ASSESSMENT_2026_11_04: dict[str, _Assessment] = {
     'survivin suppression (YM155 / sepantronium)': _Assessment(
         Status.CANDIDATE, None,
         'PubMed 2026-11-04: (siRNA OR antisense OR survivin) AND (DH82 OR "canine histiocytic" OR ...) -> 6 records.',
-        "Assessed on discovery: the strongest canine-HS evidence of any candidate -- in-vivo "
-        "xenograft benefit plus reversal of transporter-mediated lomustine resistance. Not in the "
+        "Assessed on discovery: in-vitro and mouse-xenograft evidence in canine HS (no dog dosed, no "
+        "exposure data, and no intracranial tumour -- indirect for the site), plus reversal of "
+        "transporter-mediated lomustine resistance. Not in the "
         "regimen and no admissible exclusion ground.",
         "YM155 unbound brain or CSF exposure in any species, against its canine HS IC50"),
     'MDM2-p53 interaction inhibition': _Assessment(
@@ -2420,7 +2423,7 @@ ASSESSMENT_2026_11_04: dict[str, _Assessment] = {
     'polyamine-synthesis inhibition (ornithine decarboxylase)': _Assessment(
         Status.CANDIDATE, None,
         'PubMed 2026-11-04: (eflornithine OR difluoromethylornithine OR DFMO OR polyamine) AND (histiocytic sarcoma OR malignant histiocytosis) AND (dog OR canine OR dogs) -> 0 records.',
-        'Assessed: licensed indefinite oral maintenance; human CSF up to 51% at an inflamed barrier (ceiling); no canine HS data.',
+        'Assessed: licensed oral maintenance capped at two years by label; human CSF up to 51% at an inflamed barrier (ceiling); no canine HS data.',
         'eflornithine growth inhibition of canine HS lines at achievable concentration'),
     'anti-invasion / adhesion / chemokine-axis blockade (integrin, CXCR4)': _Assessment(
         Status.CANDIDATE, None,
@@ -2504,6 +2507,91 @@ UNIVERSE = _apply_assessment()
 #: After assessment, nothing is NOT_ASSESSED. The guard below still fails if a new unassessed row
 #: is added without being declared here.
 KNOWN_OPEN_CLASSES = ()
+
+
+#: INDEPENDENT VERIFICATION OF ALL CANDIDATES, 2026-11-04 (four verifiers, ~7 classes each). Every
+#: load-bearing source re-fetched, one fresh search per class including cell-line names. No class
+#: gained an admissible exclusion ground; every note below is appended to its row.
+VERIFICATION_2026_11_04: dict[str, str] = {
+    'targeted protein degradation / cereblon modulators (immunomodulatory imides, CELMoDs)':
+        "NCT02523040's posted results are ONE POOLED ARM (n=12) with no breakdown by diagnosis, scored by Histiocyte Society (LCH/ECD) criteria -- the HS count may be zero; indirect on disease. The 19%/17% CSF figure and the PCNSL-only 11/23 could not be re-fetched by this verifier (full text unavailable) and rest on the earlier verifier alone.",
+    'apoptosis induction / BH3 mimetics (BCL-2, BCL-XL)':
+        'The canine HS screen (PMID 42129963) excluded compounds already known to be active, and venetoclax/navitoclax do not appear in its main text, so absence from its hit list says nothing. Venetoclax keeps its own neutropenia, so the marrow-budget question remains.',
+    'HSP90 inhibition':
+        'Confirmed: 5 uM single-concentration screen; IC50s were determined only for three other drugs.',
+    'high-Z nanoparticle radioenhancement':
+        'Confirmed: 18 NBTXR3 registry studies, none intracranial.',
+    'tumour-treating fields (alternating electric fields)':
+        'Confirmed (P100034, 2011-04-08; S013 2015-10-05).',
+    'nitrogen-bisphosphonate chemosensitisation (free zoledronate)':
+        'PMID 22236140 used MALIGNANT HISTIOCYTOSIS (disseminated) lines -- indirect on presentation; only clodronate+vincristine is called synergy.',
+    'alteration-matched agents gated on lesions not reported in canine HS (ALK/NTRK/RET fusions, IDH1)':
+        "Posted Pediatric MATCH responses: ensartinib 33.3%, larotrectinib 33%, selpercatinib n=1, ivosidenib 0% (n=3); no HS breakdown -- indirect. Ensartinib's licence was not checked at an FDA source.",
+    'survivin suppression (YM155 / sepantronium)':
+        "Citation corrected (expression ranking is PMID 24260303, prognosis and YM155 are PMID 26048444); 'strongest evidence of any candidate' withdrawn; no tumour, line or xenograft was intracranial. Nuclear survivin tracks cleaved caspase-3 in skin/lung/liver HS (PMID 40271486).",
+    'glucocorticoid-receptor agonists (corticosteroids)':
+        "MISSED, right site and species: a necropsy-confirmed PRIMARY CNS HS dog 'transiently improved with prednisolone... but worsened over the following 5 months' (PMID 36504314). With the corgi (progressed by day 164 on prednisolone plus radiation) and the cited enlargement case (PMID 19400464, whose abstract does not mention prednisolone), every in-site canine report shows no DURABLE control on steroids -- an argument against them as a stand-alone durable kill arm at n=3 anecdotal strength. Not recorded as an exclusion: anecdotes with confounders are the kind of ground that was over-read twice today, and steroids keep an adjunct/oedema role that makes no kill claim.",
+    'interleukin-1 blockade as a tolerability enabler (not a tumour-kill modality)':
+        "The abstract calls the 16 (27%) 'patients' while 27% matches the 60-course denominator; 'no adjustment for confounding' is unverifiable from the abstract.",
+    'cardiac glycosides / Na+,K+-ATPase inhibition':
+        'Canine exposure ceiling now sourced: two dogs at 4.46 and 5.24 ng/ml had toxicity reversing on withdrawal (PMID 35821778), i.e. ~6 nM -- about 1/700 of the 5 uM screen concentration. The deciding test is now concrete: a canine HS IC50 below ~5 nM, otherwise TOXICITY_UNAFFORDABLE.',
+    'ligand-toxin fusions / immunotoxins (catalytic protein toxins)':
+        'The CD123-negative case (PMID 40418704) is a human secondary HS arising from CLL -- weak, indirect. CD18 is on all leukocytes and CD204 on normal macrophages/microglia: on-target toxicity to quantify.',
+    'targeted radionuclide therapy / radioconjugates':
+        'Confirmed; no therapeutic canine-HS record.',
+    'inflammatory-cytokine blockade (TNF, IL-6)':
+        "The results called 'not fetched' are published: etanercept in LCH, 'None of the five patients had improvement... concluded early due to lack of response' (PMID 30468406); tocilizumab in Erdheim-Chester (n=3), one patient had 'radiologic and clinical progression of central nervous system involvement' (PMID 28680751). Indirect (other diseases), so not a rule-13 ground, but both are negatives, one at a CNS site. NCT01727206 is registered PHASE2, n=3.",
+    'JAK/STAT inhibition':
+        'STAT3 activation was inferred from sequencing only; ERK and Akt, not STAT3, were confirmed in the cell lines (PMID 37231193).',
+    'MDM2-p53 interaction inhibition':
+        "The cell-line TP53 status is WORSE than the row said: 2 of 4 lines carry TP53 mutations with no wild-type allele and DH82 has lost the coding region; only CHS-3 is wild-type (PMID 25715778; disseminated-HS lines, indirect). And 'most cells in most dogs are p53-wild-type' does not follow: the digital PCR assayed only the insertion. Candidate stands on the monotherapy-only argument. The '4/7 corgi cases' figure carries no PMID.",
+    'nuclear export inhibition (XPO1 / SINE compounds)':
+        'The ten screen lines are all EXTRACRANIAL (skin, synovium, node, spleen, mandible, effusion) -- indirect on presentation. Quote the monkey ratio as 0.6.',
+    'translation-elongation inhibition':
+        'SYNRIBO (omacetaxine, NDA203585) is listed as DISCONTINUED in Drugs@FDA, so US obtainability is doubtful; a non-US approval was not verified.',
+    'polyamine-synthesis inhibition (ornithine decarboxylase)':
+        "IWILFIN label: 'until disease progression, unacceptable toxicity, or for a maximum of two years' -- time-limited, not indefinite.",
+    'acyclic nucleotide phosphonate prodrugs (rabacfosadine)':
+        "Label is a CAPPED course: 'once every three weeks, for up to five doses' (NADA 141-545), which conflicts with C3; contraindicated in West Highland white terriers (pulmonary fibrosis).",
+    'RANKL inhibition':
+        'Confirmed (NCT03270020 completed, no posted results). Indirect: denosumab activity in a beagle model (PMID 41407913) bears on canine RANKL binding.',
+    'boron neutron capture therapy':
+        "MISSED CANINE DATA: normal canine brain BPA-BNCT tolerance 6.7 Gy (9.8 Gy-Eq) whole brain, 8.2 Gy (12.3 Gy-Eq) hemisphere in 12 dogs (PMID 11026694) -- a measured brain budget; BPA-BNCT in 5 dogs with head-and-neck cancer, 'partial tumor control in all cases' (PMID 33036386); accelerator BNCT in 10 cats and dogs, toxicity mild and reversible (PMID 35053138). Strengthens NEAR_FUTURE: BNCT has been given to dogs.",
+    'nucleic-acid therapeutics (antisense oligonucleotide, siRNA)':
+        'Confirmed (in-vitro transfection, 4 lines).',
+    'proteasome inhibition':
+        'Confirmed; the hedgehog HS line (PMID 38880614) is another species and supports kill only indirectly.',
+    'photodynamic / sonodynamic therapy (energy-activated sensitiser)':
+        'The HS dog received CHEMOTHERAPY at the same time as PDT (confounded); the axillary lesion shrank from 9.9x9.95x15.3 to 9.6x5.9x11.1 mm while the groin lesion was unchanged (PMID 36556469).',
+    'anti-invasion / adhesion / chemokine-axis blockade (integrin, CXCR4)':
+        'Missed, expression only: MMPs and TIMP-1 concentrate at the INVASIVE FRONT of canine HS (PMID 29571518). Plerixafor use in dogs is documented (e.g. PMID 30221450).',
+    'amino-acid-depleting enzymes (L-asparaginase)':
+        'PMID 35249267 is a lomustine-neutropenia risk-factor study in which L-asparaginase was one analysed variable; no efficacy data.',
+    'farnesyltransferase inhibition':
+        'AVAILABILITY CORRECTED: lonafarnib is human-licensed and oral (ZOKINVY, NDA213969, progeria), so the class EXISTS TODAY off-label; tipifarnib is not licensed.',
+    'arsenic trioxide':
+        'Confirmed licensed; the brain-tumour trial that prompted the row is not cited by NCT number.',
+}
+
+
+def _apply_verification() -> tuple[Modality, ...]:
+    from dataclasses import replace
+    out = []
+    for m in UNIVERSE:
+        note = VERIFICATION_2026_11_04.get(m.name)
+        if note is None:
+            out.append(m)
+            continue
+        kw = {"basis": m.basis + "\nVERIFIED 2026-11-04 (independent): " + note}
+        if m.name == "farnesyltransferase inhibition":
+            kw["availability"] = Availability.EXISTS_TODAY
+            kw["availability_basis"] = ("Lonafarnib is human-licensed and oral (ZOKINVY, NDA213969, a "
+                                        "non-oncology indication); tipifarnib is not licensed.")
+        out.append(replace(m, **kw))
+    return tuple(out)
+
+
+UNIVERSE = _apply_verification()
 
 
 #: DECIDING-MEASUREMENT SWEEP, 2026-11-04. For every candidate, PubMed was searched for the specific
