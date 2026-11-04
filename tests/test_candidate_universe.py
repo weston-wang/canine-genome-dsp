@@ -244,14 +244,14 @@ def test_the_catalogue_count_and_the_open_count_are_what_the_docs_say():
     '26 -- 15/11/0 unassessed' -> '28 -- 15/12/1 open' -> '29 -- 15/13/1 open'. If this test fails,
     three documents and a reader-facing page are now lying."""
     t = cu.tally()
-    assert len(cu.UNIVERSE) == 63
+    assert len(cu.UNIVERSE) == 64
     assert t["IN_MODEL"] == 17
     assert t["EXCLUDED"] == 18
-    assert t["CANDIDATE"] == 28
+    assert t["CANDIDATE"] == 29
     assert t["NOT_ASSESSED"] == 0
     claim = cu.closure_claim(ea.audited_escape_count())
-    assert "63 modality classes" in claim
-    assert "28 assessed candidates" in claim and "0 unassessed" in claim
+    assert "64 modality classes" in claim
+    assert "29 assessed candidates" in claim and "0 unassessed" in claim
 
 
 def test_c3_records_the_maintenance_pincer_at_the_strength_shown():
@@ -549,7 +549,7 @@ def test_the_open_classes_split_by_whether_canine_evidence_exists():
     withev = cu.open_with_canine_hs_evidence()
     without = cu.open_without_canine_hs_evidence()
     assert len(withev) + len(without) == len(cu.candidates()) + len(cu.not_assessed())
-    assert len(withev) == 6 and len(without) == 22
+    assert len(withev) == 7 and len(without) == 22
     assert all(m.canine_hs_evidence.startswith("MEASURED") for m in withev)
     names = {m.name for m in withev}
     assert "nuclear export inhibition (XPO1 / SINE compounds)" in names
@@ -646,7 +646,7 @@ def test_every_formerly_open_class_was_assessed_and_given_a_verdict():
     """2026-11-04: all 28 open classes searched; each is EXCLUDED on a rule-13 ground or a CANDIDATE
     carrying the one measurement that decides it. Nothing is left NOT_ASSESSED."""
     assert cu.not_assessed() == []
-    assert set(cu.OPEN_BEFORE_ASSESSMENT_2026_11_04) == set(cu.ASSESSMENT_2026_11_04)
+    assert set(cu.OPEN_BEFORE_ASSESSMENT_2026_11_04) <= set(cu.ASSESSMENT_2026_11_04)
     for m in cu.UNIVERSE:
         if m.name in cu.ASSESSMENT_2026_11_04:
             assert "ASSESSED 2026-11-04 (PubMed" in m.basis, m.name
@@ -662,3 +662,11 @@ def test_every_formerly_open_class_was_assessed_and_given_a_verdict():
     assert "34556593" in by["glucocorticoid-receptor agonists (corticosteroids)"].basis
     assert "36556469" in by["photodynamic / sonodynamic therapy (energy-activated sensitiser)"].basis
     assert "24260303" in by["nucleic-acid therapeutics (antisense oligonucleotide, siRNA)"].basis
+
+
+def test_deciding_measurement_sweep_covers_every_original_candidate_and_found_ym155():
+    assert len(cu.DECIDING_MEASUREMENT_SWEEP_2026_11_04) == 28
+    assert all("DH82" in q for _, q in cu.DECIDING_MEASUREMENT_SWEEP_2026_11_04.values())
+    m = next(x for x in cu.UNIVERSE if x.name.startswith("survivin suppression"))
+    assert m.status is cu.Status.CANDIDATE
+    assert "25744435" in m.canine_hs_evidence and "A1" in m.basis

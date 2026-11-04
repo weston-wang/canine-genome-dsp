@@ -32,8 +32,8 @@ checklist, not a probability.
 | Items previously mis-reported as open | 9, each now graded and guarded | same |
 | Growth bar beaten | 0.055 / day | same |
 
-**Catalogue the claim is made over:** 63 therapy-modality classes — 17 in the model, 18 excluded,
-**28 assessed candidates, 0 unassessed** (6 of the 28 carry a canine-HS measurement). Every class has
+**Catalogue the claim is made over:** 64 therapy-modality classes — 17 in the model, 18 excluded,
+**29 assessed candidates, 0 unassessed** (7 of the 29 carry a canine-HS measurement). Every class has
 now been searched and given a verdict; a candidate carries the one measurement that would decide it — and 16 escape routes from an independent audit. No class is excluded for lacking canine
 data; each exclusion rests on a contradicted kill (10), a named escape that defeats it (5), or a
 toxicity budget it would blow (3). *(Was 42 / 15 / 16 / 11 until 2026-11-04; see "Fourth to seventh
@@ -133,6 +133,15 @@ only confirmed afterwards, and the same paper cites a case that grew on predniso
 therapy shrank a skin lesion in a dog with spread HS (n=1); and switching off survivin killed canine HS cells
 in the dish. One turned up a strong negative for a neighbouring tumour: the only brain-penetrant
 proteasome inhibitor failed a 749-patient glioblastoma trial.
+
+**Last, a search for the deciding experiments themselves.** For every candidate, PubMed was
+searched for the specific measurement that would settle it, this time also by the names of the
+canine histiocytic-sarcoma cell lines (DH82, CHS-3), which the earlier searches had not used. For
+none of the 28 does that measurement exist in print, so the candidates are settled by laboratory work,
+not by more searching. The sweep did turn up one family that had never been listed: **survivin
+suppression (YM155)**, which in canine HS cells reverses lomustine resistance by blocking the cells'
+drug pumps, and improved chemotherapy in mice carrying canine HS (PMIDs 26048444, 25744435). Final:
+**64 families — 17 in the plan, 18 ruled out, 29 candidates, 0 unexamined.**
 
 **Three classes were found missing from this catalogue in three days, while the line read "0
 unassessed".** That is the procedural finding, and it matters more than any of the three: each was

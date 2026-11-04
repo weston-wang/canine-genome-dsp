@@ -2185,6 +2185,26 @@ UNIVERSE: tuple[Modality, ...] = (
         Availability.EXISTS_TODAY,
         "Human-licensed intravenous drug.",
     ),
+    # ---- Found 2026-11-04 by the deciding-measurement sweep (cell-line names as search terms).
+    Modality(
+        "survivin suppression (YM155 / sepantronium)",
+        Status.NOT_ASSESSED,
+        "YM155 (sepantronium bromide)",
+        "FOUND BY THE DECIDING-MEASUREMENT SWEEP, which searched canine HS cell-line names (DH82, "
+        "CHS-3) and not only the disease name -- the earlier queries missed it. Survivin is the "
+        "highest-expressed of seven anti-apoptotic genes in canine HS and HIGH survivin predicts "
+        "shorter disease-free interval and survival in 30 dogs (PMID 26048444). YM155 suppressed "
+        "growth of four canine HS lines and REVERSED lomustine resistance by inhibiting ABC-"
+        "transporter activity (PMID 26048444) -- which bears directly on escape A1 (efflux) -- and "
+        "increased chemotherapy efficacy in mice carrying canine HS xenografts (PMID 25744435). "
+        "Distinct from the nucleic-acid row (siRNA): a small molecule with in-vivo canine-HS data.",
+        "MEASURED in canine HS: growth suppression and reversal of CCNU resistance in four lines "
+        "(PMID 26048444); enhanced chemotherapy efficacy in canine-HS xenografts in mice (PMID "
+        "25744435). No canine PK, no brain exposure figure.",
+        Availability.NEAR_FUTURE,
+        "Not licensed in any species; reached human phase 2. Its brain exposure was not looked up "
+        "and is not asserted.",
+    ),
 )
 
 
@@ -2315,6 +2335,13 @@ class _Assessment:
 OPEN_BEFORE_ASSESSMENT_2026_11_04: tuple[str, ...] = KNOWN_OPEN_CLASSES
 
 ASSESSMENT_2026_11_04: dict[str, _Assessment] = {
+    'survivin suppression (YM155 / sepantronium)': _Assessment(
+        Status.CANDIDATE, None,
+        'PubMed 2026-11-04: (siRNA OR antisense OR survivin) AND (DH82 OR "canine histiocytic" OR ...) -> 6 records.',
+        "Assessed on discovery: the strongest canine-HS evidence of any candidate -- in-vivo "
+        "xenograft benefit plus reversal of transporter-mediated lomustine resistance. Not in the "
+        "regimen and no admissible exclusion ground.",
+        "YM155 unbound brain or CSF exposure in any species, against its canine HS IC50"),
     'MDM2-p53 interaction inhibition': _Assessment(
         Status.CANDIDATE, None,
         'PubMed 2026-11-04: (MDM2 OR nutlin OR idasanutlin OR TP53 OR p53) AND (histiocytic sarcoma OR malignant histiocytosis) AND (dog OR canine OR dogs) -> 6 records.',
@@ -2477,6 +2504,47 @@ UNIVERSE = _apply_assessment()
 #: After assessment, nothing is NOT_ASSESSED. The guard below still fails if a new unassessed row
 #: is added without being declared here.
 KNOWN_OPEN_CLASSES = ()
+
+
+#: DECIDING-MEASUREMENT SWEEP, 2026-11-04. For every candidate, PubMed was searched for the specific
+#: measurement that would decide it, using canine HS CELL-LINE names (DH82, CHS-3) and neighbouring
+#: dendritic-cell sarcomas as well as the disease name. Result: for NONE of the 28 candidates does the
+#: deciding measurement exist in the literature. The hits were other tumours (follicular/
+#: interdigitating dendritic-cell sarcoma, human), other species (a hedgehog HS line sensitive to
+#: bortezomib, PMID 38880614 -- indirect), non-tumour macrophage biology, or evidence already in the
+#: record. The sweep did find ONE new class, survivin suppression (YM155), now a candidate. So the
+#: remaining candidates are decided by laboratory measurement, not by further literature search --
+#: and that statement is now a search result, recorded per class below as (record count, query).
+DECIDING_MEASUREMENT_SWEEP_2026_11_04: dict[str, tuple[int, str]] = {
+    'degraders': (5, '(pomalidomide OR lenalidomide OR thalidomide) AND (DH82 OR "canine histiocytic" OR "histiocytic sarcoma cell" OR "malignant histiocytosis" OR CHS-3 OR "dendritic cell sarcoma")'),
+    'xpo1': (0, '(verdinexor OR selinexor OR KPT-335 OR KPT-330 OR XPO1) AND (DH82 OR "canine histiocytic" OR "histiocytic sarcoma cell" OR "malignant histiocytosis" OR CHS-3 OR "dendritic cell sarcoma")'),
+    'proteasome': (2, '(bortezomib OR carfilzomib OR ixazomib OR marizomib OR proteasome inhibitor) AND (DH82 OR "canine histiocytic" OR "histiocytic sarcoma cell" OR "malignant histiocytosis" OR CHS-3 OR "dendritic cell sarcoma")'),
+    'hsp90': (1, '(HSP90 OR ganetespib OR retaspimycin OR geldanamycin OR 17-AAG OR 17-DMAG) AND (DH82 OR "canine histiocytic" OR "histiocytic sarcoma cell" OR "malignant histiocytosis" OR CHS-3 OR "dendritic cell sarcoma")'),
+    'glycoside': (0, '(digoxin OR ouabain OR digitoxin OR bufalin OR cardiac glycoside) AND (DH82 OR "canine histiocytic" OR "histiocytic sarcoma cell" OR "malignant histiocytosis" OR CHS-3 OR "dendritic cell sarcoma")'),
+    'translation': (0, '(homoharringtonine OR omacetaxine OR plitidepsin) AND (DH82 OR "canine histiocytic" OR "histiocytic sarcoma cell" OR "malignant histiocytosis" OR CHS-3 OR "dendritic cell sarcoma")'),
+    'bh3': (1, '(venetoclax OR navitoclax OR ABT-737 OR ABT-263 OR BCL-2 inhibitor) AND (DH82 OR "canine histiocytic" OR "histiocytic sarcoma cell" OR "malignant histiocytosis" OR CHS-3 OR "dendritic cell sarcoma")'),
+    'il1': (0, '(anakinra OR IL-1 receptor antagonist) AND (DH82 OR "canine histiocytic" OR "histiocytic sarcoma cell" OR "malignant histiocytosis" OR CHS-3 OR "dendritic cell sarcoma")'),
+    'glucocorticoid': (69, '(dexamethasone OR prednisolone OR glucocorticoid) AND (DH82 OR "canine histiocytic" OR "histiocytic sarcoma cell" OR "malignant histiocytosis" OR CHS-3 OR "dendritic cell sarcoma")'),
+    'mdm2': (0, '(nutlin OR MDM2 inhibitor OR idasanutlin OR RG7112) AND (DH82 OR "canine histiocytic" OR "histiocytic sarcoma cell" OR "malignant histiocytosis" OR CHS-3 OR "dendritic cell sarcoma")'),
+    'nucleic': (6, '(siRNA OR antisense OR survivin) AND (DH82 OR "canine histiocytic" OR "histiocytic sarcoma cell" OR "malignant histiocytosis" OR CHS-3 OR "dendritic cell sarcoma")'),
+    'pdt': (0, '(photodynamic OR aminolevulinic OR chlorin OR photosensitizer) AND (DH82 OR "canine histiocytic" OR "histiocytic sarcoma cell" OR "malignant histiocytosis" OR CHS-3 OR "dendritic cell sarcoma")'),
+    'radioenh': (0, '(NBTXR3 OR hafnium oxide OR gold nanoparticles radiosensitization) AND (DH82 OR "canine histiocytic" OR "histiocytic sarcoma cell" OR "malignant histiocytosis" OR CHS-3 OR "dendritic cell sarcoma")'),
+    'immunotoxin': (0, '(immunotoxin OR diphtheria toxin OR saporin OR exotoxin) AND (DH82 OR "canine histiocytic" OR "histiocytic sarcoma cell" OR "malignant histiocytosis" OR CHS-3 OR "dendritic cell sarcoma")'),
+    'odc': (4, '(eflornithine OR DFMO OR difluoromethylornithine OR polyamine) AND (DH82 OR "canine histiocytic" OR "histiocytic sarcoma cell" OR "malignant histiocytosis" OR CHS-3 OR "dendritic cell sarcoma")'),
+    'invasion': (0, '(plerixafor OR AMD3100 OR CXCR4 OR integrin inhibitor) AND (DH82 OR "canine histiocytic" OR "histiocytic sarcoma cell" OR "malignant histiocytosis" OR CHS-3 OR "dendritic cell sarcoma")'),
+    'ttfields': (5, '(tumor treating fields OR alternating electric fields) AND (DH82 OR "canine histiocytic" OR "histiocytic sarcoma cell" OR "malignant histiocytosis" OR CHS-3 OR "dendritic cell sarcoma")'),
+    'radionuclide': (6, '(radioimmunotherapy OR radionuclide OR 177Lu OR 131I) AND (DH82 OR "canine histiocytic" OR "histiocytic sarcoma cell" OR "malignant histiocytosis" OR CHS-3 OR "dendritic cell sarcoma")'),
+    'rabacfosadine': (0, '(rabacfosadine OR GS-9219 OR VDC-1101 OR PMEG) AND (DH82 OR "canine histiocytic" OR "histiocytic sarcoma cell" OR "malignant histiocytosis" OR CHS-3 OR "dendritic cell sarcoma")'),
+    'asparaginase': (2, '(asparaginase OR asparagine synthetase) AND (DH82 OR "canine histiocytic" OR "histiocytic sarcoma cell" OR "malignant histiocytosis" OR CHS-3 OR "dendritic cell sarcoma")'),
+    'zoledronate': (2, '(zoledronate OR zoledronic acid OR alendronate OR bisphosphonate) AND (DH82 OR "canine histiocytic" OR "histiocytic sarcoma cell" OR "malignant histiocytosis" OR CHS-3 OR "dendritic cell sarcoma")'),
+    'tnf': (6, '(etanercept OR TNF inhibitor OR tocilizumab) AND (DH82 OR "canine histiocytic" OR "histiocytic sarcoma cell" OR "malignant histiocytosis" OR CHS-3 OR "dendritic cell sarcoma")'),
+    'rankl': (0, '(RANKL OR denosumab OR osteoprotegerin) AND (DH82 OR "canine histiocytic" OR "histiocytic sarcoma cell" OR "malignant histiocytosis" OR CHS-3 OR "dendritic cell sarcoma")'),
+    'fti': (0, '(tipifarnib OR lonafarnib OR farnesyltransferase) AND (DH82 OR "canine histiocytic" OR "histiocytic sarcoma cell" OR "malignant histiocytosis" OR CHS-3 OR "dendritic cell sarcoma")'),
+    'fusions': (17, '(ALK OR NTRK OR RET fusion OR IDH1) AND (DH82 OR "canine histiocytic" OR "histiocytic sarcoma cell" OR "malignant histiocytosis" OR CHS-3 OR "dendritic cell sarcoma")'),
+    'jak': (3, '(ruxolitinib OR oclacitinib OR JAK inhibitor OR STAT3 inhibitor) AND (DH82 OR "canine histiocytic" OR "histiocytic sarcoma cell" OR "malignant histiocytosis" OR CHS-3 OR "dendritic cell sarcoma")'),
+    'bnct': (0, '(boron neutron capture OR boronophenylalanine) AND (DH82 OR "canine histiocytic" OR "histiocytic sarcoma cell" OR "malignant histiocytosis" OR CHS-3 OR "dendritic cell sarcoma")'),
+    'ato': (0, '(arsenic trioxide OR arsenite) AND (DH82 OR "canine histiocytic" OR "histiocytic sarcoma cell" OR "malignant histiocytosis" OR CHS-3 OR "dendritic cell sarcoma")'),
+}
 
 
 def _validate() -> None:

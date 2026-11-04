@@ -149,7 +149,9 @@ Durability is therefore reached in **two moves**:
   verifier the same day (the TP53 loss is subclonal, mostly in disseminated disease, and defeats
   monotherapy only; FTIs still slow K-Ras tumours via other farnesylated proteins). All 28 are
   CANDIDATE with the deciding measurement each. **63: 17 in model, 18 excluded, 28 candidates,
-  0 unassessed.**
+  0 unassessed.** A final sweep searched for each candidate's deciding measurement (adding cell-line
+  names DH82/CHS-3 as terms): it exists in print for none of the 28, and the sweep found one unlisted
+  class, survivin suppression (YM155; PMIDs 26048444, 25744435). **64: 17 / 18 / 29 candidates.**
 
   Updated 2026-11-01, and this one is a DOWNGRADE of a published line: a second-pass sweep found
   two more classes that had never been rows, so "0 unassessed" became "1 open". Antimetabolites /
