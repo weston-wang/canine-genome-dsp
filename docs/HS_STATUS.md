@@ -2635,3 +2635,123 @@ I never verified myself**: verdinexor's January 2026 full FDA approval. The same
 carries the **fourth** taxonomy diff. Every substantive finding above was verified by me at primary
 source first-hand; what the scheduled phase adds is **independence**, which is the thing hand-
 verification cannot supply.
+
+## 2026-11-04: the independent verification ran, and it corrected eight of my own claims
+
+The verify phase that two workflow runs had lost to usage limits finally executed: **12 independent
+skeptics, one per finding**, each told to re-fetch the primary source itself and default to
+rejecting. This is the phase hand-verification cannot substitute for, and it earned its keep —
+**four claims came back rejected and several "confirmed" ones carried material overreach.** Every
+correction below is to something *I* established and pushed.
+
+### The regulatory claim I flagged as unverified was wrong in three ways — and its load-bearing half is retracted
+
+**Verdinexor / Laverdia.** I had flagged this as the one claim taken from a sibling branch and never
+checked first-hand. It needed checking.
+
+- **Stands:** conditional approval **11 January 2021** (application 141-526, Anivive), indication
+  **lymphoma in dogs**, oral, **1.25 mg/kg twice weekly ≥72 h apart**, escalating to 1.5 mg/kg.
+- **Corrected:** full approval is **18 December 2025**, not January 2026 — **NADA 141-614**, a
+  *different* application from the conditional one. January 2026 was FDA's CVM Update *publicising*
+  it; the record had mistaken the announcement for the approval.
+- **Corrected:** the product is now **Laverdia**, not Laverdia-CA1 — "-CA1" is FDA's mandatory suffix
+  for a *conditionally* approved product and is gone; tablet strengths went from three to four.
+- **RETRACTED, and this was the half the row leaned on:** *"until progression" is not on the label in
+  any wording.* The word "until" does not appear in the 26-page approval summary. The label gives
+  dose, frequency, escalation and reduction rules and then **stops** — silent on duration. The
+  pivotal study was a **fixed 56-day** course with a **37-day median time to progression**.
+
+That kills the row's distinguishing claim. I had used "labelled until progression" to make verdinexor
+**the one agent in 42 classes "simultaneously licensed in the target species, orally dosed and
+indefinitely scheduled"**, and to resolve the tension with C3. *"The label places no limit on
+duration"* is **silence, which a prescriber fills** — not an affirmative indefinite-dosing
+instruction. Under rule 5 the honest grade for indefinite scheduling is **ASSUMED**, and the contrast
+I drew with the anthracyclines' and alkylators' hard dose caps **does not survive**: those are
+affirmative ceilings, this is an absence of guidance. Also established: the approval file reports
+**no tissue distribution and no brain or CSF concentration** for verdinexor in any species.
+
+### "At an intact barrier" was my inference, not the source's words
+
+**Selinexor brain:plasma.** The total-vs-unbound question resolved **in my favour** (they are total
+ratios; my rule-15 caution stands). Four other corrections did not:
+
+- **"At an intact barrier" / "in healthy animals" appear nowhere in the paper** — zero hits for
+  "healthy", "naive", "tumor-bearing", "intact", and there is **no methods section** for that PK
+  experiment. That was my inference and is now graded as inferred. It is also **unequal across
+  species**, which I had flattened: strong for rat and monkey (no rat or monkey tumour model exists
+  in that paper), weaker for mouse (the paper is full of leukaemia-bearing mice).
+- **The printed 0.71 does not reconcile with its own table:** 1295/1760 = **0.7358 → 0.74**. Every
+  other row reconciles exactly. So the mouse selinexor row is the one row contradicting its own
+  quotient — a defect in the *source*, but I was quoting a number its own cited table contradicts.
+  Direction: *more* favourable, so the access case isn't weakened.
+- The monkey cell prints **0.6**, not 0.60 (1565/2545 = 0.6149 → 0.61). I added a significant figure
+  the source does not carry.
+- **Dose mismatch I never recorded:** KPT-8602's mouse and rat rows are at **5 mg/kg** while all
+  selinexor rows are at **10 mg/kg**, so the headline contrast compares the comparator **at half the
+  dose** in two of three species. Only the monkey pair is dose-matched.
+
+### The decisive omission: my best access number and a null efficacy result are the same 42 patients
+
+**Abemaciclib's 31 nM in Gd-non-enhancing tumour.** Every number exact — and I had cited the access
+win while omitting that **the same abstract reports the 9 patients who cleared the threshold and
+reached Phase 2 had median PFS 2.4 months and median OS 7.2 months**, concluding on *"the
+unremarkable clinical efficacy profile"* of the combination. The drug cleared its trigger, engaged
+its target in that tissue, and did not help. Quoting the 31 nM without the 2.4 months is exactly the
+selective reading rule 5 exists to stop, and I did it.
+
+**And the brain-metastases trial runs the opposite way to how I used it.** Its own surgical cohort
+measured unbound abemaciclib at **96× the CDK4 and 19× the CDK6 IC50** in brain-met tissue, and the
+authors write that *"failure to achieve a therapeutic concentration in brain metastases is unlikely
+to be the etiology of this study's lack of response"*. Two consequences: the **19–96× figure this
+project already cited as its favourable CDK4/6 access evidence comes from this same trial** — the
+best access number and the starkest efficacy negative are *one dataset*, which the catalogue
+presented as two independent things; and the trial is evidence that access is **insufficient**, not
+that the drug fails to reach the site. Using it the latter way reverses its meaning. Three numbers
+also corrected: intracranial clinical benefit is **21.4% / 8.7%** (Results), not the 26.1% / 9.1% I
+took from the abstract — I quoted the *more favourable* of two inconsistent figures; "monotherapy" is
+true of **48 of 51**, not all (3 NSCLC patients had concurrent pemetrexed); and 1.6/1.4 months is
+**intracranial** PFS, where NSCLC *extracranial* PFS was 4.9 months.
+
+**Microdialysis:** numbers exact, but **barrier status is nowhere stated**, and the two Arm 1 values
+(0.27, 0.72) came from catheters placed in a **resection bed** — surgically disrupted barrier. They
+must not be read as access behind an intact barrier, which is the quantity the project needs.
+
+### And I made the exact mistake rule 14 names
+
+**The 288-patient LCH study.** I used its neurodegeneration figures as evidence about the MAPK axis
+at the CNS site. **That was wrong, in the specific way rule 14 warns about — reading a label instead
+of the measured quantity.** "ND-LCH" is not an intracranial tumour mass: the paper defines it as a
+late **neurodegenerative syndrome** assessed by MRI criteria and attributes it to *"disease
+sequestration in the brain microglia"*. So neither "no short-term response in ND" nor the 45%
+five-year ND risk says anything about drug activity against, or access to, an intracranial **lesion**
+— the only thing I needed from it. The same paper reports the **opposite** direction for CNS
+symptomatic disease on prolonged therapy: 66% stabilisation, 33% mild regression.
+
+Numbers corrected too, all because I quoted the abstract where the body disagrees: reactivations are
+**79 of 113 (70%)**, not 69 (61%) — so I had *understated* the necessity C3 rests on; the ND
+denominator is **147**, not 143; the ND endpoint is MRI-detected with only **23 of 60 symptomatic**;
+and the **98% and 30% response figures exist only in the abstract**. Two corrections run the other
+way: the 113 are systemic risk-organ patients, not CNS, and *"restarting MAPKi after reactivation was
+observed to always be effective against systemic LCH manifestations"* — so reactivation there was
+recoverable.
+
+### Two smaller ones
+
+- **COTELLIC:** label section 14.2 enumerates all 26 supporting patients by entity — LCH n=4,
+  Rosai-Dorfman n=4, Erdheim-Chester and others — and **there is no histiocytic sarcoma among them**.
+  The indication covers this tumour by the *wording* of its entity class while its evidentiary base
+  contains none of it.
+- **Antimetabolites:** I quoted only CLBL-1 and dropped **Ema**, the other comparator. CLBL-1 is the
+  *more sensitive* line, so quoting it alone **maximises apparent resistance** — against Ema the
+  cytarabine fold is 12.6× rather than 101×. The exclusion does not depend on it (the decisive
+  argument is the IC50 against cytarabine's own measured canine CSF level), but the honest figure is
+  the 12.6–1549× range across both comparators.
+
+### What this round establishes about method
+
+Hand verification caught the substance; it could not catch **selective quotation, abstract-versus-body
+discrepancies, or my own inferences hardening into quoted fact**. All four of those failure modes
+appeared here, and all four were found by somebody re-fetching the same source without my framing.
+Three claims also stood up exactly, which is itself information. The entry two days ago that said
+"every substantive finding was verified by me at primary source first-hand; what the scheduled phase
+adds is independence" was right about the gap and wrong to imply the gap was small.

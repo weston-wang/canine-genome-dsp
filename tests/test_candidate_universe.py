@@ -394,7 +394,8 @@ def test_c3_records_the_largest_discontinuation_dataset_and_its_attack_on_the_mi
     c3 = next(c for c in dc.CONDITIONS if c.tag == "C3")
     blob = " ".join(str(v) for v in vars(c3).values())
     assert "41678955" in blob
-    assert "69 REACTIVATED" in blob
+    assert "79 REACTIVATED" in blob, "the Results section says 79, not the abstract's 69"
+    assert "UNDERSTATED the necessity" in blob
     assert "NONE of the various" in blob
     # and the correction to the figure this project published on 2026-11-01
     assert "40053897" in blob
@@ -428,15 +429,24 @@ def test_the_xpo1_class_carries_the_canine_licensed_agent_and_its_rule_15_limits
     assert m.name in cu.KNOWN_OPEN_CLASSES
     assert m.availability is cu.Availability.EXISTS_TODAY
     assert "LICENSED FOR DOGS" in m.availability_basis
-    assert "Laverdia-CA1" in m.basis
+    assert "Laverdia" in m.basis
+    # the regulatory claim was corrected on three counts and its load-bearing half retracted
+    assert "18 DECEMBER 2025" in m.basis
+    assert "141-614" in m.basis
+    assert "NOT ON THE LABEL" in m.basis
+    assert "DOES NOT SURVIVE" in m.basis
     # the measured three-species access, verified in this thread from the source table
-    assert "0.71" in m.basis and "0.72" in m.basis and "0.60 monkey" in m.basis
+    assert "0.71" in m.basis and "0.72" in m.basis and "0.6 monkey" in m.basis
+    # the source table does not reconcile on its own headline figure, and the row must say so
+    assert "DOES NOT RECONCILE" in m.basis
+    assert "DOSE MISMATCH" in m.basis
+    # "intact barrier" was this project's inference, not the source's words
+    assert "ARE NOT IN THE SOURCE" in m.basis
     assert "27323910" in m.basis
     # and the two rule-15 limits that keep it from being graded in
-    assert "TOTAL brain:plasma ratios, not unbound" in m.basis
-    assert "FLOOR for verdinexor" in m.basis
+    assert "total and not unbound" in m.basis
     # cross-branch provenance labelled, not passed off as this thread's own verification
-    assert "CROSS-BRANCH RECORD" in m.basis
+    assert "taken from the sibling branch and flagged as unverified" in m.basis
 
 
 def test_the_anthracycline_row_records_that_its_potency_CLEARS():
