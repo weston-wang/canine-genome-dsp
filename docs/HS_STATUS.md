@@ -281,7 +281,7 @@ scientifically sound."*
 | Part | Verdict | Basis (where) |
 |---|---|---|
 | Clearing the first tumour | **Holds within a now-stated catalogue.** Every escape has a closing agent: of the original 12, 7 measured in canine HS, 2 transferred, 1 model-derived, 2 structural, **0 assumed**; all 45 pairs and 120 triples covered; toxicity budgets computed, one collision (radiation + CNS microtubule agent) resolved by sequencing. The 4 audit-added routes close on 1 measurement-backed drug choice, 2 transfers, 1 structural argument | `CONSOLIDATED_REPORT.md`, `coverage_assessment`, `escape_audit` |
-| "Every mechanism" | **Now established, as a scoped claim.** "Closed within this catalogue of **25 modality classes and 16 escape routes**", 0 classes unassessed, 10 excluded with reasons named. [**Superseded 2026-10-31: 26 classes, 11 excluded.**] [**Superseded again 2026-11-01: 28 classes, 12 excluded, 1 OPEN** — antimetabolites.] [**Superseded again 2026-11-02: 29 classes, 13 excluded, 1 OPEN** — antimetabolites CLOSED on three measured canine-HS IC50s; targeted protein degradation found missing and opened.] Not the same as "every conceivable mechanism" — it is a claim whose boundary is written down | `candidate_universe.closure_claim()`, `escape_audit` |
+| "Every mechanism" | **Now established, as a scoped claim.** "Closed within this catalogue of **25 modality classes and 16 escape routes**", 0 classes unassessed, 10 excluded with reasons named. [**Superseded 2026-10-31: 26 classes, 11 excluded.**] [**Superseded again 2026-11-01: 28 classes, 12 excluded, 1 OPEN** — antimetabolites.] [**Superseded again 2026-11-02: 29 classes, 13 excluded, 1 OPEN** — antimetabolites CLOSED on three measured canine-HS IC50s; targeted protein degradation found missing and opened.] [**Superseded again 2026-11-03: 42 classes, 16 excluded, 11 OPEN** (three external-taxonomy diffs).] [**Current, 2026-11-04: 55 classes — 16 in model, 18 excluded, 21 OPEN** (fourth and fifth axes; see the last section of this file).] Not the same as "every conceivable mechanism" — it is a claim whose boundary is written down | `candidate_universe.closure_claim()`, `escape_audit` |
 | Staying clear for 10 years | **Scientifically sound hypothesis, not a result.** Model P(10-year), systemic sites: 0.56–0.72 without monitoring, 0.81–0.86 with detect-and-switch. Brain-local hinges on drug access. **CSF now 0.434 [0.17, 0.69]** on a derived rather than assumed prior, and the binding constraint there is sustained delivery (no intrathecal sustained-release product exists), not potency | `emergence.py`; `maintenance_durability.csf_answer()` |
 | Oct 2026 literature | **No change to the design.** PRMT5 brain arm weaker, CDK4/6 brain arm better evidenced on the same deletion (section A); the deletion is common (62.8%), which widens coverage; the immune floor is weaker in MTAP-null tumours | sections A, B |
 | Largest uncertainty | **How often a cleared, predisposed dog throws a new primary (Λ)** — 50–90% of the variance. Not a drug question | `emergence.py` value-of-information |
@@ -2755,3 +2755,92 @@ appeared here, and all four were found by somebody re-fetching the same source w
 Three claims also stood up exactly, which is itself information. The entry two days ago that said
 "every substantive finding was verified by me at primary source first-hand; what the scheduled phase
 adds is independence" was right about the gap and wrong to imply the gap was small.
+
+## 2026-11-04 (closing): fourth and fifth axes, and the synthesis of the search
+
+**Case:** primary intracranial (non-disseminated) histiocytic sarcoma in a predisposed breed. Evidence
+from other presentations or tumours below is labelled indirect.
+
+### The two diffs that finished before the limit, and the one done by hand
+
+A fourth taxonomy was run from two independent sources — the **NCI Thesaurus v26.10d** agent-kind
+hierarchy under C274 "Antineoplastic Agent" (classified by what the agent *is* and how it acts), and
+the delivery/platform **modality table of PMID 38578405**, corroborated by PMID 39790893 (classified
+by what makes a therapy *arrive*). Neither converged. The **veterinary formulary** diff failed on the
+usage limit and was run by hand: FDA-CVM approvals and USDA biologics for dogs, plus the standard
+off-label list, each mapped to a row or flagged missing.
+
+Load-bearing citations were re-checked at primary source before rows were written: PMIDs 30351464,
+10461068, 22901707, 3120607, 33863808 and 34907644 (abstracts), and the regulatory records for
+ELZONRIS BLA761116, IWILFIN NDA215500, GLEOLAN NDA208630, MOZOBIL NDA022311, LUTATHERA NDA208700 and
+Optune PMA P100034 (openFDA). Two reviewer claims did not survive scope checking and are written
+accordingly: the E-cadherin fragmentation finding is from **disseminated** HS lines while *localised*
+HS lines kept full-length E-cadherin (PMID 34907644), so it is indirect and points the other way; and
+the 12:1 photosensitiser tumour:normal ratio in PMID 10461068 is from the **mouse** arm, not the dog.
+
+| added row | status | why |
+|---|---|---|
+| DNA-damage-response / PARP | IN_MODEL | **integrity error**: niraparib is priced in the regimen and had no row |
+| photodynamic / sonodynamic | open | not division-gated; delivered at the cavity the model already has; canine normal-brain MTD measured (PMID 10461068) |
+| high-Z radioenhancer (NBTXR3) | open | raises tumour dose without normal-brain dose; no intracranial trial anywhere |
+| ligand-toxin fusions | open | ADC access exclusion does not transfer; licensed member treats a dendritic-cell neoplasm; target choice open (CD204/CD18 50/50, PMID 22901707) |
+| polyamine / eflornithine | open | licensed as indefinite oral relapse prevention; human CSF ≤51% (inflamed barrier → ceiling) |
+| anti-invasion / CXCR4 | open | target expression only; not a kill |
+| tumour-treating fields | open | worn continuously, so the single-session ground does not apply; absent from the repo until today |
+| targeted radionuclides | open | the catalogue had a beam and no carrier |
+| COX-2 / NSAIDs | **excluded**, kill contradicted | COX-2 in 1/20 canine HS (PMID 15872381) |
+| intralesional (tigilanol, ECT) | **excluded**, defeated by escape | same second-primary ground as oncolytic virus |
+| rabacfosadine | open | rule 15: cytarabine/methotrexate IC50s cannot be moved onto it |
+| L-asparaginase | open | no row existed; substrate status of canine HS not looked up |
+| free zoledronate (chemosensitiser) | open | measured in vitro in canine malignant-histiocytosis lines (PMID 22236140) |
+
+Considered and **not** enumerated, with the reason recorded beside `KNOWN_OPEN_CLASSES`: laser
+interstitial thermal therapy (single-session ablation — the histotripsy/H-FIRE ground applies), and
+cell-mediated drug delivery (preclinical on its source's own words, so theoretical under rule 13).
+
+**Catalogue now: 55 classes — 16 in model, 18 excluded (10 kill contradicted, 5 defeated by a named
+escape, 3 toxicity unaffordable, 0 for absent canine data), 21 open — 6 with a canine-HS
+measurement, 15 without.**
+
+### A verifier finding that had been read and not written in
+
+The re-verification of PMID 30262659 (pomalidomide in primary CNS lymphoma) found the number the
+degrader row said was missing — pomalidomide CSF:plasma **19% and 17%** (one patient, 3 mg, total
+plasma) — in a section of a paper the project already cited. It also found the paper's authors
+saying human CNS penetration is "about the same for POM and LEN", against this row's claim that the
+within-class direction favoured pomalidomide, and that dexamethasone ran for only two cycles. All
+three are now in the row as a dated correction. It is the same pattern as CLAUDE.md failure 12: a cited source read for one row and not for its other numbers.
+
+### Synthesis: what the search phase established
+
+Every planned step of the search has now been run: the 14 angles (2 by workflow, 12 by hand), the
+salvage of killed-workflow candidates, independent verification of the hand findings (eight of my
+own claims corrected, one retraction load-bearing — see the section above), the completeness critic,
+and **five** external taxonomy axes (ATC L01; Hanahan hallmarks; molecular target class; NCIt agent
+kind + delivery modality; veterinary formulary).
+
+What changed in substance, at the strength shown:
+
+1. **Nothing new closes the brain.** No agent found in this search supplies a measured kill in
+   canine HS together with measured access behind an intact barrier. The strongest newly-found
+   human evidence was negative on efficacy (NCT04391595: abemaciclib reached non-enhancing tumour at
+   31 nM and the combination still gave median PFS 2.4 months; temuterkib fell 2.5× short of its
+   trigger).
+2. **The regulatory picture moved once:** verdinexor's full canine approval (18 December 2025,
+   NADA 141-614, now Laverdia). "Until progression" is not on the label, so indefinite scheduling
+   is assumed, not licensed.
+3. **The MAPK maintenance condition (C3) got harder evidence for its necessity:** 79 of 113 children
+   reactivated after stopping MAPK inhibition (systemic disease, where restarting always worked).
+4. **The catalogue grew from 29 to 55 classes and the open count from 1 to 21**, every addition found
+   by diffing against an external list rather than re-reading this one. The five axes did not
+   converge, so a closure claim is meaningful only as "closed within this named catalogue".
+
+`standard_audit.failing()` returns **[]** — none of the live inputs fails the stated standard (real
+data or a rigorous model). The 21 open classes are not failing inputs: none is used to assert a
+closure, and "open" here means unassessed, not refuted. Six carry a canine-HS measurement and are
+the ones to work up first: XPO1, proteasome, HSP90, cardiac glycosides, translation elongation,
+zoledronate chemosensitisation.
+
+Axes **not** run, named so the next pass picks a new one instead of repeating: a clinical-trial
+registry sweep of histiocytic neoplasms, and a patent/pipeline sweep.
+

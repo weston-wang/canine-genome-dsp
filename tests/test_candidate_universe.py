@@ -244,13 +244,13 @@ def test_the_catalogue_count_and_the_open_count_are_what_the_docs_say():
     '26 -- 15/11/0 unassessed' -> '28 -- 15/12/1 open' -> '29 -- 15/13/1 open'. If this test fails,
     three documents and a reader-facing page are now lying."""
     t = cu.tally()
-    assert len(cu.UNIVERSE) == 42
-    assert t["IN_MODEL"] == 15
-    assert t["EXCLUDED"] == 16
-    assert t["NOT_ASSESSED"] == 11
+    assert len(cu.UNIVERSE) == 55
+    assert t["IN_MODEL"] == 16
+    assert t["EXCLUDED"] == 18
+    assert t["NOT_ASSESSED"] == 21
     claim = cu.closure_claim(ea.audited_escape_count())
-    assert "42 modality classes" in claim
-    assert "11 unassessed" in claim
+    assert "55 modality classes" in claim
+    assert "21 unassessed" in claim
 
 
 def test_c3_records_the_maintenance_pincer_at_the_strength_shown():
@@ -545,7 +545,7 @@ def test_the_open_classes_split_by_whether_canine_evidence_exists():
     withev = cu.open_with_canine_hs_evidence()
     without = cu.open_without_canine_hs_evidence()
     assert len(withev) + len(without) == len(cu.not_assessed())
-    assert len(withev) == 5 and len(without) == 6
+    assert len(withev) == 6 and len(without) == 15
     assert all(m.canine_hs_evidence.startswith("MEASURED") for m in withev)
     names = {m.name for m in withev}
     assert "nuclear export inhibition (XPO1 / SINE compounds)" in names
@@ -564,3 +564,55 @@ def test_the_glucocorticoid_hole_is_recorded_as_the_embarrassment_it_is():
     assert "NOT one of rule 13's three grounds" in m.basis
     # and the reason that matters: the measurement nobody looked for
     assert "trivial assay on cells that already exist" in m.basis
+
+
+def test_the_fourth_axis_found_parp_was_load_bearing_and_unrowed():
+    """NCIt diff, 2026-11-04: niraparib was priced in the regimen and appeared zero times in the
+    catalogue. The fix is a row, IN_MODEL, recorded as an integrity discrepancy -- not a discovery."""
+    m = next(x for x in cu.UNIVERSE if x.name.startswith("DNA-damage-response / PARP"))
+    assert m.status is cu.Status.IN_MODEL
+    assert "niraparib" in m.representative
+    assert "zero times in this catalogue" in m.basis
+    assert "ENZYMATIC" in m.canine_hs_evidence
+
+
+def test_fourth_and_fifth_axes_are_named_and_did_not_converge():
+    doc = cu.__doc__
+    assert "NCI Thesaurus (v26.10d)" in doc and "38578405" in doc
+    assert "veterinary formulary" in doc
+    assert "Five axes, five sets of finds" in doc
+    assert "neither has been run" in doc
+
+
+def test_formulary_exclusions_use_admissible_grounds():
+    cox = next(x for x in cu.UNIVERSE if x.name.startswith("COX-2"))
+    assert cox.exclusion_ground is cu.ExclusionGround.KILL_CONTRADICTED
+    assert "15872381" in cox.basis and "1 of 20" in cox.basis
+    tig = next(x for x in cu.UNIVERSE if x.name.startswith("intralesional"))
+    assert tig.exclusion_ground is cu.ExclusionGround.DEFEATED_BY_ESCAPE
+    assert "NOT quantified" in tig.basis
+
+
+def test_rabacfosadine_is_not_swept_into_the_antimetabolite_exclusion():
+    """Rule 15: cytarabine/methotrexate IC50s may not be carried onto a different compound."""
+    m = next(x for x in cu.UNIVERSE if "rabacfosadine" in x.name)
+    assert m.status is cu.Status.NOT_ASSESSED
+    assert "RULE 15" in m.basis
+
+
+def test_unfetched_claims_are_flagged_not_asserted():
+    """Rule 16: what the reviewers asserted but nobody fetched is labelled as such."""
+    by = {x.name: x for x in cu.UNIVERSE}
+    assert "NOT fetched" in by["anti-invasion / adhesion / chemokine-axis blockade (integrin, CXCR4)"].basis
+    assert "NOT verified" in by["high-Z nanoparticle radioenhancement"].availability_basis
+    assert "INDIRECT" in by["anti-invasion / adhesion / chemokine-axis blockade (integrin, CXCR4)"].canine_hs_evidence
+    assert "MOUSE" in by["photodynamic / sonodynamic therapy (energy-activated sensitiser)"].canine_hs_evidence
+
+
+def test_pomalidomide_csf_ratio_was_in_the_cited_paper():
+    """Rule 16: the 'missing' number was in PMID 30262659's PK section; the row now carries it,
+    with the human within-class contradiction and the dexamethasone-duration correction."""
+    m = next(x for x in cu.UNIVERSE if x.name.startswith("targeted protein degradation"))
+    assert "19% and 17%" in m.basis
+    assert "about the same for POM and LEN" in m.basis
+    assert "TWO cycles" in m.basis

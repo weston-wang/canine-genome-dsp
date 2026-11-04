@@ -132,6 +132,14 @@ Durability is therefore reached in **two moves**:
   that "modality class" has no canonical granularity, so a closure claim's denominator is
   AXIS-DEPENDENT and is only as good as the named list of axes behind it.
 
+  Updated 2026-11-04. A FOURTH axis (NCIt v26.10d agent-kind hierarchy; the delivery-modality table
+  of PMID 38578405) and a FIFTH (the veterinary formulary) added thirteen rows -> **55 classes, 16 in
+  the model, 18 excluded, 21 open** (6 with a canine-HS measurement, 15 without). One was an integrity
+  error: PARP inhibition (niraparib) was a priced arm of the regimen with no catalogue row. Two were
+  excluded on admissible grounds (COX-2 measured absent in 19/20 canine HS; intralesional tigilanol
+  on the oncolytic row's second-primary ground). Five axes, no convergence; the 42-class figures
+  above are superseded but left as written.
+
   Updated 2026-11-01, and this one is a DOWNGRADE of a published line: a second-pass sweep found
   two more classes that had never been rows, so "0 unassessed" became "1 open". Antimetabolites /
   nucleoside analogues appeared not to be excludable — three members are measured active in all ten

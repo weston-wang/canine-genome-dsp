@@ -222,6 +222,23 @@ the honest conclusion is NOT "the catalogue is now complete". It is this:
     now named in the record (chemical/ATC L01 + L02-L04; biological/Hanahan hallmarks; molecular
     target class) and why the next thread should add a fourth rather than re-run one of these.
 
+FOURTH AND FIFTH AXES, 2026-11-04 -- AND STILL NO CONVERGENCE
+-----------------------------------------------------------
+Fourth axis, run twice from independent sources: the NCI Thesaurus (v26.10d) agent-kind hierarchy
+under C274 "Antineoplastic Agent", and the delivery/platform modality table of a current CNS-tumour
+review (PMID 38578405, corroborated by PMID 39790893). Between them: seven new open classes and one
+INTEGRITY DISCREPANCY -- PARP inhibition was a priced, load-bearing arm of the regimen with no row
+in this catalogue. Fifth axis: the veterinary formulary, which found the drugs a veterinary
+oncologist prescribes every week and this catalogue did not list -- piroxicam, tigilanol tiglate,
+rabacfosadine, L-asparaginase, zoledronate. Two were excluded on admissible grounds the same day
+(COX-2 is measured absent in 19/20 canine HS; the intralesional agent shares the oncolytic row's
+second-primary ground); three are open. Count: 55 classes, 16 / 18 / 21 open.
+
+Five axes, five sets of finds. The denominator is axis-dependent, and the record now names five
+axes (ATC L01; Hanahan hallmarks; target class; NCIt agent kind + delivery modality; veterinary
+formulary). The two axes most likely to find more are a CLINICAL-TRIAL-REGISTRY sweep of
+histiocytic neoplasms and a PATENT/pipeline sweep; neither has been run.
+
 That is a weaker claim than this module used to make, and it is the correct one. The guard
 `_validate()` still cannot see a row nobody wrote; what has changed is that the record now says so
 and names what was checked instead of implying the enumeration terminated.
@@ -563,6 +580,27 @@ UNIVERSE: tuple[Modality, ...] = (
         "pomalidomide's permeability to lenalidomide's trial result or vice versa -- the trial is an "
         "EFFICACY readout for lenalidomide, the permeability is an EXPOSURE property of pomalidomide, "
         "and they are different quantities about different compounds.\n"
+        "CORRECTION 2026-11-04, FROM INDEPENDENT RE-VERIFICATION OF PMID 30262659 -- RULE 16 AGAIN. "
+        "(1) THE NUMBER THIS ROW CALLED MISSING WAS IN A PAPER IT ALREADY CITED. Section 'CNS "
+        "pharmacokinetic analysis': 'The CSF-to-plasma ratio of POM was 19% and 17% based on the "
+        "drug levels in matched CSF and plasma samples collected 3.5 hours after administration of "
+        "POM on days 1 and 14 of cycle 1.' n=1, at 3 mg (not the 5 mg MTD), CSF against TOTAL "
+        "plasma -- and since CSF is nearly protein-free, correcting plasma to unbound can only RAISE "
+        "it. That is a human measurement in the compartment at issue: it clears the 0.0145 CSF "
+        "requirement by about 12x. It is CSF, not parenchyma, so it does not by itself settle the "
+        "0.196 parenchymal requirement, but it removes the 'one obtainable number' this row was "
+        "waiting for. (2) THE WITHIN-CLASS DIRECTION IS NOT SUPPORTED IN HUMANS. The same paper: "
+        "'POM was shown to have higher CNS penetration than lenalidomide (~40% vs 11%) ... in in "
+        "vivo models. However, CNS penetration appears to be about the same for POM and LEN in "
+        "human patients', citing a lenalidomide phase 1 at 20% or greater. So the order-of-magnitude "
+        "gap above is a model-system result, and the human figures are about equal. That human "
+        "lenalidomide figure also CONFLICTS with the 1.3-2.4% from three patients used above "
+        "(PMID 35732975); the conflict is recorded, not resolved, because the cited phase 1 was "
+        "not fetched. (3) Dexamethasone ran for only the first TWO cycles; responders received a "
+        "median 6.5 cycles, and the authors read responses beyond six months as single-agent "
+        "pomalidomide activity -- so 'not attributable to the degrader alone' below is too strong. "
+        "The 12/25 also mixes 23 PCNSL with 2 vitreoretinal cases; the PCNSL-only figure is 11/23 "
+        "with all six CRs.\n"
         "THE SEARCH FOR THAT NUMBER FOUND SOMETHING THAT OUTRANKS IT, 2026-11-03. Rule 14 asks for "
         "the measurable proxy; the proxy for 'does this class work behind an intact barrier' is not "
         "only a CSF ratio but a RESPONSE RATE IN A PRIMARY CNS TUMOUR, and that is measured. "
@@ -1784,6 +1822,229 @@ UNIVERSE: tuple[Modality, ...] = (
         "detect-and-switch loop that the reroutable tiers depend on is buildable from today's "
         "reagents. What is to-build is broad-panel canine HS ctDNA, which A15 would want.",
     ),
+    # ---- FOURTH AXIS, 2026-11-04: NCIt v26.10d agent-kind hierarchy, and the delivery/platform
+    # ---- modality table of PMID 38578405 (corroborated by PMID 39790893). Eight rows.
+    Modality(
+        "DNA-damage-response / PARP inhibition",
+        Status.IN_MODEL,
+        "niraparib (licensed); AZD9574 as the PARP1-selective brain-penetrant member",
+        "FOUND BY THE NCIt DIFF AS A CATALOGUE-INTEGRITY DISCREPANCY, NOT A NEW MODALITY. Niraparib "
+        "was already a PRICED, LOAD-BEARING arm (availability_tiers.PROGRAM['niraparib']; "
+        "core.toxicity marrow 0.50; graded PASSES / TRANSFERRED in standard_audit as 'a licensed "
+        "CYTOCIDAL agent matched to the germline deletion') -- and the word 'niraparib' appeared "
+        "zero times in this catalogue. So the class that carries a licensed cytocidal kill had no "
+        "row, and _validate() could not see it. Nothing about the ARM changes; the CATALOGUE was "
+        "wrong, and the count of IN_MODEL classes was understated by one.",
+        "NONE as a cytotoxic potency. The 3.8 nM figure in the record is an ENZYMATIC PARP IC50, "
+        "not a canine-HS kill. The genotype rationale (PARP inhibition inactivates PRMT5; "
+        "MTAP-deficient tumours more olaparib-sensitive, PMID 42122132 / 33691794) is a TRANSFER.",
+        Availability.EXISTS_TODAY,
+        "Niraparib, olaparib, talazoparib, rucaparib are human-licensed and obtainable off-label.",
+    ),
+    Modality(
+        "photodynamic / sonodynamic therapy (energy-activated sensitiser)",
+        Status.NOT_ASSESSED,
+        "5-aminolevulinic acid (GLEOLAN, NDA208630) or porfimer (PHOTOFRIN, NDA020451), "
+        "illuminated intraoperatively in the resection cavity",
+        "FOUND BY BOTH FOURTH-AXIS DIFFS. Clears the plausibility bar for three case-specific "
+        "reasons: the kill (singlet oxygen on membranes and mitochondria) is NOT division-gated, "
+        "which is the stated limit of the radiation row; the delivery route is already in the "
+        "model (surgery / cytoreduction, the cavity); and its dose-limiting toxicity is a measured "
+        "canine normal-brain budget rather than more load on the oversubscribed radiation axis. "
+        "Limits stated: illumination reaches millimetres, so it treats the cavity wall and not the "
+        "leptomeninges or a second primary, and it is a session therapy, not continuous duty (C3) "
+        "-- so its plausible role is INDUCTION at the cavity, as for oncolytic virus.",
+        "NONE in canine HS. In the canine BRAIN (indirect, glioma): oral 5-ALA PpIX fluorescence "
+        "localised to a canine glioblastoma and 'absent in normal brain tissue', n=1 autopsy case "
+        "(PMID 30351464); canine normal-brain-stem MTD 0.75 mg/kg BPD + 100 J/cm2 in 21 dogs, and a "
+        "canine glioma-line IC50 of 10 ng/ml (PMID 10461068). The 12:1 tumour:normal ratio in that "
+        "paper is from the MOUSE arm and is not attributed to the dog.",
+        Availability.EXISTS_TODAY,
+        "GLEOLAN is licensed as an imaging adjunct, not a therapy, so therapeutic 5-ALA PDT is "
+        "off-label; PHOTOFRIN is a licensed photosensitiser (non-brain indications).",
+    ),
+    Modality(
+        "high-Z nanoparticle radioenhancement",
+        Status.NOT_ASSESSED,
+        "NBTXR3 / JNJ-90301900 (hafnium oxide), intratumoural, activated by the existing radiation arm",
+        "FOUND BY THE NCIt DIFF (C224703 Radioenhancer), a kind invisible to ATC L01 because it "
+        "binds nothing. Would raise the local dose of the radiation the model already gives without "
+        "raising normal-brain dose, which is the axis the radiation row says is oversubscribed. "
+        "Weakest point, stated rather than inferred around: the reviewer read all 17 NBTXR3 "
+        "registry entries and NONE is intracranial; the nearest histotype anchor is the human "
+        "soft-tissue-sarcoma phase 2/3 (NCT02379845), which is INDIRECT under rule 10. Like PDT it "
+        "needs a known lesion, so it cannot touch the second-primary route.",
+        "NONE in canine HS and none in any brain in any species.",
+        Availability.NEAR_FUTURE,
+        "Investigational (phase 3 in head-and-neck cancer, NCT04892173). The European 'Hensify' "
+        "marking for sarcoma was NOT verified at primary source and is not asserted.",
+    ),
+    Modality(
+        "ligand-toxin fusions / immunotoxins (catalytic protein toxins)",
+        Status.NOT_ASSESSED,
+        "tagraxofusp (ELZONRIS, BLA761116, IL-3/diphtheria-toxin fusion) as the licensed member; "
+        "convection-enhanced delivery as the route",
+        "FOUND BY BOTH FOURTH-AXIS DIFFS, and the ADC exclusion does NOT settle it: that row is "
+        "excluded on antibody ACCESS (0.001 against a required 0.196), but a ~58 kDa catalytic "
+        "toxin needs a few cytosolic molecules rather than a stoichiometric payload, and by CED "
+        "the access is the route's (1.0), not an IgG's. The kill (protein-synthesis arrest) is "
+        "NOT division-gated. The licensed precedent's indication, BPDCN, is a dendritic-cell "
+        "neoplasm -- same mononuclear-phagocyte family as HS, which is a lineage TRANSFER, not a "
+        "measurement. Open on TARGET SELECTION: CD123 is a pDC marker, and a human HS case was "
+        "explicitly CD123-negative (PMID 40418704), so tagraxofusp itself is probably the wrong "
+        "ligand. 47 human recurrent-glioblastoma patients received an IL-4R immunotoxin by CED "
+        "(PMID 33863808) -- that paper is a RESPONSE-CRITERIA study and is cited only for delivery "
+        "feasibility, not efficacy.",
+        "TARGET AVAILABILITY ONLY: CD204, CD18 and MHC II in 50/50 canine HS (PMID 22901707). No "
+        "potency for any fusion toxin in this disease.",
+        Availability.NEAR_FUTURE,
+        "A licensed member exists (tagraxofusp; also denileukin diftitox-cxdl, BLA761312) but its "
+        "ligand probably misses this tumour, so a CD204- or CD18-directed fusion is to-build on a "
+        "licensed platform.",
+    ),
+    Modality(
+        "polyamine-synthesis inhibition (ornithine decarboxylase)",
+        Status.NOT_ASSESSED,
+        "eflornithine / DFMO (IWILFIN, NDA215500, oral maintenance)",
+        "FOUND BY THE NCIt DIFF. Relevant on schedule rather than potency: IWILFIN is the one "
+        "licensed antineoplastic whose indication IS indefinite oral relapse-risk reduction after "
+        "response (high-risk neuroblastoma), which is exactly the maintenance shape condition C3 "
+        "asks for. CNS access is MEASURED in humans: CSF up to 51% of serum in 5 patients with "
+        "late-stage sleeping sickness (PMID 3120607) -- an inflamed-barrier disease, so per rule 15 "
+        "that is a CEILING, not a point value, and 'up to' is a maximum, not a mean.",
+        "NONE in canine HS and none in the dog.",
+        Availability.EXISTS_TODAY,
+        "Human-licensed, oral; obtainable off-label.",
+    ),
+    Modality(
+        "anti-invasion / adhesion / chemokine-axis blockade (integrin, CXCR4)",
+        Status.NOT_ASSESSED,
+        "plerixafor (MOZOBIL, NDA022311, CXCR4) as the licensed member; anti-integrin agents as "
+        "clinical-stage members",
+        "FOUND BY BOTH FOURTH-AXIS DIFFS (NCIt C2196 Antimetastatic Agent; the delivery review's "
+        "adhesion axis). Bears on the INVADING EDGE rather than the mass. It is not a kill, so it "
+        "could at most slow the reroute into parenchyma; that is why it sits low. The reviewer's "
+        "claims that MMP and integrin inhibitors failed in human trials were NOT fetched and are "
+        "not relied on.",
+        "TARGET EXPRESSION, NOT KILL: beta2-integrin CD18 in 50/50 canine HS (PMID 22901707). "
+        "E-cadherin fragmentation with weak adhesion is reported in DISSEMINATED HS and systemic "
+        "histiocytosis lines, while LOCALISED HS lines kept full-length E-cadherin (PMID 34907644) "
+        "-- so for this case that finding is INDIRECT and, if anything, points the other way.",
+        Availability.EXISTS_TODAY,
+        "Plerixafor is human-licensed (and used in dogs for stem-cell mobilisation); no integrin "
+        "or MMP inhibitor is licensed for cancer.",
+    ),
+    Modality(
+        "tumour-treating fields (alternating electric fields)",
+        Status.NOT_ASSESSED,
+        "Optune (FDA PMA P100034), worn continuously over the cranium",
+        "FOUND BY THE DELIVERY-MODALITY DIFF, and absent from the entire repository before today. "
+        "The ground the sanctuary-site row uses to decline histotripsy and H-FIRE ('single-session "
+        "ablative procedures, so neither supplies the continuous presence C3 requires') does NOT "
+        "reach it: it is worn indefinitely. Its access is physical (not barrier-limited) and it "
+        "carries no cumulative normal-brain dose, so it is the one antimitotic that does not "
+        "compete for the oversubscribed radiation axis. Honest limits: it is antimitotic, so "
+        "division-gated like radiation and blind to persisters; array placement on a canine "
+        "skull and coat is unvalidated.",
+        "NONE in canine HS; no canine tumour data of any kind.",
+        Availability.NEAR_FUTURE,
+        "Licensed device for human supratentorial glioblastoma (PMA P100034, 2011; newly-diagnosed "
+        "supplement 2015). No canine array exists, so the dog path is an adaptation of a licensed "
+        "device rather than an off-label prescription.",
+    ),
+    Modality(
+        "targeted radionuclide therapy / radioconjugates",
+        Status.NOT_ASSESSED,
+        "a radiolabelled ligand or antibody delivered into the cavity or CSF; LUTATHERA "
+        "(NDA208700) and ZEVALIN (BLA125019) as licensed members of the modality",
+        "FOUND BY THE DELIVERY-MODALITY DIFF. The radiation row is external-beam only: the "
+        "catalogue had a BEAM but no CARRIER. A carrier into the CSF is the one radiation form "
+        "that could follow leptomeningeal seeding without craniospinal dose. No licensed member is "
+        "directed at an antigen of this tumour, so the agent is to-build on a licensed modality.",
+        "NONE in canine HS and none verified in the canine brain.",
+        Availability.NEAR_FUTURE,
+        "The modality is licensed in humans; a CD204/CD18-directed conjugate is not.",
+    ),
+    # ---- FIFTH AXIS, 2026-11-04: the VETERINARY FORMULARY -- what a veterinary oncologist actually
+    # ---- prescribes for dogs (FDA-CVM approvals, USDA biologics, and the standard off-label list).
+    Modality(
+        "COX-2 inhibition (NSAIDs, piroxicam)",
+        Status.EXCLUDED,
+        "piroxicam; meloxicam/firocoxib as canine-licensed members",
+        "FOUND MISSING BY THE FORMULARY DIFF: piroxicam is one of the most routinely prescribed "
+        "drugs in veterinary oncology and had no row. Excluded because the TARGET IS MEASURED "
+        "ABSENT in this tumour: COX-2 was expressed in 1 of 20 canine histiocytic sarcomas "
+        "(PMID 15872381, archival cases of unstated presentation, so indirect for the intracranial "
+        "form). A class whose tumour-intrinsic mechanism is absent in 95% of cases cannot supply a "
+        "durable kill. Scope: this excludes the KILL claim; an NSAID used for comfort or oedema is "
+        "supportive care, not a modality, and is not addressed here.",
+        "MEASURED: COX-2 immunohistochemistry 1/20 canine HS (PMID 15872381).",
+        Availability.EXISTS_TODAY,
+        "Licensed for dogs; availability is not the reason.",
+        ExclusionGround.KILL_CONTRADICTED,
+    ),
+    Modality(
+        "intralesional ablative agents (tigilanol tiglate; electrochemotherapy)",
+        Status.EXCLUDED,
+        "tigilanol tiglate (STELFONTA, canine-licensed for mast cell tumour)",
+        "FOUND MISSING BY THE FORMULARY DIFF: a canine-licensed antineoplastic absent from the "
+        "catalogue. Excluded on the SAME ground as the oncolytic-virotherapy row, applied for the "
+        "same reason: it is injected into a lesion that is ALREADY KNOWN, so it does nothing "
+        "about the second primary that the germline lesion predicts, and it is a session therapy "
+        "that cannot supply continuous duty (C3). Its mechanism -- rapid haemorrhagic necrosis "
+        "with marked local swelling -- is also why no one would inject it intracranially, but that "
+        "toxicity is NOT quantified here and is not the stated ground.",
+        "NONE in canine HS (PubMed search for tigilanol AND histiocytic sarcoma: 0 records).",
+        Availability.EXISTS_TODAY,
+        "Licensed for dogs (subcutaneous mast cell tumour); obtainable today.",
+        ExclusionGround.DEFEATED_BY_ESCAPE,
+    ),
+    Modality(
+        "acyclic nucleotide phosphonate prodrugs (rabacfosadine)",
+        Status.NOT_ASSESSED,
+        "rabacfosadine (TANOVEA, canine-licensed for lymphoma)",
+        "FOUND BY THE FORMULARY DIFF, and recorded as its own row BECAUSE OF RULE 15. The "
+        "antimetabolite row is excluded on measured canine-HS IC50s for CYTARABINE and "
+        "METHOTREXATE. Rabacfosadine is a different compound -- a double prodrug of the guanine "
+        "nucleotide analogue PMEG, built to load lymphoid cells -- and carrying those two drugs' "
+        "IC50s onto it would be exactly the cross-compound move rule 15 forbids without a "
+        "written comparison. Nobody has made that comparison, so the class is open rather than "
+        "covered by the antimetabolite exclusion. Its brain access was not looked up and is not "
+        "asserted.",
+        "NONE in canine HS (PubMed: 0 records).",
+        Availability.EXISTS_TODAY,
+        "Licensed for dogs (FDA-CVM, canine lymphoma); obtainable today.",
+    ),
+    Modality(
+        "amino-acid-depleting enzymes (L-asparaginase)",
+        Status.NOT_ASSESSED,
+        "L-asparaginase / pegaspargase",
+        "FOUND BY THE FORMULARY DIFF: a staple of canine lymphoma protocols with no row (the "
+        "metabolic row covers DIETARY methionine restriction only). Depletes the amino acid in "
+        "plasma, so its reach is set by the depleted substrate, not by drug crossing the barrier. "
+        "Its relevance turns on whether canine HS lacks asparagine synthetase, which has not "
+        "been looked up. The well-known human CSF-asparagine depletion figures were not fetched "
+        "and are not asserted.",
+        "NONE in canine HS (PubMed: 0 records).",
+        Availability.EXISTS_TODAY,
+        "Used routinely in dogs; obtainable.",
+    ),
+    Modality(
+        "nitrogen-bisphosphonate chemosensitisation (free zoledronate)",
+        Status.NOT_ASSESSED,
+        "zoledronate, as a partner to doxorubicin",
+        "FOUND BY THE FORMULARY DIFF. Distinct from the lineage-depletion row: that row is "
+        "LIPOSOMAL clodronate, killed by phagocytic uptake; this is free zoledronate (a "
+        "mevalonate-pathway inhibitor) raising the kill of a cytotoxic partner. Two things keep it "
+        "low: its measured partner is doxorubicin, whose class is EXCLUDED on toxicity, and free "
+        "bisphosphonates are bone-avid -- but no brain figure was fetched, so none is asserted.",
+        "MEASURED in vitro in canine malignant-histiocytosis lines: zoledronate increased "
+        "doxorubicin uptake and kill, and clodronate synergised with vincristine (PMID 22236140). "
+        "One dog with HAEMOPHAGOCYTIC HS (a different presentation, indirect) did well for 147 d on "
+        "doxorubicin + zoledronate (PMID 38046421).",
+        Availability.EXISTS_TODAY,
+        "Human-licensed and already given to dogs.",
+    ),
 )
 
 
@@ -1818,7 +2079,28 @@ KNOWN_OPEN_CLASSES: tuple[str, ...] = (
     "glucocorticoid-receptor agonists (corticosteroids)",
     "MDM2-p53 interaction inhibition",
     "nucleic-acid therapeutics (antisense oligonucleotide, siRNA)",
+    # fourth axis (NCIt + delivery-modality table), 2026-11-04
+    "photodynamic / sonodynamic therapy (energy-activated sensitiser)",
+    "high-Z nanoparticle radioenhancement",
+    "ligand-toxin fusions / immunotoxins (catalytic protein toxins)",
+    "polyamine-synthesis inhibition (ornithine decarboxylase)",
+    "anti-invasion / adhesion / chemokine-axis blockade (integrin, CXCR4)",
+    "tumour-treating fields (alternating electric fields)",
+    "targeted radionuclide therapy / radioconjugates",
+    # fifth axis (veterinary formulary), 2026-11-04
+    "acyclic nucleotide phosphonate prodrugs (rabacfosadine)",
+    "amino-acid-depleting enzymes (L-asparaginase)",
+    "nitrogen-bisphosphonate chemosensitisation (free zoledronate)",
 )
+
+#: LASER INTERSTITIAL THERMAL THERAPY was raised by the delivery-modality diff and is NOT enumerated:
+#: it is a single-session ablation of a known lesion, so the ground the sanctuary-site row already
+#: applies to histotripsy and H-FIRE (no continuous presence for C3) applies unchanged, and the diff's
+#: own author ranked it last with its device clearances unverified. Cell-mediated drug delivery was
+#: also raised and is THEORETICAL on that source's own words ("in the preclinical stage").
+#: Masitinib (canine-licensed in the EU) maps to the VEGFR/KIT multikinase row; Oncept, the USDA
+#: autologous and Listeria vaccines map to the vaccine row; gilvetmab to the antibody row;
+#: Immunocidin to the innate-agonist row; Paccal Vet to the microtubule row; verdinexor to XPO1.
 
 #: TWO HALLMARK COLUMNS WERE CONSIDERED AND JUDGED NOT TO MEET RULE 9's "COULD PLAUSIBLY MATTER"
 #: BAR, recorded here rather than silently omitted so the judgement is reviewable:

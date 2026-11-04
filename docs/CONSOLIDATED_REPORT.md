@@ -32,10 +32,11 @@ checklist, not a probability.
 | Items previously mis-reported as open | 9, each now graded and guarded | same |
 | Growth bar beaten | 0.055 / day | same |
 
-**Catalogue the claim is made over:** 42 therapy-modality classes — 15 in the model, 16 excluded, **11
-open** (5 of those 11 carry a canine-HS measurement; 6 carry nothing in this disease) — and 16 escape routes from an independent audit. No class is excluded for lacking canine
-data; each exclusion rests on a contradicted kill (9), a named escape that defeats it (4), or a
-toxicity budget it would blow (3).
+**Catalogue the claim is made over:** 55 therapy-modality classes — 16 in the model, 18 excluded, **21
+open** (6 of those 21 carry a canine-HS measurement; 15 carry nothing in this disease) — and 16 escape routes from an independent audit. No class is excluded for lacking canine
+data; each exclusion rests on a contradicted kill (10), a named escape that defeats it (5), or a
+toxicity budget it would blow (3). *(Was 42 / 15 / 16 / 11 until 2026-11-04; see "Fourth and fifth
+axes" below.)*
 
 **This count moved four times in four days, and the last move is the largest.** It read "25 classes,
 0 unassessed", then 26, then 28 with 1 open, then 29, then 36 with 6 open, and now **39 with 8 open**
@@ -82,6 +83,32 @@ catalogue of N classes" means only as much as the list of axes the catalogue was
 axes are now named in the record (chemical/ATC; biological/hallmarks; molecular target class) so the
 next pass can add a fourth rather than re-run one of these. That is a weaker claim than this report
 used to make, and it is the correct one.
+
+**Fourth and fifth axes, 2026-11-04 — thirteen more classes, and still no convergence.** A fourth
+axis was run from two independent sources — the NCI Thesaurus agent-kind hierarchy (v26.10d) and the
+delivery/platform modality table of a current brain-tumour review (PMID 38578405) — and a fifth from
+the **veterinary formulary**, the drugs a veterinary oncologist actually prescribes. Together they
+added 13 rows:
+
+- **One integrity error, not a discovery.** Niraparib (PARP inhibition) is a priced, load-bearing
+  arm of the regimen, yet the class had no row in the catalogue. It is now in, as in-model.
+- **Ten new open classes**: light- or sound-activated sensitisers in the surgical cavity (5-ALA),
+  nanoparticle radiation enhancers, targeted protein toxins (a licensed one, tagraxofusp, treats a
+  dendritic-cell cancer — the same cell family as this tumour, though its target is probably absent
+  here), the polyamine blocker eflornithine (licensed as indefinite oral relapse prevention),
+  anti-invasion / CXCR4 blockade, **tumour-treating fields** (a worn device, licensed for human
+  brain tumours — absent from the whole repository until today), targeted radionuclides,
+  rabacfosadine (licensed for dogs; kept separate from the excluded antimetabolites because those
+  measurements were on different drugs), L-asparaginase, and zoledronate as a chemo-sensitiser.
+- **Two excluded the same day on admissible grounds**: piroxicam/NSAIDs (the target, COX-2, is
+  measured present in only 1 of 20 canine histiocytic sarcomas), and the dog-licensed injectable
+  tigilanol tiglate (injected into a known lump, so it cannot touch a second tumour — the same
+  ground as the oncolytic virus).
+
+Five axes, five sets of finds. The honest statement is unchanged in kind: closure is claimed over a
+**named** catalogue, and the axes it was built from are listed so the next pass can add a sixth
+(a clinical-trial-registry sweep of histiocytic cancers, or a drug-pipeline sweep) rather than
+re-run one of these.
 
 **Three classes were found missing from this catalogue in three days, while the line read "0
 unassessed".** That is the procedural finding, and it matters more than any of the three: each was
