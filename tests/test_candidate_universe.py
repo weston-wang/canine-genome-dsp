@@ -685,3 +685,9 @@ def test_every_candidate_was_independently_verified():
     assert by["farnesyltransferase inhibition"].availability is cu.Availability.EXISTS_TODAY
     xpo = by["nuclear export inhibition (XPO1 / SINE compounds)"]
     assert "labelled until progression --" not in xpo.availability_basis
+
+
+def test_discontinued_omacetaxine_is_not_graded_obtainable():
+    m = next(x for x in cu.UNIVERSE if x.name == "translation-elongation inhibition")
+    assert m.availability is cu.Availability.NEAR_FUTURE
+    assert "DISCONTINUED" in m.availability_basis

@@ -2583,6 +2583,11 @@ def _apply_verification() -> tuple[Modality, ...]:
             out.append(m)
             continue
         kw = {"basis": m.basis + "\nVERIFIED 2026-11-04 (independent): " + note}
+        if m.name == "translation-elongation inhibition":
+            kw["availability"] = Availability.NEAR_FUTURE
+            kw["availability_basis"] = ("Omacetaxine (SYNRIBO, NDA203585) is listed as DISCONTINUED in "
+                                        "Drugs@FDA, so it is not reliably obtainable today; a non-US "
+                                        "homoharringtonine approval was not verified. Graded near-future.")
         if m.name == "farnesyltransferase inhibition":
             kw["availability"] = Availability.EXISTS_TODAY
             kw["availability_basis"] = ("Lonafarnib is human-licensed and oral (ZOKINVY, NDA213969, a "

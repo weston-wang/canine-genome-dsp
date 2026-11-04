@@ -18,7 +18,7 @@ wild-type control. Exposure ceilings to compare against are in each row (e.g. di
 | 1 | A canine-HS evidence | nuclear export inhibition (XPO1 / SINE compounds) | verdinexor IC50 in canine HS lines and a canine CSF:plasma at the labelled dose | exists today |
 | 2 | A canine-HS evidence | proteasome inhibition | an IC50 in canine HS for a member with measured unbound brain exposure | exists today |
 | 3 | A canine-HS evidence | cardiac glycosides / Na+,K+-ATPase inhibition | a digoxin IC50 in canine HS lines, compared with the canine therapeutic serum range | exists today |
-| 4 | A canine-HS evidence | translation-elongation inhibition | omacetaxine IC50 in canine HS and its CSF:plasma | exists today |
+| 4 | A canine-HS evidence | translation-elongation inhibition | omacetaxine IC50 in canine HS and its CSF:plasma | near future (omacetaxine discontinued in the US) |
 | 5 | A canine-HS evidence | nitrogen-bisphosphonate chemosensitisation (free zoledronate) | zoledronate plus vincristine (the in-model partner) in canine HS lines, and zoledronate's CSF level | exists today |
 | 6 | A canine-HS evidence | HSP90 inhibition | retaspimycin or ganetespib IC50 in canine HS lines (cells exist) | near future |
 | 7 | A canine-HS evidence | survivin suppression (YM155 / sepantronium) | YM155 unbound brain or CSF exposure in any species, against its canine HS IC50 | near future |
