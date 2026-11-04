@@ -144,6 +144,10 @@ Durability is therefore reached in **two moves**:
   second integrity error (dordaviprone in the program with no class row). **63 classes: 17 / 18 /
   28 open.** Yield fell from 13 to 7 across the last two axes. A test now fails if any program
   agent lacks a catalogue class.
+  Then all 28 open classes were ASSESSED (one PubMed query each against canine HS, plus targeted
+  look-ups): MDM2 excluded (DEFEATED_BY_ESCAPE, measured subclonal TP53 loss), farnesyltransferase
+  excluded (KILL_CONTRADICTED, K-Ras alternative prenylation), 26 recorded as CANDIDATE with the
+  deciding measurement each. **63: 17 in model, 20 excluded, 26 candidates, 0 unassessed.**
 
   Updated 2026-11-01, and this one is a DOWNGRADE of a published line: a second-pass sweep found
   two more classes that had never been rows, so "0 unassessed" became "1 open". Antimetabolites /

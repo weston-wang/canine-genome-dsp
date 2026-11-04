@@ -307,6 +307,9 @@ class Status(Enum):
     IN_MODEL = "represented by at least one agent in the model"
     EXCLUDED = "evaluated and excluded, with the reason recorded"
     NOT_ASSESSED = "not yet assessed -- an open hole in the catalogue"
+    CANDIDATE = ("assessed against the bar: no admissible rule-13 exclusion ground exists and no agent "
+                 "is wired into the regimen; the ONE measurement that would decide it is recorded. "
+                 "Not a closure, not a gap under rule 11 -- a named next experiment.")
 
 
 class ExclusionGround(Enum):
@@ -358,6 +361,7 @@ class Modality:
     availability: Availability   # rule 13: exists-today vs to-build, for the representative named
     availability_basis: str      # what makes it obtainable, or what the exists-today substitute is
     exclusion_ground: ExclusionGround | None = None   # required iff status is EXCLUDED
+    deciding_measurement: str = ""   # required iff status is CANDIDATE
 
 
 #: Enumerated from the modality list in CLAUDE.md rule 9, plus classes the HS literature names.
@@ -2289,6 +2293,191 @@ KNOWN_OPEN_CLASSES: tuple[str, ...] = (
 #: here as a stated decision rather than as EXCLUDED rows with a ground they do not have.
 
 
+# ---------------------------------------------------------------------------------------------
+# ASSESSMENT OF EVERY OPEN CLASS, 2026-11-04.
+# Each of the 28 classes that sat at NOT_ASSESSED was searched (PubMed: class terms AND canine
+# histiocytic sarcoma / malignant histiocytosis; plus the targeted look-ups cited) and given a
+# verdict: EXCLUDED where a rule-13 ground was found, otherwise CANDIDATE with the ONE measurement
+# that would decide it. Two were excluded (MDM2 on measured subclonal TP53 loss; FTIs on K-Ras
+# alternative prenylation). Nothing was moved to IN_MODEL: no agent was wired into the regimen.
+# The original row text is kept; the verdict is appended, so the history stays readable.
+# ---------------------------------------------------------------------------------------------
+@dataclass(frozen=True)
+class _Assessment:
+    verdict: Status
+    ground: ExclusionGround | None
+    searched: str
+    finding: str
+    deciding_measurement: str
+
+
+OPEN_BEFORE_ASSESSMENT_2026_11_04: tuple[str, ...] = KNOWN_OPEN_CLASSES
+
+ASSESSMENT_2026_11_04: dict[str, _Assessment] = {
+    'MDM2-p53 interaction inhibition': _Assessment(
+        Status.EXCLUDED, ExclusionGround.DEFEATED_BY_ESCAPE,
+        'PubMed 2026-11-04: (MDM2 OR nutlin OR idasanutlin OR TP53 OR p53) AND (histiocytic sarcoma OR malignant histiocytosis) AND (dog OR canine OR dogs) -> 6 records.',
+        'EXCLUDED. MDM2 inhibitors kill only through WILD-TYPE p53, and canine HS carries pre-existing p53-null subclones: a 2-base TP53 insertion (p.Tyr150SerfsX8) in 12/26 dogs, 10 of them the same allele (PMID 28867679); by digital PCR in 26/64 dogs (41%) at mean mutant allele frequency 1.9%, i.e. SUBCLONAL, and enriched in metastatic disease (PMID 30852355); regionally heterogeneous in 6/8 tumours (PMID 30662044); and the insertion abolishes p53 protein and its transcriptional function in canine HS cells (PMID 31246118); DH82 is TP53-deleted. A drug whose kill requires p53 therefore selects the p53-null subclone that is already present -- escape A7 (intratumour heterogeneity) acting through A2 (target loss). Measured in this disease, so it is a rule-13 ground, not an absence of data.',
+        ''),
+    'farnesyltransferase inhibition': _Assessment(
+        Status.EXCLUDED, ExclusionGround.KILL_CONTRADICTED,
+        'PubMed 2026-11-04: (tipifarnib OR farnesyltransferase OR lonafarnib) AND (histiocytic sarcoma OR malignant histiocytosis) AND (dog OR canine OR dogs) -> 0 records.',
+        "EXCLUDED. Farnesyltransferase inhibitors block H-Ras but not K-Ras (or N-Ras), which are alternatively prenylated by geranylgeranyltransferase when FTase is inhibited (PMID 12882980; PMID 28530791). This tumour's recorded driver lesions are PTPN11/SHP2 (~56%) and KRAS -- upstream of, or in, the isoforms that bypass the drug. The licensed trial use was HRAS-gated (NCT04284774). Derived from mechanism, scoped: an HRAS-mutant canine HS would reopen the class.",
+        ''),
+    'targeted protein degradation / cereblon modulators (immunomodulatory imides, CELMoDs)': _Assessment(
+        Status.CANDIDATE, None,
+        'PubMed 2026-11-04: (lenalidomide OR pomalidomide OR thalidomide OR cereblon) AND (histiocytic sarcoma OR malignant histiocytosis) AND (dog OR canine OR dogs) -> 1 records.',
+        'Assessed: licensed, human outcome in a primary CNS tumour (48% ORR, PMID 30262659), human CSF 19%/17% clears the CSF requirement; no canine-HS potency, and its 21% grade 3/4 neutropenia lands on a marrow axis already at 0.95.',
+        'pomalidomide IC50 in the ten canine HS lines, then a priced marrow burden replacing (not adding to) one of the two licensed marrow agents'),
+    'nuclear export inhibition (XPO1 / SINE compounds)': _Assessment(
+        Status.CANDIDATE, None,
+        'PubMed 2026-11-04: (verdinexor OR selinexor OR XPO1 OR exportin) AND (histiocytic sarcoma OR malignant histiocytosis) AND (dog OR canine OR dogs) -> 0 records.',
+        "Assessed: canine-licensed (verdinexor), selinexor pan-active at 5 uM in ten canine HS lines, three-species brain:plasma measured for selinexor; verdinexor's own brain/CSF level and HS IC50 are unmeasured, and indefinite dosing is not on the label.",
+        'verdinexor IC50 in canine HS lines and a canine CSF:plasma at the labelled dose'),
+    'proteasome inhibition': _Assessment(
+        Status.CANDIDATE, None,
+        'PubMed 2026-11-04: (bortezomib OR carfilzomib OR ixazomib OR proteasome) AND (histiocytic sarcoma OR malignant histiocytosis) AND (dog OR canine OR dogs) -> 0 records.',
+        "Assessed: pan-active in the canine HS screen. The one brain-penetrant member has a NEGATIVE phase 3 in a different brain tumour: marizomib added to standard therapy in 749 newly diagnosed glioblastoma patients did not improve OS (17 vs 16.5 months, HR 1.04) and added toxicity (PMID 38502052). Indirect for HS (other tumour), so not a rule-13 ground, but it removes the class's obvious route to the brain.",
+        'an IC50 in canine HS for a member with measured unbound brain exposure'),
+    'HSP90 inhibition': _Assessment(
+        Status.CANDIDATE, None,
+        'PubMed 2026-11-04: (HSP90 OR retaspimycin OR ganetespib OR 17-AAG) AND (histiocytic sarcoma OR malignant histiocytosis) AND (dog OR canine OR dogs) -> 0 records.',
+        'Assessed: pan-active screen hit only; no licensed member in any species; no canine PK.',
+        'retaspimycin or ganetespib IC50 in canine HS lines (cells exist)'),
+    'cardiac glycosides / Na+,K+-ATPase inhibition': _Assessment(
+        Status.CANDIDATE, None,
+        'PubMed 2026-11-04: (digoxin OR ouabain OR cardiac glycoside OR digitoxin OR bufalin) AND (histiocytic sarcoma OR malignant histiocytosis) AND (dog OR canine OR dogs) -> 1 records.',
+        'Assessed: pan-active at a 5 uM screening concentration, which is a lower bound on potency (rule 16), so no margin can be computed yet; digoxin is routinely dosed in dogs.',
+        'a digoxin IC50 in canine HS lines, compared with the canine therapeutic serum range'),
+    'translation-elongation inhibition': _Assessment(
+        Status.CANDIDATE, None,
+        'PubMed 2026-11-04: (homoharringtonine OR omacetaxine OR translation elongation OR didemnin OR plitidepsin) AND (histiocytic sarcoma OR malignant histiocytosis) AND (dog OR canine OR dogs) -> 0 records.',
+        'Assessed: pan-active screen hit; omacetaxine is human-licensed (CML); no CNS figure fetched.',
+        'omacetaxine IC50 in canine HS and its CSF:plasma'),
+    'apoptosis induction / BH3 mimetics (BCL-2, BCL-XL)': _Assessment(
+        Status.CANDIDATE, None,
+        'PubMed 2026-11-04: (venetoclax OR navitoclax OR BCL-2 OR BCL2 OR BCL-XL) AND (histiocytic sarcoma OR malignant histiocytosis) AND (dog OR canine OR dogs) -> 1 records.',
+        'Assessed: PubMed returns no BCL-2 inhibitor data in canine HS; the anti-apoptotic gene that IS measured high in canine HS is survivin, not BCL-2 (PMID 24260303) -- a reason to test before use.',
+        'BH3 profiling or a venetoclax IC50 in canine HS lines'),
+    'interleukin-1 blockade as a tolerability enabler (not a tumour-kill modality)': _Assessment(
+        Status.CANDIDATE, None,
+        'PubMed 2026-11-04: (anakinra OR interleukin-1 OR IL-1) AND (histiocytic sarcoma OR malignant histiocytosis) AND (dog OR canine OR dogs) -> 2 records.',
+        'Assessed: an ENABLER, not a kill; its role is recorded at condition C3 (anakinra 94% vs 65% tolerance association). Decided by whether the MAPK maintenance arm needs it.',
+        'rate of MAPK-inhibitor intolerance in dogs on maintenance, with and without IL-1 blockade'),
+    'glucocorticoid-receptor agonists (corticosteroids)': _Assessment(
+        Status.CANDIDATE, None,
+        'PubMed 2026-11-04: (prednisone OR prednisolone OR dexamethasone OR glucocorticoid) AND (histiocytic sarcoma OR malignant histiocytosis) AND (dog OR canine OR dogs) -> 7 records.',
+        'Assessed, and the strongest in-case evidence of any candidate: a corgi with INTRACRANIAL HS, prednisolone 1 mg/kg/day shrank the lesion before radiation (PMID 34556593) -- right site, right species, n=1, with oedema reduction not separable from kill; the dog died at day 164 of CSF-borne intracranial spread. Glucocorticoids also blunt the immune arms.',
+        'a prednisolone/dexamethasone IC50 in canine HS lines (cells exist; a trivial assay)'),
+    'nucleic-acid therapeutics (antisense oligonucleotide, siRNA)': _Assessment(
+        Status.CANDIDATE, None,
+        'PubMed 2026-11-04: (antisense OR siRNA OR oligonucleotide) AND (histiocytic sarcoma OR malignant histiocytosis) AND (dog OR canine OR dogs) -> 7 records.',
+        'Assessed: target dependency IS measured in canine HS -- survivin siRNA in 4 canine HS lines caused apoptosis, growth inhibition and chemosensitisation, and survivin was the highest of six anti-apoptotic genes in 30 tumours (PMID 24260303). What is missing is delivery: no CNS-capable anti-survivin oligonucleotide exists for the dog.',
+        "an intrathecally deliverable anti-survivin oligonucleotide's knockdown in canine HS in vivo"),
+    'photodynamic / sonodynamic therapy (energy-activated sensitiser)': _Assessment(
+        Status.CANDIDATE, None,
+        'PubMed 2026-11-04: (photodynamic OR aminolevulinic OR sonodynamic) AND (histiocytic sarcoma OR malignant histiocytosis) AND (dog OR canine OR dogs) -> 1 records.',
+        "Assessed: a canine histiocytic sarcoma 'significantly diminished' after chlorin e6 PDT (one dog, presentation not stated, so indirect for the intracranial case; PMID 36556469); canine normal-brain MTD measured (PMID 10461068); 5-ALA localises to a canine brain tumour (PMID 30351464). Cavity-only and session-based, so its role is induction.",
+        '5-ALA or Ce6 fluorescence in a resected canine intracranial HS specimen'),
+    'high-Z nanoparticle radioenhancement': _Assessment(
+        Status.CANDIDATE, None,
+        'PubMed 2026-11-04: (NBTXR3 OR hafnium OR gold nanoparticle OR radioenhanc) AND (histiocytic sarcoma OR malignant histiocytosis) AND (dog OR canine OR dogs) -> 0 records.',
+        'Assessed: no brain trial in any species, no canine data; near-future only.',
+        'NBTXR3 retention and dose enhancement in an intracranial tumour in any species'),
+    'ligand-toxin fusions / immunotoxins (catalytic protein toxins)': _Assessment(
+        Status.CANDIDATE, None,
+        'PubMed 2026-11-04: (immunotoxin OR tagraxofusp OR diphtheria toxin OR pseudomonas exotoxin) AND (histiocytic sarcoma OR malignant histiocytosis) AND (dog OR canine OR dogs) -> 0 records.',
+        'Assessed: target present in 50/50 canine HS (CD204, CD18); licensed members use ligands this tumour probably lacks (CD123-negative in a human HS case); CED delivery shown in 47 patients.',
+        "a CD204- or CD18-directed fusion toxin's IC50 in canine HS lines"),
+    'polyamine-synthesis inhibition (ornithine decarboxylase)': _Assessment(
+        Status.CANDIDATE, None,
+        'PubMed 2026-11-04: (eflornithine OR difluoromethylornithine OR DFMO OR polyamine) AND (histiocytic sarcoma OR malignant histiocytosis) AND (dog OR canine OR dogs) -> 0 records.',
+        'Assessed: licensed indefinite oral maintenance; human CSF up to 51% at an inflamed barrier (ceiling); no canine HS data.',
+        'eflornithine growth inhibition of canine HS lines at achievable concentration'),
+    'anti-invasion / adhesion / chemokine-axis blockade (integrin, CXCR4)': _Assessment(
+        Status.CANDIDATE, None,
+        'PubMed 2026-11-04: (plerixafor OR CXCR4 OR integrin OR CD18) AND (histiocytic sarcoma OR malignant histiocytosis) AND (dog OR canine OR dogs) -> 30 records.',
+        'Assessed: target expression only (CD18 50/50); not a kill; the adhesion-loss finding is from disseminated, not localised, HS.',
+        'CXCR4 expression in canine intracranial HS'),
+    'tumour-treating fields (alternating electric fields)': _Assessment(
+        Status.CANDIDATE, None,
+        'PubMed 2026-11-04: (tumor treating fields OR alternating electric fields) AND (histiocytic sarcoma OR malignant histiocytosis) AND (dog OR canine OR dogs) -> 3 records.',
+        'Assessed: licensed device, continuous, no normal-brain dose; division-gated; no canine data.',
+        'field-intensity modelling or measurement for a transducer array on a canine skull'),
+    'targeted radionuclide therapy / radioconjugates': _Assessment(
+        Status.CANDIDATE, None,
+        'PubMed 2026-11-04: (radionuclide OR radioimmunotherapy OR lutetium OR iodine-131) AND (histiocytic sarcoma OR malignant histiocytosis) AND (dog OR canine OR dogs) -> 0 records.',
+        'Assessed: modality licensed in humans; no conjugate against an antigen of this tumour.',
+        'uptake of a CD204/CD18-directed radioconjugate in canine HS'),
+    'acyclic nucleotide phosphonate prodrugs (rabacfosadine)': _Assessment(
+        Status.CANDIDATE, None,
+        'PubMed 2026-11-04: (rabacfosadine OR VDC-1101 OR GS-9219) AND (histiocytic sarcoma OR malignant histiocytosis) AND (dog OR canine OR dogs) -> 0 records.',
+        "Assessed: canine-licensed; zero canine-HS records; rule 15 blocks importing cytarabine's IC50.",
+        'rabacfosadine (or PMEG) IC50 in canine HS lines and its CSF level in dogs'),
+    'amino-acid-depleting enzymes (L-asparaginase)': _Assessment(
+        Status.CANDIDATE, None,
+        'PubMed 2026-11-04: (asparaginase OR asparagine synthetase) AND (histiocytic sarcoma OR malignant histiocytosis) AND (dog OR canine OR dogs) -> 1 records.',
+        'Assessed: one canine-HS hit, about neutropenia risk with lomustine and asparaginase co-use (PMID 35249267), not efficacy.',
+        'asparagine synthetase expression in canine HS'),
+    'nitrogen-bisphosphonate chemosensitisation (free zoledronate)': _Assessment(
+        Status.CANDIDATE, None,
+        'PubMed 2026-11-04: (zoledronate OR zoledronic OR bisphosphonate) AND (histiocytic sarcoma OR malignant histiocytosis) AND (dog OR canine OR dogs) -> 3 records.',
+        'Assessed: in-vitro synergy in canine malignant histiocytosis lines (PMID 22236140); one haemophagocytic-HS dog (PMID 38046421); its measured partner, doxorubicin, is excluded.',
+        "zoledronate plus vincristine (the in-model partner) in canine HS lines, and zoledronate's CSF level"),
+    'inflammatory-cytokine blockade (TNF, IL-6)': _Assessment(
+        Status.CANDIDATE, None,
+        'PubMed 2026-11-04: (TNF OR etanercept OR tocilizumab OR interleukin-6) AND (histiocytic sarcoma OR malignant histiocytosis) AND (dog OR canine OR dogs) -> 3 records.',
+        'Assessed: mechanism only (CCL3-TNF axis specific to canine HS lines, PMID 42030266); not a kill.',
+        'effect of TNF blockade on canine HS growth in a macrophage co-culture'),
+    'RANKL inhibition': _Assessment(
+        Status.CANDIDATE, None,
+        'PubMed 2026-11-04: (RANKL OR denosumab OR RANK) AND (histiocytic sarcoma OR malignant histiocytosis) AND (dog OR canine OR dogs) -> 1 records.',
+        'Assessed: weak; rationale is osteolytic LCH bone lesions; no canine HS record.',
+        'RANK expression in canine HS'),
+    'alteration-matched agents gated on lesions not reported in canine HS (ALK/NTRK/RET fusions, IDH1)': _Assessment(
+        Status.CANDIDATE, None,
+        'PubMed 2026-11-04: (ALK OR NTRK OR RET OR IDH1 OR gene fusion) AND (histiocytic sarcoma OR malignant histiocytosis) AND (dog OR canine OR dogs) -> 0 records.',
+        'Assessed: gated purely on genotype; licensed members exist with intracranial activity.',
+        "a fusion / IDH1 panel on canine HS (the tumour's own sequencing)"),
+    'JAK/STAT inhibition': _Assessment(
+        Status.CANDIDATE, None,
+        'PubMed 2026-11-04: (JAK OR STAT3 OR ruxolitinib OR oclacitinib) AND (histiocytic sarcoma OR malignant histiocytosis) AND (dog OR canine OR dogs) -> 1 records.',
+        'Assessed: STAT3 pathway activation reported in canine HS (PMID 37231193); a JAK inhibitor is canine-licensed (oclacitinib).',
+        'ruxolitinib or oclacitinib IC50 in canine HS lines'),
+    'boron neutron capture therapy': _Assessment(
+        Status.CANDIDATE, None,
+        'PubMed 2026-11-04: (boron neutron capture OR boronophenylalanine) AND (histiocytic sarcoma OR malignant histiocytosis) AND (dog OR canine OR dogs) -> 0 records.',
+        'Assessed: radiation form with carrier selectivity; needs an accelerator; no canine HS record.',
+        'BPA tumour:normal-brain uptake ratio in canine intracranial HS (FBPA-PET)'),
+    'arsenic trioxide': _Assessment(
+        Status.CANDIDATE, None,
+        'PubMed 2026-11-04: (arsenic trioxide) AND (histiocytic sarcoma OR malignant histiocytosis) AND (dog OR canine OR dogs) -> 0 records.',
+        'Assessed: weak; licensed success is PML-RARA-specific; no canine HS record.',
+        'arsenic trioxide IC50 in canine HS lines'),
+}
+
+
+def _apply_assessment() -> tuple[Modality, ...]:
+    from dataclasses import replace
+    out = []
+    for m in UNIVERSE:
+        a = ASSESSMENT_2026_11_04.get(m.name)
+        if a is None:
+            out.append(m)
+            continue
+        out.append(replace(
+            m, status=a.verdict, exclusion_ground=a.ground,
+            basis=m.basis + "\nASSESSED 2026-11-04 (" + a.searched + "): " + a.finding,
+            deciding_measurement=a.deciding_measurement))
+    return tuple(out)
+
+
+UNIVERSE = _apply_assessment()
+#: After assessment, nothing is NOT_ASSESSED. The guard below still fails if a new unassessed row
+#: is added without being declared here.
+KNOWN_OPEN_CLASSES = ()
+
+
 def _validate() -> None:
     names = [m.name for m in UNIVERSE]
     if len(names) != len(set(names)):
@@ -2306,6 +2495,13 @@ def _validate() -> None:
                   if m.status is Status.EXCLUDED and m.exclusion_ground is None]
     if ungrounded:
         raise ValueError(f"rule 13 violated: EXCLUDED without an admissible ground: {ungrounded}")
+    undecided = [m.name for m in UNIVERSE
+                 if m.status is Status.CANDIDATE and not m.deciding_measurement]
+    if undecided:
+        raise ValueError(f"CANDIDATE without the measurement that would decide it: {undecided}")
+    missing = [n for n in OPEN_BEFORE_ASSESSMENT_2026_11_04 if n not in ASSESSMENT_2026_11_04]
+    if missing:
+        raise ValueError(f"open class never assessed: {missing}")
     stray = [m.name for m in UNIVERSE
              if m.status is not Status.EXCLUDED and m.exclusion_ground is not None]
     if stray:
@@ -2338,19 +2534,26 @@ def excluded() -> list[Modality]:
     return [m for m in UNIVERSE if m.status is Status.EXCLUDED]
 
 
+def candidates() -> list[Modality]:
+    """Assessed classes with no admissible exclusion and no agent in the regimen, each carrying the
+    measurement that would decide it."""
+    return [m for m in UNIVERSE if m.status is Status.CANDIDATE]
+
+
 def open_with_canine_hs_evidence() -> list[Modality]:
     """The open classes that already have a measurement in canine HS -- i.e. the ones worth working
     up first. Eleven open classes is a lot to read as one number, and they are not equivalent: five
     carry a canine-HS screen result and six carry nothing in this disease at all. A closure claim
     quantified over "11 open" without that split invites the reader to treat a pan-active screen hit
     and an unsearched mechanism as the same kind of gap."""
-    return [m for m in not_assessed() if m.canine_hs_evidence.startswith("MEASURED")]
+    return [m for m in candidates() + not_assessed() if m.canine_hs_evidence.startswith("MEASURED")]
 
 
 def open_without_canine_hs_evidence() -> list[Modality]:
     """The open classes with no measurement in this disease. Being here is NOT a rule-13 ground for
     exclusion and NOT a rule-11 gap to report -- it is a statement about where to look next."""
-    return [m for m in not_assessed() if not m.canine_hs_evidence.startswith("MEASURED")]
+    return [m for m in candidates() + not_assessed()
+            if not m.canine_hs_evidence.startswith("MEASURED")]
 
 
 def not_assessed() -> list[Modality]:
@@ -2487,7 +2690,8 @@ def closure_claim(n_escapes: int) -> str:
     return (
         f"Closed within this catalogue of {len(UNIVERSE)} modality classes and {n_escapes} escape "
         f"routes: {t['IN_MODEL']} classes represented in the model, {t['EXCLUDED']} evaluated and "
-        f"excluded with an admissible rule-13 ground recorded, {t['NOT_ASSESSED']} unassessed. "
+        f"excluded with an admissible rule-13 ground recorded, {t['CANDIDATE']} assessed candidates "
+        f"(each with the measurement that would decide it), {t['NOT_ASSESSED']} unassessed. "
         f"Grounds for exclusion: {len(g['KILL_CONTRADICTED'])} kill contradicted, "
         f"{len(g['DEFEATED_BY_ESCAPE'])} defeated by a named escape, "
         f"{len(g['TOXICITY_UNAFFORDABLE'])} toxicity unaffordable; "

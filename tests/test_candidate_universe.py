@@ -246,11 +246,12 @@ def test_the_catalogue_count_and_the_open_count_are_what_the_docs_say():
     t = cu.tally()
     assert len(cu.UNIVERSE) == 63
     assert t["IN_MODEL"] == 17
-    assert t["EXCLUDED"] == 18
-    assert t["NOT_ASSESSED"] == 28
+    assert t["EXCLUDED"] == 20
+    assert t["CANDIDATE"] == 26
+    assert t["NOT_ASSESSED"] == 0
     claim = cu.closure_claim(ea.audited_escape_count())
     assert "63 modality classes" in claim
-    assert "28 unassessed" in claim
+    assert "26 assessed candidates" in claim and "0 unassessed" in claim
 
 
 def test_c3_records_the_maintenance_pincer_at_the_strength_shown():
@@ -296,8 +297,9 @@ def test_the_degrader_class_is_the_third_hole_and_is_carried_open():
     POSTED results in a cohort including histiocytic sarcoma) and cannot be called closed (its
     measured human CSF access falls short at the parenchyma), so it is OPEN and declared."""
     m = next(x for x in cu.UNIVERSE if "degradation" in x.name)
-    assert m.status is cu.Status.NOT_ASSESSED
-    assert m.name in cu.KNOWN_OPEN_CLASSES
+    assert m.status is cu.Status.CANDIDATE
+    assert m.name in cu.OPEN_BEFORE_ASSESSMENT_2026_11_04
+    assert m.deciding_measurement
     assert m.exclusion_ground is None
     assert m.availability is cu.Availability.EXISTS_TODAY
     # the trial that forbids dismissing it, with its posted numbers
@@ -425,8 +427,9 @@ def test_the_xpo1_class_carries_the_canine_licensed_agent_and_its_rule_15_limits
     """The most consequential hole: a canine-LICENSED, oral, indefinitely-scheduled agent in a class
     with no row -- whose pharmacology a sibling branch of this project had already done."""
     m = next(x for x in cu.UNIVERSE if "XPO1" in x.name)
-    assert m.status is cu.Status.NOT_ASSESSED
-    assert m.name in cu.KNOWN_OPEN_CLASSES
+    assert m.status is cu.Status.CANDIDATE
+    assert m.name in cu.OPEN_BEFORE_ASSESSMENT_2026_11_04
+    assert m.deciding_measurement
     assert m.availability is cu.Availability.EXISTS_TODAY
     assert "LICENSED FOR DOGS" in m.availability_basis
     assert "Laverdia" in m.basis
@@ -504,8 +507,9 @@ def test_the_bh3_row_records_the_rule_15_error_in_the_existing_record():
     inhibition, the very thing venetoclax was engineered to spare. One compound's toxicity was
     allowed to bound another's in the direction opposite to the chemistry."""
     m = next(x for x in cu.UNIVERSE if "BH3" in x.name)
-    assert m.status is cu.Status.NOT_ASSESSED
-    assert m.name in cu.KNOWN_OPEN_CLASSES
+    assert m.status is cu.Status.CANDIDATE
+    assert m.name in cu.OPEN_BEFORE_ASSESSMENT_2026_11_04
+    assert m.deciding_measurement
     assert "ENGINEERED" in m.basis and "SPARE" in m.basis
     assert "does not appear anywhere in this repository" in m.basis, \
         "venetoclax is absent from the whole repo"
@@ -544,8 +548,8 @@ def test_the_open_classes_split_by_whether_canine_evidence_exists():
     mechanism."""
     withev = cu.open_with_canine_hs_evidence()
     without = cu.open_without_canine_hs_evidence()
-    assert len(withev) + len(without) == len(cu.not_assessed())
-    assert len(withev) == 6 and len(without) == 22
+    assert len(withev) + len(without) == len(cu.candidates()) + len(cu.not_assessed())
+    assert len(withev) == 6 and len(without) == 20
     assert all(m.canine_hs_evidence.startswith("MEASURED") for m in withev)
     names = {m.name for m in withev}
     assert "nuclear export inhibition (XPO1 / SINE compounds)" in names
@@ -557,7 +561,7 @@ def test_the_glucocorticoid_hole_is_recorded_as_the_embarrassment_it_is():
     Recorded bluntly, with the n=1 negative and the immune-arm antagonism each at its own strength,
     and with the explicit note that neither is an admissible ground for exclusion."""
     m = next(x for x in cu.UNIVERSE if "glucocorticoid" in x.name)
-    assert m.status is cu.Status.NOT_ASSESSED
+    assert m.status is cu.Status.CANDIDATE
     assert m.availability is cu.Availability.EXISTS_TODAY
     assert "NOWHERE in this repository" in m.basis
     assert "42780343" in m.basis, "the n=1 CNS-ECD case that was refractory to corticosteroids"
@@ -596,7 +600,7 @@ def test_formulary_exclusions_use_admissible_grounds():
 def test_rabacfosadine_is_not_swept_into_the_antimetabolite_exclusion():
     """Rule 15: cytarabine/methotrexate IC50s may not be carried onto a different compound."""
     m = next(x for x in cu.UNIVERSE if "rabacfosadine" in x.name)
-    assert m.status is cu.Status.NOT_ASSESSED
+    assert m.status is cu.Status.CANDIDATE
     assert "RULE 15" in m.basis
 
 
@@ -636,3 +640,25 @@ def test_registry_and_pipeline_axes_recorded():
     assert by["mitochondrial-protease activation / OXPHOS collapse (imipridones)"].status is cu.Status.IN_MODEL
     assert "37231193" in by["JAK/STAT inhibition"].canine_hs_evidence
     assert "not fetched" in by["boron neutron capture therapy"].availability_basis
+
+
+def test_every_formerly_open_class_was_assessed_and_given_a_verdict():
+    """2026-11-04: all 28 open classes searched; each is EXCLUDED on a rule-13 ground or a CANDIDATE
+    carrying the one measurement that decides it. Nothing is left NOT_ASSESSED."""
+    assert cu.not_assessed() == []
+    assert set(cu.OPEN_BEFORE_ASSESSMENT_2026_11_04) == set(cu.ASSESSMENT_2026_11_04)
+    for m in cu.UNIVERSE:
+        if m.name in cu.ASSESSMENT_2026_11_04:
+            assert "ASSESSED 2026-11-04 (PubMed" in m.basis, m.name
+            assert m.status in (cu.Status.CANDIDATE, cu.Status.EXCLUDED), m.name
+    by = {m.name: m for m in cu.UNIVERSE}
+    mdm2 = by["MDM2-p53 interaction inhibition"]
+    assert mdm2.exclusion_ground is cu.ExclusionGround.DEFEATED_BY_ESCAPE
+    assert "30852355" in mdm2.basis and "A7" in mdm2.basis
+    fti = by["farnesyltransferase inhibition"]
+    assert fti.exclusion_ground is cu.ExclusionGround.KILL_CONTRADICTED
+    assert "12882980" in fti.basis
+    assert "38502052" in by["proteasome inhibition"].basis
+    assert "34556593" in by["glucocorticoid-receptor agonists (corticosteroids)"].basis
+    assert "36556469" in by["photodynamic / sonodynamic therapy (energy-activated sensitiser)"].basis
+    assert "24260303" in by["nucleic-acid therapeutics (antisense oligonucleotide, siRNA)"].basis

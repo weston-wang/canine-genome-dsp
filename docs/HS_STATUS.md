@@ -281,7 +281,7 @@ scientifically sound."*
 | Part | Verdict | Basis (where) |
 |---|---|---|
 | Clearing the first tumour | **Holds within a now-stated catalogue.** Every escape has a closing agent: of the original 12, 7 measured in canine HS, 2 transferred, 1 model-derived, 2 structural, **0 assumed**; all 45 pairs and 120 triples covered; toxicity budgets computed, one collision (radiation + CNS microtubule agent) resolved by sequencing. The 4 audit-added routes close on 1 measurement-backed drug choice, 2 transfers, 1 structural argument | `CONSOLIDATED_REPORT.md`, `coverage_assessment`, `escape_audit` |
-| "Every mechanism" | **Now established, as a scoped claim.** "Closed within this catalogue of **25 modality classes and 16 escape routes**", 0 classes unassessed, 10 excluded with reasons named. [**Superseded 2026-10-31: 26 classes, 11 excluded.**] [**Superseded again 2026-11-01: 28 classes, 12 excluded, 1 OPEN** — antimetabolites.] [**Superseded again 2026-11-02: 29 classes, 13 excluded, 1 OPEN** — antimetabolites CLOSED on three measured canine-HS IC50s; targeted protein degradation found missing and opened.] [**Superseded again 2026-11-03: 42 classes, 16 excluded, 11 OPEN** (three external-taxonomy diffs).] [**Superseded 2026-11-04 (fourth/fifth axes): 55 classes, 21 OPEN.**] [**Current, 2026-11-04: 63 classes — 17 in model, 18 excluded, 28 OPEN** (seven axes; see the last section of this file).] Not the same as "every conceivable mechanism" — it is a claim whose boundary is written down | `candidate_universe.closure_claim()`, `escape_audit` |
+| "Every mechanism" | **Now established, as a scoped claim.** "Closed within this catalogue of **25 modality classes and 16 escape routes**", 0 classes unassessed, 10 excluded with reasons named. [**Superseded 2026-10-31: 26 classes, 11 excluded.**] [**Superseded again 2026-11-01: 28 classes, 12 excluded, 1 OPEN** — antimetabolites.] [**Superseded again 2026-11-02: 29 classes, 13 excluded, 1 OPEN** — antimetabolites CLOSED on three measured canine-HS IC50s; targeted protein degradation found missing and opened.] [**Superseded again 2026-11-03: 42 classes, 16 excluded, 11 OPEN** (three external-taxonomy diffs).] [**Superseded 2026-11-04 (fourth/fifth axes): 55 classes, 21 OPEN.**] [**Current, 2026-11-04: 63 classes — 17 in model, 20 excluded, 26 assessed candidates, 0 unassessed** (seven axes, every class assessed; see the last section of this file).] Not the same as "every conceivable mechanism" — it is a claim whose boundary is written down | `candidate_universe.closure_claim()`, `escape_audit` |
 | Staying clear for 10 years | **Scientifically sound hypothesis, not a result.** Model P(10-year), systemic sites: 0.56–0.72 without monitoring, 0.81–0.86 with detect-and-switch. Brain-local hinges on drug access. **CSF now 0.434 [0.17, 0.69]** on a derived rather than assumed prior, and the binding constraint there is sustained delivery (no intrathecal sustained-release product exists), not potency | `emergence.py`; `maintenance_durability.csf_answer()` |
 | Oct 2026 literature | **No change to the design.** PRMT5 brain arm weaker, CDK4/6 brain arm better evidenced on the same deletion (section A); the deletion is common (62.8%), which widens coverage; the immune floor is weaker in MTAP-null tumours | sections A, B |
 | Largest uncertainty | **How often a cleared, predisposed dog throws a new primary (Λ)** — 50–90% of the variance. Not a drug question | `emergence.py` value-of-information |
@@ -2870,4 +2870,38 @@ over the last two axes was 4 and 3 against 13 over the two before — the first 
 stated as that and nothing stronger. `standard_audit.failing()` still returns `[]`.
 
 Every search step that was planned or named as outstanding has now been run.
+
+### Addendum: every open class assessed
+
+The 28 classes left open above were each searched (PubMed: class terms AND canine histiocytic
+sarcoma / malignant histiocytosis; the query and record count are stored per class in
+`candidate_universe.ASSESSMENT_2026_11_04`) and given a verdict. A new status, **CANDIDATE**, means:
+assessed, no admissible rule-13 ground to exclude, no agent wired into the regimen, and the single
+measurement that would decide it recorded. `_validate()` rejects a candidate without one.
+
+**Excluded (2):**
+- **MDM2–p53** — DEFEATED_BY_ESCAPE (A7 via A2). TP53 insertion in 12/26 dogs (PMID 28867679);
+  41% of 64 dogs at mean mutant allele 1.9%, i.e. subclonal (PMID 30852355); regional heterogeneity in
+  6/8 (PMID 30662044); the insertion abolishes p53 function in canine HS cells (PMID 31246118). A
+  p53-dependent kill selects the p53-null subclone already present.
+- **Farnesyltransferase** — KILL_CONTRADICTED. FTIs do not block K-Ras or N-Ras, which are
+  geranylgeranylated instead (PMID 12882980; 28530791); the tumour's drivers are PTPN11 and KRAS.
+  Reopens for an HRAS-mutant tumour.
+
+**New evidence surfaced by the assessment:** prednisolone 1 mg/kg/day shrank an intracranial HS in a
+corgi before radiation (PMID 34556593 — already cited in `maintenance_durability`, now on the
+glucocorticoid row); chlorin e6 PDT "significantly diminished" a canine HS (PMID 36556469, n=1, site
+not stated); survivin siRNA killed 4 canine HS lines and survivin was the top anti-apoptotic gene in
+30 tumours (PMID 24260303); marizomib, the brain-penetrant proteasome inhibitor, was negative in a
+749-patient glioblastoma phase 3 (PMID 38502052 — other tumour, so not a ground).
+
+**Candidates (26)**, each with its deciding measurement in the code. Six carry a canine-HS
+measurement and come first: XPO1, proteasome, HSP90, cardiac glycosides, translation elongation,
+zoledronate chemosensitisation. Most of the 26 are decided by an IC50 in the canine HS cell lines that
+already exist.
+
+**Final: 63 classes — 17 in model, 20 excluded (11 kill contradicted, 6 defeated by escape,
+3 toxicity), 26 candidates, 0 unassessed.** `standard_audit.failing()` returns `[]`; 873 tests pass.
+The search phase is complete: every planned step, every named axis, and every class has been run
+and recorded. What remains are laboratory measurements, each named, not searches.
 
