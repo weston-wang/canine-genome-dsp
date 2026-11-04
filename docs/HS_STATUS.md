@@ -281,7 +281,7 @@ scientifically sound."*
 | Part | Verdict | Basis (where) |
 |---|---|---|
 | Clearing the first tumour | **Holds within a now-stated catalogue.** Every escape has a closing agent: of the original 12, 7 measured in canine HS, 2 transferred, 1 model-derived, 2 structural, **0 assumed**; all 45 pairs and 120 triples covered; toxicity budgets computed, one collision (radiation + CNS microtubule agent) resolved by sequencing. The 4 audit-added routes close on 1 measurement-backed drug choice, 2 transfers, 1 structural argument | `CONSOLIDATED_REPORT.md`, `coverage_assessment`, `escape_audit` |
-| "Every mechanism" | **Now established, as a scoped claim.** "Closed within this catalogue of **25 modality classes and 16 escape routes**", 0 classes unassessed, 10 excluded with reasons named. [**Superseded 2026-10-31: 26 classes, 11 excluded.**] [**Superseded again 2026-11-01: 28 classes, 12 excluded, 1 OPEN** — antimetabolites.] [**Superseded again 2026-11-02: 29 classes, 13 excluded, 1 OPEN** — antimetabolites CLOSED on three measured canine-HS IC50s; targeted protein degradation found missing and opened.] [**Superseded again 2026-11-03: 42 classes, 16 excluded, 11 OPEN** (three external-taxonomy diffs).] [**Current, 2026-11-04: 55 classes — 16 in model, 18 excluded, 21 OPEN** (fourth and fifth axes; see the last section of this file).] Not the same as "every conceivable mechanism" — it is a claim whose boundary is written down | `candidate_universe.closure_claim()`, `escape_audit` |
+| "Every mechanism" | **Now established, as a scoped claim.** "Closed within this catalogue of **25 modality classes and 16 escape routes**", 0 classes unassessed, 10 excluded with reasons named. [**Superseded 2026-10-31: 26 classes, 11 excluded.**] [**Superseded again 2026-11-01: 28 classes, 12 excluded, 1 OPEN** — antimetabolites.] [**Superseded again 2026-11-02: 29 classes, 13 excluded, 1 OPEN** — antimetabolites CLOSED on three measured canine-HS IC50s; targeted protein degradation found missing and opened.] [**Superseded again 2026-11-03: 42 classes, 16 excluded, 11 OPEN** (three external-taxonomy diffs).] [**Superseded 2026-11-04 (fourth/fifth axes): 55 classes, 21 OPEN.**] [**Current, 2026-11-04: 63 classes — 17 in model, 18 excluded, 28 OPEN** (seven axes; see the last section of this file).] Not the same as "every conceivable mechanism" — it is a claim whose boundary is written down | `candidate_universe.closure_claim()`, `escape_audit` |
 | Staying clear for 10 years | **Scientifically sound hypothesis, not a result.** Model P(10-year), systemic sites: 0.56–0.72 without monitoring, 0.81–0.86 with detect-and-switch. Brain-local hinges on drug access. **CSF now 0.434 [0.17, 0.69]** on a derived rather than assumed prior, and the binding constraint there is sustained delivery (no intrathecal sustained-release product exists), not potency | `emergence.py`; `maintenance_durability.csf_answer()` |
 | Oct 2026 literature | **No change to the design.** PRMT5 brain arm weaker, CDK4/6 brain arm better evidenced on the same deletion (section A); the deletion is common (62.8%), which widens coverage; the immune floor is weaker in MTAP-null tumours | sections A, B |
 | Largest uncertainty | **How often a cleared, predisposed dog throws a new primary (Λ)** — 50–90% of the variance. Not a drug question | `emergence.py` value-of-information |
@@ -2841,6 +2841,33 @@ closure, and "open" here means unassessed, not refuted. Six carry a canine-HS me
 the ones to work up first: XPO1, proteasome, HSP90, cardiac glycosides, translation elongation,
 zoledronate chemosensitisation.
 
-Axes **not** run, named so the next pass picks a new one instead of repeating: a clinical-trial
-registry sweep of histiocytic neoplasms, and a patent/pipeline sweep.
+### Addendum, same day: the registry and pipeline sweeps — the last two named axes, now run
+
+**Registry (sixth axis).** ClinicalTrials.gov v2, interventional, conditions naming a histiocytic or
+dendritic-cell neoplasm, HLH and Niemann-Pick removed: **71 trials**. Every intervention was mapped
+(the mapping is recorded beside `KNOWN_OPEN_CLASSES`). Four classes had no row and are now open:
+TNF/IL-6 blockade (etanercept NCT00048373, tocilizumab NCT01727206; mechanism-only canine evidence —
+CCL3-driven macrophage TNF-α specifically in canine HS lines, PMID 42030266), RANKL inhibition
+(denosumab NCT03270020), farnesyltransferase inhibition (tipifarnib NCT04284774, HRAS-gated), and
+genotype-matched agents for lesions not reported in canine HS (ALK/NTRK/RET/IDH1 Pediatric MATCH
+arms). No trial result was fetched, so no efficacy is asserted for any of them.
+
+**Pipeline (seventh axis).** ClinicalTrials.gov v2, phase 1–2, started since 2024-01-01, in glioma,
+glioblastoma, brain metastases, leptomeningeal disease, PCNSL and meningioma: **589 trials, 735
+intervention names**. Three new open classes: JAK/STAT (canine HS transcriptome reports STAT3
+pathway activation, PMID 37231193 — activation only, not a kill), boron neutron capture, and arsenic
+trioxide. Cancer-neuroscience repurposing, BTK inhibitors, RAGE antagonists and untargeted
+repurposing were considered and not enumerated, with the reason written down.
+
+**A second integrity error, found by checking the program against the catalogue rather than the
+catalogue against itself:** dordaviprone (ONC201), the program's one non-division-gated kill, had no
+class row — the same defect as niraparib. Now IN_MODEL, and `test_every_program_agent_has_a_catalogue_class`
+makes a third occurrence fail the suite.
+
+**Final catalogue: 63 classes — 17 in model, 18 excluded (10 kill contradicted, 5 defeated by
+escape, 3 toxicity), 28 open — 6 with a canine-HS measurement, 22 without.** Seven named axes. Yield
+over the last two axes was 4 and 3 against 13 over the two before — the first sign of convergence,
+stated as that and nothing stronger. `standard_audit.failing()` still returns `[]`.
+
+Every search step that was planned or named as outstanding has now been run.
 

@@ -32,10 +32,10 @@ checklist, not a probability.
 | Items previously mis-reported as open | 9, each now graded and guarded | same |
 | Growth bar beaten | 0.055 / day | same |
 
-**Catalogue the claim is made over:** 55 therapy-modality classes — 16 in the model, 18 excluded, **21
-open** (6 of those 21 carry a canine-HS measurement; 15 carry nothing in this disease) — and 16 escape routes from an independent audit. No class is excluded for lacking canine
+**Catalogue the claim is made over:** 63 therapy-modality classes — 17 in the model, 18 excluded, **28
+open** (6 of those 28 carry a canine-HS measurement; 22 carry nothing in this disease) — and 16 escape routes from an independent audit. No class is excluded for lacking canine
 data; each exclusion rests on a contradicted kill (10), a named escape that defeats it (5), or a
-toxicity budget it would blow (3). *(Was 42 / 15 / 16 / 11 until 2026-11-04; see "Fourth and fifth
+toxicity budget it would blow (3). *(Was 42 / 15 / 16 / 11 until 2026-11-04; see "Fourth to seventh
 axes" below.)*
 
 **This count moved four times in four days, and the last move is the largest.** It read "25 classes,
@@ -105,10 +105,18 @@ added 13 rows:
   tigilanol tiglate (injected into a known lump, so it cannot touch a second tumour — the same
   ground as the oncolytic virus).
 
-Five axes, five sets of finds. The honest statement is unchanged in kind: closure is claimed over a
-**named** catalogue, and the axes it was built from are listed so the next pass can add a sixth
-(a clinical-trial-registry sweep of histiocytic cancers, or a drug-pipeline sweep) rather than
-re-run one of these.
+**Sixth and seventh axes, the same day.** A sweep of the clinical-trial registry (71 trials in
+histiocytic cancers) added four open families: anti-inflammatory cytokine blockers (TNF, IL-6),
+RANKL blockade, farnesyltransferase inhibitors, and gene-matched drugs for mutations never reported
+in this tumour. A sweep of the drug pipeline (589 early-stage brain-tumour trials started since
+2024) added three — JAK/STAT blockers, boron neutron capture, arsenic trioxide — and a check of every
+drug in the plan against the list found a **second** bookkeeping error: dordaviprone, the plan's
+one kill that does not need the cell to be dividing, had no family entry. **Final count: 63
+families — 17 in the plan, 18 ruled out, 28 open.**
+
+Seven axes. The last two found 4 and 3 new families, against 13 for the two before them: the
+first sign in the record that the search is converging. Closure is still claimed only over the
+**named** catalogue.
 
 **Three classes were found missing from this catalogue in three days, while the line read "0
 unassessed".** That is the procedural finding, and it matters more than any of the three: each was

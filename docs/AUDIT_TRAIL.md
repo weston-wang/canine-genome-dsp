@@ -139,6 +139,11 @@ Durability is therefore reached in **two moves**:
   excluded on admissible grounds (COX-2 measured absent in 19/20 canine HS; intralesional tigilanol
   on the oncolytic row's second-primary ground). Five axes, no convergence; the 42-class figures
   above are superseded but left as written.
+  Later the same day a SIXTH axis (ClinicalTrials.gov, 71 histiocytic-neoplasm trials) added four
+  open rows and a SEVENTH (589 phase 1-2 CNS-tumour trials started since 2024) added three, plus a
+  second integrity error (dordaviprone in the program with no class row). **63 classes: 17 / 18 /
+  28 open.** Yield fell from 13 to 7 across the last two axes. A test now fails if any program
+  agent lacks a catalogue class.
 
   Updated 2026-11-01, and this one is a DOWNGRADE of a published line: a second-pass sweep found
   two more classes that had never been rows, so "0 unassessed" became "1 open". Antimetabolites /

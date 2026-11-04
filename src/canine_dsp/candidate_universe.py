@@ -234,6 +234,19 @@ rabacfosadine, L-asparaginase, zoledronate. Two were excluded on admissible grou
 (COX-2 is measured absent in 19/20 canine HS; the intralesional agent shares the oncolytic row's
 second-primary ground); three are open. Count: 55 classes, 16 / 18 / 21 open.
 
+SIXTH AXIS, same day: the CLINICAL-TRIAL REGISTRY (ClinicalTrials.gov, 71 interventional trials in
+histiocytic and dendritic-cell neoplasms). Four more open classes: TNF/IL-6 blockade, RANKL
+inhibition, farnesyltransferase inhibition, and genotype-matched agents for lesions never reported in
+canine HS. Count: 59 classes, 16 / 18 / 25 open. Six axes, six sets of finds.
+
+SEVENTH AXIS, same day: the DEVELOPMENT PIPELINE (589 phase 1-2 CNS-tumour trials started since
+2024), plus a check of every agent in the treatment program against this catalogue. The check found
+a SECOND integrity discrepancy: dordaviprone, the program's non-division-gated kill, had no class
+row (now IN_MODEL). The pipeline added three open classes: JAK/STAT, boron neutron capture, arsenic
+trioxide. FINAL COUNT: 63 classes, 17 in the model, 18 excluded, 28 open. Seven axes. The last two
+axes found 4 and 3 new classes against 13 for the two before them -- the yield is falling, which
+is the first sign of convergence in the record, and is all that can honestly be said.
+
 Five axes, five sets of finds. The denominator is axis-dependent, and the record now names five
 axes (ATC L01; Hanahan hallmarks; target class; NCIt agent kind + delivery modality; veterinary
 formulary). The two axes most likely to find more are a CLINICAL-TRIAL-REGISTRY sweep of
@@ -2045,6 +2058,129 @@ UNIVERSE: tuple[Modality, ...] = (
         Availability.EXISTS_TODAY,
         "Human-licensed and already given to dogs.",
     ),
+    # ---- SIXTH AXIS, 2026-11-04: CLINICAL-TRIAL REGISTRY. ClinicalTrials.gov v2, interventional,
+    # ---- conditions naming a histiocytic or dendritic-cell neoplasm (HLH and Niemann-Pick removed):
+    # ---- 71 trials. Every intervention mapped to a row; four classes had none.
+    Modality(
+        "inflammatory-cytokine blockade (TNF, IL-6)",
+        Status.NOT_ASSESSED,
+        "etanercept (TNF); tocilizumab (IL-6R)",
+        "FOUND BY THE REGISTRY SWEEP: tried in human histiocytic disease as anti-tumour therapy -- "
+        "etanercept in resistant LCH (NCT00048373, phase 2, completed) and tocilizumab in "
+        "Erdheim-Chester (NCT01727206, pilot, terminated). Distinct from the IL-1 row, which is a "
+        "tolerability enabler. Neither trial's result was fetched, so no efficacy is asserted. "
+        "Its plausible role is microenvironmental, not a direct kill.",
+        "MECHANISM ONLY, NOT A KILL: in 25 canine cancer lines, CCL3 correlated with macrophage "
+        "TNF-alpha secretion EXCLUSIVELY in the histiocytic sarcoma lines, and recombinant CCL3 drove "
+        "it dose-dependently (PMID 42030266, 2026). No potency for any blocker in canine HS.",
+        Availability.EXISTS_TODAY,
+        "Both are human-licensed biologics; canine cross-reactivity was not looked up and is not "
+        "asserted.",
+    ),
+    Modality(
+        "RANKL inhibition",
+        Status.NOT_ASSESSED,
+        "denosumab",
+        "FOUND BY THE REGISTRY SWEEP: denosumab in adult LCH (NCT03270020, phase 2, completed; "
+        "result not fetched). The rationale in LCH is the osteoclast-like biology of bone lesions. "
+        "For an intracranial, meninges-based mass the relevance is weak and is recorded as such; "
+        "it is enumerated because rule 9 asks every plausible class to carry a status.",
+        "NONE in canine HS (PubMed: 0 records).",
+        Availability.EXISTS_TODAY,
+        "Human-licensed antibody; a fully human IgG2, so canine immunogenicity would limit "
+        "repeated dosing -- stated as a direction, not a measured figure.",
+    ),
+    Modality(
+        "farnesyltransferase inhibition",
+        Status.NOT_ASSESSED,
+        "tipifarnib",
+        "FOUND BY THE REGISTRY SWEEP: NCT04284774 (Pediatric MATCH arm, tipifarnib for HRAS-mutant "
+        "tumours including histiocytic disorders). HRAS-gated in that trial. The canine HS "
+        "driver lesions recorded in this project are in PTPN11 and KRAS, not HRAS, so the class is "
+        "gated on a lesion not reported in this tumour -- recorded as a direction, not a "
+        "measurement, because no canine HS HRAS survey was fetched.",
+        "NONE in canine HS (PubMed: 0 records).",
+        Availability.NEAR_FUTURE,
+        "Not licensed in any species; clinical-stage in humans.",
+    ),
+    Modality(
+        "alteration-matched agents gated on lesions not reported in canine HS (ALK/NTRK/RET fusions, IDH1)",
+        Status.NOT_ASSESSED,
+        "ensartinib, larotrectinib, selpercatinib, ivosidenib",
+        "FOUND BY THE REGISTRY SWEEP: the NCI-COG Pediatric MATCH arms (NCT03213652, NCT03213704, "
+        "NCT04320888, NCT04195555) enrol histiocytic disorders by genotype. These drugs are only "
+        "relevant if the tumour carries the matching lesion. ALK-positive histiocytosis is a real "
+        "human entity; whether any canine HS carries an ALK, NTRK or RET fusion or an IDH1 "
+        "mutation was NOT searched here, so the class is open on genotype, not on pharmacology. "
+        "Larotrectinib and selpercatinib are licensed with intracranial activity in humans; that "
+        "is noted, not used.",
+        "NONE in canine HS (PubMed: 0 records for these lesions in canine HS).",
+        Availability.EXISTS_TODAY,
+        "All four are human-licensed; obtainable off-label if a matching lesion were found.",
+    ),
+    # ---- SEVENTH AXIS, 2026-11-04: the DEVELOPMENT PIPELINE. ClinicalTrials.gov v2, interventional
+    # ---- phase 1-2 trials STARTED since 2024-01-01 in glioma, glioblastoma, brain metastases,
+    # ---- leptomeningeal disease, primary CNS lymphoma and meningioma: 589 trials, 735 intervention
+    # ---- names. Plus a check of every agent in availability_tiers.PROGRAM against this catalogue.
+    Modality(
+        "mitochondrial-protease activation / OXPHOS collapse (imipridones)",
+        Status.IN_MODEL,
+        "dordaviprone (ONC201); lixumistat and gboxin as pipeline members acting on the same "
+        "respiratory chain",
+        "FOUND BY CHECKING THE PROGRAM AGAINST THE CATALOGUE -- the second integrity discrepancy of "
+        "the day, the same kind as PARP. Dordaviprone is in availability_tiers.PROGRAM as 'the one "
+        "kill that does NOT require the cell to be dividing' and is graded PASSES / TRANSFERRED in "
+        "standard_audit, yet its class had no row: the word appeared here only inside other rows' "
+        "text. ClpP agonism plus DRD2 antagonism collapses oxidative phosphorylation (PMID "
+        "37195023); FDA accelerated approval 2025 for H3K27M diffuse midline glioma (PMID "
+        "42232453). ClpP catalytic region 98.41% human-dog identical with both active-site residues "
+        "identical (sequence_conservation.clpp_domain_partition()). Nothing about the ARM changes.",
+        "NONE in canine HS: the kill is a class-mechanism transfer, as availability_tiers records.",
+        Availability.EXISTS_TODAY,
+        "Human-licensed (accelerated approval, 2025), oral, once weekly.",
+    ),
+    Modality(
+        "JAK/STAT inhibition",
+        Status.NOT_ASSESSED,
+        "ruxolitinib (licensed); WP1066 (STAT3, brain-tumour pipeline)",
+        "FOUND BY THE PIPELINE SWEEP (WP1066, a STAT3 inhibitor in a brain-tumour trial; ruxolitinib "
+        "and baricitinib in several) and seen in the registry sweep too (ruxolitinib in histiocytic "
+        "disorders). The catalogue had no JAK/STAT row although this project's own source "
+        "transcriptome reports the pathway active.",
+        "PATHWAY ACTIVATION ONLY, NOT A KILL: whole-exome and RNA sequencing of canine HS reported "
+        "activation of ERK1/2, PI3K-AKT and STAT3 pathways (PMID 37231193). No inhibitor potency in "
+        "canine HS.",
+        Availability.EXISTS_TODAY,
+        "Ruxolitinib and baricitinib are human-licensed oral drugs; oclacitinib (a JAK inhibitor) is "
+        "licensed for dogs for itch -- named as the obtainable canine member, with no anti-tumour "
+        "claim attached.",
+    ),
+    Modality(
+        "boron neutron capture therapy",
+        Status.NOT_ASSESSED,
+        "boronophenylalanine (B10 L-BPA) with an epithermal neutron beam",
+        "FOUND BY THE PIPELINE SWEEP (a B10 L-BPA brain-tumour trial). A radiation form whose "
+        "selectivity comes from where the boron carrier is taken up, so it can spare normal brain "
+        "-- the oversubscribed axis -- if the tumour takes up the carrier. Whether canine HS takes "
+        "up BPA (an LAT1 substrate) was not searched. Needs a neutron source, which limits "
+        "obtainability, not admissibility.",
+        "NONE in canine HS (PubMed: 0 records).",
+        Availability.NEAR_FUTURE,
+        "Clinical in humans (approved in Japan for head-and-neck cancer -- not fetched here, so not "
+        "relied on); requires an accelerator facility.",
+    ),
+    Modality(
+        "arsenic trioxide",
+        Status.NOT_ASSESSED,
+        "arsenic trioxide",
+        "FOUND BY THE PIPELINE SWEEP (ATO in a brain-tumour trial). A licensed antineoplastic "
+        "(ATC L01XX27) that the ATC diff should have surfaced and did not. Its licensed success is "
+        "PML-RARA leukaemia, which this tumour does not have, so the plausibility is weak; it is "
+        "enumerated so the omission is not silent.",
+        "NONE in canine HS (PubMed: 0 records).",
+        Availability.EXISTS_TODAY,
+        "Human-licensed intravenous drug.",
+    ),
 )
 
 
@@ -2091,7 +2227,44 @@ KNOWN_OPEN_CLASSES: tuple[str, ...] = (
     "acyclic nucleotide phosphonate prodrugs (rabacfosadine)",
     "amino-acid-depleting enzymes (L-asparaginase)",
     "nitrogen-bisphosphonate chemosensitisation (free zoledronate)",
+    # sixth axis (clinical-trial registry), 2026-11-04
+    "inflammatory-cytokine blockade (TNF, IL-6)",
+    "RANKL inhibition",
+    "farnesyltransferase inhibition",
+    "alteration-matched agents gated on lesions not reported in canine HS (ALK/NTRK/RET fusions, IDH1)",
+    # seventh axis (development pipeline), 2026-11-04
+    "JAK/STAT inhibition",
+    "boron neutron capture therapy",
+    "arsenic trioxide",
 )
+
+#: PIPELINE SWEEP MAPPING (2026-11-04). The 589 early-phase CNS-tumour trials map overwhelmingly onto
+#: existing rows: ATM/ATR inhibitors (AZD1390, XRD-0394, tuvusertib) -> DDR; FAK (defactinib) and
+#: CXCR1/2 (SX-682) -> anti-invasion/chemokine; ADI-PEG 20 -> amino-acid depletion; AMXT 1501 ->
+#: polyamine; L19TNF, N-803, GI-102 -> cytokines; Ac-225 lintuzumab (CD33, a MYELOID antigen -- worth
+#: noting for this lineage), 177Lu/186Re agents -> radionuclides; D2C7-IT -> immunotoxins; SGT-53 ->
+#: nucleic acid / p53; golcadomide -> degraders; utidelone, LP-184 -> microtubule / alkylator; G207,
+#: M032, DNX-2401, lerapolturev -> oncolytic; FUS, SonoCloud -> sanctuary-site; 5-ALA PDT/SDT and
+#: Optune -> their new rows; LITT (NeuroBlate) -> declined above.
+#: CONSIDERED AND NOT ENUMERATED (plausibility judgements, not rule-13 exclusions): CANCER-NEUROSCIENCE
+#: repurposing (perampanel, senicapoc, haloperidol, trimipramine, vortioxetine), whose rationale is
+#: glioma-neuron synaptic signalling that an extra-axial histiocytic tumour does not have; BTK
+#: inhibitors, whose anti-tumour rationale is B-cell-receptor signalling; RAGE antagonists
+#: (azeliragon), trialled for radiation necrosis rather than kill; and general repurposing without a
+#: tumour-specific rationale (statins, metformin, cannabidiol, flavonoids, disulfiram-copper,
+#: gallium maltolate).
+
+#: REGISTRY SWEEP MAPPING (2026-11-04), so the next thread does not redo it. Of the 71 trials, every
+#: other intervention maps to an existing row: MAPK (cobimetinib, trametinib, dabrafenib, vemurafenib,
+#: tovorafenib, mirdametinib, ulixertinib, luvometinib, HH2710, HLX208, FCN-159, S241656); PI3K/AKT
+#: (afuresertib/GSK2110183, samotolisib, temsirolimus); CDK4/6 (palbociclib); PARP (olaparib); FGFR
+#: (erdafitinib); EZH2 (tazemetostat) to the epigenetic row; antimetabolites (cytarabine,
+#: methotrexate, cladribine, clofarabine, 6-mercaptopurine, 6-thioguanine); degraders
+#: (lenalidomide, thalidomide); XPO1 (selinexor); CSF1R (Q702, Axl/Mer/CSF1R); cell therapy (CD207
+#: CAR-T); checkpoint (pembrolizumab, adebrelimab); oncolytic (VSV-IFNbeta-NIS); VEGFR (sunitinib,
+#: bevacizumab); transplant; glucocorticoids; COX (indomethacin); radionuclide (111In-pentetreotide);
+#: CXCR4 ([68Ga]-pentixafor, imaging only). Supportive or non-malignant-disease interventions
+#: (deferasirox, mycophenolate for Rosai-Dorfman) are not modalities.
 
 #: LASER INTERSTITIAL THERMAL THERAPY was raised by the delivery-modality diff and is NOT enumerated:
 #: it is a single-session ablation of a known lesion, so the ground the sanctuary-site row already
