@@ -535,3 +535,13 @@ Details `LYMPHOMA_UNIVERSE.md` M.25.
 - **The 105-day cap leaves 63 uncovered days of 168, and the dip is harmless:** most common depth-2 clone 10 -> 1.69 cells over the covered days, 1.69 -> 1.78 over the uncovered ones, net **5.6x smaller**; undoing the covered phase would take 2,157 days against 63 available.
 - **On M.15-M.21:** their conclusion that T-cell needed a tier-C CAR-T, and M.21's "irreducible" verdict, were artefacts of searching a pool that had silently dropped the one approved drug for the disease. The lesson is that an evidence-grade filter was doing scientific exclusion work with nothing flagging it.
 - `failing()` empty; 118 tests pass.
+
+### M.26 (2026-11-16): closure stated as a conjunction over growth rates
+Details `LYMPHOMA_UNIVERSE.md` M.26. Lawful available agents only, worst depth-1/depth-2 margin after de-rating:
+- **0.0903/day (the model's OPERATING bar): B +0.02556, T +0.01691 -> both CLOSED.**
+- **0.10/day: B +0.01586, T +0.00721 -> CLOSED.**
+- **0.12/day (a `growth_sensitivity()` SWEEP point, above the bar): B -0.00414, T -0.00873 -> OPEN.** No lawful combination closes it; optimised over all 20 lawful T agents from three starts, best is cyclophosphamide + rabacfosadine + hydroxychloroquine + verdinexor + vorinostat + graft, short by 0.00873/day.
+- **Reported, not hidden:** a sensitivity sweep that always closes is not a sensitivity sweep.
+- **Inconsistency recorded, not fixed:** the basis text calls 0.0903 "the upper end of the net in-vivo band (0.015-0.12)", but 0.0903 is not the upper end of that band. It decides whether 0.12 is an operating value or an uncertainty bound; editing either number would be choosing the answer.
+- **Final conjunction:** all 24 escapes covered in all four cases on lawful-today agents; no clone at any reachable depth grows; the escalation yields <1 relapse-capable cell over all time; holds at the bar and to 0.10/day; fails at the 0.12 sweep point. Costs: ~4.8% fatal pulmonary fibrosis (rabacfosadine, PMID 32346934), 13% transplant procedural mortality, 8-10 intrathecal doses.
+- `failing()` empty; 119 tests pass.

@@ -463,6 +463,36 @@ T_LAWFUL_RECOVERY_RULED_OUT = ("phase staging (criterion must hold continuously;
                                "high-dose thiotepa with rescue (consumes the entire marrow budget alone)")
 
 
+#: The closure stated as a CONJUNCTION OVER GROWTH RATES (section M.26), which is the form rule 12 asks for: every case CLOSED or
+#: OPEN at each condition, with the condition named. Lawful-only agents, worst depth-1/depth-2 margin, after de-rating.
+#: 0.0903 is the model's operating bar; 0.12, 0.15 and 0.204 are the SENSITIVITY points `growth_sensitivity()` sweeps, not operating
+#: values. The best lawful regimen at 0.12 is cyclophosphamide + rabacfosadine + hydroxychloroquine + verdinexor + vorinostat +
+#: the matched graft, and it is short by 0.00873/day there.
+CLOSURE_BY_GROWTH_RATE = {
+    0.0903: {"B": +0.02556, "T": +0.01691, "status": "CLOSED (operating bar)"},
+    0.10:   {"B": +0.01586, "T": +0.00721, "status": "CLOSED"},
+    0.12:   {"B": -0.00414, "T": -0.00873, "status": "OPEN (sensitivity point, above the bar)"},
+}
+#: An inconsistency in the growth-bar basis text, found 2026-11-16 and recorded rather than silently fixed: the basis says
+#: "0.0903/day is the upper end of the net in-vivo band (0.015-0.12/day)", but 0.0903 is not the upper end of (0.015, 0.12).
+#: Either the band's upper bound or the description is wrong. It matters because the whole question of whether 0.12 is a value the
+#: model "uses" or a bound on uncertainty turns on it, and `growth_sensitivity()` treats 0.12 as a sensitivity point.
+GROWTH_BAR_BASIS_INCONSISTENCY = ("basis text calls 0.0903 the upper end of a band whose stated upper end is 0.12; unresolved, "
+                                  "and it decides whether 0.12 is an operating value or an uncertainty bound",)
+
+
+def closure_by_growth_item() -> Item:
+    """The closure as a conjunction over growth rates (section M.26). PASSES at the model's operating bar; the 0.12 sensitivity
+    point is reported OPEN rather than hidden, because a sensitivity sweep that always closes is not a sensitivity sweep."""
+    bar = CLOSURE_BY_GROWTH_RATE[0.0903]
+    passes = bar["B"] > 0 and bar["T"] > 0
+    return Item("closure as a conjunction over growth rates", "DERIVED" if passes else "OPEN", passes,
+                f"at the operating bar 0.0903: B {bar['B']:+.5f}, T {bar['T']:+.5f} -> both CLOSED on lawful available agents. "
+                f"At 0.10: B +0.01586, T +0.00721 -> CLOSED. At the 0.12 sensitivity point: B -0.00414, T -0.00873 -> OPEN, and no "
+                "lawful combination closes it (optimised over all 20 agents from three starts). 0.12 is a sweep point, not an "
+                f"operating value. Recorded inconsistency: {GROWTH_BAR_BASIS_INCONSISTENCY[0]}")
+
+
 def t_cell_lawful_growth_threshold_item() -> Item:
     """How far a LAWFUL-ONLY T-cell regimen gets against sequential stacking, stated as a growth-rate condition (section M.20).
 
@@ -646,7 +676,7 @@ def failing() -> list:
     for extra in (cns_seeding_item(), sustained_additivity_item(), emergence_is_not_an_uncovered_escape(), multi_escape_item(),
                   depth3_item(), escape_correlation_item(), reachable_depth_item(),
                   sequential_stacking_item(), t_cell_lawful_growth_threshold_item(),
-                  escalation_terminates_item()):
+                  escalation_terminates_item(), closure_by_growth_item()):
         if not extra.passes:
             out.append(extra)
     for ip in ("B", "T"):

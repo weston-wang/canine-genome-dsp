@@ -1046,3 +1046,24 @@ Across growth rates: closes at the model's bar 0.0903 (+0.01691) and at 0.10 (+0
 **What this says about the preceding twelve sections.** M.15 through M.21 concluded that T-cell required a tier-C CAR-T, and M.21 called the residual "irreducible". Both were artefacts of searching a pool that had silently dropped the one approved drug for the disease, on a grading technicality the project's own rule 13 forbids. The lesson is not about CAR-T: it is that an evidence-grade filter was doing scientific exclusion work, and nothing flagged it.
 
 `failing()` is empty. 118 tests pass.
+
+### M.26 The closure as a conjunction over growth rates, including where it fails (2026-11-16)
+Rule 12 asks for a decidable conjunction -- every route CLOSED or OPEN at each condition, with the condition named -- rather than a single verdict. Here it is, on **lawful, available agents only**, worst depth-1/depth-2 margin after de-rating. Code: `CLOSURE_BY_GROWTH_RATE`, `closure_by_growth_item`, `GROWTH_BAR_BASIS_INCONSISTENCY`; test `test_closure_is_reported_as_a_conjunction_over_growth_rates_including_where_it_fails`.
+
+| growth rate | B-cell | T-cell | status |
+|---|---|---|---|
+| **0.0903/day -- the model's OPERATING bar** | **+0.02556** | **+0.01691** | **CLOSED on lawful available agents** |
+| 0.10/day | +0.01586 | +0.00721 | CLOSED |
+| **0.12/day -- a `growth_sensitivity()` SWEEP point** | **-0.00414** | **-0.00873** | **OPEN** |
+
+**The 0.12 row is reported, not hidden.** No lawful combination closes it: optimised over all 20 lawful T systemic agents by hill-climbing from three starts, the best regimen is cyclophosphamide + rabacfosadine + hydroxychloroquine + verdinexor + vorinostat + the matched graft, short by **0.00873/day**. A sensitivity sweep that always closes is not a sensitivity sweep, so this is the expected shape of the result rather than a defect.
+
+**What 0.12 is, and an inconsistency that decides it.** `growth_sensitivity()` sweeps 0.0903, 0.12, 0.15 and 0.204 -- the design treats 0.0903 as the operating value and the rest as sensitivity points. But the growth-bar basis text says *"0.0903/day is the upper end of the net in-vivo band (0.015-0.12/day)"*, and **0.0903 is not the upper end of (0.015, 0.12)**. Either the band's upper bound or the description is wrong, and the answer decides whether 0.12 is a rate the model uses or a bound on uncertainty. **Recorded as `GROWTH_BAR_BASIS_INCONSISTENCY` rather than silently fixed**, because resolving it by editing either number would be choosing the answer.
+
+**So the final state of the lymphoma closure, stated as the conjunction it is:**
+- Every one of the 24 enumerated escapes is covered in all four cases, on agents a US vet can lawfully obtain today.
+- No clone at any reachable depth grows, so sequential stacking never amplifies (M.19), and the escalation produces fewer than one relapse-capable cell over all time (M.22).
+- This holds **at the operating growth bar and above it to 0.10/day**, and **fails at the 0.12/day sweep point** by 0.004-0.009/day, where no lawful combination suffices.
+- The costs that travel with it: ~4.8% fatal pulmonary fibrosis from rabacfosadine (3/63 dogs, PMID 32346934), the transplant's 13% procedural mortality, and 8-10 intrathecal doses for the brain arm.
+
+`failing()` is empty. 119 tests pass.

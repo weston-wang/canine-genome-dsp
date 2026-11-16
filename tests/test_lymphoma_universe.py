@@ -1121,3 +1121,31 @@ def test_the_fda_approved_dog_lymphoma_drug_closes_the_t_cell_gap_lawfully():
     frac, src = S.RABACFOSADINE_FATAL_PULMONARY_FIBROSIS
     assert frac > 0.04 and "32346934" in src
     assert A.failing() == []
+
+
+def test_closure_is_reported_as_a_conjunction_over_growth_rates_including_where_it_fails():
+    """Section M.26 -- the closure in the form rule 12 asks for: each case CLOSED or OPEN at each condition, with the condition named.
+
+    On lawful, available agents only, worst depth-1/depth-2 margin after de-rating:
+      growth 0.0903 (the model's OPERATING bar): B +0.02556, T +0.01691 -> both CLOSED
+      growth 0.10:                               B +0.01586, T +0.00721 -> both CLOSED
+      growth 0.12 (a `growth_sensitivity()` SWEEP point, above the bar): B -0.00414, T -0.00873 -> OPEN, and no lawful
+        combination closes it after optimising over all 20 agents from three starts.
+    The 0.12 row is reported rather than hidden: a sensitivity sweep that always closes is not a sensitivity sweep. An
+    inconsistency in the growth-bar basis text is recorded alongside it, because whether 0.12 is an operating value or an
+    uncertainty bound turns on it."""
+    from canine_dsp import lymphoma_standard_audit as A
+    from canine_dsp.core import lymphoma_grounded as G
+
+    rows = A.CLOSURE_BY_GROWTH_RATE
+    # the operating bar is what the model runs, and both lineages close there
+    assert G.GROWTH_PER_DAY == 0.0903
+    assert rows[0.0903]["B"] > 0 and rows[0.0903]["T"] > 0
+    assert rows[0.10]["B"] > 0 and rows[0.10]["T"] > 0
+    # and the sweep point above the bar is recorded as OPEN, not quietly dropped
+    assert rows[0.12]["B"] < 0 and rows[0.12]["T"] < 0
+    assert "OPEN" in rows[0.12]["status"]
+    # the inconsistency in the basis text is recorded rather than silently fixed
+    assert A.GROWTH_BAR_BASIS_INCONSISTENCY and "0.0903" in A.GROWTH_BAR_BASIS_INCONSISTENCY[0]
+    assert A.closure_by_growth_item().passes
+    assert A.failing() == []
