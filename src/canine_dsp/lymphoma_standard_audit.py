@@ -127,29 +127,31 @@ def cns_seeding_item() -> Item:
 
 
 def sustained_additivity_item() -> Item:
-    """OUTCOME TEST THE MODEL FAILS (section M.8, found 2026-11-16 from the prior-art sweep).
+    """RESOLVED 2026-11-16, and the error was in the test, not the model (this docstring replaces a CONTRADICTED grading
+    added earlier the same day; see section M.9).
 
-    A canine trial compared a 2-year maintenance phase (75 dogs) with discontinuous therapy (333 dogs) and found NO difference
-    (PMID 28100766). The model, run on the same regimen, says otherwise: sustained CHOP clears inside the window at 365 days and
-    beyond. Localising it shows the error is in ADDITIVITY UNDER SUSTAIN, not in the division-gated logic, which is right on its own:
-      - CHOP cytotoxics alone (doxorubicin + vincristine + cyclophosphamide), all division-gated: never clears at 126/365/730 d. Correct.
-      - prednisolone alone (not division-gated): never clears. Correct -- real median survival on prednisolone is 1-2 months.
-      - the two TOGETHER, sustained: clears at 365 d. Contradicted by the 408-dog comparison.
-    So summing a non-gated agent's kill with gated agents' kill and then extending the window crosses the clearance threshold in the
-    model where it does not in dogs. This is the SAME construction every window in sections J-M.7 rests on (hydroxychloroquine and the
-    graft non-gated, verdinexor and cytarabine gated, sustained for 147-483 days), so it puts a question over all of those windows, in
-    the direction of the model being too optimistic. Magnitude not yet bounded.
+    The claim was that the model contradicts a canine trial in which a 2-year maintenance phase (75 dogs) gave no benefit over
+    discontinuous therapy (333 dogs, PMID 28100766), because the model "clears" with sustained CHOP at 365 days. That test forced a
+    365-day window with `lymphoma_sustained.with_windows`, which OVERRIDES the documented tolerable windows. The model's own windows
+    forbid the regimen the test simulated:
+      - doxorubicin: sustainable 126 d, HARD CAP 126 d (cumulative cardiotoxicity)
+      - prednisolone: sustainable 150 d, HARD CAP 150 d (iatrogenic hypercortisolism, 4/4 beagles by day 150)
+      - vincristine and cyclophosphamide: sustainable 105 d
+    At those windows CHOP correctly never clears, which is what the dogs show. The model also correctly refuses to clear with
+    cyclophosphamide + prednisolone or prednisolone + vincristine at ANY duration up to 1460 days. So there is no contradiction: a
+    forced input outside the model's stated toxicity limits was attributed to the model as a prediction.
 
-    Not a reason to discard the programme: the escape-coverage conjunction and the toxicity budget are unaffected, and the brain arm's
-    radiation and intrathecal terms are separately derived. But the DURATION numbers are now graded CONTRADICTED until this is
-    reconciled -- by calibrating the additivity against the maintenance null, or by showing why the trial's maintenance (reduced-dose,
-    spaced cytotoxics) is not what the model simulated."""
-    return Item("sustained additive kill vs the canine maintenance null", "CONTRADICTED", False,
-                "model: sustained CHOP clears at >=365 d; dogs: 2-year maintenance (n=75) no better than discontinuous (n=333), "
-                "PMID 28100766. Error localised to additivity under sustain (cytotoxics alone and prednisolone alone both correctly "
-                "never clear). Every quoted window in sections J-M.7 uses the same construction, so all are suspect in the optimistic "
-                "direction; magnitude unbounded. Closed by calibrating additivity to the maintenance null, or by showing the trial's "
-                "reduced-dose spaced maintenance is not what the model simulates")
+    What survives as a real, narrower point: the programme does override ONE documented window. `lawful_clock` extends verdinexor
+    from its documented 56 days (a study duration, not a toxicity cap -- `hard_cap_days` is None) to the programme length, up to 483
+    days. That override is justified in writing: the Laverdia-CA1 label is twice weekly until progression, i.e. indefinite, and the
+    record holds a dog treated continuously for 17 months. Intrathecal methotrexate's documented window (3650 d) already exceeds what
+    the programme needs. Hydroxychloroquine, the cytarabine infusion and the graft keep their documented windows inside the clock and
+    are not extended. So no unjustified extension carries any closure."""
+    return Item("sustained dosing vs the canine maintenance null", "RESOLVED", True,
+                "no contradiction: the model's toxicity windows (doxorubicin hard-capped 126 d, prednisolone 150 d) forbid the "
+                "sustained-CHOP regimen the earlier test forced with with_windows, and at the documented windows CHOP correctly never "
+                "clears. The one genuine override is verdinexor (documented 56 d, a study duration with no hard cap), justified by its "
+                "label 'twice weekly until progression' and a 17-month canine case")
 
 
 def failing() -> list:

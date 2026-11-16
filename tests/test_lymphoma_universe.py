@@ -237,7 +237,7 @@ def test_audit_fails_only_on_the_cns_seeding_fraction_and_the_growth_bar_is_deri
     """History of `failing()`: empty until 31 Oct (M), then the B-cell dose count (M), empty again on 1 Nov once the long-course
     intrathecal transfer landed (M.5), and from 16 Nov the CNS seeding fraction, which the port question exposed (M.7)."""
     from canine_dsp import lymphoma_standard_audit as A
-    assert [i.name.split(" (")[0] for i in A.failing()] == ["CNS seeding fraction", "sustained additive kill vs the canine maintenance null"]
+    assert [i.name.split(" (")[0] for i in A.failing()] == ["CNS seeding fraction"]
     assert A.GROWTH_BAR_BASIS["grade"] == "DERIVED" and A.GROWTH_BAR_BASIS["band"][1] >= A.GROWTH_BAR_BASIS["value"]
     assert all(i.passes for i in A.wrongly_reported_as_gaps())
 
@@ -662,25 +662,29 @@ def test_whether_a_dog_needs_a_csf_port_rests_on_an_illustrative_literal():
     assert item in A.failing()
 
 
-def test_the_model_fails_the_canine_maintenance_outcome_test():
-    """Section M.8. The duration logic is checked against a real canine outcome and does not pass. A 2-year maintenance phase in 75 dogs
-    was no better than discontinuous therapy in 333 (PMID 28100766), but the model clears with sustained CHOP at 365 d. The division-gated
-    logic is right on its own -- cytotoxics alone never clear, prednisolone alone never clears -- so the error is in ADDING a non-gated
-    agent to gated ones and then extending the window. Every window in sections J-M.7 uses that construction, so this test exists to keep
-    the discrepancy visible rather than let the windows read as settled."""
+def test_the_model_does_not_contradict_the_canine_maintenance_null():
+    """Section M.9, correcting a same-day error. A 2-year maintenance phase in 75 dogs was no better than discontinuous therapy in 333
+    (PMID 28100766). An earlier test claimed the model contradicts this because sustained CHOP clears at 365 d -- but that test forced
+    the window with with_windows, overriding toxicity caps the model itself sets (doxorubicin hard cap 126 d, prednisolone 150 d). At
+    the DOCUMENTED windows CHOP never clears, matching the dogs. The one real override in the programme is verdinexor, justified by its
+    label and a 17-month canine case."""
     from canine_dsp import lymphoma_sustained as S, lymphoma_joint as J, lymphoma_standard_audit as A
-    from canine_dsp.core import lymphoma_grounded as G
+    from canine_dsp.core import lymphoma_grounded as G, lymphoma_toxicity as T
     from canine_dsp.core.lymphoma_catalogue import SYSTEMIC
     pool = {a.name: a for a in G.grounded_agents(SYSTEMIC, "B")}
-    esc = J._escapes("B")
-
-    def clears(names, days):
-        with S.with_windows({n: days for n in names}):
-            return G.evaluate([pool[n] for n in names], esc, compartment=SYSTEMIC, clock=True).horizon_strict.cure_inside_window
-
-    cytotoxics = ["doxorubicin", "vincristine", "cyclophosphamide"]
-    assert not clears(cytotoxics, 730)                                  # division-gated agents never clear: correct
-    assert not clears(["prednisolone (glucocorticoid)"], 730)           # prednisolone alone never clears: correct
-    assert clears(cytotoxics + ["prednisolone (glucocorticoid)"], 365)  # together they do: CONTRADICTED by the 408-dog comparison
+    chop = ["doxorubicin", "vincristine", "cyclophosphamide", "prednisolone (glucocorticoid)"]
+    # the model caps the regimen well below the window the earlier test forced
+    assert T.profile_for("doxorubicin").hard_cap_days == 126.0
+    assert T.profile_for("prednisolone (glucocorticoid)").hard_cap_days == 150.0
+    # at its own documented windows CHOP does not clear
+    assert not G.evaluate([pool[n] for n in chop], J._escapes("B"), compartment=SYSTEMIC,
+                          clock=True).horizon_strict.cure_inside_window
+    # and weaker combinations never clear at any duration, which is also correct
+    for names in (["cyclophosphamide", "prednisolone (glucocorticoid)"], ["prednisolone (glucocorticoid)", "vincristine"]):
+        with S.with_windows({n: 1460 for n in names}):
+            assert not G.evaluate([pool[n] for n in names], J._escapes("B"), compartment=SYSTEMIC,
+                                  clock=True).horizon_strict.cure_inside_window
     item = A.sustained_additivity_item()
-    assert item.grade == "CONTRADICTED" and item in A.failing()
+    assert item.grade == "RESOLVED" and item.passes and item not in A.failing()
+    # the single justified override: verdinexor's documented window is a study duration, not a toxicity cap
+    assert T.profile_for("verdinexor (XPO1 inhibitor)").hard_cap_days is None

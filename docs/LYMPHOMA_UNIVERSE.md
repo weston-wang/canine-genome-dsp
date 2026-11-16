@@ -690,3 +690,23 @@ Full tables: `docs/LYMPHOMA_PRIOR_ART_TREATMENTS.md`, `docs/LYMPHOMA_PRIOR_ART_E
 **Has anyone ever done this kind of analysis?** No paper in any species enumerates a relapse-mechanism catalogue of stated size and tests a combination against every member. The closest clinical precedent is **ViPOR** (PMID 38899693): five agents against 4-5 *pathways*, with no efflux, antigen-loss, sanctuary or progenitor coverage. Beyond Bozic/Nowak, the relevant theory is Komarova & Wodarz (PNAS 2005, PMID 15980154, the "three drugs" result) and **Saputra 2018 (PMID 29686021), which predicts that efficacy-optimised combinations are the MOST fragile to single resistance** -- the published form of this project's own recorded weakness that every agent is load-bearing.
 
 **Marked unverified by the sweep:** PI3K-delta withdrawal citations, MCL1-inhibitor cardiac toxicity, magrolimab discontinuation (web-only), acalabrutinib canine numbers (carried from the record, not re-fetched).
+
+### M.9 Correction (2026-11-16, same day as M.8): the "outcome test the model fails" was my test's artefact, not a model failure
+M.8 reported that the model contradicts the canine maintenance null (2-year maintenance in 75 dogs no better than discontinuous in 333, PMID 28100766) because sustained CHOP clears at 365 days. **That was wrong, and the error was in the test.** The test forced a 365-day window with `with_windows`, which overrides the documented tolerable windows. The model's own windows forbid the regimen the test simulated:
+
+| CHOP agent | sustainable | hard cap | dose-limiting event |
+|---|---|---|---|
+| doxorubicin | 126 d | **126 d** | cumulative cardiotoxicity |
+| prednisolone | 150 d | **150 d** | iatrogenic hypercortisolism, 4/4 beagles by day 150 |
+| vincristine | 105 d | none | GI signs, neutropenia |
+| cyclophosphamide | 105 d | none | myelosuppression, sterile haemorrhagic cystitis |
+
+At those windows CHOP **does not** clear, which is what the dogs show. The model is also right where it is easy to be wrong: cyclophosphamide + prednisolone and prednisolone + vincristine never clear at any duration up to 1460 days. So no contradiction exists; a forced input outside the model's stated toxicity limits was attributed to the model as a prediction. The audit item is re-graded **RESOLVED** and `failing()` no longer returns it.
+
+**Two things were learned on the way, and both stand.**
+1. **Discounting additivity does not change this**, so additivity was never the issue: at `alpha` from 1.0 down to 0.0 in `max(kill) + alpha * sum(others)` -- i.e. all the way to winner-takes-all -- forced-window CHOP still clears at long durations. Any positive margin clears given unlimited time; the thing that stops it is the toxicity window, which is exactly what the model already applies.
+2. **An emergence cap tied to P-gp selection also does not change it** (capping pump substrates at 225 d, derived from P-gp 25% pretreatment -> 83% at relapse, PMID 8646690). Worth recording because that cap is a real phenomenon the model does not represent: escape presence is evaluated from baseline burden via `escape_presence_probability`, with no term for resistance ARISING under prolonged selection. That is a genuine structural absence, but it is not what produced the false contradiction, and the toxicity windows bound duration before it would bite.
+
+**The one genuine window override, and its justification.** `lawful_clock` extends **verdinexor** from its documented 56 days to the programme length (to 483 d). That 56 days is a study duration, not a toxicity cap (`hard_cap_days` is None), and the override is justified in writing: the Laverdia-CA1 label is twice weekly **until progression**, i.e. indefinite, and the record holds a dog treated continuously for 17 months. Intrathecal methotrexate's documented window (3650 d) already exceeds what the programme needs; hydroxychloroquine, the cytarabine infusion and the graft keep their documented windows inside the clock and are **not** extended. So no unjustified extension carries any closure.
+
+**Net effect on the answer to "do some escapes now have no real answers":** no. Zero escapes are uncovered in any of the four cases, every margin is positive (weakest is E5 at +0.020 to +0.042 /day), and the duration numbers are not after all contradicted by the maintenance evidence.
