@@ -277,6 +277,29 @@ def multi_escape_item() -> Item:
                 "cannot be fixed inside the toxicity budget: see escape_independence_item()")
 
 
+#: Depth-3+ closures found 2026-11-16 (section M.15), AFTER the model's toxicity de-rating, which is what its verdict uses.
+#: Lawful-today agents cannot do it: the five that cover every escape alone are all cytotoxic or radiation on the already-loaded
+#: marrow axis, with kills of 0.004-0.042/day against a 0.0903 growth bar. What does close it is a canine CAR-T, on the immune axis
+#: which carries only 0.30 of its budget. Tier C under rule 13 (clinical-stage modality in humans, a stated path to the dog, a derived
+#: kill), and the canine CD20 CAR-T trial is enrolling again as of this session, which is what makes the tier admissible.
+DEPTH3_CLOSURES = {
+    "B": {"agent": "persistence-engineered canine-binder CAR-T", "tier": "C", "depth3": +0.0256, "depth4": -0.0559},
+    "T": {"agent": "CD5 + CD7 dual-target CAR-T (canine binder)", "tier": "C", "depth3": +0.1309, "depth4": +0.1041},
+}
+#: Additions that do NOT close depth 3, recorded so they are not re-tried: the CD3xCD20 engager and the anti-CD20 antibody both leave
+#: it at -0.0089 /day, and the single-target CD7 CAR-T leaves the T-cell case at -0.0291.
+DEPTH3_INSUFFICIENT = ("CD3xCD20 bispecific engager", "anti-CD20 monoclonal antibody", "CD7-directed CAR-T (single target)")
+
+
+def depth3_item() -> Item:
+    """Depth 3 IS closable by treatment, with a named agent, in the near-future tier (section M.15)."""
+    b, t = DEPTH3_CLOSURES["B"], DEPTH3_CLOSURES["T"]
+    return Item("multi-escape depth 3 (closed by a near-future agent)", "TRANSFERRED", True,
+                f"B-cell: + {b['agent']} (tier {b['tier']}) gives depth-3 margin {b['depth3']:+.4f}/day after de-rating; "
+                f"T-cell: + {t['agent']} (tier {t['tier']}) gives {t['depth3']:+.4f} and also closes depth 4 at {t['depth4']:+.4f}. "
+                "No lawful-today agent closes depth 3: the universal coverers sit on the loaded marrow axis at 0.004-0.042/day")
+
+
 def escape_independence_item() -> Item:
     """THE OPEN ITEM (section M.14). From depth 3 the worst-case margin is negative (-0.004 to -0.042/day) and from depth 4 coverage
     itself fails in the body cases; neither can be fixed within the toxicity budget (see multi_escape_item). The claim that
@@ -289,9 +312,10 @@ def escape_independence_item() -> Item:
     What would close it: a measured pairwise correlation (or a bound on it) between escape mechanisms in canine lymphoma; or an agent
     with a kill high enough to carry depth 4 alone within the toxicity budget; or a demonstration that the depth-4 combinations are
     individually incompatible (e.g. that two of the mechanisms cannot coexist in one cell)."""
-    return Item("escape independence (carries the depth-4+ closure)", "ASSUMED", False,
-                "escape combinations of depth 3+ are margin-negative and depth 4+ are uncovered in the body cases, and cannot be "
-                "covered inside the toxicity budget (four added agents give +0.0029/day at headroom -2.5). Their dismissal rests on "
+    return Item("escape independence (carries the B-cell depth-4+ closure)", "ASSUMED", False,
+                "depth 3 is now CLOSED by a near-future canine CAR-T in both lineages, and depth 4 is closed for T-cell by the "
+                "dual-target CAR-T (see depth3_item). What remains open is B-cell depth 4 and beyond, which nothing tested closes. "
+                "Its dismissal rests on "
                 "independent escape rates giving ~1e-16 expected cells; no canine measurement or written transfer bounds that "
                 "correlation. Closes with a measured/bounded pairwise correlation, or an agent carrying depth 4 alone, or a shown "
                 "incompatibility between the mechanisms involved")
@@ -305,7 +329,7 @@ def failing() -> list:
         out.append(gb)
     out += [i for i in lawful_brain_items() if not i.passes]
     for extra in (cns_seeding_item(), sustained_additivity_item(), emergence_is_not_an_uncovered_escape(), multi_escape_item(),
-                  escape_independence_item()):
+                  depth3_item(), escape_independence_item()):
         if not extra.passes:
             out.append(extra)
     for ip in ("B", "T"):

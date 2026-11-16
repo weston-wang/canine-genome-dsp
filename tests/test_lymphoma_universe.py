@@ -773,3 +773,56 @@ def test_treatment_closes_multi_escape_cells_one_level_deeper_than_they_can_occu
     ind = A.escape_independence_item()
     assert ind.grade == "ASSUMED" and not ind.passes
     assert [x.name for x in A.failing()] == [ind.name]
+
+def test_depth_3_escape_combinations_are_closed_by_a_named_near_future_agent():
+    """Section M.15 -- the closing work, after M.14 found depth 3 margin-negative and reported it open.
+
+    Lawful-today agents cannot close depth 3: the five that cover every escape alone (cyclophosphamide, craniospinal radiotherapy,
+    TBI+transplant, half-body radiation, thiotepa consolidation) sit on the already-loaded marrow axis with kills of 0.004-0.042/day
+    against a 0.0903 growth bar, and four of them together give +0.0029/day at toxicity headroom -2.5.
+    A canine CAR-T does close it, on the immune axis which carries only 0.30 of its budget. Tier C under rule 13 (clinical-stage
+    modality in humans, a stated path to the dog, a derived kill), and the canine CD20 CAR-T trial is enrolling again.
+    All margins below are AFTER the model's toxicity de-rating, which is what its verdict uses."""
+    from itertools import combinations
+    from canine_dsp import lymphoma_standard_audit as A, lymphoma_joint as J, lymphoma_sustained as S
+    from canine_dsp import lymphoma_grounded_inputs as gi
+    from canine_dsp.core import lymphoma_grounded as G
+    from canine_dsp.core.lymphoma_catalogue import SYSTEMIC
+
+    def worst_derated(ip, extra_prefix, kmax):
+        esc = J._escapes(ip)
+        pool = S.lawful_pool(ip, SYSTEMIC)
+        allag = J._pools(ip, J.CENTRAL["kill"], J.CENTRAL["duty"])[SYSTEMIC]
+        reg = [[v for k, v in pool.items() if k.startswith(x)][0] for x in S.LAWFUL_PROGRAMS[ip]]
+        if extra_prefix:
+            reg.append(next(a for k, a in allag.items() if k.startswith(extra_prefix)))
+        d, _, _ = G.derate(reg, gi.EFFLUX_CO_DOSE_MULTIPLIER_CANINE_PROXY)
+        masks = [(sum(1 << i for i, e in enumerate(esc) if G.covered([a], e)), a.effective_kill) for a in d]
+        worst = None
+        for k in range(1, kmax + 1):
+            for combo in combinations(range(len(esc)), k):
+                need = sum(1 << i for i in combo)
+                m = sum(kl for mk, kl in masks if mk & need == need) - G.GROWTH_PER_DAY
+                worst = m if worst is None else min(worst, m)
+        return worst
+
+    # the programme alone does not reach depth 3
+    for ip in ("B", "T"):
+        assert worst_derated(ip, None, 3) < 0
+
+    # adding the named CAR-T does, in both lineages
+    assert worst_derated("B", "persistence-engineered", 3) > 0
+    assert worst_derated("T", "CD5 + CD7 dual-target", 3) > 0
+    # and for T-cell the dual-target agent also carries depth 4
+    assert worst_derated("T", "CD5 + CD7 dual-target", 4) > 0
+    # while B-cell depth 4 stays open -- which is what escape_independence_item() now carries
+    assert worst_derated("B", "persistence-engineered", 4) < 0
+
+    # agents that are NOT enough, recorded so they are not re-tried
+    assert worst_derated("B", "CD3xCD20", 3) < 0
+    assert worst_derated("B", "anti-CD20 monoclonal", 3) < 0
+    assert worst_derated("T", "CD7-directed CAR-T (canine", 3) < 0
+    assert len(A.DEPTH3_INSUFFICIENT) == 3
+
+    assert A.depth3_item().passes and A.depth3_item().grade == "TRANSFERRED"
+    assert [i.name.split(" (")[0] for i in A.failing()] == ["escape independence"]

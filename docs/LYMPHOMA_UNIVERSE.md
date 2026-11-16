@@ -794,3 +794,34 @@ M.13 claimed depths 1-3 were "fully covered with positive margins". **Wrong** --
 **What would close it** (any one suffices): a measured or bounded pairwise correlation between escape mechanisms in canine lymphoma; an agent whose kill carries depth 3-4 alone inside the toxicity budget; or a demonstration that the specific mechanisms in those combinations cannot coexist in one cell.
 
 `failing()` returns exactly this one item. 109 tests pass.
+
+### M.15 Closing depth 3: a named near-future agent does it; what remains open is B-cell depth 4 (2026-11-16)
+M.14 found depth-3 escape combinations margin-negative and **reported them open**. That was a stopping point, not a closure, so this section does the work. All margins are **after the model's toxicity de-rating**, which is what its verdict uses. Code: `DEPTH3_CLOSURES`, `DEPTH3_INSUFFICIENT`, `depth3_item`; test `test_depth_3_escape_combinations_are_closed_by_a_named_near_future_agent`.
+
+**Why no lawful-today agent can do it.** The five agents that cover every escape alone -- cyclophosphamide, craniospinal radiotherapy, total body irradiation with transplant, half-body irradiation, high-dose thiotepa consolidation -- are all cytotoxic or radiation, all on the **already-loaded marrow axis**, with kills of **0.004-0.042/day** against a 0.0903 growth bar. Four of them together reach only +0.0029/day at toxicity headroom **-2.5**. The constraint is not coverage, it is kill-per-unit-toxicity on an axis that is already full.
+
+**What does close it: a canine CAR-T, on the immune axis, which carries only 0.30 of its budget.**
+
+| addition | tier | depth-3 margin | depth-4 margin |
+|---|---|---|---|
+| **B-cell: persistence-engineered canine-binder CAR-T** | **C** | **+0.0256 /day -> CLOSED** | -0.0559 (open) |
+| **T-cell: CD5 + CD7 dual-target CAR-T (canine binder)** | **C** | **+0.1309 /day -> CLOSED** | **+0.1041 -> CLOSED** |
+| programme alone (either lineage) | A/B | -0.0559 | -0.0903 |
+| CD3xCD20 bispecific engager | C | -0.0089 (not enough) | -0.0903 |
+| anti-CD20 monoclonal antibody | B | -0.0089 (not enough) | -0.0903 |
+| CD7-directed CAR-T, single target | C | -0.0291 (not enough) | -0.0635 |
+
+Tier C is admissible under CLAUDE.md rule 13 (clinical-stage modality in humans, a stated path to the dog, a derived or transferred kill), and the **canine CD20 CAR-T trial is enrolling again** as of this session's sweep (section M.1), which is what makes the tier credible rather than nominal. Reported with its tier mix, as rule 13 requires: the body and brain programmes are tier A/B (lawful today), and **depth-3 closure needs one tier-C agent**.
+
+Note which agents are **not** enough, so they are not re-tried: the bispecific engager and the anti-CD20 antibody both leave depth 3 at -0.0089/day, and the single-target CD7 CAR-T leaves the T-cell case at -0.0291. Antigen-directed single-target agents are inherently defeated by the antigen-loss escapes, which is why the dual-target construct is the one that carries depth 4.
+
+**State of the depth ladder after this section:**
+
+| depth | B-cell | T-cell |
+|---|---|---|
+| 1 (the only reachable depth) | CLOSED, lawful today | CLOSED, lawful today |
+| 2 | CLOSED, lawful today | CLOSED, lawful today |
+| 3 | **CLOSED with a tier-C CAR-T** | **CLOSED with a tier-C dual-target CAR-T** |
+| 4+ | **OPEN** -- nothing tested closes it | **CLOSED** by the same dual-target CAR-T |
+
+So `failing()` now carries exactly one item, and it is narrower than before: **escape independence, carrying the B-cell depth-4+ closure alone.** T-cell no longer depends on it at any depth. What would close the B-cell case: an agent with a kill high enough to carry depth 4 on a free toxicity axis (the dual-target construct does it for T-cell, so a B-cell analogue -- a dual-antigen CD19/CD20 canine CAR-T, which `SWEEP_dog_programs` records as in development -- is the obvious candidate), or a measured bound on escape correlation.
