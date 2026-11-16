@@ -233,10 +233,11 @@ def test_theoretical_agents_are_inadmissible():
         del READINESS["__theory__"]
 
 
-def test_audit_only_the_b_cell_dose_count_fails_and_the_growth_bar_is_derived():
-    """Was `failing() == []` until section M (2026-10-31) moved the B-cell brain dose count above canine precedent."""
+def test_audit_fails_only_on_the_cns_seeding_fraction_and_the_growth_bar_is_derived():
+    """History of `failing()`: empty until 31 Oct (M), then the B-cell dose count (M), empty again on 1 Nov once the long-course
+    intrathecal transfer landed (M.5), and from 16 Nov the CNS seeding fraction, which the port question exposed (M.7)."""
     from canine_dsp import lymphoma_standard_audit as A
-    assert A.failing() == []        # [B dose count] from 31 Oct until the long-course intrathecal transfer (section M.5, 1 Nov)
+    assert [i.name.split(" (")[0] for i in A.failing()] == ["CNS seeding fraction"]
     assert A.GROWTH_BAR_BASIS["grade"] == "DERIVED" and A.GROWTH_BAR_BASIS["band"][1] >= A.GROWTH_BAR_BASIS["value"]
     assert all(i.passes for i in A.wrongly_reported_as_gaps())
 
@@ -643,3 +644,19 @@ def test_full_craniospinal_36_gy_halves_the_injection_count_but_only_with_reduce
     full = S.lawful_brain_window("B", interval_days=14, ic50_nM=118.0, rt_scale=S.RT_BRAIN_ESCALATION_FACTOR)
     spine_held = S.lawful_brain_window("B", interval_days=14, ic50_nM=14.0)
     assert full[1] <= 18 and spine_held[1] >= 30 and full[1] < spine_held[1] / 1.6
+
+
+def test_whether_a_dog_needs_a_csf_port_rests_on_an_illustrative_literal():
+    """Section M.7. Both BODY cases close on verdinexor alone, so they need no intrathecal dose and no port. The brain cases need doses,
+    and the count scales with an assumed CNS seeding fraction whose own source line calls it 'illustrative': 0.05 gives 16-18 doses (a
+    port), 0.0001 gives 7 (percutaneous cisternal puncture, ordinary canine practice). So the port requirement is decided by an
+    uncited number, and the audit now says so rather than reporting the dose count as settled."""
+    from canine_dsp import lymphoma_sustained as S, lymphoma_standard_audit as A, lymphoma_joint as J
+    from canine_dsp.core import lymphoma_grounded as G
+    from canine_dsp.core.lymphoma_catalogue import SYSTEMIC
+    for ip in ("B", "T"):
+        assert S.minimal_lawful_window(ip, SYSTEMIC) is not None          # body closes with no intrathecal agent at all
+    assert G.CNS_SEED_FRACTION == 0.05
+    item = A.cns_seeding_item()
+    assert item.grade == "ASSUMED" and not item.passes
+    assert item in A.failing()

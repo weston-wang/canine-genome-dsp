@@ -379,3 +379,11 @@ Details `LYMPHOMA_UNIVERSE.md` M.6; sweeps `SWEEP_awake_dosing.md`, `SWEEP_ric_c
 - **Ruled out:** bigger/less frequent boluses, q21/q28 intervals, depot cytarabine (withdrawn), depot methotrexate (does not exist), continuous pump (worse in dogs).
 - **Net:** ~17-18 port doses under sedation + 2 anaesthetics, no loss of modelled response. `failing()` still empty.
 - Record inconsistency flagged, not reconciled: the two in-vivo radiation conventions (dose/1.9 vs e-folds/1.9) are not interchangeable.
+
+### Port scope, and a load-bearing literal found (2026-11-16; user: "Is a port needed for all cases")
+Details `LYMPHOMA_UNIVERSE.md` M.7.
+- **No port for the body cases.** B and T body close on 168 d of verdinexor with **zero** intrathecal doses. The port belongs to the brain arm only.
+- **Brain cases need it at the current dose counts** (18 B / 16 T at q14, pessimistic IC50, 36 Gy craniospinal).
+- **`failing()` returns one item again: the CNS seeding fraction.** `LYMPHOMA_CNS_SEED_FRACTION = 0.05` is labelled "illustrative" in its own source line and feeds every CNS horizon, so it sets every brain dose count in sections J-M.6 and decides whether a port is needed at all (0.05 -> 18 doses, port; 0.0001 -> 7 doses, percutaneous practice). No canine occult-seeding measurement exists; the record's "30% CNS involvement" is a different quantity. Same pattern as CLAUDE.md failure 7.
+- **All brain dose counts previously reported are conditional on that literal.** Direction of error unknown.
+- **Next:** search for a canine occult-CNS-seeding measurement, or derive a written transfer from human CNS-relapse-risk data.

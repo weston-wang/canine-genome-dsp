@@ -648,3 +648,28 @@ Sweeps `docs/universe/SWEEP_awake_dosing.md`, `SWEEP_ric_cord_budget.md`. Code: 
 **Ruled out as ways to cut the count** (`IT_DOSE_SPARING_RULED_OUT`): fewer larger boluses (neurotoxicity 7/10 versus 1/8 at equal efficacy, PMID 638249, against a 5.2 h canine CSF half-life -- tripling the dose buys 8.2 h at triple the peak); longer intervals (the model's own sweep never clears at q21 or q28 at the brain-reach floor, even at 36 Gy); depot intrathecal cytarabine (4x event-sparing but US production ended June 2017, EU authorisation withdrawn 10 July 2018, and already excluded on mechanism); intrathecal depot methotrexate (does not exist, THEORETICAL); continuous pump infusion (exists, implanted in dogs, but the one canine head-to-head found it WORSE than bolus, PMID 27832416).
 
 **Net:** the B-cell brain can be done with **~17-18 port doses under sedation and 2 general anaesthetics**, instead of 34-45 doses each under anaesthesia -- without weakening the response in the model. Conditions: strict aseptic port protocol; reduced-intensity conditioning with mycophenolate or sirolimus; and the mixed-chimerism graft question above.
+
+### M.7 Is a port needed for all cases? No -- and the question exposed an uncited literal (2026-11-16; user: "Is a port needed for all cases")
+Code: `lymphoma_standard_audit.cns_seeding_item`; tests.
+
+| case | intrathecal doses | port? |
+|---|---|---|
+| B-cell body | **0** | **no** -- closes on 168 d of verdinexor alone |
+| T-cell body | **0** | **no** -- same |
+| T-cell brain | 16 (q14, pessimistic IC50, 36 Gy craniospinal) | yes at this count |
+| B-cell brain | 18 (same conditions) | yes at this count |
+
+So the port is a brain-arm device, not a program-wide one: it is needed only where the CNS compartment has to be closed.
+
+**The finding: the number that decides the dose count, and so whether a port is needed at all, has no basis.** `lymphoma_scenarios.LYMPHOMA_CNS_SEED_FRACTION = 0.05` carries the comment "illustrative fraction of pre-treatment burden seeding the CNS" in its own source line, and `lymphoma_grounded.evaluate` feeds it into every CNS horizon, so it sets every brain dose count quoted in sections J through M.6. It is load-bearing:
+
+| assumed CNS seeding fraction | B-cell brain | T-cell brain | device implied |
+|---|---|---|---|
+| 0.05 (the current literal) | 18 doses | 16 doses | implanted port |
+| 0.01 | 14 | 14 | port |
+| 0.001 | 10 | 10 | borderline |
+| 0.0001 | 7 | 7 | percutaneous cisternal puncture, ordinary canine practice (112 dogs, PMID 25041580) |
+
+No canine measurement of occult CNS seeding at diagnosis was found. `LYMPHOMA_DURABLE_RESPONSE.md:242` models "30% CNS involvement", which is a different quantity (share of dogs, not share of burden), so the record does not supply this number either. This is the same failure pattern as CLAUDE.md failure 7: a bare illustrative literal gating a conclusion, sitting unnoticed while the audit reported nothing failing. **`failing()` now returns it**, and it is the only item it returns. Closed by either a canine occult-CNS-seeding measurement or a written transfer from human CNS-relapse-risk data; neither has been searched yet.
+
+**Consequence for the earlier answers:** the dose counts in M.5 and M.6 (17-18, 29-45) are conditional on 0.05. They are not wrong, but they are an upper branch of a number that was never fitted. The direction of the error is unknown, because the literal could be too high or too low.
