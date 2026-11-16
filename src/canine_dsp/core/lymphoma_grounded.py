@@ -148,7 +148,12 @@ _POTENCY_TEXT = {
                         "is not separately measured.",
     "prednisolone (glucocorticoid)": "BRACKET: 0.0098-0.144 /day from two canine measurements that "
                                      "disagree ~15x; 0.10 neither derived nor contradicted.",
-    "rabacfosadine": "ASSUMED: no canine IC50 or PK found; clinical ORR 87%, median PFI 122 d.",
+    "rabacfosadine": "OUTCOME: no canine IC50 or PK found, but the agent is the FDA-APPROVED animal drug for canine lymphoma with a MEASURED "
+                             "canine clinical outcome -- ORR 87%, median progression-free interval 122 d. Under CLAUDE.md rule 13 an "
+                             "agent may not be excluded because canine potency data are absent when an outcome-calibrated input "
+                             "exists; grading this ASSUMED had filtered the approved dog lymphoma drug out of the lawful pool "
+                             "entirely (section M.25). The 0.06/day figure itself is NOT derived from an IC50 and is reported at "
+                             "OUTCOME strength only.",
     "lomustine (CNS-penetrant nitrosourea)": "ASSUMED: one line IC50 (27 uM), no canine PK found.",
     "high-dose methotrexate": "ASSUMED (human transfer).",
     "intrathecal cytarabine": "ASSUMED.",

@@ -14,21 +14,30 @@ from canine_dsp.core.lymphoma_catalogue import CNS, SYSTEMIC
 # the input they were computed from, so they are pinned to the superseded value rather than re-fitted to numbers they never asserted.
 # Current-truth brain numbers are tested by the M.11 tests below, which run the derived fraction.
 SUPERSEDED_CNS_SEED_FRACTION = 0.05
+#: The T-cell lawful programme those sections were characterised against, before section M.25 admitted rabacfosadine (the
+#: FDA-approved dog lymphoma drug, previously filtered out on an ASSUMED potency grade that CLAUDE.md rule 13 forbids) and
+#: restored prednisolone from the lawful-set optimisation.
+SUPERSEDED_T_LAWFUL_PROGRAMME = ("hydroxychloroquine", "verdinexor", "allogeneic DLA", "cytarabine CRI (q7d)")
 
 
 def at_superseded_seeding(fn):
-    """Run a section F-J characterisation test at the seeding fraction it was written against (see note above)."""
+    """Run a section F-J characterisation test against the inputs it was written for: the pre-M.11 seeding fraction and the
+    pre-M.25 T-cell lawful programme. Current-truth numbers are tested by the M.11-M.25 tests, which use the live values."""
     import functools
 
     @functools.wraps(fn)
     def wrapper(*a, **kw):
         from canine_dsp.core import lymphoma_grounded as G
-        saved = G.CNS_SEED_FRACTION
+        from canine_dsp import lymphoma_sustained as S
+        saved_frac = G.CNS_SEED_FRACTION
+        saved_prog = S.LAWFUL_PROGRAMS["T"]
         G.CNS_SEED_FRACTION = SUPERSEDED_CNS_SEED_FRACTION
+        S.LAWFUL_PROGRAMS["T"] = SUPERSEDED_T_LAWFUL_PROGRAMME
         try:
             return fn(*a, **kw)
         finally:
-            G.CNS_SEED_FRACTION = saved
+            G.CNS_SEED_FRACTION = saved_frac
+            S.LAWFUL_PROGRAMS["T"] = saved_prog
     return wrapper
 
 
@@ -930,9 +939,9 @@ def test_the_reachable_escape_depth_is_two_and_b_cell_closes_it_lawfully_today()
     assert c["reachable_depth"] == 2
     # B-cell needs nothing beyond what a vet can obtain today
     assert c["B"]["lawful_only_closes"] and c["B"]["needs_tier_C_agent"] is None
-    # T-cell does, and the requirement is named rather than glossed
-    assert not c["T"]["lawful_only_closes"]
-    assert "CAR-T" in c["T"]["needs_tier_C_agent"]
+    # T-cell needed a tier-C agent when this test was written; section M.25 closed it lawfully with rabacfosadine, so BOTH
+    # lineages now close the reachable depth on agents available today and neither needs a near-future agent.
+    assert c["T"]["lawful_only_closes"] and c["T"]["needs_tier_C_agent"] is None
 
     assert A.reachable_depth_item().passes
     assert A.failing() == []
@@ -960,11 +969,11 @@ def test_sequential_escape_stacking_is_what_the_margin_actually_prevents():
     assert b["holds"] and b["induction_breaks_at_reachable_depth"] is None
     assert b["depths"][1]["growing_clones"] == 0 and b["depths"][2]["growing_clones"] == 0
 
-    # T-cell on lawful agents is NOT durable: the induction breaks at a REACHABLE depth
+    # T-cell on lawful agents was NOT durable when this test was written (8 growing pairs at depth 2). Section M.25 closed it by
+    # admitting rabacfosadine -- the FDA-approved dog lymphoma drug, previously filtered out on an ASSUMED potency grade that rule 13
+    # forbids -- so the induction now HOLDS for T-cell on lawful agents too.
     t = A.sequential_stacking("T")
-    assert not t["holds"]
-    assert t["induction_breaks_at_reachable_depth"] == 2
-    assert t["depths"][2]["growing_clones"] >= 8 and t["depths"][2]["worst_margin"] < 0
+    assert t["holds"] and t["depths"][2]["growing_clones"] == 0
 
     # and the tier-C dual-antigen CAR-T repairs it, which is why it is load-bearing
     tc = A.sequential_stacking("T", "CD5 + CD7 dual-target")
@@ -1067,4 +1076,48 @@ def test_the_escape_escalation_terminates_because_the_treatment_bounds_the_divis
     # the bound uses the dog-measured gross birth rate, not an invented one
     assert A.GROWTH_BAR_BASIS["gross_ceiling"] == 0.204
     assert A.escalation_terminates_item().passes
+    assert A.failing() == []
+
+
+def test_the_fda_approved_dog_lymphoma_drug_closes_the_t_cell_gap_lawfully():
+    """Section M.25 -- the closure the whole depth/stacking analysis had been missing, and the reason it was missed.
+
+    Rabacfosadine (Tanovea-CA1) is the FDA-APPROVED ANIMAL DRUG for canine lymphoma. It had been filtered out of the lawful pool
+    because `potency_grade` read ASSUMED on the stated basis "no canine IC50 or PK found" -- despite a MEASURED canine ORR of 87%
+    and median progression-free interval of 122 days. CLAUDE.md rule 13 forbids excluding an agent because canine potency data are
+    absent when an outcome-calibrated input exists, so the grade was wrong, not the agent. Regraded OUTCOME it enters the pool, and:
+      - it covers the T-cell blocking pair (P-gp efflux + TP53 evasion) and is not a pump substrate;
+      - it sits on the PULMONARY axis, which the programme was not using, so it adds without the marrow collision that capped every
+        other candidate at 0.0895/day;
+      - the worst depth-1/depth-2 margin goes from -0.00082 to +0.01691/day, so sequential stacking is blocked with no near-future
+        agent anywhere in the programme.
+    The cost is real and must travel with the claim: delayed FATAL pulmonary fibrosis, grade 5 in 3/63 dogs (4.8%) at 119-144 days
+    (PMID 32346934), which is why its window is hard-capped at 105 days. That cap leaves 63 uncovered days in a 168-day programme,
+    and the dip cannot amplify anything: the most common depth-2 clone ends 5.6x smaller than it started."""
+    from canine_dsp import lymphoma_standard_audit as A, lymphoma_sustained as S, lymphoma_joint as J
+    from canine_dsp.core import lymphoma_grounded as G
+    from canine_dsp.core.lymphoma_catalogue import SYSTEMIC
+
+    # the agent is in the pool, lawful, and outcome-graded rather than assumed
+    rab = [a for a in G.grounded_agents(SYSTEMIC, "T") if a.name == "rabacfosadine"][0]
+    assert G.potency_grade(rab) == "OUTCOME"
+    assert S.legal_status("rabacfosadine")[0] == S.APPROVED_ANIMAL
+    assert "rabacfosadine" in S.LAWFUL_PROGRAMS["T"]
+    assert not rab.efflux_substrate
+
+    # it covers the blocking pair that capped every other lawful candidate
+    blk = tuple(e for e in J._escapes("T") if e.name in A.T_LAWFUL_BLOCKING_PAIR)
+    assert G.covers_conjunction(rab, blk)
+
+    # and both lineages now block sequential stacking on lawful agents alone
+    for ip in ("B", "T"):
+        st = A.sequential_stacking(ip)
+        assert st["holds"] and st["depths"][2]["growing_clones"] == 0, ip
+    c = A.closure_to_reachable_depth()
+    assert c["B"]["lawful_only_closes"] and c["B"]["needs_tier_C_agent"] is None
+    assert c["T"]["lawful_only_closes"] and c["T"]["needs_tier_C_agent"] is None
+
+    # the cost is recorded, not omitted
+    frac, src = S.RABACFOSADINE_FATAL_PULMONARY_FIBROSIS
+    assert frac > 0.04 and "32346934" in src
     assert A.failing() == []

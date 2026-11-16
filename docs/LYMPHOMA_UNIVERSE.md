@@ -1019,3 +1019,30 @@ M.23 left one lawful, FDA-approved, available agent genuinely unevaluated -- **d
 **Why this agent and not another.** It is the only candidate found that satisfies the three-way conjunction the T-cell blocking pair requires -- not a P-gp substrate, not p53-dependent, and dose-limiting toxicity that is **not** marrow or gastrointestinal (capillary leak, hepatic, infusion reactions; no cytopenia, PMID 39700456) -- while also being FDA-approved and already dosed in dogs at an identical 9 ug/kg/day (PMID 16920555). The structural finding of M.23 explains why the list is so short: everything that evades both P-gp and p53 does so by arresting protein synthesis, and that class spares dormant cells. Denileukin is in that class, so **even if the CD25 numbers come back favourable, it must be checked against E5 before it can carry anything** -- the same test that excluded L-asparaginase.
 
 **State of the T-cell residual: -0.00082/day at the top of the derived growth band, unchanged.** Every escape is covered; the shortfall is margin at the band's conservative extreme. Named route to a lawful closure, now two steps rather than three: (1) query existing canine flow databases for CD25-positive fraction and density in T-cell lymphoma; (2) if favourable, evaluate denileukin diftitox including the dormant-cell test that excluded asparaginase.
+
+### M.25 The FDA-approved dog lymphoma drug was filtered out by a grading error, and admitting it closes T-cell lawfully (2026-11-16)
+This is the closure, and the reason it took twelve sections to find is embarrassing: **rabacfosadine (Tanovea-CA1), the FDA-approved animal drug for canine lymphoma, was excluded from the lawful pool because its potency grade read ASSUMED.** The stated basis was *"no canine IC50 or PK found"* -- next to *"clinical ORR 87%, median PFI 122 d"*, in the same evidence string. CLAUDE.md rule 13 is explicit that an agent may not be excluded because canine potency data are absent when an outcome-calibrated input exists. The grade was wrong, not the agent. Code: potency evidence regraded in `lymphoma_grounded`, `LAWFUL_PROGRAMS["T"]`, `T_LAWFUL_CLOSURE_MARGIN`, `RABACFOSADINE_FATAL_PULMONARY_FIBROSIS`; test `test_the_fda_approved_dog_lymphoma_drug_closes_the_t_cell_gap_lawfully`.
+
+**Why it is exactly the missing agent.** The irreducible T-cell blocker was P-gp efflux together with TP53 evasion, and every lawful candidate that covered it sat on the already-full **marrow** axis -- which is what capped the whole search at 0.0895/day. Rabacfosadine covers that pair, is **not** a pump substrate, and sits on the **pulmonary** axis, which the programme was not using at all. So it adds kill without the collision.
+
+| | worst depth-1/depth-2 margin |
+|---|---|
+| best lawful six-agent regimen (M.20) | **-0.00082/day** |
+| **+ rabacfosadine** | **+0.01691/day** |
+
+**Both lineages now close on lawful, available agents, and neither needs a near-future agent:**
+
+| | lawful-only margin | needs a tier-C agent? |
+|---|---|---|
+| B-cell | +0.02556/day | **no** |
+| T-cell | +0.01691/day | **no** |
+
+Across growth rates: closes at the model's bar 0.0903 (+0.01691) and at 0.10 (+0.00721); short at 0.12 (-0.01279), which is above the bar. Windows: T body 189 d, B body 168 d, T brain 11 intrathecal doses over 157 d.
+
+**THE COST, which must travel with this claim.** Rabacfosadine's dose-limiting toxicity is **delayed fatal pulmonary fibrosis: grade 5 in 3 of 63 dogs (4.8%) at 119, 133 and 144 days, plus 2 of 51 in a second series** (PMID 32346934), measured in dogs. That is why its window is hard-capped at 105 days, and it is a larger single cost than anything else in the programme. A closure quoted without it is not the same claim.
+
+**The 105-day cap leaves 63 uncovered days in a 168-day programme, and that dip cannot amplify anything.** With rabacfosadine present the most common depth-2 clone goes from 10 cells to 1.69 over 105 days; across the 63 uncovered days at -0.00082/day it goes 1.69 -> 1.78. Net over the programme: **5.6x smaller than it started.** Undoing the covered phase at that rate would take **2,157 days** against the 63 available.
+
+**What this says about the preceding twelve sections.** M.15 through M.21 concluded that T-cell required a tier-C CAR-T, and M.21 called the residual "irreducible". Both were artefacts of searching a pool that had silently dropped the one approved drug for the disease, on a grading technicality the project's own rule 13 forbids. The lesson is not about CAR-T: it is that an evidence-grade filter was doing scientific exclusion work, and nothing flagged it.
+
+`failing()` is empty. 118 tests pass.

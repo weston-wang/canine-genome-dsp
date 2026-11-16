@@ -287,7 +287,15 @@ LAWFUL_PROGRAMS = {
     # That is a measured, in-dog value for exactly the quantity the model was crediting, and the value is zero; under CLAUDE.md rule 14
     # a measurement in the compartment at issue outranks a derived kill. Not load-bearing: T body goes 147 -> 168 d and the T brain is
     # unchanged at 18 doses. Its profile window is also corrected to the 68-day measured resistance onset above.
-    "T": ("hydroxychloroquine", "verdinexor", "allogeneic DLA", "cytarabine CRI (q7d)"),
+    # rabacfosadine and prednisolone ADDED 2026-11-16 (section M.25). Rabacfosadine is the FDA-APPROVED ANIMAL DRUG for canine
+    # lymphoma; it had been filtered out of the lawful pool because its potency grade read ASSUMED on the stated basis "no canine
+    # IC50 or PK found" -- despite a measured canine ORR of 87% and median progression-free interval of 122 d. CLAUDE.md rule 13
+    # forbids excluding an agent because canine potency data are absent when an outcome-calibrated input exists, so it is regraded
+    # OUTCOME and admitted. It covers the T-cell blocking pair (P-gp efflux + TP53 evasion), is not a pump substrate, and sits on the
+    # PULMONARY axis, which the programme was not using -- so it adds without the marrow collision that capped everything else.
+    # Prednisolone returns because the optimisation found it in the best lawful set; its 68-day resistance window still applies.
+    "T": ("cyclophosphamide", "prednisolone", "hydroxychloroquine", "verdinexor", "cytarabine CRI (q7d)",
+          "allogeneic DLA", "rabacfosadine"),
 }
 
 
@@ -458,6 +466,19 @@ CRANIOSPINAL_36GY_NEEDS_RIC = True
 RIC_TBI_GY = 2.0
 RIC_OPEN_CONDITION = ("2 Gy conditioning gives mixed chimerism; the graft kill input was calibrated on >95% donor chimerism "
                       "(PMID 11215693), so the graft's contribution at 2 Gy is not quantified")
+
+#: The T-cell closure on LAWFUL, FDA-APPROVED, AVAILABLE agents (section M.25). Adding rabacfosadine takes the worst depth-1/depth-2
+#: margin from -0.00082/day to +0.01691/day at the model's growth bar, so sequential stacking is blocked with nothing near-future.
+#: It closes at growth 0.0903 (+0.01691) and 0.10 (+0.00721); it is short at 0.12 (-0.01279), which is above the model's bar.
+T_LAWFUL_CLOSURE_MARGIN = 0.01691
+#: THE COST, measured in dogs and not to be omitted when this closure is quoted: delayed FATAL pulmonary fibrosis, grade 5 in
+#: 3/63 dogs (4.8%) at 119/133/144 days and 2/51 in a second series (PMID 32346934). That is why its window is hard-capped at 105 d.
+RABACFOSADINE_FATAL_PULMONARY_FIBROSIS = (0.048, "3/63 at 119-144 d; 2/51 second series; PMID 32346934")
+#: The 105-day cap leaves a 63-day gap in a 168-day programme, during which the margin reverts to -0.00082/day. That dip CANNOT
+#: amplify anything: the most common depth-2 clone goes 10 -> 1.69 cells over the 105 covered days, then 1.69 -> 1.78 over the 63
+#: uncovered ones, ending 5.6x smaller than it started. Undoing the covered phase at -0.00082/day would take 2,157 days.
+T_LAWFUL_CLOSURE_GAP_DAYS = 63.0
+T_LAWFUL_CLOSURE_NET_CLONE_FACTOR = 0.178
 
 #: Brain radiation escalation (docs/universe/SWEEP_rt3_escalation.md, section M.5), grade TRANSFERRED: 36 Gy / 20 x 1.8 Gy whole
 #: brain is the strongest defensible canine course (EQD2 34.2 Gy against a canine whole-brain anchor of ~37.5-39.6 Gy, PMIDs

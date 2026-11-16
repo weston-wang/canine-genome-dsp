@@ -368,7 +368,11 @@ def test_hcq_potency_is_a_labelled_transfer_with_a_written_justification():
 def test_sound_pool_admits_transfers_but_not_hinges_or_bare_assumptions_and_uses_the_bracket_low_end():
     names = {a.name: a for a in G.sound_pool(G.grounded_agents(SYSTEMIC, B))}
     assert "hydroxychloroquine (autophagy)" in names                 # transfer
-    assert "rabacfosadine" not in names and "high-dose methotrexate" not in names   # assumed, no basis
+    # rabacfosadine was regraded ASSUMED -> OUTCOME on 2026-11-16 (section M.25) and is now ADMITTED: it is the FDA-approved
+    # animal drug for canine lymphoma with a measured canine ORR of 87% and median PFI 122 d, and CLAUDE.md rule 13 forbids
+    # excluding an agent for absent canine potency data when an outcome-calibrated input exists. high-dose methotrexate stays out,
+    # its evidence being a bare human transfer with no canine outcome.
+    assert "rabacfosadine" in names and "high-dose methotrexate" not in names
     assert names["prednisolone (glucocorticoid)"].potency == pytest.approx(0.0098)   # bracket LOW end
 
 

@@ -525,3 +525,13 @@ Details `LYMPHOMA_UNIVERSE.md` M.24.
 - **But it does not open the gate:** "variable expression" in one case report is not a kill input, so the agent stays unevaluated.
 - **And a caution that applies even if CD25 is favourable:** denileukin kills by protein-synthesis arrest, the same class that M.23 showed spares dormant cells and that excluded L-asparaginase. It must pass the E5 dormant-cell test before it can carry any closure.
 - **T-cell residual unchanged: -0.00082/day at the top of the derived band.** Every escape covered; the shortfall is margin at the conservative extreme. Two-step route named.
+
+### M.25 (2026-11-16): T-cell CLOSED on lawful available agents -- the approved dog drug had been filtered out by a grading error
+Details `LYMPHOMA_UNIVERSE.md` M.25.
+- **Rabacfosadine (Tanovea-CA1), the FDA-approved ANIMAL drug for canine lymphoma, was excluded from the lawful pool** because its potency grade read ASSUMED on the basis "no canine IC50 or PK found" -- in the same evidence string as "clinical ORR 87%, median PFI 122 d". Rule 13 forbids that exclusion. Regraded **OUTCOME** and admitted.
+- **Why it is the missing agent:** it covers the irreducible blocker (P-gp efflux + TP53 evasion), is not a pump substrate, and sits on the **pulmonary** axis which the programme was not using -- so it avoids the marrow collision that capped the search at 0.0895/day.
+- **Worst depth-1/depth-2 margin: -0.00082 -> +0.01691/day.** Both lineages now close on lawful available agents with **no tier-C agent needed**: B +0.02556, T +0.01691. Closes at the bar 0.0903 and at 0.10; short at 0.12 (above the bar). Windows: T body 189 d, B body 168 d, T brain 11 doses / 157 d.
+- **THE COST, inseparable from the claim:** delayed **fatal pulmonary fibrosis, 3/63 dogs (4.8%) at 119-144 d** plus 2/51 in a second series (PMID 32346934), measured in dogs. Hence the 105-day hard cap, and it is the largest single cost in the programme.
+- **The 105-day cap leaves 63 uncovered days of 168, and the dip is harmless:** most common depth-2 clone 10 -> 1.69 cells over the covered days, 1.69 -> 1.78 over the uncovered ones, net **5.6x smaller**; undoing the covered phase would take 2,157 days against 63 available.
+- **On M.15-M.21:** their conclusion that T-cell needed a tier-C CAR-T, and M.21's "irreducible" verdict, were artefacts of searching a pool that had silently dropped the one approved drug for the disease. The lesson is that an evidence-grade filter was doing scientific exclusion work with nothing flagging it.
+- `failing()` empty; 118 tests pass.
