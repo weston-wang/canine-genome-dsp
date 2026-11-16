@@ -771,3 +771,26 @@ Two things stated rather than hidden:
 - **The brain is the thinner case.** From depth 4 its combinations remain *covered* but margin-negative, and the only agents still working against a fully armoured cell are the radiation course and the intrathecal methotrexate. That is consistent with M.11's finding that the brain rests on those two.
 
 This supersedes M.12's framing: the emergence item is no longer a reclassification of an open structural absence but an enumerated closure, and `failing()` is empty with 109 tests passing.
+
+### M.14 Correcting M.13, and the honest answer: treatment closes depth 2, only depth 1 can occur, and the rest rests on one unmeasured assumption (2026-11-16)
+M.13 claimed depths 1-3 were "fully covered with positive margins". **Wrong** -- it had checked coverage at depth 3 but not margin. Re-run per depth, with each worst case priced by its own escape seeding rates at a burden of 1e8 cells:
+
+| depth (escapes in one cell) | worst margin | expected cells in that worst case | verdict |
+|---|---|---|---|
+| 1 | **+0.066 to +0.363 /day** | **1-10 cells** | closed by treatment; **the only reachable depth** |
+| 2 | **+0.019 to +0.088 /day** | 1e-8 to 1e-7 | closed by treatment |
+| 3 | **-0.004 to -0.042 /day** | 1e-15 to 1e-14 | **NOT closed by treatment** |
+| 4+ | coverage itself fails (16 quadruples per body case) | <=1e-16 | **NOT closed by treatment** |
+
+**So treatment closure runs one full level deeper than anything that can physically occur.** That is the real result, and it is stronger than a bare "every escape is covered": the cells that can exist are closed with a comfortable margin, and there is a level of headroom above them.
+
+**And the thing that genuinely has no answer, stated plainly.** Depth 3+ cannot be closed by treatment, and not for want of looking:
+- Five lawful agents each cover **every** escape alone -- cyclophosphamide, craniospinal radiotherapy, total body irradiation with transplant, half-body irradiation, high-dose thiotepa consolidation -- so **coverage** is fixable.
+- But their kills are 0.004-0.042/day against a 0.0903/day growth bar. It takes **four** of them added to the programme to reach a positive worst-case depth-4 margin, and then only **+0.0029/day** -- and that regimen's toxicity headroom is **-2.5**, about three and a half times over what a dog survives.
+- **Therefore depth 3+ cannot be closed inside the toxicity budget by any lawful combination.** What stands between the dog and those routes is their rarity alone.
+
+**That rarity rests on one assumption, which is now the single failing audit item.** `escape_independence_item()`: escapes are treated as INDEPENDENT, which is what makes a depth-3 cell ~1e-15 and a depth-4 cell ~1e-16. No canine measurement bounds that correlation -- no paired diagnosis-versus-relapse sequencing exists (already in `LYMPHOMA_COVERAGE_LEDGER`) -- and no written transfer stands behind it either, so under CLAUDE.md rule 11 it is genuinely open: a number with no basis at all, load-bearing for a closure claim. A mutator phenotype, or one escape raising another's rate, would make these combinations orders of magnitude commoner and would move depth 3 into reach, where the margin is negative.
+
+**What would close it** (any one suffices): a measured or bounded pairwise correlation between escape mechanisms in canine lymphoma; an agent whose kill carries depth 3-4 alone inside the toxicity budget; or a demonstration that the specific mechanisms in those combinations cannot coexist in one cell.
+
+`failing()` returns exactly this one item. 109 tests pass.

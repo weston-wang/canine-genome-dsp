@@ -265,7 +265,9 @@ def test_audit_fails_only_on_the_cns_seeding_fraction_and_the_growth_bar_is_deri
     """History of `failing()`: empty until 31 Oct (M), then the B-cell dose count (M), empty again on 1 Nov once the long-course
     intrathecal transfer landed (M.5), and from 16 Nov the CNS seeding fraction, which the port question exposed (M.7)."""
     from canine_dsp import lymphoma_standard_audit as A
-    assert A.failing() == []       # CNS seeding fraction closed by derivation on 16 Nov (M.11); nothing fails the bar now
+    # CNS seeding fraction closed by derivation on 16 Nov (M.11); the escape-independence assumption then became the one
+    # failing item when M.14 found that depth-3+ escape combinations cannot be closed inside the toxicity budget.
+    assert [i.name.split(" (")[0] for i in A.failing()] == ["escape independence"]
     assert A.GROWTH_BAR_BASIS["grade"] == "DERIVED" and A.GROWTH_BAR_BASIS["band"][1] >= A.GROWTH_BAR_BASIS["value"]
     assert all(i.passes for i in A.wrongly_reported_as_gaps())
 
@@ -731,39 +733,43 @@ def test_resistance_emergence_cannot_leave_an_escape_uncovered():
         assert len(G.escapes_to_close(G.BURDEN_EARLY_DETECTED, escapes=full)) < len(full)   # require-all is doing work
     item = A.emergence_is_not_an_uncovered_escape()
     assert item.passes and item.grade == "DERIVED" and item not in A.failing()
-    assert A.failing() == []
+    # M.14 refined this: single-escape coverage holds, but multi-escape depth is the real question, and beyond depth 2 the
+    # closure rests on escapes being independent -- which is now the one failing audit item rather than nothing failing.
+    assert [i.name.split(" (")[0] for i in A.failing()] == ["escape independence"]
 
 
-def test_multi_escape_cells_are_closed_to_the_depth_that_can_physically_occur():
-    """Section M.13 -- the actual closing work the emergence question demanded, rather than a reclassification.
-
-    The model scored SINGLE escapes only. Emergence produces cells carrying several at once, and such a cell is killed only by an
-    agent covering EVERY escape it carries. Enumerated: depths 1-3 are fully covered with positive margins in all four cases (worst
-    pair +0.019/day); from depth 4 uncovered combinations appear (16 quadruples per body case) and the brain cases turn
-    margin-negative. None is reachable -- each needs four or more specific escapes in one cell, and the most probable has an expected
-    count of ~1e-16 at a burden of 1e8. So the programmes are closed to the depth that can occur, and the depth where they break
-    cannot be reached. Escapes are assumed independent; a mutator phenotype would raise these joint probabilities."""
+def test_treatment_closes_multi_escape_cells_one_level_deeper_than_they_can_occur():
+    """Section M.14, the corrected version of M.13. Enumerating co-occurring escapes gives, per depth:
+      depth 1: margin +0.066 to +0.363 /day, and 1-10 expected cells at a burden of 1e8 -- the only REACHABLE depth
+      depth 2: margin +0.019 to +0.088 /day -- closed by treatment, expects 1e-8 to 1e-7 cells
+      depth 3: margin -0.004 to -0.042 /day -- NOT closed by treatment, expects 1e-15 to 1e-14 cells
+      depth 4+: coverage itself fails in the body cases (16 quadruples)
+    So treatment closure reaches depth 2 while only depth 1 can occur: one level of headroom. Beyond that the dismissal rests on
+    escapes being independent, which is unmeasured in canine lymphoma and is the single failing audit item."""
     from itertools import combinations
     from canine_dsp import lymphoma_standard_audit as A, lymphoma_sustained as S, lymphoma_joint as J
     from canine_dsp.core import lymphoma_grounded as G
     from canine_dsp.core.lymphoma_catalogue import SYSTEMIC
 
-    # 1. no uncovered multi-escape combination is reachable, in any of the four cases
-    d = A.multi_escape_depth()
-    assert len(d) == 4 and all(v["reachable_failures"] == 0 for v in d.values()), d
-    item = A.multi_escape_item()
-    assert item.grade == "DERIVED" and item.passes and item not in A.failing()
+    # depth 1-2 closed by treatment in all four cases
+    d = A.multi_escape_depth(max_k=2)
+    assert len(d) == 4 and all(v["worst_margin_to_depth"] > 0 for v in d.values()), d
+    assert A.multi_escape_item().passes
 
-    # 2. depth 2 is genuinely covered with a positive margin, not merely unreachable
+    # depth 3 is NOT closed by treatment -- recorded, not glossed
+    d3 = A.multi_escape_depth(max_k=3)
+    assert any(v["worst_margin_to_depth"] <= 0 for v in d3.values())
+
+    # and only depth 1 is reachable: the worst depth-2 combination cannot produce even one cell
+    esc = J._escapes("B")
     pool = S.lawful_pool("B", SYSTEMIC)
     reg = [[v for k, v in pool.items() if k.startswith(n)][0] for n in S.LAWFUL_PROGRAMS["B"]]
-    esc = J._escapes("B")
-    worst = min(sum(a.effective_kill for a in reg if G.covered([a], e1) and G.covered([a], e2))
-                for e1, e2 in combinations(esc, 2))
-    assert worst > G.GROWTH_PER_DAY, worst
+    worst = min(((sum(a.effective_kill for a in reg if G.covered([a], e1) and G.covered([a], e2)),
+                  G.BURDEN_EARLY_DETECTED * e1.seeding_rate * e2.seeding_rate)
+                 for e1, e2 in combinations(esc, 2)), key=lambda t: t[0])
+    assert worst[0] > G.GROWTH_PER_DAY and worst[1] < 1.0
 
-    # 3. the depth where coverage fails really is out of reach
-    expected_all = G.BURDEN_EARLY_DETECTED
-    for e in esc:
-        expected_all *= e.seeding_rate
-    assert expected_all < 1e-20
+    # the open item is the independence assumption, and it is the ONLY failing item
+    ind = A.escape_independence_item()
+    assert ind.grade == "ASSUMED" and not ind.passes
+    assert [x.name for x in A.failing()] == [ind.name]

@@ -429,3 +429,10 @@ Details `LYMPHOMA_UNIVERSE.md` M.13. M.12's argument closed nothing -- it showed
 - **So: combinations of four or more escapes have no answer, and cannot occur.** Closed to the depth that physically occurs.
 - **The one assumption it rests on:** escapes are independent. A mutator phenotype or correlated rates would raise the joint probabilities; unmeasured in canine lymphoma.
 - Executable as `lymphoma_standard_audit.multi_escape_depth()` / `multi_escape_item()`; `failing()` empty; 109 tests pass.
+
+### M.14 (2026-11-16): the honest answer on multi-escape depth, correcting M.13
+- **M.13 was wrong** to say depths 1-3 were closed: it checked coverage at depth 3 but not margin.
+- **Corrected, per depth:** depth 1 margin +0.066 to +0.363/day and 1-10 expected cells (the ONLY reachable depth); depth 2 margin +0.019 to +0.088 (closed by treatment); **depth 3 margin -0.004 to -0.042 (NOT closed)**; depth 4+ coverage itself fails. **Treatment closure runs one level deeper than anything that can occur.**
+- **Depth 3+ cannot be closed by treatment.** Five lawful agents each cover every escape alone (cyclophosphamide, craniospinal RT, TBI+transplant, half-body RT, thiotepa consolidation), so coverage is fixable -- but their kills are 0.004-0.042/day against a 0.0903 growth bar, so it takes four additions to reach +0.0029/day at toxicity headroom **-2.5**, i.e. ~3.5x over survivable. Not closable inside the budget.
+- **`failing()` returns exactly one item: escape independence.** The dismissal of depth 3+ rests on independent escape rates (~1e-15 cells). No canine measurement and no written transfer bounds that correlation; no paired diagnosis-vs-relapse sequencing exists. Genuinely open under rule 11.
+- **Closes with any one of:** a measured/bounded pairwise correlation between escape mechanisms in canine lymphoma; an agent carrying depth 3-4 alone within the toxicity budget; or a shown incompatibility between the mechanisms in those combinations.

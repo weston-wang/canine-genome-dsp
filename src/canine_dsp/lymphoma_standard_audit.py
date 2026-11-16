@@ -257,13 +257,44 @@ def multi_escape_depth(max_k: int = 4) -> dict:
 
 
 def multi_escape_item() -> Item:
-    """The pass/fail form of multi_escape_depth(): no uncovered multi-escape combination is reachable."""
-    d = multi_escape_depth()
-    total = sum(v["reachable_failures"] for v in d.values())
-    return Item("multi-escape cells from emergence (depth 1-4)", "DERIVED" if total == 0 else "OPEN", total == 0,
-                f"enumerated every combination of up to 4 co-occurring escapes in all four cases; combinations whose margin is "
-                f"non-positive AND whose expected count at the treated burden reaches one cell: {total}. Uncovered combinations exist "
-                "from depth 4, but the most probable has an expected count of ~1e-16 cells. Assumes escapes are independent")
+    """Depth 1-3 is closed by TREATMENT; depth 4+ is not, and cannot be (section M.14).
+
+    Depth 3 is where the MARGIN first turns negative (-0.004 to -0.042/day), and depth 4 is where coverage itself fails.
+    Tested whether that gap can be closed by coverage rather than by probability. Five lawful agents each cover every escape
+    alone -- cyclophosphamide, craniospinal radiotherapy, total body irradiation with transplant, half-body irradiation, and high-dose
+    thiotepa consolidation -- so coverage is fixable. The MARGIN is not: their kills are 0.004-0.042/day against a growth bar of
+    0.0903, so it takes FOUR of them added to the programme to reach a positive worst-case depth-4 margin, and then only +0.0029/day
+    -- and that regimen's toxicity headroom is -2.5, i.e. roughly three and a half times over what a dog can survive.
+    So depth 4 and beyond cannot be closed by any lawful combination inside the toxicity budget. What stands between the dog and those
+    routes is only their rarity (~1e-16 expected cells), and that rests on escapes being independent, which nobody has measured in
+    canine lymphoma. That assumption is graded separately by escape_independence_item() and it FAILS the bar."""
+    d = multi_escape_depth(max_k=2)
+    worst = min(v["worst_margin_to_depth"] for v in d.values())
+    return Item("multi-escape cells, depth 1-2 (closed by treatment)", "DERIVED" if worst > 0 else "OPEN", worst > 0,
+                f"every combination of up to TWO co-occurring escapes is covered with a positive margin in all four cases; worst "
+                f"{worst:+.4f}/day. Only depth 1 is reachable (1-10 expected cells at a burden of 1e8), so treatment closure runs one "
+                "full level deeper than anything that can occur. Depth 3 already turns margin-negative (-0.004 to -0.042/day) and "
+                "cannot be fixed inside the toxicity budget: see escape_independence_item()")
+
+
+def escape_independence_item() -> Item:
+    """THE OPEN ITEM (section M.14). From depth 3 the worst-case margin is negative (-0.004 to -0.042/day) and from depth 4 coverage
+    itself fails in the body cases; neither can be fixed within the toxicity budget (see multi_escape_item). The claim that
+    they do not matter rests entirely on treating escapes as INDEPENDENT, which makes the most probable of them ~1e-16 expected cells
+    at a burden of 1e8. That independence has no measurement behind it in canine lymphoma: no paired diagnosis-versus-relapse
+    sequencing exists (already recorded in LYMPHOMA_COVERAGE_LEDGER), so there is no bound on whether a mutator phenotype or one
+    escape raising another's rate makes these combinations orders of magnitude commoner. Under CLAUDE.md rule 11 this is genuinely
+    open: a number with no basis at all that is load-bearing for a closure claim. It is not an "unmeasured in the dog" complaint --
+    a written transfer would close it, and none exists.
+    What would close it: a measured pairwise correlation (or a bound on it) between escape mechanisms in canine lymphoma; or an agent
+    with a kill high enough to carry depth 4 alone within the toxicity budget; or a demonstration that the depth-4 combinations are
+    individually incompatible (e.g. that two of the mechanisms cannot coexist in one cell)."""
+    return Item("escape independence (carries the depth-4+ closure)", "ASSUMED", False,
+                "escape combinations of depth 3+ are margin-negative and depth 4+ are uncovered in the body cases, and cannot be "
+                "covered inside the toxicity budget (four added agents give +0.0029/day at headroom -2.5). Their dismissal rests on "
+                "independent escape rates giving ~1e-16 expected cells; no canine measurement or written transfer bounds that "
+                "correlation. Closes with a measured/bounded pairwise correlation, or an agent carrying depth 4 alone, or a shown "
+                "incompatibility between the mechanisms involved")
 
 
 def failing() -> list:
@@ -273,7 +304,8 @@ def failing() -> list:
     if not gb.passes:
         out.append(gb)
     out += [i for i in lawful_brain_items() if not i.passes]
-    for extra in (cns_seeding_item(), sustained_additivity_item(), emergence_is_not_an_uncovered_escape(), multi_escape_item()):
+    for extra in (cns_seeding_item(), sustained_additivity_item(), emergence_is_not_an_uncovered_escape(), multi_escape_item(),
+                  escape_independence_item()):
         if not extra.passes:
             out.append(extra)
     for ip in ("B", "T"):
