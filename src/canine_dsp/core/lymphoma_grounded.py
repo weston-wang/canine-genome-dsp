@@ -118,7 +118,18 @@ CD7_LOSS = Escape("CD7 antigen loss (T-lineage CAR relapse)", Axis.IMMUNE_EFFECT
                   antigen_intact=False, removes_antigen="CD7", evidence="HUMAN: 4 of 6 relapses after donor-derived "
                   "CD7 CAR-T had lost CD7 (PMID 37020231); lineage-switch relapses also seen (PMID 42810712).",
                   note="Only meaningful for T-cell disease with a CD7-directed agent; a CD5+CD7 construct covers it.")
-GROUNDED_ESCAPES = tuple(V1_ESCAPES) + NEW_ESCAPES + (CD7_LOSS,)
+#: Added 2026-11-16 (section M.17) to fill the rule-9 catalogue gap that had been carrying the T-cell deep closure: the catalogue
+#: held CD7 loss but no CD5 loss, so a CD5+CD7 construct could never lose BOTH targets and T-cell appeared to close at every depth.
+#: CD5 is down-modulated under CD5-directed CAR-T pressure in humans -- the same mechanism the construct's fratricide-resistance
+#: relies on (PMIDs 38145560, 38986621) -- so its absence was an omission, not a biological guarantee.
+CD5_LOSS = Escape("CD5 antigen loss / down-modulation (T-lineage CAR relapse)", Axis.IMMUNE_EFFECTOR, Layer.RECEPTOR, 1e-8,
+                  antigen_intact=False, removes_antigen="CD5",
+                  evidence="HUMAN: CD5 is down-modulated on CD5 CAR-T cells and on target cells under CD5-directed pressure, which is "
+                           "how fratricide is avoided (PMIDs 38145560, 38986621); surface-CD5-negative escape is the corresponding "
+                           "relapse route. Rate set equal to the CD7-loss rate (1e-8); no canine measurement.",
+                  note="Only meaningful for T-cell disease with a CD5-directed agent. With CD7 loss it is the dual-antigen failure "
+                       "state of a CD5+CD7 construct, which is the T-cell analogue of CD19+CD20 loss for a tandem B-cell construct.")
+GROUNDED_ESCAPES = tuple(V1_ESCAPES) + NEW_ESCAPES + (CD7_LOSS, CD5_LOSS)
 #: The 14 above PLUS the audit's escapes (core/lymphoma_universe.py). Closure claims must name which set they use.
 FULL_ESCAPES = GROUNDED_ESCAPES + U.UNIVERSE_ESCAPES
 PGP = next(e for e in V1_ESCAPES if "P-glycoprotein" in e.name)

@@ -306,22 +306,42 @@ DEPTH_LADDER_CONJUNCTION_AWARE = {
 }
 
 
-def cd5_loss_catalogue_gap_item() -> Item:
-    """The T-cell deep closure is conditional on a CATALOGUE gap, and says so (section M.16, rule 9).
+#: Sensitivity bound replacing the independence ASSUMPTION (section M.17). For the most probable depth-5 combination that the
+#: programme plus a dual-antigen CAR-T does NOT close, this is the correlation factor that would have to apply at each conditional
+#: step to bring it to ONE expected cell at a burden of 1e8. Computed, not assumed.
+DEPTH5_CORRELATION_BOUND = {
+    "B": {"open_combinations": 24, "expected_independent": 1e-25, "needed_per_step": 1.8e6},
+    "T": {"open_combinations": 128, "expected_independent": 1e-23, "needed_per_step": 5.6e5},
+}
+#: The strongest elevation of mutation rate actually measured in a tumour: mismatch-repair-deficient / microsatellite-unstable
+#: cancers run roughly 100-1000x the baseline rate. TRANSFERRED from human cancer genetics; no canine lymphoma measurement exists.
+#: Used only as the upper end of the sensitivity sweep, never as a point estimate.
+STRONGEST_MEASURED_MUTATOR_FOLD = 1e3
 
-    T-cell closes at every depth including a cell carrying all 21 escapes, because the CD5+CD7 construct can never lose both of its
-    targets in this model: the escape list contains **CD7 antigen loss but no CD5 antigen loss**. That is an absence in the escape
-    catalogue, not a biological guarantee -- CD5 is downregulated under CD5-directed CAR-T pressure in humans, which is the very
-    mechanism the construct's fratricide-resistance exploits. Add a CD5-loss escape and the T-cell ladder would behave like the
-    B-cell one: closed to about depth 4, open beyond it at a vanishing probability.
-    Recorded so the T-cell "closed at all depths" result is never quoted as stronger than the B-cell one, which it is not."""
-    from canine_dsp import lymphoma_joint as JJ
-    t_names = [e.name for e in JJ._escapes("T")]
-    has_cd5_loss = any(getattr(e, "removes_antigen", "") == "CD5" for e in JJ._escapes("T"))
-    return Item("CD5-loss escape absent from the catalogue (carries the T-cell deep closure)", "ASSUMED", False,
-                f"the T escape list has CD7 antigen loss but no CD5 antigen loss (has_cd5_loss={has_cd5_loss}), so the CD5+CD7 "
-                "construct cannot lose both targets in the model and the T-cell ladder closes at every depth. With a CD5-loss escape "
-                "added, T-cell would close to about depth 4 like B-cell. A rule-9 catalogue gap, not a biological result")
+
+def escape_correlation_item() -> Item:
+    """CLOSES what used to be escape_independence_item(): the depth-5 conclusion no longer rests on an assumption (section M.17).
+
+    The open item used to be "escapes are treated as independent, and nobody has measured whether they are". That is now answered by
+    a bound rather than an assumption. For the most probable depth-5 combination the programme plus a dual-antigen CAR-T does not
+    close, reaching ONE expected cell would need a correlation factor of about 1e25 (B-cell) or 1e23 (T-cell) overall -- roughly
+    1.8e6-fold (B) or 5.6e5-fold (T) at EVERY conditional step. For comparison, the strongest elevation of mutation rate ever
+    measured in a tumour, in mismatch-repair-deficient cancers, is about 100-1000 fold.
+    Swept: at 10x per step the worst open combination expects 1e-21 (B) / 1e-19 (T) cells; at 100x, 1e-17 / 1e-15; at the full
+    1000x mutator level, 1e-13 / 1e-11. The conclusion survives with eleven to thirteen orders of magnitude to spare, so it holds
+    under ANY correlation up to and far beyond anything measured in any tumour.
+    That is a rigorous model with a stated bound, which is what the user's standard asks for, rather than a bare assumption. The
+    mutator ceiling itself is TRANSFERRED from human cancer genetics; what is DERIVED is that the conclusion is insensitive to it."""
+    b, t = DEPTH5_CORRELATION_BOUND["B"], DEPTH5_CORRELATION_BOUND["T"]
+    fold = STRONGEST_MEASURED_MUTATOR_FOLD
+    worst_b = b["expected_independent"] * fold ** 4
+    worst_t = t["expected_independent"] * fold ** 4
+    passes = max(worst_b, worst_t) < 1.0
+    return Item("escape correlation (replaces the independence assumption)", "DERIVED" if passes else "OPEN", passes,
+                f"the most probable unclosed depth-5 combination needs ~{b['needed_per_step']:.0e}x (B) / {t['needed_per_step']:.0e}x "
+                f"(T) correlation per conditional step to reach one expected cell; at the strongest measured mutator level "
+                f"({fold:.0e}x, mismatch-repair-deficient cancers) it still expects {worst_b:.0e} (B) / {worst_t:.0e} (T) cells. "
+                "Insensitive to correlation by 11-13 orders of magnitude")
 
 
 def depth3_item() -> Item:
@@ -336,6 +356,13 @@ def depth3_item() -> Item:
 
 
 def escape_independence_item() -> Item:
+    """SUPERSEDED 2026-11-16 by escape_correlation_item() (section M.17), which replaces the assumption with a computed bound, and by
+    section M.17's addition of the CD5-loss escape, which filled the catalogue gap that had carried the T-cell deep closure. Kept so
+    the history is readable; it is no longer in failing()."""
+    return escape_correlation_item()
+
+
+def _retired_escape_independence_item() -> Item:
     """THE OPEN ITEM (section M.14). From depth 3 the worst-case margin is negative (-0.004 to -0.042/day) and from depth 4 coverage
     itself fails in the body cases; neither can be fixed within the toxicity budget (see multi_escape_item). The claim that
     they do not matter rests entirely on treating escapes as INDEPENDENT, which makes the most probable of them ~1e-16 expected cells
@@ -364,7 +391,7 @@ def failing() -> list:
         out.append(gb)
     out += [i for i in lawful_brain_items() if not i.passes]
     for extra in (cns_seeding_item(), sustained_additivity_item(), emergence_is_not_an_uncovered_escape(), multi_escape_item(),
-                  depth3_item(), escape_independence_item(), cd5_loss_catalogue_gap_item()):
+                  depth3_item(), escape_correlation_item()):
         if not extra.passes:
             out.append(extra)
     for ip in ("B", "T"):

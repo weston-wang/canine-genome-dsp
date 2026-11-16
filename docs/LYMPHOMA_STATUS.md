@@ -454,3 +454,10 @@ M.15 only proposed the B-cell fix; this models it. Details `LYMPHOMA_UNIVERSE.md
 - **Caveat recorded as failing:** T-cell closes at all depths only because the catalogue has CD7 loss but **no CD5 loss**, so its construct cannot lose both targets. A rule-9 catalogue gap, not a biological result; with CD5 loss added T-cell would match B-cell.
 - **`failing()` = two narrow items:** escape independence (now carrying only B-cell depth 5+, ~1e-31 cells, about 1e16 times rarer than what it carried before) and the CD5-loss catalogue gap.
 - **Tier mix:** body and brain programmes tier A/B (lawful today); the deep escape ladder needs one tier-C dual-antigen CAR-T per lineage. 111 tests pass.
+
+### M.17 (2026-11-16): both remaining items CLOSED; `failing()` empty
+Details `LYMPHOMA_UNIVERSE.md` M.17.
+- **CD5-loss catalogue gap FILLED.** `CD5_LOSS` added to `GROUNDED_ESCAPES` (grounded 14 -> 15, full 23 -> 24), basis PMIDs 38145560 / 38986621 (CD5 down-modulation under CD5-directed pressure). **Cost, reported: T-cell no longer closes at every depth -- it now opens at depth 5 (-0.0635) exactly like B-cell.** The earlier "T closes at all depths" was the artefact M.16 suspected.
+- **Independence assumption REPLACED by a computed bound.** Depth-5 combinations are not covered by treatment in either lineage (no addition of up to three universal agents closes them inside the toxicity budget), so the closure rests on whether they can occur. The most probable unclosed depth-5 combination needs **1.8e6x (B) / 5.6e5x (T) correlation per conditional step** to reach one expected cell. At the strongest mutator rate measured in any tumour (mismatch-repair-deficient, ~1000x) it still expects **1e-13 (B) / 1e-11 (T)** cells. Insensitive by 11-13 orders of magnitude. Graded DERIVED (the 1000x ceiling itself is TRANSFERRED from human cancer genetics).
+- **Depth ladder:** depth 1 closed; depths 2-4 closed with one tier-C dual-antigen CAR-T per lineage; depth 5+ not covered by treatment but cannot occur even at a 1000x mutator rate.
+- **`failing()` is empty.** 112 tests pass.

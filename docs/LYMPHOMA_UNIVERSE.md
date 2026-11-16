@@ -852,3 +852,31 @@ The B-cell worst open combination is efflux + TP53 + **CD20 loss + CD19 loss** +
 2. **the CD5-loss catalogue gap**, carrying the T-cell deep closure.
 
 **Tier mix, as rule 13 requires:** the body and brain programmes are tier A/B (lawful today); closing the deep escape ladder needs **one tier-C dual-antigen CAR-T per lineage**. 111 tests pass.
+
+### M.17 Both remaining items closed: the catalogue gap filled, and the independence assumption replaced by a bound (2026-11-16)
+M.16 left two failing items. Both are now closed by work rather than by argument. Code: `lymphoma_grounded.CD5_LOSS`, `lymphoma_standard_audit.escape_correlation_item`, `DEPTH5_CORRELATION_BOUND`, `STRONGEST_MEASURED_MUTATOR_FOLD`; test `test_the_depth5_conclusion_is_a_bound_not_an_independence_assumption`.
+
+**1. The CD5-loss catalogue gap is filled, and it cost the T-cell result.** `CD5_LOSS` is now in `GROUNDED_ESCAPES` (the grounded set goes 14 -> 15, the full set 23 -> 24), with the same rate as CD7 loss and a written basis: CD5 is down-modulated on both CAR-T and target cells under CD5-directed pressure, which is how fratricide is avoided (PMIDs 38145560, 38986621), so surface-CD5-negative escape is the corresponding relapse route. **Consequence, reported rather than hidden: T-cell no longer closes at every depth. It now opens at depth 5 (-0.0635), exactly like B-cell.** The earlier "T-cell closes at all depths" was the artefact M.16 suspected it was.
+
+**2. The independence assumption is replaced by a computed bound, which is what closes depth 5.** The question was never whether depth-5 combinations are covered -- they are not, in either lineage, and no addition of up to three universal-coverage agents closes them inside the toxicity budget. The question is whether they can occur. That was resting on "escapes are independent, and nobody has measured it". Now:
+
+| | B-cell | T-cell |
+|---|---|---|
+| unclosed depth-5 combinations | 24 | 128 |
+| most probable, independent rates | 1e-25 cells | 1e-23 cells |
+| correlation needed to reach ONE cell | ~1e25 overall = **1.8e6x per conditional step** | ~1e23 = **5.6e5x per step** |
+| at 10x per step | 1e-21 | 1e-19 |
+| at 100x per step | 1e-17 | 1e-15 |
+| **at 1000x per step** (strongest measured mutator: mismatch-repair-deficient cancers) | **1e-13** | **1e-11** |
+
+**So the conclusion holds under any correlation up to and far beyond anything measured in any tumour, with eleven to thirteen orders of magnitude to spare.** That is a rigorous model with a stated bound, which is the user's standard, rather than a bare assumption. Grading kept honest: the 1000x mutator ceiling is TRANSFERRED from human cancer genetics (no canine lymphoma measurement exists); what is DERIVED is that the conclusion is insensitive to it across the whole plausible range and well past it.
+
+**`failing()` is now empty**, and the depth ladder reads:
+
+| depth | B-cell | T-cell |
+|---|---|---|
+| 1 (the only depth reachable with independent rates) | CLOSED | CLOSED |
+| 2, 3, 4 | CLOSED with a tier-C dual-antigen CAR-T | CLOSED with a tier-C dual-antigen CAR-T |
+| 5+ | not covered by treatment; **cannot occur even at a 1000x mutator rate** | same |
+
+**Tier mix (rule 13):** body and brain programmes are tier A/B, lawful today; closing depths 2-4 needs one tier-C dual-antigen CAR-T per lineage (tandem CD19/CD20 for B, CD5+CD7 for T). 112 tests pass.

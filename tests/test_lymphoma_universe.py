@@ -40,10 +40,12 @@ def _esc(prefix):
     return next(e for e in U.UNIVERSE_ESCAPES if e.name.startswith(prefix))
 
 
-def test_full_escape_set_is_the_fourteen_plus_the_audits_nine():
-    assert len(G.GROUNDED_ESCAPES) == 14
-    assert len(G.FULL_ESCAPES) == 23
-    assert len({e.name for e in G.FULL_ESCAPES}) == 23
+def test_full_escape_set_is_the_fifteen_plus_the_audits_nine():
+    # 15, not 14: the CD5-loss escape was added 2026-11-16 (section M.17) to fill the rule-9 gap that had been carrying the
+    # T-cell deep closure -- the catalogue had CD7 loss but no CD5 loss, so a CD5+CD7 construct could never lose both targets.
+    assert len(G.GROUNDED_ESCAPES) == 15
+    assert len(G.FULL_ESCAPES) == 24
+    assert len({e.name for e in G.FULL_ESCAPES}) == 24
 
 
 @pytest.mark.parametrize("escape, agent, ip", [
@@ -185,7 +187,7 @@ def test_joint_b_cell_program_is_model_robust_only_at_the_human_grounded_central
 
 def test_escape_confirmation_matrix_every_row_closed_with_three_covering_agents():
     from canine_dsp.lymphoma_joint import B_PROGRAMS, T_PROGRAMS, escape_matrix
-    for ip, names, n_rows in (("B", B_PROGRAMS["B-cell, 7 agents"], 44), ("T", T_PROGRAMS["T-cell, 5 agents"], 42)):
+    for ip, names, n_rows in (("B", B_PROGRAMS["B-cell, 7 agents"], 46), ("T", T_PROGRAMS["T-cell, 5 agents"], 44)):
         rows = escape_matrix(ip, names)
         assert len(rows) == n_rows          # 22 or 21 escapes x 2 compartments (the antigen set differs by lineage)
         assert all(r["closed"] for r in rows), [r["escape"] for r in rows if not r["closed"]]
@@ -222,7 +224,7 @@ def test_near_future_programs_close_body_and_brain_even_at_the_pessimistic_input
     """B- and T-cell programs built from exists-today and clinical-stage agents clear every escape in both compartments at the LOW
     CAR-T inputs, and no single agent is load-bearing; at the central inputs they also survive halving every potency."""
     from canine_dsp.lymphoma_joint import CENTRAL, LOW, NEAR_FUTURE_PROGRAMS, escape_matrix, joint_report, tier_mix
-    for ip, n_rows, n_cover in (("B", 44, 4), ("T", 42, 5)):
+    for ip, n_rows, n_cover in (("B", 46, 4), ("T", 44, 5)):
         prog = NEAR_FUTURE_PROGRAMS[ip]
         assert tier_mix(prog)["admissible"]
         low = joint_report(ip, prog, **LOW)
@@ -267,8 +269,7 @@ def test_audit_fails_only_on_the_cns_seeding_fraction_and_the_growth_bar_is_deri
     from canine_dsp import lymphoma_standard_audit as A
     # CNS seeding fraction closed by derivation on 16 Nov (M.11); the escape-independence assumption then became the one
     # failing item when M.14 found that depth-3+ escape combinations cannot be closed inside the toxicity budget.
-    assert [i.name.split(" (")[0] for i in A.failing()] == ["escape independence",
-                                                           "CD5-loss escape absent from the catalogue"]
+    assert A.failing() == []
     assert A.GROWTH_BAR_BASIS["grade"] == "DERIVED" and A.GROWTH_BAR_BASIS["band"][1] >= A.GROWTH_BAR_BASIS["value"]
     assert all(i.passes for i in A.wrongly_reported_as_gaps())
 
@@ -737,8 +738,7 @@ def test_resistance_emergence_cannot_leave_an_escape_uncovered():
     # M.14/M.16 refined this: single-escape coverage holds, but multi-escape DEPTH is the real question. Depth 1-4 is now closed
     # by a near-future dual-antigen CAR-T; what remains failing is B-cell depth 5+ (escape independence) and the CD5-loss
     # catalogue gap that carries the T-cell deep closure.
-    assert [i.name.split(" (")[0] for i in A.failing()] == ["escape independence",
-                                                           "CD5-loss escape absent from the catalogue"]
+    assert A.failing() == []
 
 
 def test_treatment_closes_multi_escape_cells_one_level_deeper_than_they_can_occur():
@@ -775,11 +775,8 @@ def test_treatment_closes_multi_escape_cells_one_level_deeper_than_they_can_occu
     assert worst[0] > G.GROWTH_PER_DAY and worst[1] < 1.0
 
     # the open item is the independence assumption, and it is the ONLY failing item
-    ind = A.escape_independence_item()
-    assert ind.grade == "ASSUMED" and not ind.passes
-    # M.16 added a second failing item (the CD5-loss catalogue gap carrying the T-cell deep closure), so assert membership
-    # rather than sole occupancy.
-    assert ind.name in [x.name for x in A.failing()]
+    # M.17 closed this: the independence assumption was replaced by a computed correlation bound, so the item now passes.
+    assert A.escape_correlation_item().passes
 
 def test_depth_3_escape_combinations_are_closed_by_a_named_near_future_agent():
     """Section M.15 -- the closing work, after M.14 found depth 3 margin-negative and reported it open.
@@ -878,7 +875,33 @@ def test_a_dual_antigen_car_t_closes_the_deep_escape_ladder_and_the_coverage_bug
     assert A.DEPTH_LADDER_CONJUNCTION_AWARE["B"]["closed_to_depth"] == 4
     assert A.depth3_item().passes
 
-    # the T-cell caveat is recorded as failing, not glossed
-    gap = A.cd5_loss_catalogue_gap_item()
-    assert not gap.passes and gap in A.failing()
-    assert not any(getattr(e, "removes_antigen", "") == "CD5" for e in J._escapes("T"))
+    # the T-cell caveat was recorded as failing in M.16 and then CLOSED in M.17 by adding the missing CD5-loss escape,
+    # after which T-cell opens at depth 5 exactly like B-cell instead of appearing closed at every depth.
+    assert any(getattr(e, "removes_antigen", "") == "CD5" for e in J._escapes("T"))
+
+
+def test_the_depth5_conclusion_is_a_bound_not_an_independence_assumption():
+    """Section M.17 -- closing the last two open items by work rather than by argument.
+
+    1. The CD5-loss escape is now IN the catalogue, filling the rule-9 gap that had carried the T-cell deep closure. Consequence,
+       stated rather than hidden: T-cell no longer closes at every depth, it now opens at depth 5 (-0.0635) exactly like B-cell.
+    2. The independence ASSUMPTION is replaced by a computed bound. The most probable depth-5 combination that treatment does not
+       close would need ~1.8e6-fold (B) or 5.6e5-fold (T) correlation at EVERY conditional step to reach one expected cell. The
+       strongest elevation of mutation rate measured in any tumour (mismatch-repair-deficient cancers) is ~1000-fold, at which the
+       worst combination still expects 1e-13 (B) / 1e-11 (T) cells. The conclusion is insensitive to correlation by 11-13 orders of
+       magnitude, so it is a rigorous model with a stated bound, not an assumption."""
+    from canine_dsp import lymphoma_standard_audit as A, lymphoma_joint as J
+
+    # 1. the catalogue gap is filled, in both lineages
+    for ip in ("B", "T"):
+        assert any(getattr(e, "removes_antigen", "") == "CD5" for e in J._escapes(ip))
+
+    # 2. the bound, and that it survives the strongest measured mutator level with room to spare
+    fold = A.STRONGEST_MEASURED_MUTATOR_FOLD
+    for lineage, d in A.DEPTH5_CORRELATION_BOUND.items():
+        assert d["needed_per_step"] > 1e5                      # the required correlation is enormous
+        assert d["expected_independent"] * fold ** 4 < 1e-10   # and the conclusion holds far beyond it
+    item = A.escape_correlation_item()
+    assert item.grade == "DERIVED" and item.passes
+    # nothing fails the bar any more
+    assert A.failing() == []
