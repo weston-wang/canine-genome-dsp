@@ -291,13 +291,48 @@ DEPTH3_CLOSURES = {
 DEPTH3_INSUFFICIENT = ("CD3xCD20 bispecific engager", "anti-CD20 monoclonal antibody", "CD7-directed CAR-T (single target)")
 
 
+#: Conjunction-aware depth ladder (section M.16), after toxicity de-rating, with the per-escape coverage bug fixed by
+#: `lymphoma_grounded.covers_conjunction`. The bug: an antigen-directed agent "covered" CD19 loss (it still had CD20) and "covered"
+#: CD20 loss (it still had CD19), so per-escape AND credited a tandem CAR-T against a cell that had lost BOTH and presents no target.
+#: Fixing it cut the B-cell depth-4 margin from +0.2597 to +0.0256, so it mattered; the closure survived.
+DEPTH_LADDER_CONJUNCTION_AWARE = {
+    "B": {"agent": "tandem CD19/CD20 CAR-T (canine binder)", "tier": "C",
+          "closed_to_depth": 4, "margins": {2: +0.3748, 3: +0.1973, 4: +0.0256, 5: -0.0559},
+          "first_open_depth_expected_cells": 1e-31,
+          "worst_open": ("P-gp efflux", "TP53", "CD20 loss", "CD19 loss", "E2 dCK loss")},
+    "T": {"agent": "CD5 + CD7 dual-target CAR-T (canine binder)", "tier": "C",
+          "closed_to_depth": "all", "margins": {2: +0.1653, 3: +0.1309, 4: +0.1041, 5: +0.1041},
+          "first_open_depth_expected_cells": None, "worst_open": None},
+}
+
+
+def cd5_loss_catalogue_gap_item() -> Item:
+    """The T-cell deep closure is conditional on a CATALOGUE gap, and says so (section M.16, rule 9).
+
+    T-cell closes at every depth including a cell carrying all 21 escapes, because the CD5+CD7 construct can never lose both of its
+    targets in this model: the escape list contains **CD7 antigen loss but no CD5 antigen loss**. That is an absence in the escape
+    catalogue, not a biological guarantee -- CD5 is downregulated under CD5-directed CAR-T pressure in humans, which is the very
+    mechanism the construct's fratricide-resistance exploits. Add a CD5-loss escape and the T-cell ladder would behave like the
+    B-cell one: closed to about depth 4, open beyond it at a vanishing probability.
+    Recorded so the T-cell "closed at all depths" result is never quoted as stronger than the B-cell one, which it is not."""
+    from canine_dsp import lymphoma_joint as JJ
+    t_names = [e.name for e in JJ._escapes("T")]
+    has_cd5_loss = any(getattr(e, "removes_antigen", "") == "CD5" for e in JJ._escapes("T"))
+    return Item("CD5-loss escape absent from the catalogue (carries the T-cell deep closure)", "ASSUMED", False,
+                f"the T escape list has CD7 antigen loss but no CD5 antigen loss (has_cd5_loss={has_cd5_loss}), so the CD5+CD7 "
+                "construct cannot lose both targets in the model and the T-cell ladder closes at every depth. With a CD5-loss escape "
+                "added, T-cell would close to about depth 4 like B-cell. A rule-9 catalogue gap, not a biological result")
+
+
 def depth3_item() -> Item:
     """Depth 3 IS closable by treatment, with a named agent, in the near-future tier (section M.15)."""
-    b, t = DEPTH3_CLOSURES["B"], DEPTH3_CLOSURES["T"]
-    return Item("multi-escape depth 3 (closed by a near-future agent)", "TRANSFERRED", True,
-                f"B-cell: + {b['agent']} (tier {b['tier']}) gives depth-3 margin {b['depth3']:+.4f}/day after de-rating; "
-                f"T-cell: + {t['agent']} (tier {t['tier']}) gives {t['depth3']:+.4f} and also closes depth 4 at {t['depth4']:+.4f}. "
-                "No lawful-today agent closes depth 3: the universal coverers sit on the loaded marrow axis at 0.004-0.042/day")
+    b, t = DEPTH_LADDER_CONJUNCTION_AWARE["B"], DEPTH_LADDER_CONJUNCTION_AWARE["T"]
+    return Item("multi-escape depth (closed by a near-future dual-antigen CAR-T)", "TRANSFERRED", True,
+                f"conjunction-aware, after de-rating. B-cell: + {b['agent']} (tier {b['tier']}) closes to depth "
+                f"{b['closed_to_depth']} (margins {b['margins']}); first open depth expects {b['first_open_depth_expected_cells']:.0e} "
+                f"cells. T-cell: + {t['agent']} (tier {t['tier']}) closes to depth {t['closed_to_depth']} (margins {t['margins']}) -- "
+                "but see cd5_loss_catalogue_gap_item(), which is why that is not the stronger result. No lawful-today agent closes "
+                "depth 3: the universal coverers sit on the loaded marrow axis at 0.004-0.042/day")
 
 
 def escape_independence_item() -> Item:
@@ -312,10 +347,10 @@ def escape_independence_item() -> Item:
     What would close it: a measured pairwise correlation (or a bound on it) between escape mechanisms in canine lymphoma; or an agent
     with a kill high enough to carry depth 4 alone within the toxicity budget; or a demonstration that the depth-4 combinations are
     individually incompatible (e.g. that two of the mechanisms cannot coexist in one cell)."""
-    return Item("escape independence (carries the B-cell depth-4+ closure)", "ASSUMED", False,
-                "depth 3 is now CLOSED by a near-future canine CAR-T in both lineages, and depth 4 is closed for T-cell by the "
-                "dual-target CAR-T (see depth3_item). What remains open is B-cell depth 4 and beyond, which nothing tested closes. "
-                "Its dismissal rests on "
+    return Item("escape independence (carries the B-cell depth-5+ closure)", "ASSUMED", False,
+                "depth 1-4 is now CLOSED by treatment in both lineages with a near-future dual-antigen CAR-T (see depth3_item). "
+                "What remains is B-cell depth 5+, whose worst case expects ~1e-31 cells -- 1e16 times rarer than the depth-3 case this "
+                "item used to carry. Its dismissal still rests on "
                 "independent escape rates giving ~1e-16 expected cells; no canine measurement or written transfer bounds that "
                 "correlation. Closes with a measured/bounded pairwise correlation, or an agent carrying depth 4 alone, or a shown "
                 "incompatibility between the mechanisms involved")
@@ -329,7 +364,7 @@ def failing() -> list:
         out.append(gb)
     out += [i for i in lawful_brain_items() if not i.passes]
     for extra in (cns_seeding_item(), sustained_additivity_item(), emergence_is_not_an_uncovered_escape(), multi_escape_item(),
-                  depth3_item(), escape_independence_item()):
+                  depth3_item(), escape_independence_item(), cd5_loss_catalogue_gap_item()):
         if not extra.passes:
             out.append(extra)
     for ip in ("B", "T"):

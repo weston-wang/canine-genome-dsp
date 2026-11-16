@@ -301,7 +301,22 @@ def _new_agents(compartment: str, immunophenotype: str) -> tuple:
                            "CD7-loss relapse.", potency_evidence=tl),
         ]
     if immunophenotype == "B":
+        bl = ("TRANSFER-OUTCOME: built as the B-lineage analogue of the CD5+CD7 dual-target construct above, by the same rule and at "
+              "the same potency. Modality is clinical-stage in humans -- tandem/bivalent CD19/CD20 CAR-T, and the record's own "
+              "tandem CD19/CD20 entry for the intrathecal route (PMID 38454126 for the delivery, SWEEP_near_future_cell for the "
+              "construct). Path to the dog is stated and live: the canine CD20 CAR-T trial is enrolling again (section M.1), and "
+              "Penn's bivalent-loop CD19/CD20 canine CAR-T is in laboratory development (ESVONC 2026 abstract, section M.1). "
+              "Dual antigen is the point: CD20 escape was observed in treated dogs (5 dogs, PMID 32002286), which is what a "
+              "single-target construct cannot answer. Canine biology assumed to match; the kill rate itself is not measured.")
         out += [
+            # Added 2026-11-16 (section M.16) to test whether B-cell depth-4 escape combinations can be closed by treatment, the way
+            # the CD5+CD7 construct closes them for T-cell. Same potency, same construction, two antigens so single-antigen loss does
+            # not defeat it. Tier C under rule 13; reported as near-future, never as available today.
+            Agent("tandem CD19/CD20 CAR-T (canine binder) [buildable]", Axis.IMMUNE_EFFECTOR,
+                  Layer.RECEPTOR, 0.12, cell, 1.0, False, division_gated=False,
+                  antigen_targets=("CD19", "CD20"), resists_axis_independence=True,
+                  evidence="HUMAN clinical data for the modality; no canine product. Dual construct answers the CD20-loss relapse "
+                           "seen in treated dogs (PMID 32002286).", potency_evidence=bl),
             Agent("CD20 CAR-T with PD-1/CD28 switch receptor", Axis.IMMUNE_EFFECTOR, Layer.RECEPTOR, 0.12,
                   cell, 1.0, False, division_gated=False, antigen_targets=("CD20",),
                   resists_axis_independence=True,
@@ -418,6 +433,22 @@ def _effective_agents_for(agents, escape):
     if escape is PGP and _has_reverser(agents):
         return [replace(a, efflux_substrate=False) if a.efflux_substrate else a for a in agents]
     return list(agents)
+
+
+def covers_conjunction(agent, escapes) -> bool:
+    """Is `agent` still effective against ONE cell carrying ALL of `escapes` at once? (section M.16)
+
+    `covered()` answers this per escape, which is right for a single escape and WRONG for a conjunction when the agent is
+    antigen-directed: a tandem CD19/CD20 CAR-T "covers" CD19 loss (it still has CD20) and "covers" CD20 loss (it still has CD19),
+    but a cell that has lost BOTH presents no target and cannot be killed by it. Per-escape AND credits the agent in that state.
+    So this collects every antigen removed by any escape in the set, and an antigen-directed agent survives only if at least one of
+    its own targets is left. Non-antigen-directed agents (radiation, alkylators, the graft) are unaffected and fall through to the
+    per-escape test, which is correct for them."""
+    removed = {e.removes_antigen for e in escapes if getattr(e, "removes_antigen", "")}
+    targets = tuple(getattr(agent, "antigen_targets", ()) or ())
+    if targets and removed and all(t in removed for t in targets):
+        return False
+    return all(covered([agent], e) for e in escapes)
 
 
 def kill_against(agents, escape) -> float:

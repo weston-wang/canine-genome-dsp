@@ -267,7 +267,8 @@ def test_audit_fails_only_on_the_cns_seeding_fraction_and_the_growth_bar_is_deri
     from canine_dsp import lymphoma_standard_audit as A
     # CNS seeding fraction closed by derivation on 16 Nov (M.11); the escape-independence assumption then became the one
     # failing item when M.14 found that depth-3+ escape combinations cannot be closed inside the toxicity budget.
-    assert [i.name.split(" (")[0] for i in A.failing()] == ["escape independence"]
+    assert [i.name.split(" (")[0] for i in A.failing()] == ["escape independence",
+                                                           "CD5-loss escape absent from the catalogue"]
     assert A.GROWTH_BAR_BASIS["grade"] == "DERIVED" and A.GROWTH_BAR_BASIS["band"][1] >= A.GROWTH_BAR_BASIS["value"]
     assert all(i.passes for i in A.wrongly_reported_as_gaps())
 
@@ -733,9 +734,11 @@ def test_resistance_emergence_cannot_leave_an_escape_uncovered():
         assert len(G.escapes_to_close(G.BURDEN_EARLY_DETECTED, escapes=full)) < len(full)   # require-all is doing work
     item = A.emergence_is_not_an_uncovered_escape()
     assert item.passes and item.grade == "DERIVED" and item not in A.failing()
-    # M.14 refined this: single-escape coverage holds, but multi-escape depth is the real question, and beyond depth 2 the
-    # closure rests on escapes being independent -- which is now the one failing audit item rather than nothing failing.
-    assert [i.name.split(" (")[0] for i in A.failing()] == ["escape independence"]
+    # M.14/M.16 refined this: single-escape coverage holds, but multi-escape DEPTH is the real question. Depth 1-4 is now closed
+    # by a near-future dual-antigen CAR-T; what remains failing is B-cell depth 5+ (escape independence) and the CD5-loss
+    # catalogue gap that carries the T-cell deep closure.
+    assert [i.name.split(" (")[0] for i in A.failing()] == ["escape independence",
+                                                           "CD5-loss escape absent from the catalogue"]
 
 
 def test_treatment_closes_multi_escape_cells_one_level_deeper_than_they_can_occur():
@@ -756,9 +759,11 @@ def test_treatment_closes_multi_escape_cells_one_level_deeper_than_they_can_occu
     assert len(d) == 4 and all(v["worst_margin_to_depth"] > 0 for v in d.values()), d
     assert A.multi_escape_item().passes
 
-    # depth 3 is NOT closed by treatment -- recorded, not glossed
+    # depth 3 is not closed by the LAWFUL-TODAY programme (M.14); M.16 closes it by adding a near-future dual-antigen CAR-T,
+    # which multi_escape_depth() deliberately does not include since it scores the lawful programme only.
     d3 = A.multi_escape_depth(max_k=3)
     assert any(v["worst_margin_to_depth"] <= 0 for v in d3.values())
+    assert A.depth3_item().passes          # ... and the near-future addition does close it
 
     # and only depth 1 is reachable: the worst depth-2 combination cannot produce even one cell
     esc = J._escapes("B")
@@ -772,7 +777,9 @@ def test_treatment_closes_multi_escape_cells_one_level_deeper_than_they_can_occu
     # the open item is the independence assumption, and it is the ONLY failing item
     ind = A.escape_independence_item()
     assert ind.grade == "ASSUMED" and not ind.passes
-    assert [x.name for x in A.failing()] == [ind.name]
+    # M.16 added a second failing item (the CD5-loss catalogue gap carrying the T-cell deep closure), so assert membership
+    # rather than sole occupancy.
+    assert ind.name in [x.name for x in A.failing()]
 
 def test_depth_3_escape_combinations_are_closed_by_a_named_near_future_agent():
     """Section M.15 -- the closing work, after M.14 found depth 3 margin-negative and reported it open.
@@ -815,8 +822,10 @@ def test_depth_3_escape_combinations_are_closed_by_a_named_near_future_agent():
     assert worst_derated("T", "CD5 + CD7 dual-target", 3) > 0
     # and for T-cell the dual-target agent also carries depth 4
     assert worst_derated("T", "CD5 + CD7 dual-target", 4) > 0
-    # while B-cell depth 4 stays open -- which is what escape_independence_item() now carries
+    # the persistence-engineered single-target construct still leaves B-cell depth 4 open; M.16 closes it with the
+    # tandem CD19/CD20 construct instead, which is why that agent was added.
     assert worst_derated("B", "persistence-engineered", 4) < 0
+    assert worst_derated("B", "tandem CD19/CD20", 4) > 0
 
     # agents that are NOT enough, recorded so they are not re-tried
     assert worst_derated("B", "CD3xCD20", 3) < 0
@@ -825,4 +834,51 @@ def test_depth_3_escape_combinations_are_closed_by_a_named_near_future_agent():
     assert len(A.DEPTH3_INSUFFICIENT) == 3
 
     assert A.depth3_item().passes and A.depth3_item().grade == "TRANSFERRED"
-    assert [i.name.split(" (")[0] for i in A.failing()] == ["escape independence"]
+
+
+def test_a_dual_antigen_car_t_closes_the_deep_escape_ladder_and_the_coverage_bug_is_fixed():
+    """Section M.16 -- closing B-cell depth 4, which M.15 left open, and fixing a coverage bug found while doing it.
+
+    THE BUG: `covered()` is per escape, so a tandem CD19/CD20 CAR-T "covered" CD19 loss (it still had CD20) and "covered" CD20 loss
+    (it still had CD19); per-escape AND therefore credited it against a cell that had lost BOTH and presents no target at all.
+    `covers_conjunction()` fixes it by removing every antigen the escape set removes and requiring the agent to retain a target.
+    Fixing it cut the B-cell depth-4 margin from +0.2597 to +0.0256 -- so it mattered, and the closure still holds.
+
+    THE CLOSURE: a tandem CD19/CD20 canine CAR-T (tier C, built as the B-lineage analogue of the catalogue's CD5+CD7 construct)
+    closes B-cell to depth 4; depth 5 opens at -0.0559 with a worst case expecting ~1e-31 cells.
+    THE CAVEAT: T-cell closes at every depth only because the escape catalogue has CD7 loss but NO CD5 loss, so its construct can
+    never lose both targets. That is a rule-9 catalogue gap, recorded as a failing item, not a stronger result."""
+    from canine_dsp import lymphoma_standard_audit as A, lymphoma_joint as J, lymphoma_sustained as S
+    from canine_dsp import lymphoma_grounded_inputs as gi
+    from canine_dsp.core import lymphoma_grounded as G
+    from canine_dsp.core.lymphoma_catalogue import SYSTEMIC
+
+    esc = J._escapes("B")
+    allag = J._pools("B", J.CENTRAL["kill"], J.CENTRAL["duty"])[SYSTEMIC]
+    tandem = next(a for k, a in allag.items() if k.startswith("tandem CD19/CD20"))
+    cd20 = next(e for e in esc if e.name.startswith("CD20 antigen loss"))
+    cd19 = next(e for e in esc if e.name.startswith("CD19 antigen loss"))
+
+    # the bug, and the fix: per-escape says yes to both, the conjunction says no
+    assert G.covered([tandem], cd19) and G.covered([tandem], cd20)
+    assert not G.covers_conjunction(tandem, (cd19, cd20))
+    # a non-antigen-directed agent is unaffected by the fix
+    pool = S.lawful_pool("B", SYSTEMIC)
+    graft = [v for k, v in pool.items() if k.startswith("allogeneic DLA")][0]
+    assert G.covers_conjunction(graft, (cd19, cd20)) == all(G.covered([graft], e) for e in (cd19, cd20))
+
+    # the closure, conjunction-aware and after de-rating: B-cell holds to depth 4
+    reg = [[v for k, v in pool.items() if k.startswith(x)][0] for x in S.LAWFUL_PROGRAMS["B"]] + [tandem]
+    d, _, _ = G.derate(reg, gi.EFFLUX_CO_DOSE_MULTIPLIER_CANINE_PROXY)
+    from itertools import combinations
+    for k in (2, 3, 4):
+        worst = min(sum(a.effective_kill for a in d if G.covers_conjunction(a, c)) for c in combinations(esc, k))
+        assert worst - G.GROWTH_PER_DAY > 0, (k, worst)
+
+    assert A.DEPTH_LADDER_CONJUNCTION_AWARE["B"]["closed_to_depth"] == 4
+    assert A.depth3_item().passes
+
+    # the T-cell caveat is recorded as failing, not glossed
+    gap = A.cd5_loss_catalogue_gap_item()
+    assert not gap.passes and gap in A.failing()
+    assert not any(getattr(e, "removes_antigen", "") == "CD5" for e in J._escapes("T"))

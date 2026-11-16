@@ -445,3 +445,12 @@ M.14 reported depth 3 open; this closes it. Margins after the model's toxicity d
 - **Depth ladder:** depth 1 (the only reachable depth) and depth 2 closed lawfully today; depth 3 closed with one tier-C agent in both lineages; depth 4+ closed for T-cell, **OPEN for B-cell**.
 - **`failing()` = one item, now narrower: escape independence, carrying B-cell depth 4+ only.** T-cell no longer depends on it at any depth.
 - **Closes with:** a dual-antigen CD19/CD20 canine CAR-T (in development per `SWEEP_dog_programs`) to do for B-cell what the dual-target construct does for T-cell; or a measured bound on escape correlation.
+
+### M.16 (2026-11-16): B-cell depth 4 CLOSED by a modelled agent; a coverage bug fixed; one caveat recorded
+M.15 only proposed the B-cell fix; this models it. Details `LYMPHOMA_UNIVERSE.md` M.16.
+- **Coverage bug fixed.** `covered()` is per escape, so a tandem CD19/CD20 CAR-T was credited against a cell that had lost BOTH antigens and presents no target. `covers_conjunction()` now requires an antigen-directed agent to retain a target. **This cut the B-cell depth-4 margin from +0.2597 to +0.0256** -- the closure survived, but the earlier number was inflated.
+- **B-cell depth 4 CLOSED** by `tandem CD19/CD20 CAR-T (canine binder)`, built as the exact analogue of the catalogue's CD5+CD7 construct (tier C; modality clinical-stage in humans, canine CD20 CAR-T trial enrolling, Penn bivalent-loop construct in development, answers the CD20-loss relapse seen in 5 dogs, PMID 32002286). No new toxicity: the immune axis had 0.70 of its budget free.
+- **Ladder (conjunction-aware, de-rated):** B-cell +0.375 / +0.197 / **+0.026** at depths 2/3/4, open at depth 5 (-0.056, worst case ~**1e-31 cells**). T-cell +0.165 / +0.131 / +0.104 and closed at every depth.
+- **Caveat recorded as failing:** T-cell closes at all depths only because the catalogue has CD7 loss but **no CD5 loss**, so its construct cannot lose both targets. A rule-9 catalogue gap, not a biological result; with CD5 loss added T-cell would match B-cell.
+- **`failing()` = two narrow items:** escape independence (now carrying only B-cell depth 5+, ~1e-31 cells, about 1e16 times rarer than what it carried before) and the CD5-loss catalogue gap.
+- **Tier mix:** body and brain programmes tier A/B (lawful today); the deep escape ladder needs one tier-C dual-antigen CAR-T per lineage. 111 tests pass.
