@@ -397,7 +397,57 @@ DOG_IT_DOSES_PRECEDENT_MAX = 28
 #: from the record's per-event figures is ~7-18% at 30 doses and ~11-25% at 45 (PROCEDURAL_MORTALITY_AT_DOSES).
 DOG_IT_DOSES_TRANSFERRED_MAX = 45
 DOG_IT_MIN_INTERVAL_DAYS = 10
-PROCEDURAL_MORTALITY_AT_DOSES = {30: (0.07, 0.18), 45: (0.11, 0.25)}
+PROCEDURAL_MORTALITY_AT_DOSES = {30: (0.07, 0.18), 45: (0.11, 0.25)}   # SUPERSEDED by PROCEDURAL_MORTALITY_BY_ROUTE (section M.6)
+
+#: Cumulative procedural mortality by HOW each dose is given (docs/universe/SWEEP_awake_dosing.md, section M.6), grade TRANSFERRED.
+#: Per-event anchors, both MEASURED: canine anaesthetic/sedation death 0.05% in ASA 1-2 dogs and 1.33% in ASA 3-5 (CEPSAF, 98,036 dogs,
+#: PMID 18466167); percutaneous CSF puncture major complication 0.146% (PMID 40526210). Compounded as 1-(1-p)^n.
+#: The key finding: a subcutaneous CSF port is dosed under SEDATION in the canine programme that ran 8-20 months of biweekly
+#: intraventricular and intrathecal-lumbar infusions ("Dogs were sedated during ITL or ICV infusions", PMID 24938720), and human Ommaya
+#: reservoirs are tapped by a nurse practitioner in clinic with no anaesthetic at all (UCSD SP006; 5,472 accesses in 98 children, 1
+#: infection, PMID 25017328). A 1-2 minute methotrexate bolus is two orders of magnitude shorter than those infusions, so sedation
+#: suffices and awake is plausible. General anaesthesia is then needed only for implantation and an expected revision.
+#: (ASA 1-2, ASA 3-5) cumulative mortality:
+PROCEDURAL_MORTALITY_BY_ROUTE = {
+    "general anaesthesia for every dose, 30 doses": (0.057, 0.360),
+    "general anaesthesia for every dose, 45 doses": (0.084, 0.487),
+    "port dosed awake/sedated, 25% fall back to anaesthesia, 45 doses": (0.022, 0.173),
+    "port dosed awake/sedated throughout, anaesthesia only to implant + 1 revision": (0.0010, 0.0264),
+}
+
+#: Where the risk moves once anaesthesia is removed: the device. Reservoir infection per access swings ~100-fold with technique, so strict
+#: aseptic protocol is a CONDITION of the awake route, not a detail. Cumulative over 45 accesses in brackets.
+PORT_INFECTION_PER_ACCESS = {
+    "strict aseptic protocol, trained staff only": (0.000183, 0.0082),      # PMID 25017328
+    "ordinary practice": (0.0171, 0.540),                                   # PMID 40719464 (per treatment)
+    "with intraventricular vancomycin each dose": (0.0, 0.007),             # 0/501 treatments, PMID 40719464; upper 95% bound
+}
+
+#: Ruled out as ways to cut the dose count (section M.6): fewer larger boluses (neurotoxicity 7/10 vs 1/8 at equal efficacy, PMID 638249,
+#: against a 5.2 h canine CSF half-life -- tripling the dose buys 8.2 h at triple the peak), and the model's own schedule sweep (q21 and
+#: q28 never clear at the brain-reach floor). Depot intrathecal cytarabine (DepoCyt) was 4x event-sparing but US production ended June 2017
+#: and the EU authorisation was withdrawn 10 July 2018; no intrathecal depot methotrexate exists (THEORETICAL). An implanted pump exists and
+#: has been placed in dogs, but the one canine head-to-head found continuous infusion WORSE than bolus (PMID 27832416).
+IT_DOSE_SPARING_RULED_OUT = ("fewer larger boluses", "longer intervals (q21, q28)", "depot cytarabine (withdrawn)",
+                             "intrathecal depot methotrexate (does not exist)", "continuous pump infusion (worse in dogs)")
+
+#: Full CRANIOSPINAL 36 Gy becomes affordable if the transplant uses REDUCED-INTENSITY conditioning (~2 Gy TBI instead of 2 x 4 or
+#: 2 x 5 Gy): cord burden 2 Gy + 36 Gy spine = 55.6 Gy3.9 = 66% of the canine 5%-myelopathy level (83.9 Gy3.9, PMID 26366252), BELOW the
+#: 68% the program already accepts, against 90% with 2 x 5 Gy. The canine cord limit is now directly measured, not only transferred:
+#: clinical-signs ED50 54.0 Gy at 4 Gy/fraction over a 20 cm field in 125 beagles (PMID 9572623), within 1.5% of the transferred BED50.
+#: Marrow does not bind with a graft (27 Gy mean to marrow on top of 2 Gy TBI, no graft failure, PMID 24858425); craniospinal radiation
+#: goes BEFORE the graft (PMID 38244173). Engraftment at 2 Gy is MEASURED in dogs, 8/10 pooled (PMID 23994246) -- but only with
+#: mycophenolate or sirolimus added to cyclosporine; at 2 Gy with cyclosporine alone engraftment is transient (PMID 9108426). Graft-versus-
+#: lymphoma at 2 Gy is TRANSFERRED from 279 human NHL allografts: no survival difference against higher-intensity conditioning, with lower
+#: non-relapse mortality and graft-versus-host disease (PMID 37788792); no canine tumour outcome at 2 Gy exists.
+#: THE OPEN CONDITION: 2 Gy gives stable MIXED chimerism, while the model's graft kill was calibrated on >95%-donor dogs, and canine
+#: benefit tracked donor percentage (PMID 11215693). So this trade buys ~17-18 doses instead of 34 and ~10 fewer anaesthetics, at the price
+#: of an unquantified reduction in the graft's own contribution. Conservative fallback: 30.6 Gy spine (57% of cord tolerance), which still
+#: exceeds the e-fold threshold that cuts the dose count.
+CRANIOSPINAL_36GY_NEEDS_RIC = True
+RIC_TBI_GY = 2.0
+RIC_OPEN_CONDITION = ("2 Gy conditioning gives mixed chimerism; the graft kill input was calibrated on >95% donor chimerism "
+                      "(PMID 11215693), so the graft's contribution at 2 Gy is not quantified")
 
 #: Brain radiation escalation (docs/universe/SWEEP_rt3_escalation.md, section M.5), grade TRANSFERRED: 36 Gy / 20 x 1.8 Gy whole
 #: brain is the strongest defensible canine course (EQD2 34.2 Gy against a canine whole-brain anchor of ~37.5-39.6 Gy, PMIDs

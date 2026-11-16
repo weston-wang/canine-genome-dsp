@@ -101,11 +101,14 @@ def lawful_brain_items() -> list:
 
 
 def procedural_cost() -> dict:
-    """The cost the closure carries that is not a pass/fail input: cumulative procedural mortality if each intrathecal dose needs a
-    general anaesthetic and a puncture (compounded from the record's per-event figures; SWEEP_it_longcourse.md). Near zero only if a
-    working ventricular port can be dosed without anaesthesia, which no canine series has yet shown for this many doses."""
+    """The cost the closure carries that is not a pass/fail input: cumulative procedural mortality, BY ROUTE (section M.6). Dosing a
+    subcutaneous CSF port under sedation rather than general anaesthesia cuts it ~20-80x, and is TRANSFERRED from the canine port
+    programme (sedation for 8-20 months of biweekly infusions) and human in-clinic Ommaya taps. The risk then moves to the device:
+    reservoir infection per access swings ~100-fold with technique, so strict aseptic protocol is a condition, not a detail."""
     from . import lymphoma_sustained as S
-    return dict(S.PROCEDURAL_MORTALITY_AT_DOSES)
+    return {"mortality_by_route": dict(S.PROCEDURAL_MORTALITY_BY_ROUTE),
+            "port_infection_per_access_and_cumulative_at_45": dict(S.PORT_INFECTION_PER_ACCESS),
+            "dose_sparing_ruled_out": S.IT_DOSE_SPARING_RULED_OUT}
 
 
 def failing() -> list:

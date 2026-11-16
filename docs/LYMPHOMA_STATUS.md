@@ -368,3 +368,14 @@ Details `LYMPHOMA_UNIVERSE.md` M.5; sweeps `SWEEP_it_longcourse.md`, `SWEEP_rt3_
 - **36 Gy whole brain** (TRANSFERRED; 1.54x kill) closes the brain itself on 17-18 injections, inside canine precedent; the spine stays at 23.4 Gy and still needs 34-45.
 - **No second independent drug route** among lawful agents (temozolomide, ibrutinib, ifosfamide, dexamethasone, lomustine, HD-MTX checked). Brain closure rests on intrathecal methotrexate + radiation.
 - Lomustine's derived kill (0.004-0.04/day) is still not written back into the catalogue (follow-up; not load-bearing).
+
+### Injection burden cut (2026-11-16; user: "the number of injections is a down side, is it absolutely necessary or can you find another way without compromising response")
+Details `LYMPHOMA_UNIVERSE.md` M.6; sweeps `SWEEP_awake_dosing.md`, `SWEEP_ric_cord_budget.md`.
+- **The injections were never the risk; the per-dose anaesthetic was.** Dosing a subcutaneous CSF port under **sedation** is documented in dogs (8-20 months of biweekly infusions, PMID 24938720) and awake in humans (5,472 Ommaya accesses, 1 infection, PMID 25017328). Cumulative mortality **8.4-48.7% -> 0.10-2.64%**. Answers the question K.6/M.5 left open.
+- **Risk moves to the device:** reservoir infection 0.018%/access with strict asepsis vs **1.71%/treatment in ordinary practice**; 0/501 with intraventricular vancomycin (PMID 40719464). Strict asepsis is a condition of the route.
+- **Full 36 Gy craniospinal halves the count to 17-18 doses**, affordable with ~2 Gy reduced-intensity conditioning (cord at 66% of the canine 5%-myelopathy level, below the 68% already accepted; canine cord ED50 now directly measured, PMID 9572623). Needs mycophenolate or sirolimus added to cyclosporine (PMIDs 23994246, 9108426).
+- **Open condition:** 2 Gy gives mixed chimerism while the graft kill was calibrated on >95% donor dogs (PMID 11215693) -- the graft's contribution at 2 Gy is unquantified. Fallback 30.6 Gy spine.
+- **Open number:** canine sedation-only mortality per event (CEPSAF pools sedation with anaesthesia).
+- **Ruled out:** bigger/less frequent boluses, q21/q28 intervals, depot cytarabine (withdrawn), depot methotrexate (does not exist), continuous pump (worse in dogs).
+- **Net:** ~17-18 port doses under sedation + 2 anaesthetics, no loss of modelled response. `failing()` still empty.
+- Record inconsistency flagged, not reconciled: the two in-vivo radiation conventions (dose/1.9 vs e-folds/1.9) are not interchangeable.

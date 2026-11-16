@@ -584,7 +584,7 @@ def test_b_cell_dose_count_passes_on_the_long_course_transfer_and_its_procedural
     items = {i.name[:2]: i for i in A.lawful_brain_items()}
     assert items["B:"].grade == "TRANSFERRED" and items["B:"].passes
     assert items["T:"].grade == "MEASURED-PRECEDENT"
-    assert A.procedural_cost()[45][1] >= 0.2
+    assert A.procedural_cost()["mortality_by_route"]["general anaesthesia for every dose, 45 doses"][1] >= 0.2
 
 
 def test_selinexor_csf_is_a_floor_for_verdinexor_and_the_b_cell_brain_hinges_on_where_above_it_the_dog_value_sits():
@@ -613,3 +613,33 @@ def test_36_gy_whole_brain_brings_the_brain_inside_canine_precedent_but_the_23_4
         w = S.lawful_brain_window("B", interval_days=14, ic50_nM=ic50, rt_scale=f)
         assert w is not None and w[1] <= S.DOG_IT_DOSES_PRECEDENT_MAX, (ic50, w)
     assert S.lawful_brain_window("B", interval_days=14, ic50_nM=14.0)[1] > S.DOG_IT_DOSES_PRECEDENT_MAX   # 23.4 Gy spine
+
+
+def test_dosing_the_port_under_sedation_rather_than_anaesthesia_is_what_makes_the_injection_count_affordable():
+    """Section M.6. The injections themselves are not the risk: the anaesthetic for each one is. A subcutaneous CSF port was dosed under
+    SEDATION through 8-20 months of biweekly infusions in dogs (PMID 24938720), and human Ommaya reservoirs are tapped in clinic with no
+    anaesthetic (PMID 25017328, 5,472 accesses, 1 infection). Removing the per-dose anaesthetic cuts cumulative mortality ~20-80x. The risk
+    then moves to the device, where technique swings infection ~100-fold -- so strict asepsis is a CONDITION of this route. Dose-sparing by
+    bigger or less frequent boluses is ruled out separately, on both toxicity and the model's own schedule sweep."""
+    from canine_dsp import lymphoma_sustained as S
+    ga = S.PROCEDURAL_MORTALITY_BY_ROUTE["general anaesthesia for every dose, 45 doses"]
+    port = S.PROCEDURAL_MORTALITY_BY_ROUTE["port dosed awake/sedated throughout, anaesthesia only to implant + 1 revision"]
+    assert port[0] < ga[0] / 20 and port[1] < ga[1] / 15
+    strict = S.PORT_INFECTION_PER_ACCESS["strict aseptic protocol, trained staff only"]
+    ordinary = S.PORT_INFECTION_PER_ACCESS["ordinary practice"]
+    assert ordinary[1] > 0.5 > strict[1]                      # ordinary practice would lose the gain; asepsis is load-bearing
+    # fewer/larger doses do not substitute: the model's own sweep never clears at q21 or q28 at the brain-reach floor
+    assert S.lawful_brain_window("B", interval_days=21, ic50_nM=14.0, rt_scale=S.RT_BRAIN_ESCALATION_FACTOR) is None
+    assert len(S.IT_DOSE_SPARING_RULED_OUT) >= 5
+
+
+def test_full_craniospinal_36_gy_halves_the_injection_count_but_only_with_reduced_intensity_conditioning():
+    """Section M.6. The spine was held at 23.4 Gy because the transplant's 2 x 4-5 Gy conditioning consumed cord budget. With ~2 Gy
+    reduced-intensity conditioning the cord sits at 66% of the canine 5%-myelopathy level -- below the 68% already accepted -- so a full
+    36 Gy craniospinal course is affordable, and the B-cell brain needs 17-18 doses instead of 34. The open condition is that 2 Gy gives
+    mixed rather than full donor chimerism, and the graft's kill was calibrated on >95% donor dogs."""
+    from canine_dsp import lymphoma_sustained as S
+    assert S.CRANIOSPINAL_36GY_NEEDS_RIC and S.RIC_TBI_GY == 2.0 and S.RIC_OPEN_CONDITION
+    full = S.lawful_brain_window("B", interval_days=14, ic50_nM=118.0, rt_scale=S.RT_BRAIN_ESCALATION_FACTOR)
+    spine_held = S.lawful_brain_window("B", interval_days=14, ic50_nM=14.0)
+    assert full[1] <= 18 and spine_held[1] >= 30 and full[1] < spine_held[1] / 1.6
