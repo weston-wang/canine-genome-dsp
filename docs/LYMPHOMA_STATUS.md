@@ -470,3 +470,13 @@ Details `LYMPHOMA_UNIVERSE.md` M.18. This replaces the rarity argument of M.13-M
 - M.17's correlation sweep stands as a secondary check (at a 1000x mutator rate depth 5 is still 11-13 orders below one cell).
 - The dual-antigen constructs remain headroom beyond the reachable depth; B-cell does not depend on them.
 - **`failing()` empty; 113 tests pass.**
+
+### M.19 (2026-11-16): sequential stacking is the right criterion; T-cell lawful-only FAILS it
+User: "Were you answering if one escape happens after the next?" Yes -- and that was the flaw. Details `LYMPHOMA_UNIVERSE.md` M.19.
+- **M.13-M.18 priced escapes as SIMULTANEOUS** (independent acquisitions in one lineage). Real resistance stacks **sequentially**: escape 1 arises, treatment clears the competition, the clone **re-expands**, and escape 2 arises in a far larger population. Far more probable.
+- **What blocks it is the MARGIN, as an induction:** if every clone at every reachable depth shrinks, nothing amplifies and the next depth stays unreachable. **M.18's division-budget bound is valid only conditional on this.**
+- **B-cell lawful today: HOLDS** (+0.1973 depth 1, +0.0256 depth 2, nothing grows) -> depth 3 never reached. The lawful-today claim survives the harder test.
+- **T-cell lawful today: FAILS at depth 2** -- 8 growing pairs (-0.0172), including P-gp efflux + TP53 evasion and P-gp efflux + XPO1 C528S. Reachable (~3,300 cells), so they expand and depth 3 then has 144 growing combinations. **Every earlier section missed this** by pricing escapes as simultaneous.
+- **So the T-cell CD5+CD7 dual-antigen CAR-T is LOAD-BEARING for durability**, not headroom (with it: +0.2616 / +0.1653 / +0.0671, nothing grows).
+- **Correction to the framing:** sequential escapes are NOT impossible in the real world -- the 8 T-cell pairs are exactly that. What stops them where they are stopped is that each clone is killed faster than it grows, a property of the regimen that must be checked, not assumed.
+- `failing()` empty; 114 tests pass.

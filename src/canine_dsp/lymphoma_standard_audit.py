@@ -395,6 +395,70 @@ def closure_to_reachable_depth() -> dict:
     return out
 
 
+def sequential_stacking(ip: str, extra_agent: str | None = None, kmax: int = 3) -> dict:
+    """THE PRIMARY CLOSURE CRITERION (section M.19), found when the user asked whether escapes were being counted as
+    simultaneous or as one-after-the-next.
+
+    Sections M.13-M.18 priced multi-escape cells as INDEPENDENT acquisitions in one lineage -- effectively simultaneous. Real
+    resistance evolves SEQUENTIALLY: escape 1 arises, treatment removes the competition, that clone RE-EXPANDS to a large
+    population, and escape 2 then arises anywhere in those far more numerous cells. Sequential stacking is vastly more probable
+    than simultaneous acquisition, and it is how multidrug resistance actually arises in the clinic.
+
+    What blocks it is not rarity but the MARGIN. If every clone at every reachable depth is still SHRINKING, the population never
+    re-expands, the division budget of section M.18 stays bounded, and the next depth stays unreachable -- an induction. If even one
+    reachable clone GROWS, it re-expands to ~1e8 cells, the next escape becomes reachable in that bigger target, and the ladder
+    proceeds stepwise. So the division-budget bound of M.18 is valid only CONDITIONAL on this test passing; it is not independent
+    of it.
+
+    Returns the worst margin and the number of growing clones at each depth, plus the depth at which the induction breaks."""
+    from itertools import combinations
+    from . import lymphoma_sustained as S, lymphoma_grounded_inputs as gi
+    from .core import lymphoma_grounded as G
+    from .core.lymphoma_catalogue import SYSTEMIC
+    esc = J._escapes(ip)
+    pool = S.lawful_pool(ip, SYSTEMIC)
+    reg = [[v for k, v in pool.items() if k.startswith(x)][0] for x in S.LAWFUL_PROGRAMS[ip]]
+    if extra_agent:
+        allag = J._pools(ip, J.CENTRAL["kill"], J.CENTRAL["duty"])[SYSTEMIC]
+        reg.append(next(a for k, a in allag.items() if k.startswith(extra_agent)))
+    d, _, _ = G.derate(reg, gi.EFFLUX_CO_DOSE_MULTIPLIER_CANINE_PROXY)
+    out, breaks_at = {}, None
+    for k in range(1, kmax + 1):
+        worst, growing = None, 0
+        for c in combinations(esc, k):
+            m = sum(a.effective_kill for a in d if G.covers_conjunction(a, c)) - G.GROWTH_PER_DAY
+            worst = m if worst is None else min(worst, m)
+            if m <= 0:
+                growing += 1
+        out[k] = {"worst_margin": worst, "growing_clones": growing}
+        if growing > 0 and breaks_at is None and k <= division_budget_reachable_depth()["reachable_depth"]:
+            breaks_at = k
+    return {"depths": out, "induction_breaks_at_reachable_depth": breaks_at, "holds": breaks_at is None}
+
+
+def sequential_stacking_item() -> Item:
+    """Pass/fail on the sequential criterion, which supersedes reachable_depth_item() as the headline (section M.19).
+
+    B-cell on LAWFUL-TODAY agents: every clone shrinks at depths 1 and 2 (+0.1973, +0.0256), so nothing re-expands and depth 3 is
+    never reached -- the induction holds and the lawful programme is durable.
+    T-cell on LAWFUL-TODAY agents: it FAILS. Depth 2 contains EIGHT growing pairs (worst -0.0172), among them P-gp efflux with TP53
+    evasion and P-gp efflux with the XPO1 C528S verdinexor-target mutation. Those pairs are reachable (about 3,300 expected cells at
+    depth 2), they expand, and depth 3 then has 144 growing combinations. So T-cell has a genuine stepwise escape route on lawful
+    agents alone, which every earlier section missed by pricing escapes as simultaneous.
+    Adding the tier-C CD5+CD7 dual-antigen CAR-T repairs it: depths 1-3 all positive (+0.2616, +0.1653, +0.0671), nothing grows."""
+    b = sequential_stacking("B")
+    t_law = sequential_stacking("T")
+    t_car = sequential_stacking("T", "CD5 + CD7 dual-target")
+    passes = b["holds"] and t_car["holds"]
+    return Item("sequential escape stacking (one escape after the next, under selection)", "DERIVED" if passes else "OPEN", passes,
+                f"B-cell lawful-today: induction HOLDS (depth-1 {b['depths'][1]['worst_margin']:+.4f}, depth-2 "
+                f"{b['depths'][2]['worst_margin']:+.4f}, nothing grows). T-cell lawful-today: BREAKS at depth "
+                f"{t_law['induction_breaks_at_reachable_depth']} with {t_law['depths'][2]['growing_clones']} growing pairs "
+                f"({t_law['depths'][2]['worst_margin']:+.4f}) -- a real stepwise route. With the tier-C CD5+CD7 dual-antigen CAR-T it "
+                f"HOLDS ({t_car['depths'][3]['worst_margin']:+.4f} even at depth 3). So the T-cell CAR-T is LOAD-BEARING for "
+                "durability, not headroom, and the M.18 division-budget bound is valid only conditional on this test")
+
+
 def reachable_depth_item() -> Item:
     """Pass/fail: is every escape combination the division budget can produce closed, and at what tier (section M.18)."""
     c = closure_to_reachable_depth()
@@ -455,7 +519,8 @@ def failing() -> list:
         out.append(gb)
     out += [i for i in lawful_brain_items() if not i.passes]
     for extra in (cns_seeding_item(), sustained_additivity_item(), emergence_is_not_an_uncovered_escape(), multi_escape_item(),
-                  depth3_item(), escape_correlation_item(), reachable_depth_item()):
+                  depth3_item(), escape_correlation_item(), reachable_depth_item(),
+                  sequential_stacking_item()):
         if not extra.passes:
             out.append(extra)
     for ip in ("B", "T"):

@@ -936,3 +936,40 @@ def test_the_reachable_escape_depth_is_two_and_b_cell_closes_it_lawfully_today()
 
     assert A.reachable_depth_item().passes
     assert A.failing() == []
+
+
+def test_sequential_escape_stacking_is_what_the_margin_actually_prevents():
+    """Section M.19 -- the criterion the whole depth analysis should have been built on, found when the user asked whether the
+    escapes were being counted as simultaneous or as one-after-the-next.
+
+    M.13-M.18 priced multi-escape cells as INDEPENDENT acquisitions in one lineage, i.e. effectively simultaneous. Real resistance
+    evolves sequentially: escape 1 arises, treatment removes the competition, that clone RE-EXPANDS, and escape 2 then arises in a
+    far larger target population. That route is vastly more probable, so the division-budget bound of M.18 is valid only while
+    nothing re-expands.
+    What prevents re-expansion is the MARGIN, which gives an induction: if every clone at every reachable depth is still shrinking,
+    the population never amplifies and the next depth stays out of reach.
+      B-cell lawful today: holds (+0.1973 at depth 1, +0.0256 at depth 2, nothing grows).
+      T-cell lawful today: FAILS -- 8 growing pairs at depth 2 (-0.0172), including P-gp efflux with TP53 evasion and P-gp efflux
+        with the XPO1 C528S verdinexor-target mutation; depth 3 then has 144 growing combinations.
+      T-cell + the tier-C CD5+CD7 dual-antigen CAR-T: holds (+0.0671 even at depth 3).
+    So the T-cell CAR-T is load-bearing for durability rather than headroom."""
+    from canine_dsp import lymphoma_standard_audit as A
+
+    # B-cell is durable on lawful agents: nothing grows at any reachable depth
+    b = A.sequential_stacking("B")
+    assert b["holds"] and b["induction_breaks_at_reachable_depth"] is None
+    assert b["depths"][1]["growing_clones"] == 0 and b["depths"][2]["growing_clones"] == 0
+
+    # T-cell on lawful agents is NOT durable: the induction breaks at a REACHABLE depth
+    t = A.sequential_stacking("T")
+    assert not t["holds"]
+    assert t["induction_breaks_at_reachable_depth"] == 2
+    assert t["depths"][2]["growing_clones"] >= 8 and t["depths"][2]["worst_margin"] < 0
+
+    # and the tier-C dual-antigen CAR-T repairs it, which is why it is load-bearing
+    tc = A.sequential_stacking("T", "CD5 + CD7 dual-target")
+    assert tc["holds"] and tc["depths"][3]["worst_margin"] > 0
+
+    # the induction must break no later than the depth the division budget can reach, or M.18's bound is void
+    assert A.division_budget_reachable_depth()["reachable_depth"] == 2
+    assert A.sequential_stacking_item().passes

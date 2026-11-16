@@ -904,3 +904,24 @@ So **the reachable escape depth is 2**, not 5. Depth 3 and beyond are not "impro
 So the honest headline, replacing every earlier version: **B-cell multicentric lymphoma closes every escape combination that can physically occur, on agents a US vet can lawfully obtain today. T-cell closes depth 1 lawfully but needs one near-future dual-antigen CAR-T to close depth 2.** The dual-antigen constructs of M.16-M.17 remain useful as headroom beyond the reachable depth, but B-cell does not depend on them.
 
 `failing()` is empty, and the closure is now stated as a conjunction over the depths that occur rather than over an unbounded ladder. 113 tests pass.
+
+### M.19 Sequential versus simultaneous: the criterion the depth analysis should have used, and it changes the T-cell verdict (2026-11-16)
+User: *"Were you answering if one escape happens after the next? And basically found those can't happen in the real world?"* The first half is the correction. Sections M.13-M.18 priced multi-escape cells as **independent acquisitions in one lineage**, i.e. effectively simultaneous. Real resistance evolves **sequentially**: escape 1 arises, treatment removes the competition, that clone **re-expands** to a large population, and escape 2 then arises anywhere in those far more numerous cells. Sequential stacking is vastly more probable than simultaneous acquisition and is how multidrug resistance actually arises. Code: `sequential_stacking`, `sequential_stacking_item`; test `test_sequential_escape_stacking_is_what_the_margin_actually_prevents`.
+
+**What blocks stacking is the margin, not rarity, and it gives an induction.** If every clone at every reachable depth is still SHRINKING, the population never amplifies, the division budget of M.18 stays bounded, and the next depth stays out of reach. If even one reachable clone GROWS, it re-expands to ~1e8 cells and the next escape becomes reachable in that bigger target. **So M.18's division-budget bound is valid only conditional on this test; it is not independent of it.**
+
+| programme | depth 1 | depth 2 | depth 3 | verdict |
+|---|---|---|---|---|
+| **B-cell, lawful today** | +0.1973, 0 grow | **+0.0256, 0 grow** | -0.0559, 24 grow | **HOLDS** -- nothing re-expands, so depth 3 is never reached |
+| **T-cell, lawful today** | +0.0791, 0 grow | **-0.0172, 8 GROW** | -0.0559, 144 grow | **FAILS at depth 2** |
+| T-cell + tier-C CD5+CD7 dual-antigen CAR-T | +0.2616, 0 grow | +0.1653, 0 grow | **+0.0671, 0 grow** | HOLDS |
+| B-cell + tier-C tandem CD19/CD20 CAR-T | +0.5473, 0 grow | +0.3748, 0 grow | +0.1973, 0 grow | HOLDS, large margin |
+
+**The T-cell failure is real and every earlier section missed it.** Eight depth-2 pairs grow on lawful agents, among them **P-gp efflux with TP53 evasion** and **P-gp efflux with the XPO1 C528S verdinexor-target mutation**. Those pairs are reachable -- about 3,300 expected cells at depth 2 -- so they arise, they expand, and depth 3 then has 144 growing combinations. M.18's claim that "T-cell closes depth 1 lawfully" was true and misleading: a programme that holds at depth 1 but loses at depth 2 does not hold at all, because depth 2 is reached.
+
+**Consequences, stated plainly:**
+- **B-cell is durable on lawful-today agents.** The induction holds at every reachable depth, so the earlier claim survives this harder test.
+- **The T-cell dual-antigen CAR-T is LOAD-BEARING for durability, not headroom.** M.18 had it as a depth-2 coverage requirement; it is more than that -- without it, T-cell unravels stepwise.
+- **Answer to the second half of the user's question: not quite.** It is not that sequential escapes "cannot happen in the real world". They can and do -- that is what the eight growing T-cell pairs are. What stops them, where they are stopped, is that every clone that arises is still being killed faster than it grows. That is a property of the regimen, not of the biology, and it has to be checked rather than assumed. It is now checked.
+
+`failing()` is empty, with this as the primary criterion and M.18's division budget as its corollary. 114 tests pass.
