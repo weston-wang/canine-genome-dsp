@@ -621,22 +621,27 @@ def sequential_stacking_item() -> Item:
 
     B-cell on LAWFUL-TODAY agents: every clone shrinks at depths 1 and 2 (+0.1973, +0.0256), so nothing re-expands and depth 3 is
     never reached -- the induction holds and the lawful programme is durable.
-    T-cell on LAWFUL-TODAY agents: it FAILS. Depth 2 contains EIGHT growing pairs (worst -0.0172), among them P-gp efflux with TP53
-    evasion and P-gp efflux with the XPO1 C528S verdinexor-target mutation. Those pairs are reachable (about 3,300 expected cells at
-    depth 2), they expand, and depth 3 then has 144 growing combinations. So T-cell has a genuine stepwise escape route on lawful
-    agents alone, which every earlier section missed by pricing escapes as simultaneous.
-    Adding the tier-C CD5+CD7 dual-antigen CAR-T repairs it: depths 1-3 all positive (+0.2616, +0.1653, +0.0671), nothing grows."""
+    T-cell on LAWFUL-TODAY agents: it HOLDS TOO, since section M.24 admitted rabacfosadine (+0.0988 at depth 1, +0.0169 at depth 2,
+    nothing grows). When M.19 first ran this test it FAILED for T-cell -- eight growing pairs at depth 2 (worst -0.0172), among them
+    P-gp efflux with TP53 evasion and P-gp efflux with the XPO1 C528S verdinexor-target mutation -- because rabacfosadine, the
+    FDA-approved dog lymphoma drug, had been filtered out of the lawful pool on an ASSUMED potency grade that rule 13 forbids. It
+    covers exactly that blocking pair and sits on the otherwise-free pulmonary axis. Section M.28 records the consequence.
+    The tier-C CD5+CD7 dual-antigen CAR-T is therefore HEADROOM rather than load-bearing: it extends the induction one level past the
+    reachable depth (+0.2308, +0.1489, +0.0819 at depths 1-3, nothing grows), where the lawful-only programmes turn negative
+    (B -0.0559, T -0.0140 at depth 3) on combinations the division budget never assembles."""
     b = sequential_stacking("B")
     t_law = sequential_stacking("T")
     t_car = sequential_stacking("T", "CD5 + CD7 dual-target")
     passes = b["holds"] and t_car["holds"]
     return Item("sequential escape stacking (one escape after the next, under selection)", "DERIVED" if passes else "OPEN", passes,
-                f"B-cell lawful-today: induction HOLDS (depth-1 {b['depths'][1]['worst_margin']:+.4f}, depth-2 "
-                f"{b['depths'][2]['worst_margin']:+.4f}, nothing grows). T-cell lawful-today: BREAKS at depth "
-                f"{t_law['induction_breaks_at_reachable_depth']} with {t_law['depths'][2]['growing_clones']} growing pairs "
-                f"({t_law['depths'][2]['worst_margin']:+.4f}) -- a real stepwise route. With the tier-C CD5+CD7 dual-antigen CAR-T it "
-                f"HOLDS ({t_car['depths'][3]['worst_margin']:+.4f} even at depth 3). So the T-cell CAR-T is LOAD-BEARING for "
-                "durability, not headroom, and the M.18 division-budget bound is valid only conditional on this test")
+                f"both lineages HOLD on LAWFUL-TODAY agents at every reachable depth, with zero growing clones. B-cell: depth-1 "
+                f"{b['depths'][1]['worst_margin']:+.4f}, depth-2 {b['depths'][2]['worst_margin']:+.4f}. T-cell: depth-1 "
+                f"{t_law['depths'][1]['worst_margin']:+.4f}, depth-2 {t_law['depths'][2]['worst_margin']:+.4f} "
+                f"({t_law['depths'][2]['growing_clones']} growing pairs; breaks_at={t_law['induction_breaks_at_reachable_depth']}). "
+                "When M.19 first ran this test T-cell BROKE at depth 2 with eight growing pairs; M.24's admission of rabacfosadine "
+                "closed that route, so the tier-C CD5+CD7 CAR-T is HEADROOM, not load-bearing -- it carries depth 3 "
+                f"({t_car['depths'][3]['worst_margin']:+.4f}), one level beyond what the division budget can assemble (section M.28). "
+                "The M.18 division-budget bound is valid only conditional on this test")
 
 
 def reachable_depth_item() -> Item:
@@ -647,9 +652,10 @@ def reachable_depth_item() -> Item:
     return Item(f"every escape combination reachable within the division budget (depth <= {c['reachable_depth']})",
                 "DERIVED", passes,
                 f"reachable depth is {c['reachable_depth']} (depth 3 expects 3.3e-4 cells against a budget of 3.3e10 divisions, so it "
-                f"is never assembled). B-cell closes it on LAWFUL-TODAY agents alone, worst margin {b['lawful_only_margin']:+.4f}/day. "
-                f"T-cell does NOT: worst margin {t['lawful_only_margin']:+.4f}, and no combination of up to three lawful additions "
-                f"closes it, so T-cell requires one tier-C agent ({t['needs_tier_C_agent']})")
+                f"is never assembled). BOTH lineages close it on LAWFUL-TODAY agents alone: B-cell worst margin "
+                f"{b['lawful_only_margin']:+.4f}/day, T-cell {t['lawful_only_margin']:+.4f}/day, no tier-C agent required "
+                f"(needs_tier_C_agent={t['needs_tier_C_agent']}). The T-cell row read 'does NOT close' until section M.24 admitted "
+                "rabacfosadine, which covers the P-gp-plus-TP53 blocking pair on the free pulmonary axis (section M.28)")
 
 
 def depth3_item() -> Item:

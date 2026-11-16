@@ -921,7 +921,7 @@ User: *"Were you answering if one escape happens after the next? And basically f
 
 **Consequences, stated plainly:**
 - **B-cell is durable on lawful-today agents.** The induction holds at every reachable depth, so the earlier claim survives this harder test.
-- **The T-cell dual-antigen CAR-T is LOAD-BEARING for durability, not headroom.** M.18 had it as a depth-2 coverage requirement; it is more than that -- without it, T-cell unravels stepwise.
+- **The T-cell dual-antigen CAR-T is LOAD-BEARING for durability, not headroom.** M.18 had it as a depth-2 coverage requirement; it is more than that -- without it, T-cell unravels stepwise. **[SUPERSEDED by M.28: M.24 admitted rabacfosadine, which covers the blocking pair, so the lawful-today T-cell programme now holds the induction on its own and the CAR-T is headroom.]**
 - **Answer to the second half of the user's question: not quite.** It is not that sequential escapes "cannot happen in the real world". They can and do -- that is what the eight growing T-cell pairs are. What stops them, where they are stopped, is that every clone that arises is still being killed faster than it grows. That is a property of the regimen, not of the biology, and it has to be checked rather than assumed. It is now checked.
 
 `failing()` is empty, with this as the primary criterion and M.18's division budget as its corollary. 114 tests pass.
@@ -1089,4 +1089,25 @@ So 0.12 is **neither an independent estimate nor a transcription error**: it is 
 
 That is a number a clinician can measure -- nodal tumour volume at diagnosis, or circulating tumour DNA burden -- not a modelling preference. It is recorded as `measured: False`, because the record does not contain it. This is the right shape for the last condition: rule 12 asks for the finite list of conditions and each one's status, and this one is now stated in terms of something measurable rather than as a growth-rate taste.
 
-`failing()` is empty. 120 tests pass.
+`failing()` is empty; the lymphoma suite is green (68 in `test_lymphoma_universe.py`, 203 in all `test_lymphoma_*.py`).
+
+### M.28 Two audit strings were still reporting the pre-rabacfosadine state, and the T-cell CAR-T is no longer load-bearing (2026-11-16)
+Found by executing `sequential_stacking_item()` and `reachable_depth_item()` before answering, as rule 11 requires, and reading the sentences they printed rather than their pass/fail. Both were stale, in a way that **understated** the result.
+
+`sequential_stacking_item()` printed: *"T-cell lawful-today: BREAKS at depth None with 0 growing pairs (+0.0169)"*. "Breaks at depth None with zero growing pairs" is self-contradictory: a positive worst margin and no growing clones is exactly the induction HOLDING. The f-string had been written in M.19, when T-cell genuinely broke at depth 2 with eight growing pairs, and it was never rewritten when M.24 admitted rabacfosadine. `reachable_depth_item()` had the same defect: *"T-cell does NOT: worst margin +0.0169 ... so T-cell requires one tier-C agent (None)"*, while the underlying `closure_to_reachable_depth()` already returned `lawful_only_closes: True, needs_tier_C_agent: None` for T.
+
+**The current numbers, from the code:**
+
+| programme | depth 1 | depth 2 (the reachable depth) | depth 3 | growing clones at depths 1-2 |
+|---|---|---|---|---|
+| B-cell, lawful today | +0.1973 | **+0.0256** | −0.0559 | 0 |
+| T-cell, lawful today (with rabacfosadine) | +0.0988 | **+0.0169** | −0.0140 | 0 |
+| T-cell + tier-C CD5+CD7 dual-antigen CAR-T | +0.2308 | +0.1489 | **+0.0819** | 0 |
+
+**So the correction has two parts, both in the direction of a stronger result:**
+1. **The T-cell sequential-stacking induction holds on lawful-today agents.** It did not when M.19 ran, and M.19/M.20 said so correctly at the time. What changed is M.24: rabacfosadine (Tanovea-CA1) covers the irreducible blocking pair -- P-gp efflux together with TP53/apoptosis evasion -- and sits on the pulmonary axis, which no other agent in the programme loads, so it adds its kill without de-rating the rest.
+2. **The tier-C dual-antigen CAR-T is HEADROOM, not load-bearing.** It carries depth 3, which is one level past what the division budget can assemble (depth 3 expects 3.3e-4 cells). Durability no longer depends on an agent that has to be built. That claim is withdrawn wherever it appears; the two places it is written down are now marked SUPERSEDED in place rather than deleted, so the history stays readable.
+
+**The lesson, which is CLAUDE.md rule 5 in a new form:** an audit function can pass while its stored sentence is false, because the sentence is prose and only the boolean is checked. Running the audit is not enough; the printed reason has to be read against the numbers. Both strings now derive every figure from the live computation, and a test asserts the no-longer-load-bearing claim directly.
+
+`failing()` is empty. The lymphoma suite passes: 68 tests in `test_lymphoma_universe.py`, 203 across all `test_lymphoma_*.py` files.

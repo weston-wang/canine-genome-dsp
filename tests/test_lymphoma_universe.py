@@ -958,10 +958,11 @@ def test_sequential_escape_stacking_is_what_the_margin_actually_prevents():
     What prevents re-expansion is the MARGIN, which gives an induction: if every clone at every reachable depth is still shrinking,
     the population never amplifies and the next depth stays out of reach.
       B-cell lawful today: holds (+0.1973 at depth 1, +0.0256 at depth 2, nothing grows).
-      T-cell lawful today: FAILS -- 8 growing pairs at depth 2 (-0.0172), including P-gp efflux with TP53 evasion and P-gp efflux
-        with the XPO1 C528S verdinexor-target mutation; depth 3 then has 144 growing combinations.
-      T-cell + the tier-C CD5+CD7 dual-antigen CAR-T: holds (+0.0671 even at depth 3).
-    So the T-cell CAR-T is load-bearing for durability rather than headroom."""
+      T-cell lawful today, as M.19 first ran it: FAILED -- 8 growing pairs at depth 2 (-0.0172), including P-gp efflux with TP53
+        evasion and P-gp efflux with the XPO1 C528S verdinexor-target mutation; depth 3 then had 144 growing combinations.
+      T-cell lawful today, after M.24 admitted rabacfosadine: HOLDS (+0.0988 at depth 1, +0.0169 at depth 2, nothing grows).
+      T-cell + the tier-C CD5+CD7 dual-antigen CAR-T: holds one level further still (+0.0819 at depth 3).
+    So the T-cell CAR-T is HEADROOM beyond the reachable depth, not load-bearing for durability (section M.28)."""
     from canine_dsp import lymphoma_standard_audit as A
 
     # B-cell is durable on lawful agents: nothing grows at any reachable depth
@@ -975,7 +976,7 @@ def test_sequential_escape_stacking_is_what_the_margin_actually_prevents():
     t = A.sequential_stacking("T")
     assert t["holds"] and t["depths"][2]["growing_clones"] == 0
 
-    # and the tier-C dual-antigen CAR-T repairs it, which is why it is load-bearing
+    # the tier-C dual-antigen CAR-T carries one level further, past the reachable depth: headroom, not load-bearing (M.28)
     tc = A.sequential_stacking("T", "CD5 + CD7 dual-target")
     assert tc["holds"] and tc["depths"][3]["worst_margin"] > 0
 
@@ -1179,3 +1180,42 @@ def test_the_0_12_growth_point_is_a_burden_assumption_and_the_condition_is_measu
     assert abs(growth(G.BURDEN_EARLY_DETECTED) - 0.239) < 0.002
     assert G.GROWTH_PER_DAY != growth(G.BURDEN_EARLY_DETECTED)
     assert A.closure_by_growth_item().passes
+
+
+def test_the_t_cell_car_t_is_headroom_not_load_bearing_and_the_audit_strings_say_so():
+    """Section M.28. Two audit reason strings were still describing the pre-rabacfosadine state: sequential_stacking_item()
+    printed "T-cell lawful-today: BREAKS at depth None with 0 growing pairs (+0.0169)" (self-contradictory -- a positive worst
+    margin with zero growing clones is the induction HOLDING), and reachable_depth_item() printed "T-cell does NOT ... requires
+    one tier-C agent (None)" while closure_to_reachable_depth() already returned lawful_only_closes True for T.
+    Both were written in M.19, when T-cell genuinely broke at depth 2 with eight growing pairs, and were never rewritten when
+    M.24 admitted rabacfosadine -- which covers the irreducible P-gp-plus-TP53 blocking pair on the otherwise-unloaded pulmonary
+    axis. So: the T-cell induction holds on lawful-today agents, and the tier-C dual-antigen CAR-T carries depth 3 only, one level
+    past what the division budget can assemble. It is HEADROOM, and durability depends on no agent that has to be built.
+    This test is the guard: an audit item can PASS while its stored prose is false, because only the boolean is asserted."""
+    from canine_dsp import lymphoma_standard_audit as A
+
+    # 1. the lawful-today T-cell programme holds the induction by itself, at every reachable depth
+    t_law = A.sequential_stacking("T")
+    assert t_law["holds"] and t_law["induction_breaks_at_reachable_depth"] is None
+    assert t_law["depths"][1]["growing_clones"] == 0 and t_law["depths"][2]["growing_clones"] == 0
+    assert t_law["depths"][2]["worst_margin"] > 0
+
+    # 2. the CAR-T's contribution is at depth 3, which is PAST the reachable depth -- i.e. headroom
+    assert A.division_budget_reachable_depth()["reachable_depth"] == 2
+    assert t_law["depths"][3]["worst_margin"] < 0 < A.sequential_stacking("T", "CD5 + CD7 dual-target")["depths"][3]["worst_margin"]
+
+    # 3. no tier-C agent is required to close the reachable depth, in either lineage
+    c = A.closure_to_reachable_depth()
+    for ip in ("B", "T"):
+        assert c[ip]["lawful_only_closes"] and c[ip]["needs_tier_C_agent"] is None
+
+    # 4. and the audit PROSE now matches the numbers. The old strings asserted the opposite in the present tense; the new ones
+    #    state the live result and mention the old one only as history, so the check is on the live claim, not on the absence of
+    #    the words. No load-bearing claim may survive anywhere in either reason.
+    seq, reach = A.sequential_stacking_item(), A.reachable_depth_item()
+    for item in (seq, reach):
+        assert item.passes
+        assert "CAR-T is LOAD-BEARING" not in item.reason  # the withdrawn M.19 claim, verbatim
+    assert "both lineages HOLD on LAWFUL-TODAY agents" in seq.reason and "is HEADROOM, not load-bearing" in seq.reason
+    assert "BOTH lineages close it on LAWFUL-TODAY agents alone" in reach.reason
+    assert "no tier-C agent required" in reach.reason

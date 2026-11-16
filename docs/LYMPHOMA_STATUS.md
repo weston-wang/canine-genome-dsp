@@ -477,7 +477,7 @@ User: "Were you answering if one escape happens after the next?" Yes -- and that
 - **What blocks it is the MARGIN, as an induction:** if every clone at every reachable depth shrinks, nothing amplifies and the next depth stays unreachable. **M.18's division-budget bound is valid only conditional on this.**
 - **B-cell lawful today: HOLDS** (+0.1973 depth 1, +0.0256 depth 2, nothing grows) -> depth 3 never reached. The lawful-today claim survives the harder test.
 - **T-cell lawful today: FAILS at depth 2** -- 8 growing pairs (-0.0172), including P-gp efflux + TP53 evasion and P-gp efflux + XPO1 C528S. Reachable (~3,300 cells), so they expand and depth 3 then has 144 growing combinations. **Every earlier section missed this** by pricing escapes as simultaneous.
-- **So the T-cell CD5+CD7 dual-antigen CAR-T is LOAD-BEARING for durability**, not headroom (with it: +0.2616 / +0.1653 / +0.0671, nothing grows).
+- **So the T-cell CD5+CD7 dual-antigen CAR-T is LOAD-BEARING for durability**, not headroom (with it: +0.2616 / +0.1653 / +0.0671, nothing grows). **[SUPERSEDED by M.28 -- after M.24 admitted rabacfosadine the lawful-today T-cell programme holds the induction by itself (+0.0988 / +0.0169, zero growing pairs) and the CAR-T became headroom beyond the reachable depth.]**
 - **Correction to the framing:** sequential escapes are NOT impossible in the real world -- the 8 T-cell pairs are exactly that. What stops them where they are stopped is that each clone is killed faster than it grows, a property of the regimen that must be checked, not assumed.
 - `failing()` empty; 114 tests pass.
 
@@ -552,4 +552,13 @@ Details `LYMPHOMA_UNIVERSE.md` M.27.
 - **A near-miss recorded:** applying the formula at `BURDEN_EARLY_DETECTED` (1e8) gives 0.239/day, which is **invalid** -- the 38.5-day survival is for CLINICALLY diagnosed dogs, so B_dx is the presentation burden, not where treatment starts. Early detection moves the starting burden, not the growth rate. The model is not inconsistent here.
 - **So the last open row becomes a decidable condition on a measurable quantity:** **the lawful closure holds if burden at clinical diagnosis is ~3e10 cells or more, and fails near 1e10.** Measurable by nodal tumour volume or ctDNA; recorded `measured: False` because the record lacks it.
 - This is the shape rule 12 asks for: the finite list of conditions with each one's status, stated in measurable terms rather than as a growth-rate preference.
-- `failing()` empty; 120 tests pass.
+- `failing()` empty; lymphoma suite green (68 / 203).
+
+### M.28 (2026-11-16): two audit strings were stale; the T-cell CAR-T is HEADROOM, not load-bearing
+Details `LYMPHOMA_UNIVERSE.md` M.28. Found by reading what the audit functions PRINT, not just whether they pass.
+- `sequential_stacking_item()` printed "T-cell lawful-today: BREAKS at depth None with 0 growing pairs (+0.0169)" -- self-contradictory. `reachable_depth_item()` printed "T-cell does NOT ... requires one tier-C agent (None)" while the underlying computation already returned `lawful_only_closes: True`. Both f-strings dated from M.19 and were never updated after M.24 admitted rabacfosadine.
+- **Live numbers:** B-cell lawful +0.1973 / **+0.0256** / −0.0559; T-cell lawful **+0.0988 / +0.0169** / −0.0140; T + tier-C CAR-T +0.2308 / +0.1489 / **+0.0819**. Zero growing clones at depths 1-2 in all three.
+- **Correction 1: the T-cell sequential-stacking induction HOLDS on lawful-today agents.** M.24's rabacfosadine covers the irreducible blocking pair (P-gp efflux + TP53 evasion) on the otherwise-unloaded pulmonary axis.
+- **Correction 2: the tier-C CD5+CD7 CAR-T is HEADROOM.** It carries depth 3, one level past the reachable depth (3.3e-4 expected cells). **Durability no longer depends on any agent that must be built.** The "LOAD-BEARING" claim is withdrawn; both written instances are marked SUPERSEDED in place.
+- **Lesson (rule 5 in a new form):** an audit item can PASS while its stored reason string is false, because only the boolean is tested. Read the printed reason against the live numbers. Both strings now derive every figure from the computation; a test asserts the withdrawal.
+- `failing()` empty; lymphoma suite green: 68 tests in `test_lymphoma_universe.py`, 203 across all `test_lymphoma_*.py`.
