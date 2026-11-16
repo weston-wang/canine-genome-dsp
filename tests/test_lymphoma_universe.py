@@ -1149,3 +1149,33 @@ def test_closure_is_reported_as_a_conjunction_over_growth_rates_including_where_
     assert A.GROWTH_BAR_BASIS_INCONSISTENCY and "0.0903" in A.GROWTH_BAR_BASIS_INCONSISTENCY[0]
     assert A.closure_by_growth_item().passes
     assert A.failing() == []
+
+
+def test_the_0_12_growth_point_is_a_burden_assumption_and_the_condition_is_measurable():
+    """Section M.27 -- what the 0.12 growth point actually is, which turns the last open row into a measurable condition.
+
+    The natural-history datum is untreated high-grade canine lymphoma, 38.5-day median survival, lethal burden 1e12 (PMID 9839202).
+    That pins growth x time, so growth alone needs an assumed burden at CLINICAL diagnosis via ln(1e12/B_dx)/38.5:
+        B_dx 1e10 -> 0.1196/day  (the "0.12 band upper end")
+        B_dx 3e10 -> 0.0911/day  (the 0.0903 bar)
+    So 0.12 is neither an independent estimate nor a typo: it is the same measurement under a different assumed diagnosis burden.
+    Therefore the closure's condition is not a bare growth number but a MEASURABLE quantity -- it holds if the burden at clinical
+    diagnosis is about 3e10 cells or more, and fails near 1e10.
+    Also pinned, because I nearly got it wrong: applying the formula at BURDEN_EARLY_DETECTED (1e8) gives 0.239/day, which is
+    INVALID -- the 38.5-day survival belongs to clinically diagnosed dogs, so B_dx there is the presentation burden, not the burden
+    at which treatment starts. Early detection changes where treatment begins, not the tumour's growth rate."""
+    from math import log
+    from canine_dsp import lymphoma_standard_audit as A
+    from canine_dsp.core import lymphoma_grounded as G
+
+    cond = A.CLOSURE_CONDITION_BURDEN_AT_DIAGNOSIS
+    growth = lambda b: log(1e12 / b) / 38.5
+    # the two growth values are the same datum under different burdens
+    assert abs(growth(cond["fails_near_cells"]) - 0.12) < 0.002
+    assert abs(growth(cond["holds_at_or_above_cells"]) - G.GROWTH_PER_DAY) < 0.003
+    # the condition is measurable and is recorded as not yet measured
+    assert cond["measured"] is False and "volume" in cond["how_to_measure"]
+    # and the invalid substitution is not what the model does
+    assert abs(growth(G.BURDEN_EARLY_DETECTED) - 0.239) < 0.002
+    assert G.GROWTH_PER_DAY != growth(G.BURDEN_EARLY_DETECTED)
+    assert A.closure_by_growth_item().passes

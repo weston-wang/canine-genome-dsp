@@ -477,6 +477,29 @@ CLOSURE_BY_GROWTH_RATE = {
 #: "0.0903/day is the upper end of the net in-vivo band (0.015-0.12/day)", but 0.0903 is not the upper end of (0.015, 0.12).
 #: Either the band's upper bound or the description is wrong. It matters because the whole question of whether 0.12 is a value the
 #: model "uses" or a bound on uncertainty turns on it, and `growth_sensitivity()` treats 0.12 as a sensitivity point.
+#: RESOLVED (section M.27): what the 0.12 "band upper end" actually is. The natural-history datum is untreated high-grade canine
+#: lymphoma with a 38.5-day median survival and a lethal burden of 1e12 (PMID 9839202). That pins growth x time, so growth alone
+#: needs an ASSUMED burden at CLINICAL diagnosis: ln(1e12 / B_dx) / 38.5. Working it:
+#:     B_dx 1e10 -> 0.1196/day   (this is the "0.12 band upper end")
+#:     B_dx 3e10 -> 0.0911/day   (this is the 0.0903 bar)
+#:     B_dx 1e11 -> 0.0598/day
+#: So 0.12 and 0.0903 are NOT two independent estimates and 0.12 is NOT a transcription error: they are the SAME measurement under
+#: different assumed clinical-diagnosis burdens. The basis text calling 0.0903 "the upper end" is loose wording for "the upper end
+#: of the net estimates it accepted", not an arithmetic claim about (0.015, 0.12).
+#: A thing I nearly got wrong and am recording so no one repeats it: applying this formula at the model's BURDEN_EARLY_DETECTED
+#: (1e8) gives 0.239/day, which looks alarming but is INVALID -- the 38.5-day survival belongs to dogs diagnosed CLINICALLY, so
+#: B_dx in that formula is the clinical presentation burden, not the burden at which treatment starts. Early detection changes where
+#: treatment begins, not the tumour's growth rate. The two burdens are independent and the model is not inconsistent here.
+#: CONSEQUENCE, which is the useful part: the choice between the 0.0903 bar and the 0.12 sweep point is exactly the choice of
+#: B_dx = 3e10 versus 1e10 cells at clinical diagnosis. So the closure's condition is not a bare growth number, it is a MEASURABLE
+#: quantity: the lawful closure holds if the burden at clinical diagnosis is about 3e10 cells or more, and fails near 1e10.
+#: The record does not measure it. Tumour burden at diagnosis in dogs is measurable (nodal volumes, or ctDNA), so this is a
+#: decidable condition rather than an open gap.
+CLOSURE_CONDITION_BURDEN_AT_DIAGNOSIS = {"holds_at_or_above_cells": 3e10, "fails_near_cells": 1e10,
+                                         "formula": "growth = ln(1e12 / B_dx) / 38.5 d (PMID 9839202)",
+                                         "measured": False,
+                                         "how_to_measure": "nodal tumour volume at clinical diagnosis, or ctDNA burden"}
+
 GROWTH_BAR_BASIS_INCONSISTENCY = ("basis text calls 0.0903 the upper end of a band whose stated upper end is 0.12; unresolved, "
                                   "and it decides whether 0.12 is an operating value or an uncertainty bound",)
 
@@ -490,7 +513,9 @@ def closure_by_growth_item() -> Item:
                 f"at the operating bar 0.0903: B {bar['B']:+.5f}, T {bar['T']:+.5f} -> both CLOSED on lawful available agents. "
                 f"At 0.10: B +0.01586, T +0.00721 -> CLOSED. At the 0.12 sensitivity point: B -0.00414, T -0.00873 -> OPEN, and no "
                 "lawful combination closes it (optimised over all 20 agents from three starts). 0.12 is a sweep point, not an "
-                f"operating value. Recorded inconsistency: {GROWTH_BAR_BASIS_INCONSISTENCY[0]}")
+                f"operating value. The 0.0903-vs-0.12 choice is exactly B_dx = 3e10 vs 1e10 cells at clinical diagnosis "
+                f"(growth = ln(1e12/B_dx)/38.5 d, PMID 9839202), so the closure's condition is a MEASURABLE burden, not a bare "
+                "growth number: it holds at or above ~3e10 cells and fails near 1e10 (section M.27)")
 
 
 def t_cell_lawful_growth_threshold_item() -> Item:

@@ -1067,3 +1067,26 @@ Rule 12 asks for a decidable conjunction -- every route CLOSED or OPEN at each c
 - The costs that travel with it: ~4.8% fatal pulmonary fibrosis from rabacfosadine (3/63 dogs, PMID 32346934), the transplant's 13% procedural mortality, and 8-10 intrathecal doses for the brain arm.
 
 `failing()` is empty. 119 tests pass.
+
+### M.27 What the 0.12 growth point actually is: a burden assumption, which makes the last open row a measurable condition (2026-11-16)
+M.26 left one row OPEN -- growth 0.12/day -- and called it "a sweep point, not an operating value", which was true but unhelpful. Checking the derivation instead of the label resolves it. Code: `CLOSURE_CONDITION_BURDEN_AT_DIAGNOSIS`; test `test_the_0_12_growth_point_is_a_burden_assumption_and_the_condition_is_measurable`.
+
+**The datum is one measurement, not two.** Untreated high-grade canine lymphoma has a 38.5-day median survival against a lethal burden of 1e12 (PMID 9839202). That pins growth x time, so recovering growth needs an **assumed burden at clinical diagnosis**, via `growth = ln(1e12 / B_dx) / 38.5`:
+
+| assumed burden at clinical diagnosis | implied growth |
+|---|---|
+| 1e10 cells | **0.1196/day -- this is the "0.12 band upper end"** |
+| 3e10 cells | **0.0911/day -- this is the 0.0903 bar** |
+| 1e11 cells | 0.0598/day |
+
+So 0.12 is **neither an independent estimate nor a transcription error**: it is the same measurement under a different assumed diagnosis burden. The basis text calling 0.0903 "the upper end" is loose wording for "the upper end of the net estimates it accepted", not an arithmetic claim about the interval (0.015, 0.12). The inconsistency flagged in M.26 is therefore wording, and the substantive question is which burden is right.
+
+**A mistake I nearly made, recorded so no one repeats it.** Applying the same formula at the model's `BURDEN_EARLY_DETECTED` of 1e8 gives **0.239/day**, which looks alarming and is **invalid**. The 38.5-day survival belongs to dogs diagnosed **clinically**, so `B_dx` in that formula is the presentation burden, not the burden at which treatment starts. Early detection changes where treatment begins; it does not change the tumour's growth rate. The two burdens are independent and the model is not inconsistent here.
+
+**The useful consequence: the last open row becomes a decidable condition on a measurable quantity.** The choice between the 0.0903 bar and the 0.12 sweep point is exactly the choice of **B_dx = 3e10 versus 1e10 cells at clinical diagnosis**. So:
+
+> **The lawful closure holds if the burden at clinical diagnosis is about 3e10 cells or more, and fails near 1e10.**
+
+That is a number a clinician can measure -- nodal tumour volume at diagnosis, or circulating tumour DNA burden -- not a modelling preference. It is recorded as `measured: False`, because the record does not contain it. This is the right shape for the last condition: rule 12 asks for the finite list of conditions and each one's status, and this one is now stated in terms of something measurable rather than as a growth-rate taste.
+
+`failing()` is empty. 120 tests pass.

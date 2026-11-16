@@ -545,3 +545,11 @@ Details `LYMPHOMA_UNIVERSE.md` M.26. Lawful available agents only, worst depth-1
 - **Inconsistency recorded, not fixed:** the basis text calls 0.0903 "the upper end of the net in-vivo band (0.015-0.12)", but 0.0903 is not the upper end of that band. It decides whether 0.12 is an operating value or an uncertainty bound; editing either number would be choosing the answer.
 - **Final conjunction:** all 24 escapes covered in all four cases on lawful-today agents; no clone at any reachable depth grows; the escalation yields <1 relapse-capable cell over all time; holds at the bar and to 0.10/day; fails at the 0.12 sweep point. Costs: ~4.8% fatal pulmonary fibrosis (rabacfosadine, PMID 32346934), 13% transplant procedural mortality, 8-10 intrathecal doses.
 - `failing()` empty; 119 tests pass.
+
+### M.27 (2026-11-16): the 0.12 growth point is a burden assumption -> the last open row is a MEASURABLE condition
+Details `LYMPHOMA_UNIVERSE.md` M.27.
+- **0.12 and 0.0903 are the same measurement under different assumed clinical-diagnosis burdens.** From untreated high-grade survival 38.5 d against lethal burden 1e12 (PMID 9839202), `growth = ln(1e12/B_dx)/38.5`: B_dx 1e10 -> **0.1196** (the "band upper end"), B_dx 3e10 -> **0.0911** (the bar), 1e11 -> 0.0598. So 0.12 is not an independent estimate and not a typo; the M.26 "inconsistency" is loose wording.
+- **A near-miss recorded:** applying the formula at `BURDEN_EARLY_DETECTED` (1e8) gives 0.239/day, which is **invalid** -- the 38.5-day survival is for CLINICALLY diagnosed dogs, so B_dx is the presentation burden, not where treatment starts. Early detection moves the starting burden, not the growth rate. The model is not inconsistent here.
+- **So the last open row becomes a decidable condition on a measurable quantity:** **the lawful closure holds if burden at clinical diagnosis is ~3e10 cells or more, and fails near 1e10.** Measurable by nodal tumour volume or ctDNA; recorded `measured: False` because the record lacks it.
+- This is the shape rule 12 asks for: the finite list of conditions with each one's status, stated in measurable terms rather than as a growth-rate preference.
+- `failing()` empty; 120 tests pass.
