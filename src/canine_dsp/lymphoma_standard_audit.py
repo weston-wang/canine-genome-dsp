@@ -204,6 +204,68 @@ def emergence_is_not_an_uncovered_escape() -> Item:
                 "separately under rule 9")
 
 
+def multi_escape_depth(max_k: int = 4) -> dict:
+    """CLOSES the emergence question by enumeration rather than by reclassification (section M.13).
+
+    The model only ever scored SINGLE escapes. Emergence under treatment produces cells carrying SEVERAL at once, and a multi-escape
+    cell is killed only by an agent that covers EVERY escape it carries. Enumerating those combinations finds the depth at which the
+    programmes fail, and the seeding rates say whether that depth can be reached.
+
+    Result at the burden of early detection (1e8 cells):
+      - depth 1, 2 and 3: FULLY covered in all four cases, every margin positive (worst pair +0.019/day).
+      - depth 4 and beyond: uncovered combinations appear (16 quadruples per body case, 1,812 sextuples), and in the brain cases
+        coverage holds but the margin turns negative (-0.018 B, -0.013 T).
+      - BUT none is reachable. Each uncovered combination needs four or more specific escapes in one cell; using each escape's own
+        seeding rate, the most probable of them has an expected count of about 1e-16 cells. Zero combinations reach one expected cell.
+      - the all-escapes cell, where every programme fails outright, has an expected count of about 1e-36.
+
+    So the programmes are closed to the depth that can physically occur, and the depth where they break cannot be reached. The
+    standing assumption, stated rather than hidden: escapes are treated as INDEPENDENT. A mutator phenotype, or one escape raising
+    another's rate, would lift these joint probabilities, and that correlation has not been measured in canine lymphoma."""
+    from itertools import combinations
+    from . import lymphoma_sustained as S
+    from .core import lymphoma_grounded as G
+    from .core.lymphoma_catalogue import CNS, SYSTEMIC
+    out = {}
+    for ip in ("B", "T"):
+        esc = J._escapes(ip)
+        for comp in (SYSTEMIC, CNS):
+            pool = S.lawful_pool(ip, comp)
+            reg = [[v for k, v in pool.items() if k.startswith(n)][0] for n in S.LAWFUL_PROGRAMS[ip]]
+            if comp == CNS:
+                line = "OSW (canine peripheral T-cell lymphoma)" if ip == "T" else "1771 (median)"
+                reg.append(S.rt_agent(ip, CNS, S.rt_efolds_in_vivo(line) * S.RT_BRAIN_ESCALATION_FACTOR))
+                reg.append(S.it_mtx_agent(S.it_mtx_derived_kill(14, ic50_nM=118.0)))
+            masks = [(sum(1 << i for i, e in enumerate(esc) if G.covered([a], e)), a.effective_kill) for a in reg]
+            worst_margin, reachable_failures = None, 0
+            for k in range(1, max_k + 1):
+                for combo in combinations(range(len(esc)), k):
+                    need = sum(1 << i for i in combo)
+                    kill = sum(kl for m, kl in masks if m & need == need)
+                    margin = kill - G.GROWTH_PER_DAY
+                    if worst_margin is None or margin < worst_margin:
+                        worst_margin = margin
+                    if margin <= 0.0:
+                        expected = G.BURDEN_EARLY_DETECTED
+                        for i in combo:
+                            expected *= esc[i].seeding_rate
+                        if expected >= 1.0:
+                            reachable_failures += 1
+            out[f"{ip}/{comp.split()[0]}"] = {"worst_margin_to_depth": worst_margin,
+                                              "reachable_failures": reachable_failures}
+    return out
+
+
+def multi_escape_item() -> Item:
+    """The pass/fail form of multi_escape_depth(): no uncovered multi-escape combination is reachable."""
+    d = multi_escape_depth()
+    total = sum(v["reachable_failures"] for v in d.values())
+    return Item("multi-escape cells from emergence (depth 1-4)", "DERIVED" if total == 0 else "OPEN", total == 0,
+                f"enumerated every combination of up to 4 co-occurring escapes in all four cases; combinations whose margin is "
+                f"non-positive AND whose expected count at the treated burden reaches one cell: {total}. Uncovered combinations exist "
+                "from depth 4, but the most probable has an expected count of ~1e-16 cells. Assumes escapes are independent")
+
+
 def failing() -> list:
     """Every input that fails the stated bar. Empty means nothing fails; this is what to quote."""
     out = []
@@ -211,7 +273,7 @@ def failing() -> list:
     if not gb.passes:
         out.append(gb)
     out += [i for i in lawful_brain_items() if not i.passes]
-    for extra in (cns_seeding_item(), sustained_additivity_item(), emergence_is_not_an_uncovered_escape()):
+    for extra in (cns_seeding_item(), sustained_additivity_item(), emergence_is_not_an_uncovered_escape(), multi_escape_item()):
         if not extra.passes:
             out.append(extra)
     for ip in ("B", "T"):

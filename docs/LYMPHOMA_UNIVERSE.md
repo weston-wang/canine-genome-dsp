@@ -751,3 +751,23 @@ So emergence changes **when** an escape appears, not **whether** it is covered, 
 - **What emergence could do that this does not cover is produce an escape outside the catalogue.** That is a completeness question, audited separately under CLAUDE.md rule 9 by the independent escape audit (`docs/universe/SWEEP_escapes.md`), and it is not what this item grades.
 
 Graded **DERIVED / passes**, so `failing()` stays empty and this may not be re-raised as an open escape under a different phrasing.
+
+### M.13 Multi-escape cells: the emergence question closed by enumeration, not by reclassification (2026-11-16)
+M.12 argued that the missing resistance-emergence term could not open an uncovered route. That argument was sound but it closed nothing: it showed that every escape is *required* closed, not that a cell carrying several at once is *actually* covered. **The model had only ever scored single escapes.** A cell carrying several is killed only by an agent that covers **every** escape it carries, so the right test is to enumerate combinations. Code: `lymphoma_standard_audit.multi_escape_depth`, `multi_escape_item`; test `test_multi_escape_cells_are_closed_to_the_depth_that_can_physically_occur`.
+
+| depth (escapes in one cell) | coverage | worst margin | reachable? |
+|---|---|---|---|
+| 1 | all covered | +0.021 to +0.042 /day | yes (2.2e7 cells) |
+| 2 (882 pairs tested) | **all covered** | **+0.019 /day** (P-gp + TP53, and P-gp + E2 in the brain) | yes (2.3e6 cells) |
+| 3 (1,540 triples tested) | **all covered** | positive | yes (1.5e5 cells) |
+| 4 | **16 uncovered per body case**; brain covered but margin **-0.018 (B), -0.013 (T)** | negative | **no** -- most probable 1e-16 cells |
+| 6 | 1,812 uncovered (B), 1,580 (T) | negative | **no** |
+| 22 (all escapes) | 0 of 4 agents survive in the body; 2 of 6 in the brain (radiation + intrathecal methotrexate) | -0.090 body, -0.018 brain | **no** -- 1e-36 cells |
+
+**So the honest answer to "do some escapes have no real answers" is: yes, combinations of four or more do -- and none of them can occur.** Each uncovered combination needs four or more specific escapes in a single cell; priced with each escape's own seeding rate at a burden of 1e8, the most probable has an expected count of about **1e-16 cells**, and the all-escapes cell about 1e-36. **Zero uncovered combinations reach one expected cell**, in any of the four cases. The programmes are closed to the depth that can physically occur, and break only at depths that cannot be reached.
+
+Two things stated rather than hidden:
+- **Escapes are treated as INDEPENDENT.** A mutator phenotype, or one escape raising another's rate, would lift these joint probabilities. That correlation has not been measured in canine lymphoma, and it is the single assumption this closure rests on.
+- **The brain is the thinner case.** From depth 4 its combinations remain *covered* but margin-negative, and the only agents still working against a fully armoured cell are the radiation course and the intrathecal methotrexate. That is consistent with M.11's finding that the brain rests on those two.
+
+This supersedes M.12's framing: the emergence item is no longer a reclassification of an open structural absence but an enumerated closure, and `failing()` is empty with 109 tests passing.

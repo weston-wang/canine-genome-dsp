@@ -732,3 +732,38 @@ def test_resistance_emergence_cannot_leave_an_escape_uncovered():
     item = A.emergence_is_not_an_uncovered_escape()
     assert item.passes and item.grade == "DERIVED" and item not in A.failing()
     assert A.failing() == []
+
+
+def test_multi_escape_cells_are_closed_to_the_depth_that_can_physically_occur():
+    """Section M.13 -- the actual closing work the emergence question demanded, rather than a reclassification.
+
+    The model scored SINGLE escapes only. Emergence produces cells carrying several at once, and such a cell is killed only by an
+    agent covering EVERY escape it carries. Enumerated: depths 1-3 are fully covered with positive margins in all four cases (worst
+    pair +0.019/day); from depth 4 uncovered combinations appear (16 quadruples per body case) and the brain cases turn
+    margin-negative. None is reachable -- each needs four or more specific escapes in one cell, and the most probable has an expected
+    count of ~1e-16 at a burden of 1e8. So the programmes are closed to the depth that can occur, and the depth where they break
+    cannot be reached. Escapes are assumed independent; a mutator phenotype would raise these joint probabilities."""
+    from itertools import combinations
+    from canine_dsp import lymphoma_standard_audit as A, lymphoma_sustained as S, lymphoma_joint as J
+    from canine_dsp.core import lymphoma_grounded as G
+    from canine_dsp.core.lymphoma_catalogue import SYSTEMIC
+
+    # 1. no uncovered multi-escape combination is reachable, in any of the four cases
+    d = A.multi_escape_depth()
+    assert len(d) == 4 and all(v["reachable_failures"] == 0 for v in d.values()), d
+    item = A.multi_escape_item()
+    assert item.grade == "DERIVED" and item.passes and item not in A.failing()
+
+    # 2. depth 2 is genuinely covered with a positive margin, not merely unreachable
+    pool = S.lawful_pool("B", SYSTEMIC)
+    reg = [[v for k, v in pool.items() if k.startswith(n)][0] for n in S.LAWFUL_PROGRAMS["B"]]
+    esc = J._escapes("B")
+    worst = min(sum(a.effective_kill for a in reg if G.covered([a], e1) and G.covered([a], e2))
+                for e1, e2 in combinations(esc, 2))
+    assert worst > G.GROWTH_PER_DAY, worst
+
+    # 3. the depth where coverage fails really is out of reach
+    expected_all = G.BURDEN_EARLY_DETECTED
+    for e in esc:
+        expected_all *= e.seeding_rate
+    assert expected_all < 1e-20
