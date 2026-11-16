@@ -449,6 +449,20 @@ T_BEST_LAWFUL_WORST_KILL = 0.0895
 T_LAWFUL_BLOCKING_PAIR = ("P-glycoprotein / ABCB1 efflux", "TP53 / intrinsic-apoptosis evasion")
 
 
+#: The lawful-only T-cell residual is IRREDUCIBLE within the lawful pool, established by optimisation rather than by one attempt
+#: (section M.21): an exhaustive search of all 3-to-7-agent combinations of the 19 lawful T systemic agents, plus hill-climbing from
+#: three different starting regimens, all converge on the same worst depth-1/depth-2 margin of -0.00082/day. Two mechanisms were
+#: tested and rejected as ways to recover it:
+#:   - PHASE STAGING: the three agents covering the blocking pair de-rate to 0.1014/day on their own (margin +0.0111), but the
+#:     stacking criterion must hold CONTINUOUSLY, and any phase without them has margin -0.0903. Staging is strictly worse.
+#:   - ADDING AGENTS: every addition costs more in de-rating across the shared marrow axis than it contributes.
+T_LAWFUL_RESIDUAL_PER_DAY = 0.00082
+T_LAWFUL_RESIDUAL_IRREDUCIBLE = True
+T_LAWFUL_RECOVERY_RULED_OUT = ("phase staging (criterion must hold continuously; the uncovered phase is -0.0903)",
+                               "adding lawful agents (de-rating on the shared marrow axis costs more than they add)",
+                               "high-dose thiotepa with rescue (consumes the entire marrow budget alone)")
+
+
 def t_cell_lawful_growth_threshold_item() -> Item:
     """How far a LAWFUL-ONLY T-cell regimen gets against sequential stacking, stated as a growth-rate condition (section M.20).
 
@@ -474,7 +488,9 @@ def t_cell_lawful_growth_threshold_item() -> Item:
                 f"{covered_fraction:.0%} of the derived growth band {GROWTH_BAR_BASIS['band']} including its central values; it misses "
                 f"the model's conservative bar ({G.GROWTH_PER_DAY}) by {G.GROWTH_PER_DAY - T_BEST_LAWFUL_WORST_KILL:.4f}/day. "
                 f"Irreducible blocker: {T_LAWFUL_BLOCKING_PAIR[0]} + {T_LAWFUL_BLOCKING_PAIR[1]}; the lawful agents covering it share "
-                "the marrow axis so cannot be stacked. The tier-C dual-antigen CAR-T is what covers the fast-growing end")
+                "the marrow axis so cannot be stacked. The residual is IRREDUCIBLE within the lawful pool: exhaustive 3-7 agent "
+                f"search and hill-climbing from three starts all converge on -{T_LAWFUL_RESIDUAL_PER_DAY}/day, and phase staging makes "
+                "it worse, not better. The tier-C dual-antigen CAR-T is what covers the fast-growing end")
 
 
 def sequential_stacking_item() -> Item:

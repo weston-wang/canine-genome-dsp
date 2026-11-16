@@ -489,3 +489,12 @@ Details `LYMPHOMA_UNIVERSE.md` M.20.
 - **Irreducible lawful blocker:** P-gp efflux + TP53 evasion. The four lawful agents covering it (cytarabine CRI 0.062, graft 0.048, cyclophosphamide 0.042, thiotepa 0.041) all share the **marrow axis**, and high-dose thiotepa alone consumes it, so they cannot be stacked. A toxicity-axis collision, not a missing agent.
 - **Corrected position:** lawful-only T-cell is durable for a typically-growing tumour; the tier-C dual-antigen CAR-T buys durability at the fast-growing end. B-cell unchanged and stronger (lawful-today, +0.1973 / +0.0256).
 - `failing()` empty; 115 tests pass.
+
+### M.21 (2026-11-16): the lawful T-cell residual is irreducible and is a MARGIN shortfall, not an uncovered escape
+Details `LYMPHOMA_UNIVERSE.md` M.21.
+- **Residual = -0.00082/day, irreducible within the lawful pool.** Exhaustive 3-7 agent search over the 19 lawful T systemic agents plus hill-climbing from three starts all converge on it.
+- **Recovery mechanisms tested and rejected:** phase staging (the three covering agents reach +0.0111 alone, but the criterion must hold CONTINUOUSLY and an uncovered phase is -0.0903, so staging is strictly worse); adding lawful agents (shared marrow-axis de-rating costs more than they add); high-dose thiotepa with rescue (consumes the marrow budget alone).
+- **Every escape IS covered** (asserted in the test for all 22 T-cell escapes). What is short is the MARGIN against the conservative TOP of the derived growth band, by 0.9%.
+- **Stable position:** lawful-only blocks sequential stacking for growth 0.015-0.0895/day (71% of the band, all central values); the top slice 0.0895-0.12 needs the tier-C dual-antigen CAR-T.
+- **What would close the top slice lawfully** (none available now): a lawful agent covering P-gp efflux + TP53 evasion on a NON-marrow axis; or a measured growth rate for the individual dog; or a marrow-sparing route for one of the four covering agents.
+- `failing()` empty; 116 tests pass.

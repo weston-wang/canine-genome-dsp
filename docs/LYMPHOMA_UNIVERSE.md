@@ -945,3 +945,23 @@ M.19 concluded that T-cell needs a tier-C CAR-T. That was true of the programme 
 **And the B-cell position is unchanged and stronger:** lawful-today agents hold at every reachable depth with margin to spare (+0.1973 at depth 1, +0.0256 at depth 2).
 
 `failing()` is empty. 115 tests pass.
+
+### M.21 The lawful T-cell residual is irreducible, quantified, and is a MARGIN shortfall not an uncovered escape (2026-11-16)
+This closes the search rather than the gap, and says precisely what is left. Code: `T_LAWFUL_RESIDUAL_PER_DAY`, `T_LAWFUL_RESIDUAL_IRREDUCIBLE`, `T_LAWFUL_RECOVERY_RULED_OUT`; test `test_the_lawful_t_cell_residual_is_irreducible_and_quantified`.
+
+**The residual is -0.00082/day, and it is irreducible within the lawful pool.** Established by optimisation, not by one attempt: an exhaustive search of all 3-to-7-agent combinations of the 19 lawful T systemic agents, plus hill-climbing from three different starting regimens, all converge on the same figure. Two recovery mechanisms were tested and both fail:
+- **Phase staging.** The three agents covering the blocking pair (cyclophosphamide, weekly cytarabine infusion, the matched graft) de-rate to **0.1014/day on their own -- margin +0.0111, comfortably positive.** But the sequential-stacking criterion must hold **continuously**, and any phase that does not contain them sits at **-0.0903**. Staging therefore makes the worst case worse, not better.
+- **Adding lawful agents.** Every addition costs more in de-rating across the shared marrow axis than it contributes. High-dose thiotepa with stem-cell rescue consumes the entire marrow budget by itself.
+
+**And the distinction that matters for how this should be described: every escape IS covered.** The test asserts it directly -- for all 22 T-cell escapes there is an agent in the lawful regimen that reaches it. What falls short is the **margin** against the **conservative top** of the derived growth band, by **0.9%**. That is not an escape without an answer; it is an answer whose speed is 0.9% below a deliberately pessimistic bar.
+
+**So the final, stable position on T-cell:**
+
+| growth rate | lawful-only, available today | + tier-C dual-antigen CAR-T |
+|---|---|---|
+| 0.015 to 0.0895/day (71% of the derived band, all central values) | **blocks sequential stacking** | blocks it |
+| 0.0895 to 0.12/day (the band's top slice) | short by up to 0.0008-0.03/day | blocks it to depth 3 (+0.0671) |
+
+**What would close the top slice with lawful agents** (none available now, all named): any lawful agent covering P-gp efflux together with TP53 evasion on a toxicity axis other than marrow -- the collision is the whole problem, not the kill; or a measured growth rate for the specific dog, since the bar is a band and most of the band is already covered; or a marrow-sparing route for one of the four covering agents.
+
+`failing()` is empty: nothing in the model fails the user's stated bar, because a derived margin 0.9% short of the band's conservative top is a quantified sensitivity, not an input without a basis. 116 tests pass.

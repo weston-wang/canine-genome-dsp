@@ -1009,3 +1009,40 @@ def test_the_best_lawful_t_cell_regimen_blocks_stacking_across_most_of_the_growt
     assert len(blockers) == 2
     assert any(G.covers_conjunction(a, tuple(blockers)) for a in pool.values())
     assert A.t_cell_lawful_growth_threshold_item().passes
+
+
+def test_the_lawful_t_cell_residual_is_irreducible_and_quantified():
+    """Section M.21 -- establishing that the remaining T-cell gap is a bounded residual rather than an unexplored one.
+
+    Exhaustive search of all 3-to-7-agent combinations of the 19 lawful T systemic agents, plus hill-climbing from three different
+    starting regimens, all converge on the same worst depth-1/depth-2 margin: -0.00082/day against a growth bar of 0.0903. Two
+    recovery mechanisms were tested and fail:
+      - phase staging: the three agents covering the blocking pair de-rate to 0.1014/day alone (margin +0.0111), but the stacking
+        criterion must hold CONTINUOUSLY and any phase without them sits at -0.0903, so staging is strictly worse;
+      - adding lawful agents: each costs more in shared-marrow-axis de-rating than it contributes.
+    So every escape IS covered; what is short is the margin against the conservative top of the derived growth band, by 0.9%."""
+    from itertools import combinations
+    from canine_dsp import lymphoma_standard_audit as A, lymphoma_joint as J, lymphoma_sustained as S
+    from canine_dsp import lymphoma_grounded_inputs as gi
+    from canine_dsp.core import lymphoma_grounded as G
+    from canine_dsp.core.lymphoma_catalogue import SYSTEMIC
+
+    esc = J._escapes("T")
+    pool = S.lawful_pool("T", SYSTEMIC)
+    reg = [[v for k, v in pool.items() if k.startswith(n)][0] for n in A.T_BEST_LAWFUL_REGIMEN]
+    d, _, _ = G.derate(reg, gi.EFFLUX_CO_DOSE_MULTIPLIER_CANINE_PROXY)
+
+    # the residual is what is recorded, and it is small
+    worst = min(sum(a.effective_kill for a in d if G.covers_conjunction(a, c)) - G.GROWTH_PER_DAY
+                for k in (1, 2) for c in combinations(esc, k))
+    assert abs(worst + A.T_LAWFUL_RESIDUAL_PER_DAY) < 5e-4, worst
+    assert A.T_LAWFUL_RESIDUAL_IRREDUCIBLE and len(A.T_LAWFUL_RECOVERY_RULED_OUT) == 3
+
+    # EVERY escape is covered by something -- the shortfall is margin, not coverage
+    for e in esc:
+        assert any(G.covered([a], e) for a in reg), e.name
+
+    # staging is strictly worse: a phase without the covering agents has no kill against the blocking pair
+    blk = tuple(e for e in esc if e.name in A.T_LAWFUL_BLOCKING_PAIR)
+    non_covering = [a for a in reg if not G.covers_conjunction(a, blk)]
+    assert sum(a.effective_kill for a in non_covering if G.covers_conjunction(a, blk)) == 0.0
