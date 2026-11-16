@@ -282,7 +282,12 @@ LAWFUL_PROGRAMS = {
     # the only one among the eight treatments, so it is excluded under CLAUDE.md rule 13 ("kill is contradicted / toxicity cannot be
     # afforded"), not for want of canine data. It was not load-bearing: dropping it SHORTENS the T body window (147 d vs 168) because its
     # toxicity budget had been de-rating the rest, and leaves the T brain unchanged at 18 doses.
-    "T": ("prednisolone", "hydroxychloroquine", "verdinexor", "allogeneic DLA", "cytarabine CRI (q7d)"),
+    # prednisolone REMOVED 2026-11-16 (section M.10). Zandvliet 2013 (PMID 23746872) randomised 81 dogs to the same multidrug
+    # protocol WITH or WITHOUT prednisolone and found no difference in anything (CR 75%, disease-free period 176 d, survival 283 d).
+    # That is a measured, in-dog value for exactly the quantity the model was crediting, and the value is zero; under CLAUDE.md rule 14
+    # a measurement in the compartment at issue outranks a derived kill. Not load-bearing: T body goes 147 -> 168 d and the T brain is
+    # unchanged at 18 doses. Its profile window is also corrected to the 68-day measured resistance onset above.
+    "T": ("hydroxychloroquine", "verdinexor", "allogeneic DLA", "cytarabine CRI (q7d)"),
 }
 
 

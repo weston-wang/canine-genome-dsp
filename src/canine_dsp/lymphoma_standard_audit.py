@@ -112,18 +112,22 @@ def procedural_cost() -> dict:
 
 
 def cns_seeding_item() -> Item:
-    """The fraction of pre-treatment burden assumed to seed the CNS. It is `lymphoma_scenarios.LYMPHOMA_CNS_SEED_FRACTION = 0.05`,
-    labelled "illustrative" in its own source line, and it is LOAD-BEARING: it sets how many intrathecal doses the brain needs, and so
-    whether a dog needs an implanted CSF port at all. At 0.05 the brain takes 16-18 doses (port); at 0.001 it takes 10 and at 0.0001
-    seven, which canine practice gives by percutaneous cisternal puncture without a port (112 dogs, PMID 25041580). No canine measurement
-    of occult CNS seeding at diagnosis was found. `LYMPHOMA_DURABLE_RESPONSE.md:242` separately models "30% CNS involvement", a different
-    quantity (share of dogs, not share of burden), so the record does not supply this number either.
-    This is the same failure pattern as CLAUDE.md failure 7: a bare illustrative literal gating a conclusion."""
+    """CLOSED 2026-11-16 (section M.11). Was an "illustrative" literal of 0.05 that set every brain dose count and decided whether a
+    dog needed an implanted CSF port. Now DERIVED as a bracket (low 3e-9, central 1e-6, high 1.2e-3) by two converging routes --
+    Poisson inversion of CNS relapse rates, and a cell-count conversion of occult CSF flow-cytometry positivity -- from canine
+    prevalence (PMID 27511313) and human CNS-IPI and occult-CSF anchors (PMIDs 27382100, 15358629, 24727817). The model runs the HIGH
+    branch, because one input (the CSF-to-tissue cell fraction) is still ASSUMED and the high branch is the conservative choice.
+    Consequence: the brain needs 8-10 intrathecal doses at the high branch and 2 at central, against 16-18 at the old literal -- all
+    inside ordinary percutaneous practice, so the implanted port is no longer required and its infection and anaesthetic costs fall
+    away. The one thing this does NOT give is a per-dog test: a positive CSF tap routes a dog to the full arm, but a negative tap rules
+    nothing out (6% of flow-negative humans still relapsed), and canine CSF yields ~2,500 lymphoid cells against the 50,000 a
+    diagnostic flow result needs. The cheap missing tool is a canine CNS-IPI, which has never been built."""
     from .core import lymphoma_grounded as G
-    return Item("CNS seeding fraction (sets the intrathecal dose count, and whether a port is needed)", "ASSUMED", False,
-                f"{G.CNS_SEED_FRACTION} is 'illustrative' in lymphoma_scenarios.py, not fitted or cited; load-bearing because the brain "
-                "dose count scales with it (0.05 -> 16-18 doses, needs a port; 0.0001 -> 7 doses, within percutaneous practice). "
-                "Closed by either a canine occult-CNS-seeding measurement or a written transfer from human CNS-relapse-risk data")
+    b = G.CNS_SEED_FRACTION_BRACKET
+    return Item("CNS seeding fraction (sets the intrathecal dose count, and whether a port is needed)", "DERIVED", True,
+                f"bracket low {b['low']:.0e} / central {b['central']:.0e} / high {b['high']:.0e}; model runs the high branch "
+                f"({G.CNS_SEED_FRACTION:.1e}). Two independent derivations converge; the superseded 0.05 was ~40x above the high "
+                "branch and implied clinically obvious CNS disease in a dog with no neurological signs")
 
 
 def sustained_additivity_item() -> Item:

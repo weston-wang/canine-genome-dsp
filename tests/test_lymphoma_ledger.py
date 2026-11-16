@@ -133,7 +133,9 @@ def test_time_windows_carry_the_documented_canine_caps():
     assert profile_for("doxorubicin").sustainable_days == 126.0          # 6 doses, 180 mg/m2 (PMID 30697816)
     assert profile_for("lomustine (CNS-penetrant nitrosourea)").hard_cap_days == 84.0
     assert profile_for("CD20 CAR-T").sustainable_days == 50.0            # persistence (PMID 32002286)
-    assert profile_for("prednisolone (glucocorticoid)").hard_cap_days == 150.0   # PMID 40696374
+    # 2026-11-16 (section M.10): the cap is now the MEASURED median onset of acquired glucocorticoid resistance, 68 d
+    # (PMID 31943234), which binds before the 150-day steroid-toxicity limit (PMID 40696374) that this line used to assert.
+    assert profile_for("prednisolone (glucocorticoid)").hard_cap_days == 68.0
 
 
 # ---------- the new defeat mechanics ----------

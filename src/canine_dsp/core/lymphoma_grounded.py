@@ -373,8 +373,19 @@ def sound_pool(agents) -> list:
         out.append(a)
     return out
 
-#: Fraction of the pre-treatment burden that seeds the CNS (lymphoma_scenarios.LYMPHOMA_CNS_SEED_FRACTION).
-CNS_SEED_FRACTION = 0.05
+#: Fraction of the pre-treatment burden that seeds the CNS. DERIVED 2026-11-16 (docs/universe/SWEEP_cns_seeding.md, section M.11),
+#: replacing an "illustrative" 0.05 that was never fitted. Two independent routes converge: Poisson inversion of CNS relapse rates,
+#: and a cell-count conversion of occult CSF flow-cytometry positivity. Bracket: low 3e-9, central 1e-6, HIGH 1.2e-3.
+#: Inputs: canine primary CNS lymphoma 4% and secondary 5-12% of all canine non-Hodgkin lymphoma (PMID 27511313, the only figure with
+#: the right denominator); human CNS-IPI 2-year CNS relapse 0.6 / 3.4 / 10.2% by risk group (PMID 27382100); occult CSF flow
+#: positivity 22% of 51 patients with clones down to 0.2% of CSF lymphocytes (PMID 15358629) and 13% of 246 DLBCL with 3-year freedom
+#: from CNS relapse 73% vs 94% (PMID 24727817). Grade DERIVED on TRANSFERRED inputs; one factor, the CSF-to-tissue cell fraction,
+#: remains ASSUMED, which is why the HIGH branch is the default rather than the central one.
+#: The old 0.05 sat ~40x above the high branch and ~5e4 above central: it describes a >1 cm3 CNS lesion in a dog whose whole burden is
+#: 1e8 cells, i.e. clinically obvious disease in an animal with no neurological signs. The direction of that error, recorded as
+#: "unknown" in section M.7, is now settled: it was TOO HIGH, and it is what forced the 16-18 dose count and the implanted port.
+CNS_SEED_FRACTION_BRACKET = {"low": 3e-9, "central": 1e-6, "high": 1.2e-3}
+CNS_SEED_FRACTION = CNS_SEED_FRACTION_BRACKET["high"]
 
 
 def potency_grade(a: Agent) -> str:

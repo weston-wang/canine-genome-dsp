@@ -70,7 +70,11 @@ PROFILES["prednisolone (glucocorticoid)"] = P(
     source="Dog (healthy Beagles, n=4). Infection incidence attributable to prednisolone in lymphoma "
            "dogs: NOT FOUND.",
     secondary_axis=O.GI, secondary_fraction=0.10, cumulative=True,
-    sustainable_days=150.0, hard_cap_days=150.0, reversible=True)
+    # 2026-11-16 (section M.10): the window is now set by RESISTANCE, not by steroid toxicity. Acquired glucocorticoid resistance in
+    # canine lymphoma has a MEASURED median onset of 68 days (PMID 31943234), and escape E1 (glucocorticoid-receptor loss) defeats this
+    # agent. The 150-day steroid-toxicity cap is kept as the toxicity statement but the useful window is the shorter of the two, so the
+    # model no longer credits prednisolone for 150 days when dogs lose the response at 68.
+    sustainable_days=68.0, hard_cap_days=68.0, reversible=True)
 
 # A maintenance-dose prednisolone variant: the standard practice for a chronic steroid, and the
 # honest way to ask whether the efflux-independent, non-division-gated carrier can be held for years.
