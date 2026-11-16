@@ -925,3 +925,23 @@ User: *"Were you answering if one escape happens after the next? And basically f
 - **Answer to the second half of the user's question: not quite.** It is not that sequential escapes "cannot happen in the real world". They can and do -- that is what the eight growing T-cell pairs are. What stops them, where they are stopped, is that every clone that arises is still being killed faster than it grows. That is a property of the regimen, not of the biology, and it has to be checked rather than assumed. It is now checked.
 
 `failing()` is empty, with this as the primary criterion and M.18's division budget as its corollary. 114 tests pass.
+
+### M.20 How the search was wrong, and how far lawful-only T-cell actually gets (2026-11-16)
+M.19 concluded that T-cell needs a tier-C CAR-T. That was true of the programme as written but was never tested against the best lawful regimen available: **M.15-M.19 only ever ADDED agents to a fixed four-agent programme.** Searching all 3-to-7-agent combinations of the 19 lawful T systemic agents instead finds a better one. Code: `T_BEST_LAWFUL_REGIMEN`, `T_BEST_LAWFUL_WORST_KILL`, `T_LAWFUL_BLOCKING_PAIR`, `t_cell_lawful_growth_threshold_item`.
+
+**The best lawful-only T-cell regimen** is six agents -- cyclophosphamide, prednisolone, hydroxychloroquine, verdinexor, weekly cytarabine infusion, and the matched allogeneic graft -- and its worst depth-1/depth-2 clone is killed at **0.0895/day**. The growth bar is **0.0903**. It misses by **0.0008/day: under one percent.**
+
+**Stated as a condition rather than a verdict, which is the honest form:** the lawful-only regimen blocks sequential stacking at any growth rate **below 0.0895/day**. The bar is a DERIVED net in-vivo band of **0.015-0.12/day** and the model runs it at the band's **upper end**, so the lawful regimen holds across **71% of the band, including all of its central values**, and fails only in the top slice 0.0895-0.12/day. The bar itself is unchanged -- what is reported is the threshold, not a retuned input.
+
+| | lawful-only, six agents | + tier-C dual-antigen CAR-T |
+|---|---|---|
+| typical growth (band centre, ~0.06/day) | **holds** | holds |
+| conservative bar (0.0903/day, band top) | misses by 0.0008 | holds to depth 3 (+0.0671) |
+
+**The irreducible lawful blocker** is **P-gp efflux together with TP53/apoptosis evasion**. Four lawful agents cover it -- weekly cytarabine infusion (0.062), the graft (0.048), cyclophosphamide (0.042), high-dose thiotepa (0.041) -- but they all sit on the **marrow axis**, and high-dose thiotepa alone consumes that entire budget, so they cannot be stacked. That is a toxicity-axis collision, not an absence of lawful agents, and it is why the last 0.0008/day cannot be bought lawfully.
+
+**So the corrected T-cell position:** a lawful-only regimen is durable against sequential stacking for a typically-growing T-cell lymphoma; the tier-C dual-antigen CAR-T is what buys durability at the fast-growing end of the band. Both are now stated, rather than the earlier flat claim that a CAR-T is required.
+
+**And the B-cell position is unchanged and stronger:** lawful-today agents hold at every reachable depth with margin to spare (+0.1973 at depth 1, +0.0256 at depth 2).
+
+`failing()` is empty. 115 tests pass.

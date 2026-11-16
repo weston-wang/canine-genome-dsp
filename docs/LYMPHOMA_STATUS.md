@@ -480,3 +480,12 @@ User: "Were you answering if one escape happens after the next?" Yes -- and that
 - **So the T-cell CD5+CD7 dual-antigen CAR-T is LOAD-BEARING for durability**, not headroom (with it: +0.2616 / +0.1653 / +0.0671, nothing grows).
 - **Correction to the framing:** sequential escapes are NOT impossible in the real world -- the 8 T-cell pairs are exactly that. What stops them where they are stopped is that each clone is killed faster than it grows, a property of the regimen that must be checked, not assumed.
 - `failing()` empty; 114 tests pass.
+
+### M.20 (2026-11-16): the search method was wrong; lawful-only T-cell gets to within 1% of the bar
+Details `LYMPHOMA_UNIVERSE.md` M.20.
+- **M.15-M.19 only ever ADDED agents to a fixed four-agent T programme**, which is why they concluded a tier-C CAR-T was required. Searching all 3-7 agent combinations of the 19 lawful T systemic agents finds a better regimen.
+- **Best lawful-only T-cell regimen** (cyclophosphamide, prednisolone, hydroxychloroquine, verdinexor, weekly cytarabine CRI, matched allogeneic graft): worst depth-1/2 clone killed at **0.0895/day** against a bar of 0.0903 -- **misses by 0.0008, under 1%**.
+- **As a condition:** it blocks sequential stacking at any growth below 0.0895/day = **71% of the DERIVED band (0.015-0.12), including all central values**; fails only in the top slice. The bar is unchanged; this is a threshold, not a retune.
+- **Irreducible lawful blocker:** P-gp efflux + TP53 evasion. The four lawful agents covering it (cytarabine CRI 0.062, graft 0.048, cyclophosphamide 0.042, thiotepa 0.041) all share the **marrow axis**, and high-dose thiotepa alone consumes it, so they cannot be stacked. A toxicity-axis collision, not a missing agent.
+- **Corrected position:** lawful-only T-cell is durable for a typically-growing tumour; the tier-C dual-antigen CAR-T buys durability at the fast-growing end. B-cell unchanged and stronger (lawful-today, +0.1973 / +0.0256).
+- `failing()` empty; 115 tests pass.

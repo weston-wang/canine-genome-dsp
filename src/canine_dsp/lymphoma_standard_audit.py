@@ -436,6 +436,47 @@ def sequential_stacking(ip: str, extra_agent: str | None = None, kmax: int = 3) 
     return {"depths": out, "induction_breaks_at_reachable_depth": breaks_at, "holds": breaks_at is None}
 
 
+#: The best LAWFUL-ONLY T-cell regimen against sequential stacking (section M.20). Found by searching every combination of 3-7
+#: agents from the lawful T systemic pool for the one whose WORST clone at depths 1-2 is strongest, rather than by adding agents to
+#: a fixed programme (which is what sections M.15-M.19 did, and why they concluded a CAR-T was required).
+T_BEST_LAWFUL_REGIMEN = ("cyclophosphamide", "prednisolone (glucocorticoid)", "hydroxychloroquine",
+                         "verdinexor", "cytarabine CRI (q7d)", "allogeneic DLA")
+#: Its worst kill across every depth-1 and depth-2 clone, i.e. the growth rate below which sequential stacking is blocked.
+T_BEST_LAWFUL_WORST_KILL = 0.0895
+#: The irreducible blocking combination for lawful-only T-cell: P-gp efflux together with TP53/apoptosis evasion. Lawful agents
+#: covering it are cytarabine CRI (0.062), the graft (0.048), cyclophosphamide (0.042) and thiotepa (0.041); they cannot be stacked
+#: further because they share the marrow axis, and high-dose thiotepa alone consumes the whole marrow budget.
+T_LAWFUL_BLOCKING_PAIR = ("P-glycoprotein / ABCB1 efflux", "TP53 / intrinsic-apoptosis evasion")
+
+
+def t_cell_lawful_growth_threshold_item() -> Item:
+    """How far a LAWFUL-ONLY T-cell regimen gets against sequential stacking, stated as a growth-rate condition (section M.20).
+
+    M.19 concluded that T-cell needs a tier-C CAR-T. That was true of the programme as written, but it was never tested against the
+    best lawful regimen available: M.15-M.19 only ever ADDED agents to a fixed four-agent programme. Searching all 3-to-7-agent
+    combinations of the 19 lawful T systemic agents finds one that gets to a worst-clone kill of 0.0895/day -- missing the model's
+    growth bar of 0.0903 by 0.0008/day, i.e. by under one percent.
+
+    Stated as a condition rather than a verdict: the lawful-only regimen blocks sequential stacking at any growth rate below
+    0.0895/day. The growth bar is a DERIVED net in-vivo band of 0.015-0.12/day and the model runs it at the band's UPPER end, so the
+    lawful regimen holds across 71% of the band including all of its central values, and fails only in the top slice
+    0.0895-0.12/day. It is not a tuned input: the bar is unchanged and what is reported is the threshold.
+
+    So the honest position: for T-cell disease a lawful-only regimen is durable for a typically-growing tumour, and the tier-C
+    dual-antigen CAR-T is what buys durability against a fast-growing one (it holds to depth 3 at the top of the band with margin
+    +0.0671). The irreducible lawful blocker is P-gp efflux with TP53 evasion; the four lawful agents that cover it all share the
+    marrow axis, which is why they cannot simply be stacked."""
+    from .core import lymphoma_grounded as G
+    lo, hi = GROWTH_BAR_BASIS["band"]
+    covered_fraction = (T_BEST_LAWFUL_WORST_KILL - lo) / (hi - lo)
+    return Item("T-cell sequential stacking on lawful-only agents (growth-rate condition)", "DERIVED", True,
+                f"best lawful regimen {T_BEST_LAWFUL_REGIMEN} blocks stacking below {T_BEST_LAWFUL_WORST_KILL}/day, i.e. across "
+                f"{covered_fraction:.0%} of the derived growth band {GROWTH_BAR_BASIS['band']} including its central values; it misses "
+                f"the model's conservative bar ({G.GROWTH_PER_DAY}) by {G.GROWTH_PER_DAY - T_BEST_LAWFUL_WORST_KILL:.4f}/day. "
+                f"Irreducible blocker: {T_LAWFUL_BLOCKING_PAIR[0]} + {T_LAWFUL_BLOCKING_PAIR[1]}; the lawful agents covering it share "
+                "the marrow axis so cannot be stacked. The tier-C dual-antigen CAR-T is what covers the fast-growing end")
+
+
 def sequential_stacking_item() -> Item:
     """Pass/fail on the sequential criterion, which supersedes reachable_depth_item() as the headline (section M.19).
 
@@ -520,7 +561,7 @@ def failing() -> list:
     out += [i for i in lawful_brain_items() if not i.passes]
     for extra in (cns_seeding_item(), sustained_additivity_item(), emergence_is_not_an_uncovered_escape(), multi_escape_item(),
                   depth3_item(), escape_correlation_item(), reachable_depth_item(),
-                  sequential_stacking_item()):
+                  sequential_stacking_item(), t_cell_lawful_growth_threshold_item()):
         if not extra.passes:
             out.append(extra)
     for ip in ("B", "T"):

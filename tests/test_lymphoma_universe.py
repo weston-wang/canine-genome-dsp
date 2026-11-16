@@ -973,3 +973,39 @@ def test_sequential_escape_stacking_is_what_the_margin_actually_prevents():
     # the induction must break no later than the depth the division budget can reach, or M.18's bound is void
     assert A.division_budget_reachable_depth()["reachable_depth"] == 2
     assert A.sequential_stacking_item().passes
+
+
+def test_the_best_lawful_t_cell_regimen_blocks_stacking_across_most_of_the_growth_band():
+    """Section M.20 -- correcting how M.15-M.19 searched. Those sections only ever ADDED agents to a fixed four-agent T-cell
+    programme, and so concluded a tier-C CAR-T was required. Searching all 3-to-7-agent combinations of the 19 lawful T systemic
+    agents instead finds a six-agent lawful regimen whose worst depth-1/depth-2 clone is killed at 0.0895/day -- short of the
+    model's 0.0903 bar by 0.0008, under one percent.
+    Reported as a condition, not a verdict: the lawful regimen blocks sequential stacking at any growth rate below 0.0895/day,
+    which is 71% of the DERIVED net band (0.015-0.12) and includes all its central values; the bar itself is unchanged, so this is
+    a threshold rather than a tuned input. The tier-C dual-antigen CAR-T is what covers the fast-growing end of the band.
+    The irreducible lawful blocker is P-gp efflux with TP53 evasion: the four lawful agents that cover it all sit on the marrow
+    axis, and high-dose thiotepa alone consumes that whole budget, so they cannot be stacked."""
+    from itertools import combinations
+    from canine_dsp import lymphoma_standard_audit as A, lymphoma_joint as J, lymphoma_sustained as S
+    from canine_dsp import lymphoma_grounded_inputs as gi
+    from canine_dsp.core import lymphoma_grounded as G
+    from canine_dsp.core.lymphoma_catalogue import SYSTEMIC
+
+    esc = J._escapes("T")
+    pool = S.lawful_pool("T", SYSTEMIC)
+    reg = [[v for k, v in pool.items() if k.startswith(n)][0] for n in A.T_BEST_LAWFUL_REGIMEN]
+    d, _, _ = G.derate(reg, gi.EFFLUX_CO_DOSE_MULTIPLIER_CANINE_PROXY)
+    worst_kill = min(sum(a.effective_kill for a in d if G.covers_conjunction(a, c))
+                     for k in (1, 2) for c in combinations(esc, k))
+    # the recorded threshold is what the regimen actually achieves
+    assert abs(worst_kill - A.T_BEST_LAWFUL_WORST_KILL) < 5e-4, worst_kill
+    # it misses the conservative bar by under 1%
+    assert 0 < G.GROWTH_PER_DAY - worst_kill < 0.01 * G.GROWTH_PER_DAY
+    # and it covers the central part of the derived band
+    lo, hi = A.GROWTH_BAR_BASIS["band"]
+    assert lo < worst_kill < hi and (worst_kill - lo) / (hi - lo) > 0.6
+    # the blocking pair is the one recorded, and it is a lawful-coverage problem not a lawful-absence problem
+    blockers = [e for e in esc if e.name in A.T_LAWFUL_BLOCKING_PAIR]
+    assert len(blockers) == 2
+    assert any(G.covers_conjunction(a, tuple(blockers)) for a in pool.values())
+    assert A.t_cell_lawful_growth_threshold_item().passes
