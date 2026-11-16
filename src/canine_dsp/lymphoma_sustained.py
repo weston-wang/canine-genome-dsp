@@ -277,7 +277,12 @@ def lawful_pool(ip: str, comp: str) -> dict:
 #: twice-weekly dosing); the brain adds one 23.4 Gy course and repeated intrathecal methotrexate.
 LAWFUL_PROGRAMS = {
     "B": ("hydroxychloroquine", "verdinexor", "allogeneic DLA", "cytarabine CRI (q7d)"),
-    "T": ("prednisolone", "hydroxychloroquine", "verdinexor", "allogeneic DLA", "romidepsin", "cytarabine CRI (q7d)"),
+    # romidepsin REMOVED 2026-11-16 (section M.8): it was abandoned in dogs for serious cardiotoxicity and rescued for humans only by
+    # redesigning the dose regimen (PMID 23668378); no dog has received it in vivo. That is a species-specific pharmacologic objection,
+    # the only one among the eight treatments, so it is excluded under CLAUDE.md rule 13 ("kill is contradicted / toxicity cannot be
+    # afforded"), not for want of canine data. It was not load-bearing: dropping it SHORTENS the T body window (147 d vs 168) because its
+    # toxicity budget had been de-rating the rest, and leaves the T brain unchanged at 18 doses.
+    "T": ("prednisolone", "hydroxychloroquine", "verdinexor", "allogeneic DLA", "cytarabine CRI (q7d)"),
 }
 
 

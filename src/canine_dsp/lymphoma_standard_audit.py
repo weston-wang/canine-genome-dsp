@@ -126,6 +126,32 @@ def cns_seeding_item() -> Item:
                 "Closed by either a canine occult-CNS-seeding measurement or a written transfer from human CNS-relapse-risk data")
 
 
+def sustained_additivity_item() -> Item:
+    """OUTCOME TEST THE MODEL FAILS (section M.8, found 2026-11-16 from the prior-art sweep).
+
+    A canine trial compared a 2-year maintenance phase (75 dogs) with discontinuous therapy (333 dogs) and found NO difference
+    (PMID 28100766). The model, run on the same regimen, says otherwise: sustained CHOP clears inside the window at 365 days and
+    beyond. Localising it shows the error is in ADDITIVITY UNDER SUSTAIN, not in the division-gated logic, which is right on its own:
+      - CHOP cytotoxics alone (doxorubicin + vincristine + cyclophosphamide), all division-gated: never clears at 126/365/730 d. Correct.
+      - prednisolone alone (not division-gated): never clears. Correct -- real median survival on prednisolone is 1-2 months.
+      - the two TOGETHER, sustained: clears at 365 d. Contradicted by the 408-dog comparison.
+    So summing a non-gated agent's kill with gated agents' kill and then extending the window crosses the clearance threshold in the
+    model where it does not in dogs. This is the SAME construction every window in sections J-M.7 rests on (hydroxychloroquine and the
+    graft non-gated, verdinexor and cytarabine gated, sustained for 147-483 days), so it puts a question over all of those windows, in
+    the direction of the model being too optimistic. Magnitude not yet bounded.
+
+    Not a reason to discard the programme: the escape-coverage conjunction and the toxicity budget are unaffected, and the brain arm's
+    radiation and intrathecal terms are separately derived. But the DURATION numbers are now graded CONTRADICTED until this is
+    reconciled -- by calibrating the additivity against the maintenance null, or by showing why the trial's maintenance (reduced-dose,
+    spaced cytotoxics) is not what the model simulated."""
+    return Item("sustained additive kill vs the canine maintenance null", "CONTRADICTED", False,
+                "model: sustained CHOP clears at >=365 d; dogs: 2-year maintenance (n=75) no better than discontinuous (n=333), "
+                "PMID 28100766. Error localised to additivity under sustain (cytotoxics alone and prednisolone alone both correctly "
+                "never clear). Every quoted window in sections J-M.7 uses the same construction, so all are suspect in the optimistic "
+                "direction; magnitude unbounded. Closed by calibrating additivity to the maintenance null, or by showing the trial's "
+                "reduced-dose spaced maintenance is not what the model simulates")
+
+
 def failing() -> list:
     """Every input that fails the stated bar. Empty means nothing fails; this is what to quote."""
     out = []
@@ -133,9 +159,9 @@ def failing() -> list:
     if not gb.passes:
         out.append(gb)
     out += [i for i in lawful_brain_items() if not i.passes]
-    cs = cns_seeding_item()
-    if not cs.passes:
-        out.append(cs)
+    for extra in (cns_seeding_item(), sustained_additivity_item()):
+        if not extra.passes:
+            out.append(extra)
     for ip in ("B", "T"):
         out += [i for i in program_potency_items(ip) if not i.passes]
         out += [i for i in load_bearing_unsourced(ip) if not i.passes]
