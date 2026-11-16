@@ -517,3 +517,11 @@ Details `LYMPHOMA_UNIVERSE.md` M.23; sweep `docs/universe/SWEEP_missing_lawful_c
 - **Kill-contradicted / undeliverable:** carboplatin 0/8 single agent (PMID 26463827); etoposide (50% IV hypersensitivity, 13% oral F). Hydroxyurea is a search failure, not an evidence absence.
 - **The structural insight:** every drug that evades both P-gp and p53 does so by arresting protein synthesis, and that class spares dormant cells. The blocking pair is hard for a mechanistic reason, not for want of searching.
 - **Net: the 0.00082/day T-cell residual at the top of the band STANDS.** Single named route to a lawful closure: measure canine CD25, then evaluate denileukin diftitox.
+
+### M.24 (2026-11-16): the denileukin gate is a database question, not a bench measurement
+Details `LYMPHOMA_UNIVERSE.md` M.24.
+- M.23 left denileukin diftitox-cxdl (Lymphir, FDA 2024) gated on "unmeasured" canine CD25. **It is not unmeasured.** CD25 is in the **standard canine lymphoma flow-cytometry panel** and is prognostic: in 49 dogs, high B-cell CD25 was independently associated with shorter survival (PMID 35996942). It is also reported on canine T-cell lymphoma (CD4+ PTCL-NOS, variable CD25, PMID 30229963).
+- **So the route shortens** from new bench work to **a retrospective query of flow databases that already hold the data** (CD25-positive fraction and density in canine T-cell lymphoma).
+- **But it does not open the gate:** "variable expression" in one case report is not a kill input, so the agent stays unevaluated.
+- **And a caution that applies even if CD25 is favourable:** denileukin kills by protein-synthesis arrest, the same class that M.23 showed spares dormant cells and that excluded L-asparaginase. It must pass the E5 dormant-cell test before it can carry any closure.
+- **T-cell residual unchanged: -0.00082/day at the top of the derived band.** Every escape covered; the shortfall is margin at the conservative extreme. Two-step route named.
