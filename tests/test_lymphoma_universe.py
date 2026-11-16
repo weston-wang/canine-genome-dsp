@@ -905,3 +905,34 @@ def test_the_depth5_conclusion_is_a_bound_not_an_independence_assumption():
     assert item.grade == "DERIVED" and item.passes
     # nothing fails the bar any more
     assert A.failing() == []
+
+
+def test_the_reachable_escape_depth_is_two_and_b_cell_closes_it_lawfully_today():
+    """Section M.18 -- the headline the whole depth analysis was for, and the answer to 'close the escapes that have no answer'.
+
+    A depth-k cell needs k escapes to arise, and each arises only at a cell division. The tumour's TOTAL division budget, from one
+    transformed cell to a burden of 1e8 plus ten further years of residual population, is about 3.3e10 divisions. Against that:
+    depth 1 expects 3.3e8 cells and depth 2 expects 3.3e3 -- both occur -- while **depth 3 expects 3.3e-4, about 3,400 times fewer
+    than one cell**. So no depth-3 cell is ever assembled, not because it is improbable but because there are not enough divisions
+    to build one. That is a physical bound, which is what replaces the rarity argument of M.13-M.17.
+    And at the reachable depth: **B-cell closes every combination on LAWFUL-TODAY agents alone** (+0.0256/day), while T-cell does not
+    (-0.0172) and no combination of up to three lawful additions closes it, so T-cell needs one tier-C dual-antigen CAR-T. That
+    difference in tier is reported, as rule 13 requires, rather than averaged away."""
+    from canine_dsp import lymphoma_standard_audit as A
+
+    d = A.division_budget_reachable_depth()
+    assert d["divisions"] > 1e10
+    assert d["depths"][1] >= 1.0 and d["depths"][2] >= 1.0      # depths 1 and 2 occur
+    assert d["depths"][3] < 1.0                                  # depth 3 cannot be assembled at all
+    assert d["reachable_depth"] == 2
+
+    c = A.closure_to_reachable_depth()
+    assert c["reachable_depth"] == 2
+    # B-cell needs nothing beyond what a vet can obtain today
+    assert c["B"]["lawful_only_closes"] and c["B"]["needs_tier_C_agent"] is None
+    # T-cell does, and the requirement is named rather than glossed
+    assert not c["T"]["lawful_only_closes"]
+    assert "CAR-T" in c["T"]["needs_tier_C_agent"]
+
+    assert A.reachable_depth_item().passes
+    assert A.failing() == []

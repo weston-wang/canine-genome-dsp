@@ -461,3 +461,12 @@ Details `LYMPHOMA_UNIVERSE.md` M.17.
 - **Independence assumption REPLACED by a computed bound.** Depth-5 combinations are not covered by treatment in either lineage (no addition of up to three universal agents closes them inside the toxicity budget), so the closure rests on whether they can occur. The most probable unclosed depth-5 combination needs **1.8e6x (B) / 5.6e5x (T) correlation per conditional step** to reach one expected cell. At the strongest mutator rate measured in any tumour (mismatch-repair-deficient, ~1000x) it still expects **1e-13 (B) / 1e-11 (T)** cells. Insensitive by 11-13 orders of magnitude. Graded DERIVED (the 1000x ceiling itself is TRANSFERRED from human cancer genetics).
 - **Depth ladder:** depth 1 closed; depths 2-4 closed with one tier-C dual-antigen CAR-T per lineage; depth 5+ not covered by treatment but cannot occur even at a 1000x mutator rate.
 - **`failing()` is empty.** 112 tests pass.
+
+### M.18 (2026-11-16): the division budget caps the reachable depth at 2; B-cell closes it lawfully today
+Details `LYMPHOMA_UNIVERSE.md` M.18. This replaces the rarity argument of M.13-M.17 with a physical bound.
+- **A depth-k cell needs k escapes, each arising only at a cell division.** Total divisions from one cell to burden 1e8 plus ten years of residual population = **3.3e10**. Depth 1 expects 3.3e8 cells, depth 2 expects 3.3e3 (both occur), **depth 3 expects 3.3e-4 -- about 3,400x fewer than one cell, so it is never assembled.** Not improbable: unbuildable. **Reachable depth = 2.**
+- **B-cell closes every reachable combination on LAWFUL-TODAY agents alone** (worst margin +0.0256/day). No near-future agent needed.
+- **T-cell does not** (-0.0172) and no combination of up to three lawful additions closes it, so T-cell requires **one tier-C CD5+CD7 dual-antigen CAR-T**.
+- M.17's correlation sweep stands as a secondary check (at a 1000x mutator rate depth 5 is still 11-13 orders below one cell).
+- The dual-antigen constructs remain headroom beyond the reachable depth; B-cell does not depend on them.
+- **`failing()` empty; 113 tests pass.**

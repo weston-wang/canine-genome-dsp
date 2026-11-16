@@ -880,3 +880,27 @@ M.16 left two failing items. Both are now closed by work rather than by argument
 | 5+ | not covered by treatment; **cannot occur even at a 1000x mutator rate** | same |
 
 **Tier mix (rule 13):** body and brain programmes are tier A/B, lawful today; closing depths 2-4 needs one tier-C dual-antigen CAR-T per lineage (tandem CD19/CD20 for B, CD5+CD7 for T). 112 tests pass.
+
+### M.18 The division budget: depth 3 is not rare, it is unbuildable -- and B-cell closes the reachable depth lawfully today (2026-11-16)
+Sections M.13-M.17 closed the deep escape ladder with a **rarity** argument, which is weaker than it needed to be. The right bound is physical, not probabilistic. Code: `division_budget_reachable_depth`, `closure_to_reachable_depth`, `reachable_depth_item`; test `test_the_reachable_escape_depth_is_two_and_b_cell_closes_it_lawfully_today`.
+
+**A depth-k cell needs k escapes to arise, and each one arises only at a cell division.** So the ceiling is set by how many divisions the tumour will ever perform, not by how unlikely a combination looks. From one transformed cell to a burden of 1e8, plus ten further years of a residual population held at or below that burden: **2N + N x growth x 3650 = about 3.3e10 divisions.**
+
+| depth | expected cells against that budget | status |
+|---|---|---|
+| 1 | 3.3e8 | occurs |
+| 2 | 3.3e3 | occurs |
+| **3** | **3.3e-4** | **never assembled -- about 3,400 times fewer than one cell** |
+
+So **the reachable escape depth is 2**, not 5. Depth 3 and beyond are not "improbable"; the tumour does not perform enough divisions to build one, over its whole history plus a decade of follow-up. This supersedes the correlation sweep of M.17 as the primary bound (that sweep stands as a secondary check: even at a 1000-fold mutator rate, depth 5 stays 11-13 orders below one cell).
+
+**And at the reachable depth, the two lineages differ in a way worth stating plainly:**
+
+| | worst margin over all combinations to depth 2 | closes on lawful-today agents? | requirement |
+|---|---|---|---|
+| **B-cell** | **+0.0256 /day** | **YES** | none beyond what a vet can obtain today |
+| **T-cell** | **-0.0172 /day** | **no** | one tier-C **CD5 + CD7 dual-target CAR-T**; no combination of up to three lawful additions closes it |
+
+So the honest headline, replacing every earlier version: **B-cell multicentric lymphoma closes every escape combination that can physically occur, on agents a US vet can lawfully obtain today. T-cell closes depth 1 lawfully but needs one near-future dual-antigen CAR-T to close depth 2.** The dual-antigen constructs of M.16-M.17 remain useful as headroom beyond the reachable depth, but B-cell does not depend on them.
+
+`failing()` is empty, and the closure is now stated as a conjunction over the depths that occur rather than over an unbounded ladder. 113 tests pass.

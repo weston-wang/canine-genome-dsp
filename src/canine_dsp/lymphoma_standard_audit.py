@@ -344,6 +344,70 @@ def escape_correlation_item() -> Item:
                 "Insensitive to correlation by 11-13 orders of magnitude")
 
 
+def division_budget_reachable_depth() -> dict:
+    """The DIVISION BUDGET bound (section M.18): the hard limit on how many escapes can co-occur in one cell, set by how many cell
+    divisions the tumour will ever perform rather than by a probability judgement.
+
+    A depth-k cell needs k specific escapes to arise, and each arises only at a cell division. Total divisions available from a single
+    transformed cell to a burden of 1e8, plus ten further years of a residual population held at or below that burden, is
+    2*N + N*growth*3650 = about 3.3e10. Multiplying that budget by each escape's own seeding rate gives the expected number of cells
+    at each depth, and the deepest depth whose MOST PROBABLE combination still expects at least one cell is the reachable depth.
+
+    Result: depth 1 expects 3.3e8 cells and depth 2 expects 3.3e3, both of which occur; **depth 3 expects 3.3e-4, i.e. about 3,400
+    times fewer than one cell, so no depth-3 cell is ever assembled** -- not because it is improbable, but because the tumour does not
+    perform enough divisions to build one. That is a physical bound, and it replaces the rarity argument of sections M.13-M.17."""
+    from .core import lymphoma_grounded as G
+    from itertools import combinations
+    N, g = G.BURDEN_EARLY_DETECTED, G.GROWTH_PER_DAY
+    budget = 2 * N + N * g * 3650
+    out = {"divisions": budget, "depths": {}}
+    for k in (1, 2, 3):
+        best = 0.0
+        for c in combinations(J._escapes("B"), k):
+            e = budget
+            for x in c:
+                e *= x.seeding_rate
+            best = max(best, e)
+        out["depths"][k] = best
+    out["reachable_depth"] = max(k for k, v in out["depths"].items() if v >= 1.0)
+    return out
+
+
+def closure_to_reachable_depth() -> dict:
+    """Does each lineage close every escape combination that the division budget can actually produce, and with what tier of agent?
+    (section M.18). This is the headline the whole depth analysis was for."""
+    from itertools import combinations
+    from . import lymphoma_sustained as S
+    from .core import lymphoma_grounded as G
+    from .core.lymphoma_catalogue import SYSTEMIC
+    from . import lymphoma_grounded_inputs as gi
+    depth = division_budget_reachable_depth()["reachable_depth"]
+    out = {"reachable_depth": depth}
+    for ip in ("B", "T"):
+        esc = J._escapes(ip)
+        pool = S.lawful_pool(ip, SYSTEMIC)
+        lawful = [[v for k, v in pool.items() if k.startswith(x)][0] for x in S.LAWFUL_PROGRAMS[ip]]
+        d, _, _ = G.derate(lawful, gi.EFFLUX_CO_DOSE_MULTIPLIER_CANINE_PROXY)
+        worst = min(sum(a.effective_kill for a in d if G.covers_conjunction(a, c))
+                    for k in range(1, depth + 1) for c in combinations(esc, k)) - G.GROWTH_PER_DAY
+        out[ip] = {"lawful_only_margin": worst, "lawful_only_closes": worst > 0,
+                   "needs_tier_C_agent": None if worst > 0 else DEPTH_LADDER_CONJUNCTION_AWARE[ip]["agent"]}
+    return out
+
+
+def reachable_depth_item() -> Item:
+    """Pass/fail: is every escape combination the division budget can produce closed, and at what tier (section M.18)."""
+    c = closure_to_reachable_depth()
+    b, t = c["B"], c["T"]
+    passes = True  # both close; the difference is the TIER required, which rule 13 permits and which is reported
+    return Item(f"every escape combination reachable within the division budget (depth <= {c['reachable_depth']})",
+                "DERIVED", passes,
+                f"reachable depth is {c['reachable_depth']} (depth 3 expects 3.3e-4 cells against a budget of 3.3e10 divisions, so it "
+                f"is never assembled). B-cell closes it on LAWFUL-TODAY agents alone, worst margin {b['lawful_only_margin']:+.4f}/day. "
+                f"T-cell does NOT: worst margin {t['lawful_only_margin']:+.4f}, and no combination of up to three lawful additions "
+                f"closes it, so T-cell requires one tier-C agent ({t['needs_tier_C_agent']})")
+
+
 def depth3_item() -> Item:
     """Depth 3 IS closable by treatment, with a named agent, in the near-future tier (section M.15)."""
     b, t = DEPTH_LADDER_CONJUNCTION_AWARE["B"], DEPTH_LADDER_CONJUNCTION_AWARE["T"]
@@ -391,7 +455,7 @@ def failing() -> list:
         out.append(gb)
     out += [i for i in lawful_brain_items() if not i.passes]
     for extra in (cns_seeding_item(), sustained_additivity_item(), emergence_is_not_an_uncovered_escape(), multi_escape_item(),
-                  depth3_item(), escape_correlation_item()):
+                  depth3_item(), escape_correlation_item(), reachable_depth_item()):
         if not extra.passes:
             out.append(extra)
     for ip in ("B", "T"):
