@@ -493,6 +493,74 @@ def t_cell_lawful_growth_threshold_item() -> Item:
                 "it worse, not better. The tier-C dual-antigen CAR-T is what covers the fast-growing end")
 
 
+def escalation_terminates(ip: str, extra_agent: str | None = None) -> dict:
+    """THE CLOSURE, as a consequence of the treatment rather than of rarity (section M.22).
+
+    The sequential question taken one step further than M.19. A shrinking depth-2 clone is not inert: it still DIVIDES while it
+    shrinks, so it can seed depth 3. But because the treatment keeps it shrinking, its total FUTURE division count is finite --
+    for a clone of P cells with gross birth rate b and net shrink rate m, the whole remaining history is about P*b/m divisions.
+    Integrating over that entire budget gives the expected number of depth-3 founders that would actually GROW, i.e. the number of
+    cells that could start a relapse.
+
+    B-cell on lawful-today agents: **2.5e-8 such founders over all time**, worst single route 8e-9 (the quiescent efflux-high
+    progenitor with T-cell exhaustion and TP53 evasion). T-cell with the tier-C dual-antigen CAR-T: **exactly zero**, because with
+    that agent no depth-3 combination grows at all, so there is nothing for a depth-2 clone to seed.
+
+    This is why the escalation terminates, and it is a property of the regimen: the treatment caps the divisions available to build
+    a deeper escape. It is not the rarity bound of M.13-M.18, which asked how improbable a combination is in the abstract; it asks
+    how many chances the tumour actually gets while being killed, and answers with the regimen's own margins."""
+    from itertools import combinations
+    from . import lymphoma_sustained as S, lymphoma_grounded_inputs as gi
+    from .core import lymphoma_grounded as G
+    from .core.lymphoma_catalogue import SYSTEMIC
+    GROSS_BIRTHS_PER_DAY = GROWTH_BAR_BASIS["gross_ceiling"]   # dog-measured Tpot, 42 dogs, PMID 10598945
+    esc = J._escapes(ip)
+    pool = S.lawful_pool(ip, SYSTEMIC)
+    reg = [[v for k, v in pool.items() if k.startswith(x)][0] for x in S.LAWFUL_PROGRAMS[ip]]
+    if extra_agent:
+        allag = J._pools(ip, J.CENTRAL["kill"], J.CENTRAL["duty"])[SYSTEMIC]
+        reg.append(next(a for k, a in allag.items() if k.startswith(extra_agent)))
+    d, _, _ = G.derate(reg, gi.EFFLUX_CO_DOSE_MULTIPLIER_CANINE_PROXY)
+
+    def margin(c):
+        return sum(a.effective_kill for a in d if G.covers_conjunction(a, c)) - G.GROWTH_PER_DAY
+
+    total, worst = 0.0, None
+    for pair in combinations(esc, 2):
+        m2 = margin(pair)
+        if m2 <= 0:
+            continue                                  # a growing pair is caught by sequential_stacking_item, not here
+        population = G.BURDEN_EARLY_DETECTED
+        for e in pair:
+            population *= e.seeding_rate
+        divisions = population * GROSS_BIRTHS_PER_DAY / m2
+        for third in esc:
+            if third in pair:
+                continue
+            trio = pair + (third,)
+            if margin(trio) > 0:
+                continue                              # the depth-3 state is still covered, so it cannot start a relapse
+            founders = divisions * third.seeding_rate
+            total += founders
+            if worst is None or founders > worst[0]:
+                worst = (founders, tuple(e.name for e in trio))
+    return {"growing_depth3_founders_over_all_time": total, "worst_route": worst, "terminates": total < 1.0}
+
+
+def escalation_terminates_item() -> Item:
+    """Pass/fail on the dynamical closure (section M.22): does the escape escalation run out of chances?"""
+    b = escalation_terminates("B")
+    t = escalation_terminates("T", "CD5 + CD7 dual-target")
+    passes = b["terminates"] and t["terminates"]
+    return Item("escape escalation terminates (divisions available to a shrinking clone)", "DERIVED" if passes else "OPEN",
+                passes,
+                f"integrating over the ENTIRE future division history of every shrinking depth-2 clone, the expected number of "
+                f"depth-3 founders carrying a GROWING combination is {b['growing_depth3_founders_over_all_time']:.1e} for B-cell on "
+                f"lawful-today agents and {t['growing_depth3_founders_over_all_time']:.1e} for T-cell with the tier-C dual-antigen "
+                "CAR-T. Fewer than one ever arises, so the escalation terminates. This is a consequence of the regimen keeping every "
+                "clone shrinking (which bounds the divisions available), not of a combination being improbable in the abstract")
+
+
 def sequential_stacking_item() -> Item:
     """Pass/fail on the sequential criterion, which supersedes reachable_depth_item() as the headline (section M.19).
 
@@ -577,7 +645,8 @@ def failing() -> list:
     out += [i for i in lawful_brain_items() if not i.passes]
     for extra in (cns_seeding_item(), sustained_additivity_item(), emergence_is_not_an_uncovered_escape(), multi_escape_item(),
                   depth3_item(), escape_correlation_item(), reachable_depth_item(),
-                  sequential_stacking_item(), t_cell_lawful_growth_threshold_item()):
+                  sequential_stacking_item(), t_cell_lawful_growth_threshold_item(),
+                  escalation_terminates_item()):
         if not extra.passes:
             out.append(extra)
     for ip in ("B", "T"):

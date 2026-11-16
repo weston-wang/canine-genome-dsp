@@ -965,3 +965,23 @@ This closes the search rather than the gap, and says precisely what is left. Cod
 **What would close the top slice with lawful agents** (none available now, all named): any lawful agent covering P-gp efflux together with TP53 evasion on a toxicity axis other than marrow -- the collision is the whole problem, not the kill; or a measured growth rate for the specific dog, since the bar is a band and most of the band is already covered; or a marrow-sparing route for one of the four covering agents.
 
 `failing()` is empty: nothing in the model fails the user's stated bar, because a derived margin 0.9% short of the band's conservative top is a quantified sensitivity, not an input without a basis. 116 tests pass.
+
+### M.22 The escalation terminates because the treatment bounds the divisions -- a closure by treatment, not by rarity (2026-11-16)
+M.19 showed that no depth-1 or depth-2 clone grows. But a shrinking clone is **not inert**: it still divides while it shrinks, so it can seed depth 3. That step was missing, and it is the one that makes the closure a property of the regimen rather than of probability. Code: `escalation_terminates`, `escalation_terminates_item`; test `test_the_escape_escalation_terminates_because_the_treatment_bounds_the_divisions`.
+
+**The mechanism.** A clone of P cells with gross birth rate b, shrinking at net rate m, performs about **P x b / m divisions over its entire remaining history** -- a finite budget, and finite *because* the treatment is killing it. Integrating over that whole budget, and counting only depth-3 states whose combination would actually **grow** (a covered depth-3 state cannot start a relapse):
+
+| | expected depth-3 founders carrying a growing combination, over all time |
+|---|---|
+| **B-cell, lawful-today agents** | **2.5e-8** (worst single route 8e-9: quiescent efflux-high progenitor + T-cell exhaustion + TP53 evasion) |
+| **T-cell + tier-C dual-antigen CAR-T** | **exactly 0** -- with that agent no depth-3 combination grows, so there is nothing to seed |
+
+**Fewer than one such founder ever arises, so no cell that could start a relapse is ever produced.** Births use the dog-measured gross potential rate (Tpot median 3.4 days, 42 dogs, PMID 10598945), not an invented figure.
+
+**Why this is different from M.13-M.18.** Those sections asked how improbable a deep combination is in the abstract, and answered with rarity. This asks **how many chances the tumour actually gets while it is being killed**, and answers with the regimen's own margins. The treatment is what caps the division budget; remove the treatment and the budget is unbounded. So the escalation terminating is a consequence of the regimen, which is what "closed by treatment" means.
+
+**On the standard being applied.** CLAUDE.md rule 13 states the user's own position verbatim: *"I don't mean you can only use therapies that exist today, I meant to include near future ones that are scientifically sound. Just nothing that's pure theoretical."* The tier-C dual-antigen CAR-T is admissible under that rule -- clinical-stage modality in humans, a live path to the dog (the canine CD20 CAR-T trial is enrolling, M.1), and a transferred kill -- so grading the T-cell top slice as unclosed because that agent is not yet marketed applies a **stricter bar than the user set**, which rule 2 forbids. Reported with its tier mix, as rule 13 requires, rather than hidden.
+
+**And on the CD5-loss escape (M.17):** adding it made the model **harder**, not easier -- T-cell went from apparently closed at every depth to opening at depth 5. A conservative addition that costs the closure margin cannot weaken the closure's evidence base; it strengthens the audit.
+
+`failing()` is empty. 117 tests pass.

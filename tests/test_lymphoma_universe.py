@@ -1046,3 +1046,25 @@ def test_the_lawful_t_cell_residual_is_irreducible_and_quantified():
     blk = tuple(e for e in esc if e.name in A.T_LAWFUL_BLOCKING_PAIR)
     non_covering = [a for a in reg if not G.covers_conjunction(a, blk)]
     assert sum(a.effective_kill for a in non_covering if G.covers_conjunction(a, blk)) == 0.0
+
+
+def test_the_escape_escalation_terminates_because_the_treatment_bounds_the_divisions():
+    """Section M.22 -- the closure stated as a consequence of the treatment, which is what the sequential question demanded.
+
+    M.19 established that no depth-1 or depth-2 clone grows. But a shrinking clone is not inert: it still DIVIDES while it shrinks,
+    so it can seed depth 3. What makes the escalation terminate is that a shrinking clone has a FINITE total future division count --
+    about P*b/m for a clone of P cells with gross birth rate b and net shrink rate m. Integrating over that whole budget:
+      B-cell, lawful-today agents: 2.5e-8 expected depth-3 founders carrying a GROWING combination, over all time.
+      T-cell + the tier-C dual-antigen CAR-T: exactly zero, because no depth-3 combination grows with that agent present.
+    Fewer than one such founder ever arises, so there is never a cell that could start a relapse. That is the regimen's doing -- it
+    caps the chances the tumour gets -- rather than a statement that deep combinations are improbable in the abstract."""
+    from canine_dsp import lymphoma_standard_audit as A
+
+    b = A.escalation_terminates("B")
+    assert b["terminates"] and b["growing_depth3_founders_over_all_time"] < 1e-6
+    t = A.escalation_terminates("T", "CD5 + CD7 dual-target")
+    assert t["terminates"] and t["growing_depth3_founders_over_all_time"] == 0.0
+    # the bound uses the dog-measured gross birth rate, not an invented one
+    assert A.GROWTH_BAR_BASIS["gross_ceiling"] == 0.204
+    assert A.escalation_terminates_item().passes
+    assert A.failing() == []

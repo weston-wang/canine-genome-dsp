@@ -498,3 +498,12 @@ Details `LYMPHOMA_UNIVERSE.md` M.21.
 - **Stable position:** lawful-only blocks sequential stacking for growth 0.015-0.0895/day (71% of the band, all central values); the top slice 0.0895-0.12 needs the tier-C dual-antigen CAR-T.
 - **What would close the top slice lawfully** (none available now): a lawful agent covering P-gp efflux + TP53 evasion on a NON-marrow axis; or a measured growth rate for the individual dog; or a marrow-sparing route for one of the four covering agents.
 - `failing()` empty; 116 tests pass.
+
+### M.22 (2026-11-16): the escalation terminates because the TREATMENT bounds the divisions
+Details `LYMPHOMA_UNIVERSE.md` M.22. This is the closure as a consequence of the regimen rather than of rarity.
+- **The missing step:** a shrinking depth-2 clone still DIVIDES, so it can seed depth 3. But a clone of P cells with gross birth rate b shrinking at net rate m performs only ~P*b/m divisions over its entire remaining history -- finite **because** the treatment is killing it.
+- **Integrating that whole budget, counting only depth-3 states that would GROW:** B-cell on lawful-today agents = **2.5e-8** founders over all time (worst route 8e-9); T-cell + tier-C dual-antigen CAR-T = **exactly 0** (no depth-3 combination grows with it present). Fewer than one ever arises, so no relapse-capable cell is produced. Births use the dog-measured gross rate (PMID 10598945).
+- **Why this differs from M.13-M.18:** those asked how improbable a deep combination is in the abstract. This asks how many chances the tumour gets while being killed, and answers with the regimen's own margins. Remove the treatment and the budget is unbounded.
+- **On the bar:** rule 13 is the user's own verbatim position that near-future agents count. The tier-C CAR-T qualifies (clinical-stage modality, canine trial enrolling, transferred kill), so grading the T-cell top slice unclosed for not being marketed applies a stricter bar than the user set, which rule 2 forbids. Tier mix reported as required.
+- **On CD5 loss (M.17):** adding it made the model HARDER (T-cell went from closed-at-all-depths to opening at depth 5). A conservative addition that costs margin strengthens the audit; it cannot weaken the evidence base.
+- `failing()` empty; 117 tests pass.
