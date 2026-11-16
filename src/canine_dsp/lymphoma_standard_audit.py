@@ -158,6 +158,52 @@ def sustained_additivity_item() -> Item:
                 "label 'twice weekly until progression' and a 17-month canine case")
 
 
+def emergence_is_not_an_uncovered_escape() -> Item:
+    """Settles whether the model's missing resistance-emergence term leaves any escape without an answer (section M.12).
+
+    The absence is real: `escape_presence_probability` evaluates escape presence from the BASELINE burden, and nothing in the clock
+    represents a resistant clone ARISING under prolonged selection -- while canine P-gp positivity rises from 25% pretreatment to 83%
+    at relapse (PMID 8646690). But it cannot open an uncovered route, for a reason that is checkable rather than rhetorical:
+
+    1. The lawful programmes are evaluated against the FULL lineage-filtered escape set (22 for B, 21 for T), not against the
+       presence-filtered subset (19 and 18). So every catalogued escape must be closed whether or not it is likely present at diagnosis.
+    2. The three escapes a presence filter would have dropped -- autophagy independence, B-lineage identity switch, and E8 XPO1 C528S
+       (the verdinexor target mutation) -- are exactly the ones emergence under treatment would create, and they are already required
+       to be closed.
+    3. With every escape treated as present from day 0, which is the worst case emergence could produce, EVERY margin is positive in
+       all four cases; the minimum is E5 in the B-cell brain at about +0.02 /day.
+
+    So emergence changes WHEN an escape is present, not WHETHER it is covered, and the model already runs the worst case on timing.
+    What it genuinely bounds is a different question -- whether the catalogue is complete -- which is audited separately under
+    CLAUDE.md rule 9 by an independent escape audit (docs/universe/SWEEP_escapes.md), not by this item.
+    Where the absence still matters is MAGNITUDE, not coverage: an emerging clone raises the frequency of the escape faster than the
+    model assumes, which eats margin. That is why the margins are reported at the pessimistic inputs rather than the central ones."""
+    from . import lymphoma_sustained as S
+    from .core import lymphoma_grounded as G
+    from .core.lymphoma_catalogue import CNS, SYSTEMIC
+    worst = None
+    for ip in ("B", "T"):
+        full = J._escapes(ip)
+        if len(G.escapes_to_close(G.BURDEN_EARLY_DETECTED, escapes=full)) >= len(full):
+            return Item("resistance emergence under treatment", "OPEN", False,
+                        "programmes are no longer evaluated against the full escape set, so emergence could open a route")
+        for comp in (SYSTEMIC, CNS):
+            pool = S.lawful_pool(ip, comp)
+            reg = [[v for k, v in pool.items() if k.startswith(n)][0] for n in S.LAWFUL_PROGRAMS[ip]]
+            if comp == CNS:
+                line = "OSW (canine peripheral T-cell lymphoma)" if ip == "T" else "1771 (median)"
+                reg.append(S.rt_agent(ip, CNS, S.rt_efolds_in_vivo(line) * S.RT_BRAIN_ESCALATION_FACTOR))
+                reg.append(S.it_mtx_agent(S.it_mtx_derived_kill(14, ic50_nM=118.0)))
+            m = min(G.evaluate(reg, full, compartment=comp).margins_derated.values())
+            worst = m if worst is None else min(worst, m)
+    passes = worst is not None and worst > 0.0
+    return Item("resistance emergence under treatment", "DERIVED" if passes else "OPEN", passes,
+                f"every catalogued escape is required closed whether or not present at diagnosis, and with all of them forced present "
+                f"from day 0 -- the worst case emergence could produce -- the minimum margin across all four cases is {worst:+.4f}/day. "
+                "Emergence therefore changes when an escape appears, not whether it is covered; catalogue completeness is audited "
+                "separately under rule 9")
+
+
 def failing() -> list:
     """Every input that fails the stated bar. Empty means nothing fails; this is what to quote."""
     out = []
@@ -165,7 +211,7 @@ def failing() -> list:
     if not gb.passes:
         out.append(gb)
     out += [i for i in lawful_brain_items() if not i.passes]
-    for extra in (cns_seeding_item(), sustained_additivity_item()):
+    for extra in (cns_seeding_item(), sustained_additivity_item(), emergence_is_not_an_uncovered_escape()):
         if not extra.passes:
             out.append(extra)
     for ip in ("B", "T"):

@@ -717,3 +717,18 @@ def test_the_model_does_not_contradict_the_canine_maintenance_null():
     assert item.grade == "RESOLVED" and item.passes and item not in A.failing()
     # the single justified override: verdinexor's documented window is a study duration, not a toxicity cap
     assert T.profile_for("verdinexor (XPO1 inhibitor)").hard_cap_days is None
+
+def test_resistance_emergence_cannot_leave_an_escape_uncovered():
+    """Section M.12, settling the question the goal raised. The model has no term for resistance ARISING under treatment (escape
+    presence comes from the baseline burden; canine P-gp goes 25% -> 83% by relapse, PMID 8646690). That absence is real but cannot
+    open an uncovered route: the programmes are scored against the FULL escape set rather than the presence-filtered subset, the three
+    escapes a presence filter would drop are exactly the ones emergence would create, and with every escape forced present from day 0
+    every margin is still positive. Emergence changes when an escape appears, not whether it is covered."""
+    from canine_dsp import lymphoma_standard_audit as A, lymphoma_joint as J
+    from canine_dsp.core import lymphoma_grounded as G
+    for ip in ("B", "T"):
+        full = J._escapes(ip)
+        assert len(G.escapes_to_close(G.BURDEN_EARLY_DETECTED, escapes=full)) < len(full)   # require-all is doing work
+    item = A.emergence_is_not_an_uncovered_escape()
+    assert item.passes and item.grade == "DERIVED" and item not in A.failing()
+    assert A.failing() == []
