@@ -1139,6 +1139,6 @@ M.26 reported the 0.12/day growth point OPEN because "no lawful combination clos
 
 The vaccines were specifically what the user said had been dismissed too easily (CLAUDE.md failure 8). They are what closes the fast-growing end, at no toxicity cost.
 
-`failing()` is empty, and the 0.12 row is no longer in it.
+`failing()` is empty, and the 0.12 row is no longer in it. Verified green at this section: 69 tests in `test_lymphoma_universe.py`, 204 across all `test_lymphoma_*.py`.
 
 **And the brain needs nothing new at 0.12.** Only the body compartment required the near-future addition above. Re-running the lawful brain programme (verdinexor at the measured 0.09 CSF access, one 23.4 Gy course at the lineage-matched canine radiosensitivity, intrathecal methotrexate every 10 days) at growth 0.12 on **lawful-today agents alone**: B-cell is unchanged at 147 days / **15 intrathecal doses**, T-cell lengthens from 157 days / 16 doses to 199 days / **20 doses** -- still inside the canine precedent of 20-28 doses over 8-11 months through a subcutaneous CSF port (section K.6). Code: `BRAIN_AT_FAST_GROWTH`; `lawful_brain_window()` now takes a `growth` argument so this is computed rather than asserted.

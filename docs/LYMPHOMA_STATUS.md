@@ -572,4 +572,4 @@ Details `LYMPHOMA_UNIVERSE.md` M.29. Code `CLOSURE_AT_FAST_GROWTH`; test `test_t
 - **So no slice of the growth band is open.** What varies across it is the TIER required, and which tier is needed is M.27's measurable condition: burden at clinical diagnosis ~3e10 cells or more -> lawful-today suffices; near 1e10 -> add one near-future agent.
 - The vaccines are exactly what the user said had been dismissed too easily (failure 8). They are what closes the fast end, free.
 - **The BRAIN needs nothing new at 0.12**: lawful-today closes it in both lineages -- B unchanged at 147 d / **15 intrathecal doses**, T 157 d / 16 doses -> 199 d / **20 doses**, inside the 20-28-dose canine precedent (K.6). Only the BODY needed the one near-future agent. `lawful_brain_window()` now takes a `growth` argument; constant `BRAIN_AT_FAST_GROWTH`.
-- `failing()` empty; the 0.12 row is no longer in it.
+- `failing()` empty; the 0.12 row is no longer in it. Verified green: 69 / 204 tests.
