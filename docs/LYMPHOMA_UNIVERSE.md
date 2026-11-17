@@ -1185,3 +1185,37 @@ M.30 counted evidence grades **across the programme**. That is an aggregate, and
 **What this does and does not say.** It says: every escape in the enumerated universe is covered, in every case, by at least one agent whose kill has a canine measurement, a canine-derived calculation or a canine trial outcome behind it, with margin to spare and nothing resting on an unsupported number. It does not say the programme has been given to a dog -- which is the demonstration bar the user has twice set aside.
 
 `failing()` is empty, and `per_escape_evidence_item()` is now one of the items it checks.
+
+### M.32 Two confusions in reading M.31, corrected with checks (2026-11-17)
+Code: `escapes_without_canine_existence()`, `DOGS_DOSED_BY_FAST_GROWTH_CLOSER`, `escape_basis_versus_carrier_grade_item()` (in `failing()`); test `test_escape_existence_grade_is_not_a_coverage_hole_and_the_fast_closers_have_been_given_to_dogs`.
+
+**1. An escape's existence grade is not a coverage hole — it runs the other way.** It was read off M.31 that some escapes are "carried only by mechanism-only, engineered-but-unobserved or human-data bases", naming the B-lineage identity switch, XPO1 C528S and CD19/CD7 antigen loss. That conflates two separate gradings:
+
+- the grade of the **escape's own existence** — is this resistance mechanism real?
+- the grade of the **potency that covers it** — is the kill that defeats it supported?
+
+A weakly-evidenced escape is a threat the model **includes anyway**. It makes the closure harder to reach and cannot be a hole in coverage. A hole would be an escape covered *only* by weakly-graded agents. Checked across all four cases: the **16 escape-rows whose own existence is not canine-evidenced are each covered by at least 2 canine-graded agents**, worst margin **+0.0719/day**, and **+0.0218/day counting canine grades alone**. The three named in the objection, in the B-cell body case:
+
+| escape | its own basis | carriers | canine-graded carriers | margin |
+|---|---|---|---|---|
+| B-lineage identity switch | mechanism / assumed | 4 | 3 | +0.3748 |
+| CD19 antigen loss | human data (CAR-T relapse series) | 4 | 3 | +0.3748 |
+| XPO1 C528S | engineered, not yet observed clinically | 3 | 2 | +0.2030 |
+
+XPO1 C528S has one fewer carrier because it defeats verdinexor by definition — that is the escape working as modelled, and it is still covered at +0.203/day.
+
+**2. The 0.12 closers are not "agents never given to a dog".** Dogs actually dosed, from the catalogue's own citations:
+
+| agent | dogs dosed | source |
+|---|---|---|
+| APAVAC-type autologous vaccine | **300** | safety in 300 dogs and a 148-dog DLBCL outcome series (PMID 31174615); randomised n=19, TTP 304 vs 41 d (PMID 24300788) |
+| anti-CD20 monoclonal antibody | **55** | CR 79% (33/42), PMID 38662527; 13 dogs, PFS 340 d, two remissions over 4 years, PMID 41742528 — potency MEASURED in dogs |
+| dTERT genetic vaccine | **52** | immune response 13/14 and 19/21; OS 76.1 vs 29.3 wk (PMID 23902422), >97.8 vs 37 wk (PMID 20531395), 64.5 wk with CHOP n=17 (PMID 30537967) |
+| autologous T-cell add-back | **8** | 8 infused vs 12 matched controls, tumour-free survival 338 vs 71 d (PMID 22355761) |
+| tandem CD19/CD20 CAR-T, CD5+CD7 CAR-T, CD7 CAR-T, CD3xCD20 engager | 0 | to-build constructs — **and the closure does not need them** |
+
+M.29 gives **six independent single-agent closes for B-cell and four for T-cell**, and the two cheapest are dosed-in-dogs agents, not the to-build constructs. "Unlicensed" and "never given to a dog" are different claims; only the first is true of these.
+
+**3. One clarification on wording, so it is not read wrongly again.** "Every escape covered on drugs obtainable today" is a statement about the **single-escape ledger at the operating growth rate** (M.31). At the band's top, 0.12/day, one addition is needed and it is an unlicensed-but-dosed-in-dogs agent (M.29, M.30). The two are not in conflict, but the growth rate has to be named for the sentence to be exact.
+
+**What is genuinely not closed, stated once.** No dog has received the assembled programme. That is a demonstration, and the user has twice ruled it out as the test ("I'm not asking if it's been demonstrated, I know it's not"). Under the stated bar — real data **or** a rigorous model, with written transfers allowed — `failing()` is empty and there is no input left with no basis or a circular one.

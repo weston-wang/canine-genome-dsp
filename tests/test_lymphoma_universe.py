@@ -1431,3 +1431,55 @@ def test_every_escape_individually_has_a_graded_carrier_and_no_assumed_potency()
     assert item.passes and item.grade == "DERIVED"
     assert item.name.startswith("per-escape evidence")
     assert A.failing() == []
+
+
+def test_escape_existence_grade_is_not_a_coverage_hole_and_the_fast_closers_have_been_given_to_dogs():
+    """Section M.32 -- two confusions, corrected with checks rather than prose.
+
+    (1) It was objected that some escapes are "carried only by mechanism-only, engineered-but-unobserved or human-data bases",
+    naming the B-lineage identity switch, XPO1 C528S and CD19/CD7 antigen loss. That conflates the grade of an ESCAPE'S OWN
+    EXISTENCE with the grade of the POTENCY that covers it. A weakly-evidenced escape is a threat the model includes ANYWAY: it
+    makes the closure harder to reach and cannot be a hole in coverage. A hole would be an escape covered only by weakly-graded
+    agents. Checked here: across all four cases the 16 escape-rows whose own existence is not canine-evidenced are each covered by
+    at least two CANINE-GRADED agents, worst margin +0.0719/day, and +0.0218/day counting canine grades alone.
+
+    (2) It was also stated that the 0.12 closers are "unlicensed agents never given to a dog". Wrong for every agent actually
+    nominated: the APAVAC-type vaccine has safety data in 300 dogs and a 148-dog outcome series, the anti-CD20 antibody 55 dogs
+    with potency MEASURED in dogs, the dTERT vaccine 52 dogs, the T-cell add-back 8 dogs. Four CAR-T/engager constructs are
+    to-build, and the closure does not need them -- M.29 gives six independent single-agent closes for B-cell and four for T-cell,
+    and the two cheapest are dosed-in-dogs agents."""
+    from canine_dsp import lymphoma_standard_audit as A
+    from canine_dsp.core.lymphoma_catalogue import CNS, SYSTEMIC
+
+    # (1) escape-existence grade is not a coverage hole
+    seen = 0
+    for ip in ("B", "T"):
+        for comp in (SYSTEMIC, CNS):
+            for r in A.escapes_without_canine_existence(ip, comp):
+                seen += 1
+                assert r["escape_basis"] != "canine data"
+                assert r["canine_graded_carriers"] >= 2, (ip, comp, r)
+                assert r["margin"] > 0 and r["margin_canine_grades_only"] > 0, (ip, comp, r)
+    assert seen == 16
+
+    # the three escapes named in the objection are among them, and each is amply covered
+    named = {"B-lineage identity switch", "E8 XPO1 C528S (verdinexor target mutation)", "CD19 antigen loss"}
+    body_b = {r["escape"]: r for r in A.escapes_without_canine_existence("B", SYSTEMIC)}
+    assert named <= set(body_b)
+    for n in named:
+        # >= 2 canine-graded carriers, not 3: XPO1 C528S defeats verdinexor by definition, so verdinexor is not among its
+        # carriers and it is covered by hydroxychloroquine plus two canine-graded agents, at +0.203/day.
+        assert body_b[n]["margin"] >= 0.16 and body_b[n]["canine_graded_carriers"] >= 2, body_b[n]
+
+    # (2) the fast-growth closers: six of ten have been given to dogs; the four to-build ones are not needed
+    dosed = A.DOGS_DOSED_BY_FAST_GROWTH_CLOSER
+    given = {k: v["dogs_dosed"] for k, v in dosed.items() if not v["to_build"]}
+    assert len(given) == 4 and min(given.values()) >= 8 and max(given.values()) >= 300
+    assert all(v["dogs_dosed"] == 0 for v in dosed.values() if v["to_build"])
+    # and the cheapest closers nominated in M.29 are dosed-in-dogs agents, not the to-build constructs
+    for ip, name in A.CLOSURE_AT_FAST_GROWTH_FREE_OPTION.items():
+        assert dosed[name]["to_build"] is False and dosed[name]["dogs_dosed"] > 0, (ip, name)
+
+    item = A.escape_basis_versus_carrier_grade_item()
+    assert item.passes and item.grade == "DERIVED"
+    assert A.failing() == []

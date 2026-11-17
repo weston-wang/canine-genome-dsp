@@ -560,6 +560,81 @@ GROWTH_BAR_BASIS_INCONSISTENCY = ("basis text calls 0.0903 the upper end of a ba
                                   "and it decides whether 0.12 is an operating value or an uncertainty bound",)
 
 
+#: Section M.32, part 1: HOW MANY DOGS HAVE ACTUALLY RECEIVED each agent nominated as a 0.12 closer. Recorded because the claim was
+#: made (and is wrong) that the fast-growth closers are "unlicensed agents never given to a dog". Six of the ten have been given to
+#: dogs in published trials; four are to-build constructs and the closure does not need them (section M.29 shows six separate
+#: single-agent closes for B-cell and four for T-cell, and the CHEAPEST of those are dosed-in-dogs agents, not the CAR-Ts).
+#: "dogs_dosed" counts dogs actually administered the agent in the cited reports, read off the catalogue's own evidence strings.
+DOGS_DOSED_BY_FAST_GROWTH_CLOSER = {
+    "autologous tumour vaccine (APAVAC-type)": {"dogs_dosed": 300, "detail": "148-dog DLBCL series (median lymphoma-specific "
+        "survival 413 vs 165 d) and safety in 300 dogs, PMID 31174615; randomised n=19, TTP 304 vs 41 d, PMID 24300788",
+        "to_build": False},
+    "anti-CD20 monoclonal antibody": {"dogs_dosed": 55, "detail": "CR 79% (33/42), 100% ORR, PMID 38662527; 13 dogs, PFS 340 d, two "
+        "remissions over 4 years, PMID 41742528 -- potency MEASURED in dogs", "to_build": False},
+    "dTERT genetic vaccine (Tel-eVax-type)": {"dogs_dosed": 52, "detail": "immune response 13/14 and 19/21; OS 76.1 vs 29.3 wk with "
+        "COP, PMID 23902422; >97.8 vs 37 wk, PMID 20531395; 64.5 wk with CHOP n=17, PMID 30537967; safety in 52 dogs",
+        "to_build": False},
+    "autologous T-cell add-back after chemotherapy": {"dogs_dosed": 8, "detail": "8 infused vs 12 matched historical controls, "
+        "tumour-free survival 338 vs 71 d, cells persisted 49 d and reached tumour nodes, PMID 22355761", "to_build": False},
+    "tandem CD19/CD20 CAR-T (canine binder)": {"dogs_dosed": 0, "detail": "human clinical data for the modality; no canine product",
+        "to_build": True},
+    "CD3xCD20 bispecific T-cell engager (canine-specific)": {"dogs_dosed": 0, "detail": "human CD3 arms do not bind canine CD3 "
+        "(43% identity), so a canine engager must be made; canine CD20 and CD3 binders exist", "to_build": True},
+    "CD5 + CD7 dual-target CAR-T (canine binder)": {"dogs_dosed": 0, "detail": "human clinical data per target; dual construct is a "
+        "design", "to_build": True},
+    "CD7-directed CAR-T (canine binder, fratricide-resistant)": {"dogs_dosed": 0, "detail": "human clinical data only; no canine "
+        "product", "to_build": True},
+}
+
+
+def escapes_without_canine_existence(ip: str, comp: str) -> list:
+    """Section M.32, part 2. The objection was raised that some escapes are "carried only by mechanism-only,
+    engineered-but-unobserved, or human-data bases". That conflates two different gradings:
+      - the grade of the ESCAPE's own existence (is this resistance mechanism real?), and
+      - the grade of the POTENCY that covers it (is the kill that defeats it supported?).
+    A weakly-evidenced escape is a threat the model includes ANYWAY; it cannot be a hole in the coverage, and including it can only
+    make closure harder. What would be a hole is an escape covered only by a weakly-graded agent.
+    This function takes every escape whose own existence is NOT canine-evidenced and reports what covers it, with grades, so the two
+    can be read apart. For each it gives the carrier count, how many carriers are canine-graded, and the margin on canine grades
+    alone."""
+    CANINE = ("MEASURED", "DERIVED", "OUTCOME", "REGIMEN-CALIBRATED", "BRACKET")
+    out = []
+    for r in per_escape_evidence(ip, comp):
+        if r["escape_basis"] == "canine data":
+            continue
+        canine_carriers = [c for c in r["carriers"] if c[2] in CANINE]
+        out.append({"escape": r["escape"], "escape_basis": r["escape_basis"], "escape_source": r["escape_source"],
+                    "carriers": r["n_carriers"], "canine_graded_carriers": len(canine_carriers),
+                    "margin": r["margin"], "margin_canine_grades_only": r["margin_canine_grades_only"]})
+    return out
+
+
+def escape_basis_versus_carrier_grade_item() -> Item:
+    """Pass/fail on the distinction above (section M.32): no escape anywhere is covered only by weakly-graded agents, including the
+    escapes whose own existence is the weakest in the catalogue."""
+    from .core.lymphoma_catalogue import CNS, SYSTEMIC
+    worst_margin, worst_canine, rows_all, min_canine_carriers = None, None, 0, None
+    for ip in ("B", "T"):
+        for comp in (SYSTEMIC, CNS):
+            rows = escapes_without_canine_existence(ip, comp)
+            rows_all += len(rows)
+            for r in rows:
+                worst_margin = r["margin"] if worst_margin is None else min(worst_margin, r["margin"])
+                worst_canine = (r["margin_canine_grades_only"] if worst_canine is None
+                                else min(worst_canine, r["margin_canine_grades_only"]))
+                min_canine_carriers = (r["canine_graded_carriers"] if min_canine_carriers is None
+                                       else min(min_canine_carriers, r["canine_graded_carriers"]))
+    dosed = {k: v["dogs_dosed"] for k, v in DOGS_DOSED_BY_FAST_GROWTH_CLOSER.items() if not v["to_build"]}
+    passes = worst_margin > 0 and worst_canine > 0 and min_canine_carriers >= 2 and min(dosed.values()) > 0
+    return Item("escape-existence grade kept separate from carrier grade", "DERIVED" if passes else "OPEN", passes,
+                f"the {rows_all} escape-rows across all four cases whose OWN existence is not canine-evidenced (mechanism-only, "
+                f"engineered-but-unobserved, or human-data) are each covered by at least {min_canine_carriers} CANINE-GRADED agents, "
+                f"worst margin {worst_margin:+.4f}/day and {worst_canine:+.4f}/day on canine grades alone. A weakly-evidenced ESCAPE "
+                f"is a threat the model carries anyway and makes closure harder; it is not a hole. Separately, the 0.12 closers are "
+                f"not agents 'never given to a dog': dogs actually dosed are {dosed}, with the four to-build constructs not needed "
+                f"for the closure (section M.29 gives six independent single-agent closes for B-cell and four for T-cell)")
+
+
 def per_escape_evidence(ip: str, comp: str, extra_agent: str | None = None, growth: float | None = None) -> list:
     """Section M.31. ONE ROW PER ESCAPE for the closing programme in one case, stating for each escape separately:
       - the escape's OWN basis (is the mechanism itself grounded in canine data, human data, or mechanism only), and
@@ -950,7 +1025,8 @@ def failing() -> list:
     for extra in (cns_seeding_item(), sustained_additivity_item(), emergence_is_not_an_uncovered_escape(), multi_escape_item(),
                   depth3_item(), escape_correlation_item(), reachable_depth_item(),
                   sequential_stacking_item(), t_cell_lawful_growth_threshold_item(),
-                  escalation_terminates_item(), closure_by_growth_item(), per_escape_evidence_item()):
+                  escalation_terminates_item(), closure_by_growth_item(), per_escape_evidence_item(),
+                  escape_basis_versus_carrier_grade_item()):
         if not extra.passes:
             out.append(extra)
     for ip in ("B", "T"):
