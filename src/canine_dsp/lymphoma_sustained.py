@@ -489,7 +489,8 @@ RT_BRAIN_ESCALATION_FACTOR = 1.54
 
 def lawful_brain_window(ip: str, *, interval_days: float, ic50_nM: float = 118.0,
                         verdinexor_access: float = VERDINEXOR_CNS_ACCESS_MEASURED, rt_line: str | None = None,
-                        rt_scale: float = 1.0, lo: int = 84, hi: int = 5475, step: int = 15):
+                        rt_scale: float = 1.0, lo: int = 84, hi: int = 5475, step: int = 15,
+                        growth: float | None = None, extra_agent: str | None = None):
     """Smallest window (days) at which the lawful brain program clears CNS: the lawful agents (verdinexor at `verdinexor_access`), one
     23.4 Gy course at the lineage-matched canine radiosensitivity, and intrathecal methotrexate every `interval_days` with the kill
     derived from measured canine CSF numbers. Returns (days, doses) or None if it does not clear inside `hi`."""
@@ -509,7 +510,11 @@ def lawful_brain_window(ip: str, *, interval_days: float, ic50_nM: float = 118.0
                 reg.append(a)
             reg.append(rt_agent(ip, CNS, efolds))
             reg.append(it_mtx_agent(k))
-            return G.evaluate_best_schedule(reg, esc, compartment=CNS).horizon_strict.cure_inside_window
+            if extra_agent:
+                allag = J._pools(ip, J.CENTRAL["kill"], J.CENTRAL["duty"])[CNS]
+                reg.append(next(a for kk, a in allag.items() if kk.startswith(extra_agent)))
+            kw = {} if growth is None else {"growth": growth}
+            return G.evaluate_best_schedule(reg, esc, compartment=CNS, **kw).horizon_strict.cure_inside_window
 
     if not ok(hi):
         return None

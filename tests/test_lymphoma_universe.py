@@ -1130,11 +1130,14 @@ def test_closure_is_reported_as_a_conjunction_over_growth_rates_including_where_
     On lawful, available agents only, worst depth-1/depth-2 margin after de-rating:
       growth 0.0903 (the model's OPERATING bar): B +0.02556, T +0.01691 -> both CLOSED
       growth 0.10:                               B +0.01586, T +0.00721 -> both CLOSED
-      growth 0.12 (a `growth_sensitivity()` SWEEP point, above the bar): B -0.00414, T -0.00873 -> OPEN, and no lawful
-        combination closes it after optimising over all 20 agents from three starts.
+      growth 0.12 (a `growth_sensitivity()` SWEEP point, above the bar): B -0.00414, T -0.00873 -> lawful-today is SHORT, and no
+        lawful combination recovers it after optimising over all 20 agents from three starts.
     The 0.12 row is reported rather than hidden: a sensitivity sweep that always closes is not a sensitivity sweep. An
     inconsistency in the growth-bar basis text is recorded alongside it, because whether 0.12 is an operating value or an
-    uncertainty bound turns on it."""
+    uncertainty bound turns on it.
+    UPDATED by section M.29: the 0.12 row was reported OPEN here, which was failure 13 -- the "no lawful combination" search ran
+    over the LICENSING-filtered pool, and rule 13 admits near-future agents. One near-future agent closes it. The lawful-today
+    shortfall below is still asserted, because it is the true part of the row; the status string now names the closure."""
     from canine_dsp import lymphoma_standard_audit as A
     from canine_dsp.core import lymphoma_grounded as G
 
@@ -1143,9 +1146,11 @@ def test_closure_is_reported_as_a_conjunction_over_growth_rates_including_where_
     assert G.GROWTH_PER_DAY == 0.0903
     assert rows[0.0903]["B"] > 0 and rows[0.0903]["T"] > 0
     assert rows[0.10]["B"] > 0 and rows[0.10]["T"] > 0
-    # and the sweep point above the bar is recorded as OPEN, not quietly dropped
+    # and the lawful-today shortfall above the bar is recorded, not quietly dropped -- but it is no longer reported as OPEN,
+    # because section M.29 closes it with one near-future agent (rule 13)
     assert rows[0.12]["B"] < 0 and rows[0.12]["T"] < 0
-    assert "OPEN" in rows[0.12]["status"]
+    assert "lawful-today short" in rows[0.12]["status"] and "CLOSED by one near-future agent" in rows[0.12]["status"]
+    assert "OPEN" not in rows[0.12]["status"]
     # the inconsistency in the basis text is recorded rather than silently fixed
     assert A.GROWTH_BAR_BASIS_INCONSISTENCY and "0.0903" in A.GROWTH_BAR_BASIS_INCONSISTENCY[0]
     assert A.closure_by_growth_item().passes
@@ -1219,3 +1224,88 @@ def test_the_t_cell_car_t_is_headroom_not_load_bearing_and_the_audit_strings_say
     assert "both lineages HOLD on LAWFUL-TODAY agents" in seq.reason and "is HEADROOM, not load-bearing" in seq.reason
     assert "BOTH lineages close it on LAWFUL-TODAY agents alone" in reach.reason
     assert "no tier-C agent required" in reach.reason
+
+
+def test_the_fast_growth_point_closes_on_near_future_agents_and_the_stored_table_is_live():
+    """Section M.29 -- closing the last open row instead of reframing it.
+
+    M.26 reported the 0.12/day growth point (the top of the derived net band) as OPEN because "no lawful combination closes it",
+    and M.27 recast it as a measurable condition on burden at diagnosis. Both were true and neither closed it. The search behind
+    "no lawful combination" ran over `lawful_pool`, which filters on US LICENSING (approved-animal, extra-label-human,
+    procedures) -- not on evidence. CLAUDE.md rule 13 admits NEAR-FUTURE agents and forbids excluding a class for want of a
+    licensed canine product, and the user's words are explicit: "I don't mean you can only use therapies that exist today."
+    So this is CLAUDE.md failure 13 ("do not retreat to only what exists today"), and correcting it closes the row.
+
+    At growth 0.12, adding any ONE near-future agent to the lawful-today programme closes the FULL conjunction: every reachable
+    depth positive, zero growing clones, and the escalation terminating. Six such agents for B-cell, four for T-cell. The
+    cheapest cost NOTHING in toxicity headroom (they load no axis the programme already uses) and their kill is calibrated on
+    canine trial outcomes: the APAVAC-type autologous vaccine for B-cell (+0.0507 at depth 2) and the autologous T-cell add-back
+    for T-cell (+0.0444). The CAR-T options are stronger still (+0.3451 / +0.1192) and carry depth 3 as well.
+
+    This test recomputes every stored number from the model so the table cannot drift from the code, which is the M.28 lesson."""
+    from canine_dsp import lymphoma_standard_audit as A
+
+    fast = A.CLOSURE_AT_FAST_GROWTH
+    g = fast["growth"]
+
+    # the division budget at 0.12 still reaches depth 2 only, so closing depths 1-2 IS the closure at this growth rate
+    budget = A.division_budget_reachable_depth(g)
+    assert budget["reachable_depth"] == fast["reachable_depth"] == 2
+    assert budget["depths"][3] < 1.0
+
+    # lawful-today alone is short at 0.12 in both lineages -- the honest half of the old row, kept
+    for ip in ("B", "T"):
+        assert A.sequential_stacking(ip, growth=g)["depths"][2]["worst_margin"] < 0
+        assert A.CLOSURE_BY_GROWTH_RATE[0.12][ip] < 0
+
+    # and every stored near-future option closes it, with the stored numbers recomputed live
+    for ip in ("B", "T"):
+        for opt in fast[ip]:
+            key = opt["agent"].split(" (")[0].split(" after ")[0]
+            s = A.sequential_stacking(ip, key, growth=g)
+            e = A.escalation_terminates(ip, key, growth=g)
+            for depth in (1, 2, 3):
+                assert s["depths"][depth]["worst_margin"] == pytest.approx(opt[f"d{depth}"], abs=5e-4), (ip, opt["agent"], depth)
+            assert s["depths"][1]["growing_clones"] == s["depths"][2]["growing_clones"] == opt["growing"] == 0
+            assert s["holds"] and s["induction_breaks_at_reachable_depth"] is None
+            assert e["terminates"] and e["growing_depth3_founders_over_all_time"] < 1.0
+            assert e["growing_depth3_founders_over_all_time"] == pytest.approx(opt["founders"], abs=1e-9)
+
+    # the two cheapest closers really are free on the toxicity side: no change in headroom
+    from canine_dsp import lymphoma_joint as J, lymphoma_sustained as S, lymphoma_grounded_inputs as gi
+    from canine_dsp.core import lymphoma_grounded as G
+    from canine_dsp.core.lymphoma_catalogue import SYSTEMIC
+
+    def headroom(ip, extra=None):
+        pool = S.lawful_pool(ip, SYSTEMIC)
+        reg = [[v for k, v in pool.items() if k.startswith(x)][0] for x in S.LAWFUL_PROGRAMS[ip]]
+        if extra:
+            allag = J._pools(ip, J.CENTRAL["kill"], J.CENTRAL["duty"])[SYSTEMIC]
+            reg.append(next(a for k, a in allag.items() if k.startswith(extra)))
+        return G.headroom(G.regimen_profiles(reg, gi.EFFLUX_CO_DOSE_MULTIPLIER_CANINE_PROXY))
+
+    for ip, name in A.CLOSURE_AT_FAST_GROWTH_FREE_OPTION.items():
+        key = name.split(" (")[0].split(" after ")[0]
+        assert headroom(ip, key) == pytest.approx(headroom(ip), abs=1e-9), (ip, name)
+        stored = next(o for o in fast[ip] if o["agent"] == name)
+        assert stored["d_headroom"] == 0.0 and min(stored["d1"], stored["d2"]) > 0
+
+    # those agents are outside the lawful pool for LICENSING reasons, not for want of evidence -- which is the whole point
+    for name in ("autologous tumour vaccine", "dTERT genetic vaccine", "autologous T-cell add-back"):
+        full = next(k for k in J._pools("B", J.CENTRAL["kill"], J.CENTRAL["duty"])[SYSTEMIC] if k.startswith(name))
+        assert S.legal_status(full)[0] not in S.LAWFUL
+
+    # the BRAIN compartment at 0.12 needs no near-future agent at all: lawful-today closes it in both lineages, and the T-cell
+    # window lengthens only from 16 to 20 intrathecal doses -- still inside the 20-28-dose canine precedent of section K.6
+    brain = A.BRAIN_AT_FAST_GROWTH
+    for ip in ("B", "T"):
+        at_bar = S.lawful_brain_window(ip, interval_days=brain["interval_days"], ic50_nM=brain["ic50_nM"])
+        at_fast = S.lawful_brain_window(ip, interval_days=brain["interval_days"], ic50_nM=brain["ic50_nM"],
+                                        growth=brain["growth"])
+        assert at_bar == tuple(brain[ip]["at_bar"]) and at_fast == tuple(brain[ip]["at_0_12"])
+        assert at_fast is not None and at_fast[1] <= brain["canine_precedent_doses"][1]
+
+    # and the audit item now reports 0.12 as closed rather than open
+    item = A.closure_by_growth_item()
+    assert item.passes and item.grade == "DERIVED"
+    assert "CLOSES on NEAR-FUTURE agents" in item.reason and "OPEN" not in item.reason

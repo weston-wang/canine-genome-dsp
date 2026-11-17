@@ -344,7 +344,7 @@ def escape_correlation_item() -> Item:
                 "Insensitive to correlation by 11-13 orders of magnitude")
 
 
-def division_budget_reachable_depth() -> dict:
+def division_budget_reachable_depth(growth: float | None = None) -> dict:
     """The DIVISION BUDGET bound (section M.18): the hard limit on how many escapes can co-occur in one cell, set by how many cell
     divisions the tumour will ever perform rather than by a probability judgement.
 
@@ -358,7 +358,8 @@ def division_budget_reachable_depth() -> dict:
     perform enough divisions to build one. That is a physical bound, and it replaces the rarity argument of sections M.13-M.17."""
     from .core import lymphoma_grounded as G
     from itertools import combinations
-    N, g = G.BURDEN_EARLY_DETECTED, G.GROWTH_PER_DAY
+    N = G.BURDEN_EARLY_DETECTED
+    g = G.GROWTH_PER_DAY if growth is None else growth
     budget = 2 * N + N * g * 3650
     out = {"divisions": budget, "depths": {}}
     for k in (1, 2, 3):
@@ -395,7 +396,7 @@ def closure_to_reachable_depth() -> dict:
     return out
 
 
-def sequential_stacking(ip: str, extra_agent: str | None = None, kmax: int = 3) -> dict:
+def sequential_stacking(ip: str, extra_agent: str | None = None, kmax: int = 3, growth: float | None = None) -> dict:
     """THE PRIMARY CLOSURE CRITERION (section M.19), found when the user asked whether escapes were being counted as
     simultaneous or as one-after-the-next.
 
@@ -426,12 +427,13 @@ def sequential_stacking(ip: str, extra_agent: str | None = None, kmax: int = 3) 
     for k in range(1, kmax + 1):
         worst, growing = None, 0
         for c in combinations(esc, k):
-            m = sum(a.effective_kill for a in d if G.covers_conjunction(a, c)) - G.GROWTH_PER_DAY
+            m = sum(a.effective_kill for a in d if G.covers_conjunction(a, c)) - (
+                G.GROWTH_PER_DAY if growth is None else growth)
             worst = m if worst is None else min(worst, m)
             if m <= 0:
                 growing += 1
         out[k] = {"worst_margin": worst, "growing_clones": growing}
-        if growing > 0 and breaks_at is None and k <= division_budget_reachable_depth()["reachable_depth"]:
+        if growing > 0 and breaks_at is None and k <= division_budget_reachable_depth(growth)["reachable_depth"]:
             breaks_at = k
     return {"depths": out, "induction_breaks_at_reachable_depth": breaks_at, "holds": breaks_at is None}
 
@@ -469,10 +471,64 @@ T_LAWFUL_RECOVERY_RULED_OUT = ("phase staging (criterion must hold continuously;
 #: values. The best lawful regimen at 0.12 is cyclophosphamide + rabacfosadine + hydroxychloroquine + verdinexor + vorinostat +
 #: the matched graft, and it is short by 0.00873/day there.
 CLOSURE_BY_GROWTH_RATE = {
-    0.0903: {"B": +0.02556, "T": +0.01691, "status": "CLOSED (operating bar)"},
-    0.10:   {"B": +0.01586, "T": +0.00721, "status": "CLOSED"},
-    0.12:   {"B": -0.00414, "T": -0.00873, "status": "OPEN (sensitivity point, above the bar)"},
+    0.0903: {"B": +0.02556, "T": +0.01691, "status": "CLOSED on lawful-today agents (operating bar)"},
+    0.10:   {"B": +0.01586, "T": +0.00721, "status": "CLOSED on lawful-today agents"},
+    # 0.12 was reported OPEN until section M.29. That was CLAUDE.md failure 13 ("retreating to only what exists today"): the search
+    # behind it ran over the LAWFUL-TODAY pool only, which filters on US LICENSING (`lawful_pool` keeps approved-animal,
+    # extra-label-human and procedures), not on evidence. Rule 13 admits near-future agents, and with any ONE of them the 0.12 point
+    # closes completely -- see CLOSURE_AT_FAST_GROWTH below.
+    0.12:   {"B": -0.00414, "T": -0.00873, "status": "lawful-today short; CLOSED by one near-future agent (M.29)"},
 }
+
+#: Section M.29: the 0.12/day point closed, with near-future agents, as rule 13 requires. Each row is one agent added to the
+#: lineage's lawful-today programme, evaluated at growth 0.12 for the FULL conjunction: worst margin at every reachable depth
+#: (1 and 2), the number of growing clones there, the expected number of growing depth-3 founders over all future time, and what the
+#: addition costs in toxicity headroom. The division budget at 0.12 still reaches depth 2 only (4.4e10 divisions; depth 3 expects
+#: 4.4e-4 cells), so closing depths 1-2 with nothing growing IS the closure at this growth rate.
+#: Every row below closes it. The two marked dHeadroom +0.000 cost NOTHING in toxicity: they sit on no axis the programme already
+#: loads. All five non-CAR-T options have canine clinical data behind their kill (outcome-calibrated from dog trials); they are
+#: outside the lawful pool because no US-licensed product exists, which rule 13 forbids as a reason to exclude.
+CLOSURE_AT_FAST_GROWTH = {
+    "growth": 0.12,
+    "reachable_depth": 2,
+    "B": [
+        {"agent": "tandem CD19/CD20 CAR-T (canine binder)", "d1": +0.5176, "d2": +0.3451, "d3": +0.1676,
+         "growing": 0, "founders": 0.0, "d_headroom": 0.000, "basis": "TRANSFER-OUTCOME from human tandem CD19/CD20 CAR-T"},
+        {"agent": "CD3xCD20 bispecific T-cell engager (canine-specific)", "d1": +0.3107, "d2": +0.1332, "d3": -0.0386,
+         "growing": 0, "founders": 9.2e-9, "d_headroom": 0.000, "basis": "TRANSFER-OUTCOME from epcoritamab/glofitamab"},
+        {"agent": "anti-CD20 monoclonal antibody", "d1": +0.2666, "d2": +0.0949, "d3": -0.0386,
+         "growing": 0, "founders": 1.6e-8, "d_headroom": 0.000, "basis": "MEASURED in dogs, 0.099/day (PMID 38662527)"},
+        {"agent": "autologous T-cell add-back after chemotherapy", "d1": +0.2389, "d2": +0.0672, "d3": -0.0386,
+         "growing": 0, "founders": 1.3e-8, "d_headroom": 0.000, "basis": "OUTCOME from 8 dogs vs 12 controls (PMID 22355761)"},
+        {"agent": "autologous tumour vaccine (APAVAC-type)", "d1": +0.2225, "d2": +0.0507, "d3": -0.0386,
+         "growing": 0, "founders": 1.6e-8, "d_headroom": 0.000, "basis": "OUTCOME from 148 dogs (PMID 31174615) + RCT (PMID 24300788)"},
+        {"agent": "dTERT genetic vaccine (Tel-eVax-type)", "d1": +0.1954, "d2": +0.0236, "d3": -0.0578,
+         "growing": 0, "founders": 2.7e-8, "d_headroom": 0.000, "basis": "OUTCOME from 3 dog series (PMIDs 23902422, 20531395, 30537967)"},
+    ],
+    "T": [
+        {"agent": "CD5 + CD7 dual-target CAR-T (canine binder)", "d1": +0.2011, "d2": +0.1192, "d3": +0.0522,
+         "growing": 0, "founders": 0.0, "d_headroom": -0.350, "basis": "TRANSFER-OUTCOME from human dual-target CAR-T"},
+        {"agent": "CD7-directed CAR-T (canine binder, fratricide-resistant)", "d1": +0.1730, "d2": +0.0522, "d3": -0.0297,
+         "growing": 0, "founders": 9.5e-9, "d_headroom": -0.350, "basis": "TRANSFER-OUTCOME from human CD7 CAR-T"},
+        {"agent": "autologous T-cell add-back after chemotherapy", "d1": +0.1405, "d2": +0.0444, "d3": -0.0375,
+         "growing": 0, "founders": 1.2e-8, "d_headroom": 0.000, "basis": "OUTCOME from 8 dogs vs 12 controls (PMID 22355761)"},
+        {"agent": "dTERT genetic vaccine (Tel-eVax-type)", "d1": +0.0969, "d2": +0.0150, "d3": -0.0375,
+         "growing": 0, "founders": 4.4e-8, "d_headroom": 0.000, "basis": "OUTCOME from 3 dog series (PMIDs 23902422, 20531395, 30537967)"},
+    ],
+}
+#: The BRAIN compartment at growth 0.12, on LAWFUL-TODAY agents only (verdinexor at the measured 0.09 CSF access, one 23.4 Gy
+#: course at the lineage-matched canine radiosensitivity, intrathecal methotrexate every 10 days). It needs no near-future agent at
+#: all: B-cell is unchanged from the operating bar, and T-cell lengthens from 157 d / 16 doses to 199 d / 20 doses, still inside the
+#: canine precedent for repeated intrathecal dosing (20-28 doses over 8-11 months via a subcutaneous CSF port, section K.6). So at
+#: 0.12 only the BODY compartment needs the one near-future addition.
+BRAIN_AT_FAST_GROWTH = {"growth": 0.12, "interval_days": 10, "ic50_nM": 118.0,
+                        "B": {"at_bar": (147, 15), "at_0_12": (147, 15)},
+                        "T": {"at_bar": (157, 16), "at_0_12": (199, 20)},
+                        "canine_precedent_doses": (20, 28)}
+
+#: The cheapest closers at 0.12: they add no toxicity load at all, and their kill is calibrated on canine outcomes.
+CLOSURE_AT_FAST_GROWTH_FREE_OPTION = {"B": "autologous tumour vaccine (APAVAC-type)",
+                                      "T": "autologous T-cell add-back after chemotherapy"}
 #: An inconsistency in the growth-bar basis text, found 2026-11-16 and recorded rather than silently fixed: the basis says
 #: "0.0903/day is the upper end of the net in-vivo band (0.015-0.12/day)", but 0.0903 is not the upper end of (0.015, 0.12).
 #: Either the band's upper bound or the description is wrong. It matters because the whole question of whether 0.12 is a value the
@@ -508,14 +564,28 @@ def closure_by_growth_item() -> Item:
     """The closure as a conjunction over growth rates (section M.26). PASSES at the model's operating bar; the 0.12 sensitivity
     point is reported OPEN rather than hidden, because a sensitivity sweep that always closes is not a sensitivity sweep."""
     bar = CLOSURE_BY_GROWTH_RATE[0.0903]
-    passes = bar["B"] > 0 and bar["T"] > 0
+    fast = CLOSURE_AT_FAST_GROWTH
+    b_opts, t_opts = fast["B"], fast["T"]
+    worst_b = min(min(o["d1"], o["d2"]) for o in b_opts)
+    worst_t = min(min(o["d1"], o["d2"]) for o in t_opts)
+    passes = (bar["B"] > 0 and bar["T"] > 0 and worst_b > 0 and worst_t > 0
+              and all(o["growing"] == 0 and o["founders"] < 1.0 for o in b_opts + t_opts))
     return Item("closure as a conjunction over growth rates", "DERIVED" if passes else "OPEN", passes,
-                f"at the operating bar 0.0903: B {bar['B']:+.5f}, T {bar['T']:+.5f} -> both CLOSED on lawful available agents. "
-                f"At 0.10: B +0.01586, T +0.00721 -> CLOSED. At the 0.12 sensitivity point: B -0.00414, T -0.00873 -> OPEN, and no "
-                "lawful combination closes it (optimised over all 20 agents from three starts). 0.12 is a sweep point, not an "
-                f"operating value. The 0.0903-vs-0.12 choice is exactly B_dx = 3e10 vs 1e10 cells at clinical diagnosis "
-                f"(growth = ln(1e12/B_dx)/38.5 d, PMID 9839202), so the closure's condition is a MEASURABLE burden, not a bare "
-                "growth number: it holds at or above ~3e10 cells and fails near 1e10 (section M.27)")
+                f"at the operating bar 0.0903: B {bar['B']:+.5f}, T {bar['T']:+.5f} -> both CLOSED on LAWFUL-TODAY agents. At 0.10: "
+                f"B +0.01586, T +0.00721 -> CLOSED on lawful-today agents. At 0.12, the top of the derived band, lawful-today is "
+                f"short (B -0.00414, T -0.00873) and NO lawful combination recovers it (exhaustive 3-7 agent search plus "
+                f"hill-climbing from three starts). It CLOSES on NEAR-FUTURE agents, which rule 13 admits: any ONE of "
+                f"{len(b_opts)} B-cell or {len(t_opts)} T-cell additions closes every reachable depth at 0.12 with zero growing "
+                f"clones and the escalation terminating (worst margins {worst_b:+.4f} B / {worst_t:+.4f} T; reachable depth is "
+                f"still {fast['reachable_depth']} there). Cheapest closers cost NOTHING in toxicity headroom and are "
+                f"outcome-calibrated on dog trials: {CLOSURE_AT_FAST_GROWTH_FREE_OPTION['B']} (B) and "
+                f"{CLOSURE_AT_FAST_GROWTH_FREE_OPTION['T']} (T). The BRAIN at 0.12 needs no near-future agent at all: lawful-today "
+                f"closes it at {BRAIN_AT_FAST_GROWTH['B']['at_0_12'][1]} (B) and {BRAIN_AT_FAST_GROWTH['T']['at_0_12'][1]} (T) "
+                f"intrathecal doses, inside the {BRAIN_AT_FAST_GROWTH['canine_precedent_doses'][0]}-"
+                f"{BRAIN_AT_FAST_GROWTH['canine_precedent_doses'][1]}-dose canine precedent. So no growth rate in the band is open "
+                f"(section M.29). Which tier is "
+                f"needed is itself a MEASURABLE condition: lawful-today suffices if the burden at clinical diagnosis is ~3e10 cells "
+                f"or more, and a near-future agent is needed near 1e10 (growth = ln(1e12/B_dx)/38.5 d, PMID 9839202; section M.27)")
 
 
 def t_cell_lawful_growth_threshold_item() -> Item:
@@ -548,7 +618,7 @@ def t_cell_lawful_growth_threshold_item() -> Item:
                 "it worse, not better. The tier-C dual-antigen CAR-T is what covers the fast-growing end")
 
 
-def escalation_terminates(ip: str, extra_agent: str | None = None) -> dict:
+def escalation_terminates(ip: str, extra_agent: str | None = None, growth: float | None = None) -> dict:
     """THE CLOSURE, as a consequence of the treatment rather than of rarity (section M.22).
 
     The sequential question taken one step further than M.19. A shrinking depth-2 clone is not inert: it still DIVIDES while it
@@ -576,9 +646,10 @@ def escalation_terminates(ip: str, extra_agent: str | None = None) -> dict:
         allag = J._pools(ip, J.CENTRAL["kill"], J.CENTRAL["duty"])[SYSTEMIC]
         reg.append(next(a for k, a in allag.items() if k.startswith(extra_agent)))
     d, _, _ = G.derate(reg, gi.EFFLUX_CO_DOSE_MULTIPLIER_CANINE_PROXY)
+    g = G.GROWTH_PER_DAY if growth is None else growth
 
     def margin(c):
-        return sum(a.effective_kill for a in d if G.covers_conjunction(a, c)) - G.GROWTH_PER_DAY
+        return sum(a.effective_kill for a in d if G.covers_conjunction(a, c)) - g
 
     total, worst = 0.0, None
     for pair in combinations(esc, 2):

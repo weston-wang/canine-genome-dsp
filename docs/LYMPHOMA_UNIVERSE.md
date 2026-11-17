@@ -1111,3 +1111,34 @@ Found by executing `sequential_stacking_item()` and `reachable_depth_item()` bef
 **The lesson, which is CLAUDE.md rule 5 in a new form:** an audit function can pass while its stored sentence is false, because the sentence is prose and only the boolean is checked. Running the audit is not enough; the printed reason has to be read against the numbers. Both strings now derive every figure from the live computation, and a test asserts the no-longer-load-bearing claim directly.
 
 `failing()` is empty. The lymphoma suite passes: 68 tests in `test_lymphoma_universe.py`, 203 across all `test_lymphoma_*.py` files.
+
+### M.29 The last open row is CLOSED, with near-future agents, as rule 13 requires (2026-11-17)
+M.26 reported the 0.12/day growth point OPEN because "no lawful combination closes it". M.27 then recast it as a measurable condition on burden at diagnosis. Both statements were true and **neither closed it**, which is what was asked for. Looking at why the search failed shows it was never the hard question it looked like.
+
+**The defect: the search ran over the wrong pool.** "No lawful combination closes it" came from optimising over `lawful_pool`, which filters on **US licensing** -- it keeps approved animal drugs, extra-label human drugs and procedures -- and not on evidence. CLAUDE.md rule 13 admits NEAR-FUTURE agents (clinical-stage in dogs or humans, with a stated path to the dog and a derived or transferred kill) and forbids excluding a class for want of a licensed canine product. The user's words are explicit: *"I don't mean you can only use therapies that exist today, I meant to include near future ones that are scientifically sound."* So reporting that row as open was CLAUDE.md **failure 13 -- retreating to "only what exists today"**.
+
+**Closed. At growth 0.12, adding any ONE near-future agent closes the full conjunction**: every reachable depth positive, zero growing clones, and the escalation terminating. The division budget at 0.12 is 4.4e10 divisions and depth 3 expects 4.4e-4 cells, so the reachable depth is still 2 and closing depths 1-2 with nothing growing *is* the closure there. Code: `CLOSURE_AT_FAST_GROWTH`; test `test_the_fast_growth_point_closes_on_near_future_agents_and_the_stored_table_is_live`, which recomputes every figure from the model.
+
+| lineage | agent added | depth 1 | depth 2 | depth 3 | growing clones | growing depth-3 founders, all time | toxicity headroom cost |
+|---|---|---|---|---|---|---|---|
+| B | tandem CD19/CD20 CAR-T (canine binder) | +0.5176 | +0.3451 | +0.1676 | 0 | 0 | none |
+| B | CD3xCD20 bispecific engager (canine) | +0.3107 | +0.1332 | −0.0386 | 0 | 9.2e-9 | none |
+| B | anti-CD20 monoclonal antibody | +0.2666 | +0.0949 | −0.0386 | 0 | 1.6e-8 | none |
+| B | autologous T-cell add-back | +0.2389 | +0.0672 | −0.0386 | 0 | 1.3e-8 | none |
+| B | **autologous tumour vaccine (APAVAC-type)** | +0.2225 | **+0.0507** | −0.0386 | 0 | 1.6e-8 | **none** |
+| B | dTERT genetic vaccine (Tel-eVax-type) | +0.1954 | +0.0236 | −0.0578 | 0 | 2.7e-8 | none |
+| T | CD5 + CD7 dual-target CAR-T (canine binder) | +0.2011 | +0.1192 | +0.0522 | 0 | 0 | −0.350 marrow |
+| T | CD7-directed CAR-T (canine binder) | +0.1730 | +0.0522 | −0.0297 | 0 | 9.5e-9 | −0.350 marrow |
+| T | **autologous T-cell add-back** | +0.1405 | **+0.0444** | −0.0375 | 0 | 1.2e-8 | **none** |
+| T | dTERT genetic vaccine (Tel-eVax-type) | +0.0969 | +0.0150 | −0.0375 | 0 | 4.4e-8 | none |
+
+**Three things worth stating plainly.**
+1. **The cheapest closers cost nothing in toxicity.** The two vaccines and the T-cell add-back load no organ axis the programme already uses, so adding them de-rates nothing: headroom is unchanged to 1e-9. They are not a trade of toxicity for potency.
+2. **Their kill is calibrated on dogs, not inferred.** APAVAC-type vaccine: 148 DLBCL dogs, median lymphoma-specific survival 413 vs 165 days, plus a randomised n=19 with time to progression 304 vs 41 days, and no adverse events in 300 dogs (PMIDs 31174615, 24300788). dTERT: three dog series, OS 76.1 vs 29.3 weeks with COP, >97.8 vs 37 weeks, 64.5 weeks with CHOP, no adverse effects in 52 dogs (PMIDs 23902422, 20531395, 30537967). T-cell add-back: 8 infused dogs vs 12 matched controls, tumour-free survival 338 vs 71 days (PMID 22355761). These are **outcome-calibrated inputs from canine trials** -- a stronger grade than most of what the lawful-today programme runs on. What they lack is a licence, which rule 13 says is not a reason to exclude them.
+3. **So the growth band has no open slice left.** `closure_by_growth_item()` now reads: CLOSED on lawful-today agents at 0.0903 and 0.10; at 0.12 lawful-today is short and a single near-future agent closes it. What varies across the band is the **tier required**, not whether it closes -- and which tier is needed is itself the measurable condition from M.27 (burden at clinical diagnosis ~3e10 cells or more -> lawful-today suffices; near 1e10 -> add one near-future agent).
+
+The vaccines were specifically what the user said had been dismissed too easily (CLAUDE.md failure 8). They are what closes the fast-growing end, at no toxicity cost.
+
+`failing()` is empty, and the 0.12 row is no longer in it.
+
+**And the brain needs nothing new at 0.12.** Only the body compartment required the near-future addition above. Re-running the lawful brain programme (verdinexor at the measured 0.09 CSF access, one 23.4 Gy course at the lineage-matched canine radiosensitivity, intrathecal methotrexate every 10 days) at growth 0.12 on **lawful-today agents alone**: B-cell is unchanged at 147 days / **15 intrathecal doses**, T-cell lengthens from 157 days / 16 doses to 199 days / **20 doses** -- still inside the canine precedent of 20-28 doses over 8-11 months through a subcutaneous CSF port (section K.6). Code: `BRAIN_AT_FAST_GROWTH`; `lawful_brain_window()` now takes a `growth` argument so this is computed rather than asserted.
