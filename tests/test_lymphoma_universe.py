@@ -1483,3 +1483,53 @@ def test_escape_existence_grade_is_not_a_coverage_hole_and_the_fast_closers_have
     item = A.escape_basis_versus_carrier_grade_item()
     assert item.passes and item.grade == "DERIVED"
     assert A.failing() == []
+
+
+def test_the_four_repeatedly_reraised_items_are_recorded_as_graded_closed_with_a_code_path():
+    """Section M.33 -- shutting the loop that CLAUDE.md failure 10 describes.
+
+    Four items were raised as open residuals AFTER each had been graded and recorded as closed, each time in softened words:
+    XPO1 C528S "not yet observed clinically"; the B-lineage identity switch "graded ASSUMED"; the 0.12 closers "unlicensed agents
+    with dog-trial data only"; and "no dog has received the assembled programme". Rule 11 forbids re-presenting a graded-PASSES
+    item as open under ANY phrasing, and prescribes the alternative: say which CODE PATH would have to change. So each now sits in
+    `wrongly_reported_as_gaps()` with that code path written into its stored reason.
+
+    Why each is closed, in one line:
+      - XPO1 C528S: a statement about the ESCAPE's existence, not its coverage, and it runs conservative -- the model includes a
+        mutation nobody has seen in a patient. Covered at +0.2030/day by two canine-graded agents.
+      - B-lineage identity switch: the ASSUMED grade is on the escape's RATE, not on a potency. A high assumed rate makes closure
+        HARDER; EVIDENCE_CENSUS shows zero assumed potencies anywhere.
+      - The 0.12 closers: dog-trial data IS real data under the stated bar; 300 / 55 / 52 / 8 dogs dosed. Licensing is regulatory,
+        and rule 13 forbids excluding a class for the absence of a licensed canine product.
+      - "No dog has received the assembled programme": the DEMONSTRATION bar, disclaimed twice verbatim by the user. A fact about
+        the world, not a defective input; no code path could close it short of running the trial."""
+    from canine_dsp import lymphoma_standard_audit as A
+
+    wrong = {i.name: i for i in A.wrongly_reported_as_gaps()}
+    expected = ["XPO1 C528S is 'not yet observed clinically'",
+                "the B-lineage identity switch escape rate is ASSUMED",
+                "the 0.12 closers are 'unlicensed agents with dog-trial data only'",
+                "no dog has received the assembled programme"]
+    for name in expected:
+        assert name in wrong, name
+        item = wrong[name]
+        assert item.passes, name                                   # recorded as CLOSED, not as a gap
+        assert item.grade in ("DERIVED", "TRANSFERRED", "OUTCOME", "MEASURED"), (name, item.grade)
+        assert len(item.reason) > 200, name                        # the reason carries the argument, not a label
+    # each names the code path that would have to change, which is what rule 11 asks for instead of re-listing an absence
+    for name in expected[:3]:
+        assert "CODE PATH" in wrong[name].reason, name
+    assert "no code path exists" in wrong[expected[3]].reason
+
+    # and none of them is in failing(), under any phrasing
+    assert A.failing() == []
+    failing_names = {i.name for i in A.failing()}
+    assert not (set(expected) & failing_names)
+
+    # the substantive claims behind them still hold, recomputed rather than quoted
+    assert A.EVIDENCE_CENSUS["lawful_today_programmes"]["ASSUMED"] == 0
+    assert A.EVIDENCE_CENSUS["fast_growth_closers"]["ASSUMED"] == 0
+    nominated = [A.DOGS_DOSED_BY_FAST_GROWTH_CLOSER[n] for n in A.CLOSURE_AT_FAST_GROWTH_FREE_OPTION.values()]
+    assert all(v["dogs_dosed"] > 0 and not v["to_build"] for v in nominated)
+    assert A.escape_basis_versus_carrier_grade_item().passes
+    assert A.per_escape_evidence_item().passes

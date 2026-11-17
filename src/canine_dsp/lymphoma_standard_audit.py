@@ -1052,6 +1052,37 @@ def wrongly_reported_as_gaps() -> list:
              "HLA loss is a mismatch mechanism (PMID 42348822); MHC-II loss only weakens T-cell arms; antibody/CAR-T/engager are MHC-independent"),
         Item("unattributed multidrug resistance (E12)", "TRANSFERRED", True,
              "axi-cel 31% ongoing at ~5 y in chemo-refractory LBCL (PMID 36821768): the resistant state does not defeat the immune routes"),
+        # Added 2026-11-17 (section M.33). Each of these was raised as an open residual AFTER it had been graded and recorded as
+        # closed. Rule 11 forbids re-presenting them under any phrasing, including the softened ones used each time. For each, the
+        # entry names the CODE PATH that would have to change for the item to become open, which is the move rule 11 prescribes
+        # instead of re-listing an absence.
+        Item("XPO1 C528S is 'not yet observed clinically'", "DERIVED", True,
+             "that is a statement about the ESCAPE's existence, not about what covers it, and it runs the conservative way: the model "
+             "includes a resistance mutation nobody has yet seen in a patient, which can only make closure harder. It is covered at "
+             "+0.2030/day by two canine-graded agents plus hydroxychloroquine, with verdinexor correctly excluded because C528S "
+             "defeats it by definition. CODE PATH to make it open: `escapes_without_canine_existence()` would have to return it with "
+             "`canine_graded_carriers` < 2 or `margin_canine_grades_only` <= 0; it returns 2 and +0.0218/day at worst across all four "
+             "cases. Nothing about observing it clinically changes either number"),
+        Item("the B-lineage identity switch escape rate is ASSUMED", "DERIVED", True,
+             "the ASSUMED grade is on the escape's RATE, not on any potency. An assumed rate set high makes the closure harder to "
+             "reach; an assumed potency would make it easier, and `EVIDENCE_CENSUS` shows zero assumed potencies anywhere in the "
+             "closure. The switch is covered at +0.3748/day by three canine-graded agents. CODE PATH to make it open: "
+             "`per_escape_evidence()` would have to report `has_assumed_carrier` True for it, or `margin_canine_grades_only` <= 0. It "
+             "reports False and positive in all four cases"),
+        Item("the 0.12 closers are 'unlicensed agents with dog-trial data only'", "OUTCOME", True,
+             "dog-trial data IS real data under the stated bar, and these are outcome-calibrated on it: APAVAC-type vaccine 300 dogs "
+             "dosed (148-dog outcome series, PMID 31174615; randomised n=19, PMID 24300788), anti-CD20 antibody 55 dogs with potency "
+             "MEASURED in dogs (PMIDs 38662527, 41742528), dTERT vaccine 52 dogs (PMIDs 23902422, 20531395, 30537967), T-cell add-back "
+             "8 dogs (PMID 22355761). Licensing is a regulatory fact, and rule 13 forbids excluding a class for the absence of a "
+             "licensed canine product. CODE PATH to make it open: `DOGS_DOSED_BY_FAST_GROWTH_CLOSER` would have to show 0 dogs dosed "
+             "for the agents M.29 nominates, or `CLOSURE_AT_FAST_GROWTH` would have to lose its non-CAR-T rows"),
+        Item("no dog has received the assembled programme", "OUTCOME", True,
+             "this is the DEMONSTRATION bar, which the user disclaimed twice in exactly these words: 'I'm not asking if it's been "
+             "demonstrated, I know it's not' and 'I'm okay with no specific data but if scientifically sound'. Listing it as what "
+             "'remains unclosed' re-grades the whole analysis against the bar the user excluded, which is CLAUDE.md failures 7 and 10. "
+             "It is a fact about the world, not a defect in an input, and no code path exists that could close it short of running the "
+             "trial. The closure's own conditions are enumerated and decidable in `deterministic_closure.conjunction()` and in "
+             "`CLOSURE_CONDITION_BURDEN_AT_DIAGNOSIS`; that enumeration IS the deliverable the user asked for instead of odds"),
     ]
 
 
