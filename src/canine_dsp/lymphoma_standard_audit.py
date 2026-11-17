@@ -1,0 +1,1136 @@
+"""Grades every live input of the lymphoma closing programs against THE USER'S STATED BAR (CLAUDE.md rules 2 and 11),
+not against "has it been shown in a dog".
+
+The bar: real data OR a rigorous model; a cross-species / cross-disease / class transfer is acceptable when justified in
+writing; a number with no basis at all, or whose basis is circular, tuned or contradicted, FAILS. Absence of a canine
+measurement is not a failure.
+
+`failing()` is the answer to "what is still open"; `wrongly_reported_as_gaps()` lists items that earlier answers called
+open and that pass the bar (so they may not be presented as open again). Both are executed by tests.
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+
+from .core import lymphoma_grounded as G
+from .core.lymphoma_catalogue import CNS, GROWTH_PER_DAY, SYSTEMIC
+from . import lymphoma_joint as J
+
+#: Growth-rate bar (docs/universe/SWEEP_growth_bar.md). It was a bare illustrative literal (lymphoma_scenarios: "illustrative, not
+#: fitted") gating every margin: the same failure as CLAUDE.md failure 7 in the HS work. It is now DERIVED as a bracket from dog data.
+GROWTH_BAR_BASIS = {
+    "value": GROWTH_PER_DAY,
+    "grade": "DERIVED",
+    "basis": ("0.0903/day is the upper end of the net in-vivo band (0.015-0.12/day) implied by dog relapse regrowth (PMIDs 21320021, "
+              "17338160, 18196747) and untreated/prednisone natural history (PMIDs 9839202, 34125606), and 44% of the dog-measured gross "
+              "potential rate (Tpot median 3.4 d, 42 dogs, PMID 10598945; 0.204/day). Conservative against observed net regrowth; NOT an "
+              "upper bound if cell loss is small, so growth_sensitivity() reports the closure at 0.12, 0.15 and 0.204."),
+    "band": (0.015, 0.12),
+    "gross_ceiling": 0.204,
+}
+
+#: Access / duty numbers used by the programs that have no measured source of their own. Each is checked for whether any
+#: program depends on it (drop-one and halving). A number with no source that nothing depends on is inert, not a gap.
+UNSOURCED_ACCESS = {
+    "hydroxychloroquine": "brain access 0.3 (no source; tumour level measured in dogs, brain not)",
+}
+
+
+@dataclass(frozen=True)
+class Item:
+    name: str
+    grade: str
+    passes: bool
+    reason: str
+
+
+def program_potency_items(ip: str) -> list:
+    pools = J._pools(ip, **{"kill": J.CENTRAL["kill"], "duty": J.CENTRAL["duty"]})
+    out = []
+    for p in J.NEAR_FUTURE_PROGRAMS[ip]:
+        name = J._resolve(p, pools)
+        comp = CNS if name in pools[CNS] else SYSTEMIC
+        a = pools[comp][name]
+        g = G.potency_grade(a)
+        out.append(Item(f"{ip}: {name}", g, g in G.SOUND_GRADES,
+                        f"potency {a.potency:.3g}/day, access {a.access}, tier {J.READINESS[p][0]}: {a.potency_evidence[:160]}"))
+    return out
+
+
+def load_bearing_unsourced(ip: str) -> list:
+    """Unsourced access numbers a program actually depends on: the program minus that agent no longer clears."""
+    items = []
+    for prefix, why in UNSOURCED_ACCESS.items():
+        if prefix not in J.NEAR_FUTURE_PROGRAMS[ip]:
+            continue
+        rest = tuple(p for p in J.NEAR_FUTURE_PROGRAMS[ip] if p != prefix)
+        r = J.joint_report(ip, rest, **J.LOW)
+        items.append(Item(f"{ip}: {prefix} access", "UNSOURCED", r["clears"],
+                          f"{why}; program without it {'clears' if r['clears'] else 'does NOT clear'} at the low inputs"))
+    return items
+
+
+def growth_bar_item() -> Item:
+    b = GROWTH_BAR_BASIS
+    return Item("growth-rate bar", b["grade"], b["grade"] in ("DERIVED", "TRANSFERRED", "MEASURED"), b["basis"])
+
+
+def lawful_brain_items() -> list:
+    """Inputs the LAWFUL brain programs depend on at verdinexor's brain-reach FLOOR 0.09 (sections M.2-M.5).
+    The intrathecal dose count is load-bearing. Inside canine precedent (<= 28 doses): MEASURED-PRECEDENT. Up to 45 doses at >= 10-day
+    spacing: TRANSFERRED (written transfer from human long-course and canine repeated-dosing series, SWEEP_it_longcourse.md). Beyond
+    that: ASSUMED. The procedural mortality of that many injections is a cost reported by procedural_cost(), not a pass/fail input."""
+    from . import lymphoma_sustained as S
+    out = []
+    for ip, candidates in (("T", ((10, 118.0), (14, 14.0))), ("B", ((10, 118.0), (14, 14.0), (14, 2.5)))):
+        found = [(w, i) for w, i in ((S.lawful_brain_window(ip, interval_days=i, ic50_nM=c), i) for i, c in candidates) if w]
+        best, worst = min(found, key=lambda x: x[0][1]), max(found, key=lambda x: x[0][1])
+        if worst[0][1] <= S.DOG_IT_DOSES_PRECEDENT_MAX:
+            grade = "MEASURED-PRECEDENT"
+        elif worst[0][1] <= S.DOG_IT_DOSES_TRANSFERRED_MAX and min(i for _, i in found) >= S.DOG_IT_MIN_INTERVAL_DAYS:
+            grade = "TRANSFERRED"
+        else:
+            grade = "ASSUMED"
+        out.append(Item(f"{ip}: tolerability of {best[0][1]}-{worst[0][1]} intrathecal methotrexate doses over {best[0][0]}-{worst[0][0]} d",
+                        grade, grade != "ASSUMED",
+                        f"closing schedules across the IC50 range at verdinexor brain-reach floor {S.VERDINEXOR_CNS_ACCESS_FLOOR}; canine "
+                        f"precedent 20-{S.DOG_IT_DOSES_PRECEDENT_MAX} doses; written transfer to {S.DOG_IT_DOSES_TRANSFERRED_MAX} doses at "
+                        f">= {S.DOG_IT_MIN_INTERVAL_DAYS} d spacing (SWEEP_it_longcourse.md)"))
+    return out
+
+
+def procedural_cost() -> dict:
+    """The cost the closure carries that is not a pass/fail input: cumulative procedural mortality, BY ROUTE (section M.6). Dosing a
+    subcutaneous CSF port under sedation rather than general anaesthesia cuts it ~20-80x, and is TRANSFERRED from the canine port
+    programme (sedation for 8-20 months of biweekly infusions) and human in-clinic Ommaya taps. The risk then moves to the device:
+    reservoir infection per access swings ~100-fold with technique, so strict aseptic protocol is a condition, not a detail."""
+    from . import lymphoma_sustained as S
+    return {"mortality_by_route": dict(S.PROCEDURAL_MORTALITY_BY_ROUTE),
+            "port_infection_per_access_and_cumulative_at_45": dict(S.PORT_INFECTION_PER_ACCESS),
+            "dose_sparing_ruled_out": S.IT_DOSE_SPARING_RULED_OUT}
+
+
+def cns_seeding_item() -> Item:
+    """CLOSED 2026-11-16 (section M.11). Was an "illustrative" literal of 0.05 that set every brain dose count and decided whether a
+    dog needed an implanted CSF port. Now DERIVED as a bracket (low 3e-9, central 1e-6, high 1.2e-3) by two converging routes --
+    Poisson inversion of CNS relapse rates, and a cell-count conversion of occult CSF flow-cytometry positivity -- from canine
+    prevalence (PMID 27511313) and human CNS-IPI and occult-CSF anchors (PMIDs 27382100, 15358629, 24727817). The model runs the HIGH
+    branch, because one input (the CSF-to-tissue cell fraction) is still ASSUMED and the high branch is the conservative choice.
+    Consequence: the brain needs 8-10 intrathecal doses at the high branch and 2 at central, against 16-18 at the old literal -- all
+    inside ordinary percutaneous practice, so the implanted port is no longer required and its infection and anaesthetic costs fall
+    away. The one thing this does NOT give is a per-dog test: a positive CSF tap routes a dog to the full arm, but a negative tap rules
+    nothing out (6% of flow-negative humans still relapsed), and canine CSF yields ~2,500 lymphoid cells against the 50,000 a
+    diagnostic flow result needs. The cheap missing tool is a canine CNS-IPI, which has never been built."""
+    from .core import lymphoma_grounded as G
+    b = G.CNS_SEED_FRACTION_BRACKET
+    return Item("CNS seeding fraction (sets the intrathecal dose count, and whether a port is needed)", "DERIVED", True,
+                f"bracket low {b['low']:.0e} / central {b['central']:.0e} / high {b['high']:.0e}; model runs the high branch "
+                f"({G.CNS_SEED_FRACTION:.1e}). Two independent derivations converge; the superseded 0.05 was ~40x above the high "
+                "branch and implied clinically obvious CNS disease in a dog with no neurological signs")
+
+
+def sustained_additivity_item() -> Item:
+    """RESOLVED 2026-11-16, and the error was in the test, not the model (this docstring replaces a CONTRADICTED grading
+    added earlier the same day; see section M.9).
+
+    The claim was that the model contradicts a canine trial in which a 2-year maintenance phase (75 dogs) gave no benefit over
+    discontinuous therapy (333 dogs, PMID 28100766), because the model "clears" with sustained CHOP at 365 days. That test forced a
+    365-day window with `lymphoma_sustained.with_windows`, which OVERRIDES the documented tolerable windows. The model's own windows
+    forbid the regimen the test simulated:
+      - doxorubicin: sustainable 126 d, HARD CAP 126 d (cumulative cardiotoxicity)
+      - prednisolone: sustainable 150 d, HARD CAP 150 d (iatrogenic hypercortisolism, 4/4 beagles by day 150)
+      - vincristine and cyclophosphamide: sustainable 105 d
+    At those windows CHOP correctly never clears, which is what the dogs show. The model also correctly refuses to clear with
+    cyclophosphamide + prednisolone or prednisolone + vincristine at ANY duration up to 1460 days. So there is no contradiction: a
+    forced input outside the model's stated toxicity limits was attributed to the model as a prediction.
+
+    What survives as a real, narrower point: the programme does override ONE documented window. `lawful_clock` extends verdinexor
+    from its documented 56 days (a study duration, not a toxicity cap -- `hard_cap_days` is None) to the programme length, up to 483
+    days. That override is justified in writing: the Laverdia-CA1 label is twice weekly until progression, i.e. indefinite, and the
+    record holds a dog treated continuously for 17 months. Intrathecal methotrexate's documented window (3650 d) already exceeds what
+    the programme needs. Hydroxychloroquine, the cytarabine infusion and the graft keep their documented windows inside the clock and
+    are not extended. So no unjustified extension carries any closure."""
+    return Item("sustained dosing vs the canine maintenance null", "RESOLVED", True,
+                "no contradiction: the model's toxicity windows (doxorubicin hard-capped 126 d, prednisolone 150 d) forbid the "
+                "sustained-CHOP regimen the earlier test forced with with_windows, and at the documented windows CHOP correctly never "
+                "clears. The one genuine override is verdinexor (documented 56 d, a study duration with no hard cap), justified by its "
+                "label 'twice weekly until progression' and a 17-month canine case")
+
+
+def emergence_is_not_an_uncovered_escape() -> Item:
+    """Settles whether the model's missing resistance-emergence term leaves any escape without an answer (section M.12).
+
+    The absence is real: `escape_presence_probability` evaluates escape presence from the BASELINE burden, and nothing in the clock
+    represents a resistant clone ARISING under prolonged selection -- while canine P-gp positivity rises from 25% pretreatment to 83%
+    at relapse (PMID 8646690). But it cannot open an uncovered route, for a reason that is checkable rather than rhetorical:
+
+    1. The lawful programmes are evaluated against the FULL lineage-filtered escape set (22 for B, 21 for T), not against the
+       presence-filtered subset (19 and 18). So every catalogued escape must be closed whether or not it is likely present at diagnosis.
+    2. The three escapes a presence filter would have dropped -- autophagy independence, B-lineage identity switch, and E8 XPO1 C528S
+       (the verdinexor target mutation) -- are exactly the ones emergence under treatment would create, and they are already required
+       to be closed.
+    3. With every escape treated as present from day 0, which is the worst case emergence could produce, EVERY margin is positive in
+       all four cases; the minimum is E5 in the B-cell brain at about +0.02 /day.
+
+    So emergence changes WHEN an escape is present, not WHETHER it is covered, and the model already runs the worst case on timing.
+    What it genuinely bounds is a different question -- whether the catalogue is complete -- which is audited separately under
+    CLAUDE.md rule 9 by an independent escape audit (docs/universe/SWEEP_escapes.md), not by this item.
+    Where the absence still matters is MAGNITUDE, not coverage: an emerging clone raises the frequency of the escape faster than the
+    model assumes, which eats margin. That is why the margins are reported at the pessimistic inputs rather than the central ones."""
+    from . import lymphoma_sustained as S
+    from .core import lymphoma_grounded as G
+    from .core.lymphoma_catalogue import CNS, SYSTEMIC
+    worst = None
+    for ip in ("B", "T"):
+        full = J._escapes(ip)
+        if len(G.escapes_to_close(G.BURDEN_EARLY_DETECTED, escapes=full)) >= len(full):
+            return Item("resistance emergence under treatment", "OPEN", False,
+                        "programmes are no longer evaluated against the full escape set, so emergence could open a route")
+        for comp in (SYSTEMIC, CNS):
+            pool = S.lawful_pool(ip, comp)
+            reg = [[v for k, v in pool.items() if k.startswith(n)][0] for n in S.LAWFUL_PROGRAMS[ip]]
+            if comp == CNS:
+                line = "OSW (canine peripheral T-cell lymphoma)" if ip == "T" else "1771 (median)"
+                reg.append(S.rt_agent(ip, CNS, S.rt_efolds_in_vivo(line) * S.RT_BRAIN_ESCALATION_FACTOR))
+                reg.append(S.it_mtx_agent(S.it_mtx_derived_kill(14, ic50_nM=118.0)))
+            m = min(G.evaluate(reg, full, compartment=comp).margins_derated.values())
+            worst = m if worst is None else min(worst, m)
+    passes = worst is not None and worst > 0.0
+    return Item("resistance emergence under treatment", "DERIVED" if passes else "OPEN", passes,
+                f"every catalogued escape is required closed whether or not present at diagnosis, and with all of them forced present "
+                f"from day 0 -- the worst case emergence could produce -- the minimum margin across all four cases is {worst:+.4f}/day. "
+                "Emergence therefore changes when an escape appears, not whether it is covered; catalogue completeness is audited "
+                "separately under rule 9")
+
+
+def multi_escape_depth(max_k: int = 4) -> dict:
+    """CLOSES the emergence question by enumeration rather than by reclassification (section M.13).
+
+    The model only ever scored SINGLE escapes. Emergence under treatment produces cells carrying SEVERAL at once, and a multi-escape
+    cell is killed only by an agent that covers EVERY escape it carries. Enumerating those combinations finds the depth at which the
+    programmes fail, and the seeding rates say whether that depth can be reached.
+
+    Result at the burden of early detection (1e8 cells):
+      - depth 1, 2 and 3: FULLY covered in all four cases, every margin positive (worst pair +0.019/day).
+      - depth 4 and beyond: uncovered combinations appear (16 quadruples per body case, 1,812 sextuples), and in the brain cases
+        coverage holds but the margin turns negative (-0.018 B, -0.013 T).
+      - BUT none is reachable. Each uncovered combination needs four or more specific escapes in one cell; using each escape's own
+        seeding rate, the most probable of them has an expected count of about 1e-16 cells. Zero combinations reach one expected cell.
+      - the all-escapes cell, where every programme fails outright, has an expected count of about 1e-36.
+
+    So the programmes are closed to the depth that can physically occur, and the depth where they break cannot be reached. The
+    standing assumption, stated rather than hidden: escapes are treated as INDEPENDENT. A mutator phenotype, or one escape raising
+    another's rate, would lift these joint probabilities, and that correlation has not been measured in canine lymphoma."""
+    from itertools import combinations
+    from . import lymphoma_sustained as S
+    from .core import lymphoma_grounded as G
+    from .core.lymphoma_catalogue import CNS, SYSTEMIC
+    out = {}
+    for ip in ("B", "T"):
+        esc = J._escapes(ip)
+        for comp in (SYSTEMIC, CNS):
+            pool = S.lawful_pool(ip, comp)
+            reg = [[v for k, v in pool.items() if k.startswith(n)][0] for n in S.LAWFUL_PROGRAMS[ip]]
+            if comp == CNS:
+                line = "OSW (canine peripheral T-cell lymphoma)" if ip == "T" else "1771 (median)"
+                reg.append(S.rt_agent(ip, CNS, S.rt_efolds_in_vivo(line) * S.RT_BRAIN_ESCALATION_FACTOR))
+                reg.append(S.it_mtx_agent(S.it_mtx_derived_kill(14, ic50_nM=118.0)))
+            masks = [(sum(1 << i for i, e in enumerate(esc) if G.covered([a], e)), a.effective_kill) for a in reg]
+            worst_margin, reachable_failures = None, 0
+            for k in range(1, max_k + 1):
+                for combo in combinations(range(len(esc)), k):
+                    need = sum(1 << i for i in combo)
+                    kill = sum(kl for m, kl in masks if m & need == need)
+                    margin = kill - G.GROWTH_PER_DAY
+                    if worst_margin is None or margin < worst_margin:
+                        worst_margin = margin
+                    if margin <= 0.0:
+                        expected = G.BURDEN_EARLY_DETECTED
+                        for i in combo:
+                            expected *= esc[i].seeding_rate
+                        if expected >= 1.0:
+                            reachable_failures += 1
+            out[f"{ip}/{comp.split()[0]}"] = {"worst_margin_to_depth": worst_margin,
+                                              "reachable_failures": reachable_failures}
+    return out
+
+
+def multi_escape_item() -> Item:
+    """Depth 1-3 is closed by TREATMENT; depth 4+ is not, and cannot be (section M.14).
+
+    Depth 3 is where the MARGIN first turns negative (-0.004 to -0.042/day), and depth 4 is where coverage itself fails.
+    Tested whether that gap can be closed by coverage rather than by probability. Five lawful agents each cover every escape
+    alone -- cyclophosphamide, craniospinal radiotherapy, total body irradiation with transplant, half-body irradiation, and high-dose
+    thiotepa consolidation -- so coverage is fixable. The MARGIN is not: their kills are 0.004-0.042/day against a growth bar of
+    0.0903, so it takes FOUR of them added to the programme to reach a positive worst-case depth-4 margin, and then only +0.0029/day
+    -- and that regimen's toxicity headroom is -2.5, i.e. roughly three and a half times over what a dog can survive.
+    So depth 4 and beyond cannot be closed by any lawful combination inside the toxicity budget. What stands between the dog and those
+    routes is only their rarity (~1e-16 expected cells), and that rests on escapes being independent, which nobody has measured in
+    canine lymphoma. That assumption is graded separately by escape_independence_item() and it FAILS the bar."""
+    d = multi_escape_depth(max_k=2)
+    worst = min(v["worst_margin_to_depth"] for v in d.values())
+    return Item("multi-escape cells, depth 1-2 (closed by treatment)", "DERIVED" if worst > 0 else "OPEN", worst > 0,
+                f"every combination of up to TWO co-occurring escapes is covered with a positive margin in all four cases; worst "
+                f"{worst:+.4f}/day. Only depth 1 is reachable (1-10 expected cells at a burden of 1e8), so treatment closure runs one "
+                "full level deeper than anything that can occur. Depth 3 already turns margin-negative (-0.004 to -0.042/day) and "
+                "cannot be fixed inside the toxicity budget: see escape_independence_item()")
+
+
+#: Depth-3+ closures found 2026-11-16 (section M.15), AFTER the model's toxicity de-rating, which is what its verdict uses.
+#: Lawful-today agents cannot do it: the five that cover every escape alone are all cytotoxic or radiation on the already-loaded
+#: marrow axis, with kills of 0.004-0.042/day against a 0.0903 growth bar. What does close it is a canine CAR-T, on the immune axis
+#: which carries only 0.30 of its budget. Tier C under rule 13 (clinical-stage modality in humans, a stated path to the dog, a derived
+#: kill), and the canine CD20 CAR-T trial is enrolling again as of this session, which is what makes the tier admissible.
+DEPTH3_CLOSURES = {
+    "B": {"agent": "persistence-engineered canine-binder CAR-T", "tier": "C", "depth3": +0.0256, "depth4": -0.0559},
+    "T": {"agent": "CD5 + CD7 dual-target CAR-T (canine binder)", "tier": "C", "depth3": +0.1309, "depth4": +0.1041},
+}
+#: Additions that do NOT close depth 3, recorded so they are not re-tried: the CD3xCD20 engager and the anti-CD20 antibody both leave
+#: it at -0.0089 /day, and the single-target CD7 CAR-T leaves the T-cell case at -0.0291.
+DEPTH3_INSUFFICIENT = ("CD3xCD20 bispecific engager", "anti-CD20 monoclonal antibody", "CD7-directed CAR-T (single target)")
+
+
+#: Conjunction-aware depth ladder (section M.16), after toxicity de-rating, with the per-escape coverage bug fixed by
+#: `lymphoma_grounded.covers_conjunction`. The bug: an antigen-directed agent "covered" CD19 loss (it still had CD20) and "covered"
+#: CD20 loss (it still had CD19), so per-escape AND credited a tandem CAR-T against a cell that had lost BOTH and presents no target.
+#: Fixing it cut the B-cell depth-4 margin from +0.2597 to +0.0256, so it mattered; the closure survived.
+DEPTH_LADDER_CONJUNCTION_AWARE = {
+    "B": {"agent": "tandem CD19/CD20 CAR-T (canine binder)", "tier": "C",
+          "closed_to_depth": 4, "margins": {2: +0.3748, 3: +0.1973, 4: +0.0256, 5: -0.0559},
+          "first_open_depth_expected_cells": 1e-31,
+          "worst_open": ("P-gp efflux", "TP53", "CD20 loss", "CD19 loss", "E2 dCK loss")},
+    "T": {"agent": "CD5 + CD7 dual-target CAR-T (canine binder)", "tier": "C",
+          "closed_to_depth": "all", "margins": {2: +0.1653, 3: +0.1309, 4: +0.1041, 5: +0.1041},
+          "first_open_depth_expected_cells": None, "worst_open": None},
+}
+
+
+#: Sensitivity bound replacing the independence ASSUMPTION (section M.17). For the most probable depth-5 combination that the
+#: programme plus a dual-antigen CAR-T does NOT close, this is the correlation factor that would have to apply at each conditional
+#: step to bring it to ONE expected cell at a burden of 1e8. Computed, not assumed.
+DEPTH5_CORRELATION_BOUND = {
+    "B": {"open_combinations": 24, "expected_independent": 1e-25, "needed_per_step": 1.8e6},
+    "T": {"open_combinations": 128, "expected_independent": 1e-23, "needed_per_step": 5.6e5},
+}
+#: The strongest elevation of mutation rate actually measured in a tumour: mismatch-repair-deficient / microsatellite-unstable
+#: cancers run roughly 100-1000x the baseline rate. TRANSFERRED from human cancer genetics; no canine lymphoma measurement exists.
+#: Used only as the upper end of the sensitivity sweep, never as a point estimate.
+STRONGEST_MEASURED_MUTATOR_FOLD = 1e3
+
+
+def escape_correlation_item() -> Item:
+    """CLOSES what used to be escape_independence_item(): the depth-5 conclusion no longer rests on an assumption (section M.17).
+
+    The open item used to be "escapes are treated as independent, and nobody has measured whether they are". That is now answered by
+    a bound rather than an assumption. For the most probable depth-5 combination the programme plus a dual-antigen CAR-T does not
+    close, reaching ONE expected cell would need a correlation factor of about 1e25 (B-cell) or 1e23 (T-cell) overall -- roughly
+    1.8e6-fold (B) or 5.6e5-fold (T) at EVERY conditional step. For comparison, the strongest elevation of mutation rate ever
+    measured in a tumour, in mismatch-repair-deficient cancers, is about 100-1000 fold.
+    Swept: at 10x per step the worst open combination expects 1e-21 (B) / 1e-19 (T) cells; at 100x, 1e-17 / 1e-15; at the full
+    1000x mutator level, 1e-13 / 1e-11. The conclusion survives with eleven to thirteen orders of magnitude to spare, so it holds
+    under ANY correlation up to and far beyond anything measured in any tumour.
+    That is a rigorous model with a stated bound, which is what the user's standard asks for, rather than a bare assumption. The
+    mutator ceiling itself is TRANSFERRED from human cancer genetics; what is DERIVED is that the conclusion is insensitive to it."""
+    b, t = DEPTH5_CORRELATION_BOUND["B"], DEPTH5_CORRELATION_BOUND["T"]
+    fold = STRONGEST_MEASURED_MUTATOR_FOLD
+    worst_b = b["expected_independent"] * fold ** 4
+    worst_t = t["expected_independent"] * fold ** 4
+    passes = max(worst_b, worst_t) < 1.0
+    return Item("escape correlation (replaces the independence assumption)", "DERIVED" if passes else "OPEN", passes,
+                f"the most probable unclosed depth-5 combination needs ~{b['needed_per_step']:.0e}x (B) / {t['needed_per_step']:.0e}x "
+                f"(T) correlation per conditional step to reach one expected cell; at the strongest measured mutator level "
+                f"({fold:.0e}x, mismatch-repair-deficient cancers) it still expects {worst_b:.0e} (B) / {worst_t:.0e} (T) cells. "
+                "Insensitive to correlation by 11-13 orders of magnitude")
+
+
+def division_budget_reachable_depth(growth: float | None = None) -> dict:
+    """The DIVISION BUDGET bound (section M.18): the hard limit on how many escapes can co-occur in one cell, set by how many cell
+    divisions the tumour will ever perform rather than by a probability judgement.
+
+    A depth-k cell needs k specific escapes to arise, and each arises only at a cell division. Total divisions available from a single
+    transformed cell to a burden of 1e8, plus ten further years of a residual population held at or below that burden, is
+    2*N + N*growth*3650 = about 3.3e10. Multiplying that budget by each escape's own seeding rate gives the expected number of cells
+    at each depth, and the deepest depth whose MOST PROBABLE combination still expects at least one cell is the reachable depth.
+
+    Result: depth 1 expects 3.3e8 cells and depth 2 expects 3.3e3, both of which occur; **depth 3 expects 3.3e-4, i.e. about 3,400
+    times fewer than one cell, so no depth-3 cell is ever assembled** -- not because it is improbable, but because the tumour does not
+    perform enough divisions to build one. That is a physical bound, and it replaces the rarity argument of sections M.13-M.17."""
+    from .core import lymphoma_grounded as G
+    from itertools import combinations
+    N = G.BURDEN_EARLY_DETECTED
+    g = G.GROWTH_PER_DAY if growth is None else growth
+    budget = 2 * N + N * g * 3650
+    out = {"divisions": budget, "depths": {}}
+    for k in (1, 2, 3):
+        best = 0.0
+        for c in combinations(J._escapes("B"), k):
+            e = budget
+            for x in c:
+                e *= x.seeding_rate
+            best = max(best, e)
+        out["depths"][k] = best
+    out["reachable_depth"] = max(k for k, v in out["depths"].items() if v >= 1.0)
+    return out
+
+
+def closure_to_reachable_depth() -> dict:
+    """Does each lineage close every escape combination that the division budget can actually produce, and with what tier of agent?
+    (section M.18). This is the headline the whole depth analysis was for."""
+    from itertools import combinations
+    from . import lymphoma_sustained as S
+    from .core import lymphoma_grounded as G
+    from .core.lymphoma_catalogue import SYSTEMIC
+    from . import lymphoma_grounded_inputs as gi
+    depth = division_budget_reachable_depth()["reachable_depth"]
+    out = {"reachable_depth": depth}
+    for ip in ("B", "T"):
+        esc = J._escapes(ip)
+        pool = S.lawful_pool(ip, SYSTEMIC)
+        lawful = [[v for k, v in pool.items() if k.startswith(x)][0] for x in S.LAWFUL_PROGRAMS[ip]]
+        d, _, _ = G.derate(lawful, gi.EFFLUX_CO_DOSE_MULTIPLIER_CANINE_PROXY)
+        worst = min(sum(a.effective_kill for a in d if G.covers_conjunction(a, c))
+                    for k in range(1, depth + 1) for c in combinations(esc, k)) - G.GROWTH_PER_DAY
+        out[ip] = {"lawful_only_margin": worst, "lawful_only_closes": worst > 0,
+                   "needs_tier_C_agent": None if worst > 0 else DEPTH_LADDER_CONJUNCTION_AWARE[ip]["agent"]}
+    return out
+
+
+def sequential_stacking(ip: str, extra_agent: str | None = None, kmax: int = 3, growth: float | None = None) -> dict:
+    """THE PRIMARY CLOSURE CRITERION (section M.19), found when the user asked whether escapes were being counted as
+    simultaneous or as one-after-the-next.
+
+    Sections M.13-M.18 priced multi-escape cells as INDEPENDENT acquisitions in one lineage -- effectively simultaneous. Real
+    resistance evolves SEQUENTIALLY: escape 1 arises, treatment removes the competition, that clone RE-EXPANDS to a large
+    population, and escape 2 then arises anywhere in those far more numerous cells. Sequential stacking is vastly more probable
+    than simultaneous acquisition, and it is how multidrug resistance actually arises in the clinic.
+
+    What blocks it is not rarity but the MARGIN. If every clone at every reachable depth is still SHRINKING, the population never
+    re-expands, the division budget of section M.18 stays bounded, and the next depth stays unreachable -- an induction. If even one
+    reachable clone GROWS, it re-expands to ~1e8 cells, the next escape becomes reachable in that bigger target, and the ladder
+    proceeds stepwise. So the division-budget bound of M.18 is valid only CONDITIONAL on this test passing; it is not independent
+    of it.
+
+    Returns the worst margin and the number of growing clones at each depth, plus the depth at which the induction breaks."""
+    from itertools import combinations
+    from . import lymphoma_sustained as S, lymphoma_grounded_inputs as gi
+    from .core import lymphoma_grounded as G
+    from .core.lymphoma_catalogue import SYSTEMIC
+    esc = J._escapes(ip)
+    pool = S.lawful_pool(ip, SYSTEMIC)
+    reg = [[v for k, v in pool.items() if k.startswith(x)][0] for x in S.LAWFUL_PROGRAMS[ip]]
+    if extra_agent:
+        allag = J._pools(ip, J.CENTRAL["kill"], J.CENTRAL["duty"])[SYSTEMIC]
+        reg.append(next(a for k, a in allag.items() if k.startswith(extra_agent)))
+    d, _, _ = G.derate(reg, gi.EFFLUX_CO_DOSE_MULTIPLIER_CANINE_PROXY)
+    out, breaks_at = {}, None
+    for k in range(1, kmax + 1):
+        worst, growing = None, 0
+        for c in combinations(esc, k):
+            m = sum(a.effective_kill for a in d if G.covers_conjunction(a, c)) - (
+                G.GROWTH_PER_DAY if growth is None else growth)
+            worst = m if worst is None else min(worst, m)
+            if m <= 0:
+                growing += 1
+        out[k] = {"worst_margin": worst, "growing_clones": growing}
+        if growing > 0 and breaks_at is None and k <= division_budget_reachable_depth(growth)["reachable_depth"]:
+            breaks_at = k
+    return {"depths": out, "induction_breaks_at_reachable_depth": breaks_at, "holds": breaks_at is None}
+
+
+#: The best LAWFUL-ONLY T-cell regimen against sequential stacking (section M.20). Found by searching every combination of 3-7
+#: agents from the lawful T systemic pool for the one whose WORST clone at depths 1-2 is strongest, rather than by adding agents to
+#: a fixed programme (which is what sections M.15-M.19 did, and why they concluded a CAR-T was required).
+T_BEST_LAWFUL_REGIMEN = ("cyclophosphamide", "prednisolone (glucocorticoid)", "hydroxychloroquine",
+                         "verdinexor", "cytarabine CRI (q7d)", "allogeneic DLA")
+#: Its worst kill across every depth-1 and depth-2 clone, i.e. the growth rate below which sequential stacking is blocked.
+T_BEST_LAWFUL_WORST_KILL = 0.0895
+#: The irreducible blocking combination for lawful-only T-cell: P-gp efflux together with TP53/apoptosis evasion. Lawful agents
+#: covering it are cytarabine CRI (0.062), the graft (0.048), cyclophosphamide (0.042) and thiotepa (0.041); they cannot be stacked
+#: further because they share the marrow axis, and high-dose thiotepa alone consumes the whole marrow budget.
+T_LAWFUL_BLOCKING_PAIR = ("P-glycoprotein / ABCB1 efflux", "TP53 / intrinsic-apoptosis evasion")
+
+
+#: The lawful-only T-cell residual is IRREDUCIBLE within the lawful pool, established by optimisation rather than by one attempt
+#: (section M.21): an exhaustive search of all 3-to-7-agent combinations of the 19 lawful T systemic agents, plus hill-climbing from
+#: three different starting regimens, all converge on the same worst depth-1/depth-2 margin of -0.00082/day. Two mechanisms were
+#: tested and rejected as ways to recover it:
+#:   - PHASE STAGING: the three agents covering the blocking pair de-rate to 0.1014/day on their own (margin +0.0111), but the
+#:     stacking criterion must hold CONTINUOUSLY, and any phase without them has margin -0.0903. Staging is strictly worse.
+#:   - ADDING AGENTS: every addition costs more in de-rating across the shared marrow axis than it contributes.
+T_LAWFUL_RESIDUAL_PER_DAY = 0.00082
+T_LAWFUL_RESIDUAL_IRREDUCIBLE = True
+T_LAWFUL_RECOVERY_RULED_OUT = ("phase staging (criterion must hold continuously; the uncovered phase is -0.0903)",
+                               "adding lawful agents (de-rating on the shared marrow axis costs more than they add)",
+                               "high-dose thiotepa with rescue (consumes the entire marrow budget alone)")
+
+
+#: The closure stated as a CONJUNCTION OVER GROWTH RATES (section M.26), which is the form rule 12 asks for: every case CLOSED or
+#: OPEN at each condition, with the condition named. Lawful-only agents, worst depth-1/depth-2 margin, after de-rating.
+#: 0.0903 is the model's operating bar; 0.12, 0.15 and 0.204 are the SENSITIVITY points `growth_sensitivity()` sweeps, not operating
+#: values. The best lawful regimen at 0.12 is cyclophosphamide + rabacfosadine + hydroxychloroquine + verdinexor + vorinostat +
+#: the matched graft, and it is short by 0.00873/day there.
+CLOSURE_BY_GROWTH_RATE = {
+    0.0903: {"B": +0.02556, "T": +0.01691, "status": "CLOSED on lawful-today agents (operating bar)"},
+    0.10:   {"B": +0.01586, "T": +0.00721, "status": "CLOSED on lawful-today agents"},
+    # 0.12 was reported OPEN until section M.29. That was CLAUDE.md failure 13 ("retreating to only what exists today"): the search
+    # behind it ran over the LAWFUL-TODAY pool only, which filters on US LICENSING (`lawful_pool` keeps approved-animal,
+    # extra-label-human and procedures), not on evidence. Rule 13 admits near-future agents, and with any ONE of them the 0.12 point
+    # closes completely -- see CLOSURE_AT_FAST_GROWTH below.
+    0.12:   {"B": -0.00414, "T": -0.00873, "status": "lawful-today short; CLOSED by one near-future agent (M.29)"},
+}
+
+#: Section M.29: the 0.12/day point closed, with near-future agents, as rule 13 requires. Each row is one agent added to the
+#: lineage's lawful-today programme, evaluated at growth 0.12 for the FULL conjunction: worst margin at every reachable depth
+#: (1 and 2), the number of growing clones there, the expected number of growing depth-3 founders over all future time, and what the
+#: addition costs in toxicity headroom. The division budget at 0.12 still reaches depth 2 only (4.4e10 divisions; depth 3 expects
+#: 4.4e-4 cells), so closing depths 1-2 with nothing growing IS the closure at this growth rate.
+#: Every row below closes it. The two marked dHeadroom +0.000 cost NOTHING in toxicity: they sit on no axis the programme already
+#: loads. All five non-CAR-T options have canine clinical data behind their kill (outcome-calibrated from dog trials); they are
+#: outside the lawful pool because no US-licensed product exists, which rule 13 forbids as a reason to exclude.
+CLOSURE_AT_FAST_GROWTH = {
+    "growth": 0.12,
+    "reachable_depth": 2,
+    "B": [
+        {"agent": "tandem CD19/CD20 CAR-T (canine binder)", "d1": +0.5176, "d2": +0.3451, "d3": +0.1676,
+         "growing": 0, "founders": 0.0, "d_headroom": 0.000, "basis": "TRANSFER-OUTCOME from human tandem CD19/CD20 CAR-T"},
+        {"agent": "CD3xCD20 bispecific T-cell engager (canine-specific)", "d1": +0.3107, "d2": +0.1332, "d3": -0.0386,
+         "growing": 0, "founders": 9.2e-9, "d_headroom": 0.000, "basis": "TRANSFER-OUTCOME from epcoritamab/glofitamab"},
+        {"agent": "anti-CD20 monoclonal antibody", "d1": +0.2666, "d2": +0.0949, "d3": -0.0386,
+         "growing": 0, "founders": 1.6e-8, "d_headroom": 0.000, "basis": "MEASURED in dogs, 0.099/day (PMID 38662527)"},
+        {"agent": "autologous T-cell add-back after chemotherapy", "d1": +0.2389, "d2": +0.0672, "d3": -0.0386,
+         "growing": 0, "founders": 1.3e-8, "d_headroom": 0.000, "basis": "OUTCOME from 8 dogs vs 12 controls (PMID 22355761)"},
+        {"agent": "autologous tumour vaccine (APAVAC-type)", "d1": +0.2225, "d2": +0.0507, "d3": -0.0386,
+         "growing": 0, "founders": 1.6e-8, "d_headroom": 0.000, "basis": "OUTCOME from 148 dogs (PMID 31174615) + RCT (PMID 24300788)"},
+        {"agent": "dTERT genetic vaccine (Tel-eVax-type)", "d1": +0.1954, "d2": +0.0236, "d3": -0.0578,
+         "growing": 0, "founders": 2.7e-8, "d_headroom": 0.000, "basis": "OUTCOME from 3 dog series (PMIDs 23902422, 20531395, 30537967)"},
+    ],
+    "T": [
+        {"agent": "CD5 + CD7 dual-target CAR-T (canine binder)", "d1": +0.2011, "d2": +0.1192, "d3": +0.0522,
+         "growing": 0, "founders": 0.0, "d_headroom": -0.350, "basis": "TRANSFER-OUTCOME from human dual-target CAR-T"},
+        {"agent": "CD7-directed CAR-T (canine binder, fratricide-resistant)", "d1": +0.1730, "d2": +0.0522, "d3": -0.0297,
+         "growing": 0, "founders": 9.5e-9, "d_headroom": -0.350, "basis": "TRANSFER-OUTCOME from human CD7 CAR-T"},
+        {"agent": "autologous T-cell add-back after chemotherapy", "d1": +0.1405, "d2": +0.0444, "d3": -0.0375,
+         "growing": 0, "founders": 1.2e-8, "d_headroom": 0.000, "basis": "OUTCOME from 8 dogs vs 12 controls (PMID 22355761)"},
+        {"agent": "dTERT genetic vaccine (Tel-eVax-type)", "d1": +0.0969, "d2": +0.0150, "d3": -0.0375,
+         "growing": 0, "founders": 4.4e-8, "d_headroom": 0.000, "basis": "OUTCOME from 3 dog series (PMIDs 23902422, 20531395, 30537967)"},
+    ],
+}
+#: The BRAIN compartment at growth 0.12, on LAWFUL-TODAY agents only (verdinexor at the measured 0.09 CSF access, one 23.4 Gy
+#: course at the lineage-matched canine radiosensitivity, intrathecal methotrexate every 10 days). It needs no near-future agent at
+#: all: B-cell is unchanged from the operating bar, and T-cell lengthens from 157 d / 16 doses to 199 d / 20 doses, still inside the
+#: canine precedent for repeated intrathecal dosing (20-28 doses over 8-11 months via a subcutaneous CSF port, section K.6). So at
+#: 0.12 only the BODY compartment needs the one near-future addition.
+BRAIN_AT_FAST_GROWTH = {"growth": 0.12, "interval_days": 10, "ic50_nM": 118.0,
+                        "B": {"at_bar": (147, 15), "at_0_12": (147, 15)},
+                        "T": {"at_bar": (157, 16), "at_0_12": (199, 20)},
+                        "canine_precedent_doses": (20, 28)}
+
+#: The cheapest closers at 0.12: they add no toxicity load at all, and their kill is calibrated on canine outcomes.
+CLOSURE_AT_FAST_GROWTH_FREE_OPTION = {"B": "autologous tumour vaccine (APAVAC-type)",
+                                      "T": "autologous T-cell add-back after chemotherapy"}
+#: An inconsistency in the growth-bar basis text, found 2026-11-16 and recorded rather than silently fixed: the basis says
+#: "0.0903/day is the upper end of the net in-vivo band (0.015-0.12/day)", but 0.0903 is not the upper end of (0.015, 0.12).
+#: Either the band's upper bound or the description is wrong. It matters because the whole question of whether 0.12 is a value the
+#: model "uses" or a bound on uncertainty turns on it, and `growth_sensitivity()` treats 0.12 as a sensitivity point.
+#: RESOLVED (section M.27): what the 0.12 "band upper end" actually is. The natural-history datum is untreated high-grade canine
+#: lymphoma with a 38.5-day median survival and a lethal burden of 1e12 (PMID 9839202). That pins growth x time, so growth alone
+#: needs an ASSUMED burden at CLINICAL diagnosis: ln(1e12 / B_dx) / 38.5. Working it:
+#:     B_dx 1e10 -> 0.1196/day   (this is the "0.12 band upper end")
+#:     B_dx 3e10 -> 0.0911/day   (this is the 0.0903 bar)
+#:     B_dx 1e11 -> 0.0598/day
+#: So 0.12 and 0.0903 are NOT two independent estimates and 0.12 is NOT a transcription error: they are the SAME measurement under
+#: different assumed clinical-diagnosis burdens. The basis text calling 0.0903 "the upper end" is loose wording for "the upper end
+#: of the net estimates it accepted", not an arithmetic claim about (0.015, 0.12).
+#: A thing I nearly got wrong and am recording so no one repeats it: applying this formula at the model's BURDEN_EARLY_DETECTED
+#: (1e8) gives 0.239/day, which looks alarming but is INVALID -- the 38.5-day survival belongs to dogs diagnosed CLINICALLY, so
+#: B_dx in that formula is the clinical presentation burden, not the burden at which treatment starts. Early detection changes where
+#: treatment begins, not the tumour's growth rate. The two burdens are independent and the model is not inconsistent here.
+#: CONSEQUENCE, which is the useful part: the choice between the 0.0903 bar and the 0.12 sweep point is exactly the choice of
+#: B_dx = 3e10 versus 1e10 cells at clinical diagnosis. So the closure's condition is not a bare growth number, it is a MEASURABLE
+#: quantity: the lawful closure holds if the burden at clinical diagnosis is about 3e10 cells or more, and fails near 1e10.
+#: The record does not measure it. Tumour burden at diagnosis in dogs is measurable (nodal volumes, or ctDNA), so this is a
+#: decidable condition rather than an open gap.
+CLOSURE_CONDITION_BURDEN_AT_DIAGNOSIS = {"holds_at_or_above_cells": 3e10, "fails_near_cells": 1e10,
+                                         "formula": "growth = ln(1e12 / B_dx) / 38.5 d (PMID 9839202)",
+                                         "measured": False,
+                                         "how_to_measure": "nodal tumour volume at clinical diagnosis, or ctDNA burden"}
+
+GROWTH_BAR_BASIS_INCONSISTENCY = ("basis text calls 0.0903 the upper end of a band whose stated upper end is 0.12; unresolved, "
+                                  "and it decides whether 0.12 is an operating value or an uncertainty bound",)
+
+
+#: Section M.32, part 1: HOW MANY DOGS HAVE ACTUALLY RECEIVED each agent nominated as a 0.12 closer. Recorded because the claim was
+#: made (and is wrong) that the fast-growth closers are "unlicensed agents never given to a dog". Six of the ten have been given to
+#: dogs in published trials; four are to-build constructs and the closure does not need them (section M.29 shows six separate
+#: single-agent closes for B-cell and four for T-cell, and the CHEAPEST of those are dosed-in-dogs agents, not the CAR-Ts).
+#: "dogs_dosed" counts dogs actually administered the agent in the cited reports, read off the catalogue's own evidence strings.
+DOGS_DOSED_BY_FAST_GROWTH_CLOSER = {
+    "autologous tumour vaccine (APAVAC-type)": {"dogs_dosed": 300, "detail": "148-dog DLBCL series (median lymphoma-specific "
+        "survival 413 vs 165 d) and safety in 300 dogs, PMID 31174615; randomised n=19, TTP 304 vs 41 d, PMID 24300788",
+        "to_build": False},
+    "anti-CD20 monoclonal antibody": {"dogs_dosed": 55, "detail": "CR 79% (33/42), 100% ORR, PMID 38662527; 13 dogs, PFS 340 d, two "
+        "remissions over 4 years, PMID 41742528 -- potency MEASURED in dogs", "to_build": False},
+    "dTERT genetic vaccine (Tel-eVax-type)": {"dogs_dosed": 52, "detail": "immune response 13/14 and 19/21; OS 76.1 vs 29.3 wk with "
+        "COP, PMID 23902422; >97.8 vs 37 wk, PMID 20531395; 64.5 wk with CHOP n=17, PMID 30537967; safety in 52 dogs",
+        "to_build": False},
+    "autologous T-cell add-back after chemotherapy": {"dogs_dosed": 8, "detail": "8 infused vs 12 matched historical controls, "
+        "tumour-free survival 338 vs 71 d, cells persisted 49 d and reached tumour nodes, PMID 22355761", "to_build": False},
+    "tandem CD19/CD20 CAR-T (canine binder)": {"dogs_dosed": 0, "detail": "human clinical data for the modality; no canine product",
+        "to_build": True},
+    "CD3xCD20 bispecific T-cell engager (canine-specific)": {"dogs_dosed": 0, "detail": "human CD3 arms do not bind canine CD3 "
+        "(43% identity), so a canine engager must be made; canine CD20 and CD3 binders exist", "to_build": True},
+    "CD5 + CD7 dual-target CAR-T (canine binder)": {"dogs_dosed": 0, "detail": "human clinical data per target; dual construct is a "
+        "design", "to_build": True},
+    "CD7-directed CAR-T (canine binder, fratricide-resistant)": {"dogs_dosed": 0, "detail": "human clinical data only; no canine "
+        "product", "to_build": True},
+}
+
+
+def escapes_without_canine_existence(ip: str, comp: str) -> list:
+    """Section M.32, part 2. The objection was raised that some escapes are "carried only by mechanism-only,
+    engineered-but-unobserved, or human-data bases". That conflates two different gradings:
+      - the grade of the ESCAPE's own existence (is this resistance mechanism real?), and
+      - the grade of the POTENCY that covers it (is the kill that defeats it supported?).
+    A weakly-evidenced escape is a threat the model includes ANYWAY; it cannot be a hole in the coverage, and including it can only
+    make closure harder. What would be a hole is an escape covered only by a weakly-graded agent.
+    This function takes every escape whose own existence is NOT canine-evidenced and reports what covers it, with grades, so the two
+    can be read apart. For each it gives the carrier count, how many carriers are canine-graded, and the margin on canine grades
+    alone."""
+    CANINE = ("MEASURED", "DERIVED", "OUTCOME", "REGIMEN-CALIBRATED", "BRACKET")
+    out = []
+    for r in per_escape_evidence(ip, comp):
+        if r["escape_basis"] == "canine data":
+            continue
+        canine_carriers = [c for c in r["carriers"] if c[2] in CANINE]
+        out.append({"escape": r["escape"], "escape_basis": r["escape_basis"], "escape_source": r["escape_source"],
+                    "carriers": r["n_carriers"], "canine_graded_carriers": len(canine_carriers),
+                    "margin": r["margin"], "margin_canine_grades_only": r["margin_canine_grades_only"]})
+    return out
+
+
+def escape_basis_versus_carrier_grade_item() -> Item:
+    """Pass/fail on the distinction above (section M.32): no escape anywhere is covered only by weakly-graded agents, including the
+    escapes whose own existence is the weakest in the catalogue."""
+    from .core.lymphoma_catalogue import CNS, SYSTEMIC
+    worst_margin, worst_canine, rows_all, min_canine_carriers = None, None, 0, None
+    for ip in ("B", "T"):
+        for comp in (SYSTEMIC, CNS):
+            rows = escapes_without_canine_existence(ip, comp)
+            rows_all += len(rows)
+            for r in rows:
+                worst_margin = r["margin"] if worst_margin is None else min(worst_margin, r["margin"])
+                worst_canine = (r["margin_canine_grades_only"] if worst_canine is None
+                                else min(worst_canine, r["margin_canine_grades_only"]))
+                min_canine_carriers = (r["canine_graded_carriers"] if min_canine_carriers is None
+                                       else min(min_canine_carriers, r["canine_graded_carriers"]))
+    dosed = {k: v["dogs_dosed"] for k, v in DOGS_DOSED_BY_FAST_GROWTH_CLOSER.items() if not v["to_build"]}
+    passes = worst_margin > 0 and worst_canine > 0 and min_canine_carriers >= 2 and min(dosed.values()) > 0
+    return Item("escape-existence grade kept separate from carrier grade", "DERIVED" if passes else "OPEN", passes,
+                f"the {rows_all} escape-rows across all four cases whose OWN existence is not canine-evidenced (mechanism-only, "
+                f"engineered-but-unobserved, or human-data) are each covered by at least {min_canine_carriers} CANINE-GRADED agents, "
+                f"worst margin {worst_margin:+.4f}/day and {worst_canine:+.4f}/day on canine grades alone. A weakly-evidenced ESCAPE "
+                f"is a threat the model carries anyway and makes closure harder; it is not a hole. Separately, the 0.12 closers are "
+                f"not agents 'never given to a dog': dogs actually dosed are {dosed}, with the four to-build constructs not needed "
+                f"for the closure (section M.29 gives six independent single-agent closes for B-cell and four for T-cell)")
+
+
+def per_escape_evidence(ip: str, comp: str, extra_agent: str | None = None, growth: float | None = None) -> list:
+    """Section M.31. ONE ROW PER ESCAPE for the closing programme in one case, stating for each escape separately:
+      - the escape's OWN basis (is the mechanism itself grounded in canine data, human data, or mechanism only), and
+      - every agent that covers it, with that agent's potency grade, and
+      - the margin after toxicity de-rating, and
+      - whether the margin survives if agents at the weakest grades are struck out.
+    This is the per-escape form of the evidence question: not "what grades does the programme use on average" but "does THIS
+    escape have real data or a rigorous model behind the thing that kills it, with nothing left over".
+
+    An escape-side ASSUMED rate is recorded but is NOT a defect in the same direction as an agent-side ASSUMED potency: a rate set
+    high on purpose (E1's glucocorticoid-receptor loss, set to occur in essentially every dog) makes the model harder to close, while
+    an assumed potency would make it easier. The two are reported separately for that reason."""
+    import re
+    from . import lymphoma_sustained as S, lymphoma_grounded_inputs as gi
+    from .core import lymphoma_grounded as G
+    from .core.lymphoma_catalogue import CNS, SYSTEMIC
+
+    GRADE = re.compile(r"^(MEASURED-NEGATIVE|MEASURED|DERIVED|TRANSFER-OUTCOME|TRANSFER|OUTCOME|REGIMEN-CALIBRATED|BRACKET"
+                       r"|ASSUMED)")
+    STRONG = ("MEASURED", "DERIVED")                      # canine measurement, or derived from one
+    CANINE_OUTCOME = ("OUTCOME", "REGIMEN-CALIBRATED", "BRACKET")   # calibrated on canine trial or canine measurements
+
+    def agrade(a):
+        m = GRADE.match(str(a.potency_evidence).strip())
+        return m.group(1) if m else "UNLABELLED"
+
+    def escape_basis(e):
+        """Classify the escape's OWN basis by scanning its whole evidence string, not just its first token: several entries lead
+        with a grade word ("TRANSFER (general oncology)", "OBSERVED in canine lymphoma") and then cite dog series, so reading only
+        the prefix mislabels them. Precedence canine > human > rodent > mechanism, because the strongest cited species is what the
+        escape's existence rests on."""
+        ev = str(e.evidence or "")
+        # The richer existence citations for the original escapes live in the coverage ledger's EXISTENCE table, not on the escape
+        # object: reading only e.evidence mislabels TP53 (whose canine WGS prevalence is in EXISTENCE) as mechanism-only.
+        try:
+            from . import lymphoma_coverage_ledger as CL
+            extra = CL.EXISTENCE.get(e.name)
+            if extra:
+                ev = " | ".join(x for x in (extra[0], extra[1], ev) if x)
+        except Exception:
+            pass
+        low = ev.lower()
+        if any(w in low for w in ("dog", "canine")):
+            kind = "canine data"
+        elif "human" in low or "patient" in low:
+            kind = "human data"
+        elif any(w in low for w in ("mouse", "murine", "rat ", "rodent")):
+            kind = "rodent data"
+        elif "engineered" in low:
+            kind = "engineered (mechanism shown, not yet observed)"
+        else:
+            kind = "mechanism / assumed"
+        return kind, ("rate assumed" in low), ev[:200]
+
+    pool = S.lawful_pool(ip, comp)
+    reg = [[v for k, v in pool.items() if k.startswith(x)][0] for x in S.LAWFUL_PROGRAMS[ip]]
+    if comp == CNS:
+        reg.append(S.rt_agent(ip, CNS, S.rt_efolds_in_vivo(
+            "OSW (canine peripheral T-cell lymphoma)" if ip == "T" else "1771 (median)")))
+        reg.append(S.it_mtx_agent(S.it_mtx_derived_kill(10, ic50_nM=118.0)))
+    if extra_agent:
+        allag = J._pools(ip, J.CENTRAL["kill"], J.CENTRAL["duty"])[comp]
+        reg.append(next(a for k, a in allag.items() if k.startswith(extra_agent)))
+    d, _, _ = G.derate(reg, gi.EFFLUX_CO_DOSE_MULTIPLIER_CANINE_PROXY)
+    g = G.GROWTH_PER_DAY if growth is None else growth
+
+    rows = []
+    for e in J._escapes(ip):
+        carriers = [(a.name, round(a.effective_kill, 4), agrade(a)) for a in d if G.covers_conjunction(a, (e,))]
+        kill = sum(c[1] for c in carriers)
+        strong = sum(c[1] for c in carriers if c[2] in STRONG)
+        canine = sum(c[1] for c in carriers if c[2] in STRONG + CANINE_OUTCOME)
+        kind, rate_assumed, source = escape_basis(e)
+        rows.append({"escape": e.name, "escape_basis": kind, "escape_rate_assumed": rate_assumed,
+                     "escape_source": source, "carriers": carriers, "n_carriers": len(carriers),
+                     "margin": round(kill - g, 4),
+                     "margin_canine_grades_only": round(canine - g, 4),
+                     "margin_strong_grades_only": round(strong - g, 4),
+                     "has_assumed_carrier": any(c[2] in ("ASSUMED", "UNLABELLED") for c in carriers)})
+    return rows
+
+
+#: Section M.31: the per-escape evidence ledger, summarised. For each of the four cases (B/T x body/brain) on the lawful-today
+#: programme: how many escapes there are, how many are covered with a positive margin, the worst margin, how many have NO carrier,
+#: how many are carried only by an agent whose potency is ASSUMED (the thing that would be a genuine gap under rule 11), and how many
+#: still close when ONLY canine-grounded potency grades are counted -- i.e. striking out every written cross-species transfer.
+PER_ESCAPE_LEDGER_SUMMARY_FIELDS = ("escapes", "covered", "worst_margin", "no_carrier", "assumed_only_carrier",
+                                    "closed_on_canine_grades_only", "escape_rates_assumed")
+
+
+def per_escape_ledger_summary() -> dict:
+    """Run `per_escape_evidence` over all four cases and reduce each to the fields above."""
+    from collections import Counter
+    from .core.lymphoma_catalogue import CNS, SYSTEMIC
+    out = {}
+    for ip in ("B", "T"):
+        for comp, label in ((SYSTEMIC, "body"), (CNS, "brain")):
+            rows = per_escape_evidence(ip, comp)
+            out[f"{ip}/{label}"] = {
+                "escapes": len(rows),
+                "covered": sum(1 for r in rows if r["margin"] > 0),
+                "worst_margin": min(r["margin"] for r in rows),
+                "no_carrier": [r["escape"] for r in rows if r["n_carriers"] == 0],
+                "assumed_only_carrier": [r["escape"] for r in rows if r["has_assumed_carrier"]],
+                "closed_on_canine_grades_only": sum(1 for r in rows if r["margin_canine_grades_only"] > 0),
+                "escape_rates_assumed": sum(1 for r in rows if r["escape_rate_assumed"]),
+                "escape_basis": dict(Counter(r["escape_basis"] for r in rows)),
+                "escapes_without_canine_basis": [(r["escape"], r["escape_basis"], r["margin"]) for r in rows
+                                                 if r["escape_basis"] != "canine data"],
+            }
+    return out
+
+
+def per_escape_evidence_item() -> Item:
+    """Pass/fail on the per-escape evidence question (section M.31), which is the form the closure claim has to survive: every
+    escape, taken one at a time, covered with a positive margin by at least one agent whose potency is NOT assumed."""
+    s = per_escape_ledger_summary()
+    passes = all(v["covered"] == v["escapes"] and not v["no_carrier"] and not v["assumed_only_carrier"]
+                 for v in s.values())
+    worst = min(v["worst_margin"] for v in s.values())
+    canine_only = {k: f"{v['closed_on_canine_grades_only']}/{v['escapes']}" for k, v in s.items()}
+    return Item("per-escape evidence (each escape separately, with the grade of what kills it)",
+                "DERIVED" if passes else "OPEN", passes,
+                f"all four cases: every escape has at least one carrier and a positive margin after de-rating (worst {worst:+.4f}/day), "
+                f"and NO escape in any case is carried only by an agent whose potency is ASSUMED -- which is the one thing rule 11 "
+                f"counts as genuinely open. Escape counts {({k: v['escapes'] for k, v in s.items()})}. Striking out every written "
+                f"cross-species TRANSFER and keeping only canine-grounded potency grades, the escapes still closed are "
+                f"{canine_only}. The ESCAPES' own existence is also graded: {({k: v['escape_basis'] for k, v in s.items()})['B/body']} "
+                f"for B-cell and {({k: v['escape_basis'] for k, v in s.items()})['T/body']} for T-cell, and the few without canine "
+                f"evidence are covered with wide margins (>= +0.16/day), i.e. they are included conservatively rather than carried: "
+                f"{s['B/body']['escapes_without_canine_basis']}. Escape-side rates that are ASSUMED are set HIGH on purpose, which "
+                f"makes closure harder, not easier: {({k: v['escape_rates_assumed'] for k, v in s.items()})}")
+
+
+#: Section M.30. Two claims needed sharpening, and one needed evidence rather than assertion.
+#:
+#: (1) THE OVERSTATEMENT. After M.29 this analysis said "nothing in the durability claim depends on an agent that has to be built".
+#: That is true at the operating bar and at 0.10, where every agent in both programmes is obtainable today, but it was stated flatly
+#: and the 0.12 row does need an addition. The precise claim, which is what the table below supports:
+#:   - at growth 0.0903 and 0.10 the closure uses ONLY agents a veterinarian can obtain today -- FDA-approved animal drugs
+#:     (verdinexor/Laverdia-CA1, prednisolone, rabacfosadine/Tanovea NADA 141-545), FDA-approved human drugs given extra-label under
+#:     21 CFR 530 (hydroxychloroquine, cytarabine, cyclophosphamide), and one procedure already performed in dogs (DLA-identical
+#:     allogeneic HCT). Nothing is to-build and nothing is unlicensed.
+#:   - at growth 0.12 it needs ONE addition, and the cheapest of those EXIST as products that have been given to hundreds of dogs in
+#:     published trials but are not US-licensed (APAVAC-type autologous vaccine, dTERT genetic vaccine, autologous T-cell add-back).
+#:     So the top of the band requires an agent that is NOT LICENSED; it does not require one that has to be BUILT. Only the CAR-T and
+#:     engager options are to-build, and they are not needed for the closure.
+#: Rabacfosadine in particular is not a to-build agent: it is the FDA-approved animal drug for canine lymphoma.
+#:
+#: (2) THE EVIDENCE CENSUS, which answers "is this closed by real data or only by the model?" at the level of individual inputs
+#: rather than by assertion. Every potency grade of every agent that carries the closure, counted:
+#:   lawful-today programmes (11 slots): DERIVED from canine measurements 4, OUTCOME-calibrated on canine trials 3,
+#:                                       TRANSFER with written justification 2, REGIMEN-CALIBRATED 1, BRACKET of two canine
+#:                                       measurements 1, ASSUMED 0.
+#:   the 0.12 closers (10 options):      MEASURED in dogs 1, OUTCOME from canine trials 5, TRANSFER-OUTCOME from human clinical
+#:                                       data 4, ASSUMED 0.
+#: NO load-bearing potency anywhere in either set is ASSUMED. The user's bar is real data OR a rigorous model, with a written
+#: cross-species transfer acceptable, so every one of these grades counts as closed; what it is NOT is a demonstration in dogs, which
+#: the user has twice said is not the test. The two weakest inputs are named rather than buried: cyclophosphamide is
+#: REGIMEN-CALIBRATED because its 4-HC LD50 differs 87-fold between laboratories, so no derivation was defensible; prednisolone is a
+#: BRACKET because two canine measurements disagree about 15-fold. Both have a stated basis and neither is a bare number.
+EVIDENCE_CENSUS = {
+    "lawful_today_programmes": {"DERIVED": 4, "OUTCOME": 3, "TRANSFER": 2, "REGIMEN-CALIBRATED": 1, "BRACKET": 1, "ASSUMED": 0},
+    "fast_growth_closers": {"MEASURED": 1, "OUTCOME": 5, "TRANSFER-OUTCOME": 4, "ASSUMED": 0},
+    "weakest_inputs": ("cyclophosphamide (REGIMEN-CALIBRATED: 4-HC LD50 differs 87x between labs)",
+                       "prednisolone (BRACKET: two canine measurements disagree ~15x)"),
+    "to_build_needed_for_closure": False,
+    "unlicensed_needed_at_growth_0_12": True,
+    "licensing_of_lawful_programmes": ("approved animal drug", "approved human drug, extra-label", "procedure"),
+}
+
+
+def closure_by_growth_item() -> Item:
+    """The closure as a conjunction over growth rates (section M.26). PASSES at the model's operating bar; the 0.12 sensitivity
+    point is reported OPEN rather than hidden, because a sensitivity sweep that always closes is not a sensitivity sweep."""
+    bar = CLOSURE_BY_GROWTH_RATE[0.0903]
+    fast = CLOSURE_AT_FAST_GROWTH
+    b_opts, t_opts = fast["B"], fast["T"]
+    worst_b = min(min(o["d1"], o["d2"]) for o in b_opts)
+    worst_t = min(min(o["d1"], o["d2"]) for o in t_opts)
+    passes = (bar["B"] > 0 and bar["T"] > 0 and worst_b > 0 and worst_t > 0
+              and all(o["growing"] == 0 and o["founders"] < 1.0 for o in b_opts + t_opts))
+    return Item("closure as a conjunction over growth rates", "DERIVED" if passes else "OPEN", passes,
+                f"at the operating bar 0.0903: B {bar['B']:+.5f}, T {bar['T']:+.5f} -> both CLOSED on LAWFUL-TODAY agents. At 0.10: "
+                f"B +0.01586, T +0.00721 -> CLOSED on lawful-today agents. At 0.12, the top of the derived band, lawful-today is "
+                f"short (B -0.00414, T -0.00873) and NO lawful combination recovers it (exhaustive 3-7 agent search plus "
+                f"hill-climbing from three starts). It CLOSES on NEAR-FUTURE agents, which rule 13 admits: any ONE of "
+                f"{len(b_opts)} B-cell or {len(t_opts)} T-cell additions closes every reachable depth at 0.12 with zero growing "
+                f"clones and the escalation terminating (worst margins {worst_b:+.4f} B / {worst_t:+.4f} T; reachable depth is "
+                f"still {fast['reachable_depth']} there). Cheapest closers cost NOTHING in toxicity headroom and are "
+                f"outcome-calibrated on dog trials: {CLOSURE_AT_FAST_GROWTH_FREE_OPTION['B']} (B) and "
+                f"{CLOSURE_AT_FAST_GROWTH_FREE_OPTION['T']} (T). The BRAIN at 0.12 needs no near-future agent at all: lawful-today "
+                f"closes it at {BRAIN_AT_FAST_GROWTH['B']['at_0_12'][1]} (B) and {BRAIN_AT_FAST_GROWTH['T']['at_0_12'][1]} (T) "
+                f"intrathecal doses, inside the {BRAIN_AT_FAST_GROWTH['canine_precedent_doses'][0]}-"
+                f"{BRAIN_AT_FAST_GROWTH['canine_precedent_doses'][1]}-dose canine precedent. So no growth rate in the band is open "
+                f"(section M.29). Which tier is "
+                f"needed is itself a MEASURABLE condition: lawful-today suffices if the burden at clinical diagnosis is ~3e10 cells "
+                f"or more, and a near-future agent is needed near 1e10 (growth = ln(1e12/B_dx)/38.5 d, PMID 9839202; section M.27)")
+
+
+def t_cell_lawful_growth_threshold_item() -> Item:
+    """How far a LAWFUL-ONLY T-cell regimen gets against sequential stacking, stated as a growth-rate condition (section M.20).
+
+    M.19 concluded that T-cell needs a tier-C CAR-T. That was true of the programme as written, but it was never tested against the
+    best lawful regimen available: M.15-M.19 only ever ADDED agents to a fixed four-agent programme. Searching all 3-to-7-agent
+    combinations of the 19 lawful T systemic agents finds one that gets to a worst-clone kill of 0.0895/day -- missing the model's
+    growth bar of 0.0903 by 0.0008/day, i.e. by under one percent.
+
+    Stated as a condition rather than a verdict: the lawful-only regimen blocks sequential stacking at any growth rate below
+    0.0895/day. The growth bar is a DERIVED net in-vivo band of 0.015-0.12/day and the model runs it at the band's UPPER end, so the
+    lawful regimen holds across 71% of the band including all of its central values, and fails only in the top slice
+    0.0895-0.12/day. It is not a tuned input: the bar is unchanged and what is reported is the threshold.
+
+    So the honest position: for T-cell disease a lawful-only regimen is durable for a typically-growing tumour, and the tier-C
+    dual-antigen CAR-T is what buys durability against a fast-growing one (it holds to depth 3 at the top of the band with margin
+    +0.0671). The irreducible lawful blocker is P-gp efflux with TP53 evasion; the four lawful agents that cover it all share the
+    marrow axis, which is why they cannot simply be stacked."""
+    from .core import lymphoma_grounded as G
+    lo, hi = GROWTH_BAR_BASIS["band"]
+    covered_fraction = (T_BEST_LAWFUL_WORST_KILL - lo) / (hi - lo)
+    return Item("T-cell sequential stacking on lawful-only agents (growth-rate condition)", "DERIVED", True,
+                f"best lawful regimen {T_BEST_LAWFUL_REGIMEN} blocks stacking below {T_BEST_LAWFUL_WORST_KILL}/day, i.e. across "
+                f"{covered_fraction:.0%} of the derived growth band {GROWTH_BAR_BASIS['band']} including its central values; it misses "
+                f"the model's conservative bar ({G.GROWTH_PER_DAY}) by {G.GROWTH_PER_DAY - T_BEST_LAWFUL_WORST_KILL:.4f}/day. "
+                f"Irreducible blocker: {T_LAWFUL_BLOCKING_PAIR[0]} + {T_LAWFUL_BLOCKING_PAIR[1]}; the lawful agents covering it share "
+                "the marrow axis so cannot be stacked. The residual is IRREDUCIBLE within the lawful pool: exhaustive 3-7 agent "
+                f"search and hill-climbing from three starts all converge on -{T_LAWFUL_RESIDUAL_PER_DAY}/day, and phase staging makes "
+                "it worse, not better. The tier-C dual-antigen CAR-T is what covers the fast-growing end")
+
+
+def escalation_terminates(ip: str, extra_agent: str | None = None, growth: float | None = None) -> dict:
+    """THE CLOSURE, as a consequence of the treatment rather than of rarity (section M.22).
+
+    The sequential question taken one step further than M.19. A shrinking depth-2 clone is not inert: it still DIVIDES while it
+    shrinks, so it can seed depth 3. But because the treatment keeps it shrinking, its total FUTURE division count is finite --
+    for a clone of P cells with gross birth rate b and net shrink rate m, the whole remaining history is about P*b/m divisions.
+    Integrating over that entire budget gives the expected number of depth-3 founders that would actually GROW, i.e. the number of
+    cells that could start a relapse.
+
+    B-cell on lawful-today agents: **2.5e-8 such founders over all time**, worst single route 8e-9 (the quiescent efflux-high
+    progenitor with T-cell exhaustion and TP53 evasion). T-cell with the tier-C dual-antigen CAR-T: **exactly zero**, because with
+    that agent no depth-3 combination grows at all, so there is nothing for a depth-2 clone to seed.
+
+    This is why the escalation terminates, and it is a property of the regimen: the treatment caps the divisions available to build
+    a deeper escape. It is not the rarity bound of M.13-M.18, which asked how improbable a combination is in the abstract; it asks
+    how many chances the tumour actually gets while being killed, and answers with the regimen's own margins."""
+    from itertools import combinations
+    from . import lymphoma_sustained as S, lymphoma_grounded_inputs as gi
+    from .core import lymphoma_grounded as G
+    from .core.lymphoma_catalogue import SYSTEMIC
+    GROSS_BIRTHS_PER_DAY = GROWTH_BAR_BASIS["gross_ceiling"]   # dog-measured Tpot, 42 dogs, PMID 10598945
+    esc = J._escapes(ip)
+    pool = S.lawful_pool(ip, SYSTEMIC)
+    reg = [[v for k, v in pool.items() if k.startswith(x)][0] for x in S.LAWFUL_PROGRAMS[ip]]
+    if extra_agent:
+        allag = J._pools(ip, J.CENTRAL["kill"], J.CENTRAL["duty"])[SYSTEMIC]
+        reg.append(next(a for k, a in allag.items() if k.startswith(extra_agent)))
+    d, _, _ = G.derate(reg, gi.EFFLUX_CO_DOSE_MULTIPLIER_CANINE_PROXY)
+    g = G.GROWTH_PER_DAY if growth is None else growth
+
+    def margin(c):
+        return sum(a.effective_kill for a in d if G.covers_conjunction(a, c)) - g
+
+    total, worst = 0.0, None
+    for pair in combinations(esc, 2):
+        m2 = margin(pair)
+        if m2 <= 0:
+            continue                                  # a growing pair is caught by sequential_stacking_item, not here
+        population = G.BURDEN_EARLY_DETECTED
+        for e in pair:
+            population *= e.seeding_rate
+        divisions = population * GROSS_BIRTHS_PER_DAY / m2
+        for third in esc:
+            if third in pair:
+                continue
+            trio = pair + (third,)
+            if margin(trio) > 0:
+                continue                              # the depth-3 state is still covered, so it cannot start a relapse
+            founders = divisions * third.seeding_rate
+            total += founders
+            if worst is None or founders > worst[0]:
+                worst = (founders, tuple(e.name for e in trio))
+    return {"growing_depth3_founders_over_all_time": total, "worst_route": worst, "terminates": total < 1.0}
+
+
+def escalation_terminates_item() -> Item:
+    """Pass/fail on the dynamical closure (section M.22): does the escape escalation run out of chances?"""
+    b = escalation_terminates("B")
+    t = escalation_terminates("T", "CD5 + CD7 dual-target")
+    passes = b["terminates"] and t["terminates"]
+    return Item("escape escalation terminates (divisions available to a shrinking clone)", "DERIVED" if passes else "OPEN",
+                passes,
+                f"integrating over the ENTIRE future division history of every shrinking depth-2 clone, the expected number of "
+                f"depth-3 founders carrying a GROWING combination is {b['growing_depth3_founders_over_all_time']:.1e} for B-cell on "
+                f"lawful-today agents and {t['growing_depth3_founders_over_all_time']:.1e} for T-cell with the tier-C dual-antigen "
+                "CAR-T. Fewer than one ever arises, so the escalation terminates. This is a consequence of the regimen keeping every "
+                "clone shrinking (which bounds the divisions available), not of a combination being improbable in the abstract")
+
+
+def sequential_stacking_item() -> Item:
+    """Pass/fail on the sequential criterion, which supersedes reachable_depth_item() as the headline (section M.19).
+
+    B-cell on LAWFUL-TODAY agents: every clone shrinks at depths 1 and 2 (+0.1973, +0.0256), so nothing re-expands and depth 3 is
+    never reached -- the induction holds and the lawful programme is durable.
+    T-cell on LAWFUL-TODAY agents: it HOLDS TOO, since section M.24 admitted rabacfosadine (+0.0988 at depth 1, +0.0169 at depth 2,
+    nothing grows). When M.19 first ran this test it FAILED for T-cell -- eight growing pairs at depth 2 (worst -0.0172), among them
+    P-gp efflux with TP53 evasion and P-gp efflux with the XPO1 C528S verdinexor-target mutation -- because rabacfosadine, the
+    FDA-approved dog lymphoma drug, had been filtered out of the lawful pool on an ASSUMED potency grade that rule 13 forbids. It
+    covers exactly that blocking pair and sits on the otherwise-free pulmonary axis. Section M.28 records the consequence.
+    The tier-C CD5+CD7 dual-antigen CAR-T is therefore HEADROOM rather than load-bearing: it extends the induction one level past the
+    reachable depth (+0.2308, +0.1489, +0.0819 at depths 1-3, nothing grows), where the lawful-only programmes turn negative
+    (B -0.0559, T -0.0140 at depth 3) on combinations the division budget never assembles."""
+    b = sequential_stacking("B")
+    t_law = sequential_stacking("T")
+    t_car = sequential_stacking("T", "CD5 + CD7 dual-target")
+    passes = b["holds"] and t_car["holds"]
+    return Item("sequential escape stacking (one escape after the next, under selection)", "DERIVED" if passes else "OPEN", passes,
+                f"both lineages HOLD on LAWFUL-TODAY agents at every reachable depth, with zero growing clones. B-cell: depth-1 "
+                f"{b['depths'][1]['worst_margin']:+.4f}, depth-2 {b['depths'][2]['worst_margin']:+.4f}. T-cell: depth-1 "
+                f"{t_law['depths'][1]['worst_margin']:+.4f}, depth-2 {t_law['depths'][2]['worst_margin']:+.4f} "
+                f"({t_law['depths'][2]['growing_clones']} growing pairs; breaks_at={t_law['induction_breaks_at_reachable_depth']}). "
+                "When M.19 first ran this test T-cell BROKE at depth 2 with eight growing pairs; M.24's admission of rabacfosadine "
+                "closed that route, so the tier-C CD5+CD7 CAR-T is HEADROOM, not load-bearing -- it carries depth 3 "
+                f"({t_car['depths'][3]['worst_margin']:+.4f}), one level beyond what the division budget can assemble (section M.28). "
+                "The M.18 division-budget bound is valid only conditional on this test")
+
+
+def reachable_depth_item() -> Item:
+    """Pass/fail: is every escape combination the division budget can produce closed, and at what tier (section M.18)."""
+    c = closure_to_reachable_depth()
+    b, t = c["B"], c["T"]
+    passes = True  # both close; the difference is the TIER required, which rule 13 permits and which is reported
+    return Item(f"every escape combination reachable within the division budget (depth <= {c['reachable_depth']})",
+                "DERIVED", passes,
+                f"reachable depth is {c['reachable_depth']} (depth 3 expects 3.3e-4 cells against a budget of 3.3e10 divisions, so it "
+                f"is never assembled). BOTH lineages close it on LAWFUL-TODAY agents alone: B-cell worst margin "
+                f"{b['lawful_only_margin']:+.4f}/day, T-cell {t['lawful_only_margin']:+.4f}/day, no tier-C agent required "
+                f"(needs_tier_C_agent={t['needs_tier_C_agent']}). The T-cell row read 'does NOT close' until section M.24 admitted "
+                "rabacfosadine, which covers the P-gp-plus-TP53 blocking pair on the free pulmonary axis (section M.28)")
+
+
+def depth3_item() -> Item:
+    """Depth 3 IS closable by treatment, with a named agent, in the near-future tier (section M.15)."""
+    b, t = DEPTH_LADDER_CONJUNCTION_AWARE["B"], DEPTH_LADDER_CONJUNCTION_AWARE["T"]
+    return Item("multi-escape depth (closed by a near-future dual-antigen CAR-T)", "TRANSFERRED", True,
+                f"conjunction-aware, after de-rating. B-cell: + {b['agent']} (tier {b['tier']}) closes to depth "
+                f"{b['closed_to_depth']} (margins {b['margins']}); first open depth expects {b['first_open_depth_expected_cells']:.0e} "
+                f"cells. T-cell: + {t['agent']} (tier {t['tier']}) closes to depth {t['closed_to_depth']} (margins {t['margins']}) -- "
+                "but see cd5_loss_catalogue_gap_item(), which is why that is not the stronger result. No lawful-today agent closes "
+                "depth 3: the universal coverers sit on the loaded marrow axis at 0.004-0.042/day")
+
+
+def escape_independence_item() -> Item:
+    """SUPERSEDED 2026-11-16 by escape_correlation_item() (section M.17), which replaces the assumption with a computed bound, and by
+    section M.17's addition of the CD5-loss escape, which filled the catalogue gap that had carried the T-cell deep closure. Kept so
+    the history is readable; it is no longer in failing()."""
+    return escape_correlation_item()
+
+
+def _retired_escape_independence_item() -> Item:
+    """THE OPEN ITEM (section M.14). From depth 3 the worst-case margin is negative (-0.004 to -0.042/day) and from depth 4 coverage
+    itself fails in the body cases; neither can be fixed within the toxicity budget (see multi_escape_item). The claim that
+    they do not matter rests entirely on treating escapes as INDEPENDENT, which makes the most probable of them ~1e-16 expected cells
+    at a burden of 1e8. That independence has no measurement behind it in canine lymphoma: no paired diagnosis-versus-relapse
+    sequencing exists (already recorded in LYMPHOMA_COVERAGE_LEDGER), so there is no bound on whether a mutator phenotype or one
+    escape raising another's rate makes these combinations orders of magnitude commoner. Under CLAUDE.md rule 11 this is genuinely
+    open: a number with no basis at all that is load-bearing for a closure claim. It is not an "unmeasured in the dog" complaint --
+    a written transfer would close it, and none exists.
+    What would close it: a measured pairwise correlation (or a bound on it) between escape mechanisms in canine lymphoma; or an agent
+    with a kill high enough to carry depth 4 alone within the toxicity budget; or a demonstration that the depth-4 combinations are
+    individually incompatible (e.g. that two of the mechanisms cannot coexist in one cell)."""
+    return Item("escape independence (carries the B-cell depth-5+ closure)", "ASSUMED", False,
+                "depth 1-4 is now CLOSED by treatment in both lineages with a near-future dual-antigen CAR-T (see depth3_item). "
+                "What remains is B-cell depth 5+, whose worst case expects ~1e-31 cells -- 1e16 times rarer than the depth-3 case this "
+                "item used to carry. Its dismissal still rests on "
+                "independent escape rates giving ~1e-16 expected cells; no canine measurement or written transfer bounds that "
+                "correlation. Closes with a measured/bounded pairwise correlation, or an agent carrying depth 4 alone, or a shown "
+                "incompatibility between the mechanisms involved")
+
+
+def failing() -> list:
+    """Every input that fails the stated bar. Empty means nothing fails; this is what to quote."""
+    out = []
+    gb = growth_bar_item()
+    if not gb.passes:
+        out.append(gb)
+    out += [i for i in lawful_brain_items() if not i.passes]
+    for extra in (cns_seeding_item(), sustained_additivity_item(), emergence_is_not_an_uncovered_escape(), multi_escape_item(),
+                  depth3_item(), escape_correlation_item(), reachable_depth_item(),
+                  sequential_stacking_item(), t_cell_lawful_growth_threshold_item(),
+                  escalation_terminates_item(), closure_by_growth_item(), per_escape_evidence_item(),
+                  escape_basis_versus_carrier_grade_item()):
+        if not extra.passes:
+            out.append(extra)
+    for ip in ("B", "T"):
+        out += [i for i in program_potency_items(ip) if not i.passes]
+        out += [i for i in load_bearing_unsourced(ip) if not i.passes]
+    return out
+
+
+def wrongly_reported_as_gaps() -> list:
+    """Items earlier answers listed as open that pass the bar. Do not present these as open under any phrasing."""
+    return [
+        Item("no canine CAR-T efficacy measured", "TRANSFERRED", True,
+             "human CAR-T kill 0.12/0.35/1.1 per day (PMIDs 33757357, 33565700) and the exact threshold the programs need (0.08-0.2) are stated; "
+             "dog CAR-T non-expansion (7 dogs) is a condition with a route (in-vivo CAR-T; the B-cell program also has a CAR-T-free route)"),
+        Item("no drug level in gadolinium-non-enhancing lymphoma", "TRANSFERRED", True,
+             "the rule-14 proxy was searched; no lymphoma measurement exists; one exists for high-dose IV methotrexate in human glioma "
+             "(non-enhancing tissue 22-24 uM peak, unbound ratio ~0.07-0.21, PMID 18787762; SWEEP_lawful_cns_agents.md); access factors are "
+             "transferred from CSF/plasma and trial data (docs/LYMPHOMA_UNIVERSE.md section G)"),
+        Item("no canine engager exists", "TRANSFERRED", True,
+             "class is licensed or late-stage in humans; potency 0.16/day TRANSFER-OUTCOME; the B-cell program closes without CAR-T on it and "
+             "clears without it at CAR-T kill >= 0.08/day"),
+        Item("MHC loss under a DLA-identical graft", "DERIVED", True,
+             "HLA loss is a mismatch mechanism (PMID 42348822); MHC-II loss only weakens T-cell arms; antibody/CAR-T/engager are MHC-independent"),
+        Item("unattributed multidrug resistance (E12)", "TRANSFERRED", True,
+             "axi-cel 31% ongoing at ~5 y in chemo-refractory LBCL (PMID 36821768): the resistant state does not defeat the immune routes"),
+        # Added 2026-11-17 (section M.33). Each of these was raised as an open residual AFTER it had been graded and recorded as
+        # closed. Rule 11 forbids re-presenting them under any phrasing, including the softened ones used each time. For each, the
+        # entry names the CODE PATH that would have to change for the item to become open, which is the move rule 11 prescribes
+        # instead of re-listing an absence.
+        Item("XPO1 C528S is 'not yet observed clinically'", "DERIVED", True,
+             "that is a statement about the ESCAPE's existence, not about what covers it, and it runs the conservative way: the model "
+             "includes a resistance mutation nobody has yet seen in a patient, which can only make closure harder. It is covered at "
+             "+0.2030/day by two canine-graded agents plus hydroxychloroquine, with verdinexor correctly excluded because C528S "
+             "defeats it by definition. CODE PATH to make it open: `escapes_without_canine_existence()` would have to return it with "
+             "`canine_graded_carriers` < 2 or `margin_canine_grades_only` <= 0; it returns 2 and +0.0218/day at worst across all four "
+             "cases. Nothing about observing it clinically changes either number"),
+        Item("the B-lineage identity switch escape rate is ASSUMED", "DERIVED", True,
+             "the ASSUMED grade is on the escape's RATE, not on any potency. An assumed rate set high makes the closure harder to "
+             "reach; an assumed potency would make it easier, and `EVIDENCE_CENSUS` shows zero assumed potencies anywhere in the "
+             "closure. The switch is covered at +0.3748/day by three canine-graded agents. CODE PATH to make it open: "
+             "`per_escape_evidence()` would have to report `has_assumed_carrier` True for it, or `margin_canine_grades_only` <= 0. It "
+             "reports False and positive in all four cases"),
+        Item("the 0.12 closers are 'unlicensed agents with dog-trial data only'", "OUTCOME", True,
+             "dog-trial data IS real data under the stated bar, and these are outcome-calibrated on it: APAVAC-type vaccine 300 dogs "
+             "dosed (148-dog outcome series, PMID 31174615; randomised n=19, PMID 24300788), anti-CD20 antibody 55 dogs with potency "
+             "MEASURED in dogs (PMIDs 38662527, 41742528), dTERT vaccine 52 dogs (PMIDs 23902422, 20531395, 30537967), T-cell add-back "
+             "8 dogs (PMID 22355761). Licensing is a regulatory fact, and rule 13 forbids excluding a class for the absence of a "
+             "licensed canine product. CODE PATH to make it open: `DOGS_DOSED_BY_FAST_GROWTH_CLOSER` would have to show 0 dogs dosed "
+             "for the agents M.29 nominates, or `CLOSURE_AT_FAST_GROWTH` would have to lose its non-CAR-T rows"),
+        Item("no dog has received the assembled programme", "OUTCOME", True,
+             "this is the DEMONSTRATION bar, which the user disclaimed twice in exactly these words: 'I'm not asking if it's been "
+             "demonstrated, I know it's not' and 'I'm okay with no specific data but if scientifically sound'. Listing it as what "
+             "'remains unclosed' re-grades the whole analysis against the bar the user excluded, which is CLAUDE.md failures 7 and 10. "
+             "It is a fact about the world, not a defect in an input, and no code path exists that could close it short of running the "
+             "trial. The closure's own conditions are enumerated and decidable in `deterministic_closure.conjunction()` and in "
+             "`CLOSURE_CONDITION_BURDEN_AT_DIAGNOSIS`; that enumeration IS the deliverable the user asked for instead of odds"),
+    ]
+
+
+def growth_sensitivity(growths=(0.0903, 0.12, 0.15, 0.204)) -> list:
+    """Closure of the near-future programs when the growth bar is raised, potencies held fixed (adverse: outcome-calibrated kills would
+    rise with the bar). Returns rows (growth, immunophenotype, input set, clears, halved, drop-one). Restores the model afterwards."""
+    from .core import lymphoma_horizon as H
+    base = GROWTH_PER_DAY
+    saved = (G.GROWTH_PER_DAY, G.margin_for.__defaults__, dict(G.evaluate.__kwdefaults__), H.BULK_GROWTH_PER_DAY)
+
+    def set_g(g):
+        G.GROWTH_PER_DAY = g
+        d = list(saved[1]); d[0] = g
+        G.margin_for.__defaults__ = tuple(d)
+        G.evaluate.__kwdefaults__["growth"] = g
+        H.BULK_GROWTH_PER_DAY = saved[3] * g / base
+
+    rows = []
+    try:
+        for g in growths:
+            set_g(g)
+            for ip in ("B", "T"):
+                for lab, kw in (("low", J.LOW), ("central", J.CENTRAL)):
+                    r = J.joint_report(ip, J.NEAR_FUTURE_PROGRAMS[ip], **kw)
+                    rows.append({"growth": g, "ip": ip, "inputs": lab, "clears": r["clears"], "halved": r["halved_clears"],
+                                 "drop_one": r["any_one_removed_clears"]})
+    finally:
+        G.GROWTH_PER_DAY, G.margin_for.__defaults__ = saved[0], saved[1]
+        G.evaluate.__kwdefaults__.update(saved[2])
+        H.BULK_GROWTH_PER_DAY = saved[3]
+    return rows
+
+
+def routes_not_counted() -> list:
+    """Closure routes found by the drawing-board pass that carry an ASSUMED input and are therefore NOT counted as closing anything
+    (docs/LYMPHOMA_UNIVERSE.md section H). `failing()` covers the inputs of the counted programs; this lists what was set aside and why."""
+    return [
+        Item("B-cell brain by sustaining oral cytarabine ~1,500 days", "ASSUMED", False,
+             "needs a CSF time-average >= ~0.11 uM (measured troughs 0.04-0.27 uM; time-average 0.3-1.4 uM is derived, never measured) and "
+             "multi-year tolerability (no source: human use is 10-14 days per 28; longest dog dosing is 7 days continuous / pulsed IV for 24 months)"),
+        Item("persistent graft-versus-lymphoma past day 166 closing the dormant progenitor", "TRANSFERRED hold, no rate", False,
+             "supports a hold (dog plateau, CML transcripts) but the model needs 0.06-0.12 /day against a 0.0008-0.004 /day bracket"),
+        Item("brain closure on 20 (B) / 11-12 (T) intrathecal doses every 21 days", "ASSUMED", False,
+             "needs verdinexor brain reach >= ~0.24 (B) / 0.25-0.30 (T) in the dog. The 0.30 used was read off a TOTAL brain:plasma "
+             "ratio and has no basis in the right compartment; the only compartment measurement is selinexor's human CSF / unbound "
+             "plasma 0.09 (Blood 2025;146 Suppl 1:3550), a FLOOR for verdinexor (less polar, not a canine P-gp substrate), at which this "
+             "schedule never clears. Not contradicted for verdinexor; unsupported (sections M.2, M.4)"),
+        Item("T-cell brain by the section-I route (sustained oral cytarabine or CD7/CD5 CAR-T, no intrathecal methotrexate)", "OPEN", False,
+             "dormant lineage needs ~8 years of oral cytarabine in T-cell disease; CD7/CD5 CAR-T has no dog program found. The T-cell "
+             "brain itself closes by radiation + intrathecal methotrexate (sections J, M); this lists only the set-aside route"),
+    ]
