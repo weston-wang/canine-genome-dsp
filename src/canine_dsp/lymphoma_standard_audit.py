@@ -560,6 +560,44 @@ GROWTH_BAR_BASIS_INCONSISTENCY = ("basis text calls 0.0903 the upper end of a ba
                                   "and it decides whether 0.12 is an operating value or an uncertainty bound",)
 
 
+#: Section M.30. Two claims needed sharpening, and one needed evidence rather than assertion.
+#:
+#: (1) THE OVERSTATEMENT. After M.29 this analysis said "nothing in the durability claim depends on an agent that has to be built".
+#: That is true at the operating bar and at 0.10, where every agent in both programmes is obtainable today, but it was stated flatly
+#: and the 0.12 row does need an addition. The precise claim, which is what the table below supports:
+#:   - at growth 0.0903 and 0.10 the closure uses ONLY agents a veterinarian can obtain today -- FDA-approved animal drugs
+#:     (verdinexor/Laverdia-CA1, prednisolone, rabacfosadine/Tanovea NADA 141-545), FDA-approved human drugs given extra-label under
+#:     21 CFR 530 (hydroxychloroquine, cytarabine, cyclophosphamide), and one procedure already performed in dogs (DLA-identical
+#:     allogeneic HCT). Nothing is to-build and nothing is unlicensed.
+#:   - at growth 0.12 it needs ONE addition, and the cheapest of those EXIST as products that have been given to hundreds of dogs in
+#:     published trials but are not US-licensed (APAVAC-type autologous vaccine, dTERT genetic vaccine, autologous T-cell add-back).
+#:     So the top of the band requires an agent that is NOT LICENSED; it does not require one that has to be BUILT. Only the CAR-T and
+#:     engager options are to-build, and they are not needed for the closure.
+#: Rabacfosadine in particular is not a to-build agent: it is the FDA-approved animal drug for canine lymphoma.
+#:
+#: (2) THE EVIDENCE CENSUS, which answers "is this closed by real data or only by the model?" at the level of individual inputs
+#: rather than by assertion. Every potency grade of every agent that carries the closure, counted:
+#:   lawful-today programmes (11 slots): DERIVED from canine measurements 4, OUTCOME-calibrated on canine trials 3,
+#:                                       TRANSFER with written justification 2, REGIMEN-CALIBRATED 1, BRACKET of two canine
+#:                                       measurements 1, ASSUMED 0.
+#:   the 0.12 closers (10 options):      MEASURED in dogs 1, OUTCOME from canine trials 5, TRANSFER-OUTCOME from human clinical
+#:                                       data 4, ASSUMED 0.
+#: NO load-bearing potency anywhere in either set is ASSUMED. The user's bar is real data OR a rigorous model, with a written
+#: cross-species transfer acceptable, so every one of these grades counts as closed; what it is NOT is a demonstration in dogs, which
+#: the user has twice said is not the test. The two weakest inputs are named rather than buried: cyclophosphamide is
+#: REGIMEN-CALIBRATED because its 4-HC LD50 differs 87-fold between laboratories, so no derivation was defensible; prednisolone is a
+#: BRACKET because two canine measurements disagree about 15-fold. Both have a stated basis and neither is a bare number.
+EVIDENCE_CENSUS = {
+    "lawful_today_programmes": {"DERIVED": 4, "OUTCOME": 3, "TRANSFER": 2, "REGIMEN-CALIBRATED": 1, "BRACKET": 1, "ASSUMED": 0},
+    "fast_growth_closers": {"MEASURED": 1, "OUTCOME": 5, "TRANSFER-OUTCOME": 4, "ASSUMED": 0},
+    "weakest_inputs": ("cyclophosphamide (REGIMEN-CALIBRATED: 4-HC LD50 differs 87x between labs)",
+                       "prednisolone (BRACKET: two canine measurements disagree ~15x)"),
+    "to_build_needed_for_closure": False,
+    "unlicensed_needed_at_growth_0_12": True,
+    "licensing_of_lawful_programmes": ("approved animal drug", "approved human drug, extra-label", "procedure"),
+}
+
+
 def closure_by_growth_item() -> Item:
     """The closure as a conjunction over growth rates (section M.26). PASSES at the model's operating bar; the 0.12 sensitivity
     point is reported OPEN rather than hidden, because a sensitivity sweep that always closes is not a sensitivity sweep."""

@@ -1309,3 +1309,71 @@ def test_the_fast_growth_point_closes_on_near_future_agents_and_the_stored_table
     item = A.closure_by_growth_item()
     assert item.passes and item.grade == "DERIVED"
     assert "CLOSES on NEAR-FUTURE agents" in item.reason and "OPEN" not in item.reason
+
+
+def test_the_closure_needs_nothing_built_and_no_assumed_potency_anywhere():
+    """Section M.30 -- sharpening two claims and replacing an assertion with a census.
+
+    (1) The M.29 write-up said "nothing in the durability claim depends on an agent that has to be built". True at the operating
+    bar, but stated flatly it glossed the 0.12 row, which does need one addition. The exact position, asserted here:
+      - at growth 0.0903 and 0.10 every agent in both programmes is obtainable TODAY: FDA-approved animal drugs
+        (verdinexor/Laverdia-CA1, prednisolone, rabacfosadine/Tanovea NADA 141-545), FDA-approved human drugs given extra-label
+        under 21 CFR 530 (hydroxychloroquine, cytarabine, cyclophosphamide), and one procedure already done in dogs
+        (DLA-identical allogeneic HCT). Nothing to-build, nothing unlicensed.
+      - at 0.12 one addition is needed, and the cheapest options EXIST as products given to hundreds of dogs in published trials
+        but are not US-licensed. So the top of the band needs an UNLICENSED agent, not a TO-BUILD one.
+      Rabacfosadine in particular is not a to-build agent: it is the approved animal drug for canine lymphoma.
+
+    (2) The census answers "real data or only the model?" per input instead of by assertion. Across every agent carrying the
+    closure, NO potency grade is ASSUMED: the lawful-today programmes are DERIVED x4 from canine measurements, OUTCOME x3 from
+    canine trials, TRANSFER x2 in writing, plus one regimen-calibrated and one bracketed canine measurement; the 0.12 closers are
+    MEASURED in dogs x1, OUTCOME from canine trials x5, TRANSFER-OUTCOME from human clinical data x4."""
+    import re
+    from collections import Counter
+    from canine_dsp import lymphoma_standard_audit as A, lymphoma_joint as J, lymphoma_sustained as S
+    from canine_dsp.core.lymphoma_catalogue import SYSTEMIC
+
+    GRADE = re.compile(r"^(MEASURED-NEGATIVE|MEASURED|DERIVED|TRANSFER-OUTCOME|TRANSFER|OUTCOME|REGIMEN-CALIBRATED|BRACKET"
+                       r"|ASSUMED)")
+
+    def grade(agent):
+        m = GRADE.match(str(agent.potency_evidence).strip())
+        return m.group(1) if m else "UNLABELLED"
+
+    # (1a) every agent in both lawful-today programmes is licensed or a procedure -- nothing to build, nothing unlicensed
+    lawful_grades = []
+    for ip in ("B", "T"):
+        pool = S.lawful_pool(ip, SYSTEMIC)
+        for name in S.LAWFUL_PROGRAMS[ip]:
+            agent = [v for k, v in pool.items() if k.startswith(name)][0]
+            status = S.legal_status(agent.name)[0]
+            assert status in A.EVIDENCE_CENSUS["licensing_of_lawful_programmes"], (agent.name, status)
+            assert "buildable" not in agent.name and "needs development" not in agent.name
+            lawful_grades.append(grade(agent))
+
+    # rabacfosadine is the FDA-approved animal drug, not something to be built
+    t_pool = S.lawful_pool("T", SYSTEMIC)
+    raba = [v for k, v in t_pool.items() if k.startswith("rabacfosadine")][0]
+    assert S.legal_status(raba.name)[0] == "approved animal drug"
+
+    # (1b) at 0.12 the cheapest closers are existing-but-unlicensed products, not to-build constructs
+    assert A.EVIDENCE_CENSUS["to_build_needed_for_closure"] is False
+    assert A.EVIDENCE_CENSUS["unlicensed_needed_at_growth_0_12"] is True
+    for ip, name in A.CLOSURE_AT_FAST_GROWTH_FREE_OPTION.items():
+        full = next(k for k in J._pools(ip, J.CENTRAL["kill"], J.CENTRAL["duty"])[SYSTEMIC] if k.startswith(name.split(" (")[0]))
+        assert S.legal_status(full)[0] == "investigational only"      # exists, given to dogs, not licensed
+        assert "buildable" not in full and "needs development" not in full
+
+    # (2) the census, recomputed: and crucially no ASSUMED potency anywhere
+    closer_grades = []
+    for ip in ("B", "T"):
+        allag = J._pools(ip, J.CENTRAL["kill"], J.CENTRAL["duty"])[SYSTEMIC]
+        for opt in A.CLOSURE_AT_FAST_GROWTH[ip]:
+            key = opt["agent"].split(" (")[0].split(" after ")[0]
+            closer_grades.append(grade(next(v for k, v in allag.items() if k.startswith(key))))
+
+    assert Counter(lawful_grades) == Counter({k: v for k, v in A.EVIDENCE_CENSUS["lawful_today_programmes"].items() if v})
+    assert Counter(closer_grades) == Counter({k: v for k, v in A.EVIDENCE_CENSUS["fast_growth_closers"].items() if v})
+    assert "ASSUMED" not in lawful_grades and "ASSUMED" not in closer_grades
+    assert "UNLABELLED" not in lawful_grades and "UNLABELLED" not in closer_grades
+    assert A.failing() == []

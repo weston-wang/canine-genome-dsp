@@ -1106,7 +1106,7 @@ Found by executing `sequential_stacking_item()` and `reachable_depth_item()` bef
 
 **So the correction has two parts, both in the direction of a stronger result:**
 1. **The T-cell sequential-stacking induction holds on lawful-today agents.** It did not when M.19 ran, and M.19/M.20 said so correctly at the time. What changed is M.24: rabacfosadine (Tanovea-CA1) covers the irreducible blocking pair -- P-gp efflux together with TP53/apoptosis evasion -- and sits on the pulmonary axis, which no other agent in the programme loads, so it adds its kill without de-rating the rest.
-2. **The tier-C dual-antigen CAR-T is HEADROOM, not load-bearing.** It carries depth 3, which is one level past what the division budget can assemble (depth 3 expects 3.3e-4 cells). Durability no longer depends on an agent that has to be built. That claim is withdrawn wherever it appears; the two places it is written down are now marked SUPERSEDED in place rather than deleted, so the history stays readable.
+2. **The tier-C dual-antigen CAR-T is HEADROOM, not load-bearing.** It carries depth 3, which is one level past what the division budget can assemble (depth 3 expects 3.3e-4 cells). Durability no longer depends on an agent that has to be built. **[SHARPENED in M.30: true at the operating bar and at 0.10, where every agent is obtainable today; at the band's top, 0.12, one addition is needed, and the cheapest of those exist as products given to dogs in trials but are not US-licensed -- so an UNLICENSED agent, still not a to-build one.]** That claim is withdrawn wherever it appears; the two places it is written down are now marked SUPERSEDED in place rather than deleted, so the history stays readable.
 
 **The lesson, which is CLAUDE.md rule 5 in a new form:** an audit function can pass while its stored sentence is false, because the sentence is prose and only the boolean is checked. Running the audit is not enough; the printed reason has to be read against the numbers. Both strings now derive every figure from the live computation, and a test asserts the no-longer-load-bearing claim directly.
 
@@ -1142,3 +1142,26 @@ The vaccines were specifically what the user said had been dismissed too easily 
 `failing()` is empty, and the 0.12 row is no longer in it. Verified green at this section: 69 tests in `test_lymphoma_universe.py`, 204 across all `test_lymphoma_*.py`.
 
 **And the brain needs nothing new at 0.12.** Only the body compartment required the near-future addition above. Re-running the lawful brain programme (verdinexor at the measured 0.09 CSF access, one 23.4 Gy course at the lineage-matched canine radiosensitivity, intrathecal methotrexate every 10 days) at growth 0.12 on **lawful-today agents alone**: B-cell is unchanged at 147 days / **15 intrathecal doses**, T-cell lengthens from 157 days / 16 doses to 199 days / **20 doses** -- still inside the canine precedent of 20-28 doses over 8-11 months through a subcutaneous CSF port (section K.6). Code: `BRAIN_AT_FAST_GROWTH`; `lawful_brain_window()` now takes a `growth` argument so this is computed rather than asserted.
+
+### M.30 Sharpening the "nothing has to be built" claim, and an evidence census instead of an assertion (2026-11-17)
+Two things in the M.29 write-up were looser than the record supports. Code: `EVIDENCE_CENSUS`; test `test_the_closure_needs_nothing_built_and_no_assumed_potency_anywhere`.
+
+**1. The overstatement.** I wrote "nothing in the durability claim depends on an agent that has to be built." That is true at the operating bar, but stated flatly it glossed over the 0.12 row, which does need an addition. The exact position:
+
+| growth | what the closure uses | to-build? | unlicensed? |
+|---|---|---|---|
+| 0.0903 (operating bar), 0.10 | FDA-approved animal drugs (verdinexor / Laverdia-CA1; prednisolone; **rabacfosadine / Tanovea, NADA 141-545**), FDA-approved human drugs extra-label under 21 CFR 530 (hydroxychloroquine, cytarabine, cyclophosphamide), one procedure already done in dogs (DLA-identical allogeneic HCT) | **no** | **no** |
+| 0.12 (top of the band) | the above **plus one** addition. Cheapest options are existing products given to hundreds of dogs in published trials: APAVAC-type autologous vaccine, dTERT genetic vaccine, autologous T-cell add-back | **no** | **yes** |
+
+So: the top of the band needs an agent that is **not US-licensed**; it does not need one that has to be **built**. The CAR-T and engager options are to-build, and the closure does not require them. Rabacfosadine is specifically not a to-build agent -- it is the FDA-approved animal drug for canine lymphoma.
+
+**2. The evidence census, in place of asserting that the closure is "modelled".** Counting the potency grade of every agent that carries the closure:
+
+| set | MEASURED in dogs | DERIVED from canine measurements | OUTCOME-calibrated on canine trials | TRANSFER (written) | other | **ASSUMED** |
+|---|---|---|---|---|---|---|
+| lawful-today programmes, 11 slots | 0 | **4** | **3** | 2 | 2 (1 regimen-calibrated, 1 bracket) | **0** |
+| the 0.12 closers, 10 options | **1** | 0 | **5** | 4 (transfer-outcome from human trials) | 0 | **0** |
+
+**No load-bearing potency anywhere in either set is ASSUMED.** Under the stated bar -- real data **or** a rigorous model, with a written cross-species transfer acceptable -- every one of those grades is closed. What the set is *not* is a demonstration in dogs, which is the thing the user has said twice is not the test ("I'm not asking if it's been demonstrated, I know it's not"; "I'm okay with no specific data but if scientifically sound"). Saying "the closure is only conditional on modelled inputs, not measured data" is that disclaimed bar in different words.
+
+The two weakest inputs are named rather than buried: **cyclophosphamide** is REGIMEN-CALIBRATED because its 4-HC LD50 differs 87-fold between laboratories, so no derivation was defensible; **prednisolone** is a BRACKET because two canine measurements disagree about 15-fold (0.0098-0.144/day, 0.10 used). Both have a written basis; neither is a bare number, so neither is open under rule 11.
