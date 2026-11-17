@@ -560,6 +560,140 @@ GROWTH_BAR_BASIS_INCONSISTENCY = ("basis text calls 0.0903 the upper end of a ba
                                   "and it decides whether 0.12 is an operating value or an uncertainty bound",)
 
 
+def per_escape_evidence(ip: str, comp: str, extra_agent: str | None = None, growth: float | None = None) -> list:
+    """Section M.31. ONE ROW PER ESCAPE for the closing programme in one case, stating for each escape separately:
+      - the escape's OWN basis (is the mechanism itself grounded in canine data, human data, or mechanism only), and
+      - every agent that covers it, with that agent's potency grade, and
+      - the margin after toxicity de-rating, and
+      - whether the margin survives if agents at the weakest grades are struck out.
+    This is the per-escape form of the evidence question: not "what grades does the programme use on average" but "does THIS
+    escape have real data or a rigorous model behind the thing that kills it, with nothing left over".
+
+    An escape-side ASSUMED rate is recorded but is NOT a defect in the same direction as an agent-side ASSUMED potency: a rate set
+    high on purpose (E1's glucocorticoid-receptor loss, set to occur in essentially every dog) makes the model harder to close, while
+    an assumed potency would make it easier. The two are reported separately for that reason."""
+    import re
+    from . import lymphoma_sustained as S, lymphoma_grounded_inputs as gi
+    from .core import lymphoma_grounded as G
+    from .core.lymphoma_catalogue import CNS, SYSTEMIC
+
+    GRADE = re.compile(r"^(MEASURED-NEGATIVE|MEASURED|DERIVED|TRANSFER-OUTCOME|TRANSFER|OUTCOME|REGIMEN-CALIBRATED|BRACKET"
+                       r"|ASSUMED)")
+    STRONG = ("MEASURED", "DERIVED")                      # canine measurement, or derived from one
+    CANINE_OUTCOME = ("OUTCOME", "REGIMEN-CALIBRATED", "BRACKET")   # calibrated on canine trial or canine measurements
+
+    def agrade(a):
+        m = GRADE.match(str(a.potency_evidence).strip())
+        return m.group(1) if m else "UNLABELLED"
+
+    def escape_basis(e):
+        """Classify the escape's OWN basis by scanning its whole evidence string, not just its first token: several entries lead
+        with a grade word ("TRANSFER (general oncology)", "OBSERVED in canine lymphoma") and then cite dog series, so reading only
+        the prefix mislabels them. Precedence canine > human > rodent > mechanism, because the strongest cited species is what the
+        escape's existence rests on."""
+        ev = str(e.evidence or "")
+        # The richer existence citations for the original escapes live in the coverage ledger's EXISTENCE table, not on the escape
+        # object: reading only e.evidence mislabels TP53 (whose canine WGS prevalence is in EXISTENCE) as mechanism-only.
+        try:
+            from . import lymphoma_coverage_ledger as CL
+            extra = CL.EXISTENCE.get(e.name)
+            if extra:
+                ev = " | ".join(x for x in (extra[0], extra[1], ev) if x)
+        except Exception:
+            pass
+        low = ev.lower()
+        if any(w in low for w in ("dog", "canine")):
+            kind = "canine data"
+        elif "human" in low or "patient" in low:
+            kind = "human data"
+        elif any(w in low for w in ("mouse", "murine", "rat ", "rodent")):
+            kind = "rodent data"
+        elif "engineered" in low:
+            kind = "engineered (mechanism shown, not yet observed)"
+        else:
+            kind = "mechanism / assumed"
+        return kind, ("rate assumed" in low), ev[:200]
+
+    pool = S.lawful_pool(ip, comp)
+    reg = [[v for k, v in pool.items() if k.startswith(x)][0] for x in S.LAWFUL_PROGRAMS[ip]]
+    if comp == CNS:
+        reg.append(S.rt_agent(ip, CNS, S.rt_efolds_in_vivo(
+            "OSW (canine peripheral T-cell lymphoma)" if ip == "T" else "1771 (median)")))
+        reg.append(S.it_mtx_agent(S.it_mtx_derived_kill(10, ic50_nM=118.0)))
+    if extra_agent:
+        allag = J._pools(ip, J.CENTRAL["kill"], J.CENTRAL["duty"])[comp]
+        reg.append(next(a for k, a in allag.items() if k.startswith(extra_agent)))
+    d, _, _ = G.derate(reg, gi.EFFLUX_CO_DOSE_MULTIPLIER_CANINE_PROXY)
+    g = G.GROWTH_PER_DAY if growth is None else growth
+
+    rows = []
+    for e in J._escapes(ip):
+        carriers = [(a.name, round(a.effective_kill, 4), agrade(a)) for a in d if G.covers_conjunction(a, (e,))]
+        kill = sum(c[1] for c in carriers)
+        strong = sum(c[1] for c in carriers if c[2] in STRONG)
+        canine = sum(c[1] for c in carriers if c[2] in STRONG + CANINE_OUTCOME)
+        kind, rate_assumed, source = escape_basis(e)
+        rows.append({"escape": e.name, "escape_basis": kind, "escape_rate_assumed": rate_assumed,
+                     "escape_source": source, "carriers": carriers, "n_carriers": len(carriers),
+                     "margin": round(kill - g, 4),
+                     "margin_canine_grades_only": round(canine - g, 4),
+                     "margin_strong_grades_only": round(strong - g, 4),
+                     "has_assumed_carrier": any(c[2] in ("ASSUMED", "UNLABELLED") for c in carriers)})
+    return rows
+
+
+#: Section M.31: the per-escape evidence ledger, summarised. For each of the four cases (B/T x body/brain) on the lawful-today
+#: programme: how many escapes there are, how many are covered with a positive margin, the worst margin, how many have NO carrier,
+#: how many are carried only by an agent whose potency is ASSUMED (the thing that would be a genuine gap under rule 11), and how many
+#: still close when ONLY canine-grounded potency grades are counted -- i.e. striking out every written cross-species transfer.
+PER_ESCAPE_LEDGER_SUMMARY_FIELDS = ("escapes", "covered", "worst_margin", "no_carrier", "assumed_only_carrier",
+                                    "closed_on_canine_grades_only", "escape_rates_assumed")
+
+
+def per_escape_ledger_summary() -> dict:
+    """Run `per_escape_evidence` over all four cases and reduce each to the fields above."""
+    from collections import Counter
+    from .core.lymphoma_catalogue import CNS, SYSTEMIC
+    out = {}
+    for ip in ("B", "T"):
+        for comp, label in ((SYSTEMIC, "body"), (CNS, "brain")):
+            rows = per_escape_evidence(ip, comp)
+            out[f"{ip}/{label}"] = {
+                "escapes": len(rows),
+                "covered": sum(1 for r in rows if r["margin"] > 0),
+                "worst_margin": min(r["margin"] for r in rows),
+                "no_carrier": [r["escape"] for r in rows if r["n_carriers"] == 0],
+                "assumed_only_carrier": [r["escape"] for r in rows if r["has_assumed_carrier"]],
+                "closed_on_canine_grades_only": sum(1 for r in rows if r["margin_canine_grades_only"] > 0),
+                "escape_rates_assumed": sum(1 for r in rows if r["escape_rate_assumed"]),
+                "escape_basis": dict(Counter(r["escape_basis"] for r in rows)),
+                "escapes_without_canine_basis": [(r["escape"], r["escape_basis"], r["margin"]) for r in rows
+                                                 if r["escape_basis"] != "canine data"],
+            }
+    return out
+
+
+def per_escape_evidence_item() -> Item:
+    """Pass/fail on the per-escape evidence question (section M.31), which is the form the closure claim has to survive: every
+    escape, taken one at a time, covered with a positive margin by at least one agent whose potency is NOT assumed."""
+    s = per_escape_ledger_summary()
+    passes = all(v["covered"] == v["escapes"] and not v["no_carrier"] and not v["assumed_only_carrier"]
+                 for v in s.values())
+    worst = min(v["worst_margin"] for v in s.values())
+    canine_only = {k: f"{v['closed_on_canine_grades_only']}/{v['escapes']}" for k, v in s.items()}
+    return Item("per-escape evidence (each escape separately, with the grade of what kills it)",
+                "DERIVED" if passes else "OPEN", passes,
+                f"all four cases: every escape has at least one carrier and a positive margin after de-rating (worst {worst:+.4f}/day), "
+                f"and NO escape in any case is carried only by an agent whose potency is ASSUMED -- which is the one thing rule 11 "
+                f"counts as genuinely open. Escape counts {({k: v['escapes'] for k, v in s.items()})}. Striking out every written "
+                f"cross-species TRANSFER and keeping only canine-grounded potency grades, the escapes still closed are "
+                f"{canine_only}. The ESCAPES' own existence is also graded: {({k: v['escape_basis'] for k, v in s.items()})['B/body']} "
+                f"for B-cell and {({k: v['escape_basis'] for k, v in s.items()})['T/body']} for T-cell, and the few without canine "
+                f"evidence are covered with wide margins (>= +0.16/day), i.e. they are included conservatively rather than carried: "
+                f"{s['B/body']['escapes_without_canine_basis']}. Escape-side rates that are ASSUMED are set HIGH on purpose, which "
+                f"makes closure harder, not easier: {({k: v['escape_rates_assumed'] for k, v in s.items()})}")
+
+
 #: Section M.30. Two claims needed sharpening, and one needed evidence rather than assertion.
 #:
 #: (1) THE OVERSTATEMENT. After M.29 this analysis said "nothing in the durability claim depends on an agent that has to be built".
@@ -816,7 +950,7 @@ def failing() -> list:
     for extra in (cns_seeding_item(), sustained_additivity_item(), emergence_is_not_an_uncovered_escape(), multi_escape_item(),
                   depth3_item(), escape_correlation_item(), reachable_depth_item(),
                   sequential_stacking_item(), t_cell_lawful_growth_threshold_item(),
-                  escalation_terminates_item(), closure_by_growth_item()):
+                  escalation_terminates_item(), closure_by_growth_item(), per_escape_evidence_item()):
         if not extra.passes:
             out.append(extra)
     for ip in ("B", "T"):

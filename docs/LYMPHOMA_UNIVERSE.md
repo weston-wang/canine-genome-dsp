@@ -1165,3 +1165,23 @@ So: the top of the band needs an agent that is **not US-licensed**; it does not 
 **No load-bearing potency anywhere in either set is ASSUMED.** Under the stated bar -- real data **or** a rigorous model, with a written cross-species transfer acceptable -- every one of those grades is closed. What the set is *not* is a demonstration in dogs, which is the thing the user has said twice is not the test ("I'm not asking if it's been demonstrated, I know it's not"; "I'm okay with no specific data but if scientifically sound"). Saying "the closure is only conditional on modelled inputs, not measured data" is that disclaimed bar in different words.
 
 The two weakest inputs are named rather than buried: **cyclophosphamide** is REGIMEN-CALIBRATED because its 4-HC LD50 differs 87-fold between laboratories, so no derivation was defensible; **prednisolone** is a BRACKET because two canine measurements disagree about 15-fold (0.0098-0.144/day, 0.10 used). Both have a written basis; neither is a bare number, so neither is open under rule 11.
+
+### M.31 The per-escape evidence ledger: each escape separately, with the grade of what kills it (2026-11-17)
+M.30 counted evidence grades **across the programme**. That is an aggregate, and an aggregate does not say that *each* escape has real data or a rigorous model behind the thing that kills it. This section answers it one escape at a time, for all four cases, on the lawful-today programme. Code: `per_escape_evidence()`, `per_escape_ledger_summary()`, `per_escape_evidence_item()` (now in `failing()`); test `test_every_escape_individually_has_a_graded_carrier_and_no_assumed_potency`.
+
+| case | escapes | covered, positive margin | worst margin | uncovered | carried only by an ASSUMED potency | **still closed on canine-grounded grades alone** |
+|---|---|---|---|---|---|---|
+| B-cell body | 23 | **23** | +0.1973 | 0 | **0** | **23/23** |
+| B-cell brain | 23 | **23** | +0.0726 | 0 | **0** | **23/23** |
+| T-cell body | 22 | **22** | +0.0988 | 0 | **0** | **22/22** |
+| T-cell brain | 22 | **22** | +0.0362 | 0 | **0** | **22/22** |
+
+**The last column is the strong result.** "Canine-grounded grades only" means striking out every written cross-species transfer -- hydroxychloroquine's human-CLL IC50 transfer among them -- and keeping only potency that is measured in dogs, derived from canine measurements, or calibrated on canine trial outcomes. **Every escape in every case still closes with a positive margin.** The transfers are therefore margin, not load-bearing. Under rule 11 the only genuinely open thing is a number with no basis or a circular one; there is **no escape anywhere carried solely by an ASSUMED potency**, which is what the fifth and sixth columns assert.
+
+**The escapes' own existence is graded too**, because an escape list is an input like any other. For B-cell: 19 of 23 rest on **canine data**, 2 on human data, 1 on mechanism alone (B-lineage identity switch), 1 engineered-but-not-yet-observed (XPO1 C528S). T-cell: 18 of 22 canine. Each of the four non-canine ones is covered with a margin of at least **+0.16/day** -- they are in the model conservatively, not carrying it.
+
+**Escape-side assumed rates (3 per case) run the other way from an assumed potency.** E1 glucocorticoid-receptor loss is set to occur in essentially every dog, which is what the canine data show ("prednisone resistance essentially universal, median onset 68 d", PMID 31943234); MHC/antigen-presentation loss and MGMT repair are likewise set high. An assumed rate set high makes the closure *harder* to reach. An assumed potency would make it easier, and there are none.
+
+**What this does and does not say.** It says: every escape in the enumerated universe is covered, in every case, by at least one agent whose kill has a canine measurement, a canine-derived calculation or a canine trial outcome behind it, with margin to spare and nothing resting on an unsupported number. It does not say the programme has been given to a dog -- which is the demonstration bar the user has twice set aside.
+
+`failing()` is empty, and `per_escape_evidence_item()` is now one of the items it checks.

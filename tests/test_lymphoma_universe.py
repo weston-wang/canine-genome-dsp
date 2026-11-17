@@ -1377,3 +1377,57 @@ def test_the_closure_needs_nothing_built_and_no_assumed_potency_anywhere():
     assert "ASSUMED" not in lawful_grades and "ASSUMED" not in closer_grades
     assert "UNLABELLED" not in lawful_grades and "UNLABELLED" not in closer_grades
     assert A.failing() == []
+
+
+def test_every_escape_individually_has_a_graded_carrier_and_no_assumed_potency():
+    """Section M.31 -- the per-escape form of the evidence question, which the M.30 census did not answer.
+
+    M.30 counted evidence grades across the programme. That is an aggregate: it does not say that EACH escape, taken one at a
+    time, has real data or a rigorous model behind the thing that kills it. This test does, for all four cases (B/T x body/brain)
+    on the lawful-today programme, and asserts:
+      - every escape has at least one covering agent (none is uncovered),
+      - every escape's margin is positive after toxicity de-rating,
+      - NO escape is carried only by an agent whose potency grade is ASSUMED or unlabelled -- the one thing rule 11 counts as
+        genuinely open,
+      - and, striking out every written cross-species TRANSFER and keeping only canine-grounded grades (measured in dogs, derived
+        from canine measurements, calibrated on canine trial outcomes), every escape STILL closes. 23/23 and 22/22.
+    The escapes' own existence is graded too: 19 of 23 (B) and 18 of 22 (T) rest on canine data; the remainder are human data (2),
+    one mechanism-only (B-lineage identity switch) and one engineered-but-not-yet-observed (XPO1 C528S), each covered with a
+    margin of at least +0.16/day -- i.e. carried in the model conservatively rather than load-bearing.
+    Escape-side ASSUMED RATES (3 per case) are not a defect in the same direction as an assumed potency: they are set high on
+    purpose, which makes the closure harder to reach, not easier."""
+    from canine_dsp import lymphoma_standard_audit as A
+    from canine_dsp.core.lymphoma_catalogue import CNS, SYSTEMIC
+
+    summary = A.per_escape_ledger_summary()
+    assert set(summary) == {"B/body", "B/brain", "T/body", "T/brain"}
+
+    for case, v in summary.items():
+        assert v["escapes"] >= 22, case
+        assert v["covered"] == v["escapes"], case                      # nothing uncovered
+        assert v["worst_margin"] > 0, (case, v["worst_margin"])        # nothing growing
+        assert v["no_carrier"] == [], case                             # every escape has a named carrier
+        assert v["assumed_only_carrier"] == [], case                   # no escape rests on an ASSUMED potency
+        assert v["closed_on_canine_grades_only"] == v["escapes"], case  # survives striking out every transfer
+        assert v["escape_rates_assumed"] == 3, case                    # conservative, and pinned so a change is visible
+
+    # per-escape detail, recomputed: carriers are named with their grades, and the few escapes whose own existence is not canine
+    # are covered with wide margins rather than carried
+    for ip in ("B", "T"):
+        rows = A.per_escape_evidence(ip, SYSTEMIC)
+        assert all(r["n_carriers"] >= 1 and r["carriers"] for r in rows)
+        assert all(grade not in ("ASSUMED", "UNLABELLED") for r in rows for _, _, grade in r["carriers"])
+        thin = [r for r in rows if r["escape_basis"] != "canine data"]
+        assert 0 < len(thin) <= 5
+        assert all(r["margin"] >= 0.16 for r in thin), [(r["escape"], r["margin"]) for r in thin]
+        assert sum(1 for r in rows if r["escape_basis"] == "canine data") >= 18
+
+    # the brain case is the tightest and still closes on canine grades alone
+    brain = A.per_escape_evidence("T", CNS)
+    assert min(r["margin"] for r in brain) > 0
+    assert min(r["margin_canine_grades_only"] for r in brain) > 0
+
+    item = A.per_escape_evidence_item()
+    assert item.passes and item.grade == "DERIVED"
+    assert item.name.startswith("per-escape evidence")
+    assert A.failing() == []

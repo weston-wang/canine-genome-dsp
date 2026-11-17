@@ -580,3 +580,12 @@ Details `LYMPHOMA_UNIVERSE.md` M.30. Code `EVIDENCE_CENSUS`; test `test_the_clos
 - **Evidence census** (potency grade of every agent carrying the closure): lawful-today 11 slots = DERIVED 4, OUTCOME 3, TRANSFER 2, REGIMEN-CALIBRATED 1, BRACKET 1, **ASSUMED 0**. The 0.12 closers, 10 options = MEASURED in dogs 1, OUTCOME 5, TRANSFER-OUTCOME 4, **ASSUMED 0**.
 - **No load-bearing potency anywhere is ASSUMED.** Under the stated bar (real data OR rigorous model, written transfer acceptable) all of those are closed. "Conditional on modelled inputs, not measured data" is the disclaimed demonstration bar in other words (rule 11).
 - **Weakest two named, not buried:** cyclophosphamide REGIMEN-CALIBRATED (4-HC LD50 differs 87x between labs); prednisolone BRACKET (two canine measurements disagree ~15x, 0.10 used). Both have a written basis.
+
+### M.31 (2026-11-17): per-escape evidence ledger -- every escape, individually, with the grade of what kills it
+Details `LYMPHOMA_UNIVERSE.md` M.31. Code `per_escape_evidence()`, `per_escape_ledger_summary()`, `per_escape_evidence_item()` (added to `failing()`); test `test_every_escape_individually_has_a_graded_carrier_and_no_assumed_potency`.
+- M.30's census was an AGGREGATE over the programme. This is per escape, for all four cases, on lawful-today agents.
+- **B body 23/23 covered (worst +0.1973); B brain 23/23 (+0.0726); T body 22/22 (+0.0988); T brain 22/22 (+0.0362).** Zero uncovered, zero carried only by an ASSUMED potency.
+- **Strongest line: striking out every written cross-species TRANSFER and keeping only canine-grounded potency (measured in dogs / derived from canine measurements / calibrated on canine trial outcomes), every escape STILL closes -- 23/23 and 22/22.** The transfers are margin, not load-bearing.
+- **The escapes' own existence is graded:** B 19/23 canine data, 2 human, 1 mechanism-only (B-lineage identity switch), 1 engineered-not-yet-observed (XPO1 C528S); T 18/22 canine. All four non-canine ones covered at >= +0.16/day -- included conservatively, not carrying anything.
+- **Escape-side assumed RATES (3 per case) run the opposite way from an assumed potency:** set high on purpose (E1 GR-loss is universal in dogs, PMID 31943234), making closure harder, not easier. No assumed potency exists anywhere.
+- Does NOT claim the programme has been given to a dog; that is the demonstration bar the user set aside twice.
